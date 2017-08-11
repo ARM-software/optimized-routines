@@ -1,6 +1,6 @@
 # CMakeLists.txt
 #
-# Copyright (C) 2015, ARM Limited, All Rights Reserved
+# Copyright (C) 2015-2017, ARM Limited, All Rights Reserved
 # SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,11 +19,13 @@
 
 # Use -frounding-math so gcc doesn't constant fold away expressions that raise
 # exceptions in funder.c and dunder.c.
-set_source_files_properties(funder.c dunder.c PROPERTIES COMPILE_FLAGS -frounding-math)
+set_source_files_properties(funder.c dunder.c math_errf.c PROPERTIES COMPILE_FLAGS -frounding-math)
 
 # Add files to the library.
 set(mathlib_src
-  e_expf.c e_logf.c e_powf.c
+  e_expf.c e_exp2f.c e_logf.c e_log2f.c e_powf.c
+  e_exp2f_data.c e_logf_data.c e_log2f_data.c e_powf_log2_data.c
+  math_errf.c
   e_rem_pio2.c
   dunder.c funder.c ieee_status.c poly.c rredf.c
   k_cos.c s_cos.c

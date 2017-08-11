@@ -270,10 +270,10 @@ test_func tfuncs[] = {
     TFUNC(at_d,rt_d, expm1, ULPUNIT),
     TFUNCARM(at_s,rt_s, logf, 3*ULPUNIT),
     TFUNC(at_s,rt_s, log10f, 3*ULPUNIT),
-    TFUNC(at_s,rt_s, log2f, 3*ULPUNIT),
+    TFUNCARM(at_s,rt_s, log2f, 3*ULPUNIT),
     TFUNC(at_s,rt_s, log1pf, 2*ULPUNIT),
     TFUNCARM(at_s,rt_s, expf, 3*ULPUNIT),
-    TFUNC(at_s,rt_s, exp2f, 3*ULPUNIT),
+    TFUNCARM(at_s,rt_s, exp2f, 3*ULPUNIT),
     TFUNC(at_s,rt_s, expm1f, ULPUNIT),
 
     /* power */

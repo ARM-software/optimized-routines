@@ -1,5 +1,5 @@
 /*
- *  Single-precision e^x function.
+ *  Single-precision 2^x function.
  *
  *  Copyright (C) 2017, ARM Limited, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
@@ -19,10 +19,6 @@
  *  This file is part of the Optimized Routines project
  */
 
-#if WANT_SINGLEPREC
-#include "single/e_expf.c"
-#else
-
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -32,15 +28,15 @@ EXP2F_TABLE_BITS = 5
 EXP2F_POLY_ORDER = 3
 
 ULP error: 0.502 (nearest rounding.)
-Relative error: 1.69 * 2^-34 in [-ln2/64, ln2/64] (before rounding.)
-Wrong count: 170635 (all nearest rounding wrong results with fma.)
+Relative error: 1.69 * 2^-34 in [-1/64, 1/64] (before rounding.)
+Wrong count: 168353 (all nearest rounding wrong results with fma.)
 Non-nearest ULP error: 1 (rounded ULP error)
 */
 
 #define N (1 << EXP2F_TABLE_BITS)
-#define InvLn2N __exp2f_data.invln2_scaled
 #define T __exp2f_data.tab
-#define C __exp2f_data.poly_scaled
+#define C __exp2f_data.poly
+#define SHIFT __exp2f_data.shift_scaled
 
 static inline uint32_t
 top12 (float x)
@@ -49,7 +45,7 @@ top12 (float x)
 }
 
 float
-ARM__expf (float x)
+ARM__exp2f (float x)
 {
   uint32_t abstop;
   uint64_t ki, t;
@@ -58,44 +54,30 @@ ARM__expf (float x)
 
   xd = (double_t) x;
   abstop = top12 (x) & 0x7ff;
-  if (__builtin_expect (abstop >= top12 (88.0f), 0))
+  if (__builtin_expect (abstop >= top12 (128.0f), 0))
     {
-      /* |x| >= 88 or x is nan.  */
+      /* |x| >= 128 or x is nan.  */
       if (asuint (x) == asuint (-INFINITY))
 	return 0.0f;
       if (abstop >= top12 (INFINITY))
 	return x + x;
-      if (x > 0x1.62e42ep6f) /* x > log(0x1p128) ~= 88.72 */
+      if (x > 0.0f)
 	return __math_oflowf (0);
-      if (x < -0x1.9fe368p6f) /* x < log(0x1p-150) ~= -103.97 */
+      if (x <= -150.0f)
 	return __math_uflowf (0);
 #if WANT_ERRNO_UFLOW
-      if (x < -0x1.9d1d9ep6f) /* x < log(0x1p-149) ~= -103.28 */
+      if (x < -149.0f)
 	return __math_may_uflowf (0);
 #endif
     }
 
-  /* x*N/Ln2 = k + r with r in [-1/2, 1/2] and int k.  */
-  z = InvLn2N * xd;
-
-  /* Round and convert z to int, the result is in [-150*N, 128*N] and
-     ideally ties-to-even rule is used, otherwise the magnitude of r
-     can be bigger which gives larger approximation error.  */
-#if TOINT_INTRINSICS
-  kd = roundtoint (z);
-  ki = converttoint (z);
-#elif TOINT_RINT
-  kd = rint (z);
-  ki = (long) kd;
-#elif TOINT_SHIFT
-# define SHIFT __exp2f_data.shift
-  kd = (double) (z + SHIFT); /* Rounding to double precision is required.  */
+  /* x = k/N + r with r in [-1/(2N), 1/(2N)] and int k.  */
+  kd = (double) (xd + SHIFT); /* Rounding to double precision is required.  */
   ki = asuint64 (kd);
-  kd -= SHIFT;
-#endif
-  r = z - kd;
+  kd -= SHIFT; /* k/N for int k.  */
+  r = xd - kd;
 
-  /* exp(x) = 2^(k/N) * 2^(r/N) ~= s * (C0*r^3 + C1*r^2 + C2*r + 1) */
+  /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1) */
   t = T[ki % N];
   t += ki << (52 - EXP2F_TABLE_BITS);
   s = asdouble (t);
@@ -106,4 +88,3 @@ ARM__expf (float x)
   y = y * s;
   return (float) y;
 }
-#endif

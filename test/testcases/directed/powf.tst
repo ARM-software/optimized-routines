@@ -144,7 +144,7 @@ func=powf op1=00000000 op2=80000000 result=3f800000 errno=0
 func=powf op1=00000000 op2=bf000000 result=7f800000 errno=ERANGE status=z
 func=powf op1=00000000 op2=c0400000 result=7f800000 errno=ERANGE status=z
 func=powf op1=00000000 op2=c0800000 result=7f800000 errno=ERANGE status=z
-func=powf op1=00000000 op2=ff800000 result=7f800000 errno=ERANGE status=z
+func=powf op1=00000000 op2=ff800000 result=7f800000 errno=ERANGE
 func=powf op1=80000000 op2=7f800001 result=7fc00001 errno=0 status=i
 func=powf op1=80000000 op2=ff800001 result=7fc00001 errno=0 status=i
 func=powf op1=80000000 op2=7fc00001 result=7fc00001 errno=0
@@ -158,7 +158,7 @@ func=powf op1=80000000 op2=80000000 result=3f800000 errno=0
 func=powf op1=80000000 op2=bf000000 result=7f800000 errno=ERANGE status=z
 func=powf op1=80000000 op2=c0400000 result=ff800000 errno=ERANGE status=z
 func=powf op1=80000000 op2=c0800000 result=7f800000 errno=ERANGE status=z
-func=powf op1=80000000 op2=ff800000 result=7f800000 errno=ERANGE status=z
+func=powf op1=80000000 op2=ff800000 result=7f800000 errno=ERANGE
 func=powf op1=be800000 op2=7f800001 result=7fc00001 errno=0 status=i
 func=powf op1=be800000 op2=ff800001 result=7fc00001 errno=0 status=i
 func=powf op1=be800000 op2=7fc00001 result=7fc00001 errno=0
@@ -238,8 +238,9 @@ func=powf op1=406bf67b op2=c29f5f12 result=00000000 errno=ERANGE status=ux
 func=powf op1=2d82a6fc op2=4085779e result=00000000 errno=ERANGE status=ux
 func=powf op1=4551f827 op2=41304516 result=7f800000 errno=ERANGE status=ox
 func=powf op1=3a917c51 op2=41726c0a result=00000001.37f errno=0 status=ux
-func=powf op1=3b19bbaa op2=4188e6fb result=00000000.b5f errno=0 status=ux
-func=powf op1=4088bd18 op2=c28ef056 result=00000000.986 errno=0 status=ux
+; iso c allows both errno=ERANGE and errno=0
+;func=powf op1=3b19bbaa op2=4188e6fb result=00000000.b5f errno=0 status=ux
+;func=powf op1=4088bd18 op2=c28ef056 result=00000000.986 errno=0 status=ux
 func=powf op1=3f7ffd76 op2=4a09221e result=00aa9d24.3ad error=0
 
 func=powf op1=007fffff op2=bf000001 result=5f00002c.2b2 error=0

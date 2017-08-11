@@ -23,7 +23,7 @@
 
 __inline unsigned __ieee_status(unsigned bicmask, unsigned xormask)
 {
-#ifdef __FP_FENV_EXCEPTIONS
+#if defined __aarch64__ && defined __FP_FENV_EXCEPTIONS
   unsigned status_word;
   unsigned ret;
 

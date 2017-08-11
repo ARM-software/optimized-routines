@@ -29,5 +29,7 @@ float ARM__sinf(float);
 float ARM__cosf(float);
 float ARM__tanf(float);
 float ARM__expf(float);
+float ARM__exp2f(float);
 float ARM__logf(float);
+float ARM__log2f(float);
 float ARM__powf(float, float);
