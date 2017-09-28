@@ -28,22 +28,22 @@
 
 #ifndef WANT_ROUNDING
 /* Correct special case results in non-nearest rounding modes.  */
-#define WANT_ROUNDING 1
+# define WANT_ROUNDING 1
 #endif
 #ifndef WANT_ERRNO
 /* Set errno according to ISO C with (math_errhandling & MATH_ERRNO) != 0.  */
-#define WANT_ERRNO 1
+# define WANT_ERRNO 1
 #endif
 #ifndef WANT_ERRNO_UFLOW
 /* Set errno to ERANGE if result underflows to 0 (in all rounding modes).  */
-#define WANT_ERRNO_UFLOW (WANT_ROUNDING && WANT_ERRNO)
+# define WANT_ERRNO_UFLOW (WANT_ROUNDING && WANT_ERRNO)
 #endif
 
 #ifdef __aarch64__
-#include <arm_neon.h>
+# include <arm_neon.h>
 
 /* ACLE intrinsics for frintn and fcvtns instructions.  */
-#define TOINT_INTRINSICS 1
+# define TOINT_INTRINSICS 1
 
 static inline double_t
 roundtoint (double_t x)
@@ -59,13 +59,13 @@ converttoint (double_t x)
 #endif
 
 #ifndef TOINT_INTRINSICS
-#define TOINT_INTRINSICS 0
+# define TOINT_INTRINSICS 0
 #endif
 #ifndef TOINT_RINT
-#define TOINT_RINT 0
+# define TOINT_RINT 0
 #endif
 #ifndef TOINT_SHIFT
-#define TOINT_SHIFT 1
+# define TOINT_SHIFT 1
 #endif
 
 static inline uint32_t
@@ -121,11 +121,11 @@ ieee_2008_issignaling (float x)
 }
 
 #ifdef __GNUC__
-#define HIDDEN __attribute__ ((__visibility__ ("hidden")))
-#define NOINLINE __attribute__ ((noinline))
+# define HIDDEN __attribute__ ((__visibility__ ("hidden")))
+# define NOINLINE __attribute__ ((noinline))
 #else
-#define HIDDEN
-#define NOINLINE
+# define HIDDEN
+# define NOINLINE
 #endif
 
 HIDDEN float __math_oflowf (unsigned long);
@@ -145,7 +145,7 @@ extern const struct exp2f_data
   double shift;
   double invln2_scaled;
   double poly_scaled[EXP2F_POLY_ORDER];
-} __exp2f_data;
+} __exp2f_data HIDDEN;
 
 #define LOGF_TABLE_BITS 4
 #define LOGF_POLY_ORDER 4
@@ -157,7 +157,7 @@ extern const struct logf_data
   } tab[1 << LOGF_TABLE_BITS];
   double ln2;
   double poly[LOGF_POLY_ORDER];
-} __logf_data;
+} __logf_data HIDDEN;
 
 #define LOG2F_TABLE_BITS 4
 #define LOG2F_POLY_ORDER 4
@@ -168,14 +168,14 @@ extern const struct log2f_data
     double invc, logc;
   } tab[1 << LOG2F_TABLE_BITS];
   double poly[LOG2F_POLY_ORDER];
-} __log2f_data;
+} __log2f_data HIDDEN;
 
 #define POWF_LOG2_TABLE_BITS 4
 #define POWF_LOG2_POLY_ORDER 5
 #if TOINT_INTRINSICS
-#define POWF_SCALE_BITS EXP2F_TABLE_BITS
+# define POWF_SCALE_BITS EXP2F_TABLE_BITS
 #else
-#define POWF_SCALE_BITS 0
+# define POWF_SCALE_BITS 0
 #endif
 #define POWF_SCALE ((double) (1 << POWF_SCALE_BITS))
 extern const struct powf_log2_data
@@ -185,6 +185,6 @@ extern const struct powf_log2_data
     double invc, logc;
   } tab[1 << POWF_LOG2_TABLE_BITS];
   double poly[POWF_LOG2_POLY_ORDER];
-} __powf_log2_data;
+} __powf_log2_data HIDDEN;
 
 #endif
