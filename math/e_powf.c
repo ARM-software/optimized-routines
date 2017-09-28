@@ -161,9 +161,9 @@ ARM__powf (float x, float y)
       if (__builtin_expect (zeroinfnan (iy), 0))
 	{
 	  if (2 * iy == 0)
-	    return ieee_2008_issignaling (x) ? x + y : 1.0f;
+	    return issignalingf_inline (x) ? x + y : 1.0f;
 	  if (ix == 0x3f800000)
-	    return ieee_2008_issignaling (y) ? x + y : 1.0f;
+	    return issignalingf_inline (y) ? x + y : 1.0f;
 	  if (2 * ix > 2u * 0x7f800000 || 2 * iy > 2u * 0x7f800000)
 	    return x + y;
 	  if (2 * ix == 2 * 0x3f800000)

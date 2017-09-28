@@ -112,12 +112,16 @@ asdouble (uint64_t i)
   return u.f;
 }
 
+#ifndef IEEE_754_2008_SNAN
+# define IEEE_754_2008_SNAN 1
+#endif
 static inline int
-ieee_2008_issignaling (float x)
+issignalingf_inline (float x)
 {
   uint32_t ix = asuint (x);
-  ix ^= 0x00400000; /* IEEE 754-2008 snan bit.  */
-  return 2 * ix > 2u * 0x7fc00000;
+  if (!IEEE_754_2008_SNAN)
+    return (ix & 0x7fc00000) == 0x7fc00000;
+  return 2 * (ix ^ 0x00400000) > 2u * 0x7fc00000;
 }
 
 #ifdef __GNUC__
