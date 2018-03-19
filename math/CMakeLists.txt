@@ -28,11 +28,8 @@ set(mathlib_src
   math_errf.c
   e_rem_pio2.c
   dunder.c funder.c ieee_status.c poly.c rredf.c
-  k_cos.c s_cos.c
   s_cosf.c
-  k_sin.c s_sin.c
   s_sinf.c
-  k_tan.c s_tan.c
   s_tanf.c)
 
 add_library(mathlib SHARED ${mathlib_src})

@@ -19,8 +19,6 @@
 
 func=tan op1=7ff80000.00000001 result=7ff80000.00000001 errno=0
 func=tan op1=fff80000.00000001 result=7ff80000.00000001 errno=0
-func=tan op1=7ff00000.00000001 result=7ff80000.00000001 errno=0 status=i
-func=tan op1=fff00000.00000001 result=7ff80000.00000001 errno=0 status=i
 func=tan op1=7ff00000.00000000 result=7ff80000.00000001 errno=EDOM status=i
 func=tan op1=fff00000.00000000 result=7ff80000.00000001 errno=EDOM status=i
 func=tan op1=00000000.00000000 result=00000000.00000000 errno=0

@@ -233,9 +233,9 @@ test_func tfuncs[] = {
     TFUNC(at_d,rt_d, atan, 4*ULPUNIT),
     TFUNC(at_d2,rt_d, atan2, 4*ULPUNIT),
 
-    TFUNCARM(at_d,rt_d, tan, 2*ULPUNIT),
-    TFUNCARM(at_d,rt_d, sin, 2*ULPUNIT),
-    TFUNCARM(at_d,rt_d, cos, 2*ULPUNIT),
+    TFUNC(at_d,rt_d, tan, 2*ULPUNIT),
+    TFUNC(at_d,rt_d, sin, 2*ULPUNIT),
+    TFUNC(at_d,rt_d, cos, 2*ULPUNIT),
 
     TFUNC(at_s,rt_s, acosf, 4*ULPUNIT),
     TFUNC(at_s,rt_s, asinf, 4*ULPUNIT),
