@@ -1,73 +1,43 @@
-ARM math library functions
-----------------------------
+Arm Optimized Routines
+----------------------
 
-This package contains a number of math functions from ARM's math library,
-as well as a build system and a test suite. In addition to the source code,
-there is also a script "remez.jl", which was used to generate coefficients
-used in the implementation of these functions (see comments in the code).
+This repository contains implementations of math library functions
+provided by Arm under Apache License 2.0 (See LICENSE). Contributions
+to this project are accepted, but the terms will need negotiation (so
+relicensing and copyright assignment to the FSF is possible later).
 
-Requirements: gcc >= 4.8, cmake >= 2.8, mpfr, mpc, qemu-user-static.
+Source code layout:
 
-For a native build on an AArch64 platform, everything (including tests) should
-work out-of the box, assuming the system compiler is a recent gcc. Simply follow
-the instructions below to configure the build using cmake (leaving out the
--DCMAKE_TOOLCHAIN_FILE argument).
+auxiliary/      - design tools.
+build/          - build directory (created by make).
+math/           - math library source.
+math/include/   - math library public headers.
+math/single/    - code for cpu with only single precision support.
+test/           - test related source.
+test/rtest/     - test generator (requires mpfr and mpc).
+test/testcases/ - test cases.
 
-Cross builds are supported for Linux hosts. First, install the required
-packages to build and run the tests on your distro of choice:
-# apt-get install qemu-user-static gcc-aarch64-linux-gnu libmpfr-dev \
-  libmpc-dev cmake
+The steps to build the library and run the tests:
 
-You could also use a custom aarch64-linux-gnu-gcc cross toolchain, e.g. from
-Linaro, if your system doesn't provide one:
-
-https://releases.linaro.org/15.02/components/toolchain/binaries/
-
-The build script will build both a shared and a static math library object
-containing the ARM functions for the specified target, a host-side application
-rtest that generates test cases, and a target-side application mathtest that is
-linked against the math library and actually executes the tests.
-
-Generally, the steps to build and run the tests are:
-
-mkdir -p /my/build/folder && cd /my/build/folder
-cmake /path/to/src -DCMAKE_TOOLCHAIN_FILE=/path/to/toolchain/file
+cp config.mk.dist config.mk
+# edit config.mk if necessary ...
 make
 make check
 
-The toolchain file specifies the paths to the cross-compiler, i.e.
-aarch64-linux-gnu-gcc, as well as the sysroot parameter for the build. An
-example can be found in toolchain-gcc.cmake, which assumes that you have
-the cross toolchain installed in /usr/bin and the sysroot is
-/usr/aarch64-linux-gnu respectively. This should work with the Ubuntu packages
-suggested above as-is. Edit the paths as necessary if your cross toolchain
-lives somewhere else. Alternatively, you can specify the necessary parameters
-from the toolchain file directly on the command line.
+Or building outside of the source directory:
 
-The files are built in the build directory as follows:
-build/
-  bin/
-    rtest
-    mathtest
-    runtest.sh
-  lib/
-    libmathlib.so
-    libmathlib_static.a
-  include/
-    arm_math.h
+ln -s path/to/src/Makefile Makefile
+cp path/to/src/config.mk.dist config.mk
+echo 'srcdir = path/to/src' >> config.mk
+# further edits to config.mk
+make
+make check
 
-It is possible to specify which emulator to use for the execution of the tests
-in the cross compilation case by specifying the following option:
-cmake (...) -DCMAKE_CROSSCOMPILING_EMULATOR=/path/to/your/emulator
-By default, qemu-aarch64-static will be used, so this has to be on your path
-if you want to cross-run the test suite.
+The test system requires libmpfr and libmpc.
 
-Whenever the CMake configuration is changed, it is wise to delete the whole
-build folder instead of just rerunning CMake inside the existing folder.
+For cross build, CROSS_COMPILE should be set in config.mk and EMULATOR
+should be set for cross testing (e.g. using qemu-user or remote access
+to a target machine), see the examples in config.mk.dist.
 
-The build system also has experimental support for using clang as the cross
-compiler.
-!!!You need CMake >= 3.0 and clang >= 3.5.0 for this!!!
-Before compilation, apply the source patch in the patches/ folder to make sure
-everything works properly when compiled with clang. There is a sample toolchain
-file for clang included as toolchain-clang.cmake.
+The script "remez.jl" was used to generate some of the coefficients
+(see comments in the code).

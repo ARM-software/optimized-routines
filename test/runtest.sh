@@ -25,4 +25,4 @@ cd "${0%/*}"
 # For a cross-build, the actual tests have to be executed in QEMU or an emulator
 # of choice. This is set in the CMake script and filled in here.
 
-find . -iname "*.tst" -print0 | xargs -0 cat | ./rtest | @CMAKE_CROSSCOMPILING_EMULATOR@ "$@"
+find . -iname "*.tst" -print0 | xargs -0 cat | ./rtest | "$@"
