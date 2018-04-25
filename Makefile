@@ -21,9 +21,7 @@ bindir = $(prefix)/bin
 libdir = $(prefix)/lib
 includedir = $(prefix)/include
 
-HACK = $(srcdir)/math/s_sincosf.c
-
-MATH_SRCS = $(filter-out $(HACK),$(wildcard $(srcdir)/math/*.[cS]))
+MATH_SRCS = $(wildcard $(srcdir)/math/*.[cS])
 MATH_BASE = $(basename $(MATH_SRCS))
 MATH_OBJS = $(MATH_BASE:$(srcdir)/%=build/%.o)
 RTEST_SRCS = $(wildcard $(srcdir)/test/rtest/*.[cS])

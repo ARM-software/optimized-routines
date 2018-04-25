@@ -56,7 +56,7 @@ _Pragma(STR(import IMPORT_SYMBOL))
 #endif
 
 EXTERN_C int ARM__ieee754_rem_pio2(double, double *);
-#include "../math/rredf.h"
+#include "../math/single/rredf.h"
 
 int sp_rem_pio2(float x, float *y) {
   int q;
