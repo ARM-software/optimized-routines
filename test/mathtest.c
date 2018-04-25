@@ -29,11 +29,8 @@
 #include <fenv.h>
 #include <arm_math.h>
 
-#ifdef __GNUC__
-#  include <endian.h>
-#  ifndef math_errhandling
-#    define math_errhandling MATH_ERREXCEPT
-#  endif
+#ifndef math_errhandling
+# define math_errhandling 0
 #endif
 
 #ifdef __cplusplus
@@ -69,8 +66,6 @@ int quiet = 0;
 
 #define EXTRABITS (12)
 #define ULPUNIT (1<<EXTRABITS)
-
-EXTERN_C unsigned int __ieee_status(unsigned int mask,unsigned int flags);
 
 typedef int (*test) (void);
 
@@ -411,7 +406,7 @@ char *errors[] = {
 static int verbose, fo, strict;
 
 /* state toggled by random=on / random=off */
-static int random = 0;
+static int randomstate;
 
 /* Canonify a double NaN: SNaNs all become 7FF00000.00000001 and QNaNs
  * all become 7FF80000.00000001 */
@@ -760,7 +755,7 @@ testdetail parsetest(char *testbuf, testdetail oldtest) {
         testbuf++;
     }
 
-    ret.random = random;
+    ret.random = randomstate;
 
     ret.in_err = 0;
     ret.in_err_limit = e_number_of_errnos;
@@ -774,7 +769,7 @@ testdetail parsetest(char *testbuf, testdetail oldtest) {
         k = find(p, keywords, sizeof(keywords));
         switch (k) {
         case k_random:
-            random = (!strcmp(q, "on"));
+            randomstate = (!strcmp(q, "on"));
             ret.comment = 1;
             return ret;                /* otherwise ignore this line */
         case k_func:
@@ -1025,11 +1020,7 @@ int runtest(testdetail t) {
         return test_invalid;
 
     /* Set IEEE status to mathlib-normal */
-#ifdef __GNUC__
     feclearexcept(FE_ALL_EXCEPT);
-#else
-    __ieee_status(0xC01F1F, 0x000000);
-#endif
 
     /* Deal with operands */
 #define DO_DOP(arg,op) arg.i[dmsd] = t.op[0]; arg.i[dlsd] = t.op[1]
@@ -1146,15 +1137,7 @@ int runtest(testdetail t) {
      * complex functions are hard to get exactly right and we don't
      * have to anyway (C99 annex G is only informative). */
     if (!(is_complex_argtype(t.func->argtype) || is_complex_rettype(t.func->rettype))) {
-#ifdef __GNUC__
-        status = 0;
-        if(fetestexcept(FE_INVALID)) status |= 0x01;
-        if(fetestexcept(FE_DIVBYZERO)) status |= 0x02;
-        if(fetestexcept(FE_OVERFLOW)) status |= 0x04;
-        if(fetestexcept(FE_UNDERFLOW)) status |= 0x08;
-#else
-        status = __ieee_status(0, 0) & (FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW);
-#endif /* __GNUC__ */
+        status = fetestexcept(FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW);
         if ((status|t.maybestatus) != (t.status|t.maybestatus)) {
             if (quiet) failtext[0]='x';
             else {
@@ -1379,6 +1362,12 @@ int runtest(testdetail t) {
                 }
             }
         } else {
+            if(is_complex_rettype(t.func->rettype))
+                /*
+                 * Complex functions are not fully supported,
+                 * this is unreachable, but prevents warnings.
+                 */
+                abort();
             /*
              * The test case data has provided the result in
              * exactly the output precision. Therefore we must
@@ -1562,7 +1551,6 @@ int main(int ac, char **av) {
     char **files;
     int i, nfiles = 0;
     dbl d;
-    int dmsd_c;
 
 #ifdef MICROLIB
     /*
@@ -1594,12 +1582,6 @@ int main(int ac, char **av) {
     }
 #endif
 
-#if defined __BIG_ENDIAN && (!defined(__GNUC__) || __BYTE_ORDER==__BIG_ENDIAN)
-    dmsd_c = 0;
-#else
-    dmsd_c = 1;
-#endif
-
     /* Sort tfuncs */
     qsort(tfuncs, sizeof(tfuncs)/sizeof(test_func), sizeof(test_func), &compare_tfuncs);
 
@@ -1617,7 +1599,7 @@ int main(int ac, char **av) {
      */
     d.i[0] = d.i[1] = 0x11111111;/* a random +ve number */
     d.f /= d.f;                    /* must now be one */
-    if (d.i[dmsd] == 0 || dmsd_c != dmsd) {
+    if (d.i[dmsd] == 0) {
         fprintf(stderr, "YIKES! Compiler and runtime disagree on endianness"
                 " of `double'. Bailing out\n");
         return 1;

@@ -1995,9 +1995,9 @@ void docase(Testable *fn, uint32 *args) {
       case args2f:
       case args1fcr:
       case rredf:
+        printextra = 1;
         if (rejected == 0) {
             errstr = NULL;
-            printextra = 1;
             if (!mpfr_zero_p(a)) {
                 if ((result[0] & 0x7FFFFFFF) == 0) {
                     /*

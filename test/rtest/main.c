@@ -210,9 +210,8 @@ void dofile(FILE *fp, int translating) {
              */
             uint32 ops[8], result[8];
             int got_op = 0; /* &1 for got_op1, &4 for got_op3 etc. */
-            Testable *f;
+            Testable *f = 0;
             char *q, *r;
-            int i;
             int got_result = 0, got_errno_in = 0;
 
             for (q = strtok(p, " \t"); q; q = strtok(NULL, " \t")) {
