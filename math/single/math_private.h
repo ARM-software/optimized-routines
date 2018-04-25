@@ -28,10 +28,8 @@
 #include <errno.h>
 #include <stdint.h>
 
-extern int    ARM__ieee754_rem_pio2(double, double *);
-extern double ARM__kernel_sin(double, double, int);
-extern double ARM__kernel_cos(double, double);
-extern double ARM__kernel_poly(const double *, int, double);
+extern int    __ieee754_rem_pio2(double, double *);
+extern double __kernel_poly(const double *, int, double);
 
 #define __FP_IEEE
 #define __FP_FENV_EXCEPTIONS
@@ -98,7 +96,6 @@ extern float  __mathlib_flt_infnan2(float, float);
 extern double __mathlib_dbl_infnan(double);
 extern double __mathlib_dbl_infnan2(double, double);
 extern unsigned __ieee_status(unsigned, unsigned);
-extern double ARM__kernel_tan(double, double, int);
 
 #define FLOAT_INFNAN(x) __mathlib_flt_infnan(x)
 #define FLOAT_INFNAN2(x,y) __mathlib_flt_infnan2(x,y)

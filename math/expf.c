@@ -47,7 +47,7 @@ top12 (float x)
 }
 
 float
-ARM__expf (float x)
+expf (float x)
 {
   uint32_t abstop;
   uint64_t ki, t;

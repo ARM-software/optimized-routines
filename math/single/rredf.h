@@ -37,7 +37,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern float ARM__mathlib_rredf2(float x, int *q, unsigned k);
+extern float __mathlib_rredf2(float x, int *q, unsigned k);
 
 /*
  * Semantics of the function:
@@ -53,7 +53,7 @@ extern float ARM__mathlib_rredf2(float x, int *q, unsigned k);
  *    input value was trivial in some way (infinity, NaN, or so
  *    small that we can safely return sin(x)=tan(x)=x,cos(x)=1).
  */
-static __inline float ARM__mathlib_rredf(float x, int *q)
+static __inline float __mathlib_rredf(float x, int *q)
 {
     /*
      * First, extract the bit pattern of x as an integer, so that we
@@ -146,7 +146,7 @@ static __inline float ARM__mathlib_rredf(float x, int *q)
      * That's enough to do in-line; if we're still playing, hand off
      * to the out-of-line main range reducer.
      */
-    return ARM__mathlib_rredf2(x, q, k);
+    return __mathlib_rredf2(x, q, k);
 }
 
 #ifdef __cplusplus

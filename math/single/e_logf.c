@@ -22,14 +22,12 @@
  * out of all recognition by SGT.
  */
 
-#include "arm_math.h"
-#include "math_private.h"
 #include <math.h>
 #include <errno.h>
-
+#include "math_private.h"
 
 float
-ARM__logf(float X)
+logf(float X)
 {
     int N = 0;
     int aindex;

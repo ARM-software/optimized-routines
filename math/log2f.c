@@ -35,7 +35,7 @@ Relative error: 1.9 * 2^-26 (before rounding.)
 #define OFF 0x3f330000
 
 float
-ARM__log2f (float x)
+log2f (float x)
 {
   /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
   double_t z, r, r2, p, y, y0, invc, logc;

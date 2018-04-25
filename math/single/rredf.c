@@ -47,7 +47,7 @@ extern "C" {
  *    this value into a second register and we should change the
  *    prototype!
  */
-float ARM__mathlib_rredf2(float x, int *q, unsigned k)
+float __mathlib_rredf2(float x, int *q, unsigned k)
 {
     /*
      * First, weed out infinities and NaNs, and deal with them by

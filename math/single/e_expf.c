@@ -22,13 +22,12 @@
  * out of all recognition by SGT.
  */
 
-#include "arm_math.h"
-#include "math_private.h"
 #include <math.h>
 #include <errno.h>
+#include "math_private.h"
 
 float
-ARM__expf(float X)
+expf(float X)
 {
   int N; float XN, g, Rg, Result;
   unsigned ix = fai(X), edgecaseflag = 0;

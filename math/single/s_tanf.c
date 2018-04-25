@@ -31,7 +31,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-float ARM__tanf(float x)
+float tanf(float x)
 {
     int q;
 
@@ -46,7 +46,7 @@ float ARM__tanf(float x)
          * be worth.
          */
         int qq;
-        x = ARM__mathlib_rredf(x, &qq);
+        x = __mathlib_rredf(x, &qq);
         q = qq;
     }
     if (__builtin_expect(q < 0, 0)) { /* this signals tiny, inf, or NaN */

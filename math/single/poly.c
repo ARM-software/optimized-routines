@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-double ARM__kernel_poly(const double *coeffs, int n, double x)
+double __kernel_poly(const double *coeffs, int n, double x)
 {
   double result = coeffs[--n];
 

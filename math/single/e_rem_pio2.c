@@ -17,11 +17,10 @@
  * limitations under the License.
  */
 
-#include "arm_math.h"
-#include "math_private.h"
 #include <math.h>
+#include "math_private.h"
 
-int ARM__ieee754_rem_pio2(double x, double *y) {
+int __ieee754_rem_pio2(double x, double *y) {
     int q;
 
     y[1] = 0.0;                        /* default */

@@ -21,18 +21,18 @@
  * Source: my own head, and Remez-generated polynomial approximations.
  */
 
-#include "rredf.h"
 #include <fenv.h>
-#include "math_private.h"
 #include <math.h>
 #include <errno.h>
+#include "rredf.h"
+#include "math_private.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 #ifndef COSINE
-#define FUNCNAME ARM__sinf
+#define FUNCNAME sinf
 #define SOFTFP_FUNCNAME __softfp_sinf
 #define DO_SIN (!(q & 1))
 #define NEGATE_SIN ((q & 2))
@@ -40,7 +40,7 @@ extern "C" {
 #define TRIVIAL_RESULT(x) FLOAT_CHECKDENORM(x)
 #define ERR_INF MATHERR_SINF_INF
 #else
-#define FUNCNAME ARM__cosf
+#define FUNCNAME cosf
 #define SOFTFP_FUNCNAME __softfp_cosf
 #define DO_SIN (q & 1)
 #define NEGATE_SIN (!(q & 2))
@@ -58,13 +58,13 @@ float FUNCNAME(float x)
      */
     {
         /*
-         * I enclose the call to ARM__mathlib_rredf in braces so that
+         * I enclose the call to __mathlib_rredf in braces so that
          * the address-taken-ness of qq does not propagate
          * throughout the rest of the function, for what that might
          * be worth.
          */
         int qq;
-        x = ARM__mathlib_rredf(x, &qq);
+        x = __mathlib_rredf(x, &qq);
         q = qq;
     }
     if (__builtin_expect(q < 0, 0)) { /* this signals tiny, inf, or NaN */

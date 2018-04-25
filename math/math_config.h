@@ -20,7 +20,6 @@
 #ifndef _MATH_CONFIG_H
 #define _MATH_CONFIG_H
 
-#include "arm_math.h"
 #include <math.h>
 #include <stdint.h>
 

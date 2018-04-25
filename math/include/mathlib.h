@@ -1,5 +1,5 @@
 /*
- * arm_math.h - ARM math library function definitions
+ * Public API.
  *
  * Copyright (c) 2015, Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
@@ -17,17 +17,11 @@
  * limitations under the License.
  */
 
-/* Double precision */
-__attribute__((const)) double ARM__sin(double);
-__attribute__((const)) double ARM__cos(double);
-double ARM__tan(double);
-
-/* Single precision */
-float ARM__sinf(float);
-float ARM__cosf(float);
-float ARM__tanf(float);
-float ARM__expf(float);
-float ARM__exp2f(float);
-float ARM__logf(float);
-float ARM__log2f(float);
-float ARM__powf(float, float);
+float sinf(float);
+float cosf(float);
+float tanf(float);
+float expf(float);
+float exp2f(float);
+float logf(float);
+float log2f(float);
+float powf(float, float);

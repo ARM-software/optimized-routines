@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#include "math_private.h"
 #include <fenv.h>
+#include "math_private.h"
 
 __inline float __mathlib_flt_infnan2(float x, float y)
 {

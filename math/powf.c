@@ -144,7 +144,7 @@ zeroinfnan (uint32_t ix)
 }
 
 float
-ARM__powf (float x, float y)
+powf (float x, float y)
 {
   unsigned long sign_bias = 0;
   uint32_t ix, iy;

@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <fenv.h>
-#include <arm_math.h>
 
 #ifndef math_errhandling
 # define math_errhandling 0
@@ -52,12 +51,12 @@
 _Pragma(STR(import IMPORT_SYMBOL))
 #endif
 
-EXTERN_C int ARM__ieee754_rem_pio2(double, double *);
+EXTERN_C int __ieee754_rem_pio2(double, double *);
 #include "../math/single/rredf.h"
 
 int sp_rem_pio2(float x, float *y) {
   int q;
-  *y = ARM__mathlib_rredf(x, &q);
+  *y = __mathlib_rredf(x, &q);
   return q;
 }
 
@@ -209,11 +208,7 @@ int is_complex_rettype(int rettype) {
 #define ABSLOWERBOUND 0x4000000000000000LL
 #define PLUSMINUSPIO2 0x1000000000000000LL
 
-#ifndef TEST_LOCAL_LIBM
-#define ARM_PREFIX(x) ARM__##x
-#else
 #define ARM_PREFIX(x) x
-#endif
 
 #define TFUNC(arg,ret,name,tolerance) { t_func, arg, ret, (void*)&name, m_none, tolerance, #name }
 #define TFUNCARM(arg,ret,name,tolerance) { t_func, arg, ret, (void*)& ARM_PREFIX(name), m_none, tolerance, #name }
@@ -1113,7 +1108,7 @@ int runtest(testdetail t) {
         case m_islessgreaterf: intres = islessgreater(s_arg1.f, s_arg2.f); break;
         case m_isunorderedf: intres = isunordered(s_arg1.f, s_arg2.f); break;
 
-        case m_rred:  intres = 3 & ARM__ieee754_rem_pio2(d_arg1.f, d_res.da); break;
+        case m_rred:  intres = 3 & __ieee754_rem_pio2(d_arg1.f, d_res.da); break;
         case m_rredf: intres = 3 & sp_rem_pio2(s_arg1.f, s_res.da); break;
         default:
             printf("unhandled macro: %s\n",t.func->name);

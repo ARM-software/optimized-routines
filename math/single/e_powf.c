@@ -17,13 +17,12 @@
  * limitations under the License.
  */
 
-#include "arm_math.h"
-#include "math_private.h"
 #include <math.h>
 #include <errno.h>
+#include "math_private.h"
 
 float
-ARM__powf(float x, float y)
+powf(float x, float y)
 {
     float logh, logl;
     float rlogh, rlogl;
