@@ -38,18 +38,36 @@ extern double __kernel_poly(const double *, int, double);
 
 #define __set_errno(val) (errno = (val))
 
-#define __FLT(x) (*(unsigned *)&(x))
-#if defined(__ARM_BIG_ENDIAN) || defined(__BIG_ENDIAN)
-#  define __LO(x) (*(1 + (unsigned *)&(x)))
-#  define __HI(x) (*(unsigned *)&(x))
-#else /* !defined(__ARM_BIG_ENDIAN) && !defined(__BIG_ENDIAN) */
-#  define __HI(x) (*(1 + (unsigned *)&(x)))
-#  define __LO(x) (*(unsigned *)&(x))
-#endif /* !defined(__ARM_BIG_ENDIAN) && !defined(__BIG_ENDIAN) */
+static __inline uint32_t __LO(double x)
+{
+  union {double f; uint64_t i;} u = {x};
+  return (uint32_t)u.i;
+}
 
-// FIXME: Implement these without type punning.
-static __inline unsigned int fai(float f) { return __FLT(f); }
-static __inline float fhex(unsigned int n) { float f; __FLT(f) = n; return f; }
+static __inline uint32_t __HI(double x)
+{
+  union {double f; uint64_t i;} u = {x};
+  return u.i >> 32;
+}
+
+static __inline double __SET_LO(double x, uint32_t lo)
+{
+  union {double f; uint64_t i;} u = {x};
+  u.i = (u.i >> 32) << 32 | lo;
+  return u.f;
+}
+
+static __inline unsigned int fai(float f)
+{
+  union {float f; uint32_t i;} u = {f};
+  return u.i;
+}
+
+static __inline float fhex(unsigned int n)
+{
+  union {uint32_t i; float f;} u = {n};
+  return u.f;
+}
 
 #define CLEARBOTTOMHALF(x) fhex((fai(x) + 0x00000800) & 0xFFFFF000)
 

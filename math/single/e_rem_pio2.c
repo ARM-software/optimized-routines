@@ -263,7 +263,7 @@ int __ieee754_rem_pio2(double x, double *y) {
          * single-precision output number.
          */
         double ftop = f1 + (f2 + (f3 + f4));
-        __LO(ftop) = 0;
+        ftop = __SET_LO(ftop, 0);
         double fbot = f4 - (((ftop-f1)-f2)-f3);
 
         /* ... and multiply by a prec-and-a-half value of (pi/2)*2^-32. */
