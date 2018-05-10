@@ -36,33 +36,42 @@
 # define WANT_ERRNO_UFLOW (WANT_ROUNDING && WANT_ERRNO)
 #endif
 
-#ifdef __aarch64__
-# include <arm_neon.h>
+/* Compiler can inline round as a single instruction.  */
+#ifndef HAVE_FAST_ROUND
+# if __aarch64__
+#   define HAVE_FAST_ROUND 1
+# else
+#   define HAVE_FAST_ROUND 0
+# endif
+#endif
 
-/* ACLE intrinsics for frintn and fcvtns instructions.  */
+/* Compiler can inline lround, but not (long)round(x).  */
+#ifndef HAVE_FAST_LROUND
+# if __aarch64__ && (100*__GNUC__ + __GNUC_MINOR__) >= 408 && __NO_MATH_ERRNO__
+#   define HAVE_FAST_LROUND 1
+# else
+#   define HAVE_FAST_LROUND 0
+# endif
+#endif
+
+#if HAVE_FAST_ROUND
 # define TOINT_INTRINSICS 1
 
 static inline double_t
 roundtoint (double_t x)
 {
-  return vget_lane_f64 (vrndn_f64 (vld1_f64 (&x)), 0);
+  return round (x);
 }
 
 static inline uint64_t
 converttoint (double_t x)
 {
-  return vcvtnd_s64_f64 (x);
+# if HAVE_FAST_LROUND
+  return lround (x);
+# else
+  return (long) round (x);
+# endif
 }
-#endif
-
-#ifndef TOINT_INTRINSICS
-# define TOINT_INTRINSICS 0
-#endif
-#ifndef TOINT_RINT
-# define TOINT_RINT 0
-#endif
-#ifndef TOINT_SHIFT
-# define TOINT_SHIFT 1
 #endif
 
 static inline uint32_t

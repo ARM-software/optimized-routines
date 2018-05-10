@@ -77,15 +77,12 @@ expf (float x)
   z = InvLn2N * xd;
 
   /* Round and convert z to int, the result is in [-150*N, 128*N] and
-     ideally ties-to-even rule is used, otherwise the magnitude of r
-     can be bigger which gives larger approximation error.  */
+     ideally nearest int is used, otherwise the magnitude of r can be
+     bigger which gives larger approximation error.  */
 #if TOINT_INTRINSICS
   kd = roundtoint (z);
   ki = converttoint (z);
-#elif TOINT_RINT
-  kd = rint (z);
-  ki = (long) kd;
-#elif TOINT_SHIFT
+#else
 # define SHIFT __exp2f_data.shift
   kd = (double) (z + SHIFT); /* Rounding to double precision is required.  */
   ki = asuint64 (kd);

@@ -25,7 +25,7 @@ CFLAGS += -Wall -Wno-missing-braces -Wno-strict-aliasing -Wno-unused-function
 
 # Use with gcc.
 CFLAGS += -frounding-math -fexcess-precision=standard -fno-stack-protector
-CFLAGS += -ffp-contract=fast
+CFLAGS += -ffp-contract=fast -fno-math-errno
 
 # Use with clang.
 #CFLAGS += -DCLANG_EXCEPTIONS
