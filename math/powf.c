@@ -102,7 +102,7 @@ exp2_inline (double_t xd, uint32_t sign_bias)
 # define C __exp2f_data.poly
 # define SHIFT __exp2f_data.shift_scaled
   /* x = k/N + r with r in [-1/(2N), 1/(2N)] */
-  kd = (double) (xd + SHIFT); /* Rounding to double precision is required.  */
+  kd = eval_as_double (xd + SHIFT);
   ki = asuint64 (kd);
   kd -= SHIFT; /* k/N */
 #endif

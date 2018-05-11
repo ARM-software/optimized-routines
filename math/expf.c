@@ -84,7 +84,7 @@ expf (float x)
   ki = converttoint (z);
 #else
 # define SHIFT __exp2f_data.shift
-  kd = (double) (z + SHIFT); /* Rounding to double precision is required.  */
+  kd = eval_as_double (z + SHIFT);
   ki = asuint64 (kd);
   kd -= SHIFT;
 #endif

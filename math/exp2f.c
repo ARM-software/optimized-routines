@@ -70,7 +70,7 @@ exp2f (float x)
     }
 
   /* x = k/N + r with r in [-1/(2N), 1/(2N)] and int k.  */
-  kd = (double) (xd + SHIFT); /* Rounding to double precision is required.  */
+  kd = eval_as_double (xd + SHIFT);
   ki = asuint64 (kd);
   kd -= SHIFT; /* k/N for int k.  */
   r = xd - kd;
