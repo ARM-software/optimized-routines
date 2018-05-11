@@ -56,7 +56,7 @@ expf (float x)
 
   xd = (double_t) x;
   abstop = top12 (x) & 0x7ff;
-  if (__builtin_expect (abstop >= top12 (88.0f), 0))
+  if (unlikely (abstop >= top12 (88.0f)))
     {
       /* |x| >= 88 or x is nan.  */
       if (asuint (x) == asuint (-INFINITY))

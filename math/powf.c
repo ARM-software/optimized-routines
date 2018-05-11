@@ -151,12 +151,10 @@ powf (float x, float y)
 
   ix = asuint (x);
   iy = asuint (y);
-  if (__builtin_expect (ix - 0x00800000 >= 0x7f800000 - 0x00800000
-			  || zeroinfnan (iy),
-			0))
+  if (unlikely (ix - 0x00800000 >= 0x7f800000 - 0x00800000 || zeroinfnan (iy)))
     {
       /* Either (x < 0x1p-126 or inf or nan) or (y is 0 or inf or nan).  */
-      if (__builtin_expect (zeroinfnan (iy), 0))
+      if (unlikely (zeroinfnan (iy)))
 	{
 	  if (2 * iy == 0)
 	    return issignalingf_inline (x) ? x + y : 1.0f;
@@ -170,7 +168,7 @@ powf (float x, float y)
 	    return 0.0f; /* |x|<1 && y==inf or |x|>1 && y==-inf.  */
 	  return y * y;
 	}
-      if (__builtin_expect (zeroinfnan (ix), 0))
+      if (unlikely (zeroinfnan (ix)))
 	{
 	  float_t x2 = x * x;
 	  if (ix & 0x80000000 && checkint (iy) == 1)
@@ -213,9 +211,8 @@ powf (float x, float y)
     }
   double_t logx = log2_inline (ix);
   double_t ylogx = y * logx; /* Note: cannot overflow, y is single prec.  */
-  if (__builtin_expect ((asuint64 (ylogx) >> 47 & 0xffff)
-			  >= asuint64 (126.0 * POWF_SCALE) >> 47,
-			0))
+  if (unlikely ((asuint64 (ylogx) >> 47 & 0xffff)
+		 >= asuint64 (126.0 * POWF_SCALE) >> 47))
     {
       /* |y*log(x)| >= 126.  */
       if (ylogx > 0x1.fffffffd1d571p+6 * POWF_SCALE)

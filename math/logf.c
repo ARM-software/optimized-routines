@@ -50,10 +50,10 @@ logf (float x)
   ix = asuint (x);
 #if WANT_ROUNDING
   /* Fix sign of zero with downward rounding when x==1.  */
-  if (__builtin_expect (ix == 0x3f800000, 0))
+  if (unlikely (ix == 0x3f800000))
     return 0;
 #endif
-  if (__builtin_expect (ix - 0x00800000 >= 0x7f800000 - 0x00800000, 0))
+  if (unlikely (ix - 0x00800000 >= 0x7f800000 - 0x00800000))
     {
       /* x < 0x1p-126 or inf or nan.  */
       if (ix * 2 == 0)
