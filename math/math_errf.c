@@ -63,11 +63,17 @@ __math_oflowf (uint32_t sign)
   return xflowf (sign, 0x1p97f);
 }
 
+/* NOINLINE prevents fenv semantics breaking optimizations.  */
+NOINLINE static float
+divzerof (float x)
+{
+  return with_errnof (x / 0.0f, ERANGE);
+}
+
 HIDDEN float
 __math_divzerof (uint32_t sign)
 {
-  float y = 0;
-  return with_errnof ((sign ? -1 : 1) / y, ERANGE);
+  return divzerof (sign ? -1.0f : 1.0f);
 }
 
 HIDDEN float
