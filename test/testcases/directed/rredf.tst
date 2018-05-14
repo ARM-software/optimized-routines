@@ -1,22 +1,20 @@
 ; rredf.tst - tests for single-precision trig range reducer,
 ; including all the hardest cases
 ;
-; Copyright (C) 1999-2015, ARM Limited, All Rights Reserved
+; Copyright (c) 1999-2015, Arm Limited.
 ; SPDX-License-Identifier: Apache-2.0
 ;
-; Licensed under the Apache License, Version 2.0 (the "License"); you may
-; not use this file except in compliance with the License.
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
 ; You may obtain a copy of the License at
 ;
-; http://www.apache.org/licenses/LICENSE-2.0
+;     http://www.apache.org/licenses/LICENSE-2.0
 ;
 ; Unless required by applicable law or agreed to in writing, software
-; distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-; WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
-;
-; This file is part of the Optimized Routines project
 
 func=rredf op1=3fc90fda result=b3a22168.c23 res2=00000001 error=0
 func=rredf op1=bfc90fda result=33a22168.c23 res2=00000003 error=0
