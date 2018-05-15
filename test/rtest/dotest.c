@@ -487,6 +487,10 @@ Testable functions[] = {
         cases_uniform, 0x3e400000, 0x40300000},
     {"tanf", (funcptr)mpfr_tan, args1f, {NULL},
         cases_uniform_float, 0x39800000, 0x41800000},
+    {"sincosf_sinf", (funcptr)mpfr_sin, args1f, {NULL},
+        cases_uniform_float, 0x39800000, 0x41800000},
+    {"sincosf_cosf", (funcptr)mpfr_cos, args1f, {NULL},
+        cases_uniform_float, 0x39800000, 0x41800000},
     /*
      * Inverse trig: asin, acos. Between 1 and -1, of course. acos
      * goes down to 2^-54, asin to 2^-27.

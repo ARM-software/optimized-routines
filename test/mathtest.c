@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <fenv.h>
+#include "mathlib.h"
 
 #ifndef math_errhandling
 # define math_errhandling 0
@@ -214,6 +215,10 @@ int is_complex_rettype(int rettype) {
 #define TFUNCARM(arg,ret,name,tolerance) { t_func, arg, ret, (void*)& ARM_PREFIX(name), m_none, tolerance, #name }
 #define MFUNC(arg,ret,name,tolerance) { t_macro, arg, ret, NULL, m_##name, tolerance, #name }
 
+/* sincosf wrappers for easier testing.  */
+static float sincosf_sinf(float x) { float s,c; sincosf(x, &s, &c); return s; }
+static float sincosf_cosf(float x) { float s,c; sincosf(x, &s, &c); return c; }
+
 test_func tfuncs[] = {
     /* trigonometric */
     TFUNC(at_d,rt_d, acos, 4*ULPUNIT),
@@ -232,6 +237,8 @@ test_func tfuncs[] = {
     TFUNCARM(at_s,rt_s, tanf, 4*ULPUNIT),
     TFUNCARM(at_s,rt_s, sinf, 4*ULPUNIT),
     TFUNCARM(at_s,rt_s, cosf, 4*ULPUNIT),
+    TFUNCARM(at_s,rt_s, sincosf_sinf, 4*ULPUNIT),
+    TFUNCARM(at_s,rt_s, sincosf_cosf, 4*ULPUNIT),
 
     /* hyperbolic */
     TFUNC(at_d, rt_d, atanh, 4*ULPUNIT),
