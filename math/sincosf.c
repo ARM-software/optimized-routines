@@ -1,5 +1,5 @@
 /*
- * Single-precision sin function.
+ * Single-precision sin/cos function.
  *
  * Copyright (c) 2018, Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
@@ -18,20 +18,21 @@
  */
 
 #if WANT_SINGLEPREC
-#include "single/s_sinf.c"
+#include "single/s_sincosf.c"
 #else
 
+#include <stdint.h>
 #include <math.h>
 #include "math_config.h"
 #include "sincosf.h"
 
-/* Fast sinf implementation.  Worst-case ULP is 0.56072, maximum relative
+/* Fast sincosf implementation.  Worst-case ULP is 0.56072, maximum relative
    error is 0.5303p-23.  A single-step signed range reduction is used for
    small values.  Large inputs have their range reduced using fast integer
    arithmetic.
 */
-float
-sinf (float y)
+void
+sincosf (float y, float *sinp, float *cosp)
 {
   double x = y;
   double s;
@@ -40,19 +41,21 @@ sinf (float y)
 
   if (abstop12 (y) < abstop12 (pio4))
     {
-      s = x * x;
+      double x2 = x * x;
 
       if (unlikely (abstop12 (y) < abstop12 (0x1p-12f)))
       {
 	if (unlikely (abstop12 (y) < abstop12 (0x1p-126f)))
 	  /* Force underflow for tiny y.  */
-	  force_eval_float (s);
-	return y;
+	  force_eval_float (x2);
+	*sinp = y;
+	*cosp = 1.0f;
+	return;
       }
 
-      return sinf_poly (x, s, p, 0);
+      sincosf_poly (x, x2, p, 0, sinp, cosp);
     }
-  else if (likely (abstop12 (y) < abstop12 (120.0f)))
+  else if (abstop12 (y) < abstop12 (120.0f))
     {
       x = reduce_fast (x, p, &n);
 
@@ -62,9 +65,9 @@ sinf (float y)
       if (n & 2)
 	p = &sincosf_table[1];
 
-      return sinf_poly (x * s, x * x, p, n);
+      sincosf_poly (x * s, x * x, p, n, sinp, cosp);
     }
-  else if (abstop12 (y) < abstop12 (INFINITY))
+  else if (likely (abstop12 (y) < abstop12 (INFINITY)))
     {
       uint32_t xi = asuint (y);
       int sign = xi >> 31;
@@ -77,10 +80,19 @@ sinf (float y)
       if ((n + sign) & 2)
 	p = &sincosf_table[1];
 
-      return sinf_poly (x * s, x * x, p, n);
+      sincosf_poly (x * s, x * x, p, n, sinp, cosp);
     }
   else
-    return __math_invalidf (y);
+    {
+      /* Return NaN if Inf or NaN for both sin and cos.  */
+      *sinp = *cosp = y - y;
+#if WANT_ERRNO
+      /* Needed to set errno for +-Inf, the add is a hack to work
+	 around a gcc register allocation issue: just passing y
+	 affects code generation in the fast path.  */
+      __math_invalidf (y + y);
+#endif
+    }
 }
 
 #endif

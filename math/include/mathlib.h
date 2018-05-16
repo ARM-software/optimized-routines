@@ -25,3 +25,6 @@ float exp2f(float);
 float logf(float);
 float log2f(float);
 float powf(float, float);
+float sinf(float);
+float cosf(float);
+void sincosf(float, float*, float*);
