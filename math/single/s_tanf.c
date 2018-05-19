@@ -22,6 +22,7 @@
  */
 
 #include <math.h>
+#include "../math_config.h"
 #include "math_private.h"
 #include <errno.h>
 #include <fenv.h>
@@ -49,7 +50,7 @@ float tanf(float x)
         x = __mathlib_rredf(x, &qq);
         q = qq;
     }
-    if (__builtin_expect(q < 0, 0)) { /* this signals tiny, inf, or NaN */
+    if (unlikely(q < 0)) { /* this signals tiny, inf, or NaN */
         unsigned k = fai(x) << 1;
         if (k < 0xFF000000)            /* tiny */
             return FLOAT_CHECKDENORM(x);
