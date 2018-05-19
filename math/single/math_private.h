@@ -28,7 +28,9 @@
 #include <errno.h>
 #include <stdint.h>
 
+#ifndef INLINE_REM_PIO2
 extern int    __ieee754_rem_pio2(double, double *);
+#endif
 extern double __kernel_poly(const double *, int, double);
 
 #define __FP_IEEE

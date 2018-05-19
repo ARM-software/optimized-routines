@@ -20,6 +20,10 @@
 #include <math.h>
 #include "math_private.h"
 
+#ifdef INLINE_REM_PIO2
+static __inline __always_inline
+#endif
+
 int __ieee754_rem_pio2(double x, double *y) {
     int q;
 
