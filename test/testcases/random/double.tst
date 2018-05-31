@@ -21,3 +21,4 @@ test tan 10000
 test rred 10000
 test exp 10000
 test exp2 10000
+test log 10000
