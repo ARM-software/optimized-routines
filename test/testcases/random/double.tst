@@ -19,3 +19,5 @@ test sin 10000
 test cos 10000
 test tan 10000
 test rred 10000
+test exp 10000
+test exp2 10000

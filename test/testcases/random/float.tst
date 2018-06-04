@@ -21,6 +21,8 @@ test sincosf_sinf 5000
 test sincosf_cosf 5000
 test tanf 10000
 test expf 10000
+test exp2f 10000
 test logf 10000
+test log2f 10000
 test powf 10000
 test rredf 10000
