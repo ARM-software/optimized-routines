@@ -1,7 +1,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2015, Arm Limited.
+ * Copyright (c) 2015-2018, Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,3 +28,7 @@ float powf(float, float);
 float sinf(float);
 float cosf(float);
 void sincosf(float, float*, float*);
+
+double exp(double);
+double exp2(double);
+double log(double);
