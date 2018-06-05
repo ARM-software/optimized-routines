@@ -32,3 +32,4 @@ void sincosf(float, float*, float*);
 double exp(double);
 double exp2(double);
 double log(double);
+double log2(double);

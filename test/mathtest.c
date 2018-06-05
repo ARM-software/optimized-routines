@@ -258,7 +258,7 @@ test_func tfuncs[] = {
     /* exponential and logarithmic */
     TFUNC(at_d,rt_d, log, 3*ULPUNIT/4),
     TFUNC(at_d,rt_d, log10, 3*ULPUNIT),
-    TFUNC(at_d,rt_d, log2, 3*ULPUNIT),
+    TFUNC(at_d,rt_d, log2, 3*ULPUNIT/4),
     TFUNC(at_d,rt_d, log1p, 2*ULPUNIT),
     TFUNC(at_d,rt_d, exp, 3*ULPUNIT/4),
     TFUNC(at_d,rt_d, exp2, 3*ULPUNIT/4),
