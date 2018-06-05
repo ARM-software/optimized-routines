@@ -37,7 +37,7 @@ top16 (double x)
 }
 
 double
-log_opt (double x)
+log (double x)
 {
   /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
   double_t w, z, r, r2, r3, y, invc, logc, kd, hi, lo;
