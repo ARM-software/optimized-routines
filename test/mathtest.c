@@ -272,7 +272,7 @@ test_func tfuncs[] = {
     TFUNC(at_s,rt_s, expm1f, ULPUNIT),
 
     /* power */
-    TFUNC(at_d2,rt_d, pow, 16*ULPUNIT),
+    TFUNC(at_d2,rt_d, pow, 3*ULPUNIT/4),
     TFUNC(at_d,rt_d, sqrt, ULPUNIT/2),
     TFUNC(at_d,rt_d, cbrt, 2*ULPUNIT),
     TFUNC(at_d2, rt_d, hypot, 4*ULPUNIT),
