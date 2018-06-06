@@ -160,3 +160,7 @@ log (double x)
 #endif
   return y;
 }
+#if USE_GLIBC_ABI
+strong_alias (log, __log_finite)
+hidden_alias (log, __ieee754_log)
+#endif

@@ -86,3 +86,7 @@ exp2f (float x)
   y = y * s;
   return (float) y;
 }
+#if USE_GLIBC_ABI
+strong_alias (exp2f, __exp2f_finite)
+hidden_alias (exp2f, __ieee754_exp2f)
+#endif

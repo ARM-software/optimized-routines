@@ -89,4 +89,8 @@ logf (float x)
   y = y * r2 + (y0 + r);
   return (float) y;
 }
+#if USE_GLIBC_ABI
+strong_alias (logf, __logf_finite)
+hidden_alias (logf, __ieee754_logf)
+#endif
 #endif

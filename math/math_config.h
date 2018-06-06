@@ -188,11 +188,26 @@ eval_as_double (double x)
   return x;
 }
 
+/* Provide *_finite symbols and some of the glibc hidden symbols
+   so libmathlib can be used with binaries compiled against glibc
+   to interpose math functions with both static and dynamic linking.  */
+#ifndef USE_GLIBC_ABI
+# if __GNUC__
+#   define USE_GLIBC_ABI 1
+# else
+#   define USE_GLIBC_ABI 0
+# endif
+#endif
+
 #ifdef __GNUC__
 # define HIDDEN __attribute__ ((__visibility__ ("hidden")))
 # define NOINLINE __attribute__ ((noinline))
 # define likely(x) __builtin_expect (!!(x), 1)
 # define unlikely(x) __builtin_expect (x, 0)
+# define strong_alias(f, a) \
+  extern __typeof (f) a __attribute__ ((alias (#f)));
+# define hidden_alias(f, a) \
+  extern __typeof (f) a __attribute__ ((alias (#f), visibility ("hidden")));
 #else
 # define HIDDEN
 # define NOINLINE

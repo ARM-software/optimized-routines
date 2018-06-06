@@ -134,3 +134,7 @@ exp2 (double x)
   scale = asdouble (sbits);
   return scale + scale * tmp;
 }
+#if USE_GLIBC_ABI
+strong_alias (exp2, __exp2_finite)
+hidden_alias (exp2, __ieee754_exp2)
+#endif

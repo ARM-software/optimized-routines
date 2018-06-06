@@ -369,3 +369,7 @@ pow (double x, double y)
 #endif
   return exp_inline (ehi, elo, sign_bias);
 }
+#if USE_GLIBC_ABI
+strong_alias (pow, __pow_finite)
+hidden_alias (pow, __ieee754_pow)
+#endif

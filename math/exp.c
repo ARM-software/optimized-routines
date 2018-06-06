@@ -164,3 +164,8 @@ __exp_dd (double x, double xtail)
 {
   return exp_inline (x, xtail, 1);
 }
+#if USE_GLIBC_ABI
+strong_alias (exp, __exp_finite)
+hidden_alias (exp, __ieee754_exp)
+hidden_alias (__exp_dd, __exp1)
+#endif

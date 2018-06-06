@@ -142,3 +142,7 @@ log2 (double x)
 #endif
   return y;
 }
+#if USE_GLIBC_ABI
+strong_alias (log2, __log2_finite)
+hidden_alias (log2, __ieee754_log2)
+#endif

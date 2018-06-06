@@ -226,4 +226,8 @@ powf (float x, float y)
     }
   return (float) exp2_inline (ylogx, sign_bias);
 }
+#if USE_GLIBC_ABI
+strong_alias (powf, __powf_finite)
+hidden_alias (powf, __ieee754_powf)
+#endif
 #endif

@@ -101,4 +101,8 @@ expf (float x)
   y = y * s;
   return (float) y;
 }
+#if USE_GLIBC_ABI
+strong_alias (expf, __expf_finite)
+hidden_alias (expf, __ieee754_expf)
+#endif
 #endif

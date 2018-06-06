@@ -86,3 +86,7 @@ log2f (float x)
   y = y * r2 + p;
   return (float) y;
 }
+#if USE_GLIBC_ABI
+strong_alias (log2f, __log2f_finite)
+hidden_alias (log2f, __ieee754_log2f)
+#endif
