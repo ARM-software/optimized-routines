@@ -27,7 +27,10 @@ MATH_OBJS = $(MATH_BASE:$(srcdir)/%=build/%.o)
 RTEST_SRCS = $(wildcard $(srcdir)/test/rtest/*.[cS])
 RTEST_BASE = $(basename $(RTEST_SRCS))
 RTEST_OBJS = $(RTEST_BASE:$(srcdir)/%=build/%.o)
-ALL_OBJS = $(MATH_OBJS) $(RTEST_OBJS) build/test/mathtest.o
+ALL_OBJS = $(MATH_OBJS) \
+	$(RTEST_OBJS) \
+	build/test/mathtest.o \
+	build/test/mathbench.o \
 
 INCLUDES = $(wildcard $(srcdir)/math/include/*.h)
 ALL_INCLUDES = $(INCLUDES:$(srcdir)/math/%=build/%)
@@ -40,6 +43,8 @@ ALL_TOOLS = \
 	build/bin/runtest.sh \
 	build/bin/rtest \
 	build/bin/mathtest \
+	build/bin/mathbench \
+	build/bin/mathbench_libc \
 
 TESTS = $(wildcard $(srcdir)/test/testcases/*/*.tst)
 ALL_TESTS = $(TESTS:$(srcdir)/test/testcases/%=build/bin/%)
@@ -97,6 +102,12 @@ build/bin/rtest: $(RTEST_OBJS)
 	$(HOST_CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -o $@ $^ -lm -lmpfr -lmpc
 
 build/bin/mathtest: build/test/mathtest.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ -lm
+
+build/bin/mathbench: build/test/mathbench.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ -lm
+
+build/bin/mathbench_libc: build/test/mathbench.o
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ -lm
 
 build/include/%.h: $(srcdir)/math/include/%.h
