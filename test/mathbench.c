@@ -34,6 +34,7 @@
 /* Iterations over the array.  */
 #define ITER 125
 
+static double Trace[N];
 static double A[N];
 static double B[N];
 static float Af[N];
@@ -203,6 +204,20 @@ genf_rand (double lo, double hi)
 }
 
 static void
+gen_trace (void)
+{
+  for (int i = 0; i < N; i++)
+    A[i] = Trace[i];
+}
+
+static void
+genf_trace (void)
+{
+  for (int i = 0; i < N; i++)
+    Af[i] = (float)Trace[i];
+}
+
+static void
 run_thruput (double f (double))
 {
   for (int i = 0; i < N; i++)
@@ -288,10 +303,14 @@ bench (const struct fun *f, double lo, double hi, int type, int gen)
     gen_rand (lo, hi);
   else if (f->prec == 'd' && gen == 'l')
     gen_linear (lo, hi);
+  else if (f->prec == 'd' && gen == 't')
+    gen_trace ();
   else if (f->prec == 'f' && gen == 'r')
     genf_rand (lo, hi);
   else if (f->prec == 'f' && gen == 'l')
     genf_linear (lo, hi);
+  else if (f->prec == 'f' && gen == 't')
+    genf_trace ();
 
   if (type == 'b' || type == 't')
     bench1 (f, 't', lo, hi);
@@ -301,10 +320,39 @@ bench (const struct fun *f, double lo, double hi, int type, int gen)
 }
 
 static void
+readtrace (const char *name)
+{
+	int n = 0;
+	FILE *f = strcmp (name, "-") == 0 ? stdin : fopen (name, "r");
+	if (!f)
+	  {
+	    printf ("openning \"%s\" failed: %m\n", name);
+	    exit (1);
+	  }
+	for (;;)
+	  {
+	    if (fscanf (f, "%lf", Trace + n) != 1)
+	      break;
+	    n++;
+	    if (n >= N)
+	      break;
+	  }
+	if (ferror (f) || n == 0)
+	  {
+	    printf ("reading \"%s\" failed: %m\n", name);
+	    exit (1);
+	  }
+	fclose (f);
+	for (int i=0; n < N; n++, i++)
+	  Trace[n] = Trace[i];
+}
+
+static void
 usage (void)
 {
-  printf ("usage: ./mathbench [-g rand|linear] [-t latency|thruput|both] "
-	  "[-i low high] [-m measurements] [-c iterations] func [func2 ..]\n");
+  printf ("usage: ./mathbench [-g rand|linear|trace] [-t latency|thruput|both] "
+	  "[-i low high] [-f tracefile] [-m measurements] [-c iterations] func "
+	  "[func2 ..]\n");
   printf ("func:\n");
   printf ("%7s [run all benchmarks]\n", "all");
   for (const struct fun *f = funtab; f->name; f++)
@@ -315,8 +363,9 @@ usage (void)
 int
 main (int argc, char *argv[])
 {
-  int useri = 0, gen = 'r', type = 'b', all = 0;
+  int usergen = 0, gen = 'r', type = 'b', all = 0;
   double lo = 0, hi = 0;
+  const char *tracefile = "-";
 
   argv++;
   argc--;
@@ -328,7 +377,7 @@ main (int argc, char *argv[])
 	break;
       else if (argc >= 3 && strcmp (argv[0], "-i") == 0)
 	{
-	  useri = 1;
+	  usergen = 1;
 	  lo = strtod (argv[1], 0);
 	  hi = strtod (argv[2], 0);
 	  argv += 3;
@@ -349,8 +398,15 @@ main (int argc, char *argv[])
       else if (argc >= 2 && strcmp (argv[0], "-g") == 0)
 	{
 	  gen = argv[1][0];
-	  if (strchr ("rl", gen) == 0)
+	  if (strchr ("rlt", gen) == 0)
 	    usage ();
+	  argv += 2;
+	  argc -= 2;
+	}
+      else if (argc >= 2 && strcmp (argv[0], "-f") == 0)
+	{
+	  gen = 't';  /* -f implies -g trace.  */
+	  tracefile = argv[1];
 	  argv += 2;
 	  argc -= 2;
 	}
@@ -365,6 +421,12 @@ main (int argc, char *argv[])
       else
 	usage ();
     }
+  if (gen == 't')
+    {
+      readtrace (tracefile);
+      lo = hi = 0;
+      usergen = 1;
+    }
   while (argc > 0)
     {
       int found = 0;
@@ -373,13 +435,13 @@ main (int argc, char *argv[])
 	if (all || strcmp (argv[0], f->name) == 0)
 	  {
 	    found = 1;
-	    if (!useri)
+	    if (!usergen)
 	      {
 		lo = f->lo;
 		hi = f->hi;
 	      }
 	    bench (f, lo, hi, type, gen);
-	    if (useri && !all)
+	    if (usergen && !all)
 	      break;
 	  }
       if (!found)
