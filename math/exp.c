@@ -65,7 +65,7 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
       if (WANT_ROUNDING && y == 0.0)
 	y = 0.0;
       /* The underflow exception needs to be signaled explicitly.  */
-      force_eval_double (0x1p-1022 * 0x1p-1022);
+      force_eval_double (opt_barrier_double (0x1p-1022) * 0x1p-1022);
     }
   y = 0x1p-1022 * y;
   return check_uflow (y);

@@ -148,8 +148,21 @@ issignaling_inline (double x)
   return 2 * (ix ^ 0x0008000000000000) > 2 * 0x7ff8000000000000ULL;
 }
 
-/* Force the evaluation of a floating-point expression for its side-effect.  */
 #if __aarch64__ && __GNUC__
+/* Prevent the optimization of a floating-point expression.  */
+static inline float
+opt_barrier_float (float x)
+{
+  __asm__ __volatile__ ("" : "+w" (x));
+  return x;
+}
+static inline double
+opt_barrier_double (double x)
+{
+  __asm__ __volatile__ ("" : "+w" (x));
+  return x;
+}
+/* Force the evaluation of a floating-point expression for its side-effect.  */
 static inline void
 force_eval_float (float x)
 {
@@ -161,6 +174,18 @@ force_eval_double (double x)
   __asm__ __volatile__ ("" : "+w" (x));
 }
 #else
+static inline void
+opt_barrier_float (float x)
+{
+  volatile float y = x;
+  return y;
+}
+static inline void
+opt_barrier_double (double x)
+{
+  volatile double y = x;
+  return y;
+}
 static inline void
 force_eval_float (float x)
 {

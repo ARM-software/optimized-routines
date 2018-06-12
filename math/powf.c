@@ -180,15 +180,9 @@ powf (float x, float y)
 	  if (2 * ix == 0 && iy & 0x80000000)
 	    return __math_divzerof (sign_bias);
 #endif
-#ifdef CLANG_EXCEPTIONS
-	  /* Some versions of clang hoist the 1/x2 and thus division
-	     by zero exception can be signaled spuriously, this is
-	     not a real fix (that would require clang to model fenv
-	     correctly), but seems to work in practice.  */
-	  if (2 * ix == 0 && !(iy & 0x80000000))
-	    return x2;
-#endif
-	  return iy & 0x80000000 ? 1 / x2 : x2;
+	  /* Without the barrier some versions of clang hoist the 1/x2 and
+	     thus division by zero exception can be signaled spuriously.  */
+	  return iy & 0x80000000 ? opt_barrier_float (1 / x2) : x2;
 	}
       /* x and y are non-zero finite.  */
       if (ix & 0x80000000)

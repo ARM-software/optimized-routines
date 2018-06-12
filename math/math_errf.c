@@ -33,11 +33,11 @@ with_errnof (float y, int e)
 #define with_errnof(x, e) (x)
 #endif
 
-/* NOINLINE prevents fenv semantics breaking optimizations.  */
+/* NOINLINE reduces code size.  */
 NOINLINE static float
 xflowf (uint32_t sign, float y)
 {
-  y = (sign ? -y : y) * y;
+  y = opt_barrier_float (sign ? -y : y) * y;
   return with_errnof (y, ERANGE);
 }
 
@@ -63,17 +63,11 @@ __math_oflowf (uint32_t sign)
   return xflowf (sign, 0x1p97f);
 }
 
-/* NOINLINE prevents fenv semantics breaking optimizations.  */
-NOINLINE static float
-divzerof (float x)
-{
-  return with_errnof (x / 0.0f, ERANGE);
-}
-
 HIDDEN float
 __math_divzerof (uint32_t sign)
 {
-  return divzerof (sign ? -1.0f : 1.0f);
+  float y = opt_barrier_float (sign ? -1.0f : 1.0f) / 0.0f;
+  return with_errnof (y, ERANGE);
 }
 
 HIDDEN float

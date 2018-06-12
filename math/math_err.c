@@ -33,11 +33,11 @@ with_errno (double y, int e)
 #define with_errno(x, e) (x)
 #endif
 
-/* NOINLINE prevents fenv semantics breaking optimizations.  */
+/* NOINLINE reduces code size.  */
 NOINLINE static double
 xflow (uint32_t sign, double y)
 {
-  y = (sign ? -y : y) * y;
+  y = opt_barrier_double (sign ? -y : y) * y;
   return with_errno (y, ERANGE);
 }
 
@@ -63,17 +63,11 @@ __math_oflow (uint32_t sign)
   return xflow (sign, 0x1p769);
 }
 
-/* NOINLINE prevents fenv semantics breaking optimizations.  */
-NOINLINE static double
-divzero (double x)
-{
-  return with_errno (x / 0.0, ERANGE);
-}
-
 HIDDEN double
 __math_divzero (uint32_t sign)
 {
-  return divzero (sign ? -1.0 : 1.0);
+  double y = opt_barrier_double (sign ? -1.0 : 1.0) / 0.0;
+  return with_errno (y, ERANGE);
 }
 
 HIDDEN double
