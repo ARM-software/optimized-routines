@@ -56,7 +56,7 @@
 
 /* Compiler can inline fma as a single instruction.  */
 #ifndef HAVE_FAST_FMA
-# if __aarch64__
+# ifdef FP_FAST_FMA
 #   define HAVE_FAST_FMA 1
 # else
 #   define HAVE_FAST_FMA 0
