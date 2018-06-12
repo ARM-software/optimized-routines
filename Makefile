@@ -78,6 +78,8 @@ $(ALL_OBJS:%.o=%.os): CFLAGS_ALL += -fPIC
 
 $(RTEST_OBJS): CC = $(HOST_CC)
 
+build/test/mathtest.o: CFLAGS_ALL += -fmath-errno
+
 build/%.o: $(srcdir)/%.S
 	$(CC) $(CFLAGS_ALL) -c -o $@ $<
 
