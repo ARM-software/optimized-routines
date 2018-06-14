@@ -174,13 +174,13 @@ force_eval_double (double x)
   __asm__ __volatile__ ("" : "+w" (x));
 }
 #else
-static inline void
+static inline float
 opt_barrier_float (float x)
 {
   volatile float y = x;
   return y;
 }
-static inline void
+static inline double
 opt_barrier_double (double x)
 {
   volatile double y = x;
