@@ -67,6 +67,7 @@ const struct exp_data __exp_data = {
 // abs error: 1.555*2^-66
 // ulp error: 0.509 (0.511 without fma)
 // if |x| < ln2/256+eps
+// abs error if |x| < ln2/256+0x1p-15: 1.09*2^-65
 // abs error if |x| < ln2/128: 1.7145*2^-56
 0x1.ffffffffffdbdp-2,
 0x1.555555555543cp-3,

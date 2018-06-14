@@ -38,10 +38,10 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 
   if ((ki & 0x80000000) == 0)
     {
-      /* k > 0, the exponent of scale might have overflowed by <= 85.  */
-      sbits -= 97ull << 52;
+      /* k > 0, the exponent of scale might have overflowed by 1.  */
+      sbits -= 1ull << 52;
       scale = asdouble (sbits);
-      y = 0x1p97 * (scale + scale * tmp);
+      y = 2 * (scale + scale * tmp);
       return check_oflow (y);
     }
   /* k < 0, need special care in the subnormal range.  */
@@ -70,9 +70,9 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 }
 
 static inline uint32_t
-top16 (double x)
+top12 (double x)
 {
-  return asuint64 (x) >> 48;
+  return asuint64 (x) >> 52;
 }
 
 double
@@ -83,26 +83,27 @@ exp2 (double x)
   /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
   double_t kd, r, r2, scale, tail, tmp;
 
-  abstop = top16 (x) & 0x7fff;
-  if (unlikely (abstop - top16 (0x1p-54) >= top16 (992.0) - top16 (0x1p-54)))
+  abstop = top12 (x) & 0x7ff;
+  if (unlikely (abstop - top12 (0x1p-54) >= top12 (512.0) - top12 (0x1p-54)))
     {
-      if (abstop - top16 (0x1p-54) >= 0x80000000)
+      if (abstop - top12 (0x1p-54) >= 0x80000000)
 	/* Avoid spurious underflow for tiny x.  */
 	/* Note: 0 is common input.  */
 	return WANT_ROUNDING ? 1.0 + x : 1.0;
-      if (abstop >= top16 (1088.0))
+      if (abstop >= top12 (1024.0))
 	{
 	  if (asuint64 (x) == asuint64 (-INFINITY))
 	    return 0.0;
-	  if (abstop >= top16 (INFINITY))
+	  if (abstop >= top12 (INFINITY))
 	    return 1.0 + x;
-	  if (asuint64 (x) >> 63)
-	    return __math_uflow (0);
-	  else
+	  if (!(asuint64 (x) >> 63))
 	    return __math_oflow (0);
+	  else if (asuint64 (x) >= asuint64 (-1075.0))
+	    return __math_uflow (0);
 	}
-      /* Large x is special cased below.  */
-      abstop = 0;
+      if (2 * asuint64 (x) > 2 * asuint64 (928.0))
+	/* Large x is special cased below.  */
+	abstop = 0;
     }
 
   /* exp2(x) = 2^(k/N) * 2^r, with 2^r in [2^(-1/2N),2^(1/2N)].  */
@@ -132,6 +133,8 @@ exp2 (double x)
   if (unlikely (abstop == 0))
     return specialcase (tmp, sbits, ki);
   scale = asdouble (sbits);
+  /* Note: tmp == 0 or |tmp| > 2^-65 and scale > 2^-928, so there
+     is no spurious underflow here even without fma.  */
   return scale + scale * tmp;
 }
 #if USE_GLIBC_ABI

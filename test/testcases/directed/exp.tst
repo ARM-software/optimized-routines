@@ -40,3 +40,4 @@ func=exp op1=40862e42.fefa39ef result=7fefffff.ffffff2a.1b1 errno=0
 func=exp op1=40862e42.fefa39f0 result=7ff00000.00000000 errno=ERANGE status=ox
 func=exp op1=c0874910.d52d3051 result=00000000.00000001 status=ux
 func=exp op1=c0874910.d52d3052 result=00000000.00000000 errno=ERANGE status=ux
+func=exp op1=c085d589.f2fe5107 result=00f00000.000000f1.46b errno=0

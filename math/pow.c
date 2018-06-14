@@ -36,9 +36,9 @@ ulperr_exp: 0.509 ULP (ULP error of exp)
 #define OFF 0x3fe6000000000000
 
 static inline uint32_t
-top16 (double x)
+top12 (double x)
 {
-  return asuint64 (x) >> 48;
+  return asuint64 (x) >> 52;
 }
 
 static inline double_t
@@ -142,10 +142,10 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 
   if ((ki & 0x80000000) == 0)
     {
-      /* k > 0, the exponent of scale might have overflowed by <= 85.  */
-      sbits -= 97ull << 52;
+      /* k > 0, the exponent of scale might have overflowed by <= 460.  */
+      sbits -= 1009ull << 52;
       scale = asdouble (sbits);
-      y = 0x1p97 * (scale + scale * tmp);
+      y = 0x1p1009 * (scale + scale * tmp);
       return check_oflow (y);
     }
   /* k < 0, need special care in the subnormal range.  */
@@ -186,17 +186,17 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
   double_t kd, z, r, r2, scale, tail, tmp;
 
-  abstop = top16 (x) & 0x7fff;
-  if (unlikely (abstop - top16 (0x1p-54) >= top16 (704.0) - top16 (0x1p-54)))
+  abstop = top12 (x) & 0x7ff;
+  if (unlikely (abstop - top12 (0x1p-54) >= top12 (512.0) - top12 (0x1p-54)))
     {
-      if (abstop - top16 (0x1p-54) >= 0x80000000)
+      if (abstop - top12 (0x1p-54) >= 0x80000000)
 	{
 	  /* Avoid spurious underflow for tiny x.  */
 	  /* Note: 0 is common input.  */
 	  double_t one = WANT_ROUNDING ? 1.0 + x : 1.0;
 	  return sign_bias ? -one : one;
 	}
-      if (abstop >= top16 (768.0))
+      if (abstop >= top12 (1024.0))
 	{
 	  /* Note: inf and nan are already handled.  */
 	  if (asuint64 (x) >> 63)
@@ -226,6 +226,7 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   kd -= Shift;
 #endif
   r = x + kd*NegLn2hiN + kd*NegLn2loN;
+  /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
   r += xtail;
   /* 2^(k/N) ~= scale * (1 + tail).  */
   idx = 2*(ki % N);
@@ -248,6 +249,8 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   if (unlikely (abstop == 0))
     return specialcase (tmp, sbits, ki);
   scale = asdouble (sbits);
+  /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
+     is no spurious underflow here even without fma.  */
   return scale + scale * tmp;
 }
 
@@ -282,8 +285,8 @@ pow (double x, double y)
 
   ix = asuint64 (x);
   iy = asuint64 (y);
-  topx = ix >> 52;
-  topy = iy >> 52;
+  topx = top12 (x);
+  topy = top12 (y);
   if (unlikely (topx - 0x001 >= 0x7ff - 0x001 || (topy & 0x7ff) - 0x3be >= 0x43e - 0x3be))
     {
       /* Note: if |y| > 1075 * ln2 * 2^53 ~= 0x1.749p62 then pow(x,y) = inf/0
