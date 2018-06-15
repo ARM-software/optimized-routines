@@ -34,11 +34,10 @@
 /* Iterations over the array.  */
 #define ITER 125
 
-static double Trace[N];
+static double *Trace;
+static size_t trace_size;
 static double A[N];
-static double B[N];
 static float Af[N];
-static float Bf[N];
 static long measurecount = MEASURE;
 static long itercount = ITER;
 
@@ -204,31 +203,31 @@ genf_rand (double lo, double hi)
 }
 
 static void
-gen_trace (void)
+gen_trace (int index)
 {
   for (int i = 0; i < N; i++)
-    A[i] = Trace[i];
+    A[i] = Trace[index + i];
 }
 
 static void
-genf_trace (void)
+genf_trace (int index)
 {
   for (int i = 0; i < N; i++)
-    Af[i] = (float)Trace[i];
+    Af[i] = (float)Trace[index + i];
 }
 
 static void
 run_thruput (double f (double))
 {
   for (int i = 0; i < N; i++)
-    B[i] = f (A[i]);
+    f (A[i]);
 }
 
 static void
 runf_thruput (float f (float))
 {
   for (int i = 0; i < N; i++)
-    Bf[i] = f (Af[i]);
+    f (Af[i]);
 }
 
 volatile double zero = 0;
@@ -239,7 +238,7 @@ run_latency (double f (double))
   double z = zero;
   double prev = z;
   for (int i = 0; i < N; i++)
-    B[i] = prev = f (A[i] + prev * z);
+    prev = f (A[i] + prev * z);
 }
 
 static void
@@ -248,7 +247,7 @@ runf_latency (float f (float))
   float z = (float)zero;
   float prev = z;
   for (int i = 0; i < N; i++)
-    Bf[i] = prev = f (Af[i] + prev * z);
+    prev = f (Af[i] + prev * z);
 }
 
 static uint64_t
@@ -304,19 +303,37 @@ bench (const struct fun *f, double lo, double hi, int type, int gen)
   else if (f->prec == 'd' && gen == 'l')
     gen_linear (lo, hi);
   else if (f->prec == 'd' && gen == 't')
-    gen_trace ();
+    gen_trace (0);
   else if (f->prec == 'f' && gen == 'r')
     genf_rand (lo, hi);
   else if (f->prec == 'f' && gen == 'l')
     genf_linear (lo, hi);
   else if (f->prec == 'f' && gen == 't')
-    genf_trace ();
+    genf_trace (0);
+
+  if (gen == 't')
+    hi = trace_size / N;
 
   if (type == 'b' || type == 't')
     bench1 (f, 't', lo, hi);
 
   if (type == 'b' || type == 'l')
     bench1 (f, 'l', lo, hi);
+
+  for (int i = N; i < trace_size; i += N)
+    {
+      if (f->prec == 'd')
+	gen_trace (i);
+      else
+	genf_trace (i);
+
+      lo = i / N;
+      if (type == 'b' || type == 't')
+	bench1 (f, 't', lo, hi);
+
+      if (type == 'b' || type == 'l')
+	bench1 (f, 'l', lo, hi);
+    }
 }
 
 static void
@@ -331,11 +348,19 @@ readtrace (const char *name)
 	  }
 	for (;;)
 	  {
+	    if (n >= trace_size)
+	      {
+		trace_size += N;
+		Trace = realloc (Trace, trace_size * sizeof (Trace[0]));
+		if (Trace == NULL)
+		  {
+		    printf ("out of memory\n");
+		    exit (1);
+		  }
+	      }
 	    if (fscanf (f, "%lf", Trace + n) != 1)
 	      break;
 	    n++;
-	    if (n >= N)
-	      break;
 	  }
 	if (ferror (f) || n == 0)
 	  {
@@ -343,7 +368,9 @@ readtrace (const char *name)
 	    exit (1);
 	  }
 	fclose (f);
-	for (int i=0; n < N; n++, i++)
+	if (n % N == 0)
+	  trace_size = n;
+	for (int i = 0; n < trace_size; n++, i++)
 	  Trace[n] = Trace[i];
 }
 
