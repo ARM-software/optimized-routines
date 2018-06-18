@@ -279,7 +279,7 @@ zeroinfnan (uint64_t i)
 double
 pow (double x, double y)
 {
-  uint64_t sign_bias = 0;
+  uint32_t sign_bias = 0;
   uint64_t ix, iy;
   uint32_t topx, topy;
 
