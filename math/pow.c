@@ -166,8 +166,8 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
       hi = one + y;
       lo = one - hi + y + lo;
       y = eval_as_double (hi + lo) - one;
-      /* Avoid -0.0 with downward rounding.  */
-      if (WANT_ROUNDING && y == 0.0)
+      /* Fix the sign of 0.  */
+      if (y == 0.0)
 	y = asdouble (sbits & 0x8000000000000000);
       /* The underflow exception needs to be signaled explicitly.  */
       force_eval_double (opt_barrier_double (0x1p-1022) * 0x1p-1022);
