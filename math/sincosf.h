@@ -128,7 +128,7 @@ reduce_fast (double x, sincos_t *p, int *np)
   return x - roundtoint (r) * p->hpi;
 #else
   r = x * p->hpi_inv;
-  int n = ((int)r + 0x800000) >> 24;
+  int n = ((int32_t)r + 0x800000) >> 24;
   *np = n;
   return x - n * p->hpi;
 #endif
