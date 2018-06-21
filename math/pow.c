@@ -22,18 +22,17 @@
 #include "math_config.h"
 
 /*
-Worst-case error: 0.67 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
-relerr_log: 1.8 * 2^-66 (Relative error of log)
+Worst-case error: 0.57 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
+relerr_log: 1.3 * 2^-68 (Relative error of log, 1.4 * 2^-68 without fma)
 ulperr_exp: 0.509 ULP (ULP error of exp)
 */
 
 #define T __pow_log_data.tab
-#define B __pow_log_data.poly1
 #define A __pow_log_data.poly
 #define Ln2hi __pow_log_data.ln2hi
 #define Ln2lo __pow_log_data.ln2lo
 #define N (1 << POW_LOG_TABLE_BITS)
-#define OFF 0x3fe6000000000000
+#define OFF 0x3fe6955500000000
 
 static inline uint32_t
 top12 (double x)
@@ -45,36 +44,9 @@ static inline double_t
 log_inline (uint64_t ix, double_t *tail)
 {
   /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
-  double_t w, z, zhi, zlo, r, r2, r3, y, invc, logc, kd, hi, lo, khi, rhi, rlo, p, q;
+  double_t z, r, y, invc, logc, logctail, kd, hi, t1, t2, lo, lo1, lo2, p;
   uint64_t iz, tmp;
   int k, i;
-
-#if POW_LOG_POLY1_ORDER == 9
-# define LO asuint64 (1 - 0x1.1p-7)
-# define HI asuint64 (1 + 0x1.98p-7)
-#endif
-  if (unlikely (ix - LO < HI - LO))
-    {
-      r = asdouble (ix) - 1.0;
-      /* Split r into top and bottom half.  */
-      w = r * 0x1p27;
-      rhi = r + w - w;
-      rlo = r - rhi;
-      /* Compute r - r*r/2 precisely into hi+lo.  */
-      w = rhi*rhi*B[0]; /* B[0] == -0.5.  */
-      hi = r + w;
-      lo = r - hi + w;
-      lo += B[0]*rlo*(rhi + r);
-      r2 = r*r;
-      r3 = r*r2;
-#if POW_LOG_POLY1_ORDER == 9
-      p = B[1] + r*(B[2] + r*B[3] + r2*B[4] + r3*(B[5] + r*B[6] + r2*B[7]));
-#endif
-      q = lo + r3*p;
-      y = hi + q;
-      *tail = (hi - y) + q;
-      return y;
-    }
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.
@@ -83,41 +55,55 @@ log_inline (uint64_t ix, double_t *tail)
   i = (tmp >> (52 - POW_LOG_TABLE_BITS)) % N;
   k = (int64_t) tmp >> 52; /* arithmetic shift */
   iz = ix - (tmp & 0xfffULL << 52);
-  invc = T[i].invc;
-  logc = T[i].logc;
   z = asdouble (iz);
-  zhi = asdouble ((iz + (1ULL<<31)) & (-1ULL << 32));
-  zlo = z - zhi;
-
-  /* log(x) = log1p(z/c-1) + log(c) + k*Ln2 */
-  rhi = zhi * invc - 1.0;
-  rlo = zlo * invc;
   kd = (double_t) k;
 
-  /* hi + lo = r + log(c) + k*Ln2.  */
-  khi = kd * Ln2hi;
-  w = khi + logc;
-  lo = khi - w + logc;
-  hi = w + rhi;
-  lo = w - hi + rhi + (lo + kd*Ln2lo) + rlo;
+  /* log(x) = k*Ln2 + log(c) + log1p(z/c-1).  */
+  invc = T[i].invc;
+  logc = T[i].logc;
+  logctail = T[i].logctail;
 
-  /* log(x) = lo + (log1p(r) - r) + hi.  */
-  /* Evaluation is optimized assuming superscalar pipelined execution.  */
+  /* r = z/c - 1, arranged to be exact.  */
 #if HAVE_FAST_FMA
   r = fma (z, invc, -1.0);
 #else
+  double_t zhi = asdouble (iz & (-1ULL << 32));
+  double_t zlo = z - zhi;
+  double_t rhi = zhi * invc - 1.0;
+  double_t rlo = zlo * invc;
   r = rhi + rlo;
 #endif
-  r2 = r * r;
 
-#if POW_LOG_POLY_ORDER == 7
-  p = lo + r*r2*(A[1] + r*A[2] + r2*(A[3] + r*A[4] + r2*A[5]));
+  /* k*Ln2 + log(c) + r.  */
+  t1 = kd * Ln2hi + logc;
+  t2 = t1 + r;
+  lo1 = kd * Ln2lo + logctail;
+  lo2 = t1 - t2 + r;
+
+  /* Evaluation is optimized assuming superscalar pipelined execution.  */
+  double_t ar, ar2, ar3, lo3, lo4;
+  ar = A[0] * r; /* A[0] = -0.5.  */
+  ar2 = r * ar;
+  ar3 = r * ar2;
+  /* k*Ln2 + log(c) + r + A[0]*r*r.  */
+#if HAVE_FAST_FMA
+  hi = t2 + ar2;
+  lo3 = fma (ar, r, -ar2);
+  lo4 = t2 - hi + ar2;
+#else
+  double_t arhi = A[0] * rhi;
+  double_t arhi2 = rhi * arhi;
+  hi = t2 + arhi2;
+  lo3 = rlo * (ar + arhi);
+  lo4 = t2 - hi + arhi2;
 #endif
-  q = A[0]*r2; /* A[0] == -0.5.  */
-  w = q + hi;
-  p += hi - w + q;
-  y = p + w;
-  *tail = w - y + p;
+  /* p = log1p(r) - r - A[0]*r*r.  */
+#if POW_LOG_POLY_ORDER == 8
+  p = ar3*(A[1] + r*A[2] + ar2*(A[3] + r*A[4] + ar2*(A[5] + r*A[6])));
+#endif
+  lo = lo1 + lo2 + lo3 + lo4 + p;
+  y = hi + lo;
+  *tail = hi - y + lo;
   return y;
 }
 

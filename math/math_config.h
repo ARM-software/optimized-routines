@@ -372,15 +372,14 @@ extern const struct log2_data {
 #endif
 } __log2_data HIDDEN;
 
-#define POW_LOG_TABLE_BITS 8
-#define POW_LOG_POLY_ORDER 7
-#define POW_LOG_POLY1_ORDER 9
+#define POW_LOG_TABLE_BITS 7
+#define POW_LOG_POLY_ORDER 8
 extern const struct pow_log_data {
   double ln2hi;
   double ln2lo;
   double poly[POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
-  double poly1[POW_LOG_POLY1_ORDER - 1];
-  struct {double invc, logc;} tab[1 << POW_LOG_TABLE_BITS];
+  /* Note: the pad field is unused, but allows slightly faster indexing.  */
+  struct {double invc, pad, logc, logctail;} tab[1 << POW_LOG_TABLE_BITS];
 } __pow_log_data HIDDEN;
 
 #endif
