@@ -273,7 +273,8 @@ pow (double x, double y)
   iy = asuint64 (y);
   topx = top12 (x);
   topy = top12 (y);
-  if (unlikely (topx - 0x001 >= 0x7ff - 0x001 || (topy & 0x7ff) - 0x3be >= 0x43e - 0x3be))
+  if (unlikely (topx - 0x001 >= 0x7ff - 0x001
+		|| (topy & 0x7ff) - 0x3be >= 0x43e - 0x3be))
     {
       /* Note: if |y| > 1075 * ln2 * 2^53 ~= 0x1.749p62 then pow(x,y) = inf/0
 	 and if |y| < 2^-54 / 1075 ~= 0x1.e7b6p-65 then pow(x,y) = +-1.  */
@@ -285,7 +286,8 @@ pow (double x, double y)
 	    return issignaling_inline (x) ? x + y : 1.0;
 	  if (ix == asuint64 (1.0))
 	    return issignaling_inline (y) ? x + y : 1.0;
-	  if (2 * ix > 2 * asuint64 (INFINITY) || 2 * iy > 2 * asuint64 (INFINITY))
+	  if (2 * ix > 2 * asuint64 (INFINITY)
+	      || 2 * iy > 2 * asuint64 (INFINITY))
 	    return x + y;
 	  if (2 * ix == 2 * asuint64 (1.0))
 	    return 1.0;
@@ -332,8 +334,8 @@ pow (double x, double y)
 	      else
 		return 1.0;
 	    }
-	  return (ix > asuint64 (1.0)) == (topy < 0x800)
-		 ? __math_oflow (0) : __math_uflow (0);
+	  return (ix > asuint64 (1.0)) == (topy < 0x800) ? __math_oflow (0)
+							 : __math_uflow (0);
 	}
       if (topx == 0)
 	{
@@ -348,15 +350,15 @@ pow (double x, double y)
   double_t hi = log_inline (ix, &lo);
   double_t ehi, elo;
 #if HAVE_FAST_FMA
-  ehi = y*hi;
-  elo = y*lo + fma (y, hi, -ehi);
+  ehi = y * hi;
+  elo = y * lo + fma (y, hi, -ehi);
 #else
   double_t yhi = asdouble (iy & -1ULL << 27);
   double_t ylo = y - yhi;
   double_t lhi = asdouble (asuint64 (hi) & -1ULL << 27);
   double_t llo = hi - lhi + lo;
-  ehi = yhi*lhi;
-  elo = ylo*lhi + y*llo; /* |elo| < |ehi| * 2^-25.  */
+  ehi = yhi * lhi;
+  elo = ylo * lhi + y * llo; /* |elo| < |ehi| * 2^-25.  */
 #endif
   return exp_inline (ehi, elo, sign_bias);
 }
