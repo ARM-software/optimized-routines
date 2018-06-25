@@ -22,9 +22,9 @@
 #include "math_config.h"
 
 /*
-Worst-case error: 0.57 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
-relerr_log: 1.3 * 2^-68 (Relative error of log, 1.4 * 2^-68 without fma)
-ulperr_exp: 0.509 ULP (ULP error of exp)
+Worst-case error: 0.54 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
+relerr_log: 1.3 * 2^-68 (Relative error of log, 1.5 * 2^-68 without fma)
+ulperr_exp: 0.509 ULP (ULP error of exp, 0.511 ULP without fma)
 */
 
 #define T __pow_log_data.tab
