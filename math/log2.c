@@ -60,24 +60,24 @@ log2 (double x)
 	return 0;
       r = x - 1.0;
 #if HAVE_FAST_FMA
-      hi = r*InvLn2hi;
-      lo = r*InvLn2lo + fma (r, InvLn2hi, -hi);
+      hi = r * InvLn2hi;
+      lo = r * InvLn2lo + fma (r, InvLn2hi, -hi);
 #else
       double_t rhi, rlo;
-      rhi = asdouble (asuint64 (r) & -1ULL<<32);
+      rhi = asdouble (asuint64 (r) & -1ULL << 32);
       rlo = r - rhi;
-      hi = rhi*InvLn2hi;
-      lo = rlo*InvLn2hi + r*InvLn2lo;
+      hi = rhi * InvLn2hi;
+      lo = rlo * InvLn2hi + r * InvLn2lo;
 #endif
       r2 = r * r; /* rounding error: 0x1p-62.  */
       r4 = r2 * r2;
 #if LOG2_POLY1_ORDER == 11
       /* Worst-case error is less than 0.54 ULP (0.55 ULP without fma).  */
-      p = r2*(B[0] + r*B[1]);
+      p = r2 * (B[0] + r * B[1]);
       y = hi + p;
       lo += hi - y + p;
-      lo += r4*(B[2] + r*B[3] + r2*(B[4] + r*B[5])
-		+ r4*(B[6] + r*B[7] + r2*(B[8] + r*B[9])));
+      lo += r4 * (B[2] + r * B[3] + r2 * (B[4] + r * B[5])
+		  + r4 * (B[6] + r * B[7] + r2 * (B[8] + r * B[9])));
       y += lo;
 #endif
       return y;
@@ -113,16 +113,16 @@ log2 (double x)
 #if HAVE_FAST_FMA
   /* rounding error: 0x1p-55/N.  */
   r = fma (z, invc, -1.0);
-  t1 = r*InvLn2hi;
-  t2 = r*InvLn2lo + fma (r, InvLn2hi, -t1);
+  t1 = r * InvLn2hi;
+  t2 = r * InvLn2lo + fma (r, InvLn2hi, -t1);
 #else
   double_t rhi, rlo;
   /* rounding error: 0x1p-55/N + 0x1p-65.  */
-  r = (z - T2[i].chi - T2[i].clo)*invc;
+  r = (z - T2[i].chi - T2[i].clo) * invc;
   rhi = asdouble (asuint64 (r) & -1ULL << 32);
   rlo = r - rhi;
-  t1 = rhi*InvLn2hi;
-  t2 = rlo*InvLn2hi + r*InvLn2lo;
+  t1 = rhi * InvLn2hi;
+  t2 = rlo * InvLn2hi + r * InvLn2lo;
 #endif
 
   /* hi + lo = r/ln2 + log2(c) + k.  */
@@ -137,8 +137,8 @@ log2 (double x)
 #if LOG2_POLY_ORDER == 7
   /* Worst-case error if |y| > 0x1p-4: 0.547 ULP (0.550 ULP without fma).
      ~ 0.5 + 2/N/ln2 + abs-poly-error*0x1p56 ULP (+ 0.003 ULP without fma).  */
-  p = A[0] + r*A[1] + r2*(A[2] + r*A[3]) + r4*(A[4] + r*A[5]);
-  y = lo + r2*p + hi;
+  p = A[0] + r * A[1] + r2 * (A[2] + r * A[3]) + r4 * (A[4] + r * A[5]);
+  y = lo + r2 * p + hi;
 #endif
   return y;
 }

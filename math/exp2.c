@@ -113,22 +113,22 @@ exp2 (double x)
   kd -= Shift; /* k/N for int k.  */
   r = x - kd;
   /* 2^(k/N) ~= scale * (1 + tail).  */
-  idx = 2*(ki % N);
+  idx = 2 * (ki % N);
   top = ki << (52 - EXP_TABLE_BITS);
   tail = asdouble (T[idx]);
   /* This is only a valid scale when -1023*N < k < 1024*N.  */
   sbits = T[idx + 1] + top;
   /* exp2(x) = 2^(k/N) * 2^r ~= scale + scale * (tail + 2^r - 1).  */
   /* Evaluation is optimized assuming superscalar pipelined execution.  */
-  r2 = r*r;
+  r2 = r * r;
   /* Without fma the worst case error is 0.5/N ulp larger.  */
   /* Worst case error is less than 0.5+0.86/N+(abs poly error * 2^53) ulp.  */
 #if EXP2_POLY_ORDER == 4
-  tmp = tail + r*C1 + r2*C2 + r*r2*(C3 + r*C4);
+  tmp = tail + r * C1 + r2 * C2 + r * r2 * (C3 + r * C4);
 #elif EXP2_POLY_ORDER == 5
-  tmp = tail + r*C1 + r2*(C2 + r*C3) + r2*r2*(C4 + r*C5);
+  tmp = tail + r * C1 + r2 * (C2 + r * C3) + r2 * r2 * (C4 + r * C5);
 #elif EXP2_POLY_ORDER == 6
-  tmp = tail + r*C1 + r2*(0.5 + r*C3) + r2*r2*(C4 + r*C5 + r2*C6);
+  tmp = tail + r * C1 + r2 * (0.5 + r * C3) + r2 * r2 * (C4 + r * C5 + r2 * C6);
 #endif
   if (unlikely (abstop == 0))
     return specialcase (tmp, sbits, ki);

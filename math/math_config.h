@@ -333,7 +333,8 @@ extern const struct powf_log2_data
 #define EXP_USE_TOINT_NARROW 0
 #define EXP2_POLY_ORDER 5
 #define EXP2_POLY_WIDE 0
-extern const struct exp_data {
+extern const struct exp_data
+{
   double invln2N;
   double shift;
   double negln2hiN;
@@ -347,7 +348,8 @@ extern const struct exp_data {
 #define LOG_TABLE_BITS 7
 #define LOG_POLY_ORDER 6
 #define LOG_POLY1_ORDER 12
-extern const struct log_data {
+extern const struct log_data
+{
   double ln2hi;
   double ln2lo;
   double poly[LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
@@ -361,7 +363,8 @@ extern const struct log_data {
 #define LOG2_TABLE_BITS 6
 #define LOG2_POLY_ORDER 7
 #define LOG2_POLY1_ORDER 11
-extern const struct log2_data {
+extern const struct log2_data
+{
   double invln2hi;
   double invln2lo;
   double poly[LOG2_POLY_ORDER - 1];
@@ -374,7 +377,8 @@ extern const struct log2_data {
 
 #define POW_LOG_TABLE_BITS 7
 #define POW_LOG_POLY_ORDER 8
-extern const struct pow_log_data {
+extern const struct pow_log_data
+{
   double ln2hi;
   double ln2lo;
   double poly[POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
