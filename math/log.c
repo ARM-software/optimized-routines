@@ -30,6 +30,7 @@
 #define N (1 << LOG_TABLE_BITS)
 #define OFF 0x3fe6000000000000
 
+/* Top 16 bits of a double.  */
 static inline uint32_t
 top16 (double x)
 {

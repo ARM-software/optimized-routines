@@ -34,12 +34,16 @@ ulperr_exp: 0.509 ULP (ULP error of exp, 0.511 ULP without fma)
 #define N (1 << POW_LOG_TABLE_BITS)
 #define OFF 0x3fe6955500000000
 
+/* Top 12 bits of a double (sign and exponent bits).  */
 static inline uint32_t
 top12 (double x)
 {
   return asuint64 (x) >> 52;
 }
 
+/* Compute y+tail = log(x) where the rounded result is y and tail has about
+   additional 15 bits precision.  The bit representation of x if in ix, but
+   normalized in the subnormal range using sign bit too for the exponent.  */
 static inline double_t
 log_inline (uint64_t ix, double_t *tail)
 {
@@ -122,6 +126,10 @@ log_inline (uint64_t ix, double_t *tail)
 #define C5 __exp_data.poly[8 - EXP_POLY_ORDER]
 #define C6 __exp_data.poly[9 - EXP_POLY_ORDER]
 
+/* Handle inputs that may overflow or underflow when computing the result
+   that is scale*(1+tmp), the exponent bits of scale might have overflown
+   into the sign bit so that needs correction before sbits is used as a
+   double, ki is only used to determine the sign of the exponent.  */
 static inline double
 specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 {
@@ -165,6 +173,8 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 
 #define SIGN_BIAS (0x800 << EXP_TABLE_BITS)
 
+/* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
+   The sign_bias argument is SIGN_BIAS or 0 and sets the sign to -1 or 1.  */
 static inline double
 exp_inline (double x, double xtail, uint32_t sign_bias)
 {
@@ -257,6 +267,7 @@ checkint (uint64_t iy)
   return 2;
 }
 
+/* Returns 1 if input is the bit representation of 0, infinity or nan.  */
 static inline int
 zeroinfnan (uint64_t i)
 {

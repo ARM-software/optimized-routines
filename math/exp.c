@@ -33,6 +33,10 @@
 #define C5 __exp_data.poly[8 - EXP_POLY_ORDER]
 #define C6 __exp_data.poly[9 - EXP_POLY_ORDER]
 
+/* Handle inputs that may overflow or underflow when computing the result
+   that is scale*(1+tmp), the exponent bits of scale might have overflown
+   into the sign bit so that needs correction before sbits is used as a
+   double, ki is only used to determine the sign of the exponent.  */
 static inline double
 specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 {
@@ -71,12 +75,15 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
   return check_uflow (y);
 }
 
+/* Top 12 bits of a double (sign and exponent bits).  */
 static inline uint32_t
 top12 (double x)
 {
   return asuint64 (x) >> 52;
 }
 
+/* Computes exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
+   If hastail is 0 then xtail is assumed to be 0 too.  */
 static inline double
 exp_inline (double x, double xtail, int hastail)
 {

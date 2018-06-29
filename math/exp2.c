@@ -31,6 +31,10 @@
 #define C5 __exp_data.exp2_poly[4]
 #define C6 __exp_data.exp2_poly[5]
 
+/* Handle inputs that may overflow or underflow when computing the result
+   that is scale*(1+tmp), the exponent bits of scale might have overflown
+   into the sign bit so that needs correction before sbits is used as a
+   double, ki is only used to determine the sign of the exponent.  */
 static inline double
 specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 {
@@ -69,6 +73,7 @@ specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
   return check_uflow (y);
 }
 
+/* Top 12 bits of a double (sign and exponent bits).  */
 static inline uint32_t
 top12 (double x)
 {

@@ -66,12 +66,16 @@
 #if HAVE_FAST_ROUND
 # define TOINT_INTRINSICS 1
 
+/* Round x to nearest int, ties have to be rounded consistently with
+   converttoint.  The result is in [-2^31+1, 2^31-1].  */
 static inline double_t
 roundtoint (double_t x)
 {
   return round (x);
 }
 
+/* Convert x to nearest int, ties have to be rounded consistently with
+   roundtoint.  The result is in [-2^31+1, 2^31-1].  */
 static inline uint64_t
 converttoint (double_t x)
 {
@@ -240,28 +244,48 @@ eval_as_double (double x)
 # define unlikely(x) (x)
 #endif
 
-/* Error handling tail calls for special cases, with sign argument.  */
+/* Error handling tail calls for special cases, with a sign argument.
+   The sign of the return value is set if the argument is non-zero.  */
+
+/* The result overflows.  */
 HIDDEN float __math_oflowf (uint32_t);
+/* The result underflows to 0 in nearest rounding mode.  */
 HIDDEN float __math_uflowf (uint32_t);
+/* The result underflows to 0 in some directed rounding mode only.  */
 HIDDEN float __math_may_uflowf (uint32_t);
+/* Division by zero.  */
 HIDDEN float __math_divzerof (uint32_t);
+/* The result overflows.  */
 HIDDEN double __math_oflow (uint32_t);
+/* The result underflows to 0 in nearest rounding mode.  */
 HIDDEN double __math_uflow (uint32_t);
+/* The result underflows to 0 in some directed rounding mode only.  */
 HIDDEN double __math_may_uflow (uint32_t);
+/* Division by zero.  */
 HIDDEN double __math_divzero (uint32_t);
+
 /* Error handling using input checking.  */
+
+/* Invalid input unless it is a quiet NaN.  */
 HIDDEN float __math_invalidf (float);
+/* Invalid input unless it is a quiet NaN.  */
 HIDDEN double __math_invalid (double);
+
 /* Error handling using output checking, only for errno setting.  */
+
+/* Check if the result overflowed to infinity.  */
 HIDDEN double __math_check_oflow (double);
+/* Check if the result underflowed to 0.  */
 HIDDEN double __math_check_uflow (double);
 
+/* Check if the result overflowed to infinity.  */
 static inline double
 check_oflow (double x)
 {
   return WANT_ERRNO ? __math_check_oflow (x) : x;
 }
 
+/* Check if the result underflowed to 0.  */
 static inline double
 check_uflow (double x)
 {
