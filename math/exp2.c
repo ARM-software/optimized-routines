@@ -31,10 +31,13 @@
 #define C5 __exp_data.exp2_poly[4]
 #define C6 __exp_data.exp2_poly[5]
 
-/* Handle inputs that may overflow or underflow when computing the result
-   that is scale*(1+tmp), the exponent bits of scale might have overflown
-   into the sign bit so that needs correction before sbits is used as a
-   double, ki is only used to determine the sign of the exponent.  */
+/* Handle cases that may overflow or underflow when computing the result that
+   is scale*(1+TMP) without intermediate rounding.  The bit representation of
+   scale is in SBITS, however it has a computed exponent that may have
+   overflown into the sign bit so that needs to be adjusted before using it as
+   a double.  (int32_t)KI is the k used in the argument reduction and exponent
+   adjustment of scale, positive k here means the result may overflow and
+   negative k means the result may underflow.  */
 static inline double
 specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
 {
