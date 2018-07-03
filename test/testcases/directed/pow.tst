@@ -255,6 +255,8 @@ func=pow op1=3fef9800.00000000 op2=ffefffff.ffffffff result=7ff00000.00000000 er
 func=pow op1=3fef9800.00000000 op2=fff00000.00000000 result=7ff00000.00000000 errno=0
 func=pow op1=3fef9800.00000000 op2=fff00000.00000001 result=7ff80000.00000000 errno=0 status=i
 func=pow op1=3fef9800.00000000 op2=fff80000.00000001 result=7ff80000.00000000 errno=0
+func=pow op1=3fefffff.ffffffe0 op2=4386128b.68cf9fbc result=003ff70a.f0af9c79.372 errno=0
+func=pow op1=3fefffff.ffffffe0 op2=c386128b.68cf9fbc result=7fa0047b.c8f04d90.332 errno=0
 func=pow op1=3fefffff.ffffffff op2=00000000.00000000 result=3ff00000.00000000 errno=0
 func=pow op1=3fefffff.ffffffff op2=00000000.00000001 result=3ff00000.00000000 errno=0
 func=pow op1=3fefffff.ffffffff op2=00100000.00000000 result=3ff00000.00000000 errno=0
@@ -269,6 +271,7 @@ func=pow op1=3fefffff.ffffffff op2=40120000.00000000 result=3fefffff.fffffffb.80
 func=pow op1=3fefffff.ffffffff op2=40180000.00000000 result=3fefffff.fffffffa errno=0
 func=pow op1=3fefffff.ffffffff op2=407ff800.00000000 result=3fefffff.fffffe00.800 errno=0
 func=pow op1=3fefffff.ffffffff op2=408ff800.00000000 result=3fefffff.fffffc01 errno=0
+func=pow op1=3fefffff.ffffffff op2=4386128b.68cf9fbc result=3df1d45f.3e91e17c.d0c errno=0
 func=pow op1=3fefffff.ffffffff op2=43dfffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=3fefffff.ffffffff op2=43e00000.00000000 result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=3fefffff.ffffffff op2=7fefffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
@@ -289,6 +292,7 @@ func=pow op1=3fefffff.ffffffff op2=c0120000.00000000 result=3ff00000.00000002.40
 func=pow op1=3fefffff.ffffffff op2=c0180000.00000000 result=3ff00000.00000003 errno=0
 func=pow op1=3fefffff.ffffffff op2=c07f3000.00000000 result=3ff00000.000000f9.800 errno=0
 func=pow op1=3fefffff.ffffffff op2=c090ce00.00000000 result=3ff00000.00000219.c00 errno=0
+func=pow op1=3fefffff.ffffffff op2=c386128b.68cf9fbc result=41ecb761.33b97fcc.60b errno=0
 func=pow op1=3fefffff.ffffffff op2=c3dfffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=3fefffff.ffffffff op2=c3e00000.00000000 result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=3fefffff.ffffffff op2=ffefffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
@@ -630,6 +634,7 @@ func=pow op1=7fefffff.ffffffff op2=40120000.00000000 result=7ff00000.00000000 er
 func=pow op1=7fefffff.ffffffff op2=40180000.00000000 result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=7fefffff.ffffffff op2=407ff800.00000000 result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=7fefffff.ffffffff op2=408ff800.00000000 result=7ff00000.00000000 errno=ERANGE status=o
+func=pow op1=7fefffff.ffffffff op2=4386128b.68cf9fbc result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=7fefffff.ffffffff op2=43dfffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=7fefffff.ffffffff op2=43e00000.00000000 result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=7fefffff.ffffffff op2=7fefffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
@@ -650,6 +655,7 @@ func=pow op1=7fefffff.ffffffff op2=c0120000.00000000 result=00000000.00000000 er
 func=pow op1=7fefffff.ffffffff op2=c0180000.00000000 result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=7fefffff.ffffffff op2=c07f3000.00000000 result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=7fefffff.ffffffff op2=c090ce00.00000000 result=00000000.00000000 errno=ERANGE status=u
+func=pow op1=7fefffff.ffffffff op2=c386128b.68cf9fbc result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=7fefffff.ffffffff op2=c3dfffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=7fefffff.ffffffff op2=c3e00000.00000000 result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=7fefffff.ffffffff op2=ffefffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
@@ -950,6 +956,7 @@ func=pow op1=bfe00000.00000000 op2=40120000.00000000 result=7ff80000.00000000 er
 func=pow op1=bfe00000.00000000 op2=40180000.00000000 result=3f900000.00000000 errno=0
 func=pow op1=bfe00000.00000000 op2=407ff800.00000000 result=7ff80000.00000000 errno=EDOM status=i
 func=pow op1=bfe00000.00000000 op2=408ff800.00000000 result=80080000.00000000 errno=0 status=u
+func=pow op1=bfe00000.00000000 op2=4386128b.68cf9fbc result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=bfe00000.00000000 op2=43dfffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=bfe00000.00000000 op2=43e00000.00000000 result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=bfe00000.00000000 op2=7fefffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
@@ -970,12 +977,15 @@ func=pow op1=bfe00000.00000000 op2=c0120000.00000000 result=7ff80000.00000000 er
 func=pow op1=bfe00000.00000000 op2=c0180000.00000000 result=40500000.00000000 errno=0
 func=pow op1=bfe00000.00000000 op2=c07f3000.00000000 result=df200000.00000000 errno=0
 func=pow op1=bfe00000.00000000 op2=c090ce00.00000000 result=7ff80000.00000000 errno=EDOM status=i
+func=pow op1=bfe00000.00000000 op2=c386128b.68cf9fbc result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=bfe00000.00000000 op2=c3dfffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=bfe00000.00000000 op2=c3e00000.00000000 result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=bfe00000.00000000 op2=ffefffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=bfe00000.00000000 op2=fff00000.00000000 result=7ff00000.00000000 errno=0
 func=pow op1=bfe00000.00000000 op2=fff00000.00000001 result=7ff80000.00000000 errno=0 status=i
 func=pow op1=bfe00000.00000000 op2=fff80000.00000001 result=7ff80000.00000000 errno=0
+func=pow op1=bfefffff.ffffffe0 op2=4386128b.68cf9fbc result=003ff70a.f0af9c79.372 errno=0
+func=pow op1=bfefffff.ffffffe0 op2=c386128b.68cf9fbc result=7fa0047b.c8f04d90.332 errno=0
 func=pow op1=bfefffff.ffffffff op2=00000000.00000000 result=3ff00000.00000000 errno=0
 func=pow op1=bfefffff.ffffffff op2=00000000.00000001 result=7ff80000.00000000 errno=EDOM status=i
 func=pow op1=bfefffff.ffffffff op2=00100000.00000000 result=7ff80000.00000000 errno=EDOM status=i
@@ -990,6 +1000,7 @@ func=pow op1=bfefffff.ffffffff op2=40120000.00000000 result=7ff80000.00000000 er
 func=pow op1=bfefffff.ffffffff op2=40180000.00000000 result=3fefffff.fffffffa errno=0
 func=pow op1=bfefffff.ffffffff op2=407ff800.00000000 result=7ff80000.00000000 errno=EDOM status=i
 func=pow op1=bfefffff.ffffffff op2=408ff800.00000000 result=bfefffff.fffffc01 errno=0
+func=pow op1=bfefffff.ffffffff op2=4386128b.68cf9fbc result=3df1d45f.3e91e17c.d0c errno=0
 func=pow op1=bfefffff.ffffffff op2=43dfffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=bfefffff.ffffffff op2=43e00000.00000000 result=00000000.00000000 errno=ERANGE status=u
 func=pow op1=bfefffff.ffffffff op2=7fefffff.ffffffff result=00000000.00000000 errno=ERANGE status=u
@@ -1010,6 +1021,7 @@ func=pow op1=bfefffff.ffffffff op2=c0120000.00000000 result=7ff80000.00000000 er
 func=pow op1=bfefffff.ffffffff op2=c0180000.00000000 result=3ff00000.00000003 errno=0
 func=pow op1=bfefffff.ffffffff op2=c07f3000.00000000 result=bff00000.000000f9.800 errno=0
 func=pow op1=bfefffff.ffffffff op2=c090ce00.00000000 result=7ff80000.00000000 errno=EDOM status=i
+func=pow op1=bfefffff.ffffffff op2=c386128b.68cf9fbc result=41ecb761.33b97fcc.60b errno=0
 func=pow op1=bfefffff.ffffffff op2=c3dfffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=bfefffff.ffffffff op2=c3e00000.00000000 result=7ff00000.00000000 errno=ERANGE status=o
 func=pow op1=bfefffff.ffffffff op2=ffefffff.ffffffff result=7ff00000.00000000 errno=ERANGE status=o
