@@ -40,14 +40,15 @@ ALL_LIBS = \
 	build/lib/libmathlib.a \
 
 ALL_TOOLS = \
-	build/bin/runtest.sh \
-	build/bin/rtest \
 	build/bin/mathtest \
 	build/bin/mathbench \
 	build/bin/mathbench_libc \
 
-TESTS = $(wildcard $(srcdir)/test/testcases/*/*.tst)
-ALL_TESTS = $(TESTS:$(srcdir)/test/testcases/%=build/bin/%)
+HOST_TOOLS = \
+	build/bin/rtest \
+
+TESTS = $(wildcard $(srcdir)/test/testcases/directed/*.tst)
+RTESTS = $(wildcard $(srcdir)/test/testcases/random/*.tst)
 
 # Configure these in config.mk, do not make changes in this file.
 HOST_CC = cc
@@ -66,10 +67,10 @@ LDFLAGS_ALL = $(LDFLAGS)
 
 all: $(ALL_LIBS) $(ALL_TOOLS) $(ALL_INCLUDES)
 
-DIRS = $(dir $(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_INCLUDES) $(ALL_TESTS))
+DIRS = $(dir $(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_INCLUDES))
 ALL_DIRS = $(sort $(DIRS:%/=%))
 
-$(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_OBJS:%.o=%.os) $(ALL_INCLUDES) $(ALL_TESTS): | $(ALL_DIRS)
+$(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_OBJS:%.o=%.os) $(ALL_INCLUDES): | $(ALL_DIRS)
 
 $(ALL_DIRS):
 	mkdir -p $@
@@ -115,12 +116,6 @@ build/bin/mathbench_libc: build/test/mathbench.o
 build/include/%.h: $(srcdir)/math/include/%.h
 	cp $< $@
 
-build/bin/runtest.sh: $(srcdir)/test/runtest.sh
-	cp $< $@
-
-build/bin/%.tst: $(srcdir)/test/testcases/%.tst
-	cp $< $@
-
 clean:
 	rm -rf build
 
@@ -147,7 +142,12 @@ install-headers: $(ALL_INCLUDES:build/include/%=$(DESTDIR)$(includedir)/%)
 
 install: install-libs install-headers
 
-check: $(ALL_TOOLS) $(ALL_TESTS)
-	build/bin/runtest.sh $(EMULATOR) ./mathtest
+check: $(ALL_TOOLS)
+	cat $(TESTS) | $(EMULATOR) build/bin/mathtest
 
-.PHONY: all clean distclean install install-tools install-libs install-headers check
+rcheck: $(HOST_TOOLS) $(ALL_TOOLS)
+	cat $(RTESTS) | build/bin/rtest | $(EMULATOR) build/bin/mathtest
+
+check-all: check rcheck
+
+.PHONY: all clean distclean install install-tools install-libs install-headers check rcheck check-all
