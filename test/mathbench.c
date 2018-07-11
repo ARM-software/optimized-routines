@@ -293,6 +293,7 @@ bench1 (const struct fun *f, int type, double lo, double hi)
   printf ("%7s %8s: %4u.%02u ns/elem %10llu ns in [%g %g]\n", f->name, s,
 	  (unsigned) (ns100 / 100), (unsigned) (ns100 % 100),
 	  (unsigned long long) dt, lo, hi);
+  fflush (stdout);
 }
 
 static void
