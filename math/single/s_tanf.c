@@ -53,10 +53,7 @@ float tanf(float x)
         unsigned k = fai(x) << 1;
         if (k < 0xFF000000)            /* tiny */
             return FLOAT_CHECKDENORM(x);
-        else if (k == 0xFF000000)      /* inf */
-            return MATHERR_TANF_INF(x);
-        else                           /* NaN */
-            return FLOAT_INFNAN(x);
+       return __math_invalidf (x);
     }
 
     /*
