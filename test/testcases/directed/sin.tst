@@ -23,5 +23,5 @@ func=sin op1=7ff00000.00000000 result=7ff80000.00000001 errno=EDOM status=i
 func=sin op1=fff00000.00000000 result=7ff80000.00000001 errno=EDOM status=i
 func=sin op1=00000000.00000000 result=00000000.00000000 errno=0
 func=sin op1=80000000.00000000 result=80000000.00000000 errno=0
-func=sin op1=00000000.00000001 result=00000000.00000001 errno=0 status=ux
-func=sin op1=80000000.00000001 result=80000000.00000001 errno=0 status=ux
+func=sin op1=00000000.00000001 result=00000000.00000001 errno=0 status=x maybestatus=u
+func=sin op1=80000000.00000001 result=80000000.00000001 errno=0 status=x maybestatus=u
