@@ -25,4 +25,3 @@ test exp2f 10000
 test logf 10000
 test log2f 10000
 test powf 10000
-test rredf 10000

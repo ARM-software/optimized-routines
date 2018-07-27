@@ -53,13 +53,6 @@ _Pragma(STR(import IMPORT_SYMBOL))
 #endif
 
 EXTERN_C int __ieee754_rem_pio2(double, double *);
-#include "../math/single/rredf.h"
-
-int sp_rem_pio2(float x, float *y) {
-  int q;
-  *y = __mathlib_rredf(x, &q);
-  return q;
-}
 
 int dmsd, dlsd;
 int quiet = 0;
@@ -336,10 +329,8 @@ test_func tfuncs[] = {
     TFUNC(at_ssp,rt_s2, modff, 0),
 #ifndef BIGRANGERED
     MFUNC(at_d, rt_d, rred, 2*ULPUNIT),
-    MFUNC(at_s, rt_s, rredf, 2*ULPUNIT | PLUSMINUSPIO2),
 #else
     MFUNC(at_d, rt_d, m_rred, ULPUNIT),
-    MFUNC(at_s, rt_s, m_rredf, ULPUNIT | PLUSMINUSPIO2),
 #endif
     MFUNC(at_d, rt_i, signbit, 0),
     MFUNC(at_s, rt_i, signbitf, 0),
@@ -1116,7 +1107,6 @@ int runtest(testdetail t) {
         case m_isunorderedf: intres = isunordered(s_arg1.f, s_arg2.f); break;
 
         case m_rred:  intres = 3 & __ieee754_rem_pio2(d_arg1.f, d_res.da); break;
-        case m_rredf: intres = 3 & sp_rem_pio2(s_arg1.f, s_res.da); break;
         default:
             printf("unhandled macro: %s\n",t.func->name);
             return test_fail;
