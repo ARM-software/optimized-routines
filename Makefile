@@ -52,9 +52,13 @@ RTESTS = $(wildcard $(srcdir)/test/testcases/random/*.tst)
 
 # Configure these in config.mk, do not make changes in this file.
 HOST_CC = cc
+HOST_CFLAGS = -std=c99 -O2
+HOST_LDFLAGS =
+HOST_LDLIBS = -lm -lmpfr -lmpc
 EMULATOR =
 CFLAGS = -std=c99 -O2
 LDFLAGS =
+LDLIBS = -lm
 CPPFLAGS =
 AR = $(CROSS_COMPILE)ar
 RANLIB = $(CROSS_COMPILE)ranlib
@@ -78,6 +82,7 @@ $(ALL_DIRS):
 $(ALL_OBJS:%.o=%.os): CFLAGS_ALL += -fPIC
 
 $(RTEST_OBJS): CC = $(HOST_CC)
+$(RTEST_OBJS): CFLAGS_ALL = $(HOST_CFLAGS)
 
 build/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 
@@ -102,16 +107,16 @@ build/lib/libmathlib.a: $(MATH_OBJS)
 	$(RANLIB) $@
 
 build/bin/rtest: $(RTEST_OBJS)
-	$(HOST_CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -o $@ $^ -lm -lmpfr -lmpc
+	$(HOST_CC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LDLIBS)
 
 build/bin/mathtest: build/test/mathtest.o build/lib/libmathlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ -lm
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
 
 build/bin/mathbench: build/test/mathbench.o build/lib/libmathlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ -lm
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
 
 build/bin/mathbench_libc: build/test/mathbench.o
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ -lm
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
 
 build/include/%.h: $(srcdir)/math/include/%.h
 	cp $< $@

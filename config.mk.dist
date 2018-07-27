@@ -16,9 +16,16 @@
 # limitations under the License.
 
 HOST_CC = gcc
+HOST_CFLAGS = -std=c99 -O2
+HOST_CFLAGS += -Wall -Wno-unused-function
+
 CC = $(CROSS_COMPILE)gcc
 CFLAGS = -std=c99 -pipe -O3
-CFLAGS += -Wall -Wno-missing-braces -Wno-unused-function
+CFLAGS += -Wall -Wno-missing-braces
+
+# Enable debug info.
+HOST_CFLAGS += -g
+CFLAGS += -g
 
 # Use if the target FPU only supports single precision.
 #CFLAGS += WANT_SINGLEPREC
