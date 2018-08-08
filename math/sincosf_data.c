@@ -30,7 +30,7 @@ const sincos_t __sincosf_table[2] =
 {
   {
     { 1.0, -1.0, -1.0, 1.0 },
-#if HAVE_FAST_ROUND
+#if TOINT_INTRINSICS
     0x1.45F306DC9C883p-1,
 #else
     0x1.45F306DC9C883p+23,
@@ -47,7 +47,7 @@ const sincos_t __sincosf_table[2] =
   },
   {
     { 1.0, -1.0, -1.0, 1.0 },
-#if HAVE_FAST_ROUND
+#if TOINT_INTRINSICS
     0x1.45F306DC9C883p-1,
 #else
     0x1.45F306DC9C883p+23,
