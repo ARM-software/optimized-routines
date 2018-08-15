@@ -18,6 +18,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import Base.\
+
+# ----------------------------------------------------------------------
+# Helper functions to cope with different Julia versions.
+if VERSION >= v"0.7.0"
+    array1d(T, d) = Array{T, 1}(undef, d)
+    array2d(T, d1, d2) = Array{T, 2}(undef, d1, d2)
+else
+    array1d(T, d) = Array(T, d)
+    array2d(T, d1, d2) = Array(T, d1, d2)
+end
+if VERSION < v"0.5.0"
+    String = ASCIIString
+end
+if VERSION >= v"0.6.0"
+    # Use Base.invokelatest to run functions made using eval(), to
+    # avoid "world age" error
+    run(f, x...) = Base.invokelatest(f, x...)
+else
+    # Prior to 0.6.0, invokelatest doesn't exist (but fortunately the
+    # world age problem also doesn't seem to exist)
+    run(f, x...) = f(x...)
+end
+
 # ----------------------------------------------------------------------
 # Global variables configured by command-line options.
 floatsuffix = "" # adjusted by --floatsuffix
@@ -26,7 +50,7 @@ epsbits = 256 # adjusted by --bits
 debug_facilities = Set() # adjusted by --debug
 full_output = false # adjusted by --full
 array_format = false # adjusted by --array
-preliminary_commands = String[] # adjusted by --pre
+preliminary_commands = array1d(String, 0) # adjusted by --pre
 
 # ----------------------------------------------------------------------
 # Diagnostic and utility functions.
@@ -56,7 +80,7 @@ macro debug(facility, printargs...)
     for arg in printargs
         printit = quote
             $printit
-            print($arg)
+            print($(esc(arg)))
         end
     end
     return quote
@@ -156,7 +180,7 @@ end
 #    xys      Array of (x,y) pairs of BigFloats.
 #
 # Return value is a string.
-function format_xylist(xys::Array{(BigFloat,BigFloat)})
+function format_xylist(xys::Array{Tuple{BigFloat,BigFloat}})
     return ("[\n" *
             join(["  "*string(x)*" -> "*string(y) for (x,y) in xys], "\n") *
             "\n]")
@@ -354,8 +378,8 @@ function ratfn_leastsquares(f::Function, xvals::Array{BigFloat}, n, d,
     # Build the matrix. We're solving n+d+1 equations in n+d+1
     # unknowns. (We actually have to return n+d+2 coefficients, but
     # one of them is hardwired to 1.)
-    matrix = Array(BigFloat, n+d+1, n+d+1)
-    vector = Array(BigFloat, n+d+1)
+    matrix = array2d(BigFloat, n+d+1, n+d+1)
+    vector = array1d(BigFloat, n+d+1)
     for i = 0:1:n
         # Equation obtained by differentiating with respect to p_i,
         # i.e. the numerator coefficient of x^i.
@@ -484,7 +508,7 @@ end
 # the extremum location and its value (i.e. y=f(x)).
 function find_extrema(f::Function, grid::Array{BigFloat})
     len = length(grid)
-    extrema = Array((BigFloat, BigFloat), 0)
+    extrema = array1d(Tuple{BigFloat, BigFloat}, 0)
     for i = 1:1:len
         # We have to provide goldensection() with three points
         # bracketing the extremum. If the extremum is at one end of
@@ -529,11 +553,11 @@ end
 # Returns a new array of (x,y) pairs which is a subsequence of the
 # original sequence. (So, in particular, if the input was sorted by x
 # then so will the output be.)
-function winnow_extrema(extrema::Array{(BigFloat,BigFloat)}, n)
+function winnow_extrema(extrema::Array{Tuple{BigFloat,BigFloat}}, n)
     # best[i,j] gives the best sequence so far of length i and with
     # sign j (where signs are coded as 1=positive, 2=negative), in the
     # form of a tuple (cost, actual array of x,y pairs).
-    best = fill((BigFloat(0), Array((BigFloat,BigFloat),0)), n, 2)
+    best = fill((BigFloat(0), array1d(Tuple{BigFloat,BigFloat}, 0)), n, 2)
 
     for (x,y) = extrema
         if y > 0
@@ -624,8 +648,8 @@ function ratfn_equal_deviation(f::Function, coords::Array{BigFloat},
         # in which the p_i and e are the variables, and the powers of
         # x and calls to w and f are the coefficients.
 
-        matrix = Array(BigFloat, n+2, n+2)
-        vector = Array(BigFloat, n+2)
+        matrix = array2d(BigFloat, n+2, n+2)
+        vector = array1d(BigFloat, n+2)
         currsign = +1
         for i = 1:1:n+2
             x = coords[i]
@@ -678,8 +702,8 @@ function ratfn_equal_deviation(f::Function, coords::Array{BigFloat},
             # based on the first n+d+1 of the n+d+2 coordinates, and
             # see what the error turns out to be at the final
             # coordinate.
-            matrix = Array(BigFloat, n+d+1, n+d+1)
-            vector = Array(BigFloat, n+d+1)
+            matrix = array2d(BigFloat, n+d+1, n+d+1)
+            vector = array1d(BigFloat, n+d+1)
             currsign = +1
             for i = 1:1:n+d+1
                 x = coords[i]
@@ -787,7 +811,7 @@ end
 #              means that the Chebyshev alternation theorem guarantees
 #              that any other function of the same degree must exceed
 #              the error of this one at at least one of those points.
-function ratfn_minimax(f::Function, interval::(BigFloat,BigFloat), n, d,
+function ratfn_minimax(f::Function, interval::Tuple{BigFloat,BigFloat}, n, d,
                        w = (x,y)->BigFloat(1))
     # We start off by finding a least-squares approximation. This
     # doesn't need to be perfect, but if we can get it reasonably good
@@ -934,7 +958,7 @@ function test()
     # Test leastsquares rational functions.
     println("Leastsquares test 1:")
     n = 10000
-    a = Array(BigFloat, n+1)
+    a = array1d(BigFloat, n+1)
     for i = 0:1:n
         a[1+i] = i/BigFloat(n)
     end
@@ -947,7 +971,7 @@ function test()
     # Test golden section search.
     println("Golden section test 1:")
     x, y = goldensection(x->sin(x),
-                              BigFloat(0), BigFloat("0.1"), BigFloat(4))
+                              BigFloat(0), BigFloat(1)/10, BigFloat(4))
     println("  ", x, " -> ", y)
     test(approx_eq(x, asin(BigFloat(1))))
     test(approx_eq(y, 1))
@@ -955,7 +979,7 @@ function test()
     # Test extrema-winnowing algorithm.
     println("Winnow test 1:")
     extrema = [(x, sin(20*x)*sin(197*x))
-               for x in BigFloat(0):BigFloat("0.001"):BigFloat(1)]
+               for x in BigFloat(0):BigFloat(1)/1000:BigFloat(1)]
     winnowed = winnow_extrema(extrema, 12)
     println("  ret = ", format_xylist(winnowed))
     prevx, prevy = -1, 0
@@ -973,7 +997,7 @@ function test()
     println("  ",e)
     println("  ",ratfn_to_string(nc, dc))
     test(0 < e < 1e-3)
-    for x = 0:BigFloat(0.001):1
+    for x = 0:BigFloat(1)/1000:1
         test(abs(ratfn_eval(nc, dc, x) - exp(x)) <= e * 1.0000001)
     end
 
@@ -982,7 +1006,7 @@ function test()
     println("  ",e)
     println("  ",ratfn_to_string(nc, dc))
     test(0 < e < 1e-3)
-    for x = 0:BigFloat(0.001):1
+    for x = 0:BigFloat(1)/1000:1
         test(abs(ratfn_eval(nc, dc, x) - exp(x)) <= e * 1.0000001)
     end
 
@@ -992,7 +1016,7 @@ function test()
     println("  ",e)
     println("  ",ratfn_to_string(nc, dc))
     test(0 < e < 1e-3)
-    for x = 0:BigFloat(0.001):1
+    for x = 0:BigFloat(1)/1000:1
         test(abs(ratfn_eval(nc, dc, x) - exp(x))/exp(x) <= e * 1.0000001)
     end
 
@@ -1002,7 +1026,7 @@ function test()
     println("  ",e)
     println("  ",ratfn_to_string(nc, dc))
     test(0 < e < 1e-3)
-    for x = 0:BigFloat(0.001):1
+    for x = 0:BigFloat(1)/1000:1
         test(abs(ratfn_eval(nc, dc, x) - exp(x))/exp(x) <= e * 1.0000001)
     end
 
@@ -1012,12 +1036,12 @@ function test()
     println("  ",e)
     println("  ",ratfn_to_string(nc, dc))
     test(0 < e < 1e-3)
-    for x = 0:BigFloat(0.001):1
+    for x = 0:BigFloat(1)/1000:1
         test(abs(ratfn_eval(nc, dc, x) - exp(x))/exp(x) <= e * 1.0000001)
     end
 
     total = passes + fails
-    @printf "%d passes %d fails %d total\n" passes fails total
+    println(passes, " passes ", fails, " fails ", total, " total")
 end
 
 # ----------------------------------------------------------------------
@@ -1206,14 +1230,14 @@ function main()
     end
 
     for preliminary_command in preliminary_commands
-        eval(parse(preliminary_command))
+        eval(Meta.parse(preliminary_command))
     end
 
-    lo = BigFloat(eval(parse(argwords[1])))
-    hi = BigFloat(eval(parse(argwords[2])))
-    n = int(argwords[3])
-    d = int(argwords[4])
-    f = eval(parse("x -> " * argwords[5]))
+    lo = BigFloat(eval(Meta.parse(argwords[1])))
+    hi = BigFloat(eval(Meta.parse(argwords[2])))
+    n = parse(Int,argwords[3])
+    d = parse(Int,argwords[4])
+    f = eval(Meta.parse("x -> " * argwords[5]))
 
     # Wrap the user-provided function with a function of our own. This
     # arranges to detect silly FP values (inf,nan) early and diagnose
@@ -1221,7 +1245,7 @@ function main()
     # function in case you suspect it's doing the wrong thing at some
     # special-case point.
     function func(x)
-        y = f(x)
+        y = run(f,x)
         @debug("f", x, " -> ", y)
         if !isfinite(y)
             error("f(" * string(x) * ") returned non-finite value " * string(y))
@@ -1231,9 +1255,9 @@ function main()
 
     if nargs == 6
         # Wrap the user-provided weight function similarly.
-        w = eval(parse("(x,y) -> " * argwords[6]))
+        w = eval(Meta.parse("(x,y) -> " * argwords[6]))
         function wrapped_weight(x,y)
-            ww = w(x,y)
+            ww = run(w,x,y)
             if !isfinite(ww)
                 error("w(" * string(x) * "," * string(y) *
                       ") returned non-finite value " * string(ww))
@@ -1283,9 +1307,11 @@ end
 what_to_do = main
 
 doing_opts = true
-argwords = Array(ASCIIString, 0)
+argwords = array1d(String, 0)
 for arg = ARGS
-    if doing_opts && beginswith(arg, "-")
+    global doing_opts, what_to_do, argwords
+    global full_output, array_format, xvarname, floatsuffix, epsbits
+    if doing_opts && startswith(arg, "-")
         if arg == "--"
             doing_opts = false
         elseif arg == "--help"
@@ -1296,18 +1322,19 @@ for arg = ARGS
             full_output = true
         elseif arg == "--array"
             array_format = true
-        elseif beginswith(arg, "--debug=")
-            enable_debug(arg[length("--debug=")+1:])
-        elseif beginswith(arg, "--variable=")
-            xvarname = arg[length("--variable=")+1:]
-        elseif beginswith(arg, "--suffix=")
-            floatsuffix = arg[length("--suffix=")+1:]
-        elseif beginswith(arg, "--bits=")
-            epsbits = int(arg[length("--bits=")+1:])
-        elseif beginswith(arg, "--bigfloatbits=")
-            set_bigfloat_precision(int(arg[length("--bigfloatbits=")+1:]))
-        elseif beginswith(arg, "--pre=")
-            push!(preliminary_commands, arg[length("--pre=")+1:])
+        elseif startswith(arg, "--debug=")
+            enable_debug(arg[length("--debug=")+1:end])
+        elseif startswith(arg, "--variable=")
+            xvarname = arg[length("--variable=")+1:end]
+        elseif startswith(arg, "--suffix=")
+            floatsuffix = arg[length("--suffix=")+1:end]
+        elseif startswith(arg, "--bits=")
+            epsbits = parse(Int,arg[length("--bits=")+1:end])
+        elseif startswith(arg, "--bigfloatbits=")
+            set_bigfloat_precision(
+                parse(Int,arg[length("--bigfloatbits=")+1:end]))
+        elseif startswith(arg, "--pre=")
+            push!(preliminary_commands, arg[length("--pre=")+1:end])
         else
             error("unrecognised option: ", arg)
         end
