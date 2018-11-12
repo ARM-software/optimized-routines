@@ -1,19 +1,7 @@
 ; rred4.tst
 ;
-; Copyright (c) 1999-2015, Arm Limited.
-; SPDX-License-Identifier: Apache-2.0
-;
-; Licensed under the Apache License, Version 2.0 (the "License");
-; you may not use this file except in compliance with the License.
-; You may obtain a copy of the License at
-;
-;     http://www.apache.org/licenses/LICENSE-2.0
-;
-; Unless required by applicable law or agreed to in writing, software
-; distributed under the License is distributed on an "AS IS" BASIS,
-; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-; See the License for the specific language governing permissions and
-; limitations under the License.
+; Copyright (c) 1999-2018, Arm Limited.
+; SPDX-License-Identifier: MIT
 
 func=rred op1=5ee8da6e.555f15d0 result=3ccad12f.2b4c25d3.eaa res2=00000001 errno=0
 func=rred op1=5ef7833f.a59d0dfd result=3c919ca2.3f5c493c.c76 res2=00000003 errno=0

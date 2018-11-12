@@ -2,7 +2,7 @@ Arm Optimized Routines
 ----------------------
 
 This repository contains implementations of math library functions
-provided by Arm under Apache License 2.0 (See LICENSE). Contributions
+provided by Arm under MIT License (See LICENSE). Contributions
 to this project are accepted, but the terms will need negotiation (so
 relicensing and copyright assignment to the FSF is possible later).
 
