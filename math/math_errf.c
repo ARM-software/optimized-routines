@@ -25,7 +25,7 @@ with_errnof (float y, int e)
 NOINLINE static float
 xflowf (uint32_t sign, float y)
 {
-  y = opt_barrier_float (sign ? -y : y) * y;
+  y = eval_as_float (opt_barrier_float (sign ? -y : y) * y);
   return with_errnof (y, ERANGE);
 }
 

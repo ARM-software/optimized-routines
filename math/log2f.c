@@ -72,7 +72,7 @@ log2f (float x)
   y = A[0] * r2 + y;
   p = A[3] * r + y0;
   y = y * r2 + p;
-  return (float) y;
+  return eval_as_float (y);
 }
 #if USE_GLIBC_ABI
 strong_alias (log2f, __log2f_finite)

@@ -25,7 +25,7 @@ with_errno (double y, int e)
 NOINLINE static double
 xflow (uint32_t sign, double y)
 {
-  y = opt_barrier_double (sign ? -y : y) * y;
+  y = eval_as_double (opt_barrier_double (sign ? -y : y) * y);
   return with_errno (y, ERANGE);
 }
 

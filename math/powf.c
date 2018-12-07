@@ -74,7 +74,7 @@ log2_inline (uint32_t ix)
 /* The output of log2 and thus the input of exp2 is either scaled by N
    (in case of fast toint intrinsics) or not.  The unscaled xd must be
    in [-1021,1023], sign_bias sets the sign of the result.  */
-static inline double_t
+static inline float
 exp2_inline (double_t xd, uint32_t sign_bias)
 {
   uint64_t ki, ski, t;
@@ -106,7 +106,7 @@ exp2_inline (double_t xd, uint32_t sign_bias)
   y = C[2] * r + 1;
   y = z * r2 + y;
   y = y * s;
-  return y;
+  return eval_as_float (y);
 }
 
 /* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
@@ -214,7 +214,7 @@ powf (float x, float y)
 	return __math_may_uflowf (sign_bias);
 #endif
     }
-  return (float) exp2_inline (ylogx, sign_bias);
+  return exp2_inline (ylogx, sign_bias);
 }
 #if USE_GLIBC_ABI
 strong_alias (powf, __powf_finite)

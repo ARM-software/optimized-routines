@@ -72,7 +72,7 @@ exp2f (float x)
   y = C[2] * r + 1;
   y = z * r2 + y;
   y = y * s;
-  return (float) y;
+  return eval_as_float (y);
 }
 #if USE_GLIBC_ABI
 strong_alias (exp2f, __exp2f_finite)

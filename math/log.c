@@ -93,7 +93,7 @@ log (double x)
       y += hi;
 # endif
 #endif
-      return y;
+      return eval_as_double (y);
     }
   if (unlikely (top - 0x0010 >= 0x7ff0 - 0x0010))
     {
@@ -150,7 +150,7 @@ log (double x)
 	      + r2 * r2 * (A[4] + r * A[5]))
       + hi;
 #endif
-  return y;
+  return eval_as_double (y);
 }
 #if USE_GLIBC_ABI
 strong_alias (log, __log_finite)

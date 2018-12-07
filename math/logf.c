@@ -75,7 +75,7 @@ logf (float x)
   y = A[1] * r + A[2];
   y = A[0] * r2 + y;
   y = y * r2 + (y0 + r);
-  return (float) y;
+  return eval_as_float (y);
 }
 #if USE_GLIBC_ABI
 strong_alias (logf, __logf_finite)
