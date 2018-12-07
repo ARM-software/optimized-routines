@@ -199,7 +199,14 @@ powf (float x, float y)
     {
       /* |y*log(x)| >= 126.  */
       if (ylogx > 0x1.fffffffd1d571p+6 * POWF_SCALE)
+	/* |x^y| > 0x1.ffffffp127.  */
 	return __math_oflowf (sign_bias);
+      if (WANT_ROUNDING && WANT_ERRNO
+	  && ylogx > 0x1.fffffffa3aae2p+6 * POWF_SCALE)
+	/* |x^y| > 0x1.fffffep127, check if we round away from 0.  */
+	if ((!sign_bias && opt_barrier_float (-ylogx) != -128 * POWF_SCALE)
+	    || (sign_bias && -opt_barrier_float (ylogx) != -128 * POWF_SCALE))
+	  return __math_oflowf (sign_bias);
       if (ylogx <= -150.0 * POWF_SCALE)
 	return __math_uflowf (sign_bias);
 #if WANT_ERRNO_UFLOW
