@@ -117,7 +117,7 @@ int __ieee754_rem_pio2(double x, double *y) {
             0x9c845f8b, 0xbdf9283b, 0x1ff897ff, 0xde05980f, 0xef2f118b,
             0x5a0a6d1f, 0x6d367ecf, 0x27cb09b7, 0x4f463f66, 0x9e5fea2d,
             0x7527bac7, 0xebe5f17b, 0x3d0739f7, 0x8a5292ea, 0x6bfb5fb1,
-            0x1f8d5d08,
+            0x1f8d5d08, 0x56033046,
         };
 
         /*
