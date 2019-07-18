@@ -10,10 +10,10 @@ libdir = $(prefix)/lib
 includedir = $(prefix)/include
 
 # Build targets
-ALL_OBJS = $(math-objs)
-ALL_INCLUDES = $(math-includes)
-ALL_LIBS = $(math-libs)
-ALL_TOOLS = $(math-tools)
+ALL_OBJS = $(math-objs) $(string-objs)
+ALL_INCLUDES = $(math-includes) $(string-includes)
+ALL_LIBS = $(math-libs) $(string-libs)
+ALL_TOOLS = $(math-tools) $(string-tools)
 HOST_TOOLS = $(math-host-tools)
 
 # Configure these in config.mk, do not make changes in this file.
@@ -38,8 +38,9 @@ all:
 -include config.mk
 
 include math/Dir.mk
+include string/Dir.mk
 
-all: all-math
+all: all-math all-string
 
 DIRS = $(dir $(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_INCLUDES))
 ALL_DIRS = $(sort $(DIRS:%/=%))
@@ -89,6 +90,6 @@ install-headers: $(ALL_INCLUDES:build/include/%=$(DESTDIR)$(includedir)/%)
 
 install: install-libs install-headers
 
-check: check-math
+check: check-math check-string
 
 .PHONY: all clean distclean install install-tools install-libs install-headers check

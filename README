@@ -13,6 +13,9 @@ math/           - math subproject sources.
 math/include/   - math library public headers.
 math/test/      - math test and benchmark related sources.
 math/tools/     - tools used for designing the algorithms.
+string/         - string routines subproject sources.
+string/include/ - string library public headers.
+string/test/    - string test and benchmark related sources.
 
 The steps to build the target libraries and run the tests:
 
