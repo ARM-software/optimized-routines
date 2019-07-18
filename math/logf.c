@@ -5,10 +5,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#if WANT_SINGLEPREC
-#include "single/e_logf.c"
-#else
-
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -80,5 +76,4 @@ logf (float x)
 #if USE_GLIBC_ABI
 strong_alias (logf, __logf_finite)
 hidden_alias (logf, __ieee754_logf)
-#endif
 #endif

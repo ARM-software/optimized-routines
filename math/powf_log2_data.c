@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#if !WANT_SINGLEPREC
-
 #include "math_config.h"
 
 const struct powf_log2_data __powf_log2_data = {
@@ -34,4 +32,3 @@ const struct powf_log2_data __powf_log2_data = {
   0x1.71547652ab82bp0 * POWF_SCALE,
   }
 };
-#endif

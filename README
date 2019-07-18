@@ -12,7 +12,6 @@ auxiliary/      - design tools.
 build/          - build directory (created by make).
 math/           - math library source.
 math/include/   - math library public headers.
-math/single/    - code for cpu with only single precision support.
 test/           - test related source.
 test/rtest/     - test generator (requires mpfr and mpc).
 test/testcases/ - test cases.

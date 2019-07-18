@@ -40,8 +40,6 @@
 _Pragma(STR(import IMPORT_SYMBOL))
 #endif
 
-EXTERN_C int __ieee754_rem_pio2(double, double *);
-
 int dmsd, dlsd;
 int quiet = 0;
 
@@ -1094,7 +1092,6 @@ int runtest(testdetail t) {
         case m_islessgreaterf: intres = islessgreater(s_arg1.f, s_arg2.f); break;
         case m_isunorderedf: intres = isunordered(s_arg1.f, s_arg2.f); break;
 
-        case m_rred:  intres = 3 & __ieee754_rem_pio2(d_arg1.f, d_res.da); break;
         default:
             printf("unhandled macro: %s\n",t.func->name);
             return test_fail;

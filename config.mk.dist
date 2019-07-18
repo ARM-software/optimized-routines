@@ -15,9 +15,6 @@ CFLAGS += -Wall -Wno-missing-braces
 HOST_CFLAGS += -g
 CFLAGS += -g
 
-# Use if the target FPU only supports single precision.
-#CFLAGS += -DWANT_SINGLEPREC
-
 # Use if mpfr is available on the target for ulp error checking.
 #LDLIBS += -lmpfr -lgmp
 #CFLAGS += -DUSE_MPFR
@@ -27,7 +24,6 @@ CFLAGS += -frounding-math -fexcess-precision=standard -fno-stack-protector
 CFLAGS += -ffp-contract=fast -fno-math-errno
 
 # Use with clang.
-#CFLAGS += -DCLANG_EXCEPTIONS
 #CFLAGS += -ffp-contract=fast
 
 # Use for cross compilation with gcc.

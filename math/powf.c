@@ -5,10 +5,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#if WANT_SINGLEPREC
-#include "single/e_powf.c"
-#else
-
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -222,5 +218,4 @@ powf (float x, float y)
 #if USE_GLIBC_ABI
 strong_alias (powf, __powf_finite)
 hidden_alias (powf, __ieee754_powf)
-#endif
 #endif

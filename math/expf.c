@@ -5,10 +5,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#if WANT_SINGLEPREC
-#include "single/e_expf.c"
-#else
-
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -92,5 +88,4 @@ expf (float x)
 #if USE_GLIBC_ABI
 strong_alias (expf, __expf_finite)
 hidden_alias (expf, __ieee754_expf)
-#endif
 #endif

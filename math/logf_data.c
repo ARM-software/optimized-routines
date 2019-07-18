@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#if !WANT_SINGLEPREC
-
 #include "math_config.h"
 
 const struct logf_data __logf_data = {
@@ -33,4 +31,3 @@ const struct logf_data __logf_data = {
   -0x1.00ea348b88334p-2, 0x1.5575b0be00b6ap-2, -0x1.ffffef20a4123p-2,
   }
 };
-#endif
