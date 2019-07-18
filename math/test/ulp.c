@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mathlib.h"
 
 /* Don't depend on mpfr by default.  */
 #ifndef USE_MPFR
@@ -208,11 +209,38 @@ struct conf
   double errlim;
 };
 
+/* A bit of a hack: call vector functions twice with the same
+   input in lane 0 but a different value in other lanes: once
+   with an in-range value and then with a special case value.  */
+static int secondcall;
+
+/* Wrappers for vector functions.  */
+#if __aarch64__
+typedef __f32x4_t v_float;
+typedef __f64x2_t v_double;
+static const float fv[2] = {1.0f, -INFINITY};
+static const double dv[2] = {1.0, -INFINITY};
+static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
+static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
+
+static float v_expf_1u(float x) { return __v_expf_1u(argf(x))[0]; }
+static float v_expf(float x) { return __v_expf(argf(x))[0]; }
+static double v_exp(double x) { return __v_exp(argd(x))[0]; }
+#ifdef __vpcs
+static float vn_expf_1u(float x) { return __vn_expf_1u(argf(x))[0]; }
+static float vn_expf(float x) { return __vn_expf(argf(x))[0]; }
+static double vn_exp(double x) { return __vn_exp(argd(x))[0]; }
+static float Z_expf(float x) { return _ZGVnN4v_expf(argf(x))[0]; }
+static double Z_exp(double x) { return _ZGVnN2v_exp(argd(x))[0]; }
+#endif
+#endif
+
 struct fun
 {
   const char *name;
   int arity;
   int singleprec;
+  int twice;
   union
   {
     float (*f1) (float);
@@ -240,16 +268,16 @@ struct fun
 
 static const struct fun fun[] = {
 #if USE_MPFR
-# define F(x, x_long, x_mpfr, a, s, t) \
-  {#x, a, s, {.t = x}, {.t = x_long}, {.t = x_mpfr}},
+# define F(x, x_wrap, x_long, x_mpfr, a, s, t, twice) \
+  {#x, a, s, twice, {.t = x_wrap}, {.t = x_long}, {.t = x_mpfr}},
 #else
-# define F(x, x_long, x_mpfr, a, s, t) \
-  {#x, a, s, {.t = x}, {.t = x_long}},
+# define F(x, x_wrap, x_long, x_mpfr, a, s, t, twice) \
+  {#x, a, s, twice, {.t = x_wrap}, {.t = x_long}},
 #endif
-#define F1(x) F (x##f, x, mpfr_##x, 1, 1, f1)
-#define F2(x) F (x##f, x, mpfr_##x, 2, 1, f2)
-#define D1(x) F (x, x##l, mpfr_##x, 1, 0, d1)
-#define D2(x) F (x, x##l, mpfr_##x, 2, 0, d2)
+#define F1(x) F (x##f, x##f, x, mpfr_##x, 1, 1, f1, 0)
+#define F2(x) F (x##f, x##f, x, mpfr_##x, 2, 1, f2, 0)
+#define D1(x) F (x, x, x##l, mpfr_##x, 1, 0, d1, 0)
+#define D2(x) F (x, x, x##l, mpfr_##x, 2, 0, d2, 0)
  F1 (sin)
  F1 (cos)
  F1 (exp)
@@ -262,6 +290,26 @@ static const struct fun fun[] = {
  D1 (log)
  D1 (log2)
  D2 (pow)
+ F (__s_expf_1u, __s_expf_1u, exp, mpfr_exp, 1, 1, f1, 0)
+ F (__s_expf, __s_expf, exp, mpfr_exp, 1, 1, f1, 0)
+ F (__s_exp, __s_exp, expl, mpfr_exp, 1, 0, d1, 0)
+#if __aarch64__
+ F (__v_expf_1u, v_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__v_expf, v_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__v_exp, v_exp, expl, mpfr_exp, 1, 0, d1, 1)
+#ifdef __vpcs
+ F (__vn_expf_1u, vn_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__vn_expf, vn_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__vn_exp, vn_exp, expl, mpfr_exp, 1, 0, d1, 1)
+ F (_ZGVnN4v_expf, Z_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (_ZGVnN2v_exp, Z_exp, expl, mpfr_exp, 1, 0, d1, 1)
+#endif
+#endif
+#undef F
+#undef F1
+#undef F2
+#undef D1
+#undef D2
  {0}};
 
 /* Boilerplate for generic calls.  */
