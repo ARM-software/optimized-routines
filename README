@@ -8,15 +8,13 @@ relicensing and copyright assignment to the FSF is possible later).
 
 Source code layout:
 
-auxiliary/      - design tools.
 build/          - build directory (created by make).
-math/           - math library source.
+math/           - math subproject sources.
 math/include/   - math library public headers.
-test/           - test related source.
-test/rtest/     - test generator (requires mpfr and mpc).
-test/testcases/ - test cases.
+math/test/      - math test and benchmark related sources.
+math/tools/     - tools used for designing the algorithms.
 
-The steps to build the library and run the tests:
+The steps to build the target libraries and run the tests:
 
 cp config.mk.dist config.mk
 # edit config.mk if necessary ...
@@ -37,6 +35,3 @@ The test system requires libmpfr and libmpc.
 For cross build, CROSS_COMPILE should be set in config.mk and EMULATOR
 should be set for cross testing (e.g. using qemu-user or remote access
 to a target machine), see the examples in config.mk.dist.
-
-The "*.sollya" scripts and "remez.jl" were used to generate some of the
-coefficients (see comments in the code).
