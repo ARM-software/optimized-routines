@@ -19,6 +19,7 @@ ALL_OBJS = $(MATH_OBJS) \
 	$(RTEST_OBJS) \
 	build/test/mathtest.o \
 	build/test/mathbench.o \
+	build/test/ulp.o \
 
 INCLUDES = $(wildcard $(srcdir)/math/include/*.h)
 ALL_INCLUDES = $(INCLUDES:$(srcdir)/math/%=build/%)
@@ -31,6 +32,8 @@ ALL_TOOLS = \
 	build/bin/mathtest \
 	build/bin/mathbench \
 	build/bin/mathbench_libc \
+	build/bin/runulp.sh \
+	build/bin/ulp \
 
 HOST_TOOLS = \
 	build/bin/rtest \
@@ -74,6 +77,8 @@ $(RTEST_OBJS): CFLAGS_ALL = $(HOST_CFLAGS)
 
 build/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 
+build/test/ulp.o: $(srcdir)/test/ulp.h
+
 build/%.o: $(srcdir)/%.S
 	$(CC) $(CFLAGS_ALL) -c -o $@ $<
 
@@ -106,7 +111,13 @@ build/bin/mathbench: build/test/mathbench.o build/lib/libmathlib.a
 build/bin/mathbench_libc: build/test/mathbench.o
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
 
+build/bin/ulp: build/test/ulp.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
+
 build/include/%.h: $(srcdir)/math/include/%.h
+	cp $< $@
+
+build/bin/%.sh: $(srcdir)/test/%.sh
 	cp $< $@
 
 clean:
@@ -141,6 +152,9 @@ check: $(ALL_TOOLS)
 rcheck: $(HOST_TOOLS) $(ALL_TOOLS)
 	cat $(RTESTS) | build/bin/rtest | $(EMULATOR) build/bin/mathtest
 
-check-all: check rcheck
+ucheck: $(ALL_TOOLS)
+	build/bin/runulp.sh $(EMULATOR)
 
-.PHONY: all clean distclean install install-tools install-libs install-headers check rcheck check-all
+check-all: check rcheck ucheck
+
+.PHONY: all clean distclean install install-tools install-libs install-headers check rcheck ucheck check-all

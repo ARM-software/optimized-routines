@@ -16,7 +16,11 @@ HOST_CFLAGS += -g
 CFLAGS += -g
 
 # Use if the target FPU only supports single precision.
-#CFLAGS += WANT_SINGLEPREC
+#CFLAGS += -DWANT_SINGLEPREC
+
+# Use if mpfr is available on the target for ulp error checking.
+#LDLIBS += -lmpfr -lgmp
+#CFLAGS += -DUSE_MPFR
 
 # Use with gcc.
 CFLAGS += -frounding-math -fexcess-precision=standard -fno-stack-protector
