@@ -39,5 +39,5 @@ For cross build, CROSS_COMPILE should be set in config.mk and EMULATOR
 should be set for cross testing (e.g. using qemu-user or remote access
 to a target machine), see the examples in config.mk.dist.
 
-The script "remez.jl" was used to generate some of the coefficients
-(see comments in the code).
+The "*.sollya" scripts and "remez.jl" were used to generate some of the
+coefficients (see comments in the code).
