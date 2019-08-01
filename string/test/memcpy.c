@@ -20,6 +20,7 @@ static const struct fun
 F(memcpy)
 #if __aarch64__
 F(__memcpy_bytewise)
+F(__memcpy_aarch64)
 #endif
 #undef F
 	{0, 0}
