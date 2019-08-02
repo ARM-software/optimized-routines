@@ -18,6 +18,9 @@ static const struct fun
 } funtab[] = {
 #define F(x) {#x, x},
 F(memmove)
+#if __aarch64__
+F(__memmove_aarch64)
+#endif
 #undef F
 	{0, 0}
 };
