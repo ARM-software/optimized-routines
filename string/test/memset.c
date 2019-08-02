@@ -18,6 +18,9 @@ static const struct fun
 } funtab[] = {
 #define F(x) {#x, x},
 F(memset)
+#if __aarch64__
+F(__memset_aarch64)
+#endif
 #undef F
 	{0, 0}
 };
