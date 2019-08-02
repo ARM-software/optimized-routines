@@ -704,7 +704,7 @@ main (int argc, char *argv[])
   if (!USE_MPFR && conf.mpfr)
     {
       puts ("mpfr is not available.");
-      return 1;
+      return 0;
     }
   argc--;
   argv++;
