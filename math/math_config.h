@@ -144,55 +144,47 @@ issignaling_inline (double x)
   return 2 * (ix ^ 0x0008000000000000) > 2 * 0x7ff8000000000000ULL;
 }
 
-#if __aarch64__ && __GNUC__
+#ifdef __GNUC__
+# if __aarch64__
+#  define opt_barrier(x, type) \
+  ({ __typeof (x) __x = (x); __asm__ ("" : "+w" (__x)); __x; })
+#  define force_eval(x, type) \
+  ({ __typeof (x) __x = (x); __asm__ __volatile ("" : : "w" (__x)); })
+# else
+#  define opt_barrier(x, typr) \
+  ({ __typeof (x) __x = (x); __asm ("" : "+m" (__x)); __x; })
+#  define force_eval(x, typr) \
+  ({ __typeof (x) __x = (x); __asm __volatile__ ("" : : "m" (__x)); })
+# endif
+#else
+# define opt_barrier(x, type) \
+  volatile type ret = x, ret
+# define force_eval(x, type) \
+  volatile type ret = x, ret
+#endif
+
 /* Prevent the optimization of a floating-point expression.  */
 static inline float
 opt_barrier_float (float x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
-  return x;
+  return opt_barrier(x, float);
 }
 static inline double
 opt_barrier_double (double x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
-  return x;
+  return opt_barrier(x, double);
 }
 /* Force the evaluation of a floating-point expression for its side-effect.  */
 static inline void
 force_eval_float (float x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
+  return force_eval(x, float);
 }
 static inline void
 force_eval_double (double x)
 {
-  __asm__ __volatile__ ("" : "+w" (x));
+  return force_eval(x, double);
 }
-#else
-static inline float
-opt_barrier_float (float x)
-{
-  volatile float y = x;
-  return y;
-}
-static inline double
-opt_barrier_double (double x)
-{
-  volatile double y = x;
-  return y;
-}
-static inline void
-force_eval_float (float x)
-{
-  volatile float y = x;
-}
-static inline void
-force_eval_double (double x)
-{
-  volatile double y = x;
-}
-#endif
 
 /* Evaluate an expression as the specified type, normally a type
    cast should be enough, but compilers implement non-standard
