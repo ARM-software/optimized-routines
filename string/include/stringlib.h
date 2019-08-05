@@ -17,4 +17,5 @@ void *__memcpy_bytewise (void *__restrict, const void *__restrict, size_t);
 void *__memcpy_aarch64 (void *__restrict, const void *__restrict, size_t);
 void *__memmove_aarch64 (void *__restrict, const void *__restrict, size_t);
 void *__memset_aarch64 (void *, int, size_t);
+void *__memchr_aarch64 (const void *, int, size_t);
 #endif
