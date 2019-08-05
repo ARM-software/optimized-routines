@@ -21,6 +21,8 @@ F(memcpy)
 #if __aarch64__
 F(__memcpy_bytewise)
 F(__memcpy_aarch64)
+#elif __arm__
+F(__memcpy_arm)
 #endif
 #undef F
 	{0, 0}
