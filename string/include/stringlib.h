@@ -29,4 +29,5 @@ int __strncmp_aarch64 (const char *, const char *, size_t);
 #elif __arm__
 void *__memcpy_arm (void *__restrict, const void *__restrict, size_t);
 void *__memset_arm (void *, int, size_t);
+void *__memchr_arm (const void *, int, size_t);
 #endif

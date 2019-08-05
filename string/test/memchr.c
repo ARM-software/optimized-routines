@@ -21,6 +21,8 @@ static const struct fun
 F(memchr)
 #if __aarch64__
 F(__memchr_aarch64)
+#elif __arm__
+F(__memchr_arm)
 #endif
 #undef F
 	{0, 0}
