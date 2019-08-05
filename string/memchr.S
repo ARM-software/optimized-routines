@@ -7,4 +7,6 @@
 
 #if __aarch64__
 #include "aarch64/memchr.S"
+#elif __arm__
+#include "arm/memchr.S"
 #endif
