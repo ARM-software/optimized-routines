@@ -20,6 +20,8 @@ static const struct fun
 F(memset)
 #if __aarch64__
 F(__memset_aarch64)
+#elif __arm__
+F(__memset_arm)
 #endif
 #undef F
 	{0, 0}
