@@ -22,4 +22,5 @@ int __memcmp_aarch64 (const void *, const void *, size_t);
 char *__strcpy_aarch64 (char *__restrict, const char *__restrict);
 int __strcmp_aarch64 (const char *, const char *);
 char *__strchr_aarch64 (const char *, int);
+char *__strchrnul_aarch64 (const char *, int );
 #endif

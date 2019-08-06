@@ -21,6 +21,9 @@ static const struct fun
 } funtab[] = {
 #define F(x) {#x, x},
 F(strchrnul)
+#if __aarch64__
+F(__strchrnul_aarch64)
+#endif
 #undef F
 	{0, 0}
 };
