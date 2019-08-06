@@ -31,4 +31,5 @@ void *__memcpy_arm (void *__restrict, const void *__restrict, size_t);
 void *__memset_arm (void *, int, size_t);
 void *__memchr_arm (const void *, int, size_t);
 char *__strcpy_arm (char *__restrict, const char *__restrict);
+int __strcmp_arm (const char *, const char *);
 #endif
