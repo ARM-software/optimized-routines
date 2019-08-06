@@ -15,6 +15,9 @@ CFLAGS += -Wall -Wno-missing-braces
 HOST_CFLAGS += -g
 CFLAGS += -g
 
+# Optimize the shared libraries on aarch64 assuming they fit in 1M.
+#CFLAGS_SHARED = -fPIC -mcmodel=tiny
+
 # Use if mpfr is available on the target for ulp error checking.
 #LDLIBS += -lmpfr -lgmp
 #CFLAGS += -DUSE_MPFR
