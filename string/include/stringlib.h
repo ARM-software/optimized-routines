@@ -19,4 +19,5 @@ void *__memmove_aarch64 (void *__restrict, const void *__restrict, size_t);
 void *__memset_aarch64 (void *, int, size_t);
 void *__memchr_aarch64 (const void *, int, size_t);
 int __memcmp_aarch64 (const void *, const void *, size_t);
+char *__strcpy_aarch64 (char *__restrict, const char *__restrict);
 #endif
