@@ -18,7 +18,8 @@ string-tools := \
 	build/bin/test/memset \
 	build/bin/test/memchr \
 	build/bin/test/memcmp \
-	build/bin/test/strcpy
+	build/bin/test/strcpy \
+	build/bin/test/strcmp
 
 string-lib-base := $(basename $(string-lib-srcs))
 string-lib-objs := $(string-lib-base:$(srcdir)/%=build/%.o)
@@ -57,5 +58,6 @@ check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/memchr
 	$(EMULATOR) build/bin/test/memcmp
 	$(EMULATOR) build/bin/test/strcpy
+	$(EMULATOR) build/bin/test/strcmp
 
 .PHONY: all-string check-string
