@@ -8,5 +8,7 @@
 #if __aarch64__
 #include "aarch64/memcpy.S"
 #elif __arm__
+# if !defined __thumb__
 #include "arm/memcpy.S"
+# endif
 #endif
