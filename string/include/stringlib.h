@@ -33,4 +33,5 @@ void *__memchr_arm (const void *, int, size_t);
 char *__strcpy_arm (char *__restrict, const char *__restrict);
 int __strcmp_arm (const char *, const char *);
 int __strcmp_armv6m (const char *, const char *);
+size_t __strlen_armv6t2 (const char *);
 #endif
