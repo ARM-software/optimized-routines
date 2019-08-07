@@ -24,4 +24,5 @@ int __strcmp_aarch64 (const char *, const char *);
 char *__strchr_aarch64 (const char *, int);
 char *__strchrnul_aarch64 (const char *, int );
 size_t __strlen_aarch64 (const char *);
+size_t __strnlen_aarch64 (const char *, size_t);
 #endif
