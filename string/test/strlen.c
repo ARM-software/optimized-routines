@@ -21,6 +21,10 @@ static const struct fun
 F(strlen)
 #if __aarch64__
 F(__strlen_aarch64)
+#elif __arm__
+# if __ARM_ARCH >= 6 && __ARM_ARCH_ISA_THUMB == 2
+F(__strlen_armv6t2)
+# endif
 #endif
 #undef F
 	{0, 0}
