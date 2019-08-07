@@ -23,7 +23,8 @@ string-tools := \
 	build/bin/test/strchr \
 	build/bin/test/strchrnul \
 	build/bin/test/strlen \
-	build/bin/test/strnlen
+	build/bin/test/strnlen \
+	build/bin/test/strncmp
 
 string-lib-base := $(basename $(string-lib-srcs))
 string-lib-objs := $(string-lib-base:$(srcdir)/%=build/%.o)
@@ -67,5 +68,6 @@ check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/strchrnul
 	$(EMULATOR) build/bin/test/strlen
 	$(EMULATOR) build/bin/test/strnlen
+	$(EMULATOR) build/bin/test/strncmp
 
 .PHONY: all-string check-string
