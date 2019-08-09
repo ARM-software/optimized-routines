@@ -128,6 +128,15 @@ range_sinf='
 '
 range_cosf="$range_sinf"
 
+range_powf='
+ 0x1p-1   0x1p1  x  0x1p-7 0x1p7   50000
+ 0x1p-1   0x1p1  x -0x1p-7 -0x1p7  50000
+ 0x1p-70 0x1p70  x  0x1p-1 0x1p1   50000
+ 0x1p-70 0x1p70  x  -0x1p-1 -0x1p1 50000
+ 0x1.ep-1 0x1.1p0 x  0x1p8 0x1p14  50000
+ 0x1.ep-1 0x1.1p0 x -0x1p8 -0x1p14 50000
+'
+
 # error limits
 L_exp=1.9
 L_expf=1.49
@@ -135,6 +144,7 @@ L_expf_1u=0.4
 L_logf=2.9
 L_sinf=1.4
 L_cosf=1.4
+L_powf=2.1
 
 # group symbol run
 echo "
@@ -166,6 +176,11 @@ cosf __s_cosf      1
 cosf __v_cosf      $runv
 cosf __vn_cosf     $runvn
 cosf _ZGVnN4v_cosf $runvn
+
+powf __s_powf       1
+powf __v_powf       $runv
+powf __vn_powf      $runvn
+powf _ZGVnN4vv_powf $runvn
 
 " | while read G F R
 do

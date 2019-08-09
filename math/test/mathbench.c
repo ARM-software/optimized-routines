@@ -97,6 +97,7 @@ __v_dummyf (v_float x)
   return x;
 }
 
+#if __aarch64__
 #ifdef __vpcs
 __vpcs static v_double
 __vn_dummy (v_double x)
@@ -108,6 +109,25 @@ __vpcs static v_float
 __vn_dummyf (v_float x)
 {
   return x;
+}
+
+__vpcs static v_float
+xy__vn_powf (v_float x)
+{
+  return __vn_powf (x, x);
+}
+
+__vpcs static v_float
+xy_Z_powf (v_float x)
+{
+  return _ZGVnN4vv_powf (x, x);
+}
+#endif
+
+static v_float
+xy__v_powf (v_float x)
+{
+  return __v_powf (x, x);
 }
 #endif
 
@@ -121,6 +141,12 @@ static float
 xypowf (float x)
 {
   return powf (x, x);
+}
+
+static float
+xy__s_powf (float x)
+{
+  return __s_powf (x, x);
 }
 
 static double
@@ -202,6 +228,7 @@ F (logf, 0.01, 11.1)
 F (__s_logf, 0.01, 11.1)
 F (log2f, 0.01, 11.1)
 {"powf", 'f', 0, 0.01, 11.1, {.f = xypowf}},
+{"__s_powf", 'f', 0, 0.01, 11.1, {.f = xy__s_powf}},
 F (xpowf, 0.01, 11.1)
 F (ypowf, -9.9, 9.9)
 {"sincosf", 'f', 0, 0.1, 0.7, {.f = sincosf_wrap}},
@@ -231,6 +258,7 @@ VF (__v_dummyf, 1.0, 2.0)
 VF (__v_expf, -9.9, 9.9)
 VF (__v_expf_1u, -9.9, 9.9)
 VF (__v_logf, 0.01, 11.1)
+{"__v_powf", 'f', 'v', 0.01, 11.1, {.vf = xy__v_powf}},
 VF (__v_sinf, -3.1, 3.1)
 VF (__v_cosf, -3.1, 3.1)
 #ifdef __vpcs
@@ -243,6 +271,8 @@ VNF (_ZGVnN4v_expf, -9.9, 9.9)
 VNF (__vn_expf_1u, -9.9, 9.9)
 VNF (__vn_logf, 0.01, 11.1)
 VNF (_ZGVnN4v_logf, 0.01, 11.1)
+{"__vn_powf", 'f', 'n', 0.01, 11.1, {.vnf = xy__vn_powf}},
+{"_ZGVnN4vv_powf", 'f', 'n', 0.01, 11.1, {.vnf = xy_Z_powf}},
 VNF (__vn_sinf, -3.1, 3.1)
 VNF (_ZGVnN4v_sinf, -3.1, 3.1)
 VNF (__vn_cosf, -3.1, 3.1)
