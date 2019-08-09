@@ -30,6 +30,8 @@ float __s_expf (float);
 float __s_expf_1u (float);
 float __s_logf (float);
 float __s_powf (float, float);
+double __s_sin (double);
+double __s_cos (double);
 double __s_exp (double);
 
 #if __aarch64__
@@ -50,6 +52,8 @@ __f32x4_t __v_expf (__f32x4_t);
 __f32x4_t __v_expf_1u (__f32x4_t);
 __f32x4_t __v_logf (__f32x4_t);
 __f32x4_t __v_powf (__f32x4_t, __f32x4_t);
+__f64x2_t __v_sin (__f64x2_t);
+__f64x2_t __v_cos (__f64x2_t);
 __f64x2_t __v_exp (__f64x2_t);
 
 #if __GNUC__ >= 9 || __clang_major__ >= 8
@@ -62,6 +66,8 @@ __vpcs __f32x4_t __vn_expf (__f32x4_t);
 __vpcs __f32x4_t __vn_expf_1u (__f32x4_t);
 __vpcs __f32x4_t __vn_logf (__f32x4_t);
 __vpcs __f32x4_t __vn_powf (__f32x4_t, __f32x4_t);
+__vpcs __f64x2_t __vn_sin (__f64x2_t);
+__vpcs __f64x2_t __vn_cos (__f64x2_t);
 __vpcs __f64x2_t __vn_exp (__f64x2_t);
 
 /* Vector functions following the vector PCS using ABI names.  */
@@ -70,6 +76,8 @@ __vpcs __f32x4_t _ZGVnN4v_cosf (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_expf (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_logf (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4vv_powf (__f32x4_t, __f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_sin (__f64x2_t);
+__vpcs __f64x2_t _ZGVnN2v_cos (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_exp (__f64x2_t);
 #endif
 #endif
