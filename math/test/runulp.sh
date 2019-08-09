@@ -121,11 +121,20 @@ range_logf='
  0x1p-4    0x1p4    500000
 '
 
+range_sinf='
+ 0    0xffff0000    10000
+ 0x1p-4    0x1p4    300000
+-0x1p-9   -0x1p9    300000
+'
+range_cosf="$range_sinf"
+
 # error limits
 L_exp=1.9
 L_expf=1.49
 L_expf_1u=0.4
 L_logf=2.9
+L_sinf=1.4
+L_cosf=1.4
 
 # group symbol run
 echo "
@@ -147,6 +156,16 @@ logf __s_logf      1
 logf __v_logf      $runv
 logf __vn_logf     $runvn
 logf _ZGVnN4v_logf $runvn
+
+sinf __s_sinf      1
+sinf __v_sinf      $runv
+sinf __vn_sinf     $runvn
+sinf _ZGVnN4v_sinf $runvn
+
+cosf __s_cosf      1
+cosf __v_cosf      $runv
+cosf __vn_cosf     $runvn
+cosf _ZGVnN4v_cosf $runvn
 
 " | while read G F R
 do
