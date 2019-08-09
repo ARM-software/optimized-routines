@@ -199,6 +199,7 @@ F (__s_expf, -9.9, 9.9)
 F (__s_expf_1u, -9.9, 9.9)
 F (exp2f, -9.9, 9.9)
 F (logf, 0.01, 11.1)
+F (__s_logf, 0.01, 11.1)
 F (log2f, 0.01, 11.1)
 {"powf", 'f', 0, 0.01, 11.1, {.f = xypowf}},
 F (xpowf, 0.01, 11.1)
@@ -227,6 +228,7 @@ VD (__v_exp, -9.9, 9.9)
 VF (__v_dummyf, 1.0, 2.0)
 VF (__v_expf, -9.9, 9.9)
 VF (__v_expf_1u, -9.9, 9.9)
+VF (__v_logf, 0.01, 11.1)
 #ifdef __vpcs
 VND (__vn_dummy, 1.0, 2.0)
 VND (__vn_exp, -9.9, 9.9)
@@ -235,6 +237,8 @@ VNF (__vn_dummyf, 1.0, 2.0)
 VNF (__vn_expf, -9.9, 9.9)
 VNF (_ZGVnN4v_expf, -9.9, 9.9)
 VNF (__vn_expf_1u, -9.9, 9.9)
+VNF (__vn_logf, 0.01, 11.1)
+VNF (_ZGVnN4v_logf, 0.01, 11.1)
 #endif
 #endif
 {0},

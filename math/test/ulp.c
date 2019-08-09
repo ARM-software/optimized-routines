@@ -225,12 +225,15 @@ static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
 
 static float v_expf_1u(float x) { return __v_expf_1u(argf(x))[0]; }
 static float v_expf(float x) { return __v_expf(argf(x))[0]; }
+static float v_logf(float x) { return __v_logf(argf(x))[0]; }
 static double v_exp(double x) { return __v_exp(argd(x))[0]; }
 #ifdef __vpcs
 static float vn_expf_1u(float x) { return __vn_expf_1u(argf(x))[0]; }
 static float vn_expf(float x) { return __vn_expf(argf(x))[0]; }
+static float vn_logf(float x) { return __vn_logf(argf(x))[0]; }
 static double vn_exp(double x) { return __vn_exp(argd(x))[0]; }
 static float Z_expf(float x) { return _ZGVnN4v_expf(argf(x))[0]; }
+static float Z_logf(float x) { return _ZGVnN4v_logf(argf(x))[0]; }
 static double Z_exp(double x) { return _ZGVnN2v_exp(argd(x))[0]; }
 #endif
 #endif
@@ -292,16 +295,20 @@ static const struct fun fun[] = {
  D2 (pow)
  F (__s_expf_1u, __s_expf_1u, exp, mpfr_exp, 1, 1, f1, 0)
  F (__s_expf, __s_expf, exp, mpfr_exp, 1, 1, f1, 0)
+ F (__s_logf, __s_logf, log, mpfr_log, 1, 1, f1, 0)
  F (__s_exp, __s_exp, expl, mpfr_exp, 1, 0, d1, 0)
 #if __aarch64__
  F (__v_expf_1u, v_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
  F (__v_expf, v_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__v_logf, v_logf, log, mpfr_log, 1, 1, f1, 1)
  F (__v_exp, v_exp, expl, mpfr_exp, 1, 0, d1, 1)
 #ifdef __vpcs
  F (__vn_expf_1u, vn_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
  F (__vn_expf, vn_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__vn_logf, vn_logf, log, mpfr_log, 1, 1, f1, 1)
  F (__vn_exp, vn_exp, expl, mpfr_exp, 1, 0, d1, 1)
  F (_ZGVnN4v_expf, Z_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (_ZGVnN4v_logf, Z_logf, log, mpfr_log, 1, 1, f1, 1)
  F (_ZGVnN2v_exp, Z_exp, expl, mpfr_exp, 1, 0, d1, 1)
 #endif
 #endif

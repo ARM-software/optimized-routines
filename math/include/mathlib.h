@@ -26,6 +26,7 @@ double pow (double, double);
 /* Scalar functions using the vector algorithm with identical result.  */
 float __s_expf (float);
 float __s_expf_1u (float);
+float __s_logf (float);
 double __s_exp (double);
 
 #if __aarch64__
@@ -42,6 +43,7 @@ typedef __attribute__((__neon_vector_type__(2))) double __f64x2_t;
 /* Vector functions following the base PCS.  */
 __f32x4_t __v_expf (__f32x4_t);
 __f32x4_t __v_expf_1u (__f32x4_t);
+__f32x4_t __v_logf (__f32x4_t);
 __f64x2_t __v_exp (__f64x2_t);
 
 #if __GNUC__ >= 9 || __clang_major__ >= 8
@@ -50,10 +52,12 @@ __f64x2_t __v_exp (__f64x2_t);
 /* Vector functions following the vector PCS.  */
 __vpcs __f32x4_t __vn_expf (__f32x4_t);
 __vpcs __f32x4_t __vn_expf_1u (__f32x4_t);
+__vpcs __f32x4_t __vn_logf (__f32x4_t);
 __vpcs __f64x2_t __vn_exp (__f64x2_t);
 
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_expf (__f32x4_t);
+__vpcs __f32x4_t _ZGVnN4v_logf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_exp (__f64x2_t);
 #endif
 #endif

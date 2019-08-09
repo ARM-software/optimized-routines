@@ -116,10 +116,16 @@ range_expf='
 
 range_expf_1u="$range_expf"
 
+range_logf='
+ 0    0xffff0000    10000
+ 0x1p-4    0x1p4    500000
+'
+
 # error limits
 L_exp=1.9
 L_expf=1.49
 L_expf_1u=0.4
+L_logf=2.9
 
 # group symbol run
 echo "
@@ -136,6 +142,11 @@ expf _ZGVnN4v_expf $runvn
 expf_1u __s_expf_1u   1
 expf_1u __v_expf_1u   $runv
 expf_1u __vn_expf_1u  $runvn
+
+logf __s_logf      1
+logf __v_logf      $runv
+logf __vn_logf     $runvn
+logf _ZGVnN4v_logf $runvn
 
 " | while read G F R
 do
