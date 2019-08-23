@@ -14,6 +14,17 @@ string-libs := \
 
 string-tools := \
 	build/bin/test/memcpy \
+	build/bin/test/memmove \
+	build/bin/test/memset \
+	build/bin/test/memchr \
+	build/bin/test/memcmp \
+	build/bin/test/strcpy \
+	build/bin/test/strcmp \
+	build/bin/test/strchr \
+	build/bin/test/strchrnul \
+	build/bin/test/strlen \
+	build/bin/test/strnlen \
+	build/bin/test/strncmp
 
 string-lib-base := $(basename $(string-lib-srcs))
 string-lib-objs := $(string-lib-base:$(srcdir)/%=build/%.o)
@@ -47,5 +58,16 @@ build/bin/%.sh: $(srcdir)/string/test/%.sh
 
 check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/memcpy
+	$(EMULATOR) build/bin/test/memmove
+	$(EMULATOR) build/bin/test/memset
+	$(EMULATOR) build/bin/test/memchr
+	$(EMULATOR) build/bin/test/memcmp
+	$(EMULATOR) build/bin/test/strcpy
+	$(EMULATOR) build/bin/test/strcmp
+	$(EMULATOR) build/bin/test/strchr
+	$(EMULATOR) build/bin/test/strchrnul
+	$(EMULATOR) build/bin/test/strlen
+	$(EMULATOR) build/bin/test/strnlen
+	$(EMULATOR) build/bin/test/strncmp
 
 .PHONY: all-string check-string
