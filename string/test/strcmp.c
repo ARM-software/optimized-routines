@@ -20,6 +20,9 @@ static const struct fun
 F(strcmp)
 #if __aarch64__
 F(__strcmp_aarch64)
+# if __ARM_FEATURE_SVE
+F(__strcmp_aarch64_sve)
+# endif
 #elif __arm__
 # if __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1
 F(__strcmp_arm)
