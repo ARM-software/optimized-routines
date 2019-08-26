@@ -20,6 +20,9 @@ static const struct fun
 F(memcmp)
 #if __aarch64__
 F(__memcmp_aarch64)
+# if __ARM_FEATURE_SVE
+F(__memcmp_aarch64_sve)
+# endif
 #endif
 #undef F
 	{0, 0}
