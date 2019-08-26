@@ -21,6 +21,7 @@ string-tools := \
 	build/bin/test/strcpy \
 	build/bin/test/strcmp \
 	build/bin/test/strchr \
+	build/bin/test/strrchr \
 	build/bin/test/strchrnul \
 	build/bin/test/strlen \
 	build/bin/test/strnlen \
@@ -65,6 +66,7 @@ check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/strcpy
 	$(EMULATOR) build/bin/test/strcmp
 	$(EMULATOR) build/bin/test/strchr
+	$(EMULATOR) build/bin/test/strrchr
 	$(EMULATOR) build/bin/test/strchrnul
 	$(EMULATOR) build/bin/test/strlen
 	$(EMULATOR) build/bin/test/strnlen
