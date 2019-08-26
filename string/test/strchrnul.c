@@ -23,6 +23,9 @@ static const struct fun
 F(strchrnul)
 #if __aarch64__
 F(__strchrnul_aarch64)
+# if __ARM_FEATURE_SVE
+F(__strchrnul_aarch64_sve)
+# endif
 #endif
 #undef F
 	{0, 0}
