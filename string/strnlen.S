@@ -7,4 +7,7 @@
 
 #if __aarch64__
 #include "aarch64/strnlen.S"
+# if __ARM_FEATURE_SVE
+#include "aarch64/strnlen-sve.S"
+# endif
 #endif

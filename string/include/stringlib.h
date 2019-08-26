@@ -34,6 +34,7 @@ char *__strchrnul_aarch64_sve (const char *, int );
 int __strcmp_aarch64_sve (const char *, const char *);
 char *__strcpy_aarch64_sve (char *__restrict, const char *__restrict);
 size_t __strlen_aarch64_sve (const char *);
+size_t __strnlen_aarch64_sve (const char *, size_t);
 int __strncmp_aarch64_sve (const char *, const char *, size_t);
 # endif
 #elif __arm__
