@@ -7,4 +7,7 @@
 
 #if __aarch64__
 #include "aarch64/memcmp.S"
+# if __ARM_FEATURE_SVE
+#include "aarch64/memcmp-sve.S"
+# endif
 #endif

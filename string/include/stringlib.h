@@ -28,6 +28,7 @@ size_t __strnlen_aarch64 (const char *, size_t);
 int __strncmp_aarch64 (const char *, const char *, size_t);
 # if __ARM_FEATURE_SVE
 void *__memchr_aarch64_sve (const void *, int, size_t);
+int __memcmp_aarch64_sve (const void *, const void *, size_t);
 # endif
 #elif __arm__
 void *__memcpy_arm (void *__restrict, const void *__restrict, size_t);
