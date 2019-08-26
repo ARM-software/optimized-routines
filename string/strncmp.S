@@ -7,4 +7,7 @@
 
 #if __aarch64__
 #include "aarch64/strncmp.S"
+# if __ARM_FEATURE_SVE
+#include "aarch64/strncmp-sve.S"
+# endif
 #endif
