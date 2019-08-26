@@ -20,6 +20,9 @@ static const struct fun
 F(strcpy)
 #if __aarch64__
 F(__strcpy_aarch64)
+# if __ARM_FEATURE_SVE
+F(__strcpy_aarch64_sve)
+# endif
 #elif __arm__ && defined (__thumb2__) && !defined (__thumb__)
 F(__strcpy_arm)
 #endif
