@@ -32,6 +32,7 @@ int __memcmp_aarch64_sve (const void *, const void *, size_t);
 char *__strchr_aarch64_sve (const char *, int);
 char *__strchrnul_aarch64_sve (const char *, int );
 int __strcmp_aarch64_sve (const char *, const char *);
+char *__strcpy_aarch64_sve (char *__restrict, const char *__restrict);
 # endif
 #elif __arm__
 void *__memcpy_arm (void *__restrict, const void *__restrict, size_t);
