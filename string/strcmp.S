@@ -7,6 +7,9 @@
 
 #if __aarch64__
 #include "aarch64/strcmp.S"
+# if __ARM_FEATURE_SVE
+#include "aarch64/strcmp-sve.S"
+# endif
 #elif __arm__
 # if __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1
 #include "arm/strcmp.S"
