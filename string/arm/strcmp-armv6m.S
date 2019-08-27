@@ -1,13 +1,9 @@
 /*
- * strcmp for ARMv6m
+ * strcmp for ARMv6-M (optimized for performance, not size)
  *
  * Copyright (c) 2014-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
-
-/* Implementation of __strcmp_armv6m for ARMv6m.  This version is only used in
-   ARMv6-M when we want an efficient implementation.  Otherwize if the
-   code size is preferred, __strcmp_armv6m-armv4t.S will be used.  */
 
 	.thumb_func
 	.syntax unified
