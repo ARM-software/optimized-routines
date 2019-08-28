@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <float.h>
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -136,4 +137,7 @@ exp2 (double x)
 #if USE_GLIBC_ABI
 strong_alias (exp2, __exp2_finite)
 hidden_alias (exp2, __ieee754_exp2)
+# if LDBL_MANT_DIG == 53
+long double exp2l (long double x) { return exp2 (x); }
+# endif
 #endif

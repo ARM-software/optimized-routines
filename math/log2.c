@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <float.h>
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -134,4 +135,7 @@ log2 (double x)
 #if USE_GLIBC_ABI
 strong_alias (log2, __log2_finite)
 hidden_alias (log2, __ieee754_log2)
+# if LDBL_MANT_DIG == 53
+long double log2l (long double x) { return log2 (x); }
+# endif
 #endif

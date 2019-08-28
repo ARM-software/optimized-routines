@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <float.h>
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
@@ -371,4 +372,7 @@ pow (double x, double y)
 #if USE_GLIBC_ABI
 strong_alias (pow, __pow_finite)
 hidden_alias (pow, __ieee754_pow)
+# if LDBL_MANT_DIG == 53
+long double powl (long double x, long double y) { return pow (x, y); }
+# endif
 #endif
