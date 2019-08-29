@@ -232,6 +232,7 @@ static float v_powf(float x, float y) { return __v_powf(argf(x),argf(y))[0]; }
 static double v_sin(double x) { return __v_sin(argd(x))[0]; }
 static double v_cos(double x) { return __v_cos(argd(x))[0]; }
 static double v_exp(double x) { return __v_exp(argd(x))[0]; }
+static double v_log(double x) { return __v_log(argd(x))[0]; }
 #ifdef __vpcs
 static float vn_sinf(float x) { return __vn_sinf(argf(x))[0]; }
 static float vn_cosf(float x) { return __vn_cosf(argf(x))[0]; }
@@ -242,6 +243,7 @@ static float vn_powf(float x, float y) { return __vn_powf(argf(x),argf(y))[0]; }
 static double vn_sin(double x) { return __vn_sin(argd(x))[0]; }
 static double vn_cos(double x) { return __vn_cos(argd(x))[0]; }
 static double vn_exp(double x) { return __vn_exp(argd(x))[0]; }
+static double vn_log(double x) { return __vn_log(argd(x))[0]; }
 static float Z_sinf(float x) { return _ZGVnN4v_sinf(argf(x))[0]; }
 static float Z_cosf(float x) { return _ZGVnN4v_cosf(argf(x))[0]; }
 static float Z_expf(float x) { return _ZGVnN4v_expf(argf(x))[0]; }
@@ -250,6 +252,7 @@ static float Z_powf(float x, float y) { return _ZGVnN4vv_powf(argf(x),argf(y))[0
 static double Z_sin(double x) { return _ZGVnN2v_sin(argd(x))[0]; }
 static double Z_cos(double x) { return _ZGVnN2v_cos(argd(x))[0]; }
 static double Z_exp(double x) { return _ZGVnN2v_exp(argd(x))[0]; }
+static double Z_log(double x) { return _ZGVnN2v_log(argd(x))[0]; }
 #endif
 #endif
 
@@ -317,6 +320,7 @@ static const struct fun fun[] = {
  F (__s_sin, __s_sin, sinl, mpfr_sin, 1, 0, d1, 0)
  F (__s_cos, __s_cos, cosl, mpfr_cos, 1, 0, d1, 0)
  F (__s_exp, __s_exp, expl, mpfr_exp, 1, 0, d1, 0)
+ F (__s_log, __s_log, logl, mpfr_log, 1, 0, d1, 0)
 #if __aarch64__
  F (__v_sinf, v_sinf, sin, mpfr_sin, 1, 1, f1, 1)
  F (__v_cosf, v_cosf, cos, mpfr_cos, 1, 1, f1, 1)
@@ -327,6 +331,7 @@ static const struct fun fun[] = {
  F (__v_sin, v_sin, sinl, mpfr_sin, 1, 0, d1, 1)
  F (__v_cos, v_cos, cosl, mpfr_cos, 1, 0, d1, 1)
  F (__v_exp, v_exp, expl, mpfr_exp, 1, 0, d1, 1)
+ F (__v_log, v_log, logl, mpfr_log, 1, 0, d1, 1)
 #ifdef __vpcs
  F (__vn_sinf, vn_sinf, sin, mpfr_sin, 1, 1, f1, 1)
  F (__vn_cosf, vn_cosf, cos, mpfr_cos, 1, 1, f1, 1)
@@ -337,6 +342,7 @@ static const struct fun fun[] = {
  F (__vn_sin, vn_sin, sinl, mpfr_sin, 1, 0, d1, 1)
  F (__vn_cos, vn_cos, cosl, mpfr_cos, 1, 0, d1, 1)
  F (__vn_exp, vn_exp, expl, mpfr_exp, 1, 0, d1, 1)
+ F (__vn_log, vn_log, logl, mpfr_log, 1, 0, d1, 1)
  F (_ZGVnN4v_sinf, Z_sinf, sin, mpfr_sin, 1, 1, f1, 1)
  F (_ZGVnN4v_cosf, Z_cosf, cos, mpfr_cos, 1, 1, f1, 1)
  F (_ZGVnN4v_expf, Z_expf, exp, mpfr_exp, 1, 1, f1, 1)
@@ -345,6 +351,7 @@ static const struct fun fun[] = {
  F (_ZGVnN2v_sin, Z_sin, sinl, mpfr_sin, 1, 0, d1, 1)
  F (_ZGVnN2v_cos, Z_cos, cosl, mpfr_cos, 1, 0, d1, 1)
  F (_ZGVnN2v_exp, Z_exp, expl, mpfr_exp, 1, 0, d1, 1)
+ F (_ZGVnN2v_log, Z_log, logl, mpfr_log, 1, 0, d1, 1)
 #endif
 #endif
 #undef F
