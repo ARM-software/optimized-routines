@@ -95,10 +95,9 @@ int main()
 					test(funtab+i, d, s, n, n / 2);
 				}
 			}
-		if (test_status) {
+		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
+		if (test_status)
 			r = -1;
-			ERR("FAIL %s\n", funtab[i].name);
-		}
 	}
 	return r;
 }
