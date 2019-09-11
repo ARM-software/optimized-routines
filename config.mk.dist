@@ -29,6 +29,10 @@ CFLAGS += -ffp-contract=fast -fno-math-errno
 # Use with clang.
 #CFLAGS += -ffp-contract=fast
 
+# Additional CFLAGS for subprojects.
+#math-cflags =
+#string-cflags =
+
 # Use for cross compilation with gcc.
 #CROSS_COMPILE = aarch64-none-linux-gnu-
 

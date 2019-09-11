@@ -34,17 +34,19 @@ math-test-objs := $(math-test-base:$(srcdir)/%=build/%.o)
 math-test-host-base := $(basename $(math-test-host-srcs))
 math-test-host-objs := $(math-test-host-base:$(srcdir)/%=build/%.o)
 
-math-objs := \
+math-target-objs := \
 	$(math-lib-objs) \
 	$(math-test-objs) \
-	$(math-test-host-objs) \
+
+math-objs := $(math-target-objs) $(math-test-host-objs)
 
 all-math: $(math-libs) $(math-tools) $(math-includes)
 
 TESTS = $(wildcard $(srcdir)/math/test/testcases/directed/*.tst)
 RTESTS = $(wildcard $(srcdir)/math/test/testcases/random/*.tst)
 
-$(math-objs) $(math-objs:%.o=%.os): $(math-includes)
+$(math-target-objs) $(math-objs:%.o=%.os): $(math-includes)
+$(math-target-objs) $(math-objs:%.o=%.os): CFLAGS_ALL += $(math-cflags)
 build/math/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 $(math-test-host-objs): CC = $(HOST_CC)
 $(math-test-host-objs): CFLAGS_ALL = $(HOST_CFLAGS)

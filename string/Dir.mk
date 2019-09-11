@@ -39,6 +39,7 @@ string-objs := \
 all-string: $(string-libs) $(string-tools) $(string-includes)
 
 $(string-objs) $(string-objs:%.o=%.os): $(string-includes)
+$(string-objs) $(string-objs:%.o=%.os): CFLAGS_ALL += $(string-cflags)
 
 build/lib/libstringlib.so: $(string-lib-objs:%.o=%.os)
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -shared -o $@ $^
