@@ -33,6 +33,11 @@ echo 'srcdir = path/to/src' >> config.mk
 make
 make check
 
+Or building and testing the math subproject only:
+
+make all-math
+make check-math
+
 The test system requires libmpfr and libmpc.
 For example on debian linux they can be installed as:
 
