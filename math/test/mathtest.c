@@ -1677,9 +1677,9 @@ int main(int ac, char **av) {
     if (declined)
         printf(" plus %d declined", declined);
     printf(")\n");
-    if (0 < passed && failed == 0)
-        printf("** TEST PASSED OK **\n");
-
+    if (failed || passed == 0)
+        return 1;
+    printf("** TEST PASSED OK **\n");
     return 0;
 }
 
