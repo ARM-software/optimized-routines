@@ -34,6 +34,9 @@ make
 make check
 
 The test system requires libmpfr and libmpc.
+For example on debian linux they can be installed as:
+
+sudo apt-get install libmpfr-dev libmpc-dev
 
 For cross build, CROSS_COMPILE should be set in config.mk and EMULATOR
 should be set for cross testing (e.g. using qemu-user or remote access
