@@ -42,6 +42,8 @@ _Pragma(STR(import IMPORT_SYMBOL))
 
 int dmsd, dlsd;
 int quiet = 0;
+int doround = 0;
+unsigned statusmask = FE_ALL_EXCEPT;
 
 #define EXTRABITS (12)
 #define ULPUNIT (1<<EXTRABITS)
@@ -1115,7 +1117,7 @@ int runtest(testdetail t) {
      * have to anyway (C99 annex G is only informative). */
     if (!(is_complex_argtype(t.func->argtype) || is_complex_rettype(t.func->rettype))) {
         status = fetestexcept(FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW);
-        if ((status|t.maybestatus) != (t.status|t.maybestatus)) {
+        if ((status|t.maybestatus|~statusmask) != (t.status|t.maybestatus|~statusmask)) {
             if (quiet) failtext[0]='x';
             else {
                 failp += sprintf(failp,
@@ -1605,8 +1607,8 @@ int main(int ac, char **av) {
 #if 0
                 "-noinexact",
                 "-noround",
-                "-nostatus",
 #endif
+                "-nostatus",
                 "-quiet",
                 "-strict",
                 "-v",
@@ -1617,8 +1619,8 @@ int main(int ac, char **av) {
 #if 0
                 op_noinexact,
                 op_noround,
-                op_nostatus,
 #endif
+                op_nostatus,
                 op_quiet,
                 op_strict,
                 op_v,
@@ -1635,11 +1637,11 @@ int main(int ac, char **av) {
             case op_noround:
                 doround = 0;
                 break;
+#endif
             case op_nostatus:        /* no status word => noinx,noround */
                 statusmask = 0;
                 doround = 0;
                 break;
-#endif
             case op_v:
             case op_verbose:
                 verbose = 1;

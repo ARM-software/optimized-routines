@@ -33,6 +33,10 @@ CFLAGS += -ffp-contract=fast -fno-math-errno
 #math-cflags =
 #string-cflags =
 
+# Disable fenv checks
+#ULPFLAGS = -q -f
+#MATHTESTFLAGS = -nostatus
+
 # Use for cross compilation with gcc.
 #CROSS_COMPILE = aarch64-none-linux-gnu-
 

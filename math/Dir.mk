@@ -86,13 +86,13 @@ build/bin/%.sh: $(srcdir)/math/test/%.sh
 	cp $< $@
 
 check-math-test: $(math-tools)
-	cat $(TESTS) | $(EMULATOR) build/bin/mathtest
+	cat $(TESTS) | $(EMULATOR) build/bin/mathtest $(MATHTESTFLAGS)
 
 check-math-rtest: $(math-host-tools) $(math-tools)
-	cat $(RTESTS) | build/bin/rtest | $(EMULATOR) build/bin/mathtest
+	cat $(RTESTS) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(MATHTESTFLAGS)
 
 check-math-ulp: $(math-tools)
-	build/bin/runulp.sh $(EMULATOR)
+	ULPFLAGS="$(ULPFLAGS)" build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp
 

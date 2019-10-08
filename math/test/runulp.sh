@@ -13,7 +13,7 @@ cd "${0%/*}"
 
 rmodes='n u d z'
 #rmodes=n
-flags='-q'
+flags="${ULPFLAGS:--q}"
 emu="$@"
 
 FAIL=0
