@@ -16,9 +16,12 @@ rmodes='n u d z'
 flags='-q'
 emu="$@"
 
+FAIL=0
+PASS=0
+
 t() {
 	[ $r = "n" ] && Lt=$L || Lt=$Ldir
-	$emu ./ulp -r $r -e $Lt $flags "$@"
+	$emu ./ulp -r $r -e $Lt $flags "$@" && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
 }
 
 Ldir=0.5
@@ -83,3 +86,8 @@ t powf  0x1p-70 0x1p70  x  -0x1p-1 -0x1p1 50000
 t powf  0x1.ep-1 0x1.1p0 x  0x1p8 0x1p14  50000
 t powf  0x1.ep-1 0x1.1p0 x -0x1p8 -0x1p14 50000
 done
+
+[ 0 -eq $FAIL ] || {
+	echo "FAILED $FAIL PASSED $PASS"
+	exit 1
+}

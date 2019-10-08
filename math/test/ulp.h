@@ -239,7 +239,7 @@ static inline int T(call_mpfr_fix) (const struct fun *f, struct T(args) a,
 #endif
 }
 
-static void T(cmp) (const struct fun *f, struct gen *gen,
+static int T(cmp) (const struct fun *f, struct gen *gen,
 		     const struct conf *conf)
 {
   double maxerr = 0;
@@ -335,4 +335,5 @@ static void T(cmp) (const struct fun *f, struct gen *gen,
 	  (unsigned long long) cnt1, 100.0 * cnt1 / cc,
 	  (unsigned long long) cnt2, 100.0 * cnt2 / cc,
 	  (unsigned long long) cntfail, 100.0 * cntfail / cc);
+  return !!cntfail;
 }

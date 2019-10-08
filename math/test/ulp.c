@@ -514,19 +514,21 @@ usage (void)
   exit (1);
 }
 
-static void
+static int
 cmp (const struct fun *f, struct gen *gen, const struct conf *conf)
 {
+  int r = 1;
   if (f->arity == 1 && f->singleprec)
-    cmp_f1 (f, gen, conf);
+    r = cmp_f1 (f, gen, conf);
   else if (f->arity == 2 && f->singleprec)
-    cmp_f2 (f, gen, conf);
+    r = cmp_f2 (f, gen, conf);
   else if (f->arity == 1 && !f->singleprec)
-    cmp_d1 (f, gen, conf);
+    r = cmp_d1 (f, gen, conf);
   else if (f->arity == 2 && !f->singleprec)
-    cmp_d2 (f, gen, conf);
+    r = cmp_d2 (f, gen, conf);
   else
     usage ();
+  return r;
 }
 
 static uint64_t
@@ -710,5 +712,5 @@ main (int argc, char *argv[])
   argv++;
   parsegen (&gen, argc, argv, f);
   conf.n = gen.cnt;
-  cmp (f, &gen, &conf);
+  return cmp (f, &gen, &conf);
 }
