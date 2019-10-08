@@ -1519,8 +1519,8 @@ void runtests(char *name, FILE *fp) {
             }
             test.in_err++;
             print_errno = 1;
-            lineno++;
         }
+        lineno++;
     }
 }
 
