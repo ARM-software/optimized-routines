@@ -115,6 +115,8 @@ range_expf='
 '
 
 range_expf_1u="$range_expf"
+range_exp2f="$range_expf"
+range_exp2f_1u="$range_expf"
 
 range_logf='
  0    0xffff0000    10000
@@ -141,6 +143,8 @@ range_powf='
 L_exp=1.9
 L_expf=1.49
 L_expf_1u=0.4
+L_exp2f=1.49
+L_exp2f_1u=0.4
 L_logf=2.9
 L_sinf=1.4
 L_cosf=1.4
@@ -175,6 +179,15 @@ expf _ZGVnN4v_expf $runvn
 expf_1u __s_expf_1u   1
 expf_1u __v_expf_1u   $runv
 expf_1u __vn_expf_1u  $runvn
+
+exp2f __s_exp2f      1
+exp2f __v_exp2f      $runv
+exp2f __vn_exp2f     $runvn
+exp2f _ZGVnN4v_exp2f $runvn
+
+exp2f_1u __s_exp2f_1u  1
+exp2f_1u __v_exp2f_1u  $runv
+exp2f_1u __vn_exp2f_1u $runvn
 
 logf __s_logf      1
 logf __v_logf      $runv

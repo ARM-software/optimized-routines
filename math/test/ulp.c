@@ -227,6 +227,8 @@ static float v_sinf(float x) { return __v_sinf(argf(x))[0]; }
 static float v_cosf(float x) { return __v_cosf(argf(x))[0]; }
 static float v_expf_1u(float x) { return __v_expf_1u(argf(x))[0]; }
 static float v_expf(float x) { return __v_expf(argf(x))[0]; }
+static float v_exp2f_1u(float x) { return __v_exp2f_1u(argf(x))[0]; }
+static float v_exp2f(float x) { return __v_exp2f(argf(x))[0]; }
 static float v_logf(float x) { return __v_logf(argf(x))[0]; }
 static float v_powf(float x, float y) { return __v_powf(argf(x),argf(y))[0]; }
 static double v_sin(double x) { return __v_sin(argd(x))[0]; }
@@ -238,6 +240,8 @@ static float vn_sinf(float x) { return __vn_sinf(argf(x))[0]; }
 static float vn_cosf(float x) { return __vn_cosf(argf(x))[0]; }
 static float vn_expf_1u(float x) { return __vn_expf_1u(argf(x))[0]; }
 static float vn_expf(float x) { return __vn_expf(argf(x))[0]; }
+static float vn_exp2f_1u(float x) { return __vn_exp2f_1u(argf(x))[0]; }
+static float vn_exp2f(float x) { return __vn_exp2f(argf(x))[0]; }
 static float vn_logf(float x) { return __vn_logf(argf(x))[0]; }
 static float vn_powf(float x, float y) { return __vn_powf(argf(x),argf(y))[0]; }
 static double vn_sin(double x) { return __vn_sin(argd(x))[0]; }
@@ -247,6 +251,7 @@ static double vn_log(double x) { return __vn_log(argd(x))[0]; }
 static float Z_sinf(float x) { return _ZGVnN4v_sinf(argf(x))[0]; }
 static float Z_cosf(float x) { return _ZGVnN4v_cosf(argf(x))[0]; }
 static float Z_expf(float x) { return _ZGVnN4v_expf(argf(x))[0]; }
+static float Z_exp2f(float x) { return _ZGVnN4v_exp2f(argf(x))[0]; }
 static float Z_logf(float x) { return _ZGVnN4v_logf(argf(x))[0]; }
 static float Z_powf(float x, float y) { return _ZGVnN4vv_powf(argf(x),argf(y))[0]; }
 static double Z_sin(double x) { return _ZGVnN2v_sin(argd(x))[0]; }
@@ -315,6 +320,8 @@ static const struct fun fun[] = {
  F (__s_cosf, __s_cosf, cos, mpfr_cos, 1, 1, f1, 0)
  F (__s_expf_1u, __s_expf_1u, exp, mpfr_exp, 1, 1, f1, 0)
  F (__s_expf, __s_expf, exp, mpfr_exp, 1, 1, f1, 0)
+ F (__s_exp2f_1u, __s_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 0)
+ F (__s_exp2f, __s_exp2f, exp2, mpfr_exp2, 1, 1, f1, 0)
  F (__s_powf, __s_powf, pow, mpfr_pow, 2, 1, f2, 0)
  F (__s_logf, __s_logf, log, mpfr_log, 1, 1, f1, 0)
  F (__s_sin, __s_sin, sinl, mpfr_sin, 1, 0, d1, 0)
@@ -326,6 +333,8 @@ static const struct fun fun[] = {
  F (__v_cosf, v_cosf, cos, mpfr_cos, 1, 1, f1, 1)
  F (__v_expf_1u, v_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
  F (__v_expf, v_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__v_exp2f_1u, v_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 1)
+ F (__v_exp2f, v_exp2f, exp2, mpfr_exp2, 1, 1, f1, 1)
  F (__v_logf, v_logf, log, mpfr_log, 1, 1, f1, 1)
  F (__v_powf, v_powf, pow, mpfr_pow, 2, 1, f2, 1)
  F (__v_sin, v_sin, sinl, mpfr_sin, 1, 0, d1, 1)
@@ -337,6 +346,8 @@ static const struct fun fun[] = {
  F (__vn_cosf, vn_cosf, cos, mpfr_cos, 1, 1, f1, 1)
  F (__vn_expf_1u, vn_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
  F (__vn_expf, vn_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (__vn_exp2f_1u, vn_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 1)
+ F (__vn_exp2f, vn_exp2f, exp2, mpfr_exp2, 1, 1, f1, 1)
  F (__vn_logf, vn_logf, log, mpfr_log, 1, 1, f1, 1)
  F (__vn_powf, vn_powf, pow, mpfr_pow, 2, 1, f2, 1)
  F (__vn_sin, vn_sin, sinl, mpfr_sin, 1, 0, d1, 1)
@@ -346,6 +357,7 @@ static const struct fun fun[] = {
  F (_ZGVnN4v_sinf, Z_sinf, sin, mpfr_sin, 1, 1, f1, 1)
  F (_ZGVnN4v_cosf, Z_cosf, cos, mpfr_cos, 1, 1, f1, 1)
  F (_ZGVnN4v_expf, Z_expf, exp, mpfr_exp, 1, 1, f1, 1)
+ F (_ZGVnN4v_exp2f, Z_exp2f, exp2, mpfr_exp2, 1, 1, f1, 1)
  F (_ZGVnN4v_logf, Z_logf, log, mpfr_log, 1, 1, f1, 1)
  F (_ZGVnN4vv_powf, Z_powf, pow, mpfr_pow, 2, 1, f2, 1)
  F (_ZGVnN2v_sin, Z_sin, sinl, mpfr_sin, 1, 0, d1, 1)
