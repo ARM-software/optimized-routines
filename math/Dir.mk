@@ -73,8 +73,9 @@ build/bin/mathtest: build/math/test/mathtest.o build/lib/libmathlib.a
 build/bin/mathbench: build/math/test/mathbench.o build/lib/libmathlib.a
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
 
-build/bin/mathbench_libc: build/math/test/mathbench.o
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
+# This is not ideal, but allows custom symbols in mathbench to get resolved.
+build/bin/mathbench_libc: build/math/test/mathbench.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $< $(LDLIBS) -lc build/lib/libmathlib.a -lm
 
 build/bin/ulp: build/math/test/ulp.o build/lib/libmathlib.a
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
