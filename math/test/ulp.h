@@ -125,6 +125,8 @@ static inline int T(call_long_fenv) (const struct fun *f, struct T(args) a,
   if (r != FE_TONEAREST)
     fesetround (r);
   feclearexcept (FE_ALL_EXCEPT);
+  volatile struct T(args) va = a; // TODO: barrier
+  a = va;
   RT(double) yl = T(call_long) (f, a);
   p->y = (RT(float)) yl;
   volatile RT(float) vy = p->y; // TODO: barrier
