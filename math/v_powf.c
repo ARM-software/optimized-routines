@@ -205,8 +205,15 @@ V_NAME(powf) (v_f32_t x, v_f32_t y)
 		   : v_get_u32 (cmp, lane));
 
       /* N*x = k + r with r in [-1/2, 1/2] */
+#if TOINT_INTRINSICS
       kd = roundtoint (ylogx); /* k */
       ki = converttoint (ylogx);
+#else
+# define SHIFT 0x1.8p52
+      kd = eval_as_double (ylogx + SHIFT);
+      ki = asuint64 (kd);
+      kd -= SHIFT;
+#endif
       r = ylogx - kd;
 
       /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1) */
