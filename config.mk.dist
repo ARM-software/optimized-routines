@@ -10,6 +10,7 @@ HOST_CFLAGS += -Wall -Wno-unused-function
 CC = $(CROSS_COMPILE)gcc
 CFLAGS = -std=c99 -pipe -O3
 CFLAGS += -Wall -Wno-missing-braces
+CFLAGS += -Werror=implicit-function-declaration
 
 # Enable debug info.
 HOST_CFLAGS += -g
