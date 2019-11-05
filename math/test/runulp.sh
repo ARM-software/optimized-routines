@@ -146,8 +146,22 @@ L_sinf=1.4
 L_cosf=1.4
 L_powf=2.1
 
+while read G F R
+do
+	[ "$R" = 1 ] || continue
+	case "$G" in \#*) continue ;; esac
+	eval range="\${range_$G}"
+	eval L="\${L_$G}"
+	while read X
+	do
+		[ -n "$X" ] || continue
+		case "$X" in \#*) continue ;; esac
+		t $F $X
+	done << EOF
+$range
+EOF
+done << EOF
 # group symbol run
-echo "
 exp  __s_exp       1
 exp  __v_exp       $runv
 exp  __vn_exp      $runvn
@@ -181,20 +195,7 @@ powf __s_powf       1
 powf __v_powf       $runv
 powf __vn_powf      $runvn
 powf _ZGVnN4vv_powf $runvn
-
-" | while read G F R
-do
-	[ "$R" = 1 ] || continue
-	case "$G" in \#*) continue ;; esac
-	eval range="\${range_$G}"
-	eval L="\${L_$G}"
-	echo "$range" |while read X
-	do
-		[ -n "$X" ] || continue
-		case "$X" in \#*) continue ;; esac
-		t $F $X
-	done
-done
+EOF
 
 [ 0 -eq $FAIL ] || {
 	echo "FAILED $FAIL PASSED $PASS"
