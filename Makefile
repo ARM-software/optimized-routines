@@ -38,8 +38,8 @@ all:
 
 -include config.mk
 
-include math/Dir.mk
-include string/Dir.mk
+include $(srcdir)/math/Dir.mk
+include $(srcdir)/string/Dir.mk
 
 all: all-math all-string
 
