@@ -69,10 +69,16 @@
 # define UNUSED __attribute__ ((unused))
 # define likely(x) __builtin_expect (!!(x), 1)
 # define unlikely(x) __builtin_expect (x, 0)
+# if __GNUC__ >= 9
+#   define attribute_copy(f) __attribute__ ((copy (f)))
+# else
+#   define attribute_copy(f)
+# endif
 # define strong_alias(f, a) \
-  extern __typeof (f) a __attribute__ ((alias (#f)));
+  extern __typeof (f) a __attribute__ ((alias (#f))) attribute_copy (f);
 # define hidden_alias(f, a) \
-  extern __typeof (f) a __attribute__ ((alias (#f), visibility ("hidden")));
+  extern __typeof (f) a __attribute__ ((alias (#f), visibility ("hidden"))) \
+  attribute_copy (f);
 #else
 # define HIDDEN
 # define NOINLINE
