@@ -85,6 +85,7 @@ dummyf (float x)
   return x;
 }
 
+#if __aarch64__
 static v_double
 __v_dummy (v_double x)
 {
@@ -97,7 +98,6 @@ __v_dummyf (v_float x)
   return x;
 }
 
-#if __aarch64__
 #ifdef __vpcs
 __vpcs static v_double
 __vn_dummy (v_double x)
