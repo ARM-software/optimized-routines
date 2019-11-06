@@ -66,6 +66,7 @@
 #ifdef __GNUC__
 # define HIDDEN __attribute__ ((__visibility__ ("hidden")))
 # define NOINLINE __attribute__ ((noinline))
+# define UNUSED __attribute__ ((unused))
 # define likely(x) __builtin_expect (!!(x), 1)
 # define unlikely(x) __builtin_expect (x, 0)
 # define strong_alias(f, a) \
@@ -75,6 +76,7 @@
 #else
 # define HIDDEN
 # define NOINLINE
+# define UNUSED
 # define likely(x) (x)
 # define unlikely(x) (x)
 #endif
@@ -213,12 +215,12 @@ opt_barrier_double (double x)
 static inline void
 force_eval_float (float x)
 {
-  volatile float y = x;
+  volatile float y UNUSED = x;
 }
 static inline void
 force_eval_double (double x)
 {
-  volatile double y = x;
+  volatile double y UNUSED = x;
 }
 #endif
 
