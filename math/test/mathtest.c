@@ -847,7 +847,7 @@ testdetail parsetest(char *testbuf, testdetail oldtest) {
                 case e_underflow: ret.maybestatus |= FE_UNDERFLOW; break;
                 }
             }
-            if(math_errhandling&MATH_ERRNO) {
+            {
                 switch(n) {
                 case e_domain:
                     ret.maybeerr = e_EDOM; break;
@@ -886,6 +886,16 @@ testdetail parsetest(char *testbuf, testdetail oldtest) {
                 case e_overflow:
                 case e_underflow:
                     ret.err = e_ERANGE; break;
+                }
+            }
+            if(!(math_errhandling&MATH_ERRNO)) {
+                switch(n) {
+                case e_domain:
+                    ret.maybeerr = e_EDOM; break;
+                case e_divbyzero:
+                case e_overflow:
+                case e_underflow:
+                    ret.maybeerr = e_ERANGE; break;
                 }
             }
             break;
