@@ -8,6 +8,12 @@
 #ifndef _V_MATH_H
 #define _V_MATH_H
 
+#ifndef WANT_VMATH
+/* Enable the build of vector math code.  */
+# define WANT_VMATH 1
+#endif
+#if WANT_VMATH
+
 /* The goal of this header is to allow vector and scalar
    build of the same algorithm, the provided intrinsic
    wrappers are also vector length agnostic so they can
@@ -601,4 +607,5 @@ v_call_f64 (f64_t (*f) (f64_t), v_f64_t x, v_f64_t y, v_u64_t p)
 }
 #endif
 
+#endif
 #endif

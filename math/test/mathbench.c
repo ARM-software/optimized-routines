@@ -15,6 +15,11 @@
 #include <math.h>
 #include "mathlib.h"
 
+#ifndef WANT_VMATH
+/* Enable the build of vector math code.  */
+# define WANT_VMATH 1
+#endif
+
 /* Number of measurements, best result is reported.  */
 #define MEASURE 60
 /* Array size.  */
@@ -29,7 +34,7 @@ static float Af[N];
 static long measurecount = MEASURE;
 static long itercount = ITER;
 
-#if __aarch64__
+#if __aarch64__ && WANT_VMATH
 typedef __f64x2_t v_double;
 
 #define v_double_len() 2
@@ -85,6 +90,7 @@ dummyf (float x)
   return x;
 }
 
+#if WANT_VMATH
 #if __aarch64__
 static v_double
 __v_dummy (v_double x)
@@ -131,6 +137,13 @@ xy__v_powf (v_float x)
 }
 #endif
 
+static float
+xy__s_powf (float x)
+{
+  return __s_powf (x, x);
+}
+#endif
+
 static double
 xypow (double x)
 {
@@ -141,12 +154,6 @@ static float
 xypowf (float x)
 {
   return powf (x, x);
-}
-
-static float
-xy__s_powf (float x)
-{
-  return __s_powf (x, x);
 }
 
 static double
@@ -207,15 +214,11 @@ static const struct fun
 #define VND(func, lo, hi) {#func, 'd', 'n', lo, hi, {.vnd = func}},
 #define VNF(func, lo, hi) {#func, 'f', 'n', lo, hi, {.vnf = func}},
 D (dummy, 1.0, 2.0)
-D (__s_sin, -3.1, 3.1)
-D (__s_cos, -3.1, 3.1)
 D (exp, -9.9, 9.9)
 D (exp, 0.5, 1.0)
-D (__s_exp, -9.9, 9.9)
 D (exp2, -9.9, 9.9)
 D (log, 0.01, 11.1)
 D (log, 0.999, 1.001)
-D (__s_log, 0.01, 11.1)
 D (log2, 0.01, 11.1)
 D (log2, 0.999, 1.001)
 {"pow", 'd', 0, 0.01, 11.1, {.d = xypow}},
@@ -224,16 +227,10 @@ D (ypow, -9.9, 9.9)
 
 F (dummyf, 1.0, 2.0)
 F (expf, -9.9, 9.9)
-F (__s_expf, -9.9, 9.9)
-F (__s_expf_1u, -9.9, 9.9)
-F (__s_exp2f, -9.9, 9.9)
-F (__s_exp2f_1u, -9.9, 9.9)
 F (exp2f, -9.9, 9.9)
 F (logf, 0.01, 11.1)
-F (__s_logf, 0.01, 11.1)
 F (log2f, 0.01, 11.1)
 {"powf", 'f', 0, 0.01, 11.1, {.f = xypowf}},
-{"__s_powf", 'f', 0, 0.01, 11.1, {.f = xy__s_powf}},
 F (xpowf, 0.01, 11.1)
 F (ypowf, -9.9, 9.9)
 {"sincosf", 'f', 0, 0.1, 0.7, {.f = sincosf_wrap}},
@@ -248,13 +245,24 @@ F (sinf, -3.1, 3.1)
 F (sinf, 3.3, 33.3)
 F (sinf, 100, 1000)
 F (sinf, 1e6, 1e32)
-F (__s_sinf, -3.1, 3.1)
 F (cosf, 0.1, 0.7)
 F (cosf, 0.8, 3.1)
 F (cosf, -3.1, 3.1)
 F (cosf, 3.3, 33.3)
 F (cosf, 100, 1000)
 F (cosf, 1e6, 1e32)
+#if WANT_VMATH
+D (__s_sin, -3.1, 3.1)
+D (__s_cos, -3.1, 3.1)
+D (__s_exp, -9.9, 9.9)
+D (__s_log, 0.01, 11.1)
+F (__s_expf, -9.9, 9.9)
+F (__s_expf_1u, -9.9, 9.9)
+F (__s_exp2f, -9.9, 9.9)
+F (__s_exp2f_1u, -9.9, 9.9)
+F (__s_logf, 0.01, 11.1)
+{"__s_powf", 'f', 0, 0.01, 11.1, {.f = xy__s_powf}},
+F (__s_sinf, -3.1, 3.1)
 F (__s_cosf, -3.1, 3.1)
 #if __aarch64__
 VD (__v_dummy, 1.0, 2.0)
@@ -296,6 +304,7 @@ VNF (__vn_sinf, -3.1, 3.1)
 VNF (_ZGVnN4v_sinf, -3.1, 3.1)
 VNF (__vn_cosf, -3.1, 3.1)
 VNF (_ZGVnN4v_cosf, -3.1, 3.1)
+#endif
 #endif
 #endif
 {0},

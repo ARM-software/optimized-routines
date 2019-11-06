@@ -95,6 +95,8 @@ done
 Ldir=0.5
 r='n'
 flags="${ULPFLAGS:--q} -f"
+runs=
+check __s_exp 1 && runs=1
 runv=
 check __v_exp 1 && runv=1
 runvn=
@@ -166,45 +168,45 @@ $range
 EOF
 done << EOF
 # group symbol run
-exp  __s_exp       1
+exp  __s_exp       $runs
 exp  __v_exp       $runv
 exp  __vn_exp      $runvn
 exp  _ZGVnN2v_exp  $runvn
 
-expf __s_expf      1
+expf __s_expf      $runs
 expf __v_expf      $runv
 expf __vn_expf     $runvn
 expf _ZGVnN4v_expf $runvn
 
-expf_1u __s_expf_1u   1
+expf_1u __s_expf_1u   $runs
 expf_1u __v_expf_1u   $runv
 expf_1u __vn_expf_1u  $runvn
 
-exp2f __s_exp2f      1
+exp2f __s_exp2f      $runs
 exp2f __v_exp2f      $runv
 exp2f __vn_exp2f     $runvn
 exp2f _ZGVnN4v_exp2f $runvn
 
-exp2f_1u __s_exp2f_1u  1
+exp2f_1u __s_exp2f_1u  $runs
 exp2f_1u __v_exp2f_1u  $runv
 exp2f_1u __vn_exp2f_1u $runvn
 
-logf __s_logf      1
+logf __s_logf      $runs
 logf __v_logf      $runv
 logf __vn_logf     $runvn
 logf _ZGVnN4v_logf $runvn
 
-sinf __s_sinf      1
+sinf __s_sinf      $runs
 sinf __v_sinf      $runv
 sinf __vn_sinf     $runvn
 sinf _ZGVnN4v_sinf $runvn
 
-cosf __s_cosf      1
+cosf __s_cosf      $runs
 cosf __v_cosf      $runv
 cosf __vn_cosf     $runvn
 cosf _ZGVnN4v_cosf $runvn
 
-powf __s_powf       1
+powf __s_powf       $runs
 powf __v_powf       $runv
 powf __vn_powf      $runvn
 powf _ZGVnN4vv_powf $runvn

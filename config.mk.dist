@@ -38,6 +38,9 @@ CFLAGS += -ffp-contract=fast -fno-math-errno
 #ULPFLAGS = -q -f
 #MATHTESTFLAGS = -nostatus
 
+# Disable vector math code
+#CFLAGS += -DWANT_VMATH=0
+
 # Use for cross compilation with gcc.
 #CROSS_COMPILE = aarch64-none-linux-gnu-
 

@@ -23,6 +23,11 @@
 # include <mpfr.h>
 #endif
 
+#ifndef WANT_VMATH
+/* Enable the build of vector math code.  */
+# define WANT_VMATH 1
+#endif
+
 static inline uint64_t
 asuint64 (double f)
 {
@@ -215,7 +220,7 @@ struct conf
 static int secondcall;
 
 /* Wrappers for vector functions.  */
-#if __aarch64__
+#if __aarch64__ && WANT_VMATH
 typedef __f32x4_t v_float;
 typedef __f64x2_t v_double;
 static const float fv[2] = {1.0f, -INFINITY};
@@ -316,6 +321,7 @@ static const struct fun fun[] = {
  D1 (log)
  D1 (log2)
  D2 (pow)
+#if WANT_VMATH
  F (__s_sinf, __s_sinf, sin, mpfr_sin, 1, 1, f1, 0)
  F (__s_cosf, __s_cosf, cos, mpfr_cos, 1, 1, f1, 0)
  F (__s_expf_1u, __s_expf_1u, exp, mpfr_exp, 1, 1, f1, 0)
@@ -364,6 +370,7 @@ static const struct fun fun[] = {
  F (_ZGVnN2v_cos, Z_cos, cosl, mpfr_cos, 1, 0, d1, 1)
  F (_ZGVnN2v_exp, Z_exp, expl, mpfr_exp, 1, 0, d1, 1)
  F (_ZGVnN2v_log, Z_log, logl, mpfr_log, 1, 0, d1, 1)
+#endif
 #endif
 #endif
 #undef F
