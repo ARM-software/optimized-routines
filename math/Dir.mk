@@ -3,15 +3,18 @@
 # Copyright (c) 2019, Arm Limited.
 # SPDX-License-Identifier: MIT
 
-math-lib-srcs := $(wildcard $(srcdir)/math/*.[cS])
-math-test-srcs := \
-	$(srcdir)/math/test/mathtest.c \
-	$(srcdir)/math/test/mathbench.c \
-	$(srcdir)/math/test/ulp.c \
+S := $(srcdir)/math
+B := build/math
 
-math-test-host-srcs := $(wildcard $(srcdir)/math/test/rtest/*.[cS])
-math-includes-src := $(wildcard $(srcdir)/math/include/*.h)
-math-includes := $(math-includes-src:$(srcdir)/math/%=build/%)
+math-lib-srcs := $(wildcard $(S)/*.[cS])
+math-test-srcs := \
+	$(S)/test/mathtest.c \
+	$(S)/test/mathbench.c \
+	$(S)/test/ulp.c \
+
+math-test-host-srcs := $(wildcard $(S)/test/rtest/*.[cS])
+
+math-includes := $(patsubst $(S)/%,build/%,$(wildcard $(S)/include/*.h))
 
 math-libs := \
 	build/lib/libmathlib.so \
@@ -27,34 +30,31 @@ math-tools := \
 math-host-tools := \
 	build/bin/rtest \
 
-math-lib-base := $(basename $(math-lib-srcs))
-math-lib-objs := $(math-lib-base:$(srcdir)/%=build/%.o)
-math-test-base := $(basename $(math-test-srcs))
-math-test-objs := $(math-test-base:$(srcdir)/%=build/%.o)
-math-test-host-base := $(basename $(math-test-host-srcs))
-math-test-host-objs := $(math-test-host-base:$(srcdir)/%=build/%.o)
+math-lib-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(math-lib-srcs)))
+math-test-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(math-test-srcs)))
+math-host-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(math-test-host-srcs)))
+math-target-objs := $(math-lib-objs) $(math-test-objs)
+math-objs := $(math-target-objs) $(math-target-objs:%.o=%.os) $(math-host-objs)
 
-math-target-objs := \
-	$(math-lib-objs) \
-	$(math-test-objs) \
-
-math-objs := $(math-target-objs) $(math-test-host-objs)
+math-files := \
+	$(math-objs) \
+	$(math-libs) \
+	$(math-tools) \
+	$(math-host-tools) \
+	$(math-includes) \
 
 all-math: $(math-libs) $(math-tools) $(math-includes)
 
-TESTS = $(wildcard $(srcdir)/math/test/testcases/directed/*.tst)
-RTESTS = $(wildcard $(srcdir)/math/test/testcases/random/*.tst)
+$(math-objs): $(math-includes)
+$(math-objs): CFLAGS_ALL += $(math-cflags)
+$(B)/test/mathtest.o: CFLAGS_ALL += -fmath-errno
+$(math-host-objs): CC = $(HOST_CC)
+$(math-host-objs): CFLAGS_ALL = $(HOST_CFLAGS)
 
-$(math-target-objs) $(math-objs:%.o=%.os): $(math-includes)
-$(math-target-objs) $(math-objs:%.o=%.os): CFLAGS_ALL += $(math-cflags)
-build/math/test/mathtest.o: CFLAGS_ALL += -fmath-errno
-$(math-test-host-objs): CC = $(HOST_CC)
-$(math-test-host-objs): CFLAGS_ALL = $(HOST_CFLAGS)
-
-build/math/test/ulp.o: $(srcdir)/math/test/ulp.h
+$(B)/test/ulp.o: $(S)/test/ulp.h
 
 build/lib/libmathlib.so: $(math-lib-objs:%.o=%.os)
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -shared -o $@ $^
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -shared -o $@ $^
 
 build/lib/libmathlib.a: $(math-lib-objs)
 	rm -f $@
@@ -62,39 +62,49 @@ build/lib/libmathlib.a: $(math-lib-objs)
 	$(RANLIB) $@
 
 $(math-host-tools): HOST_LDLIBS += -lm -lmpfr -lmpc
-$(math-tools): LDLIBS += -lm
+$(math-tools): LDLIBS += $(math-ldlibs) -lm
 
-build/bin/rtest: $(math-test-host-objs)
+build/bin/rtest: $(math-host-objs)
 	$(HOST_CC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LDLIBS)
 
-build/bin/mathtest: build/math/test/mathtest.o build/lib/libmathlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
+build/bin/mathtest: $(B)/test/mathtest.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
 
-build/bin/mathbench: build/math/test/mathbench.o build/lib/libmathlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
+build/bin/mathbench: $(B)/test/mathbench.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
 
 # This is not ideal, but allows custom symbols in mathbench to get resolved.
-build/bin/mathbench_libc: build/math/test/mathbench.o build/lib/libmathlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $< $(LDLIBS) -lc build/lib/libmathlib.a -lm
+build/bin/mathbench_libc: $(B)/test/mathbench.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $< $(LDLIBS) -lc build/lib/libmathlib.a -lm
 
-build/bin/ulp: build/math/test/ulp.o build/lib/libmathlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
+build/bin/ulp: $(B)/test/ulp.o build/lib/libmathlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
 
-build/include/%.h: $(srcdir)/math/include/%.h
+build/include/%.h: $(S)/include/%.h
 	cp $< $@
 
-build/bin/%.sh: $(srcdir)/math/test/%.sh
+build/bin/%.sh: $(S)/test/%.sh
 	cp $< $@
+
+math-tests := $(wildcard $(S)/test/testcases/directed/*.tst)
+math-rtests := $(wildcard $(S)/test/testcases/random/*.tst)
 
 check-math-test: $(math-tools)
-	cat $(TESTS) | $(EMULATOR) build/bin/mathtest $(MATHTESTFLAGS)
+	cat $(math-tests) | $(EMULATOR) build/bin/mathtest $(math-testflags)
 
 check-math-rtest: $(math-host-tools) $(math-tools)
-	cat $(RTESTS) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(MATHTESTFLAGS)
+	cat $(math-rtests) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(math-testflags)
 
 check-math-ulp: $(math-tools)
-	ULPFLAGS="$(ULPFLAGS)" build/bin/runulp.sh $(EMULATOR)
+	ULPFLAGS="$(math-ulpflags)" build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp
 
-.PHONY: all-math check-math-test check-math-rtest check-math-ulp check-math
+install-math: \
+ $(math-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
+ $(math-includes:build/include/%=$(DESTDIR)$(includedir)/%)
+
+clean-math:
+	rm -f $(math-files)
+
+.PHONY: all-math check-math-test check-math-rtest check-math-ulp check-math install-math clean-math

@@ -9,30 +9,22 @@ bindir = $(prefix)/bin
 libdir = $(prefix)/lib
 includedir = $(prefix)/include
 
-# Build targets
-ALL_OBJS = $(math-objs) $(string-objs)
-ALL_INCLUDES = $(math-includes) $(string-includes)
-ALL_LIBS = $(math-libs) $(string-libs)
-ALL_TOOLS = $(math-tools) $(string-tools)
-HOST_TOOLS = $(math-host-tools)
-
 # Configure these in config.mk, do not make changes in this file.
+SUBS = math string
 HOST_CC = cc
 HOST_CFLAGS = -std=c99 -O2
 HOST_LDFLAGS =
 HOST_LDLIBS =
 EMULATOR =
+CPPFLAGS =
 CFLAGS = -std=c99 -O2
+CFLAGS_SHARED = -fPIC
+CFLAGS_ALL = -Ibuild/include $(CPPFLAGS) $(CFLAGS)
 LDFLAGS =
 LDLIBS =
-CPPFLAGS =
 AR = $(CROSS_COMPILE)ar
 RANLIB = $(CROSS_COMPILE)ranlib
 INSTALL = install
-
-CFLAGS_SHARED = -fPIC
-CFLAGS_ALL = -Ibuild/include $(CPPFLAGS) $(CFLAGS)
-LDFLAGS_ALL = $(LDFLAGS)
 
 all:
 
@@ -41,17 +33,25 @@ all:
 include $(srcdir)/math/Dir.mk
 include $(srcdir)/string/Dir.mk
 
-all: all-math all-string
+# Required targets of subproject foo:
+#   all-foo
+#   check-foo
+#   clean-foo
+#   install-foo
+# Required make variables of subproject foo:
+#   foo-files: Built files (all in build/).
+# Make variables used by subproject foo:
+#   foo-...: Variables defined in foo/Dir.mk or by config.mk.
 
-DIRS = $(dir $(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_INCLUDES))
-ALL_DIRS = $(sort $(DIRS:%/=%))
+all: $(SUBS:%=all-%)
 
-$(ALL_LIBS) $(ALL_TOOLS) $(ALL_OBJS) $(ALL_OBJS:%.o=%.os) $(ALL_INCLUDES): | $(ALL_DIRS)
-
-$(ALL_DIRS):
+ALL_FILES = $(foreach sub,$(SUBS),$($(sub)-files))
+DIRS = $(sort $(patsubst %/,%,$(dir $(ALL_FILES))))
+$(ALL_FILES): | $(DIRS)
+$(DIRS):
 	mkdir -p $@
 
-$(ALL_OBJS:%.o=%.os): CFLAGS_ALL += $(CFLAGS_SHARED)
+$(filter %.os,$(ALL_FILES)): CFLAGS_ALL += $(CFLAGS_SHARED)
 
 build/%.o: $(srcdir)/%.S
 	$(CC) $(CFLAGS_ALL) -c -o $@ $<
@@ -65,7 +65,7 @@ build/%.os: $(srcdir)/%.S
 build/%.os: $(srcdir)/%.c
 	$(CC) $(CFLAGS_ALL) -c -o $@ $<
 
-clean:
+clean: $(SUBS:%=clean-%)
 	rm -rf build
 
 distclean: clean
@@ -83,14 +83,8 @@ $(DESTDIR)$(libdir)/%: build/lib/%
 $(DESTDIR)$(includedir)/%: build/include/%
 	$(INSTALL) -m 644 -D $< $@
 
-install-tools: $(ALL_TOOLS:build/bin/%=$(DESTDIR)$(bindir)/%)
+install: $(SUBS:%=install-%)
 
-install-libs: $(ALL_LIBS:build/lib/%=$(DESTDIR)$(libdir)/%)
+check: $(SUBS:%=check-%)
 
-install-headers: $(ALL_INCLUDES:build/include/%=$(DESTDIR)$(includedir)/%)
-
-install: install-libs install-headers
-
-check: check-math check-string
-
-.PHONY: all clean distclean install install-tools install-libs install-headers check
+.PHONY: all clean distclean install check

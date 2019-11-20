@@ -1,7 +1,10 @@
 # Example config.mk
 #
-# Copyright (c) 2018, Arm Limited.
+# Copyright (c) 2018-2019, Arm Limited.
 # SPDX-License-Identifier: MIT
+
+# Subprojects to build
+SUBS = math string
 
 HOST_CC = gcc
 HOST_CFLAGS = -std=c99 -O2
@@ -19,31 +22,34 @@ CFLAGS += -g
 # Optimize the shared libraries on aarch64 assuming they fit in 1M.
 #CFLAGS_SHARED = -fPIC -mcmodel=tiny
 
-# Use if mpfr is available on the target for ulp error checking.
-#LDLIBS += -lmpfr -lgmp
-#CFLAGS += -DUSE_MPFR
-
-# Use with gcc.
-CFLAGS += -frounding-math -fexcess-precision=standard -fno-stack-protector
-CFLAGS += -ffp-contract=fast -fno-math-errno
-
-# Use with clang.
-#CFLAGS += -ffp-contract=fast
-
-# Additional CFLAGS for subprojects.
-#math-cflags =
-#string-cflags =
-
-# Disable fenv checks
-#ULPFLAGS = -q -f
-#MATHTESTFLAGS = -nostatus
-
-# Disable vector math code
-#CFLAGS += -DWANT_VMATH=0
-
 # Use for cross compilation with gcc.
 #CROSS_COMPILE = aarch64-none-linux-gnu-
 
 # Use with cross testing.
 #EMULATOR = qemu-aarch64-static
 #EMULATOR = sh -c 'scp $$1 user@host:/dir && ssh user@host /dir/"$$@"' --
+
+# Additional flags for subprojects.
+math-cflags =
+math-ldlibs =
+math-ulpflags =
+math-testflags =
+string-cflags =
+
+# Use if mpfr is available on the target for ulp error checking.
+#math-ldlibs += -lmpfr -lgmp
+#math-cflags += -DUSE_MPFR
+
+# Use with gcc.
+math-cflags += -frounding-math -fexcess-precision=standard -fno-stack-protector
+math-cflags += -ffp-contract=fast -fno-math-errno
+
+# Use with clang.
+#math-cflags += -ffp-contract=fast
+
+# Disable vector math code
+#math-cflags += -DWANT_VMATH=0
+
+# Disable fenv checks
+#math-ulpflags = -q -f
+#math-testflags = -nostatus

@@ -3,10 +3,13 @@
 # Copyright (c) 2019, Arm Limited.
 # SPDX-License-Identifier: MIT
 
-string-lib-srcs := $(wildcard $(srcdir)/string/*.[cS])
-string-includes-src := $(wildcard $(srcdir)/string/include/*.h)
-string-includes := $(string-includes-src:$(srcdir)/string/%=build/%)
-string-test-srcs := $(wildcard $(srcdir)/string/test/*.c)
+S := $(srcdir)/string
+B := build/string
+
+string-lib-srcs := $(wildcard $(S)/*.[cS])
+string-test-srcs := $(wildcard $(S)/test/*.c)
+
+string-includes := $(patsubst $(S)/%,build/%,$(wildcard $(S)/include/*.h))
 
 string-libs := \
 	build/lib/libstringlib.so \
@@ -27,35 +30,40 @@ string-tools := \
 	build/bin/test/strnlen \
 	build/bin/test/strncmp
 
-string-lib-base := $(basename $(string-lib-srcs))
-string-lib-objs := $(string-lib-base:$(srcdir)/%=build/%.o)
-string-test-base := $(basename $(string-test-srcs))
-string-test-objs := $(string-test-base:$(srcdir)/%=build/%.o)
+string-lib-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-lib-srcs)))
+string-test-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-test-srcs)))
 
 string-objs := \
 	$(string-lib-objs) \
+	$(string-lib-objs:%.o=%.os) \
 	$(string-test-objs) \
+
+string-files := \
+	$(string-objs) \
+	$(string-libs) \
+	$(string-tools) \
+	$(string-includes) \
 
 all-string: $(string-libs) $(string-tools) $(string-includes)
 
-$(string-objs) $(string-objs:%.o=%.os): $(string-includes)
-$(string-objs) $(string-objs:%.o=%.os): CFLAGS_ALL += $(string-cflags)
+$(string-objs): $(string-includes)
+$(string-objs): CFLAGS_ALL += $(string-cflags)
 
 build/lib/libstringlib.so: $(string-lib-objs:%.o=%.os)
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -shared -o $@ $^
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -shared -o $@ $^
 
 build/lib/libstringlib.a: $(string-lib-objs)
 	rm -f $@
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
-build/bin/test/%: build/string/test/%.o build/lib/libstringlib.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS_ALL) -static -o $@ $^ $(LDLIBS)
+build/bin/test/%: $(B)/test/%.o build/lib/libstringlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
 
-build/include/%.h: $(srcdir)/string/include/%.h
+build/include/%.h: $(S)/include/%.h
 	cp $< $@
 
-build/bin/%.sh: $(srcdir)/string/test/%.sh
+build/bin/%.sh: $(S)/test/%.sh
 	cp $< $@
 
 check-string: $(string-tools)
@@ -73,4 +81,11 @@ check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/strnlen
 	$(EMULATOR) build/bin/test/strncmp
 
-.PHONY: all-string check-string
+install-string: \
+ $(string-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
+ $(string-includes:build/include/%=$(DESTDIR)$(includedir)/%)
+
+clean-string:
+	rm -f $(string-files)
+
+.PHONY: all-string check-string install-string clean-string
