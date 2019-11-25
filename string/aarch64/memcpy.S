@@ -11,6 +11,8 @@
  *
  */
 
+#include "../asmdefs.h"
+
 #define dstin	x0
 #define src	x1
 #define count	x2
@@ -38,16 +40,6 @@
 #define H_h	srcend
 #define tmp1	x14
 
-#define L(l) .L ## l
-
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
 /* Copies are split into 3 main cases: small copies of up to 32 bytes,
    medium copies of 33..128 bytes which are fully unrolled. Large copies
    of more than 128 bytes align the destination and use an unrolled loop
@@ -58,7 +50,7 @@
    Overlapping large forward memmoves use a loop that copies backwards.
 */
 
-def_fn __memcpy_aarch64 p2align=6
+ENTRY (__memcpy_aarch64)
 	prfm	PLDL1KEEP, [src]
 	add	srcend, src, count
 	add	dstend, dstin, count
@@ -190,4 +182,4 @@ L(last64):
 	stp	C_l, C_h, [dstend, -16]
 	ret
 
-	.size	__memcpy_aarch64, . - __memcpy_aarch64
+END (__memcpy_aarch64)
