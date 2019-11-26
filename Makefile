@@ -30,8 +30,7 @@ all:
 
 -include config.mk
 
-include $(srcdir)/math/Dir.mk
-include $(srcdir)/string/Dir.mk
+$(foreach sub,$(SUBS),$(eval include $(srcdir)/$(sub)/Dir.mk))
 
 # Required targets of subproject foo:
 #   all-foo
