@@ -1,10 +1,12 @@
 Arm Optimized Routines
 ----------------------
 
-This repository contains implementations of math library functions
+This repository contains implementations of library functions
 provided by Arm under MIT License (See LICENSE). Contributions
 to this project are accepted, but the terms will need negotiation (so
 relicensing and copyright assignment to the FSF is possible later).
+
+Regular quarterly releases are tagged as vYY.MM (e.g. v19.11).
 
 Source code layout:
 
