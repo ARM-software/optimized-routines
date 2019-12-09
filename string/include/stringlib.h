@@ -15,7 +15,7 @@
 #if __aarch64__
 void *__memcpy_bytewise (void *__restrict, const void *__restrict, size_t);
 void *__memcpy_aarch64 (void *__restrict, const void *__restrict, size_t);
-void *__memmove_aarch64 (void *__restrict, const void *__restrict, size_t);
+void *__memmove_aarch64 (void *, const void *, size_t);
 void *__memset_aarch64 (void *, int, size_t);
 void *__memchr_aarch64 (const void *, int, size_t);
 int __memcmp_aarch64 (const void *, const void *, size_t);
@@ -28,6 +28,7 @@ size_t __strnlen_aarch64 (const char *, size_t);
 int __strncmp_aarch64 (const char *, const char *, size_t);
 #if __ARM_NEON
 void *__memcpy_aarch64_simd (void *__restrict, const void *__restrict, size_t);
+void *__memmove_aarch64_simd (void *, const void *, size_t);
 #endif
 # if __ARM_FEATURE_SVE
 void *__memchr_aarch64_sve (const void *, int, size_t);

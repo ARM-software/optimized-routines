@@ -17,6 +17,11 @@
 
 #define ENTRY(name)	ENTRY_ALIGN(name, 6)
 
+#define ENTRY_ALIAS(name)	\
+  .global name;		\
+  .type name,%function;	\
+  name:
+
 #define END(name)	\
   .cfi_endproc;		\
   .size name, .-name;

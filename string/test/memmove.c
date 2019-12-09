@@ -20,6 +20,9 @@ static const struct fun
 F(memmove)
 #if __aarch64__
 F(__memmove_aarch64)
+# if __ARM_NEON
+F(__memmove_aarch64_simd)
+# endif
 #endif
 #undef F
 	{0, 0}
