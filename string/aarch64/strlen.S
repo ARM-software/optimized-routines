@@ -10,6 +10,8 @@
  * ARMv8-a, AArch64, unaligned accesses, min page size 4k.
  */
 
+#include "../asmdefs.h"
+
 /* To test the page crossing code path more thoroughly, compile with
    -DTEST_PAGE_CROSS - this will force all calls through the slower
    entry path.  This option is not intended for production use.	 */
@@ -29,16 +31,6 @@
 #define tmp3		x6
 #define tmp4		x7
 #define zeroones	x8
-
-#define L(l) .L ## l
-
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
 
 	/* NUL detection works on the principle that (X - 1) & (~X) & 0x80
 	   (=> (X - 1) & ~(X | 0x7f)) is non-zero iff a byte is zero, and
@@ -81,7 +73,7 @@
 	   whether the first fetch, which may be misaligned, crosses a page
 	   boundary.  */
 
-def_fn __strlen_aarch64 p2align=6
+ENTRY (__strlen_aarch64)
 	and	tmp1, srcin, MIN_PAGE_SIZE - 1
 	mov	zeroones, REP8_01
 	cmp	tmp1, MIN_PAGE_SIZE - 16
@@ -211,4 +203,4 @@ L(page_cross):
 	csel	data2, data2, tmp2, eq
 	b	L(page_cross_entry)
 
-	.size	__strlen_aarch64, . - __strlen_aarch64
+END (__strlen_aarch64)

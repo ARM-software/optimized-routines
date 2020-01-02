@@ -11,13 +11,7 @@
 
  */
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
+#include "../asmdefs.h"
 
 #ifdef __ARMEB__
 #define S2LO		lsl
@@ -44,7 +38,7 @@
 #define tmp1		r4		/* Overlaps const_0  */
 #define tmp2		r5
 
-def_fn	__strlen_armv6t2 p2align=6
+ENTRY (__strlen_armv6t2)
 	pld	[srcin, #0]
 	strd	r4, r5, [sp, #-8]!
 	bic	src, srcin, #7
@@ -122,4 +116,5 @@ def_fn	__strlen_armv6t2 p2align=6
 	movne	data1a, const_m1
 	mov	const_0, #0
 	b	.Lstart_realigned
-	.size	__strlen_armv6t2, . - __strlen_armv6t2
+
+END (__strlen_armv6t2)

@@ -10,6 +10,8 @@
    is sufficiently aligned.  Use saturating arithmetic to optimize
    the compares.  */
 
+#include "../asmdefs.h"
+
 /* Build Options:
    STRCMP_NO_PRECHECK: Don't run a quick pre-check of the first
    byte in the string.  If comparing completely random strings
@@ -47,14 +49,6 @@
 #define MSB 0xff000000
 #define LSB 0x000000ff
 #endif /* not  __ARM_BIG_ENDIAN */
-
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
 
 /* Parameters and result.  */
 #define src1		r0
@@ -138,7 +132,7 @@
 	bx	lr
 	nop
 #endif
-def_fn	__strcmp_arm
+ENTRY_ALIGN (__strcmp_arm, 0)
 #if STRCMP_NO_PRECHECK == 0
 	ldrb	r2, [src1]
 	ldrb	r3, [src2]
@@ -147,7 +141,6 @@ def_fn	__strcmp_arm
 	cmpcs	r2, r3
 	bne	.Lfastpath_exit
 #endif
-	.cfi_startproc
 	strd	r4, r5, [sp, #-16]!
 	.cfi_def_cfa_offset 16
 	.cfi_offset 4, -16
@@ -475,5 +468,5 @@ def_fn	__strcmp_arm
 	.cfi_restore 7
 	sub	result, result, data2, lsr #24
 	bx	lr
-	.cfi_endproc
-	.size __strcmp, . - .Lstrcmp_start_addr
+
+END (__strcmp_arm)

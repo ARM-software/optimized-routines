@@ -17,6 +17,8 @@
 
  */
 
+#include "../asmdefs.h"
+
 	.syntax unified
 	/* This implementation requires ARM state.  */
 	.arm
@@ -118,15 +120,7 @@
 	.endm
 #endif
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
-def_fn __memcpy_arm p2align=6
+ENTRY (__memcpy_arm)
 
 	mov	dst, dstin	/* Preserve dstin, we need to return it.  */
 	cmp	count, #64
@@ -590,4 +584,4 @@ def_fn __memcpy_arm p2align=6
 	bne	.Ltail63unaligned
 	bx	lr
 
-	.size	__memcpy_arm, . - __memcpy_arm
+END (__memcpy_arm)

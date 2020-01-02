@@ -10,13 +10,7 @@
  * ARMv8-a, AArch64
  */
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
+#include "../asmdefs.h"
 
 #define REP8_01 0x0101010101010101
 #define REP8_7f 0x7f7f7f7f7f7f7f7f
@@ -51,7 +45,7 @@
 	.rep 7
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
-def_fn __strncmp_aarch64
+ENTRY_ALIGN (__strncmp_aarch64, 0)
 	cbz	limit, .Lret0
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
@@ -263,4 +257,5 @@ def_fn __strncmp_aarch64
 .Lret0:
 	mov	result, #0
 	ret
-	.size __strncmp_aarch64, . - __strncmp_aarch64
+
+END ( __strncmp_aarch64)

@@ -9,7 +9,7 @@
  * ARMv8-a, AArch64, unaligned accesses.
  */
 
-#define L(l) .L ## l
+#include "../asmdefs.h"
 
 /* Parameters and result.  */
 #define src1		x0
@@ -27,15 +27,7 @@
 #define tmp1		x7
 #define tmp2		x8
 
-        .macro def_fn f p2align=0
-        .text
-        .p2align \p2align
-        .global \f
-        .type \f, %function
-\f:
-        .endm
-
-def_fn __memcmp_aarch64 p2align=6
+ENTRY (__memcmp_aarch64)
 	subs	limit, limit, 8
 	b.lo	L(less8)
 
@@ -138,4 +130,4 @@ L(byte_loop):
 	sub	result, data1w, data2w
 	ret
 
-	.size __memcmp_aarch64, . - __memcmp_aarch64
+END (__memcmp_aarch64)

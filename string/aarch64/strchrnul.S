@@ -11,6 +11,8 @@
  * Neon Available.
  */
 
+#include "../asmdefs.h"
+
 /* Arguments and results.  */
 #define srcin		x0
 #define chrin		w1
@@ -44,15 +46,7 @@
 
 /* Locals and temporaries.  */
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
-def_fn __strchrnul_aarch64
+ENTRY (__strchrnul_aarch64)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the termination condition.  */
 	mov	wtmp2, #0x0401
@@ -119,4 +113,4 @@ def_fn __strchrnul_aarch64
 	add	result, src, tmp1, lsr #1
 	ret
 
-	.size	__strchrnul_aarch64, . - __strchrnul_aarch64
+END (__strchrnul_aarch64)

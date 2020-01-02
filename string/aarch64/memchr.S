@@ -11,6 +11,8 @@
  * Neon Available.
  */
 
+#include "../asmdefs.h"
+
 /* Arguments and results.  */
 #define srcin		x0
 #define chrin		w1
@@ -44,15 +46,7 @@
  * identify exactly which byte has matched.
  */
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
-def_fn __memchr_aarch64
+ENTRY (__memchr_aarch64)
 	/* Do not dereference srcin if no bytes to compare.  */
 	cbz	cntin, .Lzero_length
 	/*
@@ -146,4 +140,4 @@ def_fn __memchr_aarch64
 	mov	result, #0
 	ret
 
-	.size	__memchr_aarch64, . - __memchr_aarch64
+END (__memchr_aarch64)

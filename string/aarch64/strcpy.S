@@ -10,6 +10,8 @@
  * ARMv8-a, AArch64, unaligned accesses, min page size 4k.
  */
 
+#include "../asmdefs.h"
+
 /* To build as stpcpy, define BUILD_STPCPY before compiling this file.
 
    To test the page crossing code path more thoroughly, compile with
@@ -46,14 +48,6 @@
 #define STRCPY __strcpy_aarch64
 #endif
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
 	/* NUL detection works on the principle that (X - 1) & (~X) & 0x80
 	   (=> (X - 1) & ~(X | 0x7f)) is non-zero iff a byte is zero, and
 	   can be done in parallel across the entire word.  */
@@ -85,7 +79,7 @@
 
 #define MIN_PAGE_SIZE (1 << MIN_PAGE_P2)
 
-def_fn STRCPY p2align=6
+ENTRY (STRCPY)
 	/* For moderately short strings, the fastest way to do the copy is to
 	   calculate the length of the string in the same way as strlen, then
 	   essentially do a memcpy of the result.  This avoids the need for
@@ -311,4 +305,4 @@ def_fn STRCPY p2align=6
 	bic	has_nul2, tmp3, tmp4
 	b	.Lfp_gt8
 
-	.size	STRCPY, . - STRCPY
+END (STRCPY)

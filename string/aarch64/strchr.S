@@ -11,6 +11,8 @@
  * Neon Available.
  */
 
+#include "../asmdefs.h"
+
 /* Arguments and results.  */
 #define srcin		x0
 #define chrin		w1
@@ -48,15 +50,7 @@
 
 /* Locals and temporaries.  */
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
-def_fn __strchr_aarch64
+ENTRY (__strchr_aarch64)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the requested byte.  Magic constant 0x80200802 used
 	   similarly for NUL termination.  */
@@ -134,4 +128,4 @@ def_fn __strchr_aarch64
 	csel	result, result, xzr, eq
 	ret
 
-	.size	__strchr_aarch64, . - __strchr_aarch64
+END (__strchr_aarch64)

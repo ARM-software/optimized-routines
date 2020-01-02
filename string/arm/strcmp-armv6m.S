@@ -26,12 +26,7 @@
 	DoSub	\n, \label
 	.endm
 
-	.text
-	.p2align	0
-	.global	__strcmp_armv6m
-	.type	__strcmp_armv6m, %function
-__strcmp_armv6m:
-	.cfi_startproc
+ENTRY_ALIGN (__strcmp_armv6m, 4)
 	mov	r2, r0
 	push	{r4, r5, r6, lr}
 	orrs	r2, r1
@@ -114,5 +109,5 @@ __strcmp_armv6m:
 7:
 	subs	r0, r2, r3
 	pop	{r4, r5, r6, pc}
-	.cfi_endproc
-	.size	__strcmp_armv6m, . - __strcmp_armv6m
+
+END (__strcmp_armv6m)

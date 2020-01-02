@@ -10,6 +10,8 @@
  * ARMv8-a, AArch64
  */
 
+#include "../asmdefs.h"
+
 /* Arguments and results.  */
 #define srcin		x0
 #define len		x0
@@ -30,14 +32,6 @@
 #define pos		x13
 #define limit_wd	x14
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
 #define REP8_01 0x0101010101010101
 #define REP8_7f 0x7f7f7f7f7f7f7f7f
 #define REP8_80 0x8080808080808080
@@ -54,7 +48,7 @@
 	mov	len, limit
 	ret
 
-def_fn __strnlen_aarch64
+ENTRY_ALIGN (__strnlen_aarch64, 0)
 	cbz	limit, .Lhit_limit
 	mov	zeroones, #REP8_01
 	bic	src, srcin, #15
@@ -157,4 +151,5 @@ def_fn __strnlen_aarch64
 	csinv	data1, data1, xzr, le
 	csel	data2, data2, data2a, le
 	b	.Lrealigned
-	.size	__strnlen_aarch64, . - .Lstart	/* Include pre-padding in size.  */
+
+END (__strnlen_aarch64)

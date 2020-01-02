@@ -11,6 +11,7 @@
  *
  */
 
+#include "../asmdefs.h"
 
 #define dstin	x0
 #define val	x1
@@ -25,17 +26,7 @@
 #define zva_len x7
 #define zva_lenw w7
 
-#define L(l) .L ## l
-
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
-def_fn __memset_aarch64 p2align=6
+ENTRY (__memset_aarch64)
 
 	dup	v0.16B, valw
 	add	dstend, dstin, count
@@ -185,4 +176,4 @@ L(zva_other):
 4:	add	count, count, zva_len
 	b	L(tail64)
 
-	.size	__memset_aarch64, . - __memset_aarch64
+END (__memset_aarch64)

@@ -10,15 +10,7 @@
  * ARMv8-a, AArch64
  */
 
-	.macro def_fn f p2align=0
-	.text
-	.p2align \p2align
-	.global \f
-	.type \f, %function
-\f:
-	.endm
-
-#define L(label) .L ## label
+#include "../asmdefs.h"
 
 #define REP8_01 0x0101010101010101
 #define REP8_7f 0x7f7f7f7f7f7f7f7f
@@ -44,7 +36,7 @@
 #define pos		x11
 
 	/* Start of performance-critical section  -- one 64B cache line.  */
-def_fn __strcmp_aarch64 p2align=6
+ENTRY (__strcmp_aarch64)
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
 	tst	tmp1, #7
@@ -174,4 +166,5 @@ L(loop_misaligned):
 L(done):
 	sub	result, data1, data2
 	ret
-	.size   __strcmp_aarch64, .-__strcmp_aarch64
+
+END (__strcmp_aarch64)
