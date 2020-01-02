@@ -114,7 +114,7 @@ L(main_loop_entry):
 	sub	src, src, 16
 L(main_loop):
 	ldp	data1, data2, [src, 32]!
-.Lpage_cross_entry:
+L(page_cross_entry):
 	sub	tmp1, data1, zeroones
 	sub	tmp3, data2, zeroones
 	orr	tmp2, tmp1, tmp3

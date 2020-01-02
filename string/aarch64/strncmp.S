@@ -46,13 +46,13 @@
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
 ENTRY_ALIGN (__strncmp_aarch64, 0)
-	cbz	limit, .Lret0
+	cbz	limit, L(ret0)
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
 	tst	tmp1, #7
 	and	count, src1, #7
-	b.ne	.Lmisaligned8
-	cbnz	count, .Lmutual_align
+	b.ne	L(misaligned8)
+	cbnz	count, L(mutual_align)
 	/* Calculate the number of full and partial words -1.  */
 	sub	limit_wd, limit, #1	/* limit != 0, so no underflow.  */
 	lsr	limit_wd, limit_wd, #3	/* Convert to Dwords.  */
@@ -61,10 +61,10 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	   (=> (X - 1) & ~(X | 0x7f)) is non-zero iff a byte is zero, and
 	   can be done in parallel across the entire word.  */
 	/* Start of performance-critical section  -- one 64B cache line.  */
-.Lloop_aligned:
+L(loop_aligned):
 	ldr	data1, [src1], #8
 	ldr	data2, [src2], #8
-.Lstart_realigned:
+L(start_realigned):
 	subs	limit_wd, limit_wd, #1
 	sub	tmp1, data1, zeroones
 	orr	tmp2, data1, #REP8_7f
@@ -72,15 +72,15 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	csinv	endloop, diff, xzr, pl	/* Last Dword or differences.  */
 	bics	has_nul, tmp1, tmp2	/* Non-zero if NUL terminator.  */
 	ccmp	endloop, #0, #0, eq
-	b.eq	.Lloop_aligned
+	b.eq	L(loop_aligned)
 	/* End of performance-critical section  -- one 64B cache line.  */
 
 	/* Not reached the limit, must have found the end or a diff.  */
-	tbz	limit_wd, #63, .Lnot_limit
+	tbz	limit_wd, #63, L(not_limit)
 
 	/* Limit % 8 == 0 => all bytes significant.  */
 	ands	limit, limit, #7
-	b.eq	.Lnot_limit
+	b.eq	L(not_limit)
 
 	lsl	limit, limit, #3	/* Bits -> bytes.  */
 	mov	mask, #~0
@@ -95,7 +95,7 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	/* Make sure that the NUL byte is marked in the syndrome.  */
 	orr	has_nul, has_nul, mask
 
-.Lnot_limit:
+L(not_limit):
 	orr	syndrome, diff, has_nul
 
 #ifndef	__AARCH64EB__
@@ -148,7 +148,7 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	ret
 #endif
 
-.Lmutual_align:
+L(mutual_align):
 	/* Sources are mutually aligned, but are not currently at an
 	   alignment boundary.  Round down the addresses and then mask off
 	   the bytes that precede the start point.
@@ -176,56 +176,56 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	orr	data1, data1, tmp2
 	orr	data2, data2, tmp2
 	add	limit_wd, limit_wd, tmp3, lsr #3
-	b	.Lstart_realigned
+	b	L(start_realigned)
 
 	.p2align 6
 	/* Don't bother with dwords for up to 16 bytes.  */
-.Lmisaligned8:
+L(misaligned8):
 	cmp	limit, #16
-	b.hs	.Ltry_misaligned_words
+	b.hs	L(try_misaligned_words)
 
-.Lbyte_loop:
+L(byte_loop):
 	/* Perhaps we can do better than this.  */
 	ldrb	data1w, [src1], #1
 	ldrb	data2w, [src2], #1
 	subs	limit, limit, #1
 	ccmp	data1w, #1, #0, hi	/* NZCV = 0b0000.  */
 	ccmp	data1w, data2w, #0, cs	/* NZCV = 0b0000.  */
-	b.eq	.Lbyte_loop
-.Ldone:
+	b.eq	L(byte_loop)
+L(done):
 	sub	result, data1, data2
 	ret
 	/* Align the SRC1 to a dword by doing a bytewise compare and then do
 	   the dword loop.  */
-.Ltry_misaligned_words:
+L(try_misaligned_words):
 	lsr	limit_wd, limit, #3
-	cbz	count, .Ldo_misaligned
+	cbz	count, L(do_misaligned)
 
 	neg	count, count
 	and	count, count, #7
 	sub	limit, limit, count
 	lsr	limit_wd, limit, #3
 
-.Lpage_end_loop:
+L(page_end_loop):
 	ldrb	data1w, [src1], #1
 	ldrb	data2w, [src2], #1
 	cmp	data1w, #1
 	ccmp	data1w, data2w, #0, cs	/* NZCV = 0b0000.  */
-	b.ne	.Ldone
+	b.ne	L(done)
 	subs	count, count, #1
-	b.hi	.Lpage_end_loop
+	b.hi	L(page_end_loop)
 
-.Ldo_misaligned:
+L(do_misaligned):
 	/* Prepare ourselves for the next page crossing.  Unlike the aligned
 	   loop, we fetch 1 less dword because we risk crossing bounds on
 	   SRC2.  */
 	mov	count, #8
 	subs	limit_wd, limit_wd, #1
-	b.lo	.Ldone_loop
-.Lloop_misaligned:
+	b.lo	L(done_loop)
+L(loop_misaligned):
 	and	tmp2, src2, #0xff8
 	eor	tmp2, tmp2, #0xff8
-	cbz	tmp2, .Lpage_end_loop
+	cbz	tmp2, L(page_end_loop)
 
 	ldr	data1, [src1], #8
 	ldr	data2, [src2], #8
@@ -234,14 +234,14 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	eor	diff, data1, data2	/* Non-zero if differences found.  */
 	bics	has_nul, tmp1, tmp2	/* Non-zero if NUL terminator.  */
 	ccmp	diff, #0, #0, eq
-	b.ne	.Lnot_limit
+	b.ne	L(not_limit)
 	subs	limit_wd, limit_wd, #1
-	b.pl	.Lloop_misaligned
+	b.pl	L(loop_misaligned)
 
-.Ldone_loop:
+L(done_loop):
 	/* We found a difference or a NULL before the limit was reached.  */
 	and	limit, limit, #7
-	cbz	limit, .Lnot_limit
+	cbz	limit, L(not_limit)
 	/* Read the last word.  */
 	sub	src1, src1, 8
 	sub	src2, src2, 8
@@ -252,9 +252,9 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	eor	diff, data1, data2	/* Non-zero if differences found.  */
 	bics	has_nul, tmp1, tmp2	/* Non-zero if NUL terminator.  */
 	ccmp	diff, #0, #0, eq
-	b.ne	.Lnot_limit
+	b.ne	L(not_limit)
 
-.Lret0:
+L(ret0):
 	mov	result, #0
 	ret
 

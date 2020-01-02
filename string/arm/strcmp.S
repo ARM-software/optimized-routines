@@ -125,9 +125,9 @@
 
 	.text
 	.p2align	5
-.Lstrcmp_start_addr:
+L(strcmp_start_addr):
 #if STRCMP_NO_PRECHECK == 0
-.Lfastpath_exit:
+L(fastpath_exit):
 	sub	r0, r2, r3
 	bx	lr
 	nop
@@ -139,7 +139,7 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	cmp	r2, #1
 	it	cs
 	cmpcs	r2, r3
-	bne	.Lfastpath_exit
+	bne	L(fastpath_exit)
 #endif
 	strd	r4, r5, [sp, #-16]!
 	.cfi_def_cfa_offset 16
@@ -151,12 +151,12 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	.cfi_offset 7, -4
 	mvn	const_m1, #0
 	lsl	r2, tmp1, #29
-	cbz	r2, .Lloop_aligned8
+	cbz	r2, L(loop_aligned8)
 
-.Lnot_aligned:
+L(not_aligned):
 	eor	tmp1, src1, src2
 	tst	tmp1, #7
-	bne	.Lmisaligned8
+	bne	L(misaligned8)
 
 	/* Deal with mutual misalignment by aligning downwards and then
 	   masking off the unwanted loaded data to prevent a difference.  */
@@ -173,29 +173,29 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	S2HI	tmp1, const_m1, tmp2
 	orn	data1a, data1a, tmp1
 	orn	data2a, data2a, tmp1
-	beq	.Lstart_realigned8
+	beq	L(start_realigned8)
 	orn	data1b, data1b, tmp1
 	mov	data1a, const_m1
 	orn	data2b, data2b, tmp1
 	mov	data2a, const_m1
-	b	.Lstart_realigned8
+	b	L(start_realigned8)
 
 	/* Unwind the inner loop by a factor of 2, giving 16 bytes per
 	   pass.  */
 	.p2align 5,,12  /* Don't start in the tail bytes of a cache line.  */
 	.p2align 2	/* Always word aligned.  */
-.Lloop_aligned8:
+L(loop_aligned8):
 	ldrd	data1a, data1b, [src1], #16
 	ldrd	data2a, data2b, [src2], #16
-.Lstart_realigned8:
+L(start_realigned8):
 	uadd8	syndrome_b, data1a, const_m1	/* Only want GE bits,  */
 	eor	syndrome_a, data1a, data2a
 	sel	syndrome_a, syndrome_a, const_m1
-	cbnz	syndrome_a, .Ldiff_in_a
+	cbnz	syndrome_a, L(diff_in_a)
 	uadd8	syndrome_b, data1b, const_m1	/* Only want GE bits.  */
 	eor	syndrome_b, data1b, data2b
 	sel	syndrome_b, syndrome_b, const_m1
-	cbnz	syndrome_b, .Ldiff_in_b
+	cbnz	syndrome_b, L(diff_in_b)
 
 	ldrd	data1a, data1b, [src1, #-8]
 	ldrd	data2a, data2b, [src2, #-8]
@@ -207,47 +207,47 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	sel	syndrome_b, syndrome_b, const_m1
 	/* Can't use CBZ for backwards branch.  */
 	orrs	syndrome_b, syndrome_b, syndrome_a /* Only need if s_a == 0 */
-	beq	.Lloop_aligned8
+	beq	L(loop_aligned8)
 
-.Ldiff_found:
-	cbnz	syndrome_a, .Ldiff_in_a
+L(diff_found):
+	cbnz	syndrome_a, L(diff_in_a)
 
-.Ldiff_in_b:
+L(diff_in_b):
 	strcmp_epilogue_aligned syndrome_b, data1b, data2b 1
 
-.Ldiff_in_a:
+L(diff_in_a):
 	.cfi_restore_state
 	strcmp_epilogue_aligned syndrome_a, data1a, data2a 1
 
 	.cfi_restore_state
-.Lmisaligned8:
+L(misaligned8):
 	tst	tmp1, #3
-	bne	.Lmisaligned4
+	bne	L(misaligned4)
 	ands	tmp1, src1, #3
-	bne	.Lmutual_align4
+	bne	L(mutual_align4)
 
 	/* Unrolled by a factor of 2, to reduce the number of post-increment
 	   operations.  */
-.Lloop_aligned4:
+L(loop_aligned4):
 	ldr	data1, [src1], #8
 	ldr	data2, [src2], #8
-.Lstart_realigned4:
+L(start_realigned4):
 	uadd8	syndrome, data1, const_m1	/* Only need GE bits.  */
 	eor	syndrome, data1, data2
 	sel	syndrome, syndrome, const_m1
-	cbnz	syndrome, .Laligned4_done
+	cbnz	syndrome, L(aligned4_done)
 	ldr	data1, [src1, #-4]
 	ldr	data2, [src2, #-4]
 	uadd8	syndrome, data1, const_m1
 	eor	syndrome, data1, data2
 	sel	syndrome, syndrome, const_m1
 	cmp	syndrome, #0
-	beq	.Lloop_aligned4
+	beq	L(loop_aligned4)
 
-.Laligned4_done:
+L(aligned4_done):
 	strcmp_epilogue_aligned syndrome, data1, data2, 0
 
-.Lmutual_align4:
+L(mutual_align4):
 	.cfi_restore_state
 	/* Deal with mutual misalignment by aligning downwards and then
 	   masking off the unwanted loaded data to prevent a difference.  */
@@ -262,57 +262,57 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	S2HI	tmp1, const_m1, tmp1
 	orn	data1, data1, tmp1
 	orn	data2, data2, tmp1
-	b	.Lstart_realigned4
+	b	L(start_realigned4)
 
-.Lmisaligned4:
+L(misaligned4):
 	ands	tmp1, src1, #3
-	beq	.Lsrc1_aligned
+	beq	L(src1_aligned)
 	sub	src2, src2, tmp1
 	bic	src1, src1, #3
 	lsls	tmp1, tmp1, #31
 	ldr	data1, [src1], #4
-	beq	.Laligned_m2
-	bcs	.Laligned_m1
+	beq	L(aligned_m2)
+	bcs	L(aligned_m1)
 
 #if STRCMP_NO_PRECHECK == 1
 	ldrb	data2, [src2, #1]
 	uxtb	tmp1, data1, ror #BYTE1_OFFSET
 	subs	tmp1, tmp1, data2
-	bne	.Lmisaligned_exit
-	cbz	data2, .Lmisaligned_exit
+	bne	L(misaligned_exit)
+	cbz	data2, L(misaligned_exit)
 
-.Laligned_m2:
+L(aligned_m2):
 	ldrb	data2, [src2, #2]
 	uxtb	tmp1, data1, ror #BYTE2_OFFSET
 	subs	tmp1, tmp1, data2
-	bne	.Lmisaligned_exit
-	cbz	data2, .Lmisaligned_exit
+	bne	L(misaligned_exit)
+	cbz	data2, L(misaligned_exit)
 
-.Laligned_m1:
+L(aligned_m1):
 	ldrb	data2, [src2, #3]
 	uxtb	tmp1, data1, ror #BYTE3_OFFSET
 	subs	tmp1, tmp1, data2
-	bne	.Lmisaligned_exit
+	bne	L(misaligned_exit)
 	add	src2, src2, #4
-	cbnz	data2, .Lsrc1_aligned
+	cbnz	data2, L(src1_aligned)
 #else  /* STRCMP_NO_PRECHECK */
 	/* If we've done the pre-check, then we don't need to check the
 	   first byte again here.  */
 	ldrb	data2, [src2, #2]
 	uxtb	tmp1, data1, ror #BYTE2_OFFSET
 	subs	tmp1, tmp1, data2
-	bne	.Lmisaligned_exit
-	cbz	data2, .Lmisaligned_exit
+	bne	L(misaligned_exit)
+	cbz	data2, L(misaligned_exit)
 
-.Laligned_m2:
+L(aligned_m2):
 	ldrb	data2, [src2, #3]
 	uxtb	tmp1, data1, ror #BYTE3_OFFSET
 	subs	tmp1, tmp1, data2
-	bne	.Lmisaligned_exit
-	cbnz	data2, .Laligned_m1
+	bne	L(misaligned_exit)
+	cbnz	data2, L(aligned_m1)
 #endif
 
-.Lmisaligned_exit:
+L(misaligned_exit):
 	.cfi_remember_state
 	mov	result, tmp1
 	ldr	r4, [sp], #16
@@ -320,10 +320,10 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	bx	lr
 
 #if STRCMP_NO_PRECHECK == 0
-.Laligned_m1:
+L(aligned_m1):
 	add	src2, src2, #4
 #endif
-.Lsrc1_aligned:
+L(src1_aligned):
 	.cfi_restore_state
 	/* src1 is word aligned, but src2 has no common alignment
 	   with it.  */
@@ -332,11 +332,11 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 
 	bic	src2, src2, #3
 	ldr	data2, [src2], #4
-	bhi	.Loverlap1		/* C=1, Z=0 => src2[1:0] = 0b11.  */
-	bcs	.Loverlap2		/* C=1, Z=1 => src2[1:0] = 0b10.  */
+	bhi	L(overlap1)		/* C=1, Z=0 => src2[1:0] = 0b11.  */
+	bcs	L(overlap2)		/* C=1, Z=1 => src2[1:0] = 0b10.  */
 
 	/* (overlap3) C=0, Z=0 => src2[1:0] = 0b01.  */
-.Loverlap3:
+L(overlap3):
 	bic	tmp1, data1, #MSB
 	uadd8	syndrome, data1, const_m1
 	eors	syndrome, tmp1, data2, S2LO #8
@@ -348,14 +348,14 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	cmp	tmp1, data2, S2HI #24
 	bne	6f
 	ldr	data1, [src1], #4
-	b	.Loverlap3
+	b	L(overlap3)
 4:
 	S2LO	data2, data2, #8
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 
 5:
 	bics	syndrome, syndrome, #MSB
-	bne	.Lstrcmp_done_equal
+	bne	L(strcmp_done_equal)
 
 	/* We can only get here if the MSB of data1 contains 0, so
 	   fast-path the exit.  */
@@ -374,10 +374,10 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	.cfi_restore_state
 	S2LO	data1, data1, #24
 	and	data2, data2, #LSB
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 
 	.p2align 5,,12	/* Ensure at least 3 instructions in cache line.  */
-.Loverlap2:
+L(overlap2):
 	and	tmp1, data1, const_m1, S2LO #16
 	uadd8	syndrome, data1, const_m1
 	eors	syndrome, tmp1, data2, S2LO #16
@@ -389,28 +389,28 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	cmp	tmp1, data2, S2HI #16
 	bne	6f
 	ldr	data1, [src1], #4
-	b	.Loverlap2
+	b	L(overlap2)
 4:
 	S2LO	data2, data2, #16
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 5:
 	ands	syndrome, syndrome, const_m1, S2LO #16
-	bne	.Lstrcmp_done_equal
+	bne	L(strcmp_done_equal)
 
 	ldrh	data2, [src2]
 	S2LO	data1, data1, #16
 #ifdef __ARM_BIG_ENDIAN
 	lsl	data2, data2, #16
 #endif
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 
 6:
 	S2LO	data1, data1, #16
 	and	data2, data2, const_m1, S2LO #16
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 
 	.p2align 5,,12	/* Ensure at least 3 instructions in cache line.  */
-.Loverlap1:
+L(overlap1):
 	and	tmp1, data1, #LSB
 	uadd8	syndrome, data1, const_m1
 	eors	syndrome, tmp1, data2, S2LO #24
@@ -422,20 +422,20 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	cmp	tmp1, data2, S2HI #8
 	bne	6f
 	ldr	data1, [src1], #4
-	b	.Loverlap1
+	b	L(overlap1)
 4:
 	S2LO	data2, data2, #24
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 5:
 	tst	syndrome, #LSB
-	bne	.Lstrcmp_done_equal
+	bne	L(strcmp_done_equal)
 	ldr	data2, [src2]
 6:
 	S2LO	data1, data1, #8
 	bic	data2, data2, #MSB
-	b	.Lstrcmp_tail
+	b	L(strcmp_tail)
 
-.Lstrcmp_done_equal:
+L(strcmp_done_equal):
 	mov	result, #0
 	.cfi_remember_state
 	ldrd	r4, r5, [sp], #16
@@ -446,7 +446,7 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	.cfi_restore 7
 	bx	lr
 
-.Lstrcmp_tail:
+L(strcmp_tail):
 	.cfi_restore_state
 #ifndef __ARM_BIG_ENDIAN
 	rev	data1, data1

@@ -99,9 +99,9 @@ ENTRY (STRCPY)
 	   srcin + 15 causes bit[MIN_PAGE_P2] to change value.  A 16-byte
 	   aligned string will never fail the page align check, so will
 	   always take the fast path.  */
-	b.gt	.Lpage_cross
+	b.gt	L(page_cross)
 
-.Lpage_cross_ok:
+L(page_cross_ok):
 	ldp	data1, data2, [srcin]
 #ifdef __AARCH64EB__
 	/* Because we expect the end to be found within 16 characters
@@ -113,7 +113,7 @@ ENTRY (STRCPY)
 	sub	tmp1, tmp2, zeroones
 	orr	tmp2, tmp2, #REP8_7f
 	bics	has_nul1, tmp1, tmp2
-	b.ne	.Lfp_le8
+	b.ne	L(fp_le8)
 	rev	tmp4, data2
 	sub	tmp3, tmp4, zeroones
 	orr	tmp4, tmp4, #REP8_7f
@@ -121,17 +121,17 @@ ENTRY (STRCPY)
 	sub	tmp1, data1, zeroones
 	orr	tmp2, data1, #REP8_7f
 	bics	has_nul1, tmp1, tmp2
-	b.ne	.Lfp_le8
+	b.ne	L(fp_le8)
 	sub	tmp3, data2, zeroones
 	orr	tmp4, data2, #REP8_7f
 #endif
 	bics	has_nul2, tmp3, tmp4
-	b.eq	.Lbulk_entry
+	b.eq	L(bulk_entry)
 
 	/* The string is short (<=16 bytes).  We don't know exactly how
 	   short though, yet.  Work out the exact length so that we can
 	   quickly select the optimal copy strategy.  */
-.Lfp_gt8:
+L(fp_gt8):
 	rev	has_nul2, has_nul2
 	clz	pos, has_nul2
 	mov	tmp2, #56
@@ -149,12 +149,12 @@ ENTRY (STRCPY)
 #endif
 	ret
 
-.Lfp_le8:
+L(fp_le8):
 	rev	has_nul1, has_nul1
 	clz	pos, has_nul1
 	add	dst, dstin, pos, lsr #3		/* Bits to bytes.  */
 	subs	tmp2, pos, #24			/* Pos in bits. */
-	b.lt	.Lfp_lt4
+	b.lt	L(fp_lt4)
 #ifdef __AARCH64EB__
 	mov	tmp2, #56
 	sub	pos, tmp2, pos
@@ -170,15 +170,15 @@ ENTRY (STRCPY)
 	mov	dstin, dst
 #endif
 	ret
-.Lfp_lt4:
-	cbz	pos, .Lfp_lt2
+L(fp_lt4):
+	cbz	pos, L(fp_lt2)
 	/* 2->3 bytes to copy.  */
 #ifdef __AARCH64EB__
 	lsr	data1, data1, #48
 #endif
 	strh	data1w, [dstin]
 	/* Fall-through, one byte (max) to go.  */
-.Lfp_lt2:
+L(fp_lt2):
 	/* Null-terminated string.  Last character must be zero!  */
 	strb	wzr, [dst]
 #ifdef BUILD_STPCPY
@@ -189,20 +189,20 @@ ENTRY (STRCPY)
 	.p2align 6
 	/* Aligning here ensures that the entry code and main loop all lies
 	   within one 64-byte cache line.  */
-.Lbulk_entry:
+L(bulk_entry):
 	sub	to_align, to_align, #16
 	stp	data1, data2, [dstin]
 	sub	src, srcin, to_align
 	sub	dst, dstin, to_align
-	b	.Lentry_no_page_cross
+	b	L(entry_no_page_cross)
 
 	/* The inner loop deals with two Dwords at a time.  This has a
 	   slightly higher start-up cost, but we should win quite quickly,
 	   especially on cores with a high number of issue slots per
 	   cycle, as we get much better parallelism out of the operations.  */
-.Lmain_loop:
+L(main_loop):
 	stp	data1, data2, [dst], #16
-.Lentry_no_page_cross:
+L(entry_no_page_cross):
 	ldp	data1, data2, [src], #16
 	sub	tmp1, data1, zeroones
 	orr	tmp2, data1, #REP8_7f
@@ -211,7 +211,7 @@ ENTRY (STRCPY)
 	bic	has_nul1, tmp1, tmp2
 	bics	has_nul2, tmp3, tmp4
 	ccmp	has_nul1, #0, #0, eq	/* NZCV = 0000  */
-	b.eq	.Lmain_loop
+	b.eq	L(main_loop)
 
 	/* Since we know we are copying at least 16 bytes, the fastest way
 	   to deal with the tail is to determine the location of the
@@ -244,7 +244,7 @@ ENTRY (STRCPY)
 #endif
 	ret
 
-.Lpage_cross:
+L(page_cross):
 	bic	src, srcin, #15
 	/* Start by loading two words at [srcin & ~15], then forcing the
 	   bytes that precede srcin to 0xff.  This means they never look
@@ -270,7 +270,7 @@ ENTRY (STRCPY)
 	bic	has_nul1, tmp1, tmp2
 	bics	has_nul2, tmp3, tmp4
 	ccmp	has_nul1, #0, #0, eq	/* NZCV = 0000  */
-	b.eq	.Lpage_cross_ok
+	b.eq	L(page_cross_ok)
 	/* We now need to make data1 and data2 look like they've been
 	   loaded directly from srcin.  Do a rotate on the 128-bit value.  */
 	lsl	tmp1, to_align, #3	/* Bytes->bits.  */
@@ -301,8 +301,8 @@ ENTRY (STRCPY)
 	orr	tmp4, data2, #REP8_7f
 #endif
 	bic	has_nul1, tmp1, tmp2
-	cbnz	has_nul1, .Lfp_le8
+	cbnz	has_nul1, L(fp_le8)
 	bic	has_nul2, tmp3, tmp4
-	b	.Lfp_gt8
+	b	L(fp_gt8)
 
 END (STRCPY)

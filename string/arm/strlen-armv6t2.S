@@ -45,20 +45,20 @@ ENTRY (__strlen_armv6t2)
 	mvn	const_m1, #0
 	ands	tmp1, srcin, #7		/* (8 - bytes) to alignment.  */
 	pld	[src, #32]
-	bne.w	.Lmisaligned8
+	bne.w	L(misaligned8)
 	mov	const_0, #0
 	mov	result, #-8
-.Lloop_aligned:
+L(loop_aligned):
 	/* Bytes 0-7.  */
 	ldrd	data1a, data1b, [src]
 	pld	[src, #64]
 	add	result, result, #8
-.Lstart_realigned:
+L(start_realigned):
 	uadd8	data1a, data1a, const_m1	/* Saturating GE<0:3> set.  */
 	sel	data1a, const_0, const_m1	/* Select based on GE<0:3>.  */
 	uadd8	data1b, data1b, const_m1
 	sel	data1b, data1a, const_m1	/* Only used if d1a == 0.  */
-	cbnz	data1b, .Lnull_found
+	cbnz	data1b, L(null_found)
 
 	/* Bytes 8-15.  */
 	ldrd	data1a, data1b, [src, #8]
@@ -67,7 +67,7 @@ ENTRY (__strlen_armv6t2)
 	sel	data1a, const_0, const_m1	/* Select based on GE<0:3>.  */
 	uadd8	data1b, data1b, const_m1
 	sel	data1b, data1a, const_m1	/* Only used if d1a == 0.  */
-	cbnz	data1b, .Lnull_found
+	cbnz	data1b, L(null_found)
 
 	/* Bytes 16-23.  */
 	ldrd	data1a, data1b, [src, #16]
@@ -76,7 +76,7 @@ ENTRY (__strlen_armv6t2)
 	sel	data1a, const_0, const_m1	/* Select based on GE<0:3>.  */
 	uadd8	data1b, data1b, const_m1
 	sel	data1b, data1a, const_m1	/* Only used if d1a == 0.  */
-	cbnz	data1b, .Lnull_found
+	cbnz	data1b, L(null_found)
 
 	/* Bytes 24-31.  */
 	ldrd	data1a, data1b, [src, #24]
@@ -87,9 +87,9 @@ ENTRY (__strlen_armv6t2)
 	uadd8	data1b, data1b, const_m1
 	sel	data1b, data1a, const_m1	/* Only used if d1a == 0.  */
 	cmp	data1b, #0
-	beq	.Lloop_aligned
+	beq	L(loop_aligned)
 
-.Lnull_found:
+L(null_found):
 	cmp	data1a, #0
 	itt	eq
 	addeq	result, result, #4
@@ -102,7 +102,7 @@ ENTRY (__strlen_armv6t2)
 	add	result, result, data1a, lsr #3	/* Bits -> Bytes.  */
 	bx	lr
 
-.Lmisaligned8:
+L(misaligned8):
 	ldrd	data1a, data1b, [src]
 	and	tmp2, tmp1, #3
 	rsb	result, tmp1, #0
@@ -115,6 +115,6 @@ ENTRY (__strlen_armv6t2)
 	ornne	data1b, data1b, tmp2
 	movne	data1a, const_m1
 	mov	const_0, #0
-	b	.Lstart_realigned
+	b	L(start_realigned)
 
 END (__strlen_armv6t2)

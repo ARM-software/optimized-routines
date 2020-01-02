@@ -124,11 +124,11 @@ ENTRY (__memcpy_arm)
 
 	mov	dst, dstin	/* Preserve dstin, we need to return it.  */
 	cmp	count, #64
-	bge	.Lcpy_not_short
+	bge	L(cpy_not_short)
 	/* Deal with small copies quickly by dropping straight into the
 	   exit block.  */
 
-.Ltail63unaligned:
+L(tail63unaligned):
 #ifdef USE_NEON
 	and	tmp1, count, #0x38
 	rsb	tmp1, tmp1, #(56 - PC_OFFSET + INSN_SIZE)
@@ -207,13 +207,13 @@ ENTRY (__memcpy_arm)
 	strbne	src, [dst]
 	bx	lr
 
-.Lcpy_not_short:
+L(cpy_not_short):
 	/* At least 64 bytes to copy, but don't know the alignment yet.  */
 	str	tmp2, [sp, #-FRAME_SIZE]!
 	and	tmp2, src, #7
 	and	tmp1, dst, #7
 	cmp	tmp1, tmp2
-	bne	.Lcpy_notaligned
+	bne	L(cpy_notaligned)
 
 #ifdef USE_VFP
 	/* Magic dust alert!  Force VFP on Cortex-A9.  Experiments show
@@ -239,12 +239,12 @@ ENTRY (__memcpy_arm)
 
 1:
 	subs	tmp2, count, #64	/* Use tmp2 for count.  */
-	blt	.Ltail63aligned
+	blt	L(tail63aligned)
 
 	cmp	tmp2, #512
-	bge	.Lcpy_body_long
+	bge	L(cpy_body_long)
 
-.Lcpy_body_medium:			/* Count in tmp2.  */
+L(cpy_body_medium):			/* Count in tmp2.  */
 #ifdef USE_VFP
 1:
 	vldr	d0, [src, #0]
@@ -268,9 +268,9 @@ ENTRY (__memcpy_arm)
 	add	dst, dst, #64
 	bge	1b
 	tst	tmp2, #0x3f
-	beq	.Ldone
+	beq	L(done)
 
-.Ltail63aligned:			/* Count in tmp2.  */
+L(tail63aligned):			/* Count in tmp2.  */
 	and	tmp1, tmp2, #0x38
 	add	dst, dst, tmp1
 	add	src, src, tmp1
@@ -321,7 +321,7 @@ ENTRY (__memcpy_arm)
 	add	src, src, #8
 	add	dst, dst, #8
 
-.Ltail63aligned:			/* Count in tmp2.  */
+L(tail63aligned):			/* Count in tmp2.  */
 	/* Copy up to 7 d-words of data.  Similar to Ltail63unaligned, but
 	   we know that the src and dest are 64-bit aligned so we can use
 	   LDRD/STRD to improve efficiency.  */
@@ -358,11 +358,11 @@ ENTRY (__memcpy_arm)
 	strhcs	tmp1, [dst], #2
 	strbne	tmp2, [dst]
 
-.Ldone:
+L(done):
 	ldr	tmp2, [sp], #FRAME_SIZE
 	bx	lr
 
-.Lcpy_body_long:			/* Count in tmp2.  */
+L(cpy_body_long):			/* Count in tmp2.  */
 
 	/* Long copy.  We know that there's at least (prefetch_lines * 64)
 	   bytes to go.  */
@@ -419,7 +419,7 @@ ENTRY (__memcpy_arm)
 	vstr	d2, [dst, #64 + 56]
 	add	dst, dst, #128
 	add	tmp2, tmp2, #prefetch_lines * 64
-	b	.Lcpy_body_medium
+	b	L(cpy_body_medium)
 #else
 	/* Long copy.  Use an SMS style loop to maximize the I/O
 	   bandwidth of the core.  We don't have enough spare registers
@@ -473,12 +473,12 @@ ENTRY (__memcpy_arm)
 	ldrd	D_l, D_h, [sp, #24]
 	add	dst, dst, #72
 	tst	tmp2, #0x3f
-	bne	.Ltail63aligned
+	bne	L(tail63aligned)
 	ldr	tmp2, [sp], #FRAME_SIZE
 	bx	lr
 #endif
 
-.Lcpy_notaligned:
+L(cpy_notaligned):
 	pld	[src]
 	pld	[src, #64]
 	/* There's at least 64 bytes to copy, but there is no mutual
@@ -500,7 +500,7 @@ ENTRY (__memcpy_arm)
 	pld	[src, #(3 * 64)]
 	subs	count, count, #64
 	ldrmi	tmp2, [sp], #FRAME_SIZE
-	bmi	.Ltail63unaligned
+	bmi	L(tail63unaligned)
 	pld	[src, #(4 * 64)]
 
 #ifdef USE_NEON
@@ -581,7 +581,7 @@ ENTRY (__memcpy_arm)
 	ands	count, tmp2, #0x3f
 #endif
 	ldr	tmp2, [sp], #FRAME_SIZE
-	bne	.Ltail63unaligned
+	bne	L(tail63unaligned)
 	bx	lr
 
 END (__memcpy_arm)
