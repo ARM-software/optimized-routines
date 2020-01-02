@@ -3,8 +3,10 @@ Arm Optimized Routines
 
 This repository contains implementations of library functions
 provided by Arm under MIT License (See LICENSE). Contributions
-to this project are accepted, but the terms will need negotiation (so
-relicensing and copyright assignment to the FSF is possible later).
+to this project are accepted, but Contributors have to sign an
+Assignment Agreement, please follow the instructions in
+contributor-agreement.pdf. This is needed so upstreaming code
+to projects that require copyright assignment is possible.
 
 Regular quarterly releases are tagged as vYY.MM (e.g. v19.11).
 
