@@ -20,6 +20,7 @@ static const struct fun
 #define F(x) {#x, x},
 F(strrchr)
 #if __aarch64__
+F(__strrchr_aarch64)
 # if __ARM_FEATURE_SVE
 F(__strrchr_aarch64_sve)
 # endif
