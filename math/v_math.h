@@ -249,6 +249,11 @@ v_call2_f32 (f32_t (*f) (f32_t, f32_t), v_f32_t x1, v_f32_t x2, v_f32_t y,
   return f (x1, x2);
 }
 
+static inline int
+v_lanes64 (void)
+{
+  return 1;
+}
 static inline v_f64_t
 v_f64 (f64_t x)
 {
@@ -263,6 +268,16 @@ static inline v_s64_t
 v_s64 (s64_t x)
 {
   return x;
+}
+static inline f64_t
+v_get_f64 (v_f64_t x, int i)
+{
+  return x;
+}
+static inline void
+v_set_f64 (v_f64_t *x, int i, f64_t v)
+{
+  *x = v;
 }
 /* true if any elements of a v_cond result is non-zero.  */
 static inline int
@@ -506,6 +521,11 @@ v_call2_f32 (f32_t (*f) (f32_t, f32_t), v_f32_t x1, v_f32_t x2, v_f32_t y,
 	     p[2] ? f (x1[2], x2[2]) : y[2], p[3] ? f (x1[3], x2[3]) : y[3]};
 }
 
+static inline int
+v_lanes64 (void)
+{
+  return 2;
+}
 static inline v_f64_t
 v_f64 (f64_t x)
 {
@@ -520,6 +540,16 @@ static inline v_s64_t
 v_s64 (s64_t x)
 {
   return (v_s64_t){x, x};
+}
+static inline f64_t
+v_get_f64 (v_f64_t x, int i)
+{
+  return x[i];
+}
+static inline void
+v_set_f64 (v_f64_t *x, int i, f64_t v)
+{
+  (*x)[i] = v;
 }
 /* true if any elements of a v_cond result is non-zero.  */
 static inline int

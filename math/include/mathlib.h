@@ -36,6 +36,7 @@ double __s_sin (double);
 double __s_cos (double);
 double __s_exp (double);
 double __s_log (double);
+double __s_pow (double, double);
 
 #if __aarch64__
 #if __GNUC__ >= 5
@@ -61,6 +62,7 @@ __f64x2_t __v_sin (__f64x2_t);
 __f64x2_t __v_cos (__f64x2_t);
 __f64x2_t __v_exp (__f64x2_t);
 __f64x2_t __v_log (__f64x2_t);
+__f64x2_t __v_pow (__f64x2_t, __f64x2_t);
 
 #if __GNUC__ >= 9 || __clang_major__ >= 8
 #define __vpcs __attribute__((__aarch64_vector_pcs__))
@@ -78,6 +80,7 @@ __vpcs __f64x2_t __vn_sin (__f64x2_t);
 __vpcs __f64x2_t __vn_cos (__f64x2_t);
 __vpcs __f64x2_t __vn_exp (__f64x2_t);
 __vpcs __f64x2_t __vn_log (__f64x2_t);
+__vpcs __f64x2_t __vn_pow (__f64x2_t, __f64x2_t);
 
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_sinf (__f32x4_t);
@@ -90,6 +93,7 @@ __vpcs __f64x2_t _ZGVnN2v_sin (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_cos (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_exp (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_log (__f64x2_t);
+__vpcs __f64x2_t _ZGVnN2vv_pow (__f64x2_t, __f64x2_t);
 #endif
 #endif
 

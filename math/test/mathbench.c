@@ -128,6 +128,18 @@ xy_Z_powf (v_float x)
 {
   return _ZGVnN4vv_powf (x, x);
 }
+
+__vpcs static v_double
+xy__vn_pow (v_double x)
+{
+  return __vn_pow (x, x);
+}
+
+__vpcs static v_double
+xy_Z_pow (v_double x)
+{
+  return _ZGVnN2vv_pow (x, x);
+}
 #endif
 
 static v_float
@@ -135,12 +147,24 @@ xy__v_powf (v_float x)
 {
   return __v_powf (x, x);
 }
+
+static v_double
+xy__v_pow (v_double x)
+{
+  return __v_pow (x, x);
+}
 #endif
 
 static float
 xy__s_powf (float x)
 {
   return __s_powf (x, x);
+}
+
+static double
+xy__s_pow (double x)
+{
+  return __s_pow (x, x);
 }
 #endif
 
@@ -256,6 +280,7 @@ D (__s_sin, -3.1, 3.1)
 D (__s_cos, -3.1, 3.1)
 D (__s_exp, -9.9, 9.9)
 D (__s_log, 0.01, 11.1)
+{"__s_pow", 'd', 0, 0.01, 11.1, {.d = xy__s_pow}},
 F (__s_expf, -9.9, 9.9)
 F (__s_expf_1u, -9.9, 9.9)
 F (__s_exp2f, -9.9, 9.9)
@@ -270,6 +295,7 @@ VD (__v_sin, -3.1, 3.1)
 VD (__v_cos, -3.1, 3.1)
 VD (__v_exp, -9.9, 9.9)
 VD (__v_log, 0.01, 11.1)
+{"__v_pow", 'd', 'v', 0.01, 11.1, {.vd = xy__v_pow}},
 VF (__v_dummyf, 1.0, 2.0)
 VF (__v_expf, -9.9, 9.9)
 VF (__v_expf_1u, -9.9, 9.9)
@@ -285,6 +311,8 @@ VND (__vn_exp, -9.9, 9.9)
 VND (_ZGVnN2v_exp, -9.9, 9.9)
 VND (__vn_log, 0.01, 11.1)
 VND (_ZGVnN2v_log, 0.01, 11.1)
+{"__vn_pow", 'd', 'n', 0.01, 11.1, {.vnd = xy__vn_pow}},
+{"_ZGVnN2vv_pow", 'd', 'n', 0.01, 11.1, {.vnd = xy_Z_pow}},
 VND (__vn_sin, -3.1, 3.1)
 VND (_ZGVnN2v_sin, -3.1, 3.1)
 VND (__vn_cos, -3.1, 3.1)

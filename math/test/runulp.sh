@@ -110,6 +110,15 @@ range_exp='
  -633.3     -777.3     10000
 '
 
+range_pow='
+ 0x1p-1   0x1p1  x  0x1p-10 0x1p10   50000
+ 0x1p-1   0x1p1  x -0x1p-10 -0x1p10  50000
+ 0x1p-500 0x1p500  x  0x1p-1 0x1p1   50000
+ 0x1p-500 0x1p500  x  -0x1p-1 -0x1p1 50000
+ 0x1.ep-1 0x1.1p0 x  0x1p8 0x1p16    50000
+ 0x1.ep-1 0x1.1p0 x -0x1p8 -0x1p16   50000
+'
+
 range_expf='
   0    0xffff0000    10000
   0x1p-14   0x1p8    500000
@@ -143,6 +152,7 @@ range_powf='
 
 # error limits
 L_exp=1.9
+L_pow=0.05
 L_expf=1.49
 L_expf_1u=0.4
 L_exp2f=1.49
@@ -172,6 +182,11 @@ exp  __s_exp       $runs
 exp  __v_exp       $runv
 exp  __vn_exp      $runvn
 exp  _ZGVnN2v_exp  $runvn
+
+pow __s_pow       $runs
+pow __v_pow       $runv
+pow __vn_pow      $runvn
+pow _ZGVnN2vv_pow $runvn
 
 expf __s_expf      $runs
 expf __v_expf      $runv
