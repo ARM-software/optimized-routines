@@ -45,6 +45,16 @@ t exp2 -0x1p-6    -0x1p6     40000
 t exp2  633.3      733.3     10000
 t exp2 -633.3     -777.3     10000
 
+L=0.02
+t log  0 0xffff000000000000 10000
+t log  0x1p-4    0x1p4      40000
+t log  0         inf        40000
+
+L=0.05
+t log2  0 0xffff000000000000 10000
+t log2  0x1p-4    0x1p4      40000
+t log2  0         inf        40000
+
 L=0.05
 t pow  0.5  2.0  x  0  inf 20000
 t pow -0.5 -2.0  x  0  inf 20000
@@ -72,6 +82,16 @@ t exp2f  0    0xffff0000   10000
 t exp2f  0x1p-14   0x1p8   50000
 t exp2f -0x1p-14  -0x1p8   50000
 
+L=0.32
+t logf  0    0xffff0000    10000
+t logf  0x1p-4    0x1p4    50000
+t logf  0         inf      50000
+
+L=0.26
+t log2f  0    0xffff0000   10000
+t log2f  0x1p-4    0x1p4   50000
+t log2f  0         inf     50000
+
 L=0.06
 t sinf  0    0xffff0000    10000
 t sinf  0x1p-14  0x1p54    50000
@@ -81,6 +101,16 @@ L=0.06
 t cosf  0    0xffff0000    10000
 t cosf  0x1p-14  0x1p54    50000
 t cosf -0x1p-14 -0x1p54    50000
+
+L=0.06
+t sincosf_sinf  0    0xffff0000    10000
+t sincosf_sinf  0x1p-14  0x1p54    50000
+t sincosf_sinf -0x1p-14 -0x1p54    50000
+
+L=0.06
+t sincosf_cosf  0    0xffff0000    10000
+t sincosf_cosf  0x1p-14  0x1p54    50000
+t sincosf_cosf -0x1p-14 -0x1p54    50000
 
 L=0.4
 t powf  0x1p-1   0x1p1  x  0x1p-7 0x1p7   50000
@@ -110,6 +140,12 @@ range_exp='
  -633.3     -777.3     10000
 '
 
+range_log='
+  0 0xffff000000000000 10000
+  0x1p-4     0x1p4     400000
+  0          inf       400000
+'
+
 range_pow='
  0x1p-1   0x1p1  x  0x1p-10 0x1p10   50000
  0x1p-1   0x1p1  x -0x1p-10 -0x1p10  50000
@@ -118,6 +154,13 @@ range_pow='
  0x1.ep-1 0x1.1p0 x  0x1p8 0x1p16    50000
  0x1.ep-1 0x1.1p0 x -0x1p8 -0x1p16   50000
 '
+
+range_sin='
+  0 0xffff000000000000 10000
+  0x1p-4     0x1p4     400000
+ -0x1p-23    0x1p23    400000
+'
+range_cos="$range_sin"
 
 range_expf='
   0    0xffff0000    10000
@@ -152,7 +195,10 @@ range_powf='
 
 # error limits
 L_exp=1.9
+L_log=1.2
 L_pow=0.05
+L_sin=3.0
+L_cos=3.0
 L_expf=1.49
 L_expf_1u=0.4
 L_exp2f=1.49
@@ -183,10 +229,25 @@ exp  __v_exp       $runv
 exp  __vn_exp      $runvn
 exp  _ZGVnN2v_exp  $runvn
 
+log  __s_log       $runs
+log  __v_log       $runv
+log  __vn_log      $runvn
+log  _ZGVnN2v_log  $runvn
+
 pow __s_pow       $runs
 pow __v_pow       $runv
 pow __vn_pow      $runvn
 pow _ZGVnN2vv_pow $runvn
+
+sin __s_sin       $runs
+sin __v_sin       $runv
+sin __vn_sin      $runvn
+sin _ZGVnN2v_sin  $runvn
+
+cos __s_cos       $runs
+cos __v_cos       $runv
+cos __vn_cos      $runvn
+cos _ZGVnN2v_cos  $runvn
 
 expf __s_expf      $runs
 expf __v_expf      $runv

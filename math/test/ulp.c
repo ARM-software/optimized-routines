@@ -214,6 +214,16 @@ struct conf
   double errlim;
 };
 
+/* Wrappers for sincos.  */
+static float sincosf_sinf(float x) {(void)cosf(x); return sinf(x);}
+static float sincosf_cosf(float x) {(void)sinf(x); return cosf(x);}
+static double sincos_sin(double x) {(void)cos(x); return sin(x);}
+static double sincos_cos(double x) {(void)sin(x); return cos(x);}
+#if USE_MPFR
+static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_cos(y,x,r); return mpfr_sin(y,x,r); }
+static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,x,r); return mpfr_cos(y,x,r); }
+#endif
+
 /* A bit of a hack: call vector functions twice with the same
    input in lane 0 but a different value in other lanes: once
    with an in-range value and then with a special case value.  */
@@ -314,6 +324,8 @@ static const struct fun fun[] = {
 #define D2(x) F (x, x, x##l, mpfr_##x, 2, 0, d2, 0)
  F1 (sin)
  F1 (cos)
+ F (sincosf_sinf, sincosf_sinf, sincos_sin, sincos_mpfr_sin, 1, 1, f1, 0)
+ F (sincosf_cosf, sincosf_cosf, sincos_cos, sincos_mpfr_cos, 1, 1, f1, 0)
  F1 (exp)
  F1 (exp2)
  F1 (log)
