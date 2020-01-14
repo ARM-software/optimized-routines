@@ -19,7 +19,6 @@ static const struct fun
 #define F(x) {#x, x},
 F(memcpy)
 #if __aarch64__
-F(__memcpy_bytewise)
 F(__memcpy_aarch64)
 # if __ARM_NEON
 F(__memcpy_aarch64_simd)

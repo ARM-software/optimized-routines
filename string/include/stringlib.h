@@ -13,7 +13,6 @@
 #endif
 
 #if __aarch64__
-void *__memcpy_bytewise (void *__restrict, const void *__restrict, size_t);
 void *__memcpy_aarch64 (void *__restrict, const void *__restrict, size_t);
 void *__memmove_aarch64 (void *, const void *, size_t);
 void *__memset_aarch64 (void *, int, size_t);
