@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#if __ARM_FEATURE_SVE
 /* Assumptions:
  *
  * ARMv8-a, AArch64
@@ -67,3 +68,4 @@ FUNC:
 	ret
 
 	.size	FUNC, . - FUNC
+#endif

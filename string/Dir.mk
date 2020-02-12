@@ -6,7 +6,13 @@
 S := $(srcdir)/string
 B := build/string
 
-string-lib-srcs := $(wildcard $(S)/*.[cS])
+ifeq ($(ARCH),)
+all-string check-string install-string clean-string:
+	@echo "*** Please set ARCH in config.mk. ***"
+	@exit 1
+else
+
+string-lib-srcs := $(wildcard $(S)/$(ARCH)/*.[cS])
 string-test-srcs := $(wildcard $(S)/test/*.c)
 
 string-includes := $(patsubst $(S)/%,build/%,$(wildcard $(S)/include/*.h))
@@ -87,5 +93,6 @@ install-string: \
 
 clean-string:
 	rm -f $(string-files)
+endif
 
 .PHONY: all-string check-string install-string clean-string

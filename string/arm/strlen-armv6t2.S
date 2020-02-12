@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#if __ARM_ARCH >= 6 && __ARM_ARCH_ISA_THUMB == 2
+
 /*
    Assumes:
    ARMv6T2, AArch32
@@ -118,3 +120,5 @@ L(misaligned8):
 	b	L(start_realigned)
 
 END (__strlen_armv6t2)
+
+#endif /* __ARM_ARCH >= 6 && __ARM_ARCH_ISA_THUMB == 2  */

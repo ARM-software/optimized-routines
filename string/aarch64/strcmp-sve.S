@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#if __ARM_FEATURE_SVE
 /* Assumptions:
  *
  * ARMv8-a, AArch64
@@ -55,3 +56,4 @@ __strcmp_aarch64_sve:
 	b	1b
 
 	.size	__strcmp_aarch64_sve, . - __strcmp_aarch64_sve
+#endif

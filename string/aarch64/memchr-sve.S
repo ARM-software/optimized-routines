@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#if __ARM_FEATURE_SVE
 /* Assumptions:
  *
  * ARMv8-a, AArch64
@@ -60,3 +61,4 @@ __memchr_aarch64_sve:
 	ret
 
 	.size	__memchr_aarch64_sve, . - __memchr_aarch64_sve
+#endif

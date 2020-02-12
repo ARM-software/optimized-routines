@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#if __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1
+
 /* Implementation of strcmp for ARMv7 when DSP instructions are
    available.  Use ldrd to support wider loads, provided the data
    is sufficiently aligned.  Use saturating arithmetic to optimize
@@ -470,3 +472,5 @@ L(strcmp_tail):
 	bx	lr
 
 END (__strcmp_arm)
+
+#endif /* __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1  */
