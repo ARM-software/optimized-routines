@@ -1,10 +1,11 @@
 /*
- * strcpy test.
+ * stpcpy test.
  *
  * Copyright (c) 2019-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
+#define _GNU_SOURCE
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,14 +18,12 @@ static const struct fun
 	char *(*fun)(char *dest, const char *src);
 } funtab[] = {
 #define F(x) {#x, x},
-F(strcpy)
+F(stpcpy)
 #if __aarch64__
-F(__strcpy_aarch64)
+F(__stpcpy_aarch64)
 # if __ARM_FEATURE_SVE
-F(__strcpy_aarch64_sve)
+F(__stpcpy_aarch64_sve)
 # endif
-#elif __arm__ && defined (__thumb2__) && !defined (__thumb__)
-F(__strcpy_arm)
 #endif
 #undef F
 	{0, 0}
@@ -66,7 +65,7 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 	s[i] = w[i] = '\0';
 
 	p = fun->fun(d, s);
-	if (p != d)
+	if (p != d + len)
 		ERR("%s(%p,..) returned %p\n", fun->name, d, p);
 	for (i = 0; i < len+A; i++) {
 		if (dst[i] != want[i]) {

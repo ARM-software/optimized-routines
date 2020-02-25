@@ -1,7 +1,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
@@ -19,6 +19,7 @@ void *__memset_aarch64 (void *, int, size_t);
 void *__memchr_aarch64 (const void *, int, size_t);
 int __memcmp_aarch64 (const void *, const void *, size_t);
 char *__strcpy_aarch64 (char *__restrict, const char *__restrict);
+char *__stpcpy_aarch64 (char *__restrict, const char *__restrict);
 int __strcmp_aarch64 (const char *, const char *);
 char *__strchr_aarch64 (const char *, int);
 char *__strrchr_aarch64 (const char *, int);
@@ -39,6 +40,7 @@ char *__strrchr_aarch64_sve (const char *, int);
 char *__strchrnul_aarch64_sve (const char *, int );
 int __strcmp_aarch64_sve (const char *, const char *);
 char *__strcpy_aarch64_sve (char *__restrict, const char *__restrict);
+char *__stpcpy_aarch64_sve (char *__restrict, const char *__restrict);
 size_t __strlen_aarch64_sve (const char *);
 size_t __strnlen_aarch64_sve (const char *, size_t);
 int __strncmp_aarch64_sve (const char *, const char *, size_t);
