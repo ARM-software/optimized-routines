@@ -10,7 +10,7 @@ libdir = $(prefix)/lib
 includedir = $(prefix)/include
 
 # Configure these in config.mk, do not make changes in this file.
-SUBS = math string
+SUBS = math string networking
 HOST_CC = cc
 HOST_CFLAGS = -std=c99 -O2
 HOST_LDFLAGS =

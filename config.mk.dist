@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 # Subprojects to build
-SUBS = math string
+SUBS = math string networking
 
 # Target architecture: aarch64, arm or x86_64
 ARCH = aarch64
@@ -40,6 +40,7 @@ math-ldlibs =
 math-ulpflags =
 math-testflags =
 string-cflags =
+networking-cflags =
 
 # Use if mpfr is available on the target for ulp error checking.
 #math-ldlibs += -lmpfr -lgmp
@@ -58,3 +59,9 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 # Disable fenv checks
 #math-ulpflags = -q -f
 #math-testflags = -nostatus
+
+# Enable assertion checks.
+#networking-cflags += -DWANT_ASSERT
+
+# Avoid auto-vectorization of scalar code and unroll loops
+networking-cflags += -O2 -fno-tree-vectorize -funroll-loops
