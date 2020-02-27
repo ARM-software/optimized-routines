@@ -57,8 +57,8 @@ ENTRY (__memcpy_aarch64)
 ENTRY_ALIAS (__memmove_aarch64)
 	add	srcend, src, count
 	add	dstend, dstin, count
-	cmp     count, 128
-	b.hi    L(copy_long)
+	cmp	count, 128
+	b.hi	L(copy_long)
 	cmp	count, 32
 	b.hi	L(copy32_128)
 
@@ -106,16 +106,16 @@ L(copy0):
 	.p2align 4
 	/* Medium copies: 33..128 bytes.  */
 L(copy32_128):
-	ldp     A_l, A_h, [src]
-	ldp     B_l, B_h, [src, 16]
-	ldp     C_l, C_h, [srcend, -32]
-	ldp     D_l, D_h, [srcend, -16]
-	cmp     count, 64
-	b.hi    L(copy128)
-	stp     A_l, A_h, [dstin]
-	stp     B_l, B_h, [dstin, 16]
-	stp     C_l, C_h, [dstend, -32]
-	stp     D_l, D_h, [dstend, -16]
+	ldp	A_l, A_h, [src]
+	ldp	B_l, B_h, [src, 16]
+	ldp	C_l, C_h, [srcend, -32]
+	ldp	D_l, D_h, [srcend, -16]
+	cmp	count, 64
+	b.hi	L(copy128)
+	stp	A_l, A_h, [dstin]
+	stp	B_l, B_h, [dstin, 16]
+	stp	C_l, C_h, [dstend, -32]
+	stp	D_l, D_h, [dstend, -16]
 	ret
 
 	.p2align 4
@@ -127,14 +127,14 @@ L(copy128):
 	b.ls	L(copy96)
 	ldp	G_l, G_h, [srcend, -64]
 	ldp	H_l, H_h, [srcend, -48]
-	stp     G_l, G_h, [dstend, -64]
-	stp     H_l, H_h, [dstend, -48]
+	stp	G_l, G_h, [dstend, -64]
+	stp	H_l, H_h, [dstend, -48]
 L(copy96):
 	stp	A_l, A_h, [dstin]
-	stp     B_l, B_h, [dstin, 16]
-	stp     E_l, E_h, [dstin, 32]
-	stp     F_l, F_h, [dstin, 48]
-	stp     C_l, C_h, [dstend, -32]
+	stp	B_l, B_h, [dstin, 16]
+	stp	E_l, E_h, [dstin, 32]
+	stp	F_l, F_h, [dstin, 48]
+	stp	C_l, C_h, [dstend, -32]
 	stp	D_l, D_h, [dstend, -16]
 	ret
 
