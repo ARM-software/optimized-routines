@@ -12,12 +12,17 @@
 #include <stdint.h>
 
 #ifndef WANT_ROUNDING
-/* Correct special case results in non-nearest rounding modes.  */
+/* If defined to 1, return correct results for special cases in non-nearest
+   rounding modes (logf (1.0f) returns 0.0f with FE_DOWNWARD rather than -0.0f).
+   This may be set to 0 if there is no fenv support or if math functions only
+   get called in round to nearest mode.  */
 # define WANT_ROUNDING 1
 #endif
 #ifndef WANT_ERRNO
-/* Set errno according to ISO C with (math_errhandling & MATH_ERRNO) != 0.  */
-# define WANT_ERRNO 1
+/* If defined to 1, set errno in math functions according to ISO C.  Many math
+   libraries do not set errno, so this is 0 by default.  It may need to be
+   set to 1 if math.h has (math_errhandling & MATH_ERRNO) != 0.  */
+# define WANT_ERRNO 0
 #endif
 #ifndef WANT_ERRNO_UFLOW
 /* Set errno to ERANGE if result underflows to 0 (in all rounding modes).  */
