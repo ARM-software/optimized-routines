@@ -38,7 +38,7 @@ string-tools := \
 	build/bin/test/strnlen \
 	build/bin/test/strncmp
 
-string-benches := 
+string-benches := build/bin/bench/memcpy
 
 string-lib-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-lib-srcs)))
 string-test-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-test-srcs)))
@@ -99,6 +99,7 @@ check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/strncmp
 
 bench-string: $(string-benches)
+	$(EMULATOR) build/bin/bench/memcpy
 
 install-string: \
  $(string-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
