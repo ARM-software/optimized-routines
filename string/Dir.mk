@@ -7,13 +7,14 @@ S := $(srcdir)/string
 B := build/string
 
 ifeq ($(ARCH),)
-all-string check-string install-string clean-string:
+all-string bench-string check-string install-string clean-string:
 	@echo "*** Please set ARCH in config.mk. ***"
 	@exit 1
 else
 
 string-lib-srcs := $(wildcard $(S)/$(ARCH)/*.[cS])
 string-test-srcs := $(wildcard $(S)/test/*.c)
+string-bench-srcs := $(wildcard $(S)/bench/*.c)
 
 string-includes := $(patsubst $(S)/%,build/%,$(wildcard $(S)/include/*.h))
 
@@ -37,21 +38,26 @@ string-tools := \
 	build/bin/test/strnlen \
 	build/bin/test/strncmp
 
+string-benches := 
+
 string-lib-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-lib-srcs)))
 string-test-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-test-srcs)))
+string-bench-objs := $(patsubst $(S)/%,$(B)/%.o,$(basename $(string-bench-srcs)))
 
 string-objs := \
 	$(string-lib-objs) \
 	$(string-lib-objs:%.o=%.os) \
 	$(string-test-objs) \
+	$(string-bench-objs)
 
 string-files := \
 	$(string-objs) \
 	$(string-libs) \
 	$(string-tools) \
+	$(string-benches) \
 	$(string-includes) \
 
-all-string: $(string-libs) $(string-tools) $(string-includes)
+all-string: $(string-libs) $(string-tools) $(string-benches) $(string-includes)
 
 $(string-objs): $(string-includes)
 $(string-objs): CFLAGS_ALL += $(string-cflags)
@@ -65,6 +71,9 @@ build/lib/libstringlib.a: $(string-lib-objs)
 	$(RANLIB) $@
 
 build/bin/test/%: $(B)/test/%.o build/lib/libstringlib.a
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
+
+build/bin/bench/%: $(B)/bench/%.o build/lib/libstringlib.a
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
 
 build/include/%.h: $(S)/include/%.h
@@ -89,6 +98,8 @@ check-string: $(string-tools)
 	$(EMULATOR) build/bin/test/strnlen
 	$(EMULATOR) build/bin/test/strncmp
 
+bench-string: $(string-benches)
+
 install-string: \
  $(string-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
  $(string-includes:build/include/%=$(DESTDIR)$(includedir)/%)
@@ -97,4 +108,4 @@ clean-string:
 	rm -f $(string-files)
 endif
 
-.PHONY: all-string check-string install-string clean-string
+.PHONY: all-string bench-string check-string install-string clean-string
