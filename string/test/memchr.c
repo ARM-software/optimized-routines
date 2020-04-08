@@ -37,6 +37,8 @@ static int test_status;
 #define A 32
 #define SP 512
 #define LEN 250000
+#define MAX_LEN SIZE_MAX
+
 static unsigned char sbuf[LEN+2*A];
 
 static void *alignup(void *p)
@@ -44,28 +46,30 @@ static void *alignup(void *p)
 	return (void*)(((uintptr_t)p + A-1) & -A);
 }
 
-static void test(const struct fun *fun, int align, int seekpos, int len)
+static void test(const struct fun *fun, int align, size_t seekpos,
+	size_t array_len, size_t param_len)
 {
 	unsigned char *src = alignup(sbuf);
 	unsigned char *s = src + align;
-	unsigned char *f = len ? s + seekpos : 0;
+	unsigned char *f = array_len ? s + seekpos : 0;
 	int seekchar = 0x1;
 	int i;
 	void *p;
 
-	if (len > LEN || seekpos >= len || align >= A)
+	if (array_len > LEN || seekpos >= array_len || align >= A)
 		abort();
 
 	for (i = 0; i < seekpos; i++)
 		s[i] = 'a' + i%23;
 	s[i++] = seekchar;
-	for (; i < len; i++)
+	for (; i < array_len; i++)
 		s[i] = 'a' + i%23;
 
-	p = fun->fun(s, seekchar, len);
+	p = fun->fun(s, seekchar, param_len);
 
 	if (p != f) {
-		ERR("%s(%p,0x%02x,%d) returned %p\n", fun->name, s, seekchar, len, p);
+		ERR("%s(%p,0x%02x,%zu) returned %p\n",
+			fun->name, s, seekchar, param_len, p);
 		ERR("expected: %p\n", f);
 		abort();
 	}
@@ -79,10 +83,13 @@ int main()
 		for (int a = 0; a < A; a++) {
 			for (int n = 0; n < 100; n++)
 				for (int sp = 0; sp < n-1; sp++)
-					test(funtab+i, a, sp, n);
+					test(funtab+i, a, sp, n, n);
 			for (int n = 100; n < LEN; n *= 2) {
-				test(funtab+i, a, n-1, n);
-				test(funtab+i, a, n/2, n);
+				test(funtab+i, a, n-1, n, n);
+				test(funtab+i, a, n/2, n, n);
+			}
+			for (int n = 0; n < 100; n++) {
+				test(funtab+i, a, LEN-1-n, LEN, MAX_LEN-n);
 			}
 		}
 		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
