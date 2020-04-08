@@ -110,7 +110,7 @@ L(end):
 	addp	vend.16b, vend.16b, vend.16b			/* 128->64 */
 	mov	synd, vend.d[0]
 	/* Only do the clear for the last possible block */
-	b.hi	L(tail)
+	b.hs	L(tail)
 
 L(masklast):
 	/* Clear the (32 - ((cntrem + soff) % 32)) * 2 upper bits */
