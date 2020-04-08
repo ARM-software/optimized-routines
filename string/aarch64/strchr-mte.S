@@ -68,7 +68,7 @@ ENTRY(__strchr_aarch64_mte)
 	   the padding bytes to a safe value, we calculate the syndrome
 	   for all the bytes, but then mask off those bits of the
 	   syndrome that are related to the padding.  */
-	ldr	qdata, [src], #16
+	ld1	{vdata.16b}, [src], #16
 	cmeq	vhas_nul.16b, vdata.16b, #0
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
 	and	vhas_nul.16b, vhas_nul.16b, vrepmask_0.16b
@@ -84,7 +84,7 @@ ENTRY(__strchr_aarch64_mte)
 	b.ne	L(tail)
 
 L(loop):
-	ldr	qdata, [src], #32
+	ld1	{vdata.16b}, [src], #16
 	cmeq	vhas_nul.16b, vdata.16b, #0
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
 	/* Use a fast check for the termination condition.  */
@@ -93,7 +93,7 @@ L(loop):
 	mov	tmp1, vend.d[0]
 	cbnz	tmp1, L(end)
 
-	ldr	qdata, [src, #-16]
+	ld1	{vdata.16b}, [src], #16
 	cmeq	vhas_nul.16b, vdata.16b, #0
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
 	/* Use a fast check for the termination condition.  */
@@ -102,14 +102,11 @@ L(loop):
 	mov	tmp1, vend.d[0]
 	cbz	tmp1, L(loop)
 
-	/* Adjust src for next two subtractions. */
-	add	src, src, #16
 L(end):
 	/* Termination condition found.  Now need to establish exactly why
 	   we terminated.  */
 	and	vhas_nul.16b, vhas_nul.16b, vrepmask_0.16b
 	and	vhas_chr.16b, vhas_chr.16b, vrepmask_c.16b
-	sub	src, src, #16
 	orr	vend.16b, vhas_nul.16b, vhas_chr.16b
 	addp	vend.16b, vend.16b, vend.16b		/* 128->64 */
 
