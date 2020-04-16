@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stringlib.h"
+#include "stringtest.h"
 
 static const struct fun
 {
@@ -30,14 +31,11 @@ F(__strcpy_arm)
 	{0, 0}
 };
 
-static int test_status;
-#define ERR(...) (test_status=1, printf(__VA_ARGS__))
-
 #define A 32
 #define LEN 250000
-static char dbuf[LEN+2*A];
-static char sbuf[LEN+2*A];
-static char wbuf[LEN+2*A];
+static char dbuf[LEN+2*A+1];
+static char sbuf[LEN+2*A+1];
+static char wbuf[LEN+2*A+1];
 
 static void *alignup(void *p)
 {
@@ -55,6 +53,8 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 	void *p;
 	int i;
 
+	if (err_count >= ERR_LIMIT)
+		return;
 	if (len > LEN || dalign >= A || salign >= A)
 		abort();
 	for (i = 0; i < len+A; i++) {
@@ -63,7 +63,7 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 	}
 	for (i = 0; i < len; i++)
 		s[i] = w[i] = 'a' + i%23;
-	s[i] = w[i] = '\0';
+	s[len] = w[len] = '\0';
 
 	p = fun->fun(d, s);
 	if (p != d)
@@ -71,8 +71,8 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 	for (i = 0; i < len+A; i++) {
 		if (dst[i] != want[i]) {
 			ERR("%s(align %d, align %d, %d) failed\n", fun->name, dalign, salign, len);
-			ERR("got : %.*s\n", dalign+len+1, dst);
-			ERR("want: %.*s\n", dalign+len+1, want);
+			quoteat("got", dst, len+A, i);
+			quoteat("want", want, len+A, i);
 			break;
 		}
 	}
@@ -82,7 +82,7 @@ int main()
 {
 	int r = 0;
 	for (int i=0; funtab[i].name; i++) {
-		test_status = 0;
+		err_count = 0;
 		for (int d = 0; d < A; d++)
 			for (int s = 0; s < A; s++) {
 				int n;
@@ -91,8 +91,8 @@ int main()
 				for (; n < LEN; n *= 2)
 					test(funtab+i, d, s, n);
 			}
-		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
-		if (test_status)
+		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+		if (err_count)
 			r = -1;
 	}
 	return r;

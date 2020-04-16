@@ -11,6 +11,7 @@
 #include <string.h>
 #include <limits.h>
 #include "stringlib.h"
+#include "stringtest.h"
 
 static const struct fun
 {
@@ -34,13 +35,10 @@ F(__strlen_armv6t2)
 	{0, 0}
 };
 
-static int test_status;
-#define ERR(...) (test_status=1, printf(__VA_ARGS__))
-
 #define A 32
 #define SP 512
 #define LEN 250000
-static char sbuf[LEN+2*A];
+static char sbuf[LEN+2*A+1];
 
 static void *alignup(void *p)
 {
@@ -53,21 +51,22 @@ static void test(const struct fun *fun, int align, int len)
 	char *s = src + align;
 	size_t r;
 
+	if (err_count >= ERR_LIMIT)
+		return;
 	if (len > LEN || align >= A)
 		abort();
 
 	for (int i = 0; i < len + A; i++)
 		src[i] = '?';
-	for (int i = 0; i < len - 2; i++)
+	for (int i = 0; i < len; i++)
 		s[i] = 'a' + i%23;
-	s[len - 1] = '\0';
+	s[len] = '\0';
 
 	r = fun->fun(s);
-	if (r != len-1) {
+	if (r != len) {
 		ERR("%s(%p) returned %zu\n", fun->name, s, r);
-		ERR("input:    %.*s\n", align+len+1, src);
-		ERR("expected: %d\n", len);
-		abort();
+		quote("input", src, len);
+		printf("expected: %d\n", len);
 	}
 }
 
@@ -75,7 +74,7 @@ int main()
 {
 	int r = 0;
 	for (int i=0; funtab[i].name; i++) {
-		test_status = 0;
+		err_count = 0;
 		for (int a = 0; a < A; a++) {
 			int n;
 			for (n = 1; n < 100; n++)
@@ -83,8 +82,8 @@ int main()
 			for (; n < LEN; n *= 2)
 				test(funtab+i, a, n);
 		}
-		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
-		if (test_status)
+		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+		if (err_count)
 			r = -1;
 	}
 	return r;

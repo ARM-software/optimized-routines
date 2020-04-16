@@ -11,6 +11,7 @@
 #include <string.h>
 #include <limits.h>
 #include "stringlib.h"
+#include "stringtest.h"
 
 static const struct fun
 {
@@ -31,9 +32,6 @@ F(__memchr_arm)
 #undef F
 	{0, 0}
 };
-
-static int test_status;
-#define ERR(...) (test_status=1, printf(__VA_ARGS__))
 
 #define A 32
 #define SP 512
@@ -57,6 +55,8 @@ static void test(const struct fun *fun, int align, size_t seekpos,
 	int i;
 	void *p;
 
+	if (err_count >= ERR_LIMIT)
+		return;
 	if (array_len > LEN || seekpos >= array_len || align >= A)
 		abort();
 
@@ -71,8 +71,8 @@ static void test(const struct fun *fun, int align, size_t seekpos,
 	if (p != f) {
 		ERR("%s(%p,0x%02x,%zu) returned %p\n",
 			fun->name, s, seekchar, param_len, p);
-		ERR("expected: %p\n", f);
-		abort();
+		printf("expected: %p\n", f);
+		quote("str", s, param_len);
 	}
 }
 
@@ -80,7 +80,7 @@ int main()
 {
 	int r = 0;
 	for (int i=0; funtab[i].name; i++) {
-		test_status = 0;
+		err_count = 0;
 		for (int a = 0; a < A; a++) {
 			for (int n = 0; n < 100; n++)
 				for (int sp = 0; sp < n-1; sp++)
@@ -93,8 +93,8 @@ int main()
 				test(funtab+i, a, LEN-1-n, LEN, MAX_LEN-n);
 			}
 		}
-		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
-		if (test_status)
+		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+		if (err_count)
 			r = -1;
 	}
 	return r;

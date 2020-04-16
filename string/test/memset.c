@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stringlib.h"
+#include "stringtest.h"
 
 static const struct fun
 {
@@ -27,9 +28,6 @@ F(__memset_arm)
 	{0, 0}
 };
 
-static int test_status;
-#define ERR(...) (test_status=1, printf(__VA_ARGS__))
-
 #define A 32
 #define LEN 250000
 static unsigned char sbuf[LEN+2*A];
@@ -39,12 +37,6 @@ static void *alignup(void *p)
 	return (void*)(((uintptr_t)p + A-1) & -A);
 }
 
-static void err(const char *name, unsigned char *src, int salign, int c, int len)
-{
-	ERR("%s(align %d, %d, %d) failed\n", name, salign, c, len);
-	ERR("got : %.*s\n", salign+len+1, src);
-}
-
 static void test(const struct fun *fun, int salign, int c, int len)
 {
 	unsigned char *src = alignup(sbuf);
@@ -52,14 +44,14 @@ static void test(const struct fun *fun, int salign, int c, int len)
 	void *p;
 	int i;
 
+	if (err_count >= ERR_LIMIT)
+		return;
 	if (len > LEN || salign >= A)
 		abort();
 	for (i = 0; i < len+A; i++)
 		src[i] = '?';
 	for (i = 0; i < len; i++)
 		s[i] = 'a' + i%23;
-	for (; i<len%A; i++)
-		s[i] = '*';
 
 	p = fun->fun(s, c, len);
 	if (p != s)
@@ -67,19 +59,22 @@ static void test(const struct fun *fun, int salign, int c, int len)
 
 	for (i = 0; i < salign; i++) {
 		if (src[i] != '?') {
-			err(fun->name, src, salign, c, len);
+			ERR("%s(align %d, %d, %d) failed\n", fun->name, salign, c, len);
+			quoteat("got", src, len+A, i);
 			return;
 		}
 	}
-	for (i = salign; i < len; i++) {
+	for (; i < salign+len; i++) {
 		if (src[i] != (unsigned char)c) {
-			err(fun->name, src, salign, c, len);
+			ERR("%s(align %d, %d, %d) failed\n", fun->name, salign, c, len);
+			quoteat("got", src, len+A, i);
 			return;
 		}
 	}
-	for (; i < len%A; i++) {
-		if (src[i] != '*') {
-			err(fun->name, src, salign, c, len);
+	for (; i < len+A; i++) {
+		if (src[i] != '?') {
+			ERR("%s(align %d, %d, %d) failed\n", fun->name, salign, c, len);
+			quoteat("got", src, len+A, i);
 			return;
 		}
 	}
@@ -89,7 +84,7 @@ int main()
 {
 	int r = 0;
 	for (int i=0; funtab[i].name; i++) {
-		test_status = 0;
+		err_count = 0;
 		for (int s = 0; s < A; s++) {
 			int n;
 			for (n = 0; n < 100; n++) {
@@ -103,8 +98,8 @@ int main()
 				test(funtab+i, s, 0xaa25, n);
 			}
 		}
-		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
-		if (test_status)
+		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+		if (err_count)
 			r = -1;
 	}
 	return r;

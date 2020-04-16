@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "stringlib.h"
+#include "stringtest.h"
 
 static const struct fun
 {
@@ -27,9 +28,6 @@ F(__memmove_aarch64_simd)
 #undef F
 	{0, 0}
 };
-
-static int test_status;
-#define ERR(...) (test_status=1, printf(__VA_ARGS__))
 
 #define A 32
 #define LEN 250000
@@ -53,6 +51,8 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 	void *p;
 	int i;
 
+	if (err_count >= ERR_LIMIT)
+		return;
 	if (len > LEN || dalign >= A || salign >= A)
 		abort();
 	for (i = 0; i < len+A; i++) {
@@ -68,8 +68,8 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 	for (i = 0; i < len+A; i++) {
 		if (dst[i] != want[i]) {
 			ERR("%s(align %d, align %d, %d) failed\n", fun->name, dalign, salign, len);
-			ERR("got : %.*s\n", dalign+len+1, dst);
-			ERR("want: %.*s\n", dalign+len+1, want);
+			quoteat("got", dst, len+A, i);
+			quoteat("want", want, len+A, i);
 			break;
 		}
 	}
@@ -78,13 +78,15 @@ static void test(const struct fun *fun, int dalign, int salign, int len)
 static void test_overlap(const struct fun *fun, int dalign, int salign, int len)
 {
 	unsigned char *src = alignup(sbuf);
-	unsigned char *dst = alignup(sbuf);
+	unsigned char *dst = src;
 	unsigned char *want = wbuf;
 	unsigned char *s = src + salign;
 	unsigned char *d = dst + dalign;
 	unsigned char *w = wbuf + dalign;
 	void *p;
 
+	if (err_count >= ERR_LIMIT)
+		return;
 	if (len > LEN || dalign >= A || salign >= A)
 		abort();
 
@@ -92,16 +94,9 @@ static void test_overlap(const struct fun *fun, int dalign, int salign, int len)
 		src[i] = want[i] = '?';
 
 	for (int i = 0; i < len; i++)
-		s[i] = w[i] = 'a' + i%23;
-
-	/* Copy the potential overlap range.  */
-	if (s < d) {
-		for (int i = 0; i < (uintptr_t)d-(uintptr_t)s; i++)
-			want[salign+i] = src[salign+i];
-	} else {
-		for (int i = 0; i < (uintptr_t)s-(uintptr_t)d; i++)
-			want[len + dalign + i] = src[len + dalign + i];
-	}
+		s[i] = want[salign+i] = 'a' + i%23;
+	for (int i = 0; i < len; i++)
+		w[i] = s[i];
 
 	p = fun->fun(d, s, len);
 	if (p != d)
@@ -109,9 +104,8 @@ static void test_overlap(const struct fun *fun, int dalign, int salign, int len)
 	for (int i = 0; i < len+A; i++) {
 		if (dst[i] != want[i]) {
 			ERR("%s(align %d, align %d, %d) failed\n", fun->name, dalign, salign, len);
-			ERR("got : %.*s\n", dalign+len+1, dst);
-			ERR("want: %.*s\n", dalign+len+1, want);
-			abort();
+			quoteat("got", dst, len+A, i);
+			quoteat("want", want, len+A, i);
 			break;
 		}
 	}
@@ -119,11 +113,9 @@ static void test_overlap(const struct fun *fun, int dalign, int salign, int len)
 
 int main()
 {
-	test_overlap(funtab+0, 2, 1, 1);
-
 	int r = 0;
 	for (int i=0; funtab[i].name; i++) {
-		test_status = 0;
+		err_count = 0;
 		for (int d = 0; d < A; d++)
 			for (int s = 0; s < A; s++) {
 				int n;
@@ -136,8 +128,8 @@ int main()
 					test_overlap(funtab+i, d, s, n);
 				}
 			}
-		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
-		if (test_status)
+		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+		if (err_count)
 			r = -1;
 	}
 	return r;

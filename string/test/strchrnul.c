@@ -13,6 +13,7 @@
 #include <string.h>
 #include <limits.h>
 #include "stringlib.h"
+#include "stringtest.h"
 
 static const struct fun
 {
@@ -32,13 +33,10 @@ F(__strchrnul_aarch64_sve)
 	{0, 0}
 };
 
-static int test_status;
-#define ERR(...) (test_status=1, printf(__VA_ARGS__))
-
 #define A 32
 #define SP 512
 #define LEN 250000
-static char sbuf[LEN+2*A];
+static char sbuf[LEN+2*A+1];
 
 static void *alignup(void *p)
 {
@@ -49,29 +47,31 @@ static void test(const struct fun *fun, int align, int seekpos, int len)
 {
 	char *src = alignup(sbuf);
 	char *s = src + align;
-	char *f = seekpos != -1 ? s + seekpos : s + len - 1;
+	char *f = seekpos != -1 ? s + seekpos : s + len;
 	int seekchar = 0x1;
 	void *p;
 
-	if (len > LEN || seekpos >= len - 1 || align >= A)
+	if (err_count >= ERR_LIMIT)
+		return;
+	if (len > LEN || seekpos >= len || align >= A)
 		abort();
 	if (seekchar >= 'a' && seekchar <= 'a' + 23)
 		abort();
 
 	for (int i = 0; i < len + A; i++)
 		src[i] = '?';
-	for (int i = 0; i < len - 2; i++)
+	for (int i = 0; i < len; i++)
 		s[i] = 'a' + i%23;
 	if (seekpos != -1)
 		s[seekpos] = seekchar;
-	s[len - 1] = '\0';
+	s[len] = '\0';
 
 	p = fun->fun(s, seekchar);
 
 	if (p != f) {
 		ERR("%s(%p,0x%02x,%d) returned %p\n", fun->name, s, seekchar, len, p);
-		ERR("expected: %p\n", f);
-		abort();
+		quoteat("input", s, len+A, seekpos);
+		printf("expected: %p\n", f);
 	}
 }
 
@@ -79,7 +79,7 @@ int main()
 {
 	int r = 0;
 	for (int i=0; funtab[i].name; i++) {
-		test_status = 0;
+		err_count = 0;
 		for (int a = 0; a < A; a++) {
 			int n;
 			for (n = 1; n < 100; n++) {
@@ -92,8 +92,8 @@ int main()
 				test(funtab+i, a, n / 2, n);
 			}
 		}
-		printf("%s %s\n", test_status ? "FAIL" : "PASS", funtab[i].name);
-		if (test_status)
+		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+		if (err_count)
 			r = -1;
 	}
 	return r;
