@@ -84,38 +84,38 @@ ENTRY (__strrchr_aarch64)
 	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
 	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul2.16b	// 256->128
 	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr2.16b	// 256->128
-	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul1.16b	// 128->64
-	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr1.16b	// 128->64
-	mov	nul_match, vhas_nul1.d[0]
+	addp	vend1.16b, vhas_nul1.16b, vhas_chr1.16b		// 128->64
+	mov	nul_match, vend1.d[0]
 	lsl	tmp1, tmp1, #1
 	mov	const_m1, #~0
-	mov	chr_match, vhas_chr1.d[0]
 	lsr	tmp3, const_m1, tmp1
+	mov	chr_match, vend1.d[1]
 
 	bic	nul_match, nul_match, tmp3	// Mask padding bits.
 	bic	chr_match, chr_match, tmp3	// Mask padding bits.
 	cbnz	nul_match, L(tail)
 
+	.p2align 4
 L(loop):
 	cmp	chr_match, #0
 	csel	src_match, src, src_match, ne
 	csel	src_offset, chr_match, src_offset, ne
 L(aligned):
 	ld1	{vdata1.16b, vdata2.16b}, [src], #32
-	cmeq	vhas_nul1.16b, vdata1.16b, #0
 	cmeq	vhas_chr1.16b, vdata1.16b, vrepchr.16b
-	cmeq	vhas_nul2.16b, vdata2.16b, #0
 	cmeq	vhas_chr2.16b, vdata2.16b, vrepchr.16b
-	addp	vend1.16b, vhas_nul1.16b, vhas_nul2.16b	// 256->128
+	uminp	vend1.16b, vdata1.16b, vdata2.16b
 	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
 	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
+	cmeq	vend1.16b, vend1.16b, 0
 	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr2.16b	// 256->128
-	addp	vend1.16b, vend1.16b, vend1.16b	// 128->64
-	addp	vhas_chr1.16b, vhas_chr1.16b, vhas_chr1.16b	// 128->64
+	addp	vend1.16b, vend1.16b, vhas_chr1.16b		// 128->64
 	mov	nul_match, vend1.d[0]
-	mov	chr_match, vhas_chr1.d[0]
+	mov	chr_match, vend1.d[1]
 	cbz	nul_match, L(loop)
 
+	cmeq	vhas_nul1.16b, vdata1.16b, #0
+	cmeq	vhas_nul2.16b, vdata2.16b, #0
 	and	vhas_nul1.16b, vhas_nul1.16b, vrepmask_0.16b
 	and	vhas_nul2.16b, vhas_nul2.16b, vrepmask_0.16b
 	addp	vhas_nul1.16b, vhas_nul1.16b, vhas_nul2.16b
