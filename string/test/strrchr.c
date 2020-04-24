@@ -22,6 +22,7 @@ static const struct fun
 F(strrchr)
 #if __aarch64__
 F(__strrchr_aarch64)
+F(__strrchr_aarch64_mte)
 # if __ARM_FEATURE_SVE
 F(__strrchr_aarch64_sve)
 # endif

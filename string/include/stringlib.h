@@ -31,6 +31,7 @@ void * __memchr_aarch64_mte (const void *, int, size_t);
 char *__strchr_aarch64_mte (const char *, int);
 char * __strchrnul_aarch64_mte (const char *, int );
 size_t __strlen_aarch64_mte (const char *);
+char *__strrchr_aarch64_mte (const char *, int);
 #if __ARM_NEON
 void *__memcpy_aarch64_simd (void *__restrict, const void *__restrict, size_t);
 void *__memmove_aarch64_simd (void *, const void *, size_t);
