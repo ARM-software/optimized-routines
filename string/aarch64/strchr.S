@@ -51,11 +51,11 @@
 /* Locals and temporaries.  */
 
 ENTRY (__strchr_aarch64)
-	/* Magic constant 0x40100401 to allow us to identify which lane
-	   matches the requested byte.  Magic constant 0x80200802 used
-	   similarly for NUL termination.  */
-	mov	wtmp2, #0x0401
-	movk	wtmp2, #0x4010, lsl #16
+	/* Magic constant 0xc0300c03 to allow us to identify which lane
+	   matches the requested byte.  Even bits are set if the character
+	   matches, odd bits if either the char is NUL or matches.  */
+	mov	wtmp2, 0x0c03
+	movk	wtmp2, 0xc030, lsl 16
 	dup	vrepchr.16b, chrin
 	bic	src, srcin, #31		/* Work with aligned 32-byte hunks.  */
 	dup	vrepmask_c.4s, wtmp2
@@ -73,12 +73,10 @@ ENTRY (__strchr_aarch64)
 	cmeq	vhas_chr1.16b, vdata1.16b, vrepchr.16b
 	cmeq	vhas_nul2.16b, vdata2.16b, #0
 	cmeq	vhas_chr2.16b, vdata2.16b, vrepchr.16b
-	and	vhas_nul1.16b, vhas_nul1.16b, vrepmask_0.16b
-	and	vhas_nul2.16b, vhas_nul2.16b, vrepmask_0.16b
-	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
-	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
-	orr	vend1.16b, vhas_nul1.16b, vhas_chr1.16b
-	orr	vend2.16b, vhas_nul2.16b, vhas_chr2.16b
+	bif	vhas_nul1.16b, vhas_chr1.16b, vrepmask_0.16b
+	bif	vhas_nul2.16b, vhas_chr2.16b, vrepmask_0.16b
+	and	vend1.16b, vhas_nul1.16b, vrepmask_c.16b
+	and	vend2.16b, vhas_nul2.16b, vrepmask_c.16b
 	lsl	tmp1, tmp1, #1
 	addp	vend1.16b, vend1.16b, vend2.16b		// 256->128
 	mov	tmp3, #~0
@@ -89,31 +87,26 @@ ENTRY (__strchr_aarch64)
 	bic	tmp1, tmp3, tmp1	// Mask padding bits.
 	cbnz	tmp1, L(tail)
 
+	.p2align 4
 L(loop):
 	ld1	{vdata1.16b, vdata2.16b}, [src], #32
-	cmeq	vhas_nul1.16b, vdata1.16b, #0
 	cmeq	vhas_chr1.16b, vdata1.16b, vrepchr.16b
-	cmeq	vhas_nul2.16b, vdata2.16b, #0
 	cmeq	vhas_chr2.16b, vdata2.16b, vrepchr.16b
-	/* Use a fast check for the termination condition.  */
-	orr	vend1.16b, vhas_nul1.16b, vhas_chr1.16b
-	orr	vend2.16b, vhas_nul2.16b, vhas_chr2.16b
-	orr	vend1.16b, vend1.16b, vend2.16b
-	addp	vend1.2d, vend1.2d, vend1.2d
+	cmhs	vhas_nul1.16b, vhas_chr1.16b, vdata1.16b
+	cmhs	vhas_nul2.16b, vhas_chr2.16b, vdata2.16b
+	orr	vend1.16b, vhas_nul1.16b, vhas_nul2.16b
+	umaxp	vend1.16b, vend1.16b, vend1.16b
 	mov	tmp1, vend1.d[0]
 	cbz	tmp1, L(loop)
 
 	/* Termination condition found.  Now need to establish exactly why
 	   we terminated.  */
-	and	vhas_nul1.16b, vhas_nul1.16b, vrepmask_0.16b
-	and	vhas_nul2.16b, vhas_nul2.16b, vrepmask_0.16b
-	and	vhas_chr1.16b, vhas_chr1.16b, vrepmask_c.16b
-	and	vhas_chr2.16b, vhas_chr2.16b, vrepmask_c.16b
-	orr	vend1.16b, vhas_nul1.16b, vhas_chr1.16b
-	orr	vend2.16b, vhas_nul2.16b, vhas_chr2.16b
+	bif	vhas_nul1.16b, vhas_chr1.16b, vrepmask_0.16b
+	bif	vhas_nul2.16b, vhas_chr2.16b, vrepmask_0.16b
+	and	vend1.16b, vhas_nul1.16b, vrepmask_c.16b
+	and	vend2.16b, vhas_nul2.16b, vrepmask_c.16b
 	addp	vend1.16b, vend1.16b, vend2.16b		// 256->128
 	addp	vend1.16b, vend1.16b, vend2.16b		// 128->64
-
 	mov	tmp1, vend1.d[0]
 L(tail):
 	/* Count the trailing zeros, by bit reversing...  */
