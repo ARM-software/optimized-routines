@@ -22,7 +22,7 @@ string-libs := \
 	build/lib/libstringlib.so \
 	build/lib/libstringlib.a \
 
-string-tools := \
+string-tests := \
 	build/bin/test/memcpy \
 	build/bin/test/memmove \
 	build/bin/test/memset \
@@ -53,11 +53,11 @@ string-objs := \
 string-files := \
 	$(string-objs) \
 	$(string-libs) \
-	$(string-tools) \
+	$(string-tests) \
 	$(string-benches) \
 	$(string-includes) \
 
-all-string: $(string-libs) $(string-tools) $(string-benches) $(string-includes)
+all-string: $(string-libs) $(string-tests) $(string-benches) $(string-includes)
 
 $(string-objs): $(string-includes)
 $(string-objs): CFLAGS_ALL += $(string-cflags)
@@ -82,21 +82,14 @@ build/include/%.h: $(S)/include/%.h
 build/bin/%.sh: $(S)/test/%.sh
 	cp $< $@
 
-check-string: $(string-tools)
-	$(EMULATOR) build/bin/test/memcpy
-	$(EMULATOR) build/bin/test/memmove
-	$(EMULATOR) build/bin/test/memset
-	$(EMULATOR) build/bin/test/memchr
-	$(EMULATOR) build/bin/test/memcmp
-	$(EMULATOR) build/bin/test/strcpy
-	$(EMULATOR) build/bin/test/stpcpy
-	$(EMULATOR) build/bin/test/strcmp
-	$(EMULATOR) build/bin/test/strchr
-	$(EMULATOR) build/bin/test/strrchr
-	$(EMULATOR) build/bin/test/strchrnul
-	$(EMULATOR) build/bin/test/strlen
-	$(EMULATOR) build/bin/test/strnlen
-	$(EMULATOR) build/bin/test/strncmp
+string-tests-out = $(string-tests:build/bin/test/%=build/string/test/%.out)
+
+build/string/test/%.out: build/bin/test/%
+	$(EMULATOR) $^ | tee $@.tmp
+	mv $@.tmp $@
+
+check-string: $(string-tests-out)
+	! grep FAIL $^
 
 bench-string: $(string-benches)
 	$(EMULATOR) build/bin/bench/memcpy
