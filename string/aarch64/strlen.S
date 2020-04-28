@@ -204,3 +204,5 @@ L(page_cross):
 	b	L(page_cross_entry)
 
 END (__strlen_aarch64)
+
+END_FILE

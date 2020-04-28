@@ -110,3 +110,5 @@ L(tail):
 	ret
 
 END (__strchrnul_aarch64)
+
+END_FILE

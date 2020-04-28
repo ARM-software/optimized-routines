@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "../asmdefs.h"
+
 #if __ARM_FEATURE_SVE
 /* Assumptions:
  *
@@ -22,10 +24,7 @@
 #define FUNC  __strchr_aarch64_sve
 #endif
 
-	.globl	FUNC
-	.type	FUNC, %function
-	.p2align 4
-FUNC:
+ENTRY_ALIGN (FUNC, 4)
 	dup	z1.b, w1		/* replicate byte across vector */
 	setffr				/* initialize FFR */
 	ptrue	p1.b			/* all ones; loop invariant */
@@ -67,5 +66,8 @@ FUNC:
 	incp	x0, p0.b
 	b	0b
 
-	.size	FUNC, . - FUNC
+END (FUNC)
+
 #endif
+
+END_FILE

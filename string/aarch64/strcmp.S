@@ -168,3 +168,5 @@ L(done):
 	ret
 
 END (__strcmp_aarch64)
+
+END_FILE

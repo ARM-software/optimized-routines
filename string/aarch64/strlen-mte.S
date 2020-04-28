@@ -183,3 +183,5 @@ L(nonascii_loop):
 	b	L(tail)
 
 END(__strlen_aarch64_mte)
+
+END_FILE

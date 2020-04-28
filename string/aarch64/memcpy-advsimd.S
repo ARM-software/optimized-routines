@@ -50,8 +50,8 @@
    The loop tail is handled by always copying 64 bytes from the end.
 */
 
-ENTRY (__memcpy_aarch64_simd)
 ENTRY_ALIAS (__memmove_aarch64_simd)
+ENTRY (__memcpy_aarch64_simd)
 	add	srcend, src, count
 	add	dstend, dstin, count
 	cmp	count, 128
@@ -199,3 +199,5 @@ L(copy64_from_start):
 	ret
 
 END (__memcpy_aarch64_simd)
+
+END_FILE

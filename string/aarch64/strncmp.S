@@ -42,7 +42,7 @@
 
 	.text
 	.p2align 6
-	.rep 7
+	.rep 6
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
 ENTRY_ALIGN (__strncmp_aarch64, 0)
@@ -259,3 +259,5 @@ L(ret0):
 	ret
 
 END ( __strncmp_aarch64)
+
+END_FILE

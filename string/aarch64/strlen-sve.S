@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "../asmdefs.h"
+
 #if __ARM_FEATURE_SVE
 /* Assumptions:
  *
@@ -15,10 +17,7 @@
 	.arch	armv8-a+sve
 	.text
 
-	.globl	__strlen_aarch64_sve
-	.type	__strlen_aarch64_sve, %function
-	.p2align 4
-__strlen_aarch64_sve:
+ENTRY_ALIGN (__strlen_aarch64_sve, 4)
 	setffr			/* initialize FFR */
 	ptrue	p2.b		/* all ones; loop invariant */
 	mov	x1, 0		/* initialize length */
@@ -53,5 +52,8 @@ __strlen_aarch64_sve:
 	incp	x1, p0.b
 	b	0b
 
-	.size	__strlen_aarch64_sve, . - __strlen_aarch64_sve
+END (__strlen_aarch64_sve)
+
 #endif
+
+END_FILE

@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "../asmdefs.h"
+
 #if __ARM_FEATURE_SVE
 /* Assumptions:
  *
@@ -15,10 +17,7 @@
 	.arch	armv8-a+sve
 	.text
 
-	.globl	__strrchr_aarch64_sve
-	.type	__strrchr_aarch64_sve, %function
-	.p2align 4
-__strrchr_aarch64_sve:
+ENTRY_ALIGN (__strrchr_aarch64_sve, 4)
 	dup	z1.b, w1		/* replicate byte across vector */
 	setffr				/* initialize FFR */
 	ptrue	p1.b			/* all ones; loop invariant */
@@ -81,5 +80,8 @@ __strrchr_aarch64_sve:
 5:	mov	x0, 0
 	ret
 
-	.size	__strrchr_aarch64_sve, . - __strrchr_aarch64_sve
+END (__strrchr_aarch64_sve)
+
 #endif
+
+END_FILE

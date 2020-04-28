@@ -122,3 +122,5 @@ L(tail):
 	ret
 
 END (__strchr_aarch64)
+
+END_FILE

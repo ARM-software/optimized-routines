@@ -40,7 +40,7 @@
 	.p2align	6
 L(start):
 	/* Pre-pad to ensure critical loop begins an icache line.  */
-	.rep 7
+	.rep 6
 	nop
 	.endr
 	/* Put this code here to avoid wasting more space with pre-padding.  */
@@ -153,3 +153,5 @@ L(misaligned):
 	b	L(realigned)
 
 END (__strnlen_aarch64)
+
+END_FILE

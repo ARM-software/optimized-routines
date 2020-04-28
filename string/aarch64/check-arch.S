@@ -8,3 +8,6 @@
 #if !__aarch64__
 # error ARCH setting does not match the compiler.
 #endif
+
+#include "../asmdefs.h"
+END_FILE

@@ -112,3 +112,5 @@ L(no_zva_loop):
 	ret
 
 END (__memset_aarch64)
+
+END_FILE

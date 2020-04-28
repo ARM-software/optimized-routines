@@ -130,3 +130,5 @@ L(tail):
 	ret
 
 END (__strrchr_aarch64_mte)
+
+END_FILE
