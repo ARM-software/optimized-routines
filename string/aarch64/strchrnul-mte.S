@@ -1,100 +1,85 @@
 /*
  * strchrnul - find a character or nul in a string
  *
- * Copyright (c) 2014-2020, Arm Limited.
+ * Copyright (c) 2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
 /* Assumptions:
  *
- * ARMv8-a, AArch64
- * Neon Available.
+ * ARMv8-a, AArch64, Advanced SIMD.
+ * MTE compatible.
  */
 
 #include "../asmdefs.h"
 
-/* Arguments and results.  */
 #define srcin		x0
 #define chrin		w1
-
 #define result		x0
 
 #define src		x2
-#define	tmp1		x3
-#define wtmp2		w4
-#define tmp3		x5
+#define tmp1		x1
+#define tmp2		x3
+#define tmp2w		w3
 
 #define vrepchr		v0
-#define qdata		q1
 #define vdata		v1
 #define vhas_nul	v2
 #define vhas_chr	v3
-#define vrepmask_c	v5
-#define vend		v6
+#define vrepmask	v4
+#define vend		v5
+#define dend		d5
 
 /* Core algorithm:
 
-   For each 16-byte chunk we calculate a 64-bit syndrome value, with four bits
-   per byte. For each tuple, bit 0 is set if the relevant byte matched the
-   requested character or NUL and bit 1, 2, 3 are not used (faster than using
-   a lower bit syndrome). Since the bits in the syndrome reflect exactly the
-   order in which things occur in the original string, counting trailing zeros
-   allows to identify exactly which byte has matched.  */
-
-/* Locals and temporaries.  */
+   For each 16-byte chunk we calculate a 64-bit syndrome value with four bits
+   per byte. For even bytes, bits 0-3 are set if the relevant byte matched the
+   requested character or the byte is NUL. Bits 4-7 must be zero. Bits 4-7 are
+   set likewise for odd bytes so that adjacent bytes can be merged. Since the
+   bits in the syndrome reflect the order in which things occur in the original
+   string, counting trailing zeros identifies exactly which byte matched.  */
 
 ENTRY (__strchrnul_aarch64_mte)
-	/* Magic constant 0x10011001 to allow us to identify which lane
-	   matches the requested byte.  */
-	mov	wtmp2, #0x1001
-	movk	wtmp2, #0x1001, lsl #16
+	bic	src, srcin, 15
 	dup	vrepchr.16b, chrin
-	bic	src, srcin, #15		/* Work with aligned 16-byte chunks. */
-	dup	vrepmask_c.4s, wtmp2
-	ands	tmp1, srcin, #15
-	b.eq	L(loop)
-
-	/* Input string is not 16-byte aligned.  Rather than forcing
-	   the padding bytes to a safe value, we calculate the syndrome
-	   for all the bytes, but then mask off those bits of the
-	   syndrome that are related to the padding.  */
-	ld1	{vdata.16b}, [src], #16
+	ld1	{vdata.16b}, [src]
+	mov	tmp2w, 0xf00f
+	dup	vrepmask.8h, tmp2w
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
-	cmeq	vhas_nul.16b, vdata.16b, #0
-	lsl	tmp1, tmp1, #2
-	orr	vhas_chr.16b, vhas_nul.16b, vhas_chr.16b
-	mov	tmp3, #~0
-	and	vend.16b, vhas_chr.16b, vrepmask_c.16b
-
-	addp	vend.16b, vend.16b, vend.16b		/* 128->64 */
-	lsl	tmp1, tmp3, tmp1
-
-	mov	tmp3, vend.d[0]
-	ands	tmp1, tmp3, tmp1	/* Mask padding bits.  */
-	b.ne	L(tail)
-
-L(loop):
-	ld1	{vdata.16b}, [src], #16
-	cmeq	vhas_nul.16b, vdata.16b, #0
-	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
-	/* Use a fast check for the termination condition.  */
-	orr	vhas_chr.16b, vhas_nul.16b, vhas_chr.16b
+	cmhs	vhas_chr.16b, vhas_chr.16b, vdata.16b
+	lsl	tmp2, srcin, 2
+	and	vhas_chr.16b, vhas_chr.16b, vrepmask.16b
 	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
-	mov	tmp1, vend.d[0]
+	fmov	tmp1, dend
+	lsr	tmp1, tmp1, tmp2	/* Mask padding bits.  */
+	cbz	tmp1, L(loop1)
+
+	rbit	tmp1, tmp1
+	clz	tmp1, tmp1
+	add	result, srcin, tmp1, lsr 2
+	ret
+
+	nop
+	nop
+L(loop1):
+	add	src, src, 16
+
+	.p2align 4
+L(loop):
+	ld1	{vdata.16b}, [src], 16
+	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
+	cmhs	vhas_chr.16b, vhas_chr.16b, vdata.16b
+	umaxp	vend.16b, vhas_chr.16b, vhas_chr.16b
+	fmov	tmp1, dend
 	cbz	tmp1, L(loop)
 
-	/* Termination condition found, let's calculate the syndrome value */
-	and	vend.16b, vhas_chr.16b, vrepmask_c.16b
-	addp	vend.16b, vend.16b, vend.16b		/* 128->64 */
-
-	mov	tmp1, vend.d[0]
-L(tail):
-	/* Count the trailing zeros, by bit reversing...  */
+	sub	src, src, 16
+	bic	vhas_chr.8h, 0x0f, lsl 8
+	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
+	fmov	tmp1, dend
 	rbit	tmp1, tmp1
-	/* Re-bias source.  */
-	sub	src, src, #16
-	clz	tmp1, tmp1	/* And counting the leading zeros.  */
-	add	result, src, tmp1, lsr #2
+	clz	tmp1, tmp1
+	add	result, src, tmp1, lsr 2
 	ret
 
 END (__strchrnul_aarch64_mte)
