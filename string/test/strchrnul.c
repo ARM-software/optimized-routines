@@ -34,9 +34,8 @@ F(__strchrnul_aarch64_sve)
 };
 
 #define A 32
-#define SP 512
-#define LEN 250000
-static char sbuf[LEN+2*A+1];
+#define LEN 512
+static char sbuf[LEN+3*A];
 
 static void *alignup(void *p)
 {
@@ -55,23 +54,29 @@ static void test(const struct fun *fun, int align, int seekpos, int len)
 		return;
 	if (len > LEN || seekpos >= len || align >= A)
 		abort();
-	if (seekchar >= 'a' && seekchar <= 'a' + 23)
-		abort();
 
-	for (int i = 0; i < len + A; i++)
-		src[i] = '?';
+	for (int i = 0; src + i < s; i++)
+		src[i] = i & 1 ? seekchar : 0;
+	for (int i = 1; i < A; i++)
+		s[len+i] = i & 1 ? seekchar : 0;
 	for (int i = 0; i < len; i++)
-		s[i] = 'a' + i%23;
+		s[i] = 'a' + i%32;
 	if (seekpos != -1)
-		s[seekpos] = seekchar;
+		s[seekpos] = s[seekpos+2] = seekchar;
 	s[len] = '\0';
 
 	p = fun->fun(s, seekchar);
-
 	if (p != f) {
-		ERR("%s(%p,0x%02x,%d) returned %p\n", fun->name, s, seekchar, len, p);
-		quoteat("input", s, len+A, seekpos);
-		printf("expected: %p\n", f);
+		ERR("%s(%p,0x%02x) len %d returned %p, expected %p pos %d\n",
+			fun->name, s, seekchar, len, p, f, seekpos);
+		quote("input", s, len);
+	}
+
+	p = fun->fun(s, 0);
+	if (p != s + len) {
+		ERR("%s(%p,0x%02x) len %d returned %p, expected %p pos %d\n",
+			fun->name, s, seekchar, len, p, s + len, len);
+		quote("input", s, len);
 	}
 }
 
@@ -82,14 +87,10 @@ int main()
 		err_count = 0;
 		for (int a = 0; a < A; a++) {
 			int n;
-			for (n = 1; n < 100; n++) {
-				for (int sp = 0; sp < n - 1; sp++)
+			for (n = 1; n < LEN; n++) {
+				for (int sp = 0; sp < n; sp++)
 					test(funtab+i, a, sp, n);
 				test(funtab+i, a, -1, n);
-			}
-			for (; n < LEN; n *= 2) {
-				test(funtab+i, a, -1, n);
-				test(funtab+i, a, n / 2, n);
 			}
 		}
 		printf("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
