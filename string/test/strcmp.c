@@ -21,6 +21,7 @@ static const struct fun
 F(strcmp)
 #if __aarch64__
 F(__strcmp_aarch64)
+F(__strcmp_aarch64_mte)
 # if __ARM_FEATURE_SVE
 F(__strcmp_aarch64_sve)
 # endif
