@@ -24,6 +24,7 @@
 
 #define vrepchr		v0
 #define vdata		v1
+#define qdata		q1
 #define vhas_nul	v2
 #define vhas_chr	v3
 #define vrepmask	v4
@@ -52,32 +53,28 @@ ENTRY (__strchrnul_aarch64_mte)
 	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
 	fmov	tmp1, dend
 	lsr	tmp1, tmp1, tmp2	/* Mask padding bits.  */
-	cbz	tmp1, L(loop1)
+	cbz	tmp1, L(loop)
 
 	rbit	tmp1, tmp1
 	clz	tmp1, tmp1
 	add	result, srcin, tmp1, lsr 2
 	ret
 
-	nop
-	nop
-L(loop1):
-	add	src, src, 16
-
 	.p2align 4
 L(loop):
-	ld1	{vdata.16b}, [src], 16
+	ldr	qdata, [src, 16]!
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
 	cmhs	vhas_chr.16b, vhas_chr.16b, vdata.16b
 	umaxp	vend.16b, vhas_chr.16b, vhas_chr.16b
 	fmov	tmp1, dend
 	cbz	tmp1, L(loop)
 
-	sub	src, src, 16
-	bic	vhas_chr.8h, 0x0f, lsl 8
+	and	vhas_chr.16b, vhas_chr.16b, vrepmask.16b
 	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
 	fmov	tmp1, dend
+#ifndef __AARCH64EB__
 	rbit	tmp1, tmp1
+#endif
 	clz	tmp1, tmp1
 	add	result, src, tmp1, lsr 2
 	ret
