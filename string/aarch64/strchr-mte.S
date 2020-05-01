@@ -24,6 +24,7 @@
 
 #define vrepchr		v0
 #define vdata		v1
+#define qdata		q1
 #define vhas_nul	v2
 #define vhas_chr	v3
 #define vrepmask	v4
@@ -41,7 +42,7 @@
    in the syndrome reflect the order in which things occur in the original
    string, counting trailing zeros identifies exactly which byte matched.  */
 
-ENTRY(__strchr_aarch64_mte)
+ENTRY (__strchr_aarch64_mte)
 	bic	src, srcin, 15
 	dup	vrepchr.16b, chrin
 	ld1	{vdata.16b}, [src]
@@ -59,7 +60,7 @@ ENTRY(__strchr_aarch64_mte)
 
 	fmov	tmp1, dend
 	lsr	tmp1, tmp1, tmp3
-	cbz	tmp1, L(loop1)
+	cbz	tmp1, L(loop)
 
 	rbit	tmp1, tmp1
 	clz	tmp1, tmp1
@@ -70,25 +71,27 @@ ENTRY(__strchr_aarch64_mte)
 	csel	result, result, xzr, eq
 	ret
 
-L(loop1):
-	add	src, src, 16
-
 	.p2align 4
 L(loop):
-	ld1	{vdata.16b}, [src], 16
+	ldr	qdata, [src, 16]!
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
 	cmhs	vhas_nul.16b, vhas_chr.16b, vdata.16b
 	umaxp	vend.16b, vhas_nul.16b, vhas_nul.16b
 	fmov	tmp1, dend
 	cbz	tmp1, L(loop)
 
-	sub	src, src, 16
-	bit	vhas_nul.16b, vhas_chr.16b, vrepmask.16b
-	bic	vhas_nul.8h, 0x0f, lsl 8
+#ifdef __AARCH64EB__
+	bif	vhas_nul.16b, vhas_chr.16b, vrepmask.16b
+	and	vhas_nul.16b, vhas_nul.16b, vrepmask2.16b
 	addp	vend.16b, vhas_nul.16b, vhas_nul.16b		/* 128->64 */
-
+	fmov	tmp1, dend
+#else
+	bit	vhas_nul.16b, vhas_chr.16b, vrepmask.16b
+	and	vhas_nul.16b, vhas_nul.16b, vrepmask2.16b
+	addp	vend.16b, vhas_nul.16b, vhas_nul.16b		/* 128->64 */
 	fmov	tmp1, dend
 	rbit	tmp1, tmp1
+#endif
 	clz	tmp1, tmp1
 	/* Tmp1 is an even multiple of 2 if the target character was
 	   found first. Otherwise we've found the end of string.  */
@@ -97,6 +100,6 @@ L(loop):
 	csel	result, result, xzr, eq
 	ret
 
-END(__strchr_aarch64_mte)
+END (__strchr_aarch64_mte)
 
 END_FILE
