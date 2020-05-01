@@ -60,6 +60,9 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 #math-ulpflags = -q -f
 #math-testflags = -nostatus
 
+# Remove GNU Property Notes from asm files.
+#string-cflags += -DWANT_GNU_PROPERTY=0
+
 # Enable assertion checks.
 #networking-cflags += -DWANT_ASSERT
 

@@ -33,7 +33,17 @@
   .word features;			\
   .word 0;
 
+/* If set then the GNU Property Note section will be added to
+   mark objects to support BTI and PAC-RET.  */
+#ifndef WANT_GNU_PROPERTY
+#define WANT_GNU_PROPERTY 1
+#endif
+
+#if WANT_GNU_PROPERTY
 #define END_FILE GNU_PROPERTY(FEATURE_1_BTI|FEATURE_1_PAC)
+#else
+#define END_FILE
+#endif
 
 #define ENTRY_ALIGN(name, alignment)	\
   .global name;		\
