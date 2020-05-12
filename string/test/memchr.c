@@ -1,7 +1,7 @@
 /*
  * memchr test.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
@@ -18,7 +18,7 @@
 static const struct fun
 {
   const char *name;
-  void *(*fun) (const void *, int c, size_t n);
+  void *(*fun) (const void *s, int c, size_t n);
 } funtab[] = {
   // clang-format off
   F(memchr)
@@ -36,74 +36,64 @@ static const struct fun
 };
 #undef F
 
-#define A 32
-#define SP 512
-#define LEN 250000
-#define MAX_LEN SIZE_MAX
-
-static unsigned char sbuf[LEN + 2 * A];
+#define ALIGN 32
+#define LEN 512
+static char sbuf[LEN + 3 * ALIGN];
 
 static void *
 alignup (void *p)
 {
-  return (void *) (((uintptr_t) p + A - 1) & -A);
+  return (void *) (((uintptr_t) p + ALIGN - 1) & -ALIGN);
 }
 
 static void
-test (const struct fun *fun, int align, size_t seekpos, size_t array_len,
-      size_t param_len)
+test (const struct fun *fun, int align, size_t seekpos, size_t len,
+      size_t maxlen)
 {
-  unsigned char *src = alignup (sbuf);
-  unsigned char *s = src + align;
-  unsigned char *f = array_len ? s + seekpos : 0;
-  int seekchar = 0x1;
-  int i;
+  char *src = alignup (sbuf);
+  char *s = src + align;
+  char *f = seekpos < maxlen ? s + seekpos : NULL;
+  int seekchar = 1;
   void *p;
 
   if (err_count >= ERR_LIMIT)
     return;
-  if (array_len > LEN || seekpos >= array_len || align >= A)
+  if (len > LEN || seekpos > LEN || align > ALIGN)
     abort ();
 
-  for (i = 0; i < seekpos; i++)
-    s[i] = 'a' + i % 23;
-  s[i++] = seekchar;
-  for (; i < array_len; i++)
-    s[i] = 'a' + i % 23;
+  for (int i = 0; src + i < s; i++)
+    src[i] = seekchar;
+  for (int i = 0; i <= ALIGN; i++)
+    s[len + i] = seekchar;
+  for (int i = 0; i < len; i++)
+    s[i] = 'a' + (i & 31);
+  s[seekpos] = seekchar;
+  s[((len ^ align) & 1) ? seekpos + 1 : len] = seekchar;
 
-  p = fun->fun (s, seekchar, param_len);
-
+  p = fun->fun (s, seekchar, maxlen);
   if (p != f)
     {
-      ERR ("%s(%p,0x%02x,%zu) returned %p\n", fun->name, s, seekchar, param_len,
-	   p);
-      printf ("expected: %p\n", f);
-      quote ("str", s, param_len);
+      ERR ("%s (%p, 0x%02x, %zu) returned %p, expected %p\n", fun->name, s,
+	   seekchar, maxlen, p, f);
+      quote ("input", s, len);
     }
 }
 
 int
-main ()
+main (void)
 {
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
       err_count = 0;
-      for (int a = 0; a < A; a++)
-	{
-	  for (int n = 0; n < 100; n++)
-	    for (int sp = 0; sp < n - 1; sp++)
+      for (int a = 0; a < ALIGN; a++)
+	for (int n = 0; n < LEN; n++)
+	  {
+	    for (int sp = 0; sp < LEN; sp++)
 	      test (funtab + i, a, sp, n, n);
-	  for (int n = 100; n < LEN; n *= 2)
-	    {
-	      test (funtab + i, a, n - 1, n, n);
-	      test (funtab + i, a, n / 2, n, n);
-	    }
-	  for (int n = 0; n < 100; n++)
-	    {
-	      test (funtab + i, a, LEN - 1 - n, LEN, MAX_LEN - n);
-	    }
-	}
+	    test (funtab + i, a, n, n, SIZE_MAX - a);
+	  }
+
       printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
       if (err_count)
 	r = -1;
