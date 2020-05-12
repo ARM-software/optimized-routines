@@ -27,6 +27,7 @@ string-tests := \
 	build/bin/test/memmove \
 	build/bin/test/memset \
 	build/bin/test/memchr \
+	build/bin/test/memrchr \
 	build/bin/test/memcmp \
 	build/bin/test/strcpy \
 	build/bin/test/stpcpy \
