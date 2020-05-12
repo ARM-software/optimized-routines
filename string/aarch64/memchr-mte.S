@@ -1,32 +1,29 @@
 /*
  * memchr - find a character in a memory zone
  *
- * Copyright (c) 2014-2020, Arm Limited.
+ * Copyright (c) 2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
 /* Assumptions:
  *
- * ARMv8-a, AArch64
- * Neon Available.
+ * ARMv8-a, AArch64, Advanced SIMD.
+ * MTE compatible.
  */
 
 #include "../asmdefs.h"
 
-/* Arguments and results.  */
 #define srcin		x0
 #define chrin		w1
 #define cntin		x2
-
 #define result		x0
 
 #define src		x3
-#define	tmp		x4
-#define	tmp2		x5
-#define wtmp2		w5
-#define synd		x6
-#define soff		x9
-#define cntrem		x10
+#define cntrem		x4
+#define synd		x5
+#define shift		x6
+#define	tmp		x7
+#define wtmp		w7
 
 #define vrepchr		v0
 #define qdata		q1
@@ -34,115 +31,83 @@
 #define vhas_chr	v2
 #define vrepmask	v3
 #define vend		v4
+#define dend		d4
 
 /*
- * Core algorithm:
- *
- * For each 16-byte chunk we calculate a 64-bit syndrome value, with four bits
- * per byte. For each tuple, bit 0 is set if the relevant byte matched the
- * requested character and bit 1, 2, 3 are not used (faster than using a lower
- * bit syndrome). Since the bits in the syndrome reflect exactly the order in
- * which things occur in the original string, counting trailing zeros allows to
- * identify exactly which byte has matched.
- */
+   Core algorithm:
+
+   For each 16-byte chunk we calculate a 64-bit syndrome value with four bits
+   per byte. For even bytes, bits 0-3 are set if the relevant byte matched the
+   requested character or the byte is NUL. Bits 4-7 must be zero. Bits 4-7 are
+   set likewise for odd bytes so that adjacent bytes can be merged. Since the
+   bits in the syndrome reflect the order in which things occur in the original
+   string, counting trailing zeros identifies exactly which byte matched.  */
 
 ENTRY (__memchr_aarch64_mte)
-	/* Do not dereference srcin if no bytes to compare.  */
-	cbz	cntin, L(zero_length)
-	/*
-	 * Magic constant 0x10011001 allows us to identify which lane matches
-	 * the requested byte.
-	 */
-	mov	wtmp2, #0x1001
-	movk	wtmp2, #0x1001, lsl #16
+	bic	src, srcin, 15
+	cbz	cntin, L(nomatch)
+	ld1	{vdata.16b}, [src]
 	dup	vrepchr.16b, chrin
-	/* Work with aligned 16-byte chunks */
-	bic	src, srcin, #15
-	dup	vrepmask.4s, wtmp2
-	ands	soff, srcin, #15
-	and	cntrem, cntin, #15
-	b.eq	L(aligned_start)
-
-	/*
-	 * Input string is not 16-byte aligned. We calculate the syndrome
-	 * value for the aligned 16 bytes block containing the first bytes
-	 * and mask the irrelevant part.
-	 */
-
-	ld1	{vdata.16b}, [src], #16
-	sub	tmp, soff, #16
-	adds	cntin, cntin, tmp
+	mov	wtmp, 0xf00f
+	dup	vrepmask.8h, wtmp
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
-	lsl	tmp, soff, #2
-	mov	tmp2, #~0
+	lsl	shift, srcin, 2
 	and	vhas_chr.16b, vhas_chr.16b, vrepmask.16b
-	lsl	tmp, tmp2, tmp
-	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
-	mov	synd, vend.d[0]
-	/* Clear the soff*4 lower bits */
-	and	synd, synd, tmp
-	/* The first block can also be the last */
-	b.ls	L(masklast)
-	/* Have we found something already? */
-	cbnz	synd, L(tail)
+	addp	vend.16b, vhas_chr.16b, vhas_chr.16b            /* 128->64 */
+	fmov	synd, dend
+	lsr	synd, synd, shift
+	cbz	synd, L(start_loop)
 
-L(aligned_start:)
+	rbit	synd, synd
+	clz	synd, synd
+	add	result, srcin, synd, lsr 2
+	cmp	cntin, synd, lsr 2
+	csel	result, result, xzr, hi
+	ret
+
+L(start_loop):
+	sub	tmp, src, srcin
+	add	tmp, tmp, 16
+	subs	cntrem, cntin, tmp
+	b.ls	L(nomatch)
+
 	/* Make sure that it won't overread by a 16-byte chunk */
-	add	tmp, cntin, #15
+	add	tmp, cntrem, 15
 	tbnz	tmp, 4, L(loop32_2)
 
+	.p2align 4
 L(loop32):
-	ld1	{vdata.16b}, [src], #16
-	subs	cntin, cntin, #16
+	ldr	qdata, [src, 16]!
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
-	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
-	mov	synd, vend.d[0]
+	umaxp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
+	fmov	synd, dend
 	cbnz	synd, L(end)
 
 L(loop32_2):
-	ld1	{vdata.16b}, [src], #16
-	subs	cntin, cntin, #16
+	ldr	qdata, [src, 16]!
+	subs	cntrem, cntrem, 32
 	cmeq	vhas_chr.16b, vdata.16b, vrepchr.16b
 	b.ls	L(end)
-	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
-	mov	synd, vend.d[0]
-	/* We haven't found the character, loop with 32 byte chunks */
+	umaxp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
+	fmov	synd, dend
 	cbz	synd, L(loop32)
-
 L(end):
-	/* Termination condition found, let's calculate the syndrome value */
 	and	vhas_chr.16b, vhas_chr.16b, vrepmask.16b
 	addp	vend.16b, vhas_chr.16b, vhas_chr.16b		/* 128->64 */
-	mov	synd, vend.d[0]
-	/* Only do the clear for the last possible block */
-	b.hs	L(tail)
-
-L(masklast):
-	/* Clear the (16 - ((cntrem + soff) % 16)) * 4 upper bits */
-	add	tmp, cntrem, soff
-	and	tmp, tmp, #15
-	sub	tmp, tmp, #16
-	neg	tmp, tmp, lsl #2
-	lsl	synd, synd, tmp
-	lsr	synd, synd, tmp
-
-L(tail):
-	/* Count the trailing zeros using bit reversing */
+	fmov	synd, dend
+	add	tmp, srcin, cntin
+	sub	cntrem, tmp, src
+#ifndef __AARCH64EB__
 	rbit	synd, synd
-	/* Compensate the last post-increment */
-	sub	src, src, #16
-	/* Check that we have found a character */
-	cmp	synd, #0
-	/* And count the leading zeros */
+#endif
 	clz	synd, synd
-	/* Compute the potential result */
-	add	result, src, synd, lsr #2
-	/* Select result or NULL */
-	csel	result, xzr, result, eq
+	cmp	cntrem, synd, lsr 2
+	add	result, src, synd, lsr 2
+	csel	result, result, xzr, hi
 	ret
 
-L(zero_length):
-	mov	result, #0
+L(nomatch):
+	mov	result, 0
 	ret
 
 END (__memchr_aarch64_mte)
