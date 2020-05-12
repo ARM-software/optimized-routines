@@ -132,4 +132,3 @@ L(byte_loop):
 
 END (__memcmp_aarch64)
 
-END_FILE

@@ -56,4 +56,3 @@ END (__strlen_aarch64_sve)
 
 #endif
 
-END_FILE

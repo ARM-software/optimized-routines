@@ -108,4 +108,3 @@ L(nomatch):
 
 END (__strnlen_aarch64)
 
-END_FILE

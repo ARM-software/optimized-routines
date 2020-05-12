@@ -63,4 +63,3 @@ END (__memchr_aarch64_sve)
 
 #endif
 
-END_FILE

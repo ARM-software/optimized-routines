@@ -73,4 +73,3 @@ END (__strnlen_aarch64_sve)
 
 #endif
 
-END_FILE

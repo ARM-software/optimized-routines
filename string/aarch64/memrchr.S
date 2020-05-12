@@ -114,4 +114,3 @@ L(nomatch):
 
 END (__memrchr_aarch64)
 
-END_FILE

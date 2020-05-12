@@ -307,4 +307,3 @@ L(ret0):
 	ret
 END(__strncmp_aarch64_mte)
 
-END_FILE

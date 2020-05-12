@@ -77,4 +77,3 @@ L(loop):
 
 END (__strlen_aarch64_mte)
 
-END_FILE

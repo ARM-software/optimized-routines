@@ -142,4 +142,3 @@ L(zero_length):
 
 END (__memchr_aarch64)
 
-END_FILE

@@ -146,4 +146,3 @@ L(tail):
 
 END (__strrchr_aarch64)
 
-END_FILE

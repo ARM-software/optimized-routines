@@ -243,4 +243,3 @@ L(done):
 
 END (__strcmp_aarch64_mte)
 
-END_FILE

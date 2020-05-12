@@ -238,4 +238,3 @@ L(copy64_from_start):
 
 END (__memcpy_aarch64)
 
-END_FILE
