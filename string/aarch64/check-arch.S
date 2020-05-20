@@ -9,5 +9,5 @@
 # error ARCH setting does not match the compiler.
 #endif
 
+/* Include for GNU property notes.  */
 #include "../asmdefs.h"
-END_FILE

@@ -260,4 +260,3 @@ L(ret0):
 
 END ( __strncmp_aarch64)
 
-END_FILE

@@ -112,4 +112,3 @@ L(nomatch):
 
 END (__memchr_aarch64_mte)
 
-END_FILE

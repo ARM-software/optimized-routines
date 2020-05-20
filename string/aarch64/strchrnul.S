@@ -111,4 +111,3 @@ L(tail):
 
 END (__strchrnul_aarch64)
 
-END_FILE

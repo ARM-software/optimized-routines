@@ -24,6 +24,7 @@ static const struct fun
   F(stpcpy)
 #if __aarch64__
   F(__stpcpy_aarch64)
+  F(__stpcpy_aarch64_mte)
 # if __ARM_FEATURE_SVE
   F(__stpcpy_aarch64_sve)
 # endif

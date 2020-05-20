@@ -81,4 +81,3 @@ L(loop):
 
 END (__strchrnul_aarch64_mte)
 
-END_FILE

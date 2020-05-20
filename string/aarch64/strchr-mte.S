@@ -102,4 +102,3 @@ L(loop):
 
 END (__strchr_aarch64_mte)
 
-END_FILE

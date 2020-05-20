@@ -113,4 +113,3 @@ L(no_zva_loop):
 
 END (__memset_aarch64)
 
-END_FILE

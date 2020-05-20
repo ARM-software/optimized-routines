@@ -307,4 +307,3 @@ L(page_cross):
 
 END (STRCPY)
 
-END_FILE

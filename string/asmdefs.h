@@ -17,21 +17,24 @@
 #define PACIASP		hint	25; .cfi_window_save
 #define AUTIASP		hint	29; .cfi_window_save
 
+/* GNU_PROPERTY_AARCH64_* macros from elf.h.  */
+#define FEATURE_1_AND 0xc0000000
 #define FEATURE_1_BTI 1
 #define FEATURE_1_PAC 2
 
-/* Add a GNU_PROPERTY_AARCH64_FEATURE_1_AND note.  */
-#define GNU_PROPERTY(features)		\
+/* Add a NT_GNU_PROPERTY_TYPE_0 note.  */
+#define GNU_PROPERTY(type, value)	\
   .section .note.gnu.property, "a";	\
   .p2align 3;				\
   .word 4;				\
   .word 16;				\
   .word 5;				\
   .asciz "GNU";				\
-  .word 0xc0000000;			\
+  .word type;				\
   .word 4;				\
-  .word features;			\
-  .word 0;
+  .word value;				\
+  .word 0;				\
+  .text
 
 /* If set then the GNU Property Note section will be added to
    mark objects to support BTI and PAC-RET.  */
@@ -40,9 +43,8 @@
 #endif
 
 #if WANT_GNU_PROPERTY
-#define END_FILE GNU_PROPERTY(FEATURE_1_BTI|FEATURE_1_PAC)
-#else
-#define END_FILE
+/* Add property note with supported features to all asm files.  */
+GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 #endif
 
 #define ENTRY_ALIGN(name, alignment)	\

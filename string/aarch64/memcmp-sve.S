@@ -49,4 +49,3 @@ END (__memcmp_aarch64_sve)
 
 #endif
 
-END_FILE

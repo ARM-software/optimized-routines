@@ -205,4 +205,3 @@ L(page_cross):
 
 END (__strlen_aarch64)
 
-END_FILE
