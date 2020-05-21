@@ -1,7 +1,7 @@
 /*
  * strlen test.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
@@ -38,15 +38,14 @@ static const struct fun
 };
 #undef F
 
-#define A 32
-#define SP 512
-#define LEN 250000
-static char sbuf[LEN + 2 * A + 1];
+#define ALIGN 32
+#define LEN 512
+static char sbuf[LEN + 3 * ALIGN];
 
 static void *
 alignup (void *p)
 {
-  return (void *) (((uintptr_t) p + A - 1) & -A);
+  return (void *) (((uintptr_t) p + ALIGN - 1) & -ALIGN);
 }
 
 static void
@@ -58,39 +57,36 @@ test (const struct fun *fun, int align, int len)
 
   if (err_count >= ERR_LIMIT)
     return;
-  if (len > LEN || align >= A)
+  if (len > LEN || align >= ALIGN)
     abort ();
 
-  for (int i = 0; i < len + A; i++)
-    src[i] = '?';
+  for (int i = 0; src + i < s; i++)
+    src[i] = 0;
+  for (int i = 1; i <= ALIGN; i++)
+    s[len + i] = (len + align) & 1 ? 1 : 0;
   for (int i = 0; i < len; i++)
-    s[i] = 'a' + i % 23;
+    s[i] = 'a' + (i & 31);
   s[len] = '\0';
 
   r = fun->fun (s);
   if (r != len)
     {
-      ERR ("%s(%p) returned %zu\n", fun->name, s, r);
+      ERR ("%s (%p) returned %zu expected %d\n", fun->name, s, r, len);
       quote ("input", src, len);
-      printf ("expected: %d\n", len);
     }
 }
 
 int
-main ()
+main (void)
 {
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
       err_count = 0;
-      for (int a = 0; a < A; a++)
-	{
-	  int n;
-	  for (n = 1; n < 100; n++)
-	    test (funtab + i, a, n);
-	  for (; n < LEN; n *= 2)
-	    test (funtab + i, a, n);
-	}
+      for (int a = 0; a < ALIGN; a++)
+	for (int n = 0; n < LEN; n++)
+	  test (funtab + i, a, n);
+
       printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
       if (err_count)
 	r = -1;
