@@ -55,23 +55,24 @@ test (const struct fun *fun, int align, size_t maxlen, size_t len)
 
   if (err_count >= ERR_LIMIT)
     return;
-  if (len > LEN || align > ALIGN)
+  if (len > LEN || align >= ALIGN)
     abort ();
 
   for (int i = 0; src + i < s; i++)
     src[i] = 0;
   for (int i = 1; i <= ALIGN; i++)
-    s[len + i] = 0;
+    s[len + i] = (len + align) & 1 ? 1 : 0;
   for (int i = 0; i < len; i++)
     s[i] = 'a' + (i & 31);
   s[len] = 0;
-  s[((len ^ align) & 1) ? e + 1 : len + 1] = 0;
+  if ((len + align) & 1)
+    s[e + 1] = 0;
 
   r = fun->fun (s, maxlen);
   if (r != e)
     {
-      ERR ("%s (%p, %zu) len %zu returned %zu, expected %zu\n", fun->name, s,
-	   maxlen, len, r, e);
+      ERR ("%s (%p, %zu) len %zu returned %zu, expected %zu\n",
+	   fun->name, s, maxlen, len, r, e);
       quote ("input", s, len);
     }
 }
