@@ -13,7 +13,9 @@
 #include "stringlib.h"
 #include "benchlib.h"
 
-#define ITERS 2000
+#define ITERS 5000
+#define ITERS2 20000000
+#define ITERS3 500000
 #define MAX_COPIES 8192
 #define SIZE (256*1024)
 
@@ -158,16 +160,17 @@ int main (void)
   memset (a, 1, sizeof (a));
   memset (b, 2, sizeof (b));
 
+  printf("Random memcpy:\n");
   for (int f = 0; funtab[f].name != 0; f++)
     {
       size_t total = 0;
       uint64_t tsum = 0;
-      printf("%22s ", funtab[f].name);
+      printf ("%22s (B/ns) ", funtab[f].name);
       rand32 (0x12345678);
 
       for (int size = 16384; size <= SIZE; size *= 2)
 	{
-	  total += init_copies (size);
+	  size_t copy_size = init_copies (size) * ITERS;
 
 	  for (int c = 0; c < MAX_COPIES; c++)
 	    funtab[f].fun (b + copy[c].dst, a + copy[c].src, copy[c].len);
@@ -177,10 +180,47 @@ int main (void)
 	    for (int c = 0; c < MAX_COPIES; c++)
 	      funtab[f].fun (b + copy[c].dst, a + copy[c].src, copy[c].len);
 	  t = clock_get_ns () - t;
+	  total += copy_size;
 	  tsum += t;
-	  printf("%dK: %.1fms, ", size / 1024, t / 1000000.0);
+	  printf ("%dK: %.2f ", size / 1024, (double)copy_size / t);
 	}
-      printf("\b\b (%.2fb/ns)\n", (double)total * ITERS / tsum);
+      printf( "avg %.2f\n", (double)total / tsum);
     }
+
+  printf ("\nMedium memcpy:\n");
+  for (int f = 0; funtab[f].name != 0; f++)
+    {
+      printf ("%22s (B/ns) ", funtab[f].name);
+
+      for (int size = 16; size <= 512; size *= 2)
+	{
+	  uint64_t t = clock_get_ns ();
+	  for (int i = 0; i < ITERS2; i++)
+	    funtab[f].fun (b, a, size);
+	  t = clock_get_ns () - t;
+	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+		  size < 1024 ? 'B' : 'K', (double)size * ITERS2 / t);
+	}
+      printf ("\n");
+    }
+
+  printf ("\nLarge memcpy:\n");
+  for (int f = 0; funtab[f].name != 0; f++)
+    {
+      printf ("%22s (B/ns) ", funtab[f].name);
+
+      for (int size = 1024; size <= 32768; size *= 2)
+	{
+	  uint64_t t = clock_get_ns ();
+	  for (int i = 0; i < ITERS3; i++)
+	    funtab[f].fun (b, a, size);
+	  t = clock_get_ns () - t;
+	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+		  size < 1024 ? 'B' : 'K', (double)size * ITERS3 / t);
+	}
+      printf ("\n");
+    }
+
+
   return 0;
 }
