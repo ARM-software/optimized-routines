@@ -9,40 +9,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   int (*fun) (const char *s1, const char *s2);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(strcmp)
+  F(strcmp, 0)
 #if __aarch64__
-  F(__strcmp_aarch64)
-  F(__strcmp_aarch64_mte)
+  F(__strcmp_aarch64, 0)
+  F(__strcmp_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE
-  F(__strcmp_aarch64_sve)
+  F(__strcmp_aarch64_sve, 1)
 # endif
 #elif __arm__
 # if __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1
-  F(__strcmp_arm)
+  F(__strcmp_arm, 0)
 # elif __ARM_ARCH == 6 && __ARM_ARCH_6M__ >= 1
-  F(__strcmp_armv6m)
+  F(__strcmp_armv6m, 0)
 # endif
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define A 32
 #define LEN 250000
-static char s1buf[LEN + 2 * A + 1];
-static char s2buf[LEN + 2 * A + 1];
+static char *s1buf;
+static char *s2buf;
 
 static void *
 alignup (void *p)
@@ -77,7 +79,11 @@ test (const struct fun *fun, int s1align, int s2align, int len, int diffpos,
     s1[diffpos] += delta;
   s1[len] = s2[len] = '\0';
 
+  s1 = tag_buffer (s1, len + 1, fun->test_mte);
+  s2 = tag_buffer (s2, len + 1, fun->test_mte);
   r = fun->fun (s1, s2);
+  untag_buffer (s1, len + 1, fun->test_mte);
+  untag_buffer (s2, len + 1, fun->test_mte);
 
   if ((delta == 0 && r != 0) || (delta > 0 && r <= 0) || (delta < 0 && r >= 0))
     {
@@ -91,6 +97,8 @@ test (const struct fun *fun, int s1align, int s2align, int len, int diffpos,
 int
 main ()
 {
+  s1buf = mte_mmap (LEN + 2 * A + 1);
+  s2buf = mte_mmap (LEN + 2 * A + 1);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -115,7 +123,8 @@ main ()
 		test (funtab + i, d, s, n, n / 2, -1);
 	      }
 	  }
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }

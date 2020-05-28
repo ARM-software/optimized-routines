@@ -10,35 +10,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   void *(*fun) (const void *s, int c, size_t n);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(memchr)
+  F(memchr, 0)
 #if __aarch64__
-  F(__memchr_aarch64)
-  F(__memchr_aarch64_mte)
+  F(__memchr_aarch64, 0)
+  F(__memchr_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE
-  F(__memchr_aarch64_sve)
+  F(__memchr_aarch64_sve, 1)
 # endif
 #elif __arm__
-  F(__memchr_arm)
+  F(__memchr_arm, 0)
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define ALIGN 32
 #define LEN 512
-static char sbuf[LEN + 3 * ALIGN];
+static char *sbuf;
 
 static void *
 alignup (void *p)
@@ -70,7 +72,12 @@ test (const struct fun *fun, int align, size_t seekpos, size_t len,
   s[seekpos] = seekchar;
   s[((len ^ align) & 1) ? seekpos + 1 : len] = seekchar;
 
+  int mte_len = seekpos != -1 ? seekpos + 1 : maxlen;
+  s = tag_buffer (s, mte_len, fun->test_mte);
   p = fun->fun (s, seekchar, maxlen);
+  untag_buffer (s, mte_len, fun->test_mte);
+  p = untag_pointer (p);
+
   if (p != f)
     {
       ERR ("%s (%p, 0x%02x, %zu) returned %p, expected %p\n", fun->name, s,
@@ -82,6 +89,7 @@ test (const struct fun *fun, int align, size_t seekpos, size_t len,
 int
 main (void)
 {
+  sbuf = mte_mmap (LEN + 3 * ALIGN);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -93,8 +101,8 @@ main (void)
 	      test (funtab + i, a, sp, n, n);
 	    test (funtab + i, a, n, n, SIZE_MAX - a);
 	  }
-
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }

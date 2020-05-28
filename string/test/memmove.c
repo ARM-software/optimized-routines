@@ -9,33 +9,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   void *(*fun) (void *, const void *, size_t);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(memmove)
+  F(memmove, 0)
 #if __aarch64__
-  F(__memmove_aarch64)
+  F(__memmove_aarch64, 1)
 # if __ARM_NEON
-  F(__memmove_aarch64_simd)
+  F(__memmove_aarch64_simd, 1)
 # endif
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define A 32
 #define LEN 250000
-static unsigned char dbuf[LEN + 2 * A];
-static unsigned char sbuf[LEN + 2 * A];
+static unsigned char *dbuf;
+static unsigned char *sbuf;
 static unsigned char wbuf[LEN + 2 * A];
 
 static void *
@@ -108,7 +110,12 @@ test_overlap (const struct fun *fun, int dalign, int salign, int len)
   for (int i = 0; i < len; i++)
     w[i] = s[i];
 
+  s = tag_buffer (s, len, fun->test_mte);
+  d = tag_buffer (d, len, fun->test_mte);
   p = fun->fun (d, s, len);
+  untag_buffer (s, len, fun->test_mte);
+  untag_buffer (d, len, fun->test_mte);
+
   if (p != d)
     ERR ("%s(%p,..) returned %p\n", fun->name, d, p);
   for (int i = 0; i < len + A; i++)
@@ -127,6 +134,8 @@ test_overlap (const struct fun *fun, int dalign, int salign, int len)
 int
 main ()
 {
+  dbuf = mte_mmap (LEN + 2 * A);
+  sbuf = mte_mmap (LEN + 2 * A);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -146,7 +155,8 @@ main ()
 		test_overlap (funtab + i, d, s, n);
 	      }
 	  }
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }

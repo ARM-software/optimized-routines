@@ -9,36 +9,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   char *(*fun) (char *dest, const char *src);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(strcpy)
+  F(strcpy, 0)
 #if __aarch64__
-  F(__strcpy_aarch64)
-  F(__strcpy_aarch64_mte)
+  F(__strcpy_aarch64, 0)
+  F(__strcpy_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE
-  F(__strcpy_aarch64_sve)
+  F(__strcpy_aarch64_sve, 1)
 # endif
 #elif __arm__ && defined (__thumb2__) && !defined (__thumb__)
-  F(__strcpy_arm)
+  F(__strcpy_arm, 0)
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define ALIGN 32
 #define LEN 512
-static char dbuf[LEN + 3 * ALIGN];
-static char sbuf[LEN + 3 * ALIGN];
+static char *dbuf;
+static char *sbuf;
 static char wbuf[LEN + 3 * ALIGN];
 
 static void *
@@ -76,7 +78,12 @@ test (const struct fun *fun, int dalign, int salign, int len)
     s[i] = w[i] = 'a' + (i & 31);
   s[len] = w[len] = '\0';
 
+  s = tag_buffer (s, len + 1, fun->test_mte);
+  d = tag_buffer (d, len + 1, fun->test_mte);
   p = fun->fun (d, s);
+  untag_buffer (s, len + 1, fun->test_mte);
+  untag_buffer (d, len + 1, fun->test_mte);
+
   if (p != d)
     ERR ("%s (%p,..) returned %p\n", fun->name, d, p);
 
@@ -96,6 +103,8 @@ test (const struct fun *fun, int dalign, int salign, int len)
 int
 main (void)
 {
+  sbuf = mte_mmap (LEN + 3 * ALIGN);
+  dbuf = mte_mmap (LEN + 3 * ALIGN);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -105,7 +114,8 @@ main (void)
 	  for (int n = 0; n < LEN; n++)
 	    test (funtab + i, d, s, n);
 
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }

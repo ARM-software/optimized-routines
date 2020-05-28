@@ -9,33 +9,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   int (*fun) (const void *s1, const void *s2, size_t n);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(memcmp)
+  F(memcmp, 0)
 #if __aarch64__
-  F(__memcmp_aarch64)
+  F(__memcmp_aarch64, 1)
 # if __ARM_FEATURE_SVE
-  F(__memcmp_aarch64_sve)
+  F(__memcmp_aarch64_sve, 1)
 # endif
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define A 32
 #define LEN 250000
-static unsigned char s1buf[LEN + 2 * A];
-static unsigned char s2buf[LEN + 2 * A];
+static unsigned char *s1buf;
+static unsigned char *s2buf;
 
 static void *
 alignup (void *p)
@@ -69,7 +71,11 @@ test (const struct fun *fun, int s1align, int s2align, int len, int diffpos,
   if (delta)
     s1[diffpos] += delta;
 
+  s1 = tag_buffer (s1, len, fun->test_mte);
+  s2 = tag_buffer (s2, len, fun->test_mte);
   r = fun->fun (s1, s2, len);
+  untag_buffer (s1, len, fun->test_mte);
+  untag_buffer (s2, len, fun->test_mte);
 
   if ((delta == 0 && r != 0) || (delta > 0 && r <= 0) || (delta < 0 && r >= 0))
     {
@@ -83,6 +89,8 @@ test (const struct fun *fun, int s1align, int s2align, int len, int diffpos,
 int
 main ()
 {
+  s1buf = mte_mmap (LEN + 2 * A);
+  s2buf = mte_mmap (LEN + 2 * A);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -108,7 +116,8 @@ main ()
 		test (funtab + i, d, s, n, n / 2, -1);
 	      }
 	  }
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }

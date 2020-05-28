@@ -9,31 +9,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   void *(*fun) (void *s, int c, size_t n);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(memset)
+  F(memset, 0)
 #if __aarch64__
-  F(__memset_aarch64)
+  F(__memset_aarch64, 1)
 #elif __arm__
-  F(__memset_arm)
+  F(__memset_arm, 0)
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define A 32
 #define LEN 250000
-static unsigned char sbuf[LEN + 2 * A];
+static unsigned char *sbuf;
 
 static void *
 alignup (void *p)
@@ -58,7 +60,10 @@ test (const struct fun *fun, int salign, int c, int len)
   for (i = 0; i < len; i++)
     s[i] = 'a' + i % 23;
 
+  s = tag_buffer (s, len, fun->test_mte);
   p = fun->fun (s, c, len);
+  untag_buffer (s, len, fun->test_mte);
+
   if (p != s)
     ERR ("%s(%p,..) returned %p\n", fun->name, s, p);
 
@@ -94,6 +99,7 @@ test (const struct fun *fun, int salign, int c, int len)
 int
 main ()
 {
+  sbuf = mte_mmap (LEN + 2 * A);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -114,7 +120,8 @@ main ()
 	      test (funtab + i, s, 0xaa25, n);
 	    }
 	}
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }

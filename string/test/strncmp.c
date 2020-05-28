@@ -9,34 +9,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mte.h"
 #include "stringlib.h"
 #include "stringtest.h"
 
-#define F(x) {#x, x},
+#define F(x, mte) {#x, x, mte},
 
 static const struct fun
 {
   const char *name;
   int (*fun) (const char *, const char *, size_t);
+  int test_mte;
 } funtab[] = {
   // clang-format off
-  F(strncmp)
+  F(strncmp, 0)
 #if __aarch64__
-  F(__strncmp_aarch64)
-  F(__strncmp_aarch64_mte)
+  F(__strncmp_aarch64, 0)
+  F(__strncmp_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE
-  F(__strncmp_aarch64_sve)
+  F(__strncmp_aarch64_sve, 1)
 # endif
 #endif
-  {0, 0}
+  {0, 0, 0}
   // clang-format on
 };
 #undef F
 
 #define A 32
 #define LEN 250000
-static char s1buf[LEN + 2 * A + 1];
-static char s2buf[LEN + 2 * A + 1];
+static char *s1buf;
+static char *s2buf;
 
 static void *
 alignup (void *p)
@@ -71,7 +73,12 @@ test (const struct fun *fun, int s1align, int s2align, int maxlen, int diffpos,
     s1[diffpos] += delta;
   s1[len] = s2[len] = '\0';
 
+  size_t mte_len = maxlen < len + 1 ? maxlen : len + 1;
+  s1 = tag_buffer (s1, mte_len, fun->test_mte);
+  s2 = tag_buffer (s2, mte_len, fun->test_mte);
   r = fun->fun (s1, s2, maxlen);
+  untag_buffer (s1, mte_len, fun->test_mte);
+  untag_buffer (s2, mte_len, fun->test_mte);
 
   if (diffpos >= maxlen)
     {
@@ -91,6 +98,8 @@ test (const struct fun *fun, int s1align, int s2align, int maxlen, int diffpos,
 int
 main ()
 {
+  s1buf = mte_mmap (LEN + 2 * A + 1);
+  s2buf = mte_mmap (LEN + 2 * A + 1);
   int r = 0;
   for (int i = 0; funtab[i].name; i++)
     {
@@ -121,7 +130,8 @@ main ()
 		test (funtab + i, d, s, n / 2, n / 2, n, 1);
 	      }
 	  }
-      printf ("%s %s\n", err_count ? "FAIL" : "PASS", funtab[i].name);
+      char *pass = funtab[i].test_mte && mte_enabled () ? "MTE PASS" : "PASS";
+      printf ("%s %s\n", err_count ? "FAIL" : pass, funtab[i].name);
       if (err_count)
 	r = -1;
     }
