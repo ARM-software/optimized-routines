@@ -99,12 +99,6 @@ L(end):
 	sub	result, data1, data2, lsr 56
 	ret
 
-L(done):
-	sub	result, data1, data2
-	ret
-
-	.p2align 4
-
 L(mutual_align):
 	/* Sources are mutually aligned, but are not currently at an
 	   alignment boundary.  Round down the addresses and then mask off
@@ -113,12 +107,11 @@ L(mutual_align):
 	ldr	data2, [src1, off2]
 	ldr	data1, [src1], 8
 	neg	shift, src2, lsl 3	/* Bits to alignment -64.  */
-	LS_FW	tmp, zeroones, shift
+	mov	tmp, -1
+	LS_FW	tmp, tmp, shift
 	orr	data1, data1, tmp
 	orr	data2, data2, tmp
 	b	L(start_realigned)
-
-	.p2align 4
 
 L(misaligned8):
 	/* Align SRC1 to 8 bytes and then compare 8 bytes at a time, always
@@ -142,8 +135,9 @@ L(src1_aligned):
 #endif
 	sub	has_nul, data3, zeroones
 	orr	tmp, data3, REP8_7f
-	bics	has_nul, has_nul, tmp
-	b.ne	L(tail)
+	bic	has_nul, has_nul, tmp
+	lsr	tmp, has_nul, shift
+	cbnz	tmp, L(tail)
 
 	sub	off1, src2, src1
 
@@ -181,6 +175,11 @@ L(tail):
 	eor	diff, data1, data2
 	orr	syndrome, diff, has_nul
 	b	L(end)
+
+L(done):
+	sub	result, data1, data2
+	ret
+
 
 END (__strcmp_aarch64_mte)
 
