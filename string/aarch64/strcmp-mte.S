@@ -99,6 +99,8 @@ L(end):
 	sub	result, data1, data2, lsr 56
 	ret
 
+	.p2align 4
+
 L(mutual_align):
 	/* Sources are mutually aligned, but are not currently at an
 	   alignment boundary.  Round down the addresses and then mask off
@@ -127,17 +129,18 @@ L(do_misaligned):
 	b.ne	L(do_misaligned)
 
 L(src1_aligned):
-	lsl	shift, src2, 3
+	neg	shift, src2, lsl 3
 	bic	src2, src2, 7
 	ldr	data3, [src2], 8
 #ifdef __AARCH64EB__
 	rev	data3, data3
 #endif
+	lsr	tmp, zeroones, shift
+	orr	data3, data3, tmp
 	sub	has_nul, data3, zeroones
 	orr	tmp, data3, REP8_7f
-	bic	has_nul, has_nul, tmp
-	lsr	tmp, has_nul, shift
-	cbnz	tmp, L(tail)
+	bics	has_nul, has_nul, tmp
+	b.ne	L(tail)
 
 	sub	off1, src2, src1
 
@@ -156,8 +159,7 @@ L(loop_unaligned):
 	ccmp	data1, data2, 0, eq
 	b.eq	L(loop_unaligned)
 
-	neg	tmp, shift
-	lsl	tmp, has_nul, tmp
+	lsl	tmp, has_nul, shift
 #ifdef __AARCH64EB__
 	rev	tmp, tmp
 #endif
@@ -166,6 +168,7 @@ L(loop_unaligned):
 	cbnz	syndrome, L(end)
 L(tail):
 	ldr	data1, [src1]
+	neg	shift, shift
 	lsr	data2, data3, shift
 	lsr	has_nul, has_nul, shift
 #ifdef __AARCH64EB__
@@ -179,7 +182,6 @@ L(tail):
 L(done):
 	sub	result, data1, data2
 	ret
-
 
 END (__strcmp_aarch64_mte)
 
