@@ -167,10 +167,10 @@ L(mutual_align):
 	neg	tmp3, count, lsl #3	/* 64 - bits(bytes beyond align). */
 	ldr	data2, [src2], #8
 	mov	tmp2, #~0
-	and	count, count, #0x3f
 	LS_FW	tmp2, tmp2, tmp3	/* Shift (count & 63).  */
-	/* Adjust the limit. Only low 3 bits used, so overflow irrelevant.  */
-	add	limit, limit, count
+	/* Adjust the limit and ensure it doesn't overflow.  */
+	adds	limit, limit, count
+	csinv	limit, limit, xzr, lo
 	orr	data1, data1, tmp2
 	orr	data2, data2, tmp2
 	b	L(start_realigned)
