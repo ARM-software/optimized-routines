@@ -124,7 +124,7 @@ ENTRY (__memcpy_arm)
 
 	mov	dst, dstin	/* Preserve dstin, we need to return it.  */
 	cmp	count, #64
-	bge	L(cpy_not_short)
+	bhs	L(cpy_not_short)
 	/* Deal with small copies quickly by dropping straight into the
 	   exit block.  */
 
@@ -239,10 +239,10 @@ L(cpy_not_short):
 
 1:
 	subs	tmp2, count, #64	/* Use tmp2 for count.  */
-	blt	L(tail63aligned)
+	blo	L(tail63aligned)
 
 	cmp	tmp2, #512
-	bge	L(cpy_body_long)
+	bhs	L(cpy_body_long)
 
 L(cpy_body_medium):			/* Count in tmp2.  */
 #ifdef USE_VFP
@@ -266,7 +266,7 @@ L(cpy_body_medium):			/* Count in tmp2.  */
 	add	src, src, #64
 	vstr	d1, [dst, #56]
 	add	dst, dst, #64
-	bge	1b
+	bhs	1b
 	tst	tmp2, #0x3f
 	beq	L(done)
 
@@ -312,7 +312,7 @@ L(tail63aligned):			/* Count in tmp2.  */
 	ldrd	A_l, A_h, [src, #64]!
 	strd	A_l, A_h, [dst, #64]!
 	subs	tmp2, tmp2, #64
-	bge	1b
+	bhs	1b
 	tst	tmp2, #0x3f
 	bne	1f
 	ldr	tmp2,[sp], #FRAME_SIZE
@@ -383,7 +383,7 @@ L(cpy_body_long):			/* Count in tmp2.  */
 	add	src, src, #32
 
 	subs	tmp2, tmp2, #prefetch_lines * 64 * 2
-	blt	2f
+	blo	2f
 1:
 	cpy_line_vfp	d3, 0
 	cpy_line_vfp	d4, 64
@@ -395,7 +395,7 @@ L(cpy_body_long):			/* Count in tmp2.  */
 	add	dst, dst, #2 * 64
 	add	src, src, #2 * 64
 	subs	tmp2, tmp2, #prefetch_lines * 64
-	bge	1b
+	bhs	1b
 
 2:
 	cpy_tail_vfp	d3, 0
@@ -499,15 +499,15 @@ L(cpy_notaligned):
 1:
 	pld	[src, #(3 * 64)]
 	subs	count, count, #64
-	ldrmi	tmp2, [sp], #FRAME_SIZE
-	bmi	L(tail63unaligned)
+	ldrlo	tmp2, [sp], #FRAME_SIZE
+	blo	L(tail63unaligned)
 	pld	[src, #(4 * 64)]
 
 #ifdef USE_NEON
 	vld1.8	{d0-d3}, [src]!
 	vld1.8	{d4-d7}, [src]!
 	subs	count, count, #64
-	bmi	2f
+	blo	2f
 1:
 	pld	[src, #(4 * 64)]
 	vst1.8	{d0-d3}, [ALIGN (dst, 64)]!
@@ -515,7 +515,7 @@ L(cpy_notaligned):
 	vst1.8	{d4-d7}, [ALIGN (dst, 64)]!
 	vld1.8	{d4-d7}, [src]!
 	subs	count, count, #64
-	bpl	1b
+	bhs	1b
 2:
 	vst1.8	{d0-d3}, [ALIGN (dst, 64)]!
 	vst1.8	{d4-d7}, [ALIGN (dst, 64)]!
