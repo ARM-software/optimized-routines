@@ -221,6 +221,40 @@ int main (void)
       printf ("\n");
     }
 
+  printf ("\nUnaligned forwards memmove:\n");
+  for (int f = 0; funtab[f].name != 0; f++)
+    {
+      printf ("%22s (B/ns) ", funtab[f].name);
+
+      for (int size = 1024; size <= 32768; size *= 2)
+	{
+	  uint64_t t = clock_get_ns ();
+	  for (int i = 0; i < ITERS3; i++)
+	    funtab[f].fun (a, a + 256 + (i & 31), size);
+	  t = clock_get_ns () - t;
+	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+		  size < 1024 ? 'B' : 'K', (double)size * ITERS3 / t);
+	}
+      printf ("\n");
+    }
+
+
+  printf ("\nUnaligned backwards memmove:\n");
+  for (int f = 0; funtab[f].name != 0; f++)
+    {
+      printf ("%22s (B/ns) ", funtab[f].name);
+
+      for (int size = 1024; size <= 32768; size *= 2)
+	{
+	  uint64_t t = clock_get_ns ();
+	  for (int i = 0; i < ITERS3; i++)
+	    funtab[f].fun (a + 256 + (i & 31), a, size);
+	  t = clock_get_ns () - t;
+	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+		  size < 1024 ? 'B' : 'K', (double)size * ITERS3 / t);
+	}
+      printf ("\n");
+    }
 
   return 0;
 }
