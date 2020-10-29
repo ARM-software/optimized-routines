@@ -298,6 +298,24 @@ check_uflow (double x)
   return WANT_ERRNO ? __math_check_uflow (x) : x;
 }
 
+/* Check if the result overflowed to infinity.  */
+HIDDEN float __math_check_oflowf (float);
+/* Check if the result underflowed to 0.  */
+HIDDEN float __math_check_uflowf (float);
+
+/* Check if the result overflowed to infinity.  */
+static inline float
+check_oflowf (float x)
+{
+  return WANT_ERRNO ? __math_check_oflowf (x) : x;
+}
+
+/* Check if the result underflowed to 0.  */
+static inline float
+check_uflowf (float x)
+{
+  return WANT_ERRNO ? __math_check_uflowf (x) : x;
+}
 
 /* Shared between expf, exp2f and powf.  */
 #define EXP2F_TABLE_BITS 5
@@ -415,5 +433,11 @@ extern const struct pow_log_data
   /* Note: the pad field is unused, but allows slightly faster indexing.  */
   struct {double invc, pad, logc, logctail;} tab[1 << POW_LOG_TABLE_BITS];
 } __pow_log_data HIDDEN;
+
+extern const struct erff_data
+{
+  float erff_poly_A[6];
+  float erff_poly_B[7];
+} __erff_data HIDDEN;
 
 #endif

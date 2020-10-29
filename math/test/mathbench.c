@@ -275,6 +275,7 @@ F (cosf, -3.1, 3.1)
 F (cosf, 3.3, 33.3)
 F (cosf, 100, 1000)
 F (cosf, 1e6, 1e32)
+F (erff, -4.0, 4.0)
 #if WANT_VMATH
 D (__s_sin, -3.1, 3.1)
 D (__s_cos, -3.1, 3.1)

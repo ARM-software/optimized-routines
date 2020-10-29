@@ -64,3 +64,17 @@ __math_invalidf (float x)
   float y = (x - x) / (x - x);
   return isnan (x) ? y : with_errnof (y, EDOM);
 }
+
+/* Check result and set errno if necessary.  */
+
+HIDDEN float
+__math_check_uflowf (float y)
+{
+  return y == 0.0f ? with_errnof (y, ERANGE) : y;
+}
+
+HIDDEN float
+__math_check_oflowf (float y)
+{
+  return isinf (y) ? with_errnof (y, ERANGE) : y;
+}

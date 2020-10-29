@@ -331,6 +331,7 @@ static const struct fun fun[] = {
  F1 (log)
  F1 (log2)
  F2 (pow)
+ F1 (erf)
  D1 (exp)
  D1 (exp2)
  D1 (log)
