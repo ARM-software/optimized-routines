@@ -1,9 +1,7 @@
 ; erff.tst
 ;
-; Copyright 2009 ARM Limited. All rights reserved.
-;
-; $Id$
-; $URL$
+; Copyright (c) 2007-2020, Arm Limited.
+; SPDX-License-Identifier: MIT
 
 func=erff op1=7fc00001 result=7fc00001 errno=0
 func=erff op1=ffc00001 result=7fc00001 errno=0
