@@ -1,7 +1,7 @@
 /*
  * Ones' complement checksum test & benchmark
  *
- * Copyright 2016-2020 ARM Limited
+ * Copyright (c) 2016-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
