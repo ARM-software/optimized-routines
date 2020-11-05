@@ -337,6 +337,7 @@ static const struct fun fun[] = {
  D1 (log)
  D1 (log2)
  D2 (pow)
+ D1 (erf)
 #if WANT_VMATH
  F (__s_sinf, __s_sinf, sin, mpfr_sin, 1, 1, f1, 0)
  F (__s_cosf, __s_cosf, cos, mpfr_cos, 1, 1, f1, 0)

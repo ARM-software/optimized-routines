@@ -72,6 +72,14 @@ t pow  0x1.ffffffffffff0p-1  0x1.0000000000008p0 x 0x1p60 0x1p68 50000
 t pow  0x1.ffffffffff000p-1  0x1p0 x 0x1p50 0x1p52 50000
 t pow -0x1.ffffffffff000p-1 -0x1p0 x 0x1p50 0x1p52 50000
 
+L=1.0
+t erf  0 0xffff000000000000 10000
+t erf  0x1p-1022  0x1p-26   40000
+t erf  -0x1p-1022 -0x1p-26  40000
+t erf  0x1p-26    0x1p3     40000
+t erf  -0x1p-26  -0x1p3     40000
+t erf  0         inf        40000
+
 L=0.01
 t expf  0    0xffff0000    10000
 t expf  0x1p-14   0x1p8    50000
