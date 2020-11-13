@@ -45,7 +45,7 @@ erff (float x)
 	{ /* |x| < 2^(-28).  */
 	  if (unlikely (ia12 < 0x040))
 	    { /* |x| < 2^(-119).  */
-	      float y = x + TwoOverSqrtPiMinusOne * x;
+	      float y = fmaf (TwoOverSqrtPiMinusOne, x, x);
 	      return check_uflowf (y);
 	    }
 	  return x + TwoOverSqrtPiMinusOne * x;

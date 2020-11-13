@@ -47,7 +47,7 @@ erf (double x)
 	{ /* a < 2^(-28).  */
 	  if (ia < 0x00800000)
 	    { /* a < 2^(-1015).  */
-	      double y =  x + TwoOverSqrtPiMinusOne * x;
+	      double y =  fma (TwoOverSqrtPiMinusOne, x, x);
 	      return check_uflow (y);
 	    }
 	  return x + TwoOverSqrtPiMinusOne * x;
