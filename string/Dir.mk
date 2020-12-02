@@ -30,6 +30,7 @@ string-tests := \
 	build/bin/test/memrchr \
 	build/bin/test/memcmp \
 	build/bin/test/__mtag_tag_region \
+	build/bin/test/__mtag_tag_zero_region \
 	build/bin/test/strcpy \
 	build/bin/test/stpcpy \
 	build/bin/test/strcmp \
