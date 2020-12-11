@@ -28,6 +28,9 @@
 #define tmp2		x8
 
 ENTRY (__memcmp_aarch64)
+	PTR_ARG (0)
+	PTR_ARG (1)
+	SIZE_ARG (2)
 	subs	limit, limit, 8
 	b.lo	L(less8)
 

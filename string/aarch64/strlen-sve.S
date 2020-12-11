@@ -18,6 +18,7 @@
 	.text
 
 ENTRY_ALIGN (__strlen_aarch64_sve, 4)
+	PTR_ARG (0)
 	setffr			/* initialize FFR */
 	ptrue	p2.b		/* all ones; loop invariant */
 	mov	x1, 0		/* initialize length */

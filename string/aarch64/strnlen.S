@@ -42,6 +42,8 @@
    string, counting trailing zeros identifies exactly which byte matched.  */
 
 ENTRY (__strnlen_aarch64)
+	PTR_ARG (0)
+	SIZE_ARG (1)
 	bic	src, srcin, 15
 	mov	wtmp, 0xf00f
 	cbz	cntin, L(nomatch)
