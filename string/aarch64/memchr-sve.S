@@ -18,6 +18,8 @@
 	.text
 
 ENTRY_ALIGN(__memchr_aarch64_sve, 4)
+	PTR_ARG (0)
+	SIZE_ARG (2)
 	dup	z1.b, w1			/* duplicate c to a vector */
 	setffr					/* initialize FFR */
 	mov	x3, 0				/* initialize off */

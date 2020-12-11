@@ -18,6 +18,7 @@
 	.text
 
 ENTRY_ALIGN (__strrchr_aarch64_sve, 4)
+	PTR_ARG (0)
 	dup	z1.b, w1		/* replicate byte across vector */
 	setffr				/* initialize FFR */
 	ptrue	p1.b			/* all ones; loop invariant */

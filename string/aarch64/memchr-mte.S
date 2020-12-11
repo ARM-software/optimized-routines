@@ -44,6 +44,8 @@
    string, counting trailing zeros identifies exactly which byte matched.  */
 
 ENTRY (__memchr_aarch64_mte)
+	PTR_ARG (0)
+	SIZE_ARG (2)
 	bic	src, srcin, 15
 	cbz	cntin, L(nomatch)
 	ld1	{vdata.16b}, [src]

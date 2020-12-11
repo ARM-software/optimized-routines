@@ -37,6 +37,8 @@
 
 	/* Start of performance-critical section  -- one 64B cache line.  */
 ENTRY (__strcmp_aarch64)
+	PTR_ARG (0)
+	PTR_ARG (1)
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01
 	tst	tmp1, #7

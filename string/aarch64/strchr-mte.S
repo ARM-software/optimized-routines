@@ -43,6 +43,7 @@
    string, counting trailing zeros identifies exactly which byte matched.  */
 
 ENTRY (__strchr_aarch64_mte)
+	PTR_ARG (0)
 	bic	src, srcin, 15
 	dup	vrepchr.16b, chrin
 	ld1	{vdata.16b}, [src]

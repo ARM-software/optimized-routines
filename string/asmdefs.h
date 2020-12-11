@@ -81,4 +81,18 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 
 #define L(l) .L ## l
 
+#ifdef __ILP32__
+  /* Sanitize padding bits of pointer arguments as per aapcs64 */
+#define PTR_ARG(n)  mov w##n, w##n
+#else
+#define PTR_ARG(n)
+#endif
+
+#ifdef __ILP32__
+  /* Sanitize padding bits of size arguments as per aapcs64 */
+#define SIZE_ARG(n)  mov w##n, w##n
+#else
+#define SIZE_ARG(n)
+#endif
+
 #endif

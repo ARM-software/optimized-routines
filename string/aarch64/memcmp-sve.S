@@ -18,6 +18,9 @@
 	.text
 
 ENTRY_ALIGN (__memcmp_aarch64_sve, 4)
+	PTR_ARG (0)
+	PTR_ARG (1)
+	SIZE_ARG (2)
 	mov	x3, 0			/* initialize off */
 
 0:	whilelo	p0.b, x3, x2		/* while off < max */

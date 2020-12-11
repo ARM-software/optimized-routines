@@ -46,6 +46,9 @@
 	nop	/* Pad so that the loop below fits a cache line.  */
 	.endr
 ENTRY_ALIGN (__strncmp_aarch64, 0)
+	PTR_ARG (0)
+	PTR_ARG (1)
+	SIZE_ARG (2)
 	cbz	limit, L(ret0)
 	eor	tmp1, src1, src2
 	mov	zeroones, #REP8_01

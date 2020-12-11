@@ -39,6 +39,7 @@
    string, counting trailing zeros identifies exactly which byte matched.  */
 
 ENTRY (__strlen_aarch64_mte)
+	PTR_ARG (0)
 	bic	src, srcin, 15
 	mov	wtmp, 0xf00f
 	ld1	{vdata.16b}, [src]
