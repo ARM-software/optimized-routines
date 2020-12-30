@@ -41,11 +41,7 @@
 #define count		mask
 
 	.text
-	.p2align 6
-	.rep 6
-	nop	/* Pad so that the loop below fits a cache line.  */
-	.endr
-ENTRY_ALIGN (__strncmp_aarch64, 0)
+ENTRY (__strncmp_aarch64)
 	PTR_ARG (0)
 	PTR_ARG (1)
 	SIZE_ARG (2)
@@ -63,7 +59,7 @@ ENTRY_ALIGN (__strncmp_aarch64, 0)
 	/* NUL detection works on the principle that (X - 1) & (~X) & 0x80
 	   (=> (X - 1) & ~(X | 0x7f)) is non-zero iff a byte is zero, and
 	   can be done in parallel across the entire word.  */
-	/* Start of performance-critical section  -- one 64B cache line.  */
+	.p2align 4
 L(loop_aligned):
 	ldr	data1, [src1], #8
 	ldr	data2, [src2], #8
@@ -76,7 +72,7 @@ L(start_realigned):
 	bics	has_nul, tmp1, tmp2	/* Non-zero if NUL terminator.  */
 	ccmp	endloop, #0, #0, eq
 	b.eq	L(loop_aligned)
-	/* End of performance-critical section  -- one 64B cache line.  */
+	/* End of main loop */
 
 	/* Not reached the limit, must have found the end or a diff.  */
 	tbz	limit_wd, #63, L(not_limit)
@@ -181,7 +177,7 @@ L(mutual_align):
 	add	limit_wd, limit_wd, tmp3, lsr #3
 	b	L(start_realigned)
 
-	.p2align 6
+	.p2align 4
 	/* Don't bother with dwords for up to 16 bytes.  */
 L(misaligned8):
 	cmp	limit, #16
