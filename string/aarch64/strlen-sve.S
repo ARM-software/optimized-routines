@@ -22,11 +22,10 @@ ENTRY_ALIGN (__strlen_aarch64_sve, 4)
 	setffr			/* initialize FFR */
 	ptrue	p2.b		/* all ones; loop invariant */
 	mov	x1, 0		/* initialize length */
-	nop
 
 	/* Read a vector's worth of bytes, stopping on first fault.  */
+	.p2align 4
 0:	ldff1b	z0.b, p2/z, [x0, x1]
-	nop
 	rdffrs	p0.b, p2/z
 	b.nlast	2f
 
