@@ -39,7 +39,7 @@ ENTRY (__memset_aarch64)
 	str	val, [dstin]
 	str	val, [dstend, -8]
 	ret
-	nop
+	.p2align 4
 1:	tbz	count, 2, 2f
 	str	valw, [dstin]
 	str	valw, [dstend, -4]
