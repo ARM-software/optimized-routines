@@ -40,7 +40,6 @@
 #define endloop		x15
 #define count		mask
 
-	.text
 ENTRY (__strncmp_aarch64)
 	PTR_ARG (0)
 	PTR_ARG (1)

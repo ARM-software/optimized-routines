@@ -14,10 +14,7 @@
  * SVE Available.
  */
 
-	.arch	armv8-a+sve
-	.text
-
-ENTRY_ALIGN (__strlen_aarch64_sve, 4)
+ENTRY (__strlen_aarch64_sve)
 	PTR_ARG (0)
 	setffr			/* initialize FFR */
 	ptrue	p2.b		/* all ones; loop invariant */

@@ -125,7 +125,6 @@
 #endif
 	.endm
 
-	.text
 	.p2align	5
 L(strcmp_start_addr):
 #if STRCMP_NO_PRECHECK == 0

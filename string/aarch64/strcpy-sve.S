@@ -14,9 +14,6 @@
  * SVE Available.
  */
 
-	.arch	armv8-a+sve
-	.text
-
 /* To build as stpcpy, define BUILD_STPCPY before compiling this file.  */
 #ifdef BUILD_STPCPY
 #define FUNC  __stpcpy_aarch64_sve
@@ -24,7 +21,7 @@
 #define FUNC  __strcpy_aarch64_sve
 #endif
 
-ENTRY_ALIGN (FUNC, 4)
+ENTRY (FUNC)
 	PTR_ARG (0)
 	PTR_ARG (1)
 	setffr				/* initialize FFR */

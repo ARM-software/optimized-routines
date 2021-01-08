@@ -14,9 +14,6 @@
  * SVE Available.
  */
 
-	.arch	armv8-a+sve
-	.text
-
 /* To build as strchrnul, define BUILD_STRCHRNUL before compiling this file.  */
 #ifdef BUILD_STRCHRNUL
 #define FUNC  __strchrnul_aarch64_sve
@@ -24,7 +21,7 @@
 #define FUNC  __strchr_aarch64_sve
 #endif
 
-ENTRY_ALIGN (FUNC, 4)
+ENTRY (FUNC)
 	PTR_ARG (0)
 	dup	z1.b, w1		/* replicate byte across vector */
 	setffr				/* initialize FFR */

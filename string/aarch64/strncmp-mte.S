@@ -53,7 +53,6 @@
 #define LS_BK lsl
 #endif
 
-	.text
 ENTRY (__strncmp_aarch64_mte)
 	PTR_ARG (0)
 	PTR_ARG (1)

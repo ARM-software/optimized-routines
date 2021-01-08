@@ -14,10 +14,7 @@
  * SVE Available.
  */
 
-	.arch	armv8-a+sve
-	.text
-
-ENTRY_ALIGN(__memchr_aarch64_sve, 4)
+ENTRY (__memchr_aarch64_sve)
 	PTR_ARG (0)
 	SIZE_ARG (2)
 	dup	z1.b, w1			/* duplicate c to a vector */
