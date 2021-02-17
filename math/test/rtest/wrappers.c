@@ -1,7 +1,7 @@
 /*
  * wrappers.c - wrappers to modify output of MPFR/MPC test functions
  *
- * Copyright (c) 2014-2018, Arm Limited.
+ * Copyright (c) 2014-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

@@ -1,6 +1,6 @@
 ; Directed test cases for pow
 ;
-; Copyright (c) 2018, Arm Limited.
+; Copyright (c) 2018-2019, Arm Limited.
 ; SPDX-License-Identifier: MIT
 
 func=pow op1=00000000.00000000 op2=00000000.00000000 result=3ff00000.00000000 errno=0

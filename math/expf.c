@@ -1,7 +1,7 @@
 /*
  * Single-precision e^x function.
  *
- * Copyright (c) 2017-2018, Arm Limited.
+ * Copyright (c) 2017-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

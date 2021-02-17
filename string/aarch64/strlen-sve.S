@@ -1,7 +1,7 @@
 /*
  * __strlen_aarch64_sve - compute the length of a string
  *
- * Copyright (c) 2018, Arm Limited.
+ * Copyright (c) 2018-2021, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

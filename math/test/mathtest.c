@@ -1,7 +1,7 @@
 /*
  * mathtest.c - test rig for mathlib
  *
- * Copyright (c) 1998-2018, Arm Limited.
+ * Copyright (c) 1998-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

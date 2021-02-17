@@ -1,6 +1,6 @@
 ; Directed test cases for log2
 ;
-; Copyright (c) 2018, Arm Limited.
+; Copyright (c) 2018-2019, Arm Limited.
 ; SPDX-License-Identifier: MIT
 
 func=log2 op1=7ff80000.00000001 result=7ff80000.00000001 errno=0

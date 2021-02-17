@@ -1,6 +1,6 @@
 # Makefile - requires GNU make
 #
-# Copyright (c) 2018-2019, Arm Limited.
+# Copyright (c) 2018-2020, Arm Limited.
 # SPDX-License-Identifier: MIT
 
 srcdir = .

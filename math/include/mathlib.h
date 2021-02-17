@@ -1,7 +1,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2015-2019, Arm Limited.
+ * Copyright (c) 2015-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

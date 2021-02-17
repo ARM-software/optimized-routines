@@ -1,7 +1,7 @@
 /*
  * memchr - find a character in a memory zone
  *
- * Copyright (c) 2014-2019, Arm Limited.
+ * Copyright (c) 2014-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

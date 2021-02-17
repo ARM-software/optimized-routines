@@ -1,7 +1,7 @@
 /*
  * types.h
  *
- * Copyright (c) 2005-2018, Arm Limited.
+ * Copyright (c) 2005-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

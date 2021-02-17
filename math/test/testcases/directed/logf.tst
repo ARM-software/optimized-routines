@@ -1,6 +1,6 @@
 ; logf.tst - Directed test cases for logf
 ;
-; Copyright (c) 2007-2018, Arm Limited.
+; Copyright (c) 2007-2019, Arm Limited.
 ; SPDX-License-Identifier: MIT
 
 func=logf op1=7fc00001 result=7fc00001 errno=0

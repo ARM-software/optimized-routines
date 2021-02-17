@@ -1,7 +1,7 @@
 /*
  * strcmp for ARMv6-M (optimized for performance, not size)
  *
- * Copyright (c) 2014-2019, Arm Limited.
+ * Copyright (c) 2014-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

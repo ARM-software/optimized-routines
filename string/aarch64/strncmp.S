@@ -1,7 +1,7 @@
 /*
  * strncmp - compare two strings
  *
- * Copyright (c) 2013, Arm Limited.
+ * Copyright (c) 2013-2021, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

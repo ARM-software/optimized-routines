@@ -1,7 +1,7 @@
 /*
  * semi.c: test implementations of mathlib seminumerical functions
  *
- * Copyright (c) 1999-2018, Arm Limited.
+ * Copyright (c) 1999-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

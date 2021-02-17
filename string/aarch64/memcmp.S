@@ -1,6 +1,6 @@
 /* memcmp - compare memory
  *
- * Copyright (c) 2013, Arm Limited.
+ * Copyright (c) 2013-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

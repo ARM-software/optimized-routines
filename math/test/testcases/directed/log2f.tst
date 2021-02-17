@@ -1,6 +1,6 @@
 ; log2f.tst - Directed test cases for log2f
 ;
-; Copyright (c) 2017-2018, Arm Limited.
+; Copyright (c) 2017-2019, Arm Limited.
 ; SPDX-License-Identifier: MIT
 
 func=log2f op1=7fc00001 result=7fc00001 errno=0

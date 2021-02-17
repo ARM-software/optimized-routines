@@ -1,7 +1,7 @@
 /*
  * Configuration for math routines.
  *
- * Copyright (c) 2017-2018, Arm Limited.
+ * Copyright (c) 2017-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

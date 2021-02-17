@@ -1,7 +1,7 @@
 /*
  * random.h - header for random.c
  *
- * Copyright (c) 2009-2018, Arm Limited.
+ * Copyright (c) 2009-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

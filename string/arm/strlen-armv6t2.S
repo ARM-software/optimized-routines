@@ -1,7 +1,7 @@
 /*
  * strlen - calculate the length of a string
  *
- * Copyright (c) 2010, Arm Limited.
+ * Copyright (c) 2010-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

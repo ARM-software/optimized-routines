@@ -1,7 +1,7 @@
 /*
  * strcpy
  *
- * Copyright (c) 2008-2019, Arm Limited.
+ * Copyright (c) 2008-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

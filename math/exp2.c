@@ -1,7 +1,7 @@
 /*
  * Double-precision 2^x function.
  *
- * Copyright (c) 2018, Arm Limited.
+ * Copyright (c) 2018-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

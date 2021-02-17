@@ -1,6 +1,6 @@
 ; Directed test cases for SP sincos
 ;
-; Copyright (c) 2007-2018, Arm Limited.
+; Copyright (c) 2007-2019, Arm Limited.
 ; SPDX-License-Identifier: MIT
 
 

@@ -1,7 +1,7 @@
 /*
  * Double-precision e^x function.
  *
- * Copyright (c) 2018, Arm Limited.
+ * Copyright (c) 2018-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

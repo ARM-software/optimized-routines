@@ -1,7 +1,7 @@
 /*
  * strcpy/stpcpy - copy a string returning pointer to start/end.
  *
- * Copyright (c) 2013-2019, Arm Limited.
+ * Copyright (c) 2013-2020, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

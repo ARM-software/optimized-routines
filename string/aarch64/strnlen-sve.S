@@ -1,7 +1,7 @@
 /*
  * strnlen - calculate the length of a string with limit.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2021, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 

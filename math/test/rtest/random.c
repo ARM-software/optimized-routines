@@ -1,7 +1,7 @@
 /*
  * random.c - random number generator for producing mathlib test cases
  *
- * Copyright (c) 1998-2018, Arm Limited.
+ * Copyright (c) 1998-2019, Arm Limited.
  * SPDX-License-Identifier: MIT
  */
 
