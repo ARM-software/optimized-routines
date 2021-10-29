@@ -27,6 +27,7 @@ networking/test/ - networking test and benchmark related sources.
 string/         - string routines subproject sources.
 string/include/ - string library public headers.
 string/test/    - string test and benchmark related sources.
+pl/...          - separately maintained performance library code.
 
 The steps to build the target libraries and run the tests:
 
