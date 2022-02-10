@@ -2,7 +2,7 @@
  * __strlen_aarch64_sve - compute the length of a string
  *
  * Copyright (c) 2018-2021, Arm Limited.
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "../asmdefs.h"

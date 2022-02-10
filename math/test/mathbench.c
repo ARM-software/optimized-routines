@@ -2,7 +2,7 @@
  * Microbenchmark for math functions.
  *
  * Copyright (c) 2018-2020, Arm Limited.
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #undef _GNU_SOURCE

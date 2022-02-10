@@ -2,7 +2,7 @@
  * strcmp for ARMv7
  *
  * Copyright (c) 2012-2021, Arm Limited.
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #if __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1

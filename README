@@ -2,9 +2,10 @@ Arm Optimized Routines
 ----------------------
 
 This repository contains implementations of library functions
-provided by Arm under MIT License (See LICENSE). Contributions
-to this project are accepted, but Contributors have to sign an
-Assignment Agreement, please follow the instructions in
+provided by Arm. The outbound license is available under a dual
+license, at the user’s election, as reflected in the LICENSE file.
+Contributions to this project are accepted, but Contributors have
+to sign an Assignment Agreement, please follow the instructions in
 contributor-agreement.pdf. This is needed so upstreaming code
 to projects that require copyright assignment is possible.
 

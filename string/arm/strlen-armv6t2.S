@@ -2,7 +2,7 @@
  * strlen - calculate the length of a string
  *
  * Copyright (c) 2010-2020, Arm Limited.
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #if __ARM_ARCH >= 6 && __ARM_ARCH_ISA_THUMB == 2

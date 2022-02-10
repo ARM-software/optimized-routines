@@ -2,7 +2,7 @@
  * strcmp - compare two strings
  *
  * Copyright (c) 2012-2022, Arm Limited.
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 

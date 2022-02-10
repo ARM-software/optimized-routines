@@ -1,7 +1,7 @@
 # Makefile fragment - requires GNU make
 #
 # Copyright (c) 2019, Arm Limited.
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 S := $(srcdir)/math
 B := build/math

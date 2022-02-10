@@ -2,7 +2,7 @@
  * __strcmp_aarch64_sve - compare two strings
  *
  * Copyright (c) 2018-2021, Arm Limited.
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "../asmdefs.h"
