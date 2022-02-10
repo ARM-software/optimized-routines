@@ -29,8 +29,6 @@ size_t __strlen_aarch64 (const char *);
 size_t __strnlen_aarch64 (const char *, size_t);
 int __strncmp_aarch64 (const char *, const char *, size_t);
 void * __memchr_aarch64_mte (const void *, int, size_t);
-char *__strcpy_aarch64_mte (char *__restrict, const char *__restrict);
-char *__stpcpy_aarch64_mte (char *__restrict, const char *__restrict);
 char *__strchr_aarch64_mte (const char *, int);
 char * __strchrnul_aarch64_mte (const char *, int );
 size_t __strlen_aarch64_mte (const char *);
