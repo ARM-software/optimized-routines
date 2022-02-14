@@ -23,7 +23,11 @@ static const struct fun
 } funtab[] = {
   // clang-format off
   F(memmove, 0)
-#if __aarch64__ && !__CHERI__
+#if __aarch64__ && __CHERI__
+# if __ARM_NEON
+  F(__memmove_aarch64_simd, 1)
+# endif
+#elif __aarch64__ && !__CHERI__
   F(__memmove_aarch64, 1)
 # if __ARM_NEON
   F(__memmove_aarch64_simd, 1)

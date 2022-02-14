@@ -31,7 +31,11 @@ static const struct fun
   void *(*fun)(void *, const void *, size_t);
 } funtab[] =
 {
-#if __aarch64__ && !__CHERI__
+#if __aarch64__ && __CHERI__
+# if __ARM_NEON
+  F(__memcpy_aarch64_simd)
+# endif
+#elif __aarch64__ && !__CHERI__
   F(__memcpy_aarch64)
 # if __ARM_NEON
   F(__memcpy_aarch64_simd)
