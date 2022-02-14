@@ -28,7 +28,7 @@ static const struct fun
 } funtab[] = {
   // clang-format off
   F(memrchr, 0)
-#if __aarch64__
+#if __aarch64__ && !__CHERI__
   F(__memrchr_aarch64, 1)
 #endif
   {0, 0, 0}

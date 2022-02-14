@@ -28,7 +28,7 @@ static const struct fun
 } funtab[] = {
   // clang-format off
   F(strchrnul, 0)
-#if __aarch64__
+#if __aarch64__ && !__CHERI__
   F(__strchrnul_aarch64, 0)
   F(__strchrnul_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE

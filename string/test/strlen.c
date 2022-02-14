@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <limits.h>
 #include "mte.h"
 #include "stringlib.h"
@@ -25,7 +24,7 @@ static const struct fun
 } funtab[] = {
   // clang-format off
   F(strlen, 0)
-#if __aarch64__
+#if __aarch64__ && !__CHERI__
   F(__strlen_aarch64, 0)
   F(__strlen_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE
