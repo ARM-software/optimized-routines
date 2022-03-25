@@ -214,70 +214,7 @@ struct conf
   double errlim;
 };
 
-/* Wrappers for sincos.  */
-static float sincosf_sinf(float x) {(void)cosf(x); return sinf(x);}
-static float sincosf_cosf(float x) {(void)sinf(x); return cosf(x);}
-static double sincos_sin(double x) {(void)cos(x); return sin(x);}
-static double sincos_cos(double x) {(void)sin(x); return cos(x);}
-#if USE_MPFR
-static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_cos(y,x,r); return mpfr_sin(y,x,r); }
-static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,x,r); return mpfr_cos(y,x,r); }
-#endif
-
-/* A bit of a hack: call vector functions twice with the same
-   input in lane 0 but a different value in other lanes: once
-   with an in-range value and then with a special case value.  */
-static int secondcall;
-
-/* Wrappers for vector functions.  */
-#if __aarch64__ && WANT_VMATH
-typedef __f32x4_t v_float;
-typedef __f64x2_t v_double;
-static const float fv[2] = {1.0f, -INFINITY};
-static const double dv[2] = {1.0, -INFINITY};
-static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
-static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
-
-static float v_sinf(float x) { return __v_sinf(argf(x))[0]; }
-static float v_cosf(float x) { return __v_cosf(argf(x))[0]; }
-static float v_expf_1u(float x) { return __v_expf_1u(argf(x))[0]; }
-static float v_expf(float x) { return __v_expf(argf(x))[0]; }
-static float v_exp2f_1u(float x) { return __v_exp2f_1u(argf(x))[0]; }
-static float v_exp2f(float x) { return __v_exp2f(argf(x))[0]; }
-static float v_logf(float x) { return __v_logf(argf(x))[0]; }
-static float v_powf(float x, float y) { return __v_powf(argf(x),argf(y))[0]; }
-static double v_sin(double x) { return __v_sin(argd(x))[0]; }
-static double v_cos(double x) { return __v_cos(argd(x))[0]; }
-static double v_exp(double x) { return __v_exp(argd(x))[0]; }
-static double v_log(double x) { return __v_log(argd(x))[0]; }
-static double v_pow(double x, double y) { return __v_pow(argd(x),argd(y))[0]; }
-#ifdef __vpcs
-static float vn_sinf(float x) { return __vn_sinf(argf(x))[0]; }
-static float vn_cosf(float x) { return __vn_cosf(argf(x))[0]; }
-static float vn_expf_1u(float x) { return __vn_expf_1u(argf(x))[0]; }
-static float vn_expf(float x) { return __vn_expf(argf(x))[0]; }
-static float vn_exp2f_1u(float x) { return __vn_exp2f_1u(argf(x))[0]; }
-static float vn_exp2f(float x) { return __vn_exp2f(argf(x))[0]; }
-static float vn_logf(float x) { return __vn_logf(argf(x))[0]; }
-static float vn_powf(float x, float y) { return __vn_powf(argf(x),argf(y))[0]; }
-static double vn_sin(double x) { return __vn_sin(argd(x))[0]; }
-static double vn_cos(double x) { return __vn_cos(argd(x))[0]; }
-static double vn_exp(double x) { return __vn_exp(argd(x))[0]; }
-static double vn_log(double x) { return __vn_log(argd(x))[0]; }
-static double vn_pow(double x, double y) { return __vn_pow(argd(x),argd(y))[0]; }
-static float Z_sinf(float x) { return _ZGVnN4v_sinf(argf(x))[0]; }
-static float Z_cosf(float x) { return _ZGVnN4v_cosf(argf(x))[0]; }
-static float Z_expf(float x) { return _ZGVnN4v_expf(argf(x))[0]; }
-static float Z_exp2f(float x) { return _ZGVnN4v_exp2f(argf(x))[0]; }
-static float Z_logf(float x) { return _ZGVnN4v_logf(argf(x))[0]; }
-static float Z_powf(float x, float y) { return _ZGVnN4vv_powf(argf(x),argf(y))[0]; }
-static double Z_sin(double x) { return _ZGVnN2v_sin(argd(x))[0]; }
-static double Z_cos(double x) { return _ZGVnN2v_cos(argd(x))[0]; }
-static double Z_exp(double x) { return _ZGVnN2v_exp(argd(x))[0]; }
-static double Z_log(double x) { return _ZGVnN2v_log(argd(x))[0]; }
-static double Z_pow(double x, double y) { return _ZGVnN2vv_pow(argd(x),argd(y))[0]; }
-#endif
-#endif
+#include "test/ulp_wrappers.h"
 
 struct fun
 {
@@ -322,78 +259,7 @@ static const struct fun fun[] = {
 #define F2(x) F (x##f, x##f, x, mpfr_##x, 2, 1, f2, 0)
 #define D1(x) F (x, x, x##l, mpfr_##x, 1, 0, d1, 0)
 #define D2(x) F (x, x, x##l, mpfr_##x, 2, 0, d2, 0)
- F1 (sin)
- F1 (cos)
- F (sincosf_sinf, sincosf_sinf, sincos_sin, sincos_mpfr_sin, 1, 1, f1, 0)
- F (sincosf_cosf, sincosf_cosf, sincos_cos, sincos_mpfr_cos, 1, 1, f1, 0)
- F1 (exp)
- F1 (exp2)
- F1 (log)
- F1 (log2)
- F2 (pow)
- F1 (erf)
- D1 (exp)
- D1 (exp2)
- D1 (log)
- D1 (log2)
- D2 (pow)
- D1 (erf)
-#if WANT_VMATH
- F (__s_sinf, __s_sinf, sin, mpfr_sin, 1, 1, f1, 0)
- F (__s_cosf, __s_cosf, cos, mpfr_cos, 1, 1, f1, 0)
- F (__s_expf_1u, __s_expf_1u, exp, mpfr_exp, 1, 1, f1, 0)
- F (__s_expf, __s_expf, exp, mpfr_exp, 1, 1, f1, 0)
- F (__s_exp2f_1u, __s_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 0)
- F (__s_exp2f, __s_exp2f, exp2, mpfr_exp2, 1, 1, f1, 0)
- F (__s_powf, __s_powf, pow, mpfr_pow, 2, 1, f2, 0)
- F (__s_logf, __s_logf, log, mpfr_log, 1, 1, f1, 0)
- F (__s_sin, __s_sin, sinl, mpfr_sin, 1, 0, d1, 0)
- F (__s_cos, __s_cos, cosl, mpfr_cos, 1, 0, d1, 0)
- F (__s_exp, __s_exp, expl, mpfr_exp, 1, 0, d1, 0)
- F (__s_log, __s_log, logl, mpfr_log, 1, 0, d1, 0)
- F (__s_pow, __s_pow, powl, mpfr_pow, 2, 0, d2, 0)
-#if __aarch64__
- F (__v_sinf, v_sinf, sin, mpfr_sin, 1, 1, f1, 1)
- F (__v_cosf, v_cosf, cos, mpfr_cos, 1, 1, f1, 1)
- F (__v_expf_1u, v_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
- F (__v_expf, v_expf, exp, mpfr_exp, 1, 1, f1, 1)
- F (__v_exp2f_1u, v_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 1)
- F (__v_exp2f, v_exp2f, exp2, mpfr_exp2, 1, 1, f1, 1)
- F (__v_logf, v_logf, log, mpfr_log, 1, 1, f1, 1)
- F (__v_powf, v_powf, pow, mpfr_pow, 2, 1, f2, 1)
- F (__v_sin, v_sin, sinl, mpfr_sin, 1, 0, d1, 1)
- F (__v_cos, v_cos, cosl, mpfr_cos, 1, 0, d1, 1)
- F (__v_exp, v_exp, expl, mpfr_exp, 1, 0, d1, 1)
- F (__v_log, v_log, logl, mpfr_log, 1, 0, d1, 1)
- F (__v_pow, v_pow, powl, mpfr_pow, 2, 0, d2, 1)
-#ifdef __vpcs
- F (__vn_sinf, vn_sinf, sin, mpfr_sin, 1, 1, f1, 1)
- F (__vn_cosf, vn_cosf, cos, mpfr_cos, 1, 1, f1, 1)
- F (__vn_expf_1u, vn_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
- F (__vn_expf, vn_expf, exp, mpfr_exp, 1, 1, f1, 1)
- F (__vn_exp2f_1u, vn_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 1)
- F (__vn_exp2f, vn_exp2f, exp2, mpfr_exp2, 1, 1, f1, 1)
- F (__vn_logf, vn_logf, log, mpfr_log, 1, 1, f1, 1)
- F (__vn_powf, vn_powf, pow, mpfr_pow, 2, 1, f2, 1)
- F (__vn_sin, vn_sin, sinl, mpfr_sin, 1, 0, d1, 1)
- F (__vn_cos, vn_cos, cosl, mpfr_cos, 1, 0, d1, 1)
- F (__vn_exp, vn_exp, expl, mpfr_exp, 1, 0, d1, 1)
- F (__vn_log, vn_log, logl, mpfr_log, 1, 0, d1, 1)
- F (__vn_pow, vn_pow, powl, mpfr_pow, 2, 0, d2, 1)
- F (_ZGVnN4v_sinf, Z_sinf, sin, mpfr_sin, 1, 1, f1, 1)
- F (_ZGVnN4v_cosf, Z_cosf, cos, mpfr_cos, 1, 1, f1, 1)
- F (_ZGVnN4v_expf, Z_expf, exp, mpfr_exp, 1, 1, f1, 1)
- F (_ZGVnN4v_exp2f, Z_exp2f, exp2, mpfr_exp2, 1, 1, f1, 1)
- F (_ZGVnN4v_logf, Z_logf, log, mpfr_log, 1, 1, f1, 1)
- F (_ZGVnN4vv_powf, Z_powf, pow, mpfr_pow, 2, 1, f2, 1)
- F (_ZGVnN2v_sin, Z_sin, sinl, mpfr_sin, 1, 0, d1, 1)
- F (_ZGVnN2v_cos, Z_cos, cosl, mpfr_cos, 1, 0, d1, 1)
- F (_ZGVnN2v_exp, Z_exp, expl, mpfr_exp, 1, 0, d1, 1)
- F (_ZGVnN2v_log, Z_log, logl, mpfr_log, 1, 0, d1, 1)
- F (_ZGVnN2vv_pow, Z_pow, powl, mpfr_pow, 2, 0, d2, 1)
-#endif
-#endif
-#endif
+#include "test/ulp_funcs.h"
 #undef F
 #undef F1
 #undef F2

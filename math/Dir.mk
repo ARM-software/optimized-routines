@@ -15,6 +15,7 @@ math-test-srcs := \
 math-test-host-srcs := $(wildcard $(S)/test/rtest/*.[cS])
 
 math-includes := $(patsubst $(S)/%,build/%,$(wildcard $(S)/include/*.h))
+math-test-includes := $(patsubst $(S)/%,build/include/%,$(wildcard $(S)/test/*.h))
 
 math-libs := \
 	build/lib/libmathlib.so \
@@ -42,10 +43,11 @@ math-files := \
 	$(math-tools) \
 	$(math-host-tools) \
 	$(math-includes) \
+	$(math-test-includes) \
 
-all-math: $(math-libs) $(math-tools) $(math-includes)
+all-math: $(math-libs) $(math-tools) $(math-includes) $(math-test-includes)
 
-$(math-objs): $(math-includes)
+$(math-objs): $(math-includes) $(math-test-includes)
 $(math-objs): CFLAGS_ALL += $(math-cflags)
 $(B)/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
@@ -81,6 +83,9 @@ build/bin/ulp: $(B)/test/ulp.o build/lib/libmathlib.a
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
 
 build/include/%.h: $(S)/include/%.h
+	cp $< $@
+
+build/include/test/%.h: $(S)/test/%.h
 	cp $< $@
 
 build/bin/%.sh: $(S)/test/%.sh

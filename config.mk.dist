@@ -6,6 +6,9 @@
 # Subprojects to build
 SUBS = math string networking
 
+# Subsubprojects to build if subproject pl is built
+PLSUBS = math
+
 # Target architecture: aarch64, arm or x86_64
 ARCH = aarch64
 
