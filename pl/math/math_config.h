@@ -333,4 +333,21 @@ extern const struct logf_data
   double poly[LOGF_POLY_ORDER - 1]; /* First order coefficient is 1.  */
 } __logf_data HIDDEN;
 
+/* Data for low accuracy log10 (with 1/ln(10) included in coefficients).  */
+#define LOG10_TABLE_BITS 7
+#define LOG10_POLY_ORDER 6
+#define LOG10_POLY1_ORDER 10
+extern const struct log10_data
+{
+  double ln2hi;
+  double ln2lo;
+  double invln10;
+  double poly[LOG10_POLY_ORDER - 1]; /* First coefficient is 1/log(10).  */
+  double poly1[LOG10_POLY1_ORDER - 1];
+  struct {double invc, logc;} tab[1 << LOG10_TABLE_BITS];
+#if !HAVE_FAST_FMA
+  struct {double chi, clo;} tab2[1 << LOG10_TABLE_BITS];
+#endif
+} __log10_data HIDDEN;
+
 #endif

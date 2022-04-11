@@ -11,6 +11,8 @@
 float erff (float);
 float log10f (float);
 
+double log10 (double);
+
 #if __aarch64__
 #if __GNUC__ >= 5
 typedef __Float32x4_t __f32x4_t;

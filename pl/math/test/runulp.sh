@@ -44,6 +44,12 @@ t log10f  0x1p-26   0x1p3   50000
 t log10f  0x1p-4    0x1p4   50000
 t log10f  0         inf     50000
 
+L=1.15
+Ldir=
+t log10  0 0xffff000000000000 10000
+t log10  0x1p-4    0x1p4      40000
+t log10  0         inf        40000
+
 done
 
 [ 0 -eq $FAIL ] || {
