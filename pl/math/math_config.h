@@ -24,10 +24,6 @@
    set to 1 if math.h has (math_errhandling & MATH_ERRNO) != 0.  */
 # define WANT_ERRNO 0
 #endif
-#ifndef WANT_ERRNO_UFLOW
-/* Set errno to ERANGE if result underflows to 0 (in all rounding modes).  */
-# define WANT_ERRNO_UFLOW (WANT_ROUNDING && WANT_ERRNO)
-#endif
 
 /* Compiler can inline round as a single instruction.  */
 #ifndef HAVE_FAST_ROUND
@@ -322,5 +318,19 @@ extern const struct erff_data
   float erff_poly_A[6];
   float erff_poly_B[7];
 } __erff_data HIDDEN;
+
+/* Data for logf and log10f.  */
+#define LOGF_TABLE_BITS 4
+#define LOGF_POLY_ORDER 4
+extern const struct logf_data
+{
+  struct
+  {
+    double invc, logc;
+  } tab[1 << LOGF_TABLE_BITS];
+  double ln2;
+  double invln10;
+  double poly[LOGF_POLY_ORDER - 1]; /* First order coefficient is 1.  */
+} __logf_data HIDDEN;
 
 #endif

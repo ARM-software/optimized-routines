@@ -5,3 +5,4 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 F1 (erf)
+F1 (log10)

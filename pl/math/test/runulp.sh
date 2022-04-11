@@ -35,7 +35,14 @@ t erff -0x1p-127 -0x1p-26 40000
 t erff  0x1p-26   0x1p3   40000
 t erff -0x1p-26  -0x1p3   40000
 t erff  0         inf     40000
-Ldir=0.5
+
+L=0.30
+Ldir=
+t log10f  0      0xffff0000 10000
+t log10f  0x1p-127  0x1p-26 50000
+t log10f  0x1p-26   0x1p3   50000
+t log10f  0x1p-4    0x1p4   50000
+t log10f  0         inf     50000
 
 done
 

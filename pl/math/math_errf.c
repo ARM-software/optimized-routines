@@ -35,7 +35,6 @@ __math_uflowf (uint32_t sign)
   return xflowf (sign, 0x1p-95f);
 }
 
-#if WANT_ERRNO_UFLOW
 /* Underflows to zero in some non-nearest rounding mode, setting errno
    is valid even if the result is non-zero, but in the subnormal range.  */
 HIDDEN float
@@ -43,7 +42,6 @@ __math_may_uflowf (uint32_t sign)
 {
   return xflowf (sign, 0x1.4p-75f);
 }
-#endif
 
 HIDDEN float
 __math_oflowf (uint32_t sign)
