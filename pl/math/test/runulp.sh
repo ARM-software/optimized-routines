@@ -67,11 +67,18 @@ check __v_log10f 1 && runv=1
 runvn=
 check __vn_log10f 1 && runvn=1
 
+range_log10='
+  0 0xffff000000000000 10000
+  0x1p-4     0x1p4     400000
+  0          inf       400000
+'
+
 range_log10f='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
 '
 # error limits
+L_log10=1.16
 L_log10f=2.81
 
 while read G F R
@@ -90,6 +97,11 @@ $range
 EOF
 done << EOF
 # group symbol run
+log10  __s_log10       $runs
+log10  __v_log10       $runv
+log10  __vn_log10      $runvn
+log10  _ZGVnN2v_log10  $runvn
+
 log10f __s_log10f      $runs
 log10f __v_log10f      $runv
 log10f __vn_log10f     $runvn

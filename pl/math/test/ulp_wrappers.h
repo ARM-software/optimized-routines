@@ -25,8 +25,12 @@ static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
 static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
 
 static float v_log10f(float x) { return __v_log10f(argf(x))[0]; }
+static double v_log10(double x) { return __v_log10(argd(x))[0]; }
 #ifdef __vpcs
 static float vn_log10f(float x) { return __vn_log10f(argf(x))[0]; }
+static double vn_log10(double x) { return __vn_log10(argd(x))[0]; }
+
 static float Z_log10f(float x) { return _ZGVnN4v_log10f(argf(x))[0]; }
+static double Z_log10(double x) { return _ZGVnN2v_log10(argd(x))[0]; }
 #endif
 #endif
