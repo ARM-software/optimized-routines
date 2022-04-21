@@ -63,6 +63,14 @@ t erfc -0x1p-26   -0x1p3     40000
 t erfc  0          inf       40000
 Ldir=0.5
 
+L=1.45
+t erfcf  0      0xffff0000 10000
+t erfcf  0x1p-127  0x1p-26 40000
+t erfcf -0x1p-127 -0x1p-26 40000
+t erfcf  0x1p-26    0x1p5  40000
+t erfcf -0x1p-26   -0x1p3  40000
+t erfcf  0          inf    40000
+
 done
 
 # vector functions

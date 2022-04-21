@@ -379,4 +379,11 @@ extern const struct erfc_data
   double interval_bounds[ERFC_NUM_INTERVALS + 1];
   double poly[ERFC_NUM_INTERVALS][ERFC_POLY_ORDER + 1];
 } __erfc_data HIDDEN;
+
+#define ERFCF_POLY_NCOEFFS 16
+extern const struct erfcf_poly_data
+{
+  double poly[4][ERFCF_POLY_NCOEFFS];
+} __erfcf_poly_data HIDDEN;
+
 #endif
