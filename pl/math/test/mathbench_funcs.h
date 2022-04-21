@@ -7,6 +7,7 @@
 F (erff, -4.0, 4.0)
 F (log10f, 0.01, 11.1)
 
+D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
 
 #if WANT_VMATH

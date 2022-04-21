@@ -6,6 +6,7 @@
  */
 F1 (erf)
 F1 (log10)
+D1 (erfc)
 D1 (log10)
 #if WANT_VMATH
 F (__s_log10f, __s_log10f, log10, mpfr_log10, 1, 1, f1, 0)

@@ -350,4 +350,33 @@ extern const struct log10_data
 #endif
 } __log10_data HIDDEN;
 
+#define EXP_TABLE_BITS 7
+#define EXP_POLY_ORDER 5
+/* Use polynomial that is optimized for a wider input range.  This may be
+   needed for good precision in non-nearest rounding and !TOINT_INTRINSICS.  */
+#define EXP_POLY_WIDE 0
+/* Use close to nearest rounding toint when !TOINT_INTRINSICS.  This may be
+   needed for good precision in non-nearest rouning and !EXP_POLY_WIDE.  */
+#define EXP_USE_TOINT_NARROW 0
+#define EXP2_POLY_ORDER 5
+#define EXP2_POLY_WIDE 0
+extern const struct exp_data
+{
+  double invln2N;
+  double shift;
+  double negln2hiN;
+  double negln2loN;
+  double poly[4]; /* Last four coefficients.  */
+  double exp2_shift;
+  double exp2_poly[EXP2_POLY_ORDER];
+  uint64_t tab[2*(1 << EXP_TABLE_BITS)];
+} __exp_data HIDDEN;
+
+#define ERFC_NUM_INTERVALS 20
+#define ERFC_POLY_ORDER 12
+extern const struct erfc_data
+{
+  double interval_bounds[ERFC_NUM_INTERVALS + 1];
+  double poly[ERFC_NUM_INTERVALS][ERFC_POLY_ORDER + 1];
+} __erfc_data HIDDEN;
 #endif

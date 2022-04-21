@@ -54,6 +54,15 @@ t log10  0 0xffff000000000000 10000
 t log10  0x1p-4    0x1p4      40000
 t log10  0         inf        40000
 
+L=3.5
+t erfc  0       0xffff0000   10000
+t erfc  0x1p-1022  0x1p-26   40000
+t erfc -0x1p-1022 -0x1p-26   40000
+t erfc  0x1p-26    0x1p5     40000
+t erfc -0x1p-26   -0x1p3     40000
+t erfc  0          inf       40000
+Ldir=0.5
+
 done
 
 # vector functions
