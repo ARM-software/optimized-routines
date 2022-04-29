@@ -282,6 +282,12 @@ v_any_u64 (v_u64_t x)
 {
   return x != 0;
 }
+/* true if all elements of a v_cond result is non-zero.  */
+static inline int
+v_all_u64 (v_u64_t x)
+{
+  return x;
+}
 /* to wrap the result of relational operators.  */
 static inline v_u64_t
 v_cond_u64 (v_u64_t x)
@@ -554,6 +560,13 @@ v_any_u64 (v_u64_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (x) != 0;
+}
+/* true if all elements of a v_cond result is 1.  */
+static inline int
+v_all_u64 (v_u64_t x)
+{
+  /* assume elements in x are either 0 or -1u.  */
+  return vpaddd_s64 (vreinterpretq_s64_u64 (x)) == -2;
 }
 /* to wrap the result of relational operators.  */
 static inline v_u64_t

@@ -84,6 +84,15 @@ check __v_log10f 1 && runv=1
 runvn=
 check __vn_log10f 1 && runvn=1
 
+range_erfc='
+   0       0xffff0000   10000
+   0x1p-1022  0x1p-26   40000
+  -0x1p-1022 -0x1p-26   40000
+   0x1p-26    0x1p5     40000
+  -0x1p-26   -0x1p3     40000
+   0          inf       40000
+'
+
 range_log10='
   0 0xffff000000000000 10000
   0x1p-4     0x1p4     400000
@@ -95,6 +104,7 @@ range_log10f='
  0x1p-4    0x1p4    500000
 '
 # error limits
+L_erfc=3.7
 L_log10=1.16
 L_log10f=2.81
 
@@ -114,6 +124,10 @@ $range
 EOF
 done << EOF
 # group symbol run
+erfc   __s_erfc        $runs
+erfc   __v_erfc        $runv
+erfc   __vn_erfc       $runvn
+erfc   _ZGVnN2v_erfc   $runvn
 log10  __s_log10       $runs
 log10  __v_log10       $runv
 log10  __vn_log10      $runvn

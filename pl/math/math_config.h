@@ -379,6 +379,11 @@ extern const struct erfc_data
   double interval_bounds[ERFC_NUM_INTERVALS + 1];
   double poly[ERFC_NUM_INTERVALS][ERFC_POLY_ORDER + 1];
 } __erfc_data HIDDEN;
+extern const struct v_erfc_data
+{
+  double interval_bounds[ERFC_NUM_INTERVALS + 1];
+  double poly[ERFC_NUM_INTERVALS + 1][ERFC_POLY_ORDER + 1];
+}  __v_erfc_data HIDDEN;
 
 #define ERFCF_POLY_NCOEFFS 16
 extern const struct erfcf_poly_data
@@ -386,4 +391,6 @@ extern const struct erfcf_poly_data
   double poly[4][ERFCF_POLY_NCOEFFS];
 } __erfcf_poly_data HIDDEN;
 
+#define V_EXP_TAIL_TABLE_BITS 8
+extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
 #endif
