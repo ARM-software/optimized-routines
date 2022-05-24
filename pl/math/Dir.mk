@@ -5,7 +5,7 @@
 
 PLM := $(srcdir)/pl/math
 AOR := $(srcdir)/math
-B := $(srcdir)/build/pl/math
+B := build/pl/math
 
 math-lib-srcs := $(wildcard $(PLM)/*.[cS])
 math-test-srcs := \
