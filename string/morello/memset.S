@@ -14,7 +14,6 @@
 #include "../asmdefs.h"
 
 #if defined(__CHERI_PURE_CAPABILITY__)
-.arch armv8-a+c64
 #define dstin	c0
 #define val	x1
 #define valw	w1
