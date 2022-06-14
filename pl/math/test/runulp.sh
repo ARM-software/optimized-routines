@@ -112,11 +112,22 @@ range_log10f='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
 '
+
+range_erf='
+ 0      0xffff0000 10000
+ 0x1p-127  0x1p-26 40000
+-0x1p-127 -0x1p-26 40000
+ 0x1p-26   0x1p3   40000
+-0x1p-26  -0x1p3   40000
+ 0         inf     40000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
 L_log10=1.16
 L_log10f=2.81
+L_erf=1.76
 
 while read G F R
 do
@@ -134,6 +145,10 @@ $range
 EOF
 done << EOF
 # group symbol run
+erf   __s_erf          $runs
+erf   __v_erf          $runv
+erf   __vn_erf         $runvn
+erf   _ZGVnN2v_erf     $runvn
 erfc   __s_erfc        $runs
 erfc   __v_erfc        $runv
 erfc   __vn_erfc       $runvn

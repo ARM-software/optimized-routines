@@ -305,6 +305,10 @@ v_fma_f64 (v_f64_t x, v_f64_t y, v_f64_t z)
   return __builtin_fma (x, y, z);
 }
 static inline v_f64_t
+v_min_f64(v_f64_t x, v_f64_t y) {
+  return x < y ? x : y;
+}
+static inline v_f64_t
 v_round_f64 (v_f64_t x)
 {
   return __builtin_round (x);
@@ -313,6 +317,11 @@ static inline v_s64_t
 v_round_s64 (v_f64_t x)
 {
   return __builtin_lround (x); /* relies on -fno-math-errno.  */
+}
+static inline v_u64_t
+v_trunc_u64 (v_f64_t x)
+{
+  return __builtin_trunc (x);
 }
 /* convert to type1 from type2.  */
 static inline v_f64_t
@@ -585,6 +594,10 @@ v_fma_f64 (v_f64_t x, v_f64_t y, v_f64_t z)
   return vfmaq_f64 (z, x, y);
 }
 static inline v_f64_t
+v_min_f64(v_f64_t x, v_f64_t y) {
+  return vminq_f64(x, y);
+}
+static inline v_f64_t
 v_round_f64 (v_f64_t x)
 {
   return vrndaq_f64 (x);
@@ -593,6 +606,11 @@ static inline v_s64_t
 v_round_s64 (v_f64_t x)
 {
   return vcvtaq_s64_f64 (x);
+}
+static inline v_u64_t
+v_trunc_u64 (v_f64_t x)
+{
+  return vcvtq_u64_f64 (x);
 }
 /* convert to type1 from type2.  */
 static inline v_f64_t

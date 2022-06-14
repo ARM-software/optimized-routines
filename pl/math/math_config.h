@@ -393,4 +393,12 @@ extern const struct erfcf_poly_data
 
 #define V_EXP_TAIL_TABLE_BITS 8
 extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
+
+#define V_ERF_NINTS 49
+#define V_ERF_NCOEFFS 10
+extern const struct v_erf_data
+{
+  double shifts[V_ERF_NINTS];
+  double coeffs[V_ERF_NCOEFFS][V_ERF_NINTS];
+} __v_erf_data HIDDEN;
 #endif
