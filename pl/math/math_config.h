@@ -401,4 +401,10 @@ extern const struct v_erf_data
   double shifts[V_ERF_NINTS];
   double coeffs[V_ERF_NCOEFFS][V_ERF_NINTS];
 } __v_erf_data HIDDEN;
+
+#define V_ERFF_NCOEFFS 7
+extern const struct v_erff_data
+{
+  float coeffs[V_ERFF_NCOEFFS][2];
+} __v_erff_data HIDDEN;
 #endif

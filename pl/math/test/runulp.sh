@@ -122,12 +122,22 @@ range_erf='
  0         inf     40000
 '
 
+range_erff='
+ 0      0xffff0000 10000
+ 0x1p-127  0x1p-26 40000
+-0x1p-127 -0x1p-26 40000
+ 0x1p-26   0x1p3   40000
+-0x1p-26  -0x1p3   40000
+ 0         inf     40000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
 L_log10=1.16
 L_log10f=2.81
 L_erf=1.76
+L_erff=1.5
 
 while read G F R
 do
@@ -158,6 +168,10 @@ log10  __v_log10       $runv
 log10  __vn_log10      $runvn
 log10  _ZGVnN2v_log10  $runvn
 
+erff   __s_erff        $runs
+erff   __v_erff        $runv
+erff   __vn_erff       $runvn
+erff   _ZGVnN4v_erff   $runvn
 erfcf  __s_erfcf       $runs
 erfcf  __v_erfcf       $runv
 erfcf  __vn_erfcf      $runvn

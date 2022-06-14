@@ -24,18 +24,21 @@ static const double dv[2] = {1.0, -INFINITY};
 static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
 static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
 
+static float v_erff(float x) { return __v_erff(argf(x))[0]; }
 static float v_erfcf(float x) { return __v_erfcf(argf(x))[0]; }
 static float v_log10f(float x) { return __v_log10f(argf(x))[0]; }
 static double v_erf(double x) { return __v_erf(argd(x))[0]; }
 static double v_erfc(double x) { return __v_erfc(argd(x))[0]; }
 static double v_log10(double x) { return __v_log10(argd(x))[0]; }
 #ifdef __vpcs
+static float vn_erff(float x) { return __vn_erff(argf(x))[0]; }
 static float vn_erfcf(float x) { return __vn_erfcf(argf(x))[0]; }
 static float vn_log10f(float x) { return __vn_log10f(argf(x))[0]; }
 static double vn_erf(double x) { return __vn_erf(argd(x))[0]; }
 static double vn_erfc(double x) { return __vn_erfc(argd(x))[0]; }
 static double vn_log10(double x) { return __vn_log10(argd(x))[0]; }
 
+static float Z_erff(float x) { return _ZGVnN4v_erff(argf(x))[0]; }
 static float Z_erfcf(float x) { return _ZGVnN4v_erfcf(argf(x))[0]; }
 static float Z_log10f(float x) { return _ZGVnN4v_log10f(argf(x))[0]; }
 static double Z_erf(double x) { return _ZGVnN2v_erf(argd(x))[0]; }

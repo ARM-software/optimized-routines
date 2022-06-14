@@ -173,6 +173,16 @@ v_abs_f32 (v_f32_t x)
 {
   return __builtin_fabsf (x);
 }
+static inline v_u32_t
+v_cagt_f32 (v_f32_t x, v_f32_t y)
+{
+  return fabsf (x) > fabsf (y);
+}
+static inline v_u32_t
+v_calt_f32 (v_f32_t x, v_f32_t y)
+{
+  return fabsf (x) < fabsf (y);
+}
 static inline v_f32_t
 v_fma_f32 (v_f32_t x, v_f32_t y, v_f32_t z)
 {
@@ -187,6 +197,16 @@ static inline v_s32_t
 v_round_s32 (v_f32_t x)
 {
   return __builtin_lroundf (x); /* relies on -fno-math-errno.  */
+}
+static inline v_f32_t
+v_sel_f32 (v_u32_t p, v_f32_t x, v_f32_t y)
+{
+  return p ? x : y;
+}
+static inline v_u32_t
+v_sel_u32 (v_u32_t p, v_u32_t x, v_u32_t y)
+{
+  return p ? x : y;
 }
 /* convert to type1 from type2.  */
 static inline v_f32_t
@@ -457,6 +477,16 @@ v_abs_f32 (v_f32_t x)
 {
   return vabsq_f32 (x);
 }
+static inline v_u32_t
+v_cagt_f32 (v_f32_t x, v_f32_t y)
+{
+  return vcagtq_f32 (x, y);
+}
+static inline v_u32_t
+v_calt_f32 (v_f32_t x, v_f32_t y)
+{
+  return vcaltq_f32 (x, y);
+}
 static inline v_f32_t
 v_fma_f32 (v_f32_t x, v_f32_t y, v_f32_t z)
 {
@@ -471,6 +501,16 @@ static inline v_s32_t
 v_round_s32 (v_f32_t x)
 {
   return vcvtaq_s32_f32 (x);
+}
+static inline v_f32_t
+v_sel_f32 (v_u32_t p, v_f32_t x, v_f32_t y)
+{
+  return vbslq_f32 (p, x, y);
+}
+static inline v_u32_t
+v_sel_u32 (v_u32_t p, v_u32_t x, v_u32_t y)
+{
+  return vbslq_u32 (p, x, y);
 }
 /* convert to type1 from type2.  */
 static inline v_f32_t
