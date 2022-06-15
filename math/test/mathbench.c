@@ -66,6 +66,43 @@ v_float_dup (float x)
 {
   return (v_float){x, x, x, x};
 }
+#if WANT_SVE_MATH
+#include <arm_sve.h>
+typedef svbool_t sv_bool;
+typedef svfloat64_t sv_double;
+
+#define sv_double_len() svcntd()
+
+static inline sv_double
+sv_double_load (const double *p)
+{
+  svbool_t pg = svptrue_b64();
+  return svld1(pg, p);
+}
+
+static inline sv_double
+sv_double_dup (double x)
+{
+  return svdup_n_f64(x);
+}
+
+typedef svfloat32_t sv_float;
+
+#define sv_float_len() svcntw()
+
+static inline sv_float
+sv_float_load (const float *p)
+{
+  svbool_t pg = svptrue_b32();
+  return svld1(pg, p);
+}
+
+static inline sv_float
+sv_float_dup (float x)
+{
+  return svdup_n_f32(x);
+}
+#endif
 #else
 /* dummy definitions to make things compile.  */
 typedef double v_double;
@@ -116,6 +153,20 @@ __vn_dummyf (v_float x)
   return x;
 }
 #endif
+#if WANT_SVE_MATH
+static sv_double
+__sv_dummy (sv_double x, sv_bool pg)
+{
+  return x;
+}
+
+static sv_float
+__sv_dummyf (sv_float x, sv_bool pg)
+{
+  return x;
+}
+
+#endif
 #endif
 #endif
 
@@ -138,6 +189,10 @@ static const struct fun
     __vpcs v_double (*vnd) (v_double);
     __vpcs v_float (*vnf) (v_float);
 #endif
+#if WANT_SVE_MATH
+    sv_double (*svd) (sv_double, sv_bool);
+    sv_float (*svf) (sv_float, sv_bool);
+#endif
   } fun;
 } funtab[] = {
 #define D(func, lo, hi) {#func, 'd', 0, lo, hi, {.d = func}},
@@ -146,6 +201,8 @@ static const struct fun
 #define VF(func, lo, hi) {#func, 'f', 'v', lo, hi, {.vf = func}},
 #define VND(func, lo, hi) {#func, 'd', 'n', lo, hi, {.vnd = func}},
 #define VNF(func, lo, hi) {#func, 'f', 'n', lo, hi, {.vnf = func}},
+#define SVD(func, lo, hi) {#func, 'd', 's', lo, hi, {.svd = func}},
+#define SVF(func, lo, hi) {#func, 'f', 's', lo, hi, {.svf = func}},
 D (dummy, 1.0, 2.0)
 F (dummyf, 1.0, 2.0)
 #if WANT_VMATH
@@ -155,6 +212,10 @@ VF (__v_dummyf, 1.0, 2.0)
 #ifdef __vpcs
 VND (__vn_dummy, 1.0, 2.0)
 VNF (__vn_dummyf, 1.0, 2.0)
+#endif
+#if WANT_SVE_MATH
+SVD (__sv_dummy, 1.0, 2.0)
+SVF (__sv_dummyf, 1.0, 2.0)
 #endif
 #endif
 #endif
@@ -166,6 +227,8 @@ VNF (__vn_dummyf, 1.0, 2.0)
 #undef VD
 #undef VNF
 #undef VND
+#undef SVF
+#undef SVD
 };
 
 static void
@@ -330,6 +393,40 @@ runf_vn_latency (__vpcs v_float f (v_float))
 }
 #endif
 
+#if WANT_SVE_MATH
+static void
+run_sv_thruput (sv_double f (sv_double, sv_bool))
+{
+  for (int i = 0; i < N; i += sv_double_len ())
+    f (sv_double_load (A+i), svptrue_b64 ());
+}
+
+static void
+runf_sv_thruput (sv_float f (sv_float, sv_bool))
+{
+  for (int i = 0; i < N; i += sv_float_len ())
+    f (sv_float_load (Af+i), svptrue_b32 ());
+}
+
+static void
+run_sv_latency (sv_double f (sv_double, sv_bool))
+{
+  sv_double z = sv_double_dup (zero);
+  sv_double prev = z;
+  for (int i = 0; i < N; i += sv_double_len ())
+    prev = f (svmad_f64_x (svptrue_b64 (), prev, z, sv_double_load (A+i)), svptrue_b64 ());
+}
+
+static void
+runf_sv_latency (sv_float f (sv_float, sv_bool))
+{
+  sv_float z = sv_float_dup (zero);
+  sv_float prev = z;
+  for (int i = 0; i < N; i += sv_float_len ())
+    prev = f (svmad_f32_x (svptrue_b32 (), prev, z, sv_float_load (Af+i)), svptrue_b32 ());
+}
+#endif
+
 static uint64_t
 tic (void)
 {
@@ -391,6 +488,16 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_vn_thruput, f->fun.vnf);
   else if (f->prec == 'f' && type == 'l' && f->vec == 'n')
     TIMEIT (runf_vn_latency, f->fun.vnf);
+#endif
+#if WANT_SVE_MATH
+  else if (f->prec == 'd' && type == 't' && f->vec == 's')
+    TIMEIT (run_sv_thruput, f->fun.svd);
+  else if (f->prec == 'd' && type == 'l' && f->vec == 's')
+    TIMEIT (run_sv_latency, f->fun.svd);
+  else if (f->prec == 'f' && type == 't' && f->vec == 's')
+    TIMEIT (runf_sv_thruput, f->fun.svf);
+  else if (f->prec == 'f' && type == 'l' && f->vec == 's')
+    TIMEIT (runf_sv_latency, f->fun.svf);
 #endif
 
   if (type == 't')
