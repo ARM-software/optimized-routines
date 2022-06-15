@@ -214,7 +214,88 @@ struct conf
   double errlim;
 };
 
+/* A bit of a hack: call vector functions twice with the same
+   input in lane 0 but a different value in other lanes: once
+   with an in-range value and then with a special case value.  */
+static int secondcall;
+
+/* Wrappers for vector functions.  */
+#if __aarch64__ && WANT_VMATH
+typedef __f32x4_t v_float;
+typedef __f64x2_t v_double;
+static const float fv[2] = {1.0f, -INFINITY};
+static const double dv[2] = {1.0, -INFINITY};
+static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
+static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
+#if WANT_SVE_MATH
+#include <arm_sve.h>
+typedef __SVFloat32_t sv_float;
+typedef __SVFloat64_t sv_double;
+
+static inline sv_float svargf(float x)  {
+	int n = svcntw();
+	float base[n];
+	for (int i=0; i<n; i++)
+		base[i] = (float)x;
+	base[n-1] = (float) fv[secondcall];
+	return svld1(svptrue_b32(), base);
+}
+static inline sv_double svargd(double x) {
+	int n = svcntd();
+	double base[n];
+	for (int i=0; i<n; i++)
+		base[i] = x;
+	base[n-1] = dv[secondcall];
+	return svld1(svptrue_b64(), base);
+}
+static inline float svretf(sv_float vec)  {
+	int n = svcntw();
+	float res[n];
+	svst1(svptrue_b32(), res, vec);
+	return res[0];
+}
+static inline double svretd(sv_double vec) {
+	int n = svcntd();
+	double res[n];
+	svst1(svptrue_b64(), res, vec);
+	return res[0];
+}
+#endif
+#endif
+
+#if WANT_SVE_MATH
+long double
+dummyl (long double x)
+{
+  return x;
+}
+
+double
+dummy (double x)
+{
+  return x;
+}
+
+static sv_double
+__sv_dummy (sv_double x)
+{
+  return x;
+}
+
+static sv_float
+__sv_dummyf (sv_float x)
+{
+  return x;
+}
+#endif
+
 #include "test/ulp_wrappers.h"
+
+/* Wrappers for SVE functions.  */
+#if WANT_SVE_MATH
+static double sv_dummy (double x) { return svretd (__sv_dummy (svargd (x))); }
+static float sv_dummyf (float x) { return svretf (__sv_dummyf (svargf (x))); }
+#endif
 
 struct fun
 {
@@ -259,12 +340,32 @@ static const struct fun fun[] = {
 #define F2(x) F (x##f, x##f, x, mpfr_##x, 2, 1, f2, 0)
 #define D1(x) F (x, x, x##l, mpfr_##x, 1, 0, d1, 0)
 #define D2(x) F (x, x, x##l, mpfr_##x, 2, 0, d2, 0)
+/* SVE routines.  */
+#define SVF1(x) F (__sv_##x##f, sv_##x##f, x, mpfr_##x, 1, 1, f1, 0)
+#define SVF2(x) F (__sv_##x##f, sv_##x##f, x, mpfr_##x, 2, 1, f2, 0)
+#define SVD1(x) F (__sv_##x, sv_##x, x##l, mpfr_##x, 1, 0, d1, 0)
+#define SVD2(x) F (__sv_##x, sv_##x, x##l, mpfr_##x, 2, 0, d2, 0)
+#define ZSVF1(x) F (_ZGVsMxv_##x##f, Z_sv_##x##f, x, mpfr_##x, 1, 1, f1, 0)
+#define ZSVF2(x) F (_ZGVsMxvv_##x##f, Z_sv_##x##f, x, mpfr_##x, 2, 1, f2, 0)
+#define ZSVD1(x) F (_ZGVsMxv_##x, Z_sv_##x, x##l, mpfr_##x, 1, 0, d1, 0)
+#define ZSVD2(x) F (_ZGVsMxvv_##x, Z_sv_##x, x##l, mpfr_##x, 2, 0, d2, 0)
+
 #include "test/ulp_funcs.h"
+
+#if WANT_SVE_MATH
+ SVD1 (dummy)
+ SVF1 (dummy)
+#endif
+
 #undef F
 #undef F1
 #undef F2
 #undef D1
 #undef D2
+#undef SVF1
+#undef SVF2
+#undef SVD1
+#undef SVD2
  {0}};
 
 /* Boilerplate for generic calls.  */
