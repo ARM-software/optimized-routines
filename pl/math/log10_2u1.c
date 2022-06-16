@@ -36,10 +36,10 @@ top16 (double x)
    - Lookup parameters are scaled (at runtime) to switch from base e to base 10.
    Max ULP error: < 1.7 ulp (nearest rounding.)
      with (LOG10_POLY1_ORDER = 10, LOG10_POLY_ORDER = 6, N = 128)
-   Maximum measured at 1.655 ulp for x in [0.0746, 0.0747]:
-     log10(0x1.ee008434a44a4p-1) got -0x1.fd415bb39db27p-7
-				want -0x1.fd415bb39db29p-7
-     +0.344511 ulp err 1.15549.  */
+   Many errors above 2.08 ulp are observed across the whole range of doubles.
+   The greatest observed error is 2.09 ulp, at around 2.66e-127:
+   log10(0x1.713b77689f011p-421) got -0x1.fa4c5bacfbe41p+6
+				want -0x1.fa4c5bacfbe43p+6.  */
 double
 log10 (double x)
 {
@@ -119,6 +119,8 @@ log10 (double x)
 
   return eval_as_double (y);
 }
+
+// clang-format off
 #if USE_GLIBC_ABI
 strong_alias (log10, __log10_finite)
 hidden_alias (log10, __ieee754_log10)
@@ -130,3 +132,4 @@ log10l (long double x)
 }
 #endif
 #endif
+// clang-format on
