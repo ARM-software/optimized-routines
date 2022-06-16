@@ -407,4 +407,10 @@ extern const struct v_erff_data
 {
   float coeffs[V_ERFF_NCOEFFS][2];
 } __v_erff_data HIDDEN;
+
+#define ATAN_POLY_NCOEFFS 20
+extern const struct atan_poly_data
+{
+  double poly[ATAN_POLY_NCOEFFS];
+} __atan_poly_data HIDDEN;
 #endif

@@ -9,6 +9,7 @@ F (erfcf, -4.0, 10.0)
 F (erff, -4.0, 4.0)
 F (log10f, 0.01, 11.1)
 
+{"atan2", 'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
 D (erf, -6,6)
 D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
@@ -48,4 +49,4 @@ VND (_ZGVnN2v_log10, 0.01, 11.1)
 #endif
 #endif
 #endif
-// clang-format on
+  // clang-format on

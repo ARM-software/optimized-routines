@@ -8,6 +8,7 @@
 F1 (erfc)
 F1 (erf)
 F1 (log10)
+D2 (atan2)
 D1 (erfc)
 D1 (log10)
 #if WANT_VMATH

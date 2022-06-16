@@ -5,3 +5,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+static double
+atan2_wrap (double x)
+{
+  return atan2 (5.0, x);
+}

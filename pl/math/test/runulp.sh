@@ -71,6 +71,13 @@ t erfcf  0x1p-26    0x1p5  40000
 t erfcf -0x1p-26   -0x1p3  40000
 t erfcf  0          inf    40000
 
+L=2.0
+t atan2 -10.0       10.0  50000
+t atan2  -1.0        1.0  40000
+t atan2   0.0        1.0  40000
+t atan2   1.0      100.0  40000
+t atan2   1e6       1e32  40000
+
 done
 
 # vector functions
