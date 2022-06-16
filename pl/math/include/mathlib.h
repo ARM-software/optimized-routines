@@ -1,3 +1,4 @@
+// clang-format off
 /*
  * Public API.
  *
@@ -8,7 +9,7 @@
 #ifndef _MATHLIB_H
 #define _MATHLIB_H
 
-float erfcf(float);
+float erfcf (float);
 float erff (float);
 float log10f (float);
 
@@ -64,3 +65,4 @@ __vpcs __f64x2_t _ZGVnN2v_log10 (__f64x2_t);
 #endif
 
 #endif
+// clang-format on
