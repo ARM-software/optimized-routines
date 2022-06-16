@@ -413,4 +413,10 @@ extern const struct atan_poly_data
 {
   double poly[ATAN_POLY_NCOEFFS];
 } __atan_poly_data HIDDEN;
+
+#define ATANF_POLY_NCOEFFS 8
+extern const struct atanf_poly_data
+{
+  float poly[ATANF_POLY_NCOEFFS];
+} __atanf_poly_data HIDDEN;
 #endif

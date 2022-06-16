@@ -9,6 +9,7 @@
 #ifndef _MATHLIB_H
 #define _MATHLIB_H
 
+float atan2f (float, float);
 float erfcf (float);
 float erff (float);
 float log10f (float);

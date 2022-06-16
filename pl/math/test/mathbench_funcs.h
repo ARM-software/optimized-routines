@@ -5,6 +5,7 @@
  * Copyright (c) 2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+{"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
 F (erfcf, -4.0, 10.0)
 F (erff, -4.0, 4.0)
 F (log10f, 0.01, 11.1)

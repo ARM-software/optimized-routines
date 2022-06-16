@@ -10,3 +10,9 @@ atan2_wrap (double x)
 {
   return atan2 (5.0, x);
 }
+
+static float
+atan2f_wrap (float x)
+{
+  return atan2f (5.0f, x);
+}
