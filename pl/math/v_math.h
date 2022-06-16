@@ -319,6 +319,11 @@ v_abs_f64 (v_f64_t x)
 {
   return __builtin_fabs (x);
 }
+static inline v_u64_t
+v_cagt_f64 (v_f64_t x, v_f64_t y)
+{
+  return fabs (x) > fabs (y);
+}
 static inline v_f64_t
 v_div_f64 (v_f64_t x, v_f64_t y)
 {
@@ -643,6 +648,11 @@ static inline v_f64_t
 v_abs_f64 (v_f64_t x)
 {
   return vabsq_f64 (x);
+}
+static inline v_u64_t
+v_cagt_f64 (v_f64_t x, v_f64_t y)
+{
+  return vcagtq_f64 (x, y);
 }
 static inline v_f64_t
 v_div_f64 (v_f64_t x, v_f64_t y)

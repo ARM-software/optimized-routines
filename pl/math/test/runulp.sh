@@ -153,6 +153,14 @@ range_atan2='
    1e6       1e32  40000
 '
 
+range_atan='
+ -10.0       10.0  50000
+  -1.0        1.0  40000
+   0.0        1.0  40000
+   1.0      100.0  40000
+   1e6       1e32  40000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -161,6 +169,7 @@ L_log10f=2.81
 L_erf=1.76
 L_erff=1.5
 L_atan2=2.9
+L_atan=3.0
 
 while read G F R
 do
@@ -178,6 +187,11 @@ $range
 EOF
 done << EOF
 # group symbol run
+
+atan   __s_atan        $runs
+atan   __v_atan        $runv
+atan   __vn_atan       $runvn
+atan   _ZGVnN2v_atan   $runvn
 atan2 __s_atan2        $runs
 atan2 __v_atan2        $runv
 atan2 __vn_atan2       $runvn
