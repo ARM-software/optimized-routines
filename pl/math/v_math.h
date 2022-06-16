@@ -320,6 +320,11 @@ v_abs_f64 (v_f64_t x)
   return __builtin_fabs (x);
 }
 static inline v_f64_t
+v_div_f64 (v_f64_t x, v_f64_t y)
+{
+  return x / y;
+}
+static inline v_f64_t
 v_fma_f64 (v_f64_t x, v_f64_t y, v_f64_t z)
 {
   return __builtin_fma (x, y, z);
@@ -332,6 +337,11 @@ static inline v_f64_t
 v_round_f64 (v_f64_t x)
 {
   return __builtin_round (x);
+}
+static inline v_f64_t
+v_sel_f64 (v_u64_t p, v_f64_t x, v_f64_t y)
+{
+  return p ? x : y;
 }
 static inline v_s64_t
 v_round_s64 (v_f64_t x)
@@ -393,6 +403,12 @@ static inline v_f64_t
 v_call_f64 (f64_t (*f) (f64_t), v_f64_t x, v_f64_t y, v_u64_t p)
 {
   return f (x);
+}
+static inline v_f64_t
+v_call2_f64 (f64_t (*f) (f64_t, f64_t), v_f64_t x1, v_f64_t x2, v_f64_t y,
+	     v_u64_t p)
+{
+  return f (x1, x2);
 }
 
 #elif __aarch64__
@@ -629,6 +645,11 @@ v_abs_f64 (v_f64_t x)
   return vabsq_f64 (x);
 }
 static inline v_f64_t
+v_div_f64 (v_f64_t x, v_f64_t y)
+{
+  return vdivq_f64 (x, y);
+}
+static inline v_f64_t
 v_fma_f64 (v_f64_t x, v_f64_t y, v_f64_t z)
 {
   return vfmaq_f64 (z, x, y);
@@ -641,6 +662,11 @@ static inline v_f64_t
 v_round_f64 (v_f64_t x)
 {
   return vrndaq_f64 (x);
+}
+static inline v_f64_t
+v_sel_f64 (v_u64_t p, v_f64_t x, v_f64_t y)
+{
+  return vbslq_f64 (p, x, y);
 }
 static inline v_s64_t
 v_round_s64 (v_f64_t x)
@@ -702,6 +728,13 @@ static inline v_f64_t
 v_call_f64 (f64_t (*f) (f64_t), v_f64_t x, v_f64_t y, v_u64_t p)
 {
   return (v_f64_t){p[0] ? f (x[0]) : y[0], p[1] ? f (x[1]) : y[1]};
+}
+static inline v_f64_t
+v_call2_f64 (f64_t (*f) (f64_t, f64_t), v_f64_t x1, v_f64_t x2, v_f64_t y,
+	     v_u64_t p)
+{
+  return (v_f64_t){p[0] ? f (x1[0], x2[0]) : y[0],
+		   p[1] ? f (x1[1], x2[1]) : y[1]};
 }
 #endif
 
