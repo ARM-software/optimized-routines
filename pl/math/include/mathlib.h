@@ -17,6 +17,7 @@ float log10f (float);
 double atan2 (double, double);
 double log10 (double);
 
+float __s_atan2f (float, float);
 float __s_erfcf (float);
 float __s_erff (float);
 float __s_log10f (float);
@@ -40,6 +41,7 @@ typedef __attribute__((__neon_vector_type__(2))) double __f64x2_t;
 
 /* Vector functions following the base PCS.  */
 __f64x2_t __v_atan (__f64x2_t);
+__f32x4_t __v_atan2f (__f32x4_t, __f32x4_t);
 __f64x2_t __v_atan2 (__f64x2_t, __f64x2_t);
 __f32x4_t __v_erff (__f32x4_t);
 __f64x2_t __v_erf (__f64x2_t);
@@ -53,6 +55,7 @@ __f64x2_t __v_log10 (__f64x2_t);
 
 /* Vector functions following the vector PCS.  */
 __vpcs __f64x2_t __vn_atan (__f64x2_t);
+__vpcs __f32x4_t __vn_atan2f (__f32x4_t, __f32x4_t);
 __vpcs __f64x2_t __vn_atan2 (__f64x2_t, __f64x2_t);
 __vpcs __f32x4_t __vn_erff (__f32x4_t);
 __vpcs __f64x2_t __vn_erf (__f64x2_t);
@@ -63,6 +66,7 @@ __vpcs __f64x2_t __vn_log10 (__f64x2_t);
 
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f64x2_t _ZGVnN2v_atan (__f64x2_t);
+__vpcs __f32x4_t _ZGVnN4vv_atan2f (__f32x4_t, __f32x4_t);
 __vpcs __f64x2_t _ZGVnN2vv_atan2 (__f64x2_t, __f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_erff (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_erf (__f64x2_t);

@@ -184,6 +184,11 @@ v_calt_f32 (v_f32_t x, v_f32_t y)
   return fabsf (x) < fabsf (y);
 }
 static inline v_f32_t
+v_div_f32 (v_f32_t x, v_f32_t y)
+{
+  return x / y;
+}
+static inline v_f32_t
 v_fma_f32 (v_f32_t x, v_f32_t y, v_f32_t z)
 {
   return __builtin_fmaf (x, y, z);
@@ -507,6 +512,11 @@ static inline v_u32_t
 v_calt_f32 (v_f32_t x, v_f32_t y)
 {
   return vcaltq_f32 (x, y);
+}
+static inline v_f32_t
+v_div_f32 (v_f32_t x, v_f32_t y)
+{
+  return vdivq_f32 (x, y);
 }
 static inline v_f32_t
 v_fma_f32 (v_f32_t x, v_f32_t y, v_f32_t z)
