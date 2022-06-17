@@ -5,6 +5,7 @@
  * Copyright (c) 2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+F (atanf, -10.0, 10.0)
 {"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
 F (erfcf, -4.0, 10.0)
 F (erff, -4.0, 4.0)
@@ -17,6 +18,7 @@ D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
 
 #if WANT_VMATH
+F (__s_atanf, -10.0, 10.0)
 D (__s_atan, -10.0, 10.0)
 {"__s_atan2f", 'f', 0, -10.0, 10.0, {.f = __s_atan2f_wrap}},
 {"__s_atan2", 'd', 0, -10.0, 10.0, {.d = __s_atan2_wrap}},
@@ -27,6 +29,7 @@ D (__s_erfc, -6.0, 28.0)
 F (__s_log10f, 0.01, 11.1)
 D (__s_log10, 0.01, 11.1)
 #if __aarch64__
+VF (__v_atanf, -10.0, 10.0)
 VD (__v_atan, -10.0, 10.0)
 {"__v_atan2f", 'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
 {"__v_atan2", 'd', 'v', -10.0, 10.0, {.vd = __v_atan2_wrap}},
@@ -37,6 +40,9 @@ VD (__v_erfc, -6.0, 28.0)
 VD (__v_log10, 0.01, 11.1)
 VF (__v_log10f, 0.01, 11.1)
 #ifdef __vpcs
+VNF (__vn_atanf, -10.0, 10.0)
+VNF (_ZGVnN4v_atanf, -10.0, 10.0)
+
 VND (__vn_atan, -10.0, 10.0)
 VND (_ZGVnN2v_atan, -10.0, 10.0)
 
