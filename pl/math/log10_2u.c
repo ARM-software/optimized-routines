@@ -20,8 +20,8 @@
 #define InvLn10 __log10_data.invln10
 #define N (1 << LOG10_TABLE_BITS)
 #define OFF 0x3fe6000000000000
-#define LO asuint64 (1.0 - 0x1p-5)
-#define HI asuint64 (1.0 + 0x1.1p-5)
+#define LO asuint64 (1.0 - 0x1p-4)
+#define HI asuint64 (1.0 + 0x1.09p-4)
 
 /* Top 16 bits of a double.  */
 static inline uint32_t
@@ -34,17 +34,15 @@ top16 (double x)
    The implementation is similar to that of math/log, except that:
    - Polynomials are computed for log10(1+r) with r on same intervals as log.
    - Lookup parameters are scaled (at runtime) to switch from base e to base 10.
-   Max ULP error: < 1.7 ulp (nearest rounding.)
-     with (LOG10_POLY1_ORDER = 10, LOG10_POLY_ORDER = 6, N = 128)
-   Many errors above 2.08 ulp are observed across the whole range of doubles.
-   The greatest observed error is 2.09 ulp, at around 2.66e-127:
-   log10(0x1.713b77689f011p-421) got -0x1.fa4c5bacfbe41p+6
-				want -0x1.fa4c5bacfbe43p+6.  */
+   Many errors above 1.59 ulp are observed across the whole range of doubles.
+   The greatest observed error is 1.61 ulp, at around 0.965:
+   log10(0x1.dc8710333a29bp-1) got -0x1.fee26884905a6p-6
+			      want -0x1.fee26884905a8p-6.  */
 double
 log10 (double x)
 {
   /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
-  double_t w, z, r, r2, r3, y, invc, logc, kd;
+  double_t w, z, r, r2, r3, y, invc, logc, kd, hi, lo;
   uint64_t ix, iz, tmp;
   uint32_t top;
   int k, i;
@@ -61,13 +59,23 @@ log10 (double x)
       r = x - 1.0;
       r2 = r * r;
       r3 = r * r2;
-      /* Worst-case error is around 0.727 ULP.  */
       y = r3
 	  * (B[1] + r * B[2] + r2 * B[3]
-	     + r3 * (B[4] + r * B[5] + r2 * B[6] + r3 * (B[7] + r * B[8])));
-      w = B[0] * r2; /* B[0] == -0.5.  */
+	     + r3
+		 * (B[4] + r * B[5] + r2 * B[6]
+		    + r3 * (B[7] + r * B[8] + r2 * B[9] + r3 * B[10])));
+      /* Worst-case error is around 0.507 ULP.  */
+      w = r * 0x1p27;
+      double_t rhi = r + w - w;
+      double_t rlo = r - rhi;
+      w = rhi * rhi * B[0];
+      hi = r + w;
+      lo = r - hi + w;
+      lo += B[0] * rlo * (rhi + r);
+      y += lo;
+      y += hi;
       /* Scale by 1/ln(10). Polynomial already contains scaling.  */
-      y = (y + w) + r * InvLn10;
+      y = y * InvLn10;
 
       return eval_as_double (y);
     }
@@ -109,13 +117,15 @@ log10 (double x)
 
   /* w = log(c) + k*Ln2hi.  */
   w = kd * Ln2hi + logc;
+  hi = w + r;
+  lo = w - hi + r + kd * Ln2lo;
 
   /* log10(x) = (w + r)/log(10) + (log10(1+r) - r/log(10)).  */
   r2 = r * r; /* rounding error: 0x1p-54/N^2.  */
-  y = r2 * A[0] + r * r2 * (A[1] + r * A[2] + r2 * (A[3] + r * A[4]));
 
   /* Scale by 1/ln(10). Polynomial already contains scaling.  */
-  y = y + ((r + kd * Ln2lo) + w) * InvLn10;
+  y = lo + r2 * A[0] + r * r2 * (A[1] + r * A[2] + r2 * (A[3] + r * A[4])) + hi;
+  y = y * InvLn10;
 
   return eval_as_double (y);
 }

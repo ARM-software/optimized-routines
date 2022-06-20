@@ -14,29 +14,32 @@ const struct log10_data __log10_data = {
 .ln2lo = 0x1.ef35793c76730p-45,
 .invln10 = 0x1.bcb7b1526e50ep-2,
 .poly1 = {
-#if LOG10_POLY1_ORDER == 10
-// relative error: 0x1.d34d5238p-63
-// in -0x1p-5 0x1.1p-5 (|log10(1+x)| > 0x1p-5 outside this interval)
--0x1.bcb7b1526e50ep-3,
-0x1.287a7636f4314p-3,
--0x1.bcb7b1526eeebp-4,
-0x1.63c62776b50e6p-4,
--0x1.287a76329b69dp-4,
-0x1.fc3f7e81f44c2p-5,
--0x1.bcb7b7893672ap-5,
-0x1.8c0fa601b4779p-5,
--0x1.64403e39d7278p-5,
+#if LOG10_POLY1_ORDER == 12
+// relative error: 0x1.c04d76cp-63
+// in -0x1p-4 0x1.09p-4 (|log(1+x)| > 0x1p-4 outside the interval)
+-0x1p-1,
+0x1.5555555555577p-2,
+-0x1.ffffffffffdcbp-3,
+0x1.999999995dd0cp-3,
+-0x1.55555556745a7p-3,
+0x1.24924a344de3p-3,
+-0x1.fffffa4423d65p-4,
+0x1.c7184282ad6cap-4,
+-0x1.999eb43b068ffp-4,
+0x1.78182f7afd085p-4,
+-0x1.5521375d145cdp-4,
 #endif
 },
 .poly = {
 #if N == 128 && LOG10_POLY_ORDER == 6
-// relative error: 0x1.29fc52bp-56
+// relative error: 0x1.926199e8p-56
+// abs error: 0x1.882ff33p-65
 // in -0x1.fp-9 0x1.fp-9
--0x1.bcb7b1526e50fp-3,
-0x1.287a7636c4076p-3,
--0x1.bcb7b151bffaep-4,
-0x1.63c77372810dep-4,
--0x1.287bdeec963c2p-4,
+-0x1.0000000000001p-1,
+0x1.555555551305bp-2,
+-0x1.fffffffeb459p-3,
+0x1.999b324f10111p-3,
+-0x1.55575e506c89fp-3,
 #endif
 },
 /* Algorithm:

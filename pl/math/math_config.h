@@ -336,7 +336,7 @@ extern const struct logf_data
 /* Data for low accuracy log10 (with 1/ln(10) included in coefficients).  */
 #define LOG10_TABLE_BITS 7
 #define LOG10_POLY_ORDER 6
-#define LOG10_POLY1_ORDER 10
+#define LOG10_POLY1_ORDER 12
 extern const struct log10_data
 {
   double ln2hi;
