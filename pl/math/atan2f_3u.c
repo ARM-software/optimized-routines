@@ -15,6 +15,12 @@
 #define PiOver4 (0x1.921fb6p-1f)
 #define SignMask (0x80000000)
 
+/* We calculate atan2f by P(n/d), where n and d are similar to the input
+   arguments, and P is a polynomial. The polynomial may underflow.
+   POLY_UFLOW_BOUND is the lower bound of the difference in exponents of n and d
+   for which P underflows, and is used to special-case such inputs.  */
+#define POLY_UFLOW_BOUND 24
+
 static inline int32_t
 biased_exponent (float f)
 {
@@ -65,10 +71,10 @@ atan2f (float y, float x)
   int32_t exp_diff = biased_exponent (x) - biased_exponent (y);
 
   /* Special case for (x, y) either on or very close to the x axis. Either y =
-     0, or y is tiny and x is huge (difference in exponents >= 126). In the
-     second case, we only want to use this special case when x is negative (i.e.
-     quadrants 2 or 3).  */
-  if (unlikely (iay == 0 || (exp_diff >= 126 && m >= 2)))
+     0, or y is tiny and x is huge (difference in exponents >=
+     POLY_UFLOW_BOUND). In the second case, we only want to use this special
+     case when x is negative (i.e. quadrants 2 or 3).  */
+  if (unlikely (iay == 0 || (exp_diff >= POLY_UFLOW_BOUND && m >= 2)))
     {
       switch (m)
 	{
@@ -82,8 +88,9 @@ atan2f (float y, float x)
 	}
     }
   /* Special case for (x, y) either on or very close to the y axis. Either x =
-     0, or x is tiny and y is huge (difference in exponents >= 126).  */
-  if (unlikely (iax == 0 || exp_diff <= -126))
+     0, or x is tiny and y is huge (difference in exponents >=
+     POLY_UFLOW_BOUND).  */
+  if (unlikely (iax == 0 || exp_diff <= -POLY_UFLOW_BOUND))
     return sign_y ? -PiOver2 : PiOver2;
 
   /* x is INF.  */
@@ -134,12 +141,22 @@ atan2f (float y, float x)
   float d = pred_aygtax ? ay : ax;
   float z = n / d;
 
-  /* Work out the correct shift.  */
-  float shift = sign_x ? -2.0f : 0.0f;
-  shift = pred_aygtax ? shift + 1.0f : shift;
-  shift *= PiOver2;
+  float ret;
+  if (unlikely (m < 2 && exp_diff >= POLY_UFLOW_BOUND))
+    {
+      /* If (x, y) is very close to x axis and x is positive, the polynomial
+	 will underflow and evaluate to z.  */
+      ret = z;
+    }
+  else
+    {
+      /* Work out the correct shift.  */
+      float shift = sign_x ? -2.0f : 0.0f;
+      shift = pred_aygtax ? shift + 1.0f : shift;
+      shift *= PiOver2;
 
-  float ret = eval_poly (z, z, shift);
+      ret = eval_poly (z, z, shift);
+    }
 
   /* Account for the sign of x and y.  */
   return asfloat (asuint (ret) ^ sign_xy);
