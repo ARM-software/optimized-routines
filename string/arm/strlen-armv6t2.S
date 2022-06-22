@@ -14,6 +14,7 @@
  */
 
 #include "../asmdefs.h"
+#include "../pacbti.h"
 
 #ifdef __ARMEB__
 #define S2LO		lsl
@@ -41,8 +42,31 @@
 #define tmp2		r5
 
 ENTRY (__strlen_armv6t2)
+	/* common pacbti_prologue macro from pacbti.h not used.
+	   handwritten prologue saves one push instruction. */
+#if __ARM_FEATURE_PAC_DEFAULT
+#if __ARM_FEATURE_BTI_DEFAULT
+	pacbti ip, lr, sp
+#else
+	pac ip, lr, sp
+#endif /* __ARM_FEATURE_BTI_DEFAULT */
+	push    {r4, r5, ip}
+	.save   {r4, r5, ra_auth_code}
+	.cfi_def_cfa_offset 12
+	.cfi_offset 143, -4
+	.cfi_offset 4, -8
+	.cfi_offset 5, -12
+#else
+#if __ARM_FEATURE_BTI_DEFAULT
+	bti
+#endif /* __ARM_FEATURE_BTI_DEFAULT */
+	push    {r4, r5}
+	.save   {r4, r5}
+	.cfi_def_cfa_offset 8
+	.cfi_offset 4, -4
+	.cfi_offset 5, -8
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 	pld	[srcin, #0]
-	strd	r4, r5, [sp, #-8]!
 	bic	src, srcin, #7
 	mvn	const_m1, #0
 	ands	tmp1, srcin, #7		/* (8 - bytes) to alignment.  */
@@ -101,8 +125,11 @@ L(null_found):
 #endif
 	clz	data1a, data1a
 	ldrd	r4, r5, [sp], #8
+	.cfi_restore 5
+	.cfi_restore 4
+	.cfi_adjust_cfa_offset -8
 	add	result, result, data1a, lsr #3	/* Bits -> Bytes.  */
-	bx	lr
+	pacbti_epilogue
 
 L(misaligned8):
 	ldrd	data1a, data1b, [src]
