@@ -19,15 +19,13 @@
 #define src		x1
 #define	synd		x2
 #define tmp		x3
-#define wtmp		w3
 #define shift		x4
 
 #define data		q0
 #define vdata		v0
 #define vhas_nul	v1
-#define vrepmask	v2
-#define vend		v3
-#define dend		d3
+#define vend		v2
+#define dend		d2
 
 /* Core algorithm:
 
@@ -41,13 +39,10 @@
 ENTRY (__strlen_aarch64_mte)
 	PTR_ARG (0)
 	bic	src, srcin, 15
-	mov	wtmp, 0xf00f
 	ld1	{vdata.16b}, [src]
-	dup	vrepmask.8h, wtmp
 	cmeq	vhas_nul.16b, vdata.16b, 0
 	lsl	shift, srcin, 2
-	and	vhas_nul.16b, vhas_nul.16b, vrepmask.16b
-	addp	vend.16b, vhas_nul.16b, vhas_nul.16b		/* 128->64 */
+	shrn	vend.8b, vhas_nul.8h, 4		/* 128->64 */
 	fmov	synd, dend
 	lsr	synd, synd, shift
 	cbz	synd, L(loop)
@@ -65,8 +60,7 @@ L(loop):
 	fmov	synd, dend
 	cbz	synd, L(loop)
 
-	and	vhas_nul.16b, vhas_nul.16b, vrepmask.16b
-	addp	vend.16b, vhas_nul.16b, vhas_nul.16b		/* 128->64 */
+	shrn	vend.8b, vhas_nul.8h, 4		/* 128->64 */
 	sub	result, src, srcin
 	fmov	synd, dend
 #ifndef __AARCH64EB__
