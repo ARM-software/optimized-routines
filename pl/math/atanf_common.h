@@ -21,8 +21,8 @@
 
 #else
 
-#define FLT_T double
-#define FMA fma
+#define FLT_T float
+#define FMA fmaf
 #define P(i) __atanf_poly_data.poly[i]
 
 #endif
