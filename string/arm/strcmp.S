@@ -13,6 +13,7 @@
    the compares.  */
 
 #include "../asmdefs.h"
+#include "../pacbti.h"
 
 /* Build Options:
    STRCMP_NO_PRECHECK: Don't run a quick pre-check of the first
@@ -98,8 +99,9 @@
 	ldrd	r4, r5, [sp], #16
 	.cfi_restore 4
 	.cfi_restore 5
+	.cfi_adjust_cfa_offset -16
 	sub	result, result, r1, lsr #24
-	bx	lr
+	pacbti_epilogue
 #else
 	/* To use the big-endian trick we'd have to reverse all three words.
 	   that's slower than this approach.  */
@@ -119,21 +121,28 @@
 	ldrd	r4, r5, [sp], #16
 	.cfi_restore 4
 	.cfi_restore 5
+	.cfi_adjust_cfa_offset -16
 	sub	result, result, r1
 
-	bx	lr
+	pacbti_epilogue
 #endif
 	.endm
 
 	.p2align	5
 L(strcmp_start_addr):
+	.fnstart
+	.cfi_startproc
 #if STRCMP_NO_PRECHECK == 0
 L(fastpath_exit):
 	sub	r0, r2, r3
-	bx	lr
+	pacbti_epilogue
 	nop
 #endif
-ENTRY_ALIGN (__strcmp_arm, 0)
+	.global __strcmp_arm
+	.type __strcmp_arm,%function
+	.align 0
+__strcmp_arm:
+	pacbti_prologue
 #if STRCMP_NO_PRECHECK == 0
 	ldrb	r2, [src1]
 	ldrb	r3, [src2]
@@ -143,13 +152,25 @@ ENTRY_ALIGN (__strcmp_arm, 0)
 	bne	L(fastpath_exit)
 #endif
 	strd	r4, r5, [sp, #-16]!
-	.cfi_def_cfa_offset 16
+	.save	{r4, r5}
+	.cfi_adjust_cfa_offset 16
+#ifdef __ARM_FEATURE_PAC_DEFAULT
+	.cfi_offset 4, -20
+	.cfi_offset 5, -16
+#else
 	.cfi_offset 4, -16
 	.cfi_offset 5, -12
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 	orr	tmp1, src1, src2
 	strd	r6, r7, [sp, #8]
+	.save	{r6, r7}
+#ifdef __ARM_FEATURE_PAC_DEFAULT
+	.cfi_offset 6, -12
+	.cfi_offset 7, -8
+#else
 	.cfi_offset 6, -8
 	.cfi_offset 7, -4
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
 	mvn	const_m1, #0
 	lsl	r2, tmp1, #29
 	cbz	r2, L(loop_aligned8)
@@ -318,7 +339,9 @@ L(misaligned_exit):
 	mov	result, tmp1
 	ldr	r4, [sp], #16
 	.cfi_restore 4
-	bx	lr
+	.cfi_adjust_cfa_offset -16
+
+	pacbti_epilogue
 
 #if STRCMP_NO_PRECHECK == 0
 L(aligned_m1):
@@ -368,9 +391,9 @@ L(overlap3):
 	/* R6/7 Not used in this sequence.  */
 	.cfi_restore 6
 	.cfi_restore 7
+	.cfi_adjust_cfa_offset -16
 	neg	result, result
-	bx	lr
-
+	pacbti_epilogue
 6:
 	.cfi_restore_state
 	S2LO	data1, data1, #24
@@ -445,7 +468,8 @@ L(strcmp_done_equal):
 	/* R6/7 not used in this sequence.  */
 	.cfi_restore 6
 	.cfi_restore 7
-	bx	lr
+	.cfi_adjust_cfa_offset -16
+	pacbti_epilogue
 
 L(strcmp_tail):
 	.cfi_restore_state
@@ -467,8 +491,9 @@ L(strcmp_tail):
 	/* R6/7 not used in this sequence.  */
 	.cfi_restore 6
 	.cfi_restore 7
+	.cfi_adjust_cfa_offset -16
 	sub	result, result, data2, lsr #24
-	bx	lr
+	pacbti_epilogue
 
 END (__strcmp_arm)
 
