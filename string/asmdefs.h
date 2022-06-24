@@ -11,6 +11,9 @@
 #if defined (__arm__)
 #define ARM_FNSTART .fnstart
 #define ARM_FNEND .fnend
+#else
+#define ARM_FNSTART
+#define ARM_FNEND
 #endif
 
 #if defined(__aarch64__)
