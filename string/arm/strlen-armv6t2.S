@@ -54,8 +54,8 @@ ENTRY (__strlen_armv6t2)
 	.save   {r4, r5, ra_auth_code}
 	.cfi_def_cfa_offset 12
 	.cfi_offset 143, -4
-	.cfi_offset 4, -8
-	.cfi_offset 5, -12
+	.cfi_offset 5, -8
+	.cfi_offset 4, -12
 #else
 #if __ARM_FEATURE_BTI_DEFAULT
 	bti
@@ -63,8 +63,8 @@ ENTRY (__strlen_armv6t2)
 	push    {r4, r5}
 	.save   {r4, r5}
 	.cfi_def_cfa_offset 8
-	.cfi_offset 4, -4
-	.cfi_offset 5, -8
+	.cfi_offset 4, -8
+	.cfi_offset 5, -4
 #endif /* __ARM_FEATURE_PAC_DEFAULT */
 	pld	[srcin, #0]
 	bic	src, srcin, #7
@@ -124,12 +124,21 @@ L(null_found):
 	rev	data1a, data1a
 #endif
 	clz	data1a, data1a
-	ldrd	r4, r5, [sp], #8
-	.cfi_restore 5
-	.cfi_restore 4
-	.cfi_adjust_cfa_offset -8
 	add	result, result, data1a, lsr #3	/* Bits -> Bytes.  */
-	pacbti_epilogue
+#if __ARM_FEATURE_PAC_DEFAULT
+	pop	{r4, r5, ip}
+	.cfi_restore 4
+	.cfi_restore 5
+	.cfi_restore 143
+	.cfi_def_cfa_offset 0
+	aut ip, lr, sp
+#else
+	ldrd	r4, r5, [sp], #8
+	.cfi_restore 4
+	.cfi_restore 5
+	.cfi_def_cfa_offset 0
+#endif /* __ARM_FEATURE_PAC_DEFAULT */
+	bx lr
 
 L(misaligned8):
 	ldrd	data1a, data1b, [src]
