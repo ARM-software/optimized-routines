@@ -7,6 +7,6 @@
 #include "include/mathlib.h"
 #ifdef __vpcs
 #define VPCS 1
-#define VPCS_ALIAS strong_alias (__vn_erf, _ZGVnN2v_erf);
+#define VPCS_ALIAS strong_alias (__vn_erf, _ZGVnN2v_erf)
 #include "v_erf_2u.c"
 #endif
