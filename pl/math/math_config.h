@@ -419,4 +419,10 @@ extern const struct atanf_poly_data
 {
   float poly[ATANF_POLY_NCOEFFS];
 } __atanf_poly_data HIDDEN;
+
+#define ASINHF_NCOEFFS 8
+extern const struct asinhf_data
+{
+  float coeffs[ASINHF_NCOEFFS];
+} __asinhf_data HIDDEN;
 #endif

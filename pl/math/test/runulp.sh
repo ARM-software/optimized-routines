@@ -85,6 +85,12 @@ t atan2f   0.0        1.0  40000
 t atan2f   1.0      100.0  40000
 t atan2f   1e6       1e32  40000
 
+L=3.0
+t asinhf        0  0x1p-12  5000
+t asinhf  0x1p-12      1.0  50000
+t asinhf      1.0   0x1p11  50000
+t asinhf   0x1p11  0x1p127  20000
+
 done
 
 # vector functions
