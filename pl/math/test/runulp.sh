@@ -100,6 +100,16 @@ t asinh     -1.0  -100.0   10000
 t asinh    100.0     inf   50000
 t asinh   -100.0    -inf   10000
 
+L=2.0
+t log1p    -10.0     10.0  10000
+t log1p      0.0  0x1p-23  50000
+t log1p  0x1p-23    0.001  50000
+t log1p    0.001      1.0  50000
+t log1p      0.0 -0x1p-23  50000
+t log1p -0x1p-23   -0.001  50000
+t log1p   -0.001     -1.0  50000
+t log1p     -1.0      inf   5000
+
 done
 
 # vector functions

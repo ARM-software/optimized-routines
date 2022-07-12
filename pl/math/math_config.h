@@ -452,4 +452,10 @@ extern const struct asinh_data
 {
   double poly[ASINH_NCOEFFS];
 } __asinh_data HIDDEN;
+
+#define LOG1P_NCOEFFS 19
+extern const struct log1p_data
+{
+  double coeffs[LOG1P_NCOEFFS];
+} __log1p_data HIDDEN;
 #endif

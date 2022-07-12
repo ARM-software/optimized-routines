@@ -18,6 +18,7 @@ D (atan, -10.0, 10.0)
 D (erf, -6,6)
 D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
+D (log1p, -0.9, 10.0)
 
 #if WANT_VMATH
 F (__s_atanf, -10.0, 10.0)

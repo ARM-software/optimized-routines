@@ -18,6 +18,7 @@ float log10f (float);
 double asinh (double);
 double atan2 (double, double);
 double log10 (double);
+double log1p (double);
 
 float __s_atanf (float);
 float __s_atan2f (float, float);

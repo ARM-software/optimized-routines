@@ -13,6 +13,7 @@ D1 (asinh)
 D2 (atan2)
 D1 (erfc)
 D1 (log10)
+D1 (log1p)
 #if WANT_VMATH
 F (__s_atanf, __s_atanf, atan, mpfr_atan, 1, 1, f1, 0)
 F (__s_atan, __s_atan, atanl, mpfr_atan, 1, 0, d1, 0)
