@@ -425,4 +425,31 @@ extern const struct asinhf_data
 {
   float coeffs[ASINHF_NCOEFFS];
 } __asinhf_data HIDDEN;
+
+#define LOG_TABLE_BITS 7
+#define LOG_POLY_ORDER 6
+#define LOG_POLY1_ORDER 12
+extern const struct log_data
+{
+  double ln2hi;
+  double ln2lo;
+  double poly[LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
+  double poly1[LOG_POLY1_ORDER - 1];
+  struct
+  {
+    double invc, logc;
+  } tab[1 << LOG_TABLE_BITS];
+#if !HAVE_FAST_FMA
+  struct
+  {
+    double chi, clo;
+  } tab2[1 << LOG_TABLE_BITS];
+#endif
+} __log_data HIDDEN;
+
+#define ASINH_NCOEFFS 18
+extern const struct asinh_data
+{
+  double poly[ASINH_NCOEFFS];
+} __asinh_data HIDDEN;
 #endif

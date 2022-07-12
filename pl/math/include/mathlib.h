@@ -15,6 +15,7 @@ float erfcf (float);
 float erff (float);
 float log10f (float);
 
+double asinh (double);
 double atan2 (double, double);
 double log10 (double);
 
