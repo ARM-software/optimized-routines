@@ -110,6 +110,16 @@ t log1p -0x1p-23   -0.001  50000
 t log1p   -0.001     -1.0  50000
 t log1p     -1.0      inf   5000
 
+L=2.0
+t log1pf    -10.0     10.0  10000
+t log1pf      0.0  0x1p-23  50000
+t log1pf  0x1p-23    0.001  50000
+t log1pf    0.001      1.0  50000
+t log1pf      0.0 -0x1p-23  50000
+t log1pf -0x1p-23   -0.001  50000
+t log1pf   -0.001     -1.0  50000
+t log1pf     -1.0      inf   5000
+
 done
 
 # vector functions

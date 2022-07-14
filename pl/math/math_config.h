@@ -458,4 +458,11 @@ extern const struct log1p_data
 {
   double coeffs[LOG1P_NCOEFFS];
 } __log1p_data HIDDEN;
+
+#define LOG1PF_2U5
+#define LOG1PF_NCOEFFS 9
+extern const struct log1pf_data
+{
+  float coeffs[LOG1PF_NCOEFFS];
+} __log1pf_data HIDDEN;
 #endif
