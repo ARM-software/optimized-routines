@@ -212,6 +212,17 @@ range_atanf='
    1e6       1e32  40000
 '
 
+range_log1pf='
+    -10.0     10.0  10000
+      0.0  0x1p-23  30000
+  0x1p-23    0.001  50000
+    0.001      1.0  50000
+      0.0 -0x1p-23  30000
+ -0x1p-23   -0.001  30000
+   -0.001     -1.0  50000
+     -1.0      inf   1000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -223,6 +234,7 @@ L_atan2=2.9
 L_atan=3.0
 L_atan2f=3.0
 L_atanf=3.0
+L_log1pf=2.0
 
 while read G F R
 do
@@ -282,6 +294,10 @@ log10f __s_log10f      $runs
 log10f __v_log10f      $runv
 log10f __vn_log10f     $runvn
 log10f _ZGVnN4v_log10f $runvn
+log1pf __s_log1pf      $runs
+log1pf __v_log1pf      $runv
+log1pf __vn_log1pf     $runvn
+log1pf _ZGVnN4v_log1pf $runvn
 EOF
 
 [ 0 -eq $FAIL ] || {

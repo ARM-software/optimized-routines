@@ -231,6 +231,16 @@ v_as_u32_f32 (v_f32_t x)
   union { v_f32_t f; v_u32_t u; } r = {x};
   return r.u;
 }
+static inline v_s32_t
+v_as_s32_f32 (v_f32_t x)
+{
+  union
+  {
+    v_f32_t f;
+    v_s32_t u;
+  } r = {x};
+  return r.u;
+}
 static inline v_f32_t
 v_as_f32_u32 (v_u32_t x)
 {
@@ -559,6 +569,16 @@ static inline v_u32_t
 v_as_u32_f32 (v_f32_t x)
 {
   union { v_f32_t f; v_u32_t u; } r = {x};
+  return r.u;
+}
+static inline v_s32_t
+v_as_s32_f32 (v_f32_t x)
+{
+  union
+  {
+    v_f32_t f;
+    v_s32_t u;
+  } r = {x};
   return r.u;
 }
 static inline v_f32_t

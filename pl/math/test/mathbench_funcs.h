@@ -32,6 +32,7 @@ F (__s_erfcf, -6.0, 28.0)
 D (__s_erfc, -6.0, 28.0)
 F (__s_log10f, 0.01, 11.1)
 D (__s_log10, 0.01, 11.1)
+F (__s_log1pf, -0.9, 10.0)
 #if __aarch64__
 VF (__v_atanf, -10.0, 10.0)
 VD (__v_atan, -10.0, 10.0)
@@ -43,6 +44,7 @@ VF (__v_erfcf, -6.0, 28.0)
 VD (__v_erfc, -6.0, 28.0)
 VD (__v_log10, 0.01, 11.1)
 VF (__v_log10f, 0.01, 11.1)
+VF (__v_log1pf, -0.9, 10.0)
 #ifdef __vpcs
 VNF (__vn_atanf, -10.0, 10.0)
 VNF (_ZGVnN4v_atanf, -10.0, 10.0)
@@ -73,6 +75,9 @@ VNF (_ZGVnN4v_log10f, 0.01, 11.1)
 
 VND (__vn_log10, 0.01, 11.1)
 VND (_ZGVnN2v_log10, 0.01, 11.1)
+
+VNF (__vn_log1pf, -0.9, 10.0)
+VNF (_ZGVnN4v_log1pf, -0.9, 10.0)
 #endif
 #endif
 #endif

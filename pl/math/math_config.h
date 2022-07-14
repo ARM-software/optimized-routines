@@ -460,6 +460,7 @@ extern const struct log1p_data
 } __log1p_data HIDDEN;
 
 #define LOG1PF_2U5
+#define V_LOG1PF_2U5
 #define LOG1PF_NCOEFFS 9
 extern const struct log1pf_data
 {
