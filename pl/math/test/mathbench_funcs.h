@@ -22,6 +22,7 @@ D (log10, 0.01, 11.1)
 D (log1p, -0.9, 10.0)
 
 #if WANT_VMATH
+F (__s_asinhf, -10.0, 10.0)
 F (__s_atanf, -10.0, 10.0)
 D (__s_atan, -10.0, 10.0)
 {"__s_atan2f", 'f', 0, -10.0, 10.0, {.f = __s_atan2f_wrap}},
@@ -34,6 +35,7 @@ F (__s_log10f, 0.01, 11.1)
 D (__s_log10, 0.01, 11.1)
 F (__s_log1pf, -0.9, 10.0)
 #if __aarch64__
+VF (__v_asinhf, -10.0, 10.0)
 VF (__v_atanf, -10.0, 10.0)
 VD (__v_atan, -10.0, 10.0)
 {"__v_atan2f", 'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
@@ -46,6 +48,9 @@ VD (__v_log10, 0.01, 11.1)
 VF (__v_log10f, 0.01, 11.1)
 VF (__v_log1pf, -0.9, 10.0)
 #ifdef __vpcs
+VNF (__vn_asinhf, -10.0, 10.0)
+VNF (_ZGVnN4v_asinhf, -10.0, 10.0)
+
 VNF (__vn_atanf, -10.0, 10.0)
 VNF (_ZGVnN4v_atanf, -10.0, 10.0)
 
