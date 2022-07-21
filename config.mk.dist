@@ -62,8 +62,12 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 # Disable vector math code
 #math-cflags += -DWANT_VMATH=0
 
-# Enable SVE vector code
-#math-cflags += -march=armv8.2-a+sve -DWANT_SVE_MATH=1
+# Disable/enable SVE vector math code and tests
+WANT_SVE_MATH = 0
+ifeq ($(WANT_SVE_MATH), 1)
+  math-cflags += -march=armv8.2-a+sve
+endif
+math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH)
 
 # Disable fenv checks
 #math-ulpflags = -q -f
