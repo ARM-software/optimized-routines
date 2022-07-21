@@ -15,6 +15,9 @@ rmodes='n'
 flags="${ULPFLAGS:--q}"
 emu="$@"
 
+# Enable SVE testing
+WANT_SVE_MATH=${WANT_SVE_MATH:-0}
+
 FAIL=0
 PASS=0
 
@@ -132,6 +135,10 @@ runv=
 check __v_log10f 1 && runv=1
 runvn=
 check __vn_log10f 1 && runvn=1
+runsv=
+if [ $WANT_SVE_MATH -eq 1 ]; then
+check __sv_cosf 0 && runsv=1
+fi
 
 range_erfc='
    0       0xffff0000   10000
@@ -234,6 +241,11 @@ range_asinhf='
   -0x1p11     -inf  20000
 '
 
+range_sve_cosf='
+ 0    0xffff0000    10000
+ 0x1p-4    0x1p4    500000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -247,6 +259,8 @@ L_atan2f=3.0
 L_atanf=3.0
 L_log1pf=2.0
 L_asinhf=2.2
+
+L_sve_cosf=1.6
 
 while read G F R
 do
@@ -314,6 +328,11 @@ asinhf __s_asinhf      $runs
 asinhf __v_asinhf      $runv
 asinhf __vn_asinhf     $runvn
 asinhf _ZGVnN4v_asinhf $runvn
+
+if [ $WANT_SVE_MATH -eq 1 ]; then
+sve_cosf __sv_cosf     $runsv
+sve_cosf _ZGVsMxv_cosf $runsv
+fi
 EOF
 
 [ 0 -eq $FAIL ] || {

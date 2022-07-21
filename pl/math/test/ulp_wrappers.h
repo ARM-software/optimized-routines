@@ -6,10 +6,15 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-
 #if USE_MPFR
-static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_cos(y,x,r); return mpfr_sin(y,x,r); }
-static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,x,r); return mpfr_cos(y,x,r); }
+static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
+  mpfr_cos(y, x, r);
+  return mpfr_sin(y, x, r);
+}
+static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
+  mpfr_sin(y, x, r);
+  return mpfr_cos(y, x, r);
+}
 #endif
 
 /* Wrappers for vector functions.  */
@@ -52,6 +57,14 @@ static double Z_atan2(double x, double y) { return _ZGVnN2vv_atan2(argd(x), argd
 static double Z_erf(double x) { return _ZGVnN2v_erf(argd(x))[0]; }
 static double Z_erfc(double x) { return _ZGVnN2v_erfc(argd(x))[0]; }
 static double Z_log10(double x) { return _ZGVnN2v_log10(argd(x))[0]; }
+#endif
+#if WANT_SVE_MATH
+static float sv_cosf(float x) {
+  return svretf(__sv_cosf_x(svargf(x), svptrue_b32()));
+}
+static float Z_sv_cosf(float x) {
+  return svretf(_ZGVsMxv_cosf(svargf(x), svptrue_b32()));
+}
 #endif
 #endif
 // clang-format on

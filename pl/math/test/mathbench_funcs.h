@@ -8,6 +8,7 @@
 F (asinhf, -10.0, 10.0)
 F (atanf, -10.0, 10.0)
 {"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
+F (cosf, -3.1, 3.1)
 F (erfcf, -4.0, 10.0)
 F (erff, -4.0, 4.0)
 F (log10f, 0.01, 11.1)
@@ -84,6 +85,10 @@ VND (_ZGVnN2v_log10, 0.01, 11.1)
 VNF (__vn_log1pf, -0.9, 10.0)
 VNF (_ZGVnN4v_log1pf, -0.9, 10.0)
 #endif
+#endif
+#if WANT_SVE_MATH
+SVF (__sv_cosf_x, -3.1, 3.1)
+SVF (_ZGVsMxv_cosf, -3.1, 3.1)
 #endif
 #endif
   // clang-format on

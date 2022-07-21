@@ -68,4 +68,8 @@ F (_ZGVnN2v_log10, Z_log10, log10l, mpfr_log10, 1, 0, d1, 1)
 F (_ZGVnN4v_log1pf, Z_log1pf, log1p, mpfr_log1p, 1, 1, f1, 1)
 #endif
 #endif
+#if WANT_SVE_MATH
+SVF1 (cos)
+ZSVF1 (cos)
+#endif
 #endif
