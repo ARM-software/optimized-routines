@@ -71,5 +71,7 @@ F (_ZGVnN4v_log1pf, Z_log1pf, log1p, mpfr_log1p, 1, 1, f1, 1)
 #if WANT_SVE_MATH
 SVF1 (cos)
 ZSVF1 (cos)
+SVD1 (cos)
+ZSVD1 (cos)
 #endif
 #endif

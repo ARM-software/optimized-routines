@@ -17,6 +17,7 @@ F (log1pf, -0.9, 10.0)
 D (asinh, -10.0, 10.0)
 D (atan, -10.0, 10.0)
 {"atan2", 'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
+D (cos, -3.1, 3.1)
 D (erf, -6,6)
 D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
@@ -89,6 +90,9 @@ VNF (_ZGVnN4v_log1pf, -0.9, 10.0)
 #if WANT_SVE_MATH
 SVF (__sv_cosf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_cosf, -3.1, 3.1)
+
+SVD (__sv_cos_x, -3.1, 3.1)
+SVD (_ZGVsMxv_cos, -3.1, 3.1)
 #endif
 #endif
   // clang-format on

@@ -96,8 +96,10 @@ __vpcs __f32x4_t _ZGVnN4v_log1pf (__f32x4_t);
 #if WANT_SVE_MATH
 #include <arm_sve.h>
 svfloat32_t __sv_cosf_x (svfloat32_t, svbool_t);
+svfloat64_t __sv_cos_x (svfloat64_t, svbool_t);
 /* SVE ABI names.  */
 svfloat32_t _ZGVsMxv_cosf (svfloat32_t, svbool_t);
+svfloat64_t _ZGVsMxv_cos (svfloat64_t, svbool_t);
 #endif
 
 #endif

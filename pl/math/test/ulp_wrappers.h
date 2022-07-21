@@ -65,6 +65,12 @@ static float sv_cosf(float x) {
 static float Z_sv_cosf(float x) {
   return svretf(_ZGVsMxv_cosf(svargf(x), svptrue_b32()));
 }
+static double sv_cos(double x) {
+  return svretd(__sv_cos_x(svargd(x), svptrue_b64()));
+}
+static double Z_sv_cos(double x) {
+  return svretd(_ZGVsMxv_cos(svargd(x), svptrue_b64()));
+}
 #endif
 #endif
 // clang-format on
