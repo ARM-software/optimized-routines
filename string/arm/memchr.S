@@ -23,7 +23,7 @@
 @    Removed unneeded cbz from align loop
 
 	.syntax unified
-#if __ARM_ARCH_8M_MAIN__
+#if __ARM_ARCH >= 8 && __ARM_ARCH_PROFILE == 'M'
     /* keep config inherited from -march= */
 #else
 	.arch armv7-a
