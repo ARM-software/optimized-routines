@@ -44,7 +44,7 @@
 ENTRY (__strlen_armv6t2)
 	/* common pacbti_prologue macro from pacbti.h not used.
 	   handwritten prologue saves one push instruction. */
-#if __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 #if __ARM_FEATURE_BTI_DEFAULT
 	pacbti ip, lr, sp
 #else
@@ -65,7 +65,7 @@ ENTRY (__strlen_armv6t2)
 	.cfi_def_cfa_offset 8
 	.cfi_offset 4, -8
 	.cfi_offset 5, -4
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+#endif /* HAVE_PAC_LEAF */
 	pld	[srcin, #0]
 	bic	src, srcin, #7
 	mvn	const_m1, #0
@@ -125,7 +125,7 @@ L(null_found):
 #endif
 	clz	data1a, data1a
 	add	result, result, data1a, lsr #3	/* Bits -> Bytes.  */
-#if __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 	pop	{r4, r5, ip}
 	.cfi_restore 4
 	.cfi_restore 5
@@ -137,7 +137,7 @@ L(null_found):
 	.cfi_restore 4
 	.cfi_restore 5
 	.cfi_def_cfa_offset 0
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+#endif /* HAVE_PAC_LEAF */
 	bx lr
 
 L(misaligned8):

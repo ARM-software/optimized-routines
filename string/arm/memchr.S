@@ -75,7 +75,7 @@ __memchr_arm:
 	push	{r4,r5,r6,r7}
 	.save   {r4-r7}
 	.cfi_adjust_cfa_offset 16
-#ifdef __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 	.cfi_offset 4, -20
 	.cfi_offset 5, -16
 	.cfi_offset 6, -12
@@ -85,7 +85,7 @@ __memchr_arm:
 	.cfi_offset 5, -12
 	.cfi_offset 6, -8
 	.cfi_offset 7, -4
-#endif /*  __ARM_FEATURE_PAC_DEFAULT */
+#endif /*  HAVE_PAC_LEAF */
 	orr	r1, r1, r1, lsl #8	@ expand the match word across to all bytes
 	orr	r1, r1, r1, lsl #16
 	bic	r4, r2, #7	@ Number of double words to work with
@@ -153,20 +153,20 @@ __memchr_arm:
 
 61:
 	subs	r0,r0,#1
-#if __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 	pop	{r4,r5,r6,r7,ip}
 	.cfi_restore 143
 #else
 	pop	{r4,r5,r6,r7}
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+#endif /* HAVE_PAC_LEAF */
 	.cfi_restore 7
 	.cfi_restore 6
 	.cfi_restore 5
 	.cfi_restore 4
 	.cfi_def_cfa_offset 0
-#if __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 	aut ip, lr, sp
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+#endif /* HAVE_PAC_LEAF */
 	bx lr
 	.cfi_endproc
 	.fnend

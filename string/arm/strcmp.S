@@ -154,23 +154,23 @@ __strcmp_arm:
 	strd	r4, r5, [sp, #-16]!
 	.save	{r4, r5}
 	.cfi_adjust_cfa_offset 16
-#ifdef __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 	.cfi_offset 4, -20
 	.cfi_offset 5, -16
 #else
 	.cfi_offset 4, -16
 	.cfi_offset 5, -12
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+#endif /* HAVE_PAC_LEAF */
 	orr	tmp1, src1, src2
 	strd	r6, r7, [sp, #8]
 	.save	{r6, r7}
-#ifdef __ARM_FEATURE_PAC_DEFAULT
+#if HAVE_PAC_LEAF
 	.cfi_offset 6, -12
 	.cfi_offset 7, -8
 #else
 	.cfi_offset 6, -8
 	.cfi_offset 7, -4
-#endif /* __ARM_FEATURE_PAC_DEFAULT */
+#endif /* HAVE_PAC_LEAF */
 	mvn	const_m1, #0
 	lsl	r2, tmp1, #29
 	cbz	r2, L(loop_aligned8)
