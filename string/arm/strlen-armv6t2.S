@@ -50,6 +50,7 @@ ENTRY (__strlen_armv6t2)
 #else
 	pac ip, lr, sp
 #endif /* __ARM_FEATURE_BTI_DEFAULT */
+	.cfi_register 143, 12
 	push    {r4, r5, ip}
 	.save   {r4, r5, ra_auth_code}
 	.cfi_def_cfa_offset 12

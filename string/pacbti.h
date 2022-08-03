@@ -20,6 +20,7 @@
 #else
 	pac ip, lr, sp
 #endif /* __ARM_FEATURE_BTI_DEFAULT */
+	.cfi_register 143, 12
 	str ip, [sp, #-4]!
 	.save {ra_auth_code}
 	.cfi_def_cfa_offset 4
