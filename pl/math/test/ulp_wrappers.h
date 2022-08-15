@@ -32,6 +32,7 @@ static double v_atan2(double x, double y) { return __v_atan2(argd(x), argd(y))[0
 static double v_erf(double x) { return __v_erf(argd(x))[0]; }
 static double v_erfc(double x) { return __v_erfc(argd(x))[0]; }
 static double v_log10(double x) { return __v_log10(argd(x))[0]; }
+static double v_log2(double x) { return __v_log2(argd(x))[0]; }
 #ifdef __vpcs
 static float vn_asinhf(float x) { return __vn_asinhf(argf(x))[0]; }
 static float vn_atanf(float x) { return __vn_atanf(argf(x))[0]; }
@@ -46,6 +47,7 @@ static double vn_atan2(double x, double y) { return __vn_atan2(argd(x), argd(y))
 static double vn_erf(double x) { return __vn_erf(argd(x))[0]; }
 static double vn_erfc(double x) { return __vn_erfc(argd(x))[0]; }
 static double vn_log10(double x) { return __vn_log10(argd(x))[0]; }
+static double vn_log2(double x) { return __vn_log2(argd(x))[0]; }
 
 static float Z_asinhf(float x) { return _ZGVnN4v_asinhf(argf(x))[0]; }
 static float Z_atanf(float x) { return _ZGVnN4v_atanf(argf(x))[0]; }
@@ -60,6 +62,7 @@ static double Z_atan2(double x, double y) { return _ZGVnN2vv_atan2(argd(x), argd
 static double Z_erf(double x) { return _ZGVnN2v_erf(argd(x))[0]; }
 static double Z_erfc(double x) { return _ZGVnN2v_erfc(argd(x))[0]; }
 static double Z_log10(double x) { return _ZGVnN2v_log10(argd(x))[0]; }
+static double Z_log2(double x) { return _ZGVnN2v_log2(argd(x))[0]; }
 #endif
 #if WANT_SVE_MATH
 static float sv_cosf(float x) {

@@ -251,6 +251,15 @@ range_log2f='
       100       inf  50000
 '
 
+range_log2='
+     -0.0  -0x1p126  100
+ 0x1p-149  0x1p-126  4000
+ 0x1p-126   0x1p-23  50000
+  0x1p-23       1.0  50000
+      1.0       100  50000
+      100       inf  50000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -275,6 +284,8 @@ L_atanf=3.0
 L_log1pf=2.0
 L_asinhf=2.2
 L_log2f=2.6
+# TODO tighten log2 bound
+L_log2=3
 
 L_sve_cosf=1.6
 L_sve_cos=2.0
@@ -316,6 +327,10 @@ log10  __s_log10       $runs
 log10  __v_log10       $runv
 log10  __vn_log10      $runvn
 log10  _ZGVnN2v_log10  $runvn
+log2   __s_log2        $runs
+log2   __v_log2        $runv
+log2   __vn_log2       $runvn
+log2   _ZGVnN2v_log2   $runvn
 
 atanf  __s_atanf       $runs
 atanf  __v_atanf       $runv
