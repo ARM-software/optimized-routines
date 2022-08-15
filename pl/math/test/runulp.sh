@@ -242,6 +242,15 @@ range_asinhf='
   -0x1p11     -inf  20000
 '
 
+range_log2f='
+     -0.0  -0x1p126  100
+ 0x1p-149  0x1p-126  4000
+ 0x1p-126   0x1p-23  50000
+  0x1p-23       1.0  50000
+      1.0       100  50000
+      100       inf  50000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -265,6 +274,7 @@ L_atan2f=3.0
 L_atanf=3.0
 L_log1pf=2.0
 L_asinhf=2.2
+L_log2f=2.6
 
 L_sve_cosf=1.6
 L_sve_cos=2.0
@@ -335,6 +345,10 @@ asinhf __s_asinhf      $runs
 asinhf __v_asinhf      $runv
 asinhf __vn_asinhf     $runvn
 asinhf _ZGVnN4v_asinhf $runvn
+log2f  __s_log2f       $runs
+log2f  __v_log2f       $runv
+log2f  __vn_log2f      $runvn
+log2f  _ZGVnN4v_log2f  $runvn
 
 if [ $WANT_SVE_MATH -eq 1 ]; then
 sve_cosf __sv_cosf     $runsv
