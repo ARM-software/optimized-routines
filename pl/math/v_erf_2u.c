@@ -16,7 +16,7 @@
 
 /* Special cases (fall back to scalar calls).  */
 VPCS_ATTR
-__attribute__ ((noinline)) static v_f64_t
+NOINLINE static v_f64_t
 specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 {
   return v_call_f64 (erf, x, y, cmp);

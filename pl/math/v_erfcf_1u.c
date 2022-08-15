@@ -14,6 +14,12 @@
 
 VPCS_ATTR v_f64_t V_NAME (exp_tail) (v_f64_t, v_f64_t);
 
+static VPCS_ATTR NOINLINE v_f32_t
+specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
+{
+  return v_call_f32 (erfcf, x, y, special);
+}
+
 static inline uint32_t
 interval_index (uint32_t ia12)
 {
@@ -182,7 +188,7 @@ v_f32_t V_NAME (erfcf) (v_f32_t x)
 
   if (unlikely (v_any_u32 (special_cases)))
     {
-      y = v_call_f32 (erfcf, x, y, special_cases);
+      return specialcase (x, y, special_cases);
     }
 #endif
 

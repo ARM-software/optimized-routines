@@ -16,7 +16,7 @@
 
 /* Special cases i.e. 0, infinity and nan (fall back to scalar calls).  */
 VPCS_ATTR
-__attribute__ ((noinline)) static v_f32_t
+NOINLINE static v_f32_t
 specialcase (v_f32_t y, v_f32_t x, v_f32_t ret, v_u32_t cmp)
 {
   return v_call2_f32 (atan2f, y, x, ret, cmp);

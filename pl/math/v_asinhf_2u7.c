@@ -14,12 +14,6 @@
 #define Ln2 v_f32 (0x1.62e43p-1f)
 #define SpecialBound v_u32 (0x5f800000) /* asuint(0x1p64).  */
 
-static inline v_f32_t
-handle_special (v_f32_t ax)
-{
-  return V_NAME (log1pf) (ax) + Ln2;
-}
-
 /* Single-precision implementation of vector asinh(x), using vector log1p.
    Worst-case error is 2.66 ULP, at roughly +/-0.25:
    __v_asinhf(0x1.01b04p-2) got 0x1.fe163ep-3 want 0x1.fe1638p-3.  */

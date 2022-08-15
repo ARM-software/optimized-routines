@@ -16,7 +16,7 @@ VPCS_ATTR v_f32_t V_NAME (expf) (v_f32_t);
 
 /* Special cases (fall back to scalar calls).  */
 VPCS_ATTR
-__attribute__ ((noinline)) static v_f32_t
+NOINLINE static v_f32_t
 specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 {
   return v_call_f32 (erff, x, y, cmp);

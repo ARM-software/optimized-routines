@@ -32,7 +32,7 @@ static const float Poly[] = {
 #define Off v_u32 (0x3f2aaaab) /* 0.666667.  */
 
 VPCS_ATTR
-__attribute__ ((noinline)) static v_f32_t
+NOINLINE static v_f32_t
 specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 {
   /* Fall back to scalar code.  */
