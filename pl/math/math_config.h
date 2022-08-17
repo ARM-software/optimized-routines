@@ -490,4 +490,10 @@ extern const struct v_log2_data
   } tab[1 << V_LOG2_TABLE_BITS];
 } __v_log2_data HIDDEN;
 
+#define V_SINF_NCOEFFS 4
+extern const struct sv_sinf_data
+{
+  float coeffs[V_SINF_NCOEFFS];
+} __sv_sinf_data HIDDEN;
+
 #endif

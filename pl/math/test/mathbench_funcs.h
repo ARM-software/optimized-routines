@@ -14,6 +14,7 @@ F (erff, -4.0, 4.0)
 F (log10f, 0.01, 11.1)
 F (log1pf, -0.9, 10.0)
 F (log2f, 0.01, 11.1)
+F (sinf, -3.1, 3.1)
 
 D (asinh, -10.0, 10.0)
 D (atan, -10.0, 10.0)
@@ -102,6 +103,8 @@ VND (_ZGVnN2v_log2, 0.01, 11.1)
 #if WANT_SVE_MATH
 SVF (__sv_cosf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_cosf, -3.1, 3.1)
+SVF (__sv_sinf_x, -3.1, 3.1)
+SVF (_ZGVsMxv_sinf, -3.1, 3.1)
 
 SVD (__sv_cos_x, -3.1, 3.1)
 SVD (_ZGVsMxv_cos, -3.1, 3.1)

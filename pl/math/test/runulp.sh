@@ -139,6 +139,7 @@ runsv=
 if [ $WANT_SVE_MATH -eq 1 ]; then
 check __sv_cosf 0 && runsv=1
 check __sv_cos  0 && runsv=1
+check __sv_sinf 0 && runsv=1
 fi
 
 range_erfc='
@@ -270,6 +271,11 @@ range_sve_cos='
  0x1p-4    0x1p4    500000
 '
 
+range_sve_sinf='
+ 0    0xffff0000    10000
+ 0x1p-4    0x1p4    500000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -289,6 +295,7 @@ L_log2=3
 
 L_sve_cosf=1.6
 L_sve_cos=2.0
+L_sve_sinf=1.9
 
 while read G F R
 do
@@ -368,6 +375,9 @@ log2f  _ZGVnN4v_log2f  $runvn
 if [ $WANT_SVE_MATH -eq 1 ]; then
 sve_cosf __sv_cosf     $runsv
 sve_cosf _ZGVsMxv_cosf $runsv
+sve_sinf __sv_sinf     $runsv
+sve_sinf _ZGVsMxv_sinf $runsv
+
 sve_cos  __sv_cos      $runsv
 sve_cos  _ZGVsMxv_cos  $runsv
 fi

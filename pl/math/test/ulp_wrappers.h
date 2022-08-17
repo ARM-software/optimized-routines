@@ -71,6 +71,13 @@ static float sv_cosf(float x) {
 static float Z_sv_cosf(float x) {
   return svretf(_ZGVsMxv_cosf(svargf(x), svptrue_b32()));
 }
+static float sv_sinf(float x) {
+  return svretf(__sv_sinf_x(svargf(x), svptrue_b32()));
+}
+static float Z_sv_sinf(float x) {
+  return svretf(_ZGVsMxv_sinf(svargf(x), svptrue_b32()));
+}
+
 static double sv_cos(double x) {
   return svretd(__sv_cos_x(svargd(x), svptrue_b64()));
 }
