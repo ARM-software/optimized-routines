@@ -25,6 +25,7 @@ D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
 D (log1p, -0.9, 10.0)
 D (log2, 0.01, 11.1)
+D (sin, -3.1, 3.1)
 
 #if WANT_VMATH
 F (__s_asinhf, -10.0, 10.0)
@@ -108,6 +109,8 @@ SVF (_ZGVsMxv_sinf, -3.1, 3.1)
 
 SVD (__sv_cos_x, -3.1, 3.1)
 SVD (_ZGVsMxv_cos, -3.1, 3.1)
+SVD (__sv_sin_x, -3.1, 3.1)
+SVD (_ZGVsMxv_sin, -3.1, 3.1)
 #endif
 #endif
   // clang-format on

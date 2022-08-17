@@ -84,5 +84,7 @@ SVD1 (cos)
 ZSVD1 (cos)
 SVF1 (sin)
 ZSVF1 (sin)
+SVD1 (sin)
+ZSVD1 (sin)
 #endif
 #endif

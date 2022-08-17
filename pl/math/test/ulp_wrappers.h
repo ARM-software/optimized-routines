@@ -84,6 +84,12 @@ static double sv_cos(double x) {
 static double Z_sv_cos(double x) {
   return svretd(_ZGVsMxv_cos(svargd(x), svptrue_b64()));
 }
+static double sv_sin(double x) {
+  return svretd(__sv_sin_x(svargd(x), svptrue_b64()));
+}
+static double Z_sv_sin(double x) {
+  return svretd(_ZGVsMxv_sin(svargd(x), svptrue_b64()));
+}
 #endif
 #endif
 // clang-format on
