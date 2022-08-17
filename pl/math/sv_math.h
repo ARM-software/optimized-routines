@@ -96,6 +96,23 @@ sv_call_f64 (f64_t (*f) (f64_t), sv_f64_t x, sv_f64_t y, svbool_t cmp)
   return y;
 }
 
+static inline sv_f64_t
+sv_call2_f64 (f64_t (*f) (f64_t, f64_t), sv_f64_t x1, sv_f64_t x2, sv_f64_t y,
+	      svbool_t cmp)
+{
+  svbool_t p = svpfirst (cmp, svpfalse ());
+  while (svptest_any (cmp, p))
+    {
+      f64_t elem1 = svclastb_n_f64 (p, 0, x1);
+      f64_t elem2 = svclastb_n_f64 (p, 0, x2);
+      f64_t ret = (*f) (elem1, elem2);
+      sv_f64_t y2 = svdup_n_f64 (ret);
+      y = svsel_f64 (p, y2, y);
+      p = svpnext_b64 (cmp, p);
+    }
+  return y;
+}
+
 /* Single precision.  */
 static inline sv_s32_t
 sv_s32 (s32_t x)

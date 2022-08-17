@@ -90,6 +90,12 @@ static float Z_sv_sinf(float x) {
   return svretf(_ZGVsMxv_sinf(svargf(x), svptrue_b32()));
 }
 
+static double sv_atan2(double x, double y) {
+  return svretd(__sv_atan2_x(svargd(x), svargd(y), svptrue_b64()));
+}
+static double Z_sv_atan2(double x, double y) {
+  return svretd(_ZGVsMxvv_atan2(svargd(x), svargd(y), svptrue_b64()));
+}
 static double sv_atan(double x) {
   return svretd(__sv_atan_x(svargd(x), svptrue_b64()));
 }
