@@ -80,6 +80,8 @@ F (_ZGVnN2v_log2, Z_log2, log2l, mpfr_log2, 1, 0, d1, 1)
 #if WANT_SVE_MATH
 SVF1 (atan)
 ZSVF1 (atan)
+SVD1 (atan)
+ZSVD1 (atan)
 SVF1 (cos)
 ZSVF1 (cos)
 SVD1 (cos)
