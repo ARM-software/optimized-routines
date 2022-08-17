@@ -298,6 +298,14 @@ range_sve_atan='
    1e6       1e32  40000
 '
 
+range_sve_atan2f='
+ -10.0       10.0  50000
+  -1.0        1.0  40000
+   0.0        1.0  40000
+   1.0      100.0  40000
+   1e6       1e32  40000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -321,6 +329,7 @@ L_sve_sinf=1.9
 L_sve_sin=2.0
 L_sve_atanf=2.9
 L_sve_atan=2.5
+L_sve_atan2f=3.0
 
 while read G F R
 do
@@ -402,6 +411,8 @@ sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv
 sve_sinf     __sv_sinf         $runsv
 sve_sinf     _ZGVsMxv_sinf     $runsv
+sve_atan2f   __sv_atan2f       $runsv
+sve_atan2f   _ZGVsMxvv_atan2f  $runsv
 sve_atanf    __sv_atanf        $runsv
 sve_atanf    _ZGVsMxv_atanf    $runsv
 

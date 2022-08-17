@@ -65,6 +65,12 @@ static double Z_log10(double x) { return _ZGVnN2v_log10(argd(x))[0]; }
 static double Z_log2(double x) { return _ZGVnN2v_log2(argd(x))[0]; }
 #endif
 #if WANT_SVE_MATH
+static float sv_atan2f(float x, float y) {
+  return svretf(__sv_atan2f_x(svargf(x), svargf(y), svptrue_b32()));
+}
+static float Z_sv_atan2f(float x, float y) {
+  return svretf(_ZGVsMxvv_atan2f(svargf(x), svargf(y), svptrue_b32()));
+}
 static float sv_atanf(float x) {
   return svretf(__sv_atanf_x(svargf(x), svptrue_b32()));
 }

@@ -155,6 +155,23 @@ sv_call_f32 (f32_t (*f) (f32_t), sv_f32_t x, sv_f32_t y, svbool_t cmp)
   return y;
 }
 
+static inline sv_f32_t
+sv_call2_f32 (f32_t (*f) (f32_t, f32_t), sv_f32_t x1, sv_f32_t x2, sv_f32_t y,
+	      svbool_t cmp)
+{
+  svbool_t p = svpfirst (cmp, svpfalse ());
+  while (svptest_any (cmp, p))
+    {
+      f32_t elem1 = svclastb_n_f32 (p, 0, x1);
+      f32_t elem2 = svclastb_n_f32 (p, 0, x2);
+      f32_t ret = (*f) (elem1, elem2);
+      sv_f32_t y2 = svdup_n_f32 (ret);
+      y = svsel_f32 (p, y2, y);
+      p = svpnext_b32 (cmp, p);
+    }
+  return y;
+}
+
 #endif
 #endif
 #endif

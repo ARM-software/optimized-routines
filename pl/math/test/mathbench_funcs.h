@@ -107,6 +107,9 @@ SVF (_ZGVsMxv_atanf, -3.1, 3.1)
 SVD (__sv_atan_x, -3.1, 3.1)
 SVD (_ZGVsMxv_atan, -3.1, 3.1)
 
+{"__sv_atan2f_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_atan2f_wrap}},
+{"_ZGVsMxvv_atan2f", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
+
 SVF (__sv_cosf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_cosf, -3.1, 3.1)
 SVF (__sv_sinf_x, -3.1, 3.1)
