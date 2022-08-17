@@ -282,6 +282,14 @@ range_sve_sin='
  0x1p-4    0x1p4    500000
 '
 
+range_sve_atanf='
+ -10.0       10.0  50000
+  -1.0        1.0  40000
+   0.0        1.0  40000
+   1.0      100.0  40000
+   1e6       1e32  40000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -303,6 +311,7 @@ L_sve_cosf=1.6
 L_sve_cos=2.0
 L_sve_sinf=1.9
 L_sve_sin=2.0
+L_sve_atanf=2.9
 
 while read G F R
 do
@@ -380,10 +389,12 @@ log2f  __vn_log2f      $runvn
 log2f  _ZGVnN4v_log2f  $runvn
 
 if [ $WANT_SVE_MATH -eq 1 ]; then
-sve_cosf __sv_cosf     $runsv
-sve_cosf _ZGVsMxv_cosf $runsv
-sve_sinf __sv_sinf     $runsv
-sve_sinf _ZGVsMxv_sinf $runsv
+sve_cosf     __sv_cosf         $runsv
+sve_cosf     _ZGVsMxv_cosf     $runsv
+sve_sinf     __sv_sinf         $runsv
+sve_sinf     _ZGVsMxv_sinf     $runsv
+sve_atanf    __sv_atanf        $runsv
+sve_atanf    _ZGVsMxv_atanf    $runsv
 
 sve_cos  __sv_cos      $runsv
 sve_cos  _ZGVsMxv_cos  $runsv

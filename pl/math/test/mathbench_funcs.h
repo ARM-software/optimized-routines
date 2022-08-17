@@ -102,6 +102,9 @@ VND (_ZGVnN2v_log2, 0.01, 11.1)
 #endif
 #endif
 #if WANT_SVE_MATH
+SVF (__sv_atanf_x, -3.1, 3.1)
+SVF (_ZGVsMxv_atanf, -3.1, 3.1)
+
 SVF (__sv_cosf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_cosf, -3.1, 3.1)
 SVF (__sv_sinf_x, -3.1, 3.1)
