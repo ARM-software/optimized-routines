@@ -106,7 +106,7 @@
 	.cfi_restore 5
 	.cfi_adjust_cfa_offset -16
 	sub	result, result, r1, lsr #24
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 #else
 	/* To use the big-endian trick we'd have to reverse all three words.
 	   that's slower than this approach.  */
@@ -129,7 +129,7 @@
 	.cfi_adjust_cfa_offset -16
 	sub	result, result, r1
 
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 #endif
 	.endm
 
@@ -140,14 +140,14 @@ L(strcmp_start_addr):
 #if STRCMP_NO_PRECHECK == 0
 L(fastpath_exit):
 	sub	r0, r2, r3
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 	nop
 #endif
 	.global __strcmp_arm
 	.type __strcmp_arm,%function
 	.align 0
 __strcmp_arm:
-	pacbti_prologue
+	prologue savepac=HAVE_PAC_LEAF
 #if STRCMP_NO_PRECHECK == 0
 	ldrb	r2, [src1]
 	ldrb	r3, [src2]
@@ -158,13 +158,8 @@ __strcmp_arm:
 #endif
 	strd	r4, r5, [sp, #-16]!
 	.cfi_adjust_cfa_offset 16
-#if HAVE_PAC_LEAF
-	.cfi_offset 4, -20
-	.cfi_offset 5, -16
-#else
-	.cfi_offset 4, -16
-	.cfi_offset 5, -12
-#endif /* HAVE_PAC_LEAF */
+	.cfi_offset 5, -(12+PAC_CFI_ADJ)
+	.cfi_offset 4, -(16+PAC_CFI_ADJ)
 	orr	tmp1, src1, src2
 	strd	r6, r7, [sp, #8]
 #if HAVE_PAC_LEAF
@@ -344,7 +339,7 @@ L(misaligned_exit):
 	.cfi_restore 4
 	.cfi_adjust_cfa_offset -16
 
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 
 #if STRCMP_NO_PRECHECK == 0
 L(aligned_m1):
@@ -396,7 +391,7 @@ L(overlap3):
 	.cfi_restore 7
 	.cfi_adjust_cfa_offset -16
 	neg	result, result
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 6:
 	.cfi_restore_state
 	S2LO	data1, data1, #24
@@ -472,7 +467,7 @@ L(strcmp_done_equal):
 	.cfi_restore 6
 	.cfi_restore 7
 	.cfi_adjust_cfa_offset -16
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 
 L(strcmp_tail):
 	.cfi_restore_state
@@ -496,7 +491,7 @@ L(strcmp_tail):
 	.cfi_restore 7
 	.cfi_adjust_cfa_offset -16
 	sub	result, result, data2, lsr #24
-	pacbti_epilogue
+	epilogue savepac=HAVE_PAC_LEAF
 
 END (__strcmp_arm)
 
