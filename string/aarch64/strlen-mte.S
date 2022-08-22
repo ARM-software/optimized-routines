@@ -28,13 +28,9 @@
 #define dend		d2
 
 /* Core algorithm:
-
-   For each 16-byte chunk we calculate a 64-bit syndrome value with four bits
-   per byte. For even bytes, bits 0-3 are set if the relevant byte matched the
-   requested character or the byte is NUL. Bits 4-7 must be zero. Bits 4-7 are
-   set likewise for odd bytes so that adjacent bytes can be merged. Since the
-   bits in the syndrome reflect the order in which things occur in the original
-   string, counting trailing zeros identifies exactly which byte matched.  */
+   Process the string in 16-byte aligned chunks. Compute a 64-bit mask with
+   four bits per byte using the shrn instruction. A count trailing zeros then
+   identifies the first zero byte.  */
 
 ENTRY (__strlen_aarch64_mte)
 	PTR_ARG (0)
@@ -54,18 +50,25 @@ ENTRY (__strlen_aarch64_mte)
 
 	.p2align 5
 L(loop):
-	ldr	data, [src, 16]!
+	ldr	data, [src, 16]
+	cmeq	vhas_nul.16b, vdata.16b, 0
+	umaxp	vend.16b, vhas_nul.16b, vhas_nul.16b
+	fmov	synd, dend
+	cbnz	synd, L(loop_end)
+	ldr	data, [src, 32]!
 	cmeq	vhas_nul.16b, vdata.16b, 0
 	umaxp	vend.16b, vhas_nul.16b, vhas_nul.16b
 	fmov	synd, dend
 	cbz	synd, L(loop)
-
+	sub	src, src, 16
+L(loop_end):
 	shrn	vend.8b, vhas_nul.8h, 4		/* 128->64 */
 	sub	result, src, srcin
 	fmov	synd, dend
 #ifndef __AARCH64EB__
 	rbit	synd, synd
 #endif
+	add	result, result, 16
 	clz	tmp, synd
 	add	result, result, tmp, lsr 2
 	ret
