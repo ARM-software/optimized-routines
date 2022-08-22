@@ -10,7 +10,13 @@
 
 #if defined (__arm__)
 #define ARM_FNSTART .fnstart
+#if defined (IS_LEAF)
+#define ARM_FNEND \
+  .cantunwind	  \
+  .fnend
+#else
 #define ARM_FNEND .fnend
+# endif
 #else
 #define ARM_FNSTART
 #define ARM_FNEND

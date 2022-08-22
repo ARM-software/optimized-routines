@@ -24,6 +24,11 @@
 #define S2HI		lsl
 #endif
 
+/* Ensure the .cantunwind directive is prepended to .fnend.
+   Leaf functions cannot throw exceptions - EHABI only supports
+   synchronous exceptions.  */
+#define IS_LEAF
+
 	/* This code requires Thumb.  */
 	.thumb
 	.syntax unified
@@ -52,7 +57,6 @@ ENTRY (__strlen_armv6t2)
 #endif /* __ARM_FEATURE_BTI_DEFAULT */
 	.cfi_register 143, 12
 	push    {r4, r5, ip}
-	.save   {r4, r5, ra_auth_code}
 	.cfi_def_cfa_offset 12
 	.cfi_offset 143, -4
 	.cfi_offset 5, -8
@@ -62,7 +66,6 @@ ENTRY (__strlen_armv6t2)
 	bti
 #endif /* __ARM_FEATURE_BTI_DEFAULT */
 	push    {r4, r5}
-	.save   {r4, r5}
 	.cfi_def_cfa_offset 8
 	.cfi_offset 4, -8
 	.cfi_offset 5, -4

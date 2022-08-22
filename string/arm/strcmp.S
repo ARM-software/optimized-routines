@@ -27,6 +27,11 @@
 
 #define STRCMP_NO_PRECHECK	0
 
+/* Ensure the .cantunwind directive is prepended to .fnend.
+   Leaf functions cannot throw exceptions - EHABI only supports
+   synchronous exceptions.  */
+#define IS_LEAF
+
 	/* This version uses Thumb-2 code.  */
 	.thumb
 	.syntax unified
@@ -152,7 +157,6 @@ __strcmp_arm:
 	bne	L(fastpath_exit)
 #endif
 	strd	r4, r5, [sp, #-16]!
-	.save	{r4, r5}
 	.cfi_adjust_cfa_offset 16
 #if HAVE_PAC_LEAF
 	.cfi_offset 4, -20
@@ -163,7 +167,6 @@ __strcmp_arm:
 #endif /* HAVE_PAC_LEAF */
 	orr	tmp1, src1, src2
 	strd	r6, r7, [sp, #8]
-	.save	{r6, r7}
 #if HAVE_PAC_LEAF
 	.cfi_offset 6, -12
 	.cfi_offset 7, -8

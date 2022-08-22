@@ -73,7 +73,6 @@ __memchr_arm:
 10:
 	@ At this point, we are aligned, we know we have at least 8 bytes to work with
 	push	{r4,r5,r6,r7}
-	.save   {r4-r7}
 	.cfi_adjust_cfa_offset 16
 #if HAVE_PAC_LEAF
 	.cfi_offset 4, -20
@@ -169,6 +168,7 @@ __memchr_arm:
 #endif /* HAVE_PAC_LEAF */
 	bx lr
 	.cfi_endproc
+	.cantunwind
 	.fnend
 
 	.size	__memchr_arm, . - __memchr_arm
