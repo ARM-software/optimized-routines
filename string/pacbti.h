@@ -21,9 +21,21 @@
 # define PAC_LEAF_PUSH_IP 1
 #endif
 
+/* Two distinct PAC_CFI adjustment values are needed at any given time.
+   If PAC-signing is requested for leaf functions but pushing the pac
+   code to the stack is not, PAC_CFI_ADJ defaults to 0, as most
+   functions will not overwrite the register holding pac (ip). This is not
+   appropriate for functions that clobber the ip register, where pushing
+   to the stack is non-optional.  Wherever a generated pac code must be
+   unconditionally pushed to the stack, a CFI adjustment of
+   PAC_CFI_ADJ_DEFAULT is used instead.  */
+#if HAVE_PAC_LEAF
+#  define PAC_CFI_ADJ_DEFAULT 4
+#endif
+
 #if HAVE_PAC_LEAF
 # if PAC_LEAF_PUSH_IP
-#   define PAC_CFI_ADJ 4
+#  define PAC_CFI_ADJ 4
 # else
 #  define PAC_CFI_ADJ 0
 # endif /* PAC_LEAF_PUSH_IP*/
@@ -31,6 +43,7 @@
 # undef PAC_LEAF_PUSH_IP
 # define PAC_LEAF_PUSH_IP 0
 # define PAC_CFI_ADJ 0
+# define PAC_CFI_ADJ_DEFAULT PAC_CFI_ADJ
 #endif /* HAVE_PAC_LEAF */
 
 /* Emit .cfi_restore directives for a consecutive sequence of registers.  */
@@ -43,7 +56,7 @@
 
 /* Emit .cfi_offset directives for a consecutive sequence of registers.  */
 	.macro cfisavelist first, last, index=1
-	.cfi_offset \last, -4*(\index) - PAC_CFI_ADJ
+	.cfi_offset \last, -4 * (\index)
 	.if \last-\first
 	cfisavelist \first, \last-1, \index+1
 	.endif
@@ -68,31 +81,31 @@
 	.if \last != -1
 	.if \savepac
 	push {r\first-r\last, ip}
-	.cfi_adjust_cfa_offset ((\last-\first)+1)*4 + PAC_CFI_ADJ
-	.cfi_offset 143, -PAC_CFI_ADJ
-	cfisavelist \first, \last
+	.cfi_adjust_cfa_offset ((\last-\first)+2)*4
+	.cfi_offset 143, -4
+	cfisavelist \first, \last, 2
 	.else
 	push {r\first-r\last}
 	.cfi_adjust_cfa_offset ((\last-\first)+1)*4
-	cfisavelist \first, \last
+	cfisavelist \first, \last, 1
 	.endif
 	.else
 	.if \savepac
 	push {r\first, ip}
-	.cfi_adjust_cfa_offset 4 + PAC_CFI_ADJ
-	.cfi_offset 143, -PAC_CFI_ADJ
-	cfisavelist \first, \first
+	.cfi_adjust_cfa_offset 8
+	.cfi_offset 143, -4
+	cfisavelist \first, \first, 2
 	.else // !\savepac
 	push {r\first}
-	.cfi_adjust_cfa_offset PAC_CFI_ADJ
-	cfisavelist \first, \first
+	.cfi_adjust_cfa_offset 4
+	cfisavelist \first, \first, 1
 	.endif
 	.endif
 	.else // \first == -1
 	.if \savepac
 	push {ip}
-	.cfi_adjust_cfa_offset PAC_CFI_ADJ
-	.cfi_offset 143, -PAC_CFI_ADJ
+	.cfi_adjust_cfa_offset 4
+	.cfi_offset 143, -4
 	.endif
 	.endif
 	.endm

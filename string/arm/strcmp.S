@@ -158,8 +158,8 @@ __strcmp_arm:
 #endif
 	strd	r4, r5, [sp, #-16]!
 	.cfi_adjust_cfa_offset 16
-	.cfi_offset 5, -(12+PAC_CFI_ADJ)
-	.cfi_offset 4, -(16+PAC_CFI_ADJ)
+	.cfi_offset 5, -(12+PAC_CFI_ADJ_DEFAULT)
+	.cfi_offset 4, -(16+PAC_CFI_ADJ_DEFAULT)
 	orr	tmp1, src1, src2
 	strd	r6, r7, [sp, #8]
 #if HAVE_PAC_LEAF
