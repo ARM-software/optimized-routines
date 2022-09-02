@@ -83,6 +83,12 @@ static float sv_cosf(float x) {
 static float Z_sv_cosf(float x) {
   return svretf(_ZGVsMxv_cosf(svargf(x), svptrue_b32()));
 }
+static float sv_log10f(float x) {
+  return svretf(__sv_log10f_x(svargf(x), svptrue_b32()));
+}
+static float Z_sv_log10f(float x) {
+  return svretf(_ZGVsMxv_log10f(svargf(x), svptrue_b32()));
+}
 static float sv_sinf(float x) {
   return svretf(__sv_sinf_x(svargf(x), svptrue_b32()));
 }

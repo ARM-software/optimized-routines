@@ -508,4 +508,7 @@ extern const struct v_log10_data
   double invln10, log10_2;
 } __v_log10_data HIDDEN;
 
+#define V_LOG10F_POLY_ORDER 9
+extern const float __v_log10f_poly[V_LOG10F_POLY_ORDER - 1] HIDDEN;
+
 #endif
