@@ -15,13 +15,12 @@ float erfcf (float);
 float erff (float);
 float log10f (float);
 float log1pf (float);
-float log2f (float);
 
 double asinh (double);
 double atan2 (double, double);
+double erfc (double);
 double log10 (double);
 double log1p (double);
-double log2 (double);
 
 float __s_asinhf (float);
 float __s_atanf (float);
