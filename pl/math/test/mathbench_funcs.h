@@ -117,6 +117,9 @@ SVF (_ZGVsMxv_cosf, -3.1, 3.1)
 SVF (__sv_sinf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_sinf, -3.1, 3.1)
 
+SVD (__sv_log10_x, 0.01, 11.1)
+SVD (_ZGVsMxv_log10, 0.01, 11.1)
+
 SVD (__sv_cos_x, -3.1, 3.1)
 SVD (_ZGVsMxv_cos, -3.1, 3.1)
 SVD (__sv_sin_x, -3.1, 3.1)

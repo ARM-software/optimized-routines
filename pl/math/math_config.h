@@ -496,4 +496,16 @@ extern const struct sv_sinf_data
   float coeffs[V_SINF_NCOEFFS];
 } __sv_sinf_data HIDDEN;
 
+#define V_LOG10_TABLE_BITS 7
+#define V_LOG10_POLY_ORDER 6
+extern const struct v_log10_data
+{
+  struct
+  {
+    double invc, log10c;
+  } tab[1 << V_LOG10_TABLE_BITS];
+  double poly[V_LOG10_POLY_ORDER - 1];
+  double invln10, log10_2;
+} __v_log10_data HIDDEN;
+
 #endif

@@ -5,27 +5,12 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "v_log10.h"
 #include "include/mathlib.h"
 #include "v_math.h"
 #if V_SUPPORTED
 
-/* Constants used to switch from base e to base 10.  */
-#define ivln10 v_f64 (0x1.bcb7b1526e50ep-2)
-#define log10_2 v_f64 (0x1.34413509f79ffp-2)
-
-static const f64_t Poly[] = {
-  /* computed from log coeffs divided by log(10) in extended precision then
-     rounded to double precision.  */
-  -0x1.bcb7b1526e506p-3, 0x1.287a7636be1d1p-3, -0x1.bcb7b158af938p-4,
-  0x1.63c78734e6d07p-4, -0x1.287461742fee4p-4,
-};
-
-#define A0 v_f64 (Poly[0])
-#define A1 v_f64 (Poly[1])
-#define A2 v_f64 (Poly[2])
-#define A3 v_f64 (Poly[3])
-#define A4 v_f64 (Poly[4])
+#define A(i) v_f64 (__v_log10_data.poly[i])
+#define T(s, i) __v_log10_data.tab[i].s
 #define Ln2 v_f64 (0x1.62e42fefa39efp-1)
 #define N (1 << V_LOG10_TABLE_BITS)
 #define OFF v_u64 (0x3fe6900900000000)
@@ -41,13 +26,13 @@ lookup (v_u64_t i)
 {
   struct entry e;
 #ifdef SCALAR
-  e.invc = __v_log10_data[i].invc;
-  e.log10c = __v_log10_data[i].log10c;
+  e.invc = T (invc, i);
+  e.log10c = T (log10c, i);
 #else
-  e.invc[0] = __v_log10_data[i[0]].invc;
-  e.log10c[0] = __v_log10_data[i[0]].log10c;
-  e.invc[1] = __v_log10_data[i[1]].invc;
-  e.log10c[1] = __v_log10_data[i[1]].log10c;
+  e.invc[0] = T (invc, i[0]);
+  e.log10c[0] = T (log10c, i[0]);
+  e.invc[1] = T (invc, i[1]);
+  e.log10c[1] = T (log10c, i[1]);
 #endif
   return e;
 }
@@ -94,16 +79,16 @@ v_f64_t V_NAME (log10) (v_f64_t x)
   /* hi = r / log(10) + log10(c) + k*log10(2).
      Constants in `v_log10_data.c` are computed (in extended precision) as
      e.log10c := e.logc * ivln10.  */
-  v_f64_t w = v_fma_f64 (r, ivln10, e.log10c);
+  v_f64_t w = v_fma_f64 (r, v_f64 (__v_log10_data.invln10), e.log10c);
 
   /* y = log10(1+r) + n * log10(2).  */
-  hi = v_fma_f64 (kd, log10_2, w);
+  hi = v_fma_f64 (kd, v_f64 (__v_log10_data.log10_2), w);
 
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   r2 = r * r;
-  y = v_fma_f64 (A3, r, A2);
-  p = v_fma_f64 (A1, r, A0);
-  y = v_fma_f64 (A4, r2, y);
+  y = v_fma_f64 (A (3), r, A (2));
+  p = v_fma_f64 (A (1), r, A (0));
+  y = v_fma_f64 (A (4), r2, y);
   y = v_fma_f64 (y, r2, p);
   y = v_fma_f64 (y, r2, hi);
 
