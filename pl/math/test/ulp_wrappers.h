@@ -17,115 +17,85 @@ static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
 }
 #endif
 
+#define VF1_WRAP(func) static float v_##func##f(float x) { return __v_##func##f(argf(x))[0]; }
+#define VF2_WRAP(func) static float v_##func##f(float x, float y) { return __v_##func##f(argf(x), argf(y))[0]; }
+#define VD1_WRAP(func) static double v_##func(double x) { return __v_##func(argd(x))[0]; }
+#define VD2_WRAP(func) static double v_##func(double x, double y) { return __v_##func(argd(x), argd(y))[0]; }
+
+#define VNF1_WRAP(func) static float vn_##func##f(float x) { return __vn_##func##f(argf(x))[0]; }
+#define VNF2_WRAP(func) static float vn_##func##f(float x, float y) { return __vn_##func##f(argf(x), argf(y))[0]; }
+#define VND1_WRAP(func) static double vn_##func(double x) { return __vn_##func(argd(x))[0]; }
+#define VND2_WRAP(func) static double vn_##func(double x, double y) { return __vn_##func(argd(x), argd(y))[0]; }
+
+#define ZVF1_WRAP(func) static float Z_##func##f(float x) { return _ZGVnN4v_##func##f(argf(x))[0]; }
+#define ZVF2_WRAP(func) static float Z_##func##f(float x, float y) { return _ZGVnN4vv_##func##f(argf(x), argf(y))[0]; }
+#define ZVD1_WRAP(func) static double Z_##func(double x) { return _ZGVnN2v_##func(argd(x))[0]; }
+#define ZVD2_WRAP(func) static double Z_##func(double x, double y) { return _ZGVnN2vv_##func(argd(x), argd(y))[0]; }
+
+#define ZVNF1_WRAP(func) VNF1_WRAP(func) ZVF1_WRAP(func)
+#define ZVNF2_WRAP(func) VNF2_WRAP(func) ZVF2_WRAP(func)
+#define ZVND1_WRAP(func) VND1_WRAP(func) ZVD1_WRAP(func)
+#define ZVND2_WRAP(func) VND2_WRAP(func) ZVD2_WRAP(func)
+
+#define SVF1_WRAP(func) static float sv_##func##f(float x) { return svretf(__sv_##func##f_x(svargf(x), svptrue_b32())); }
+#define SVF2_WRAP(func) static float sv_##func##f(float x, float y) { return svretf(__sv_##func##f_x(svargf(x), svargf(y), svptrue_b32())); }
+#define SVD1_WRAP(func) static double sv_##func(double x) { return svretd(__sv_##func##_x(svargd(x), svptrue_b64())); }
+#define SVD2_WRAP(func) static double sv_##func(double x, double y) { return svretd(__sv_##func##_x(svargd(x), svargd(y), svptrue_b64())); }
+
+#define ZSVF1_WRAP(func) static float Z_sv_##func##f(float x) { return svretf(_ZGVsMxv_##func##f(svargf(x), svptrue_b32())); }
+#define ZSVF2_WRAP(func) static float Z_sv_##func##f(float x, float y) { return svretf(_ZGVsMxvv_##func##f(svargf(x), svargf(y), svptrue_b32())); }
+#define ZSVD1_WRAP(func) static double Z_sv_##func(double x) { return svretd(_ZGVsMxv_##func(svargd(x), svptrue_b64())); }
+#define ZSVD2_WRAP(func) static double Z_sv_##func(double x, double y) { return svretd(_ZGVsMxvv_##func(svargd(x), svargd(y), svptrue_b64())); }
+
+#define ZSVNF1_WRAP(func) SVF1_WRAP(func) ZSVF1_WRAP(func)
+#define ZSVNF2_WRAP(func) SVF2_WRAP(func) ZSVF2_WRAP(func)
+#define ZSVND1_WRAP(func) SVD1_WRAP(func) ZSVD1_WRAP(func)
+#define ZSVND2_WRAP(func) SVD2_WRAP(func) ZSVD2_WRAP(func)
+
 /* Wrappers for vector functions.  */
 #if __aarch64__ && WANT_VMATH
-static float v_asinhf(float x) { return __v_asinhf(argf(x))[0]; }
-static float v_atanf(float x) { return __v_atanf(argf(x))[0]; }
-static float v_atan2f(float x, float y) { return __v_atan2f(argf(x), argf(y))[0]; }
-static float v_erff(float x) { return __v_erff(argf(x))[0]; }
-static float v_erfcf(float x) { return __v_erfcf(argf(x))[0]; }
-static float v_log10f(float x) { return __v_log10f(argf(x))[0]; }
-static float v_log1pf(float x) { return __v_log1pf(argf(x))[0]; }
-static float v_log2f(float x) { return __v_log2f(argf(x))[0]; }
-static double v_atan(double x) { return __v_atan(argd(x))[0]; }
-static double v_atan2(double x, double y) { return __v_atan2(argd(x), argd(y))[0]; }
-static double v_erf(double x) { return __v_erf(argd(x))[0]; }
-static double v_erfc(double x) { return __v_erfc(argd(x))[0]; }
-static double v_log10(double x) { return __v_log10(argd(x))[0]; }
-static double v_log2(double x) { return __v_log2(argd(x))[0]; }
+VF1_WRAP(asinh)
+VF1_WRAP(atan)
+VF2_WRAP(atan2)
+VF1_WRAP(erf)
+VF1_WRAP(erfc)
+VF1_WRAP(log10)
+VF1_WRAP(log1p)
+VF1_WRAP(log2)
+VD1_WRAP(atan)
+VD2_WRAP(atan2)
+VD1_WRAP(erf)
+VD1_WRAP(erfc)
+VD1_WRAP(log10)
+VD1_WRAP(log2)
 #ifdef __vpcs
-static float vn_asinhf(float x) { return __vn_asinhf(argf(x))[0]; }
-static float vn_atanf(float x) { return __vn_atanf(argf(x))[0]; }
-static float vn_atan2f(float x, float y) { return __vn_atan2f(argf(x), argf(y))[0]; }
-static float vn_erff(float x) { return __vn_erff(argf(x))[0]; }
-static float vn_erfcf(float x) { return __vn_erfcf(argf(x))[0]; }
-static float vn_log10f(float x) { return __vn_log10f(argf(x))[0]; }
-static float vn_log1pf(float x) { return __vn_log1pf(argf(x))[0]; }
-static float vn_log2f(float x) { return __vn_log2f(argf(x))[0]; }
-static double vn_atan(double x) { return __vn_atan(argd(x))[0]; }
-static double vn_atan2(double x, double y) { return __vn_atan2(argd(x), argd(y))[0]; }
-static double vn_erf(double x) { return __vn_erf(argd(x))[0]; }
-static double vn_erfc(double x) { return __vn_erfc(argd(x))[0]; }
-static double vn_log10(double x) { return __vn_log10(argd(x))[0]; }
-static double vn_log2(double x) { return __vn_log2(argd(x))[0]; }
-
-static float Z_asinhf(float x) { return _ZGVnN4v_asinhf(argf(x))[0]; }
-static float Z_atanf(float x) { return _ZGVnN4v_atanf(argf(x))[0]; }
-static float Z_atan2f(float x, float y) { return _ZGVnN4vv_atan2f(argf(x), argf(y))[0]; }
-static float Z_erff(float x) { return _ZGVnN4v_erff(argf(x))[0]; }
-static float Z_erfcf(float x) { return _ZGVnN4v_erfcf(argf(x))[0]; }
-static float Z_log10f(float x) { return _ZGVnN4v_log10f(argf(x))[0]; }
-static float Z_log1pf(float x) { return _ZGVnN4v_log1pf(argf(x))[0]; }
-static float Z_log2f(float x) { return _ZGVnN4v_log2f(argf(x))[0]; }
-static double Z_atan(double x) { return _ZGVnN2v_atan(argd(x))[0]; }
-static double Z_atan2(double x, double y) { return _ZGVnN2vv_atan2(argd(x), argd(y))[0]; }
-static double Z_erf(double x) { return _ZGVnN2v_erf(argd(x))[0]; }
-static double Z_erfc(double x) { return _ZGVnN2v_erfc(argd(x))[0]; }
-static double Z_log10(double x) { return _ZGVnN2v_log10(argd(x))[0]; }
-static double Z_log2(double x) { return _ZGVnN2v_log2(argd(x))[0]; }
+ZVNF1_WRAP(asinh)
+ZVNF1_WRAP(atan)
+ZVNF2_WRAP(atan2)
+ZVNF1_WRAP(erf)
+ZVNF1_WRAP(erfc)
+ZVNF1_WRAP(log10)
+ZVNF1_WRAP(log1p)
+ZVNF1_WRAP(log2)
+ZVND1_WRAP(atan)
+ZVND2_WRAP(atan2)
+ZVND1_WRAP(erf)
+ZVND1_WRAP(erfc)
+ZVND1_WRAP(log10)
+ZVND1_WRAP(log2)
 #endif
 #if WANT_SVE_MATH
-static float sv_atan2f(float x, float y) {
-  return svretf(__sv_atan2f_x(svargf(x), svargf(y), svptrue_b32()));
-}
-static float Z_sv_atan2f(float x, float y) {
-  return svretf(_ZGVsMxvv_atan2f(svargf(x), svargf(y), svptrue_b32()));
-}
-static float sv_atanf(float x) {
-  return svretf(__sv_atanf_x(svargf(x), svptrue_b32()));
-}
-static float Z_sv_atanf(float x) {
-  return svretf(_ZGVsMxv_atanf(svargf(x), svptrue_b32()));
-}
-static float sv_cosf(float x) {
-  return svretf(__sv_cosf_x(svargf(x), svptrue_b32()));
-}
-static float Z_sv_cosf(float x) {
-  return svretf(_ZGVsMxv_cosf(svargf(x), svptrue_b32()));
-}
-static float sv_log10f(float x) {
-  return svretf(__sv_log10f_x(svargf(x), svptrue_b32()));
-}
-static float Z_sv_log10f(float x) {
-  return svretf(_ZGVsMxv_log10f(svargf(x), svptrue_b32()));
-}
-static float sv_sinf(float x) {
-  return svretf(__sv_sinf_x(svargf(x), svptrue_b32()));
-}
-static float Z_sv_sinf(float x) {
-  return svretf(_ZGVsMxv_sinf(svargf(x), svptrue_b32()));
-}
+ZSVNF2_WRAP(atan2)
+ZSVNF1_WRAP(atan)
+ZSVNF1_WRAP(cos)
+ZSVNF1_WRAP(log10)
+ZSVNF1_WRAP(sin)
 
-static double sv_atan2(double x, double y) {
-  return svretd(__sv_atan2_x(svargd(x), svargd(y), svptrue_b64()));
-}
-static double Z_sv_atan2(double x, double y) {
-  return svretd(_ZGVsMxvv_atan2(svargd(x), svargd(y), svptrue_b64()));
-}
-static double sv_atan(double x) {
-  return svretd(__sv_atan_x(svargd(x), svptrue_b64()));
-}
-static double Z_sv_atan(double x) {
-  return svretd(_ZGVsMxv_atan(svargd(x), svptrue_b64()));
-}
-static double sv_cos(double x) {
-  return svretd(__sv_cos_x(svargd(x), svptrue_b64()));
-}
-static double Z_sv_cos(double x) {
-  return svretd(_ZGVsMxv_cos(svargd(x), svptrue_b64()));
-}
-static double sv_log10(double x) {
-  return svretd(__sv_log10_x(svargd(x), svptrue_b64()));
-}
-static double Z_sv_log10(double x) {
-  return svretd(_ZGVsMxv_log10(svargd(x), svptrue_b64()));
-}
-static double sv_sin(double x) {
-  return svretd(__sv_sin_x(svargd(x), svptrue_b64()));
-}
-static double Z_sv_sin(double x) {
-  return svretd(_ZGVsMxv_sin(svargd(x), svptrue_b64()));
-}
+ZSVND2_WRAP(atan2)
+ZSVND1_WRAP(atan)
+ZSVND1_WRAP(cos)
+ZSVND1_WRAP(log10)
+ZSVND1_WRAP(sin)
 #endif
 #endif
 // clang-format on
