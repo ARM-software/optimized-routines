@@ -514,4 +514,13 @@ extern const float __v_log10f_poly[V_LOG10F_POLY_ORDER - 1] HIDDEN;
 #define SV_LOGF_POLY_ORDER 8
 extern const float __sv_logf_poly[SV_LOGF_POLY_ORDER - 1] HIDDEN;
 
+#define SV_LOG_POLY_ORDER 6
+#define SV_LOG_TABLE_BITS 7
+extern const struct sv_log_data
+{
+  double invc[1 << SV_LOG_TABLE_BITS];
+  double logc[1 << SV_LOG_TABLE_BITS];
+  double poly[SV_LOG_POLY_ORDER - 1];
+} __sv_log_data HIDDEN;
+
 #endif

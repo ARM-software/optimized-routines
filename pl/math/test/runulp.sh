@@ -341,6 +341,15 @@ range_sve_logf='
       100       inf  50000
 '
 
+range_sve_log='
+     -0.0  -0x1p126  100
+ 0x1p-149  0x1p-126  4000
+ 0x1p-126   0x1p-23  50000
+  0x1p-23       1.0  50000
+      1.0       100  50000
+      100       inf  50000
+'
+
 # error limits
 L_erfc=3.7
 L_erfcf=1.0
@@ -369,6 +378,7 @@ L_sve_atan2=2.0
 L_sve_log10=2.5
 L_sve_log10f=3.5
 L_sve_logf=3.5
+L_sve_log=2.5
 
 while read G F R
 do
@@ -469,6 +479,8 @@ sve_atan2  __sv_atan2      $runsv
 sve_atan2  _ZGVsMxvv_atan2 $runsv
 sve_log10  __sv_log10      $runsv
 sve_log10  _ZGVsMxv_log10  $runsv
+sve_log    __sv_log        $runsv
+sve_log    _ZGVsMxv_log    $runsv
 fi
 EOF
 
