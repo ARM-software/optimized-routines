@@ -511,4 +511,7 @@ extern const struct v_log10_data
 #define V_LOG10F_POLY_ORDER 9
 extern const float __v_log10f_poly[V_LOG10F_POLY_ORDER - 1] HIDDEN;
 
+#define SV_LOGF_POLY_ORDER 8
+extern const float __sv_logf_poly[SV_LOGF_POLY_ORDER - 1] HIDDEN;
+
 #endif
