@@ -51,13 +51,13 @@ t log10f  0x1p-26   0x1p3   50000
 t log10f  0x1p-4    0x1p4   50000
 t log10f  0         inf     50000
 
-L=1.15
+L=1.11
 Ldir=
 t log10  0 0xffff000000000000 10000
 t log10  0x1p-4    0x1p4      40000
 t log10  0         inf        40000
 
-L=3.5
+L=3.55
 t erfc  0       0xffff0000   10000
 t erfc  0x1p-1022  0x1p-26   40000
 t erfc -0x1p-1022 -0x1p-26   40000
@@ -66,7 +66,7 @@ t erfc -0x1p-26   -0x1p3     40000
 t erfc  0          inf       40000
 Ldir=0.5
 
-L=1.45
+L=1.5
 t erfcf  0      0xffff0000 10000
 t erfcf  0x1p-127  0x1p-26 40000
 t erfcf -0x1p-127 -0x1p-26 40000
@@ -74,27 +74,27 @@ t erfcf  0x1p-26    0x1p5  40000
 t erfcf -0x1p-26   -0x1p3  40000
 t erfcf  0          inf    40000
 
-L=2.0
+L=1.5
 t atan2 -10.0       10.0  50000
 t atan2  -1.0        1.0  40000
 t atan2   0.0        1.0  40000
 t atan2   1.0      100.0  40000
 t atan2   1e6       1e32  40000
 
-L=3.0
+L=2.4
 t atan2f -10.0       10.0  50000
 t atan2f  -1.0        1.0  40000
 t atan2f   0.0        1.0  40000
 t atan2f   1.0      100.0  40000
 t atan2f   1e6       1e32  40000
 
-L=3.0
+L=2.9
 t asinhf        0  0x1p-12  5000
 t asinhf  0x1p-12      1.0  50000
 t asinhf      1.0   0x1p11  50000
 t asinhf   0x1p11  0x1p127  20000
 
-L=2.0
+L=1.51
 t asinh -0x1p-26 0x1p-26   50000
 t asinh  0x1p-26     1.0   40000
 t asinh -0x1p-26    -1.0   10000
@@ -103,7 +103,7 @@ t asinh     -1.0  -100.0   10000
 t asinh    100.0     inf   50000
 t asinh   -100.0    -inf   10000
 
-L=2.0
+L=1.18
 t log1p    -10.0     10.0  10000
 t log1p      0.0  0x1p-23  50000
 t log1p  0x1p-23    0.001  50000
@@ -113,7 +113,7 @@ t log1p -0x1p-23   -0.001  50000
 t log1p   -0.001     -1.0  50000
 t log1p     -1.0      inf   5000
 
-L=2.0
+L=1.52
 t log1pf    -10.0     10.0  10000
 t log1pf      0.0  0x1p-23  50000
 t log1pf  0x1p-23    0.001  50000
@@ -351,34 +351,35 @@ range_sve_log='
 '
 
 # error limits
-L_erfc=3.7
-L_erfcf=1.0
-L_log10=1.16
+L_erfc=3.11
+L_erfcf=0.26
+L_log10=1.97
 L_log10f=2.81
-L_erf=1.76
-L_erff=1.5
+L_erf=1.26
+L_erff=0.76
+# TODO tighten this once __v_atan2 is fixed
 L_atan2=2.9
-L_atan=3.0
-L_atan2f=3.0
-L_atanf=3.0
-L_log1pf=2.0
-L_asinhf=2.2
-L_log2f=2.6
-# TODO tighten log2 bound
-L_log2=3
+L_atan=2.15
+L_atan2f=2.46
+L_atanf=2.5
+L_log1pf=1.53
+L_asinhf=2.17
+L_log2f=2.10
+L_log2=2.09
 
-L_sve_cosf=1.6
-L_sve_cos=2.0
-L_sve_sinf=1.9
-L_sve_sin=2.0
+L_sve_cosf=1.57
+L_sve_cos=1.61
+L_sve_sinf=1.40
+L_sve_sin=1.46
 L_sve_atanf=2.9
-L_sve_atan=2.5
-L_sve_atan2f=3.0
+L_sve_atan=1.7
+L_sve_atan2f=2.45
+# TODO tighten this once __sv_atan2 is fixed
 L_sve_atan2=2.0
-L_sve_log10=2.5
-L_sve_log10f=3.5
-L_sve_logf=3.5
-L_sve_log=2.5
+L_sve_log10=1.97
+L_sve_log10f=2.82
+L_sve_logf=2.85
+L_sve_log=1.68
 
 while read G F R
 do

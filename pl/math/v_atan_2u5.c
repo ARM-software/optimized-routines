@@ -15,10 +15,9 @@
 
 /* Fast implementation of vector atan.
    Based on atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
-   z=1/x and shift = pi/2. Maximum observed error is 3.0 ulps, in
-   [0x1.00e766b50e9f2p+0, 0x1.00e78cab70984p+0]:
-   v_atan(0x1.00e76c0e723e4p+0) got 0x1.9306b8d822418p-1
-			       want 0x1.9306b8d82241bp-1.  */
+   z=1/x and shift = pi/2. Maximum observed error is 2.14 ulps:
+   __v_atan(-0x1.02eac6432cb9ap+0) got -0x1.95063e76724c1p-1
+				  want -0x1.95063e76724c3p-1.  */
 VPCS_ATTR
 v_f64_t V_NAME (atan) (v_f64_t x)
 {

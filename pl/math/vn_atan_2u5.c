@@ -8,5 +8,5 @@
 #ifdef __vpcs
 #define VPCS 1
 #define VPCS_ALIAS strong_alias (__vn_atan, _ZGVnN2v_atan)
-#include "v_atan_3u.c"
+#include "v_atan_2u5.c"
 #endif
