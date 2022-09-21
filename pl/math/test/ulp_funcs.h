@@ -31,6 +31,7 @@ SD1 (log10)
 SF1 (log1p)
 SF1 (log2)
 SD1 (log2)
+SF1 (tan)
 #if __aarch64__
 VF1 (asinh)
 VF1 (atan)
@@ -46,6 +47,7 @@ VD1 (log10)
 VF1 (log1p)
 VF1 (log2)
 VD1 (log2)
+VF1 (tan)
 #ifdef __vpcs
 ZVNF1 (asinh)
 ZVNF1 (atan)
@@ -61,6 +63,7 @@ ZVND1 (log10)
 ZVNF1 (log1p)
 ZVNF1 (log2)
 ZVND1 (log2)
+ZVNF1 (tan)
 #endif
 #endif
 #if WANT_SVE_MATH

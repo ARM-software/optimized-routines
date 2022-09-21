@@ -178,6 +178,12 @@ v_cagt_f32 (v_f32_t x, v_f32_t y)
 {
   return fabsf (x) > fabsf (y);
 }
+/* to wrap |x| >= |y|.  */
+static inline v_u32_t
+v_cage_f32 (v_f32_t x, v_f32_t y)
+{
+  return fabsf (x) >= fabsf (y);
+}
 static inline v_u32_t
 v_calt_f32 (v_f32_t x, v_f32_t y)
 {
@@ -522,6 +528,12 @@ static inline v_u32_t
 v_cagt_f32 (v_f32_t x, v_f32_t y)
 {
   return vcagtq_f32 (x, y);
+}
+/* to wrap |x| >= |y|.  */
+static inline v_u32_t
+v_cage_f32 (v_f32_t x, v_f32_t y)
+{
+  return vcageq_f32 (x, y);
 }
 static inline v_u32_t
 v_calt_f32 (v_f32_t x, v_f32_t y)
