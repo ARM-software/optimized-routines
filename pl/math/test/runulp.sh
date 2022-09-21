@@ -123,6 +123,22 @@ t log1pf -0x1p-23   -0.001  50000
 t log1pf   -0.001     -1.0  50000
 t log1pf     -1.0      inf   5000
 
+L=2.80
+Ldir=
+t tanf  0      0xffff0000 10000
+t tanf  0x1p-127  0x1p-14 50000
+t tanf -0x1p-127 -0x1p-14 50000
+t tanf  0x1p-14   0.7     50000
+t tanf -0x1p-14  -0.7     50000
+t tanf  0.7       1.5     50000
+t tanf -0.7      -1.5     50000
+t tanf  1.5       0x1p17  50000
+t tanf -1.5      -0x1p17  50000
+t tanf  0x1p17    0x1p54  50000
+t tanf -0x1p17   -0x1p54  50000
+t tanf  0x1p54    inf     50000
+t tanf -0x1p54   -inf     50000
+
 done
 
 # vector functions

@@ -5,3 +5,4 @@
 
 test erff 10000
 test log10f 10000
+test tanf 10000
