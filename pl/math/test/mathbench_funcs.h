@@ -118,6 +118,9 @@ SVD (_ZGVsMxv_atan, -3.1, 3.1)
 {"__sv_atan2", 'd', 'n', -10.0, 10.0, {.svd = __sv_atan2_wrap}},
 {"_ZGVsM2vv_atan2", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
 
+SVF (__sv_expf_x, -9.9, 9.9)
+SVF (_ZGVsMxv_expf, -9.9, 9.9)
+
 SVF (__sv_cosf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_cosf, -3.1, 3.1)
 SVF (__sv_sinf_x, -3.1, 3.1)
