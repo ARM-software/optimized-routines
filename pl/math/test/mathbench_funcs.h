@@ -146,6 +146,9 @@ SVD (__sv_cos_x, -3.1, 3.1)
 SVD (_ZGVsMxv_cos, -3.1, 3.1)
 SVD (__sv_sin_x, -3.1, 3.1)
 SVD (_ZGVsMxv_sin, -3.1, 3.1)
+
+SVF (__sv_tanf_x, -3.1, 3.1)
+SVF (_ZGVsMxv_tanf, -3.1, 3.1)
 #endif
 #endif
   // clang-format on

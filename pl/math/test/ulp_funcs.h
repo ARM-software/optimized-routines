@@ -98,5 +98,7 @@ SVF1 (sin)
 ZSVF1 (sin)
 SVD1 (sin)
 ZSVD1 (sin)
+SVF1 (tan)
+ZSVF1 (tan)
 #endif
 #endif

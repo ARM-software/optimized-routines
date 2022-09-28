@@ -125,6 +125,7 @@ svfloat32_t __sv_log10f_x (svfloat32_t, svbool_t);
 svfloat64_t __sv_log10_x (svfloat64_t, svbool_t);
 svfloat32_t __sv_sinf_x (svfloat32_t, svbool_t);
 svfloat64_t __sv_sin_x (svfloat64_t, svbool_t);
+svfloat32_t __sv_tanf_x (svfloat32_t, svbool_t);
 /* SVE ABI names.  */
 svfloat32_t _ZGVsMxvv_atan2f (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_atanf (svfloat32_t, svbool_t);
@@ -141,6 +142,7 @@ svfloat32_t _ZGVsMxv_log10f (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_log10 (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_sinf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_sin (svfloat64_t, svbool_t);
+svfloat32_t _ZGVsMxv_tanf (svfloat32_t, svbool_t);
 #endif
 
 #endif
