@@ -139,6 +139,13 @@ t tanf -0x1p17   -0x1p54  50000
 t tanf  0x1p54    inf     50000
 t tanf -0x1p54   -inf     50000
 
+L=2.30
+t acoshf 0      1         100
+t acoshf 1      2       10000
+t acoshf 2      0x1p64 100000
+t acoshf 0x1p64 inf    100000
+t acoshf -0     -inf    10000
+
 done
 
 # vector functions

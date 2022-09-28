@@ -9,6 +9,7 @@
 #ifndef _MATHLIB_H
 #define _MATHLIB_H
 
+float acoshf (float);
 float asinhf (float);
 float atan2f (float, float);
 float erfcf (float);
