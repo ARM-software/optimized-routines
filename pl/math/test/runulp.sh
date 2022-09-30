@@ -396,7 +396,7 @@ range_sve_expf='
 '
 
 # error limits
-L_erfc=3.11
+L_erfc=3.14
 L_erfcf=0.26
 L_log10=1.97
 L_log10f=2.81

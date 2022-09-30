@@ -87,12 +87,7 @@ v_eval_gauss (v_f64_t a)
   v_f64_t e2;
   v_f64_t a2 = a * a;
 
-  /* Dekker's algorithm.
-     tmp = a - Scale * a.
-     a_hi = high bits of a.
-	  = Scale * a - tmp.
-     a_lo = low bits of a.
-	  = a - a_hi.  */
+  /* TwoProduct (Dekker) applied to a * a.  */
   v_f64_t a_hi = -v_fma_f64 (Scale, a, -a);
   a_hi = v_fma_f64 (Scale, a, a_hi);
   v_f64_t a_lo = a - a_hi;
@@ -108,10 +103,9 @@ v_eval_gauss (v_f64_t a)
 }
 
 /* Optimized double precision vector complementary error function erfc.
-   Max ULP: 3.7ulps.
-   Max measured: 3.610 on [5.1183, 5.1184] (at 0x1.47923afd09313p+2).
-   __v_erfc(0x1.47923afd09313p+2) got 0x1.ff487ddd86457p-42 want
-   0x1.ff487ddd8645bp-42 -0.390493 ulp err -3.10951.  */
+   Maximum measured error is 3.63 ULP:
+   __v_erfc(0x1.479279a3bbc74p+2) got 0x1.ff341c664edc5p-42
+				 want 0x1.ff341c664edc9p-42.  */
 VPCS_ATTR
 v_f64_t V_NAME (erfc) (v_f64_t x)
 {
@@ -128,7 +122,7 @@ v_f64_t V_NAME (erfc) (v_f64_t x)
   struct entry dat;
 
   /* All entries of the vector are out of bounds, take a short path.
-     Use smallest possible number above 28 representable in 12 bits.   */
+     Use smallest possible number above 28 representable in 12 bits.  */
   v_u64_t out_of_bounds = v_cond_u64 (atop >= v_u64 (0x404));
 
   /* Use sign to produce either 0 if x > 0, 2 otherwise.  */
