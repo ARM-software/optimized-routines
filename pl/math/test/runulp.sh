@@ -94,7 +94,7 @@ t asinhf  0x1p-12      1.0  50000
 t asinhf      1.0   0x1p11  50000
 t asinhf   0x1p11  0x1p127  20000
 
-L=1.51
+L=1.54
 t asinh -0x1p-26 0x1p-26   50000
 t asinh  0x1p-26     1.0   40000
 t asinh -0x1p-26    -1.0   10000

@@ -60,8 +60,8 @@ eval_poly (double z)
    |x| < 2^511: Upper bound of this region is close to sqrt(DBL_MAX). Calculate
      the result directly using the definition asinh(x) = ln(x + sqrt(x*x + 1)).
      The largest observed error in this region is 2.03 ULPs:
-     asinh(0x1.00441cdce7fd5p+0) got 0x1.c3a3b32255bf9p-1
-				want 0x1.c3a3b32255bfbp-1.
+     asinh(-0x1.00094e0f39574p+0) got -0x1.c3508eb6a681ep-1
+				 want -0x1.c3508eb6a682p-1.
 
    |x| >= 2^511: We cannot square x without overflow at a low
      cost. At very large x, asinh(x) ~= ln(2x). At huge x we cannot
