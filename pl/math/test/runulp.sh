@@ -395,6 +395,17 @@ range_sve_expf='
   -0x1p23  -inf      50000
 '
 
+range_sve_erff='
+  0        0x1p-28   20000
+  0x1p-28  1         60000
+  1        0x1p28    60000
+  0x1p28   inf       20000
+  -0       -0x1p-28  20000
+  -0x1p-28 -1        60000
+  -1       -0x1p28   60000
+  -0x1p28  -inf      20000
+'
+
 # error limits
 L_erfc=3.14
 L_erfcf=0.26
@@ -427,6 +438,7 @@ L_sve_log10f=2.82
 L_sve_logf=2.85
 L_sve_log=1.68
 L_sve_expf=1.46
+L_sve_erff=0.76
 
 while read G F R
 do
@@ -522,6 +534,8 @@ sve_logf     __sv_logf         $runsv
 sve_logf     _ZGVsMxv_logf     $runsv
 sve_expf     __sv_expf         $runsv
 sve_expf     _ZGVsMxv_expf     $runsv
+sve_erff     __sv_erff         $runsv
+sve_erff     _ZGVsMxv_erff     $runsv
 
 sve_cos    __sv_cos        $runsv
 sve_cos    _ZGVsMxv_cos    $runsv
