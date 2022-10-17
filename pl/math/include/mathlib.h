@@ -18,6 +18,7 @@ float log10f (float);
 float log1pf (float);
 float tanf (float);
 
+double acosh (double);
 double asinh (double);
 double atan2 (double, double);
 double erfc (double);
