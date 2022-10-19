@@ -28,6 +28,7 @@ D (erfc, -6.0, 28.0)
 D (log10, 0.01, 11.1)
 D (log1p, -0.9, 10.0)
 D (log2, 0.01, 11.1)
+{"powi", 'd', 0, 0.01, 11.1, {.d = powi_wrap}},
 D (sin, -3.1, 3.1)
 
 #if WANT_VMATH
@@ -158,6 +159,10 @@ SVD (_ZGVsMxv_sin, -3.1, 3.1)
 
 SVF (__sv_tanf_x, -3.1, 3.1)
 SVF (_ZGVsMxv_tanf, -3.1, 3.1)
+
+{"__sv_powif_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_powif_wrap}},
+{"_ZGVsMxvv_powi", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
+
 #endif
 #endif
   // clang-format on

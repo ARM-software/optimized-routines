@@ -17,6 +17,12 @@ atan2f_wrap (float x)
   return atan2f (5.0f, x);
 }
 
+static double
+powi_wrap (double x)
+{
+  return __builtin_powi (x, (int) round (x));
+}
+
 #if WANT_VMATH
 #if __aarch64__
 
@@ -98,6 +104,18 @@ static sv_double
 _Z_sv_atan2_wrap (sv_double x, sv_bool pg)
 {
   return _ZGVsMxvv_atan2 (x, svdup_n_f64 (5.0), pg);
+}
+
+static sv_float
+_Z_sv_powi_wrap (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_powi (x, svcvt_s32_f32_x (pg, x), pg);
+}
+
+static sv_float
+__sv_powif_wrap (sv_float x, sv_bool pg)
+{
+  return __sv_powif_x (x, svcvt_s32_f32_x (pg, x), pg);
 }
 
 #endif // WANT_SVE_MATH

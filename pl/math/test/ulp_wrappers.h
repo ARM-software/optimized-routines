@@ -6,6 +6,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include <stdbool.h>
+
 #if USE_MPFR
 static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
   mpfr_cos(y, x, r);
@@ -15,7 +17,47 @@ static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
   mpfr_sin(y, x, r);
   return mpfr_cos(y, x, r);
 }
+static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
+  mpfr_t y2;
+  mpfr_init(y2);
+  mpfr_trunc(y2, y);
+  return mpfr_pow(ret, x, y2, rnd);
+}
 #endif
+
+/* Our implementations of powi/powk are too imprecise to verify
+   against any established pow implementation. Instead we have the
+   following simple implementation, against which it is enough to
+   maintain bitwise reproducibility. Note the test framework expects
+   the reference impl to be of higher precision than the function
+   under test. For instance this means that the reference for
+   double-precision powi will be passed a long double, so to check
+   bitwise reproducibility we have to cast it back down to
+   double. This is fine since a round-trip to higher precision and
+   back down is correctly rounded.  */
+#define DECL_POW_INT_REF(NAME, DBL_T, FLT_T, INT_T)                            \
+  static DBL_T NAME (DBL_T in_val, DBL_T y)                                    \
+  {                                                                            \
+    INT_T n = (INT_T) round (y);                                               \
+    FLT_T acc = 1.0;                                                           \
+    bool want_recip = n < 0;                                                   \
+    n = n < 0 ? -n : n;                                                        \
+                                                                               \
+    for (FLT_T c = in_val; n; c *= c, n >>= 1)                                 \
+      {                                                                        \
+        if (n & 0x1)                                                           \
+          {                                                                    \
+            acc *= c;                                                          \
+          }                                                                    \
+      }                                                                        \
+    if (want_recip)                                                            \
+      {                                                                        \
+        acc = 1.0 / acc;                                                       \
+      }                                                                        \
+    return acc;                                                                \
+  }
+
+DECL_POW_INT_REF(ref_powif, double, float, int)
 
 #define VF1_WRAP(func) static float v_##func##f(float x) { return __v_##func##f(argf(x))[0]; }
 #define VF2_WRAP(func) static float v_##func##f(float x, float y) { return __v_##func##f(argf(x), argf(y))[0]; }
@@ -98,6 +140,8 @@ ZSVNF1_WRAP(log)
 ZSVNF1_WRAP(log10)
 ZSVNF1_WRAP(sin)
 ZSVNF1_WRAP(tan)
+static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
+static float sv_powif(float x, float y) { return svretf(__sv_powif_x(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
 
 ZSVND2_WRAP(atan2)
 ZSVND1_WRAP(atan)
