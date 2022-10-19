@@ -27,20 +27,21 @@ static inline int64_t
 biased_exponent (double f)
 {
   uint64_t fi = asuint64 (f);
-  int64_t ex = (fi & ExpMask) >> 52;
-  if (unlikely (ex == 0))
-    {
-      /* Subnormal case - we still need to get the exponent right for subnormal
-	 numbers as division may take us back inside the normal range.  */
-      return ex - __builtin_clz (fi << 12);
-    }
-  return ex;
+  return (fi & ExpMask) >> 52;
 }
 
-/* Fast implementation of scalar atan2. Errors are greatest when y and
-   x are reasonably close together. Maximum observed error is 2.0 ulps:
+/* Fast implementation of scalar atan2.
+
+   For normal input, there are large errors when y and x are
+   reasonably close together. The maximum such observed error is 2.0
+   ulps:
    atan2(0x1.8d9621df2f329p+2, 0x1.884cf49437972p+2)
-   got 0x1.958cd0e8c618bp-1 want 0x1.958cd0e8c618dp-1.  */
+   got 0x1.958cd0e8c618bp-1 want 0x1.958cd0e8c618dp-1.
+
+   There are larger errors when y is very small, but normal, and x is
+   subnormal. The greatest observed error is 2.23 ulps:
+   atan2(0x1.01dc020fc8e2cp-1022, 0x0.fea20ed5c5a23p-1022)
+   got 0x1.9558da87cabaap-1 want 0x1.9558da87cabacp-1.  */
 double
 atan2 (double y, double x)
 {

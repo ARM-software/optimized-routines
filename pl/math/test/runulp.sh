@@ -74,12 +74,13 @@ t erfcf  0x1p-26    0x1p5  40000
 t erfcf -0x1p-26   -0x1p3  40000
 t erfcf  0          inf    40000
 
-L=1.5
-t atan2 -10.0       10.0  50000
-t atan2  -1.0        1.0  40000
-t atan2   0.0        1.0  40000
-t atan2   1.0      100.0  40000
-t atan2   1e6       1e32  40000
+L=1.74
+t atan2     -10.0      10.0               50000
+t atan2      -1.0       1.0               40000
+t atan2       0.0       1.0               40000
+t atan2       1.0     100.0               40000
+t atan2       1e6      1e32               40000
+t atan2 0x1p-1022 0x1p-1000 x 0 0x1p-1022 40000
 # Regression-test for correct NaN handling
 check atan2 0x1.7887a0a717aefp+1017 0x1.7887a0a717aefp+1017 x -nan -nan
 check atan2 nan nan x -nan -nan
