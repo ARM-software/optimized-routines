@@ -7,6 +7,6 @@
 
 #include "math_config.h"
 
-/* Cofficients copied from the polynomial in math/v_expf.c.  */
+/* Coefficients copied from the polynomial in math/v_expf.c.  */
 const float __sv_expf_poly[] = {0x1.0e4020p-7f, 0x1.573e2ep-5f, 0x1.555e66p-3f,
 				0x1.fffdb6p-2f, 0x1.ffffecp-1f};

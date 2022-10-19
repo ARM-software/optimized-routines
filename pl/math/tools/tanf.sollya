@@ -24,7 +24,7 @@ else if (dtype==single) then { prec = 23!; };
 print("pi/4");
 pi/4;
 
-// Setup precisions (dislay and computation)
+// Setup precisions (display and computation)
 display = decimal!;
 prec=128!;
 save_prec=prec;
