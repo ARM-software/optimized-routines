@@ -54,9 +54,9 @@ eval_poly (double f)
 /* log1p approximation using polynomial on reduced interval. Largest
    observed errors are near the lower boundary of the region where k
    is 0.
-   Maximum measured error: 1.7ULP.
-   log1p(-0x1.2e515c0f31f8p-2) got  -0x1.6648c36863fc2p-2
-			       want -0x1.6648c36863fc4p-2.  */
+   Maximum measured error: 1.72ULP.
+   log1p(-0x1.2e49eddc007d4p-2) got -0x1.663e386abd899p-2
+			       want -0x1.663e386abd89bp-2.  */
 double
 log1p (double x)
 {
