@@ -435,6 +435,15 @@ range_sve_tanf='
    0x1p17       inf  50000
 '
 
+range_sve_erfc='
+   0      0xffff0000 10000
+   0x1p-127  0x1p-26 40000
+  -0x1p-127 -0x1p-26 40000
+   0x1p-26    0x1p5  40000
+  -0x1p-26   -0x1p3  40000
+   0          inf    40000
+'
+
 # error limits
 L_erfc=3.14
 L_erfcf=0.26
@@ -470,6 +479,7 @@ L_sve_expf=1.46
 L_sve_erff=0.76
 L_sve_erf=1.97
 L_sve_tanf=2.7
+L_sve_erfc=3.14
 
 while read G F R
 do
@@ -584,6 +594,8 @@ sve_log    __sv_log        $runsv
 sve_log    _ZGVsMxv_log    $runsv
 sve_erf    __sv_erf        $runsv
 sve_erf    _ZGVsMxv_erf    $runsv
+sve_erfc   __sv_erfc       $runsv
+sve_erfc   _ZGVsMxv_erfc   $runsv
 fi
 EOF
 

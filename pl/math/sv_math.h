@@ -125,6 +125,13 @@ sv_call2_f64 (f64_t (*f) (f64_t, f64_t), sv_f64_t x1, sv_f64_t x2, sv_f64_t y,
   return y;
 }
 
+/* Load array of uint64_t into svuint64_t.  */
+static inline sv_u64_t
+sv_lookup_u64_x (svbool_t pg, const u64_t *tab, sv_u64_t idx)
+{
+  return svld1_gather_u64index_u64 (pg, tab, idx);
+}
+
 /* Load array of double into svfloat64_t.  */
 static inline sv_f64_t
 sv_lookup_f64_x (svbool_t pg, const f64_t *tab, sv_u64_t idx)

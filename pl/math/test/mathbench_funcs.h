@@ -125,6 +125,9 @@ SVF (_ZGVsMxv_erff, -4.0, 4.0)
 SVD (__sv_erf_x, -4.0, 4.0)
 SVD (_ZGVsMxv_erf, -4.0, 4.0)
 
+SVD (__sv_erfc_x, -4, 10)
+SVD (_ZGVsMxv_erfc, -4, 10)
+
 SVF (__sv_expf_x, -9.9, 9.9)
 SVF (_ZGVsMxv_expf, -9.9, 9.9)
 
