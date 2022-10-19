@@ -118,4 +118,16 @@ __sv_powif_wrap (sv_float x, sv_bool pg)
   return __sv_powif_x (x, svcvt_s32_f32_x (pg, x), pg);
 }
 
+static sv_double
+_Z_sv_powk_wrap (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_powk (x, svcvt_s64_f64_x (pg, x), pg);
+}
+
+static sv_double
+__sv_powi_wrap (sv_double x, sv_bool pg)
+{
+  return __sv_powi_x (x, svcvt_s64_f64_x (pg, x), pg);
+}
+
 #endif // WANT_SVE_MATH

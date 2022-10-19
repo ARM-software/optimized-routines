@@ -58,6 +58,7 @@ static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t
   }
 
 DECL_POW_INT_REF(ref_powif, double, float, int)
+DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #define VF1_WRAP(func) static float v_##func##f(float x) { return __v_##func##f(argf(x))[0]; }
 #define VF2_WRAP(func) static float v_##func##f(float x, float y) { return __v_##func##f(argf(x), argf(y))[0]; }
@@ -151,6 +152,8 @@ ZSVND1_WRAP(erfc)
 ZSVND1_WRAP(log)
 ZSVND1_WRAP(log10)
 ZSVND1_WRAP(sin)
+static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
+static double sv_powi(double x, double y) { return svretd(__sv_powi_x(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
 #endif
 #endif
 // clang-format on

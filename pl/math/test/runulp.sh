@@ -180,6 +180,10 @@ check -q -f -e 0 __sv_powif  0  inf x  0  1000 100000 && runsv=1
 check -q -f -e 0 __sv_powif -0 -inf x  0  1000 100000 && runsv=1
 check -q -f -e 0 __sv_powif  0  inf x -0 -1000 100000 && runsv=1
 check -q -f -e 0 __sv_powif -0 -inf x -0 -1000 100000 && runsv=1
+check -q -f -e 0 __sv_powi   0  inf x  0  1000 100000 && runsv=1
+check -q -f -e 0 __sv_powi  -0 -inf x  0  1000 100000 && runsv=1
+check -q -f -e 0 __sv_powi   0  inf x -0 -1000 100000 && runsv=1
+check -q -f -e 0 __sv_powi  -0 -inf x -0 -1000 100000 && runsv=1
 fi
 
 range_erfc='

@@ -162,6 +162,8 @@ SVF (_ZGVsMxv_tanf, -3.1, 3.1)
 
 {"__sv_powif_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_powif_wrap}},
 {"_ZGVsMxvv_powi", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
+{"__sv_powi_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_powi_wrap}},
+{"_ZGVsMxvv_powk", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
 
 #endif
 #endif
