@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include <stdbool.h>
+
 #include "math_config.h"
 #include "atan_common.h"
 
@@ -51,16 +53,11 @@ atan2 (double y, double x)
   uint64_t iax = ix & ~SignMask;
   uint64_t iay = iy & ~SignMask;
 
-  /* x or y is NaN.  */
-  if ((iax > 0x7ff0000000000000) || (iay > 0x7ff0000000000000))
-    {
-      if (unlikely ((iax > 0x7f80000000000000) && (iay > 0x7f80000000000000)))
-	{
-	  /* Both are NaN. Force sign to be +ve.  */
-	  return (asdouble (iax) + asdouble (iay));
-	}
-      return x + y;
-    }
+  bool xisnan = isnan (x);
+  if (unlikely (isnan (y) && !xisnan))
+    return __math_invalid (y);
+  if (unlikely (xisnan))
+    return __math_invalid (x);
 
   /* m = 2 * sign(x) + sign(y).  */
   uint32_t m = ((iy >> 63) & 1) | ((ix >> 62) & 2);

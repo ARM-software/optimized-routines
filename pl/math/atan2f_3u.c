@@ -53,14 +53,7 @@ atan2f (float y, float x)
 
   /* x or y is NaN.  */
   if ((iax > 0x7f800000) || (iay > 0x7f800000))
-    {
-      if (unlikely ((iax > 0x7f800000) && (iay > 0x7f800000)))
-	{
-	  /* Both are NaN. Force sign to be +ve.  */
-	  return (asfloat (iax) + asfloat (iay));
-	}
-      return x + y;
-    }
+    return x + y;
 
   /* m = 2 * sign(x) + sign(y).  */
   uint32_t m = ((iy >> 31) & 1) | ((ix >> 30) & 2);

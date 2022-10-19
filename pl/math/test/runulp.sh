@@ -80,6 +80,9 @@ t atan2  -1.0        1.0  40000
 t atan2   0.0        1.0  40000
 t atan2   1.0      100.0  40000
 t atan2   1e6       1e32  40000
+# Regression-test for correct NaN handling
+check atan2 0x1.7887a0a717aefp+1017 0x1.7887a0a717aefp+1017 x -nan -nan
+check atan2 nan nan x -nan -nan
 
 L=2.4
 t atan2f -10.0       10.0  50000
