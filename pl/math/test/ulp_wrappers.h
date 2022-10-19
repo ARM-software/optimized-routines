@@ -68,6 +68,7 @@ VD2_WRAP(atan2)
 VD1_WRAP(erf)
 VD1_WRAP(erfc)
 VD1_WRAP(log10)
+VD1_WRAP(log1p)
 VD1_WRAP(log2)
 #ifdef __vpcs
 ZVNF1_WRAP(asinh)
@@ -84,6 +85,7 @@ ZVND2_WRAP(atan2)
 ZVND1_WRAP(erf)
 ZVND1_WRAP(erfc)
 ZVND1_WRAP(log10)
+ZVND1_WRAP(log1p)
 ZVND1_WRAP(log2)
 #endif
 #if WANT_SVE_MATH

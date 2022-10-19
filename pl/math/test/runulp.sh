@@ -306,6 +306,17 @@ range_tanf='
    0x1p17       inf  50000
 '
 
+range_log1p='
+    -10.0     10.0  10000
+      0.0  0x1p-23  50000
+  0x1p-23    0.001  50000
+    0.001      1.0  50000
+      0.0 -0x1p-23  50000
+ -0x1p-23   -0.001  50000
+   -0.001     -1.0  50000
+     -1.0      inf   5000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -464,6 +475,7 @@ L_asinhf=2.17
 L_log2f=2.10
 L_log2=2.09
 L_tanf=2.7
+L_log1p=1.97
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -562,6 +574,10 @@ tanf  __s_tanf         $runs
 tanf  __v_tanf         $runv
 tanf  __vn_tanf        $runvn
 tanf  _ZGVnN4v_tanf    $runvn
+log1p  __s_log1p       $runs
+log1p  __v_log1p       $runv
+log1p  __vn_log1p      $runvn
+log1p  _ZGVnN2v_log1p  $runvn
 
 if [ $WANT_SVE_MATH -eq 1 ]; then
 sve_cosf     __sv_cosf         $runsv

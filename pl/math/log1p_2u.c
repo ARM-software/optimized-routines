@@ -6,6 +6,8 @@
 
 #include "math_config.h"
 
+#include "log1p_common.h"
+
 #define Ln2Hi 0x1.62e42fefa3800p-1
 #define Ln2Lo 0x1.ef35793c76730p-45
 #define HfRt2Top 0x3fe6a09e /* top32(asuint64(sqrt(2)/2)).  */
@@ -17,39 +19,6 @@
 #define Rt2MOne 0x3fda827999fcef32
 #define AbsMask 0x7fffffffffffffff
 #define ExpM63 0x3c00
-
-#define C(i) __log1p_data.coeffs[i]
-
-static inline double
-eval_poly (double f)
-{
-  /* Evaluate polynomial using Estrin's method.  */
-  double p_01 = fma (f, C (1), C (0));
-  double p_23 = fma (f, C (3), C (2));
-  double p_45 = fma (f, C (5), C (4));
-  double p_67 = fma (f, C (7), C (6));
-  double p_89 = fma (f, C (9), C (8));
-  double p_ab = fma (f, C (11), C (10));
-  double p_cd = fma (f, C (13), C (12));
-  double p_ef = fma (f, C (15), C (14));
-  double p_gh = fma (f, C (17), C (16));
-
-  double f2 = f * f;
-  double p_03 = fma (f2, p_23, p_01);
-  double p_47 = fma (f2, p_67, p_45);
-  double p_8b = fma (f2, p_ab, p_89);
-  double p_cf = fma (f2, p_ef, p_cd);
-  double p_gi = fma (f2, C (18), p_gh);
-
-  double f4 = f2 * f2;
-  double p_07 = fma (f4, p_47, p_03);
-  double p_8f = fma (f4, p_cf, p_8b);
-
-  double f8 = f4 * f4;
-  double p_0f = fma (f8, p_8f, p_07);
-
-  return fma (f8 * f8, p_gi, p_0f);
-}
 
 /* log1p approximation using polynomial on reduced interval. Largest
    observed errors are near the lower boundary of the region where k
