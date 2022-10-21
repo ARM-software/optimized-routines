@@ -14,7 +14,6 @@
  */
 
 #include "../asmdefs.h"
-#include "../pacbti.h"
 
 #ifdef __ARMEB__
 #define S2LO		lsl
@@ -47,7 +46,7 @@
 #define tmp2		r5
 
 ENTRY (__strlen_armv6t2)
-	prologue 4 5 savepac=HAVE_PAC_LEAF
+	prologue 4 5 push_ip=HAVE_PAC_LEAF
 	pld	[srcin, #0]
 	bic	src, srcin, #7
 	mvn	const_m1, #0
@@ -98,6 +97,7 @@ L(start_realigned):
 	beq	L(loop_aligned)
 
 L(null_found):
+	.cfi_remember_state
 	cmp	data1a, #0
 	itt	eq
 	addeq	result, result, #4
@@ -107,9 +107,10 @@ L(null_found):
 #endif
 	clz	data1a, data1a
 	add	result, result, data1a, lsr #3	/* Bits -> Bytes.  */
-	epilogue 4 5 savepac=HAVE_PAC_LEAF
+	epilogue 4 5 push_ip=HAVE_PAC_LEAF
 
 L(misaligned8):
+	.cfi_restore_state
 	ldrd	data1a, data1b, [src]
 	and	tmp2, tmp1, #3
 	rsb	result, tmp1, #0

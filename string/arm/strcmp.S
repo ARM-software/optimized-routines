@@ -13,7 +13,6 @@
    the compares.  */
 
 #include "../asmdefs.h"
-#include "../pacbti.h"
 
 /* Build Options:
    STRCMP_NO_PRECHECK: Don't run a quick pre-check of the first
@@ -106,7 +105,7 @@
 	.cfi_restore 5
 	.cfi_adjust_cfa_offset -16
 	sub	result, result, r1, lsr #24
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 #else
 	/* To use the big-endian trick we'd have to reverse all three words.
 	   that's slower than this approach.  */
@@ -129,7 +128,7 @@
 	.cfi_adjust_cfa_offset -16
 	sub	result, result, r1
 
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 #endif
 	.endm
 
@@ -140,14 +139,14 @@ L(strcmp_start_addr):
 #if STRCMP_NO_PRECHECK == 0
 L(fastpath_exit):
 	sub	r0, r2, r3
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 	nop
 #endif
 	.global __strcmp_arm
 	.type __strcmp_arm,%function
 	.align 0
 __strcmp_arm:
-	prologue savepac=HAVE_PAC_LEAF
+	prologue push_ip=HAVE_PAC_LEAF
 #if STRCMP_NO_PRECHECK == 0
 	ldrb	r2, [src1]
 	ldrb	r3, [src2]
@@ -158,17 +157,12 @@ __strcmp_arm:
 #endif
 	strd	r4, r5, [sp, #-16]!
 	.cfi_adjust_cfa_offset 16
-	.cfi_offset 5, -(12+PAC_CFI_ADJ_DEFAULT)
-	.cfi_offset 4, -(16+PAC_CFI_ADJ_DEFAULT)
+	.cfi_rel_offset 4, 0
+	.cfi_rel_offset 5, 4
 	orr	tmp1, src1, src2
 	strd	r6, r7, [sp, #8]
-#if HAVE_PAC_LEAF
-	.cfi_offset 6, -12
-	.cfi_offset 7, -8
-#else
-	.cfi_offset 6, -8
-	.cfi_offset 7, -4
-#endif /* HAVE_PAC_LEAF */
+	.cfi_rel_offset 6, 8
+	.cfi_rel_offset 7, 12
 	mvn	const_m1, #0
 	lsl	r2, tmp1, #29
 	cbz	r2, L(loop_aligned8)
@@ -339,7 +333,7 @@ L(misaligned_exit):
 	.cfi_restore 4
 	.cfi_adjust_cfa_offset -16
 
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 
 #if STRCMP_NO_PRECHECK == 0
 L(aligned_m1):
@@ -391,7 +385,7 @@ L(overlap3):
 	.cfi_restore 7
 	.cfi_adjust_cfa_offset -16
 	neg	result, result
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 6:
 	.cfi_restore_state
 	S2LO	data1, data1, #24
@@ -467,7 +461,7 @@ L(strcmp_done_equal):
 	.cfi_restore 6
 	.cfi_restore 7
 	.cfi_adjust_cfa_offset -16
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 
 L(strcmp_tail):
 	.cfi_restore_state
@@ -491,7 +485,7 @@ L(strcmp_tail):
 	.cfi_restore 7
 	.cfi_adjust_cfa_offset -16
 	sub	result, result, data2, lsr #24
-	epilogue savepac=HAVE_PAC_LEAF
+	epilogue push_ip=HAVE_PAC_LEAF
 
 END (__strcmp_arm)
 

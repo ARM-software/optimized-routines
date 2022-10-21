@@ -36,8 +36,8 @@
 #define CHARTSTMASK(c) 1<<(c*8)
 #endif
 	.thumb
+#include "../asmdefs.h"
 
-#include "../pacbti.h"
 
 @ ---------------------------------------------------------------------------
 	.thumb_func
@@ -74,10 +74,10 @@ __memchr_arm:
 	@ At this point, we are aligned, we know we have at least 8 bytes to work with
 	push	{r4,r5,r6,r7}
 	.cfi_adjust_cfa_offset 16
-	.cfi_offset 4, -(16+PAC_CFI_ADJ)
-	.cfi_offset 5, -(12+PAC_CFI_ADJ)
-	.cfi_offset 6, -(8+PAC_CFI_ADJ)
-	.cfi_offset 7, -(4+PAC_CFI_ADJ)
+	.cfi_rel_offset 4, 0
+	.cfi_rel_offset 5, 4
+	.cfi_rel_offset 6, 8
+	.cfi_rel_offset 7, 12
 	orr	r1, r1, r1, lsl #8	@ expand the match word across to all bytes
 	orr	r1, r1, r1, lsl #16
 	bic	r4, r2, #7	@ Number of double words to work with
@@ -116,16 +116,20 @@ __memchr_arm:
 	bne	21b		@ on r2 flags
 
 40:
+	.cfi_remember_state
 	movs	r0,#0		@ not found
 	epilogue
 
 50:
+	.cfi_restore_state
+	.cfi_remember_state
 	subs	r0,r0,#1	@ found
 	epilogue
 
 60:  @ We're here because the fast path found a hit - now we have to track down exactly which word it was
 	@ r0 points to the start of the double word after the one that was tested
 	@ r5 has the 00/ff pattern for the first word, r6 has the chained value
+	.cfi_restore_state
 	cmp	r5, #0
 	itte	eq
 	moveq	r5, r6		@ the end is in the 2nd word
@@ -144,8 +148,14 @@ __memchr_arm:
 	addeq	r0,r0,#1
 
 61:
+	pop	{r4,r5,r6,r7}
+	.cfi_restore 7
+	.cfi_restore 6
+	.cfi_restore 5
+	.cfi_restore 4
+	.cfi_adjust_cfa_offset -16
 	subs	r0,r0,#1
-	epilogue 4 7
+	epilogue
 	.cfi_endproc
 	.cantunwind
 	.fnend
