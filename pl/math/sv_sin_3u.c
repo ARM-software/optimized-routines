@@ -26,9 +26,9 @@ __sv_sin_specialcase (sv_f64_t x, sv_f64_t y, svbool_t cmp)
 
 /* A fast SVE implementation of sin based on trigonometric
    instructions (FTMAD, FTSSEL, FTSMUL).
-   Maximum measured error: 1.95 ULPs
-   __sv_sin(0x1.0abe696a98052p+19) got -0x1.ff302079d96a4p-3
-				  want -0x1.ff302079d96a2p-3.  */
+   Maximum observed error in 2.52 ULP:
+   __sv_sin(0x1.2d2b00df69661p+19) got 0x1.10ace8f3e786bp-40
+				  want 0x1.10ace8f3e7868p-40.  */
 sv_f64_t
 __sv_sin_x (sv_f64_t x, const svbool_t pg)
 {
