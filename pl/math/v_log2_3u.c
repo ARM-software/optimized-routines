@@ -46,8 +46,8 @@ specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 /* Double-precision vector log2 routine. Implements the same algorithm as vector
    log10, with coefficients and table entries scaled in extended precision.
    The maximum observed error is 2.59 ULP:
-   __v_log2(0x1.0b5572f05bc9dp+0) got 0x1.fffc917a7a52dp-5
-				  want 0x1.fffc917a7a53p-5.  */
+   __v_log2(0x1.0b556e53a80b6p+0) got 0x1.fffbc594d146bp-5
+				 want 0x1.fffbc594d146ep-5.  */
 VPCS_ATTR
 v_f64_t V_NAME (log2) (v_f64_t x)
 {

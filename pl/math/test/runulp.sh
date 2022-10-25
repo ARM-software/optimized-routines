@@ -484,7 +484,7 @@ L_atanf=2.5
 L_log1pf=1.53
 L_asinhf=2.17
 L_log2f=2.10
-L_log2=2.09
+L_log2=2.10
 L_tanf=2.7
 L_log1p=1.97
 
