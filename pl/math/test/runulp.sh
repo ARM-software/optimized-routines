@@ -171,6 +171,14 @@ t sinhf -0x1.62e43p+6  -0x1.65a9fap+6 100
 t sinhf  0x1.65a9fap+6  inf           100
 t sinhf -0x1.65a9fap+6 -inf           100
 
+L=1.89
+t coshf  0              0x1p-63         100
+t coshf  0              0x1.5a92d8p+6   80000
+t coshf  0x1.5a92d8p+6  inf             2000
+t coshf -0             -0x1p-63         100
+t coshf -0             -0x1.5a92d8p+6   80000
+t coshf -0x1.5a92d8p+6 -inf             2000
+
 done
 
 # vector functions
@@ -358,6 +366,15 @@ range_sinhf='
  -0x1.65a9fap+6 -inf           100
 '
 
+range_coshf='
+  0              0x1p-63         100
+  0              0x1.5a92d8p+6   80000
+  0x1.5a92d8p+6  inf             2000
+ -0             -0x1p-63         100
+ -0             -0x1.5a92d8p+6   80000
+ -0x1.5a92d8p+6 -inf             2000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -519,6 +536,7 @@ L_tanf=2.7
 L_log1p=1.97
 L_expm1f=1.02
 L_sinhf=1.76
+L_coshf=1.89
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -646,6 +664,10 @@ sinhf  __s_sinhf       $runs    fenv
 sinhf  __v_sinhf       $runv    fenv
 sinhf  __vn_sinhf      $runvn   fenv
 sinhf  _ZGVnN4v_sinhf  $runvn   fenv
+coshf  __s_coshf       $runs    fenv
+coshf  __v_coshf       $runv    fenv
+coshf  __vn_coshf      $runvn   fenv
+coshf  _ZGVnN4v_coshf  $runvn   fenv
 
 sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv

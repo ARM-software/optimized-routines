@@ -10,6 +10,7 @@ F (asinhf, -10.0, 10.0)
 F (atanf, -10.0, 10.0)
 {"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
 F (cosf, -3.1, 3.1)
+F (coshf, -10.0, 10.0)
 F (erfcf, -4.0, 10.0)
 F (erff, -4.0, 4.0)
 F (expm1f, -9.9, 9.9)
@@ -39,6 +40,7 @@ F (__s_atanf, -10.0, 10.0)
 D (__s_atan, -10.0, 10.0)
 {"__s_atan2f", 'f', 0, -10.0, 10.0, {.f = __s_atan2f_wrap}},
 {"__s_atan2", 'd', 0, -10.0, 10.0, {.d = __s_atan2_wrap}},
+F (__s_coshf, -10.0, 10.0)
 F (__s_erff, -4.0, 4.0)
 D (__s_erf, -6.0, 6.0)
 F (__s_erfcf, -6.0, 28.0)
@@ -58,6 +60,7 @@ VF (__v_atanf, -10.0, 10.0)
 VD (__v_atan, -10.0, 10.0)
 {"__v_atan2f", 'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
 {"__v_atan2", 'd', 'v', -10.0, 10.0, {.vd = __v_atan2_wrap}},
+VF (__v_coshf, -10.0, 10.0)
 VF  (__v_erff, -4.0, 4.0)
 VD  (__v_erf, -6.0, 6.0)
 VF (__v_erfcf, -6.0, 28.0)
@@ -86,6 +89,9 @@ VND (_ZGVnN2v_atan, -10.0, 10.0)
 
 {"__vn_atan2", 'd', 'n', -10.0, 10.0, {.vnd = __vn_atan2_wrap}},
 {"_ZGVnN2vv_atan2", 'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
+
+VNF (__vn_coshf, -10.0, 10.0)
+VNF (_ZGVnN4v_coshf, -10.0, 10.0)
 
 VNF (__vn_erff, -4.0, 4.0)
 VNF (_ZGVnN4v_erff, -4.0, 4.0)

@@ -16,8 +16,8 @@
   0x42b2d4fd /* 0x1.65a9fap+6, minimum positive value for which sinhf should   \
 		overflow.  */
 
-double
-__exp_dd (double, double);
+float
+optr_aor_exp_f32 (float);
 
 /* Approximation for single-precision sinh(x) using expm1.
    sinh(x) = (exp(x) - exp(-x)) / 2.
@@ -52,7 +52,7 @@ sinhf (float x)
 			    ~= (exp(|x| / 2)) ^ 2 / -2   for x < 0.
 	 Greatest error in this region is 1.89 ULP:
 	 sinhf(0x1.65898cp+6) got 0x1.f00aep+127  want 0x1.f00adcp+127.  */
-      float e = __exp_dd (ax / 2, 0);
+      float e = optr_aor_exp_f32 (ax / 2);
       return (e * halfsign) * e;
     }
 
