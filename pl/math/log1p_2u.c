@@ -23,9 +23,9 @@
 /* log1p approximation using polynomial on reduced interval. Largest
    observed errors are near the lower boundary of the region where k
    is 0.
-   Maximum measured error: 1.72ULP.
-   log1p(-0x1.2e49eddc007d4p-2) got -0x1.663e386abd899p-2
-			       want -0x1.663e386abd89bp-2.  */
+   Maximum measured error: 1.75ULP.
+   log1p(-0x1.2e1aea97b3e5cp-2) got -0x1.65fb8659a2f9p-2
+			       want -0x1.65fb8659a2f92p-2.  */
 double
 log1p (double x)
 {

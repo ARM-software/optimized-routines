@@ -8,5 +8,5 @@
 #ifdef __vpcs
 #define VPCS 1
 #define VPCS_ALIAS strong_alias (__vn_erfc, _ZGVnN2v_erfc)
-#include "v_erfc_3u7.c"
+#include "v_erfc_4u.c"
 #endif

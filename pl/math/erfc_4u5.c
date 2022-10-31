@@ -118,8 +118,8 @@ top32 (double x)
    The approximation uses polynomial approximation of
    exp(x^2) * erfc(x) with fixed orders on 20 intervals.
    Maximum measured error is 4.05 ULPs:.
-   erfc(0x1.e8ee8c87064ap-2) got 0x1.ff81b0d2dc2e6p-2
-			    want 0x1.ff81b0d2dc2eap-2.  */
+   erfc(0x1.e8ebf6a2b0801p-2) got 0x1.ff84036f8f0b3p-2
+			     want 0x1.ff84036f8f0b7p-2.  */
 double
 erfc (double x)
 {

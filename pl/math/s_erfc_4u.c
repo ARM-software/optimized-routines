@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #define SCALAR 1
-#include "v_erfc_3u7.c"
+#include "v_erfc_4u.c"

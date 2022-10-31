@@ -57,7 +57,7 @@ t log10  0 0xffff000000000000 10000
 t log10  0x1p-4    0x1p4      40000
 t log10  0         inf        40000
 
-L=3.55
+L=3.56
 t erfc  0       0xffff0000   10000
 t erfc  0x1p-1022  0x1p-26   40000
 t erfc -0x1p-1022 -0x1p-26   40000
@@ -107,7 +107,7 @@ t asinh     -1.0  -100.0   10000
 t asinh    100.0     inf   50000
 t asinh   -100.0    -inf   10000
 
-L=1.24
+L=1.26
 t log1p    -10.0     10.0  10000
 t log1p      0.0  0x1p-23  50000
 t log1p  0x1p-23    0.001  50000
@@ -470,7 +470,7 @@ range_sve_erfc='
 '
 
 # error limits
-L_erfc=3.14
+L_erfc=3.15
 L_erfcf=0.26
 L_log10=1.97
 L_log10f=2.81
@@ -505,7 +505,7 @@ L_sve_expf=1.46
 L_sve_erff=0.76
 L_sve_erf=1.97
 L_sve_tanf=2.7
-L_sve_erfc=3.14
+L_sve_erfc=3.15
 
 while read G F R
 do

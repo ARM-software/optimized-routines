@@ -103,9 +103,9 @@ v_eval_gauss (v_f64_t a)
 }
 
 /* Optimized double precision vector complementary error function erfc.
-   Maximum measured error is 3.63 ULP:
-   __v_erfc(0x1.479279a3bbc74p+2) got 0x1.ff341c664edc5p-42
-				 want 0x1.ff341c664edc9p-42.  */
+   Maximum measured error is 3.64 ULP:
+   __v_erfc(0x1.4792573ee6cc7p+2) got 0x1.ff3f4c8e200d5p-42
+				 want 0x1.ff3f4c8e200d9p-42.  */
 VPCS_ATTR
 v_f64_t V_NAME (erfc) (v_f64_t x)
 {
