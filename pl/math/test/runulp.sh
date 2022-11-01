@@ -157,6 +157,12 @@ t acosh 2        0x1p511 100000
 t acosh 0x1p511  inf     100000
 t acosh -0      -inf     10000
 
+L=1.02
+t expm1f  0        0x1p-23       1000
+t expm1f -0       -0x1p-23       1000
+t expm1f  0x1p-23  0x1.644716p6  100000
+t expm1f -0x1p-23 -0x1.9bbabcp+6 100000
+
 done
 
 # vector functions
