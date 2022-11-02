@@ -230,6 +230,11 @@ v_to_f32_s32 (v_s32_t x)
 {
   return x;
 }
+static inline v_s32_t
+v_to_s32_f32 (v_f32_t x)
+{
+  return x;
+}
 static inline v_f32_t
 v_to_f32_u32 (v_u32_t x)
 {
@@ -580,6 +585,11 @@ static inline v_f32_t
 v_to_f32_s32 (v_s32_t x)
 {
   return (v_f32_t){x[0], x[1], x[2], x[3]};
+}
+static inline v_s32_t
+v_to_s32_f32 (v_f32_t x)
+{
+  return vcvtq_s32_f32 (x);
 }
 static inline v_f32_t
 v_to_f32_u32 (v_u32_t x)

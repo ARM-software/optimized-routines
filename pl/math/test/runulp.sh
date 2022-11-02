@@ -168,7 +168,7 @@ done
 # vector functions
 Ldir=0.5
 r='n'
-flags="${ULPFLAGS:--q} -f"
+flags="${ULPFLAGS:--q}"
 runs=
 check __s_log10f 1 && runs=1
 runv=
@@ -334,6 +334,13 @@ range_log1p='
      -1.0      inf   5000
 '
 
+range_expm1f='
+  0        0x1p-23       1000
+ -0       -0x1p-23       1000
+  0x1p-23  0x1.644716p6  1000000
+ -0x1p-23 -0x1.9bbabcp+6 1000000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -493,6 +500,7 @@ L_log2f=2.10
 L_log2=2.10
 L_tanf=2.7
 L_log1p=1.97
+L_expm1f=1.02
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -512,7 +520,7 @@ L_sve_erf=1.97
 L_sve_tanf=2.7
 L_sve_erfc=3.15
 
-while read G F R
+while read G F R D
 do
 	[ "$R" = 1 ] || continue
 	case "$G" in \#*) continue ;; esac
@@ -521,8 +529,18 @@ do
 	while read X
 	do
 		[ -n "$X" ] || continue
+		# fenv checking is enabled by default, but we almost
+		# always want to disable it for vector routines, so a
+		# hack is needed. Pass a fourth argument to prevent -f
+		# being added to the run line.
+		if [ -z "$D" ]
+		then
+		    f="-f"
+		else
+		    f=""
+		fi
 		case "$X" in \#*) continue ;; esac
-		t $F $X
+		t $f $F $X
 	done << EOF
 $range
 EOF
@@ -594,6 +612,10 @@ log1p  __s_log1p       $runs
 log1p  __v_log1p       $runv
 log1p  __vn_log1p      $runvn
 log1p  _ZGVnN2v_log1p  $runvn
+expm1f __s_expm1f      $runs  EF
+expm1f __v_expm1f      $runv  EF
+expm1f __vn_expm1f     $runvn EF
+expm1f _ZGVnN4v_expm1f $runvn EF
 
 if [ $WANT_SVE_MATH -eq 1 ]; then
 sve_cosf     __sv_cosf         $runsv
