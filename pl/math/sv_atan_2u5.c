@@ -17,9 +17,9 @@
 /* Fast implementation of SVE atan.
    Based on atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
    z=1/x and shift = pi/2. Largest errors are close to 1. The maximum observed
-   is 2.2 ulps:
-   __sv_atan(0x1.00050804cdc8cp+0) got 0x1.9224bd3c68773p-1
-				  want 0x1.9224bd3c68775p-1.  */
+   error is 2.22 ulps:
+   __sv_atan(0x1.0005fd947bf57p+0) got 0x1.9225b2c6cd6cdp-1
+				  want 0x1.9225b2c6cd6cfp-1.  */
 sv_f64_t
 __sv_atan_x (sv_f64_t x, const svbool_t pg)
 {

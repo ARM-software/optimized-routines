@@ -30,18 +30,10 @@ biased_exponent (double f)
   return (fi & ExpMask) >> 52;
 }
 
-/* Fast implementation of scalar atan2.
-
-   For normal input, there are large errors when y and x are
-   reasonably close together. The maximum such observed error is 2.0
-   ulps:
-   atan2(0x1.8d9621df2f329p+2, 0x1.884cf49437972p+2)
-   got 0x1.958cd0e8c618bp-1 want 0x1.958cd0e8c618dp-1.
-
-   There are larger errors when y is very small, but normal, and x is
-   subnormal. The greatest observed error is 2.23 ulps:
-   atan2(0x1.01dc020fc8e2cp-1022, 0x0.fea20ed5c5a23p-1022)
-   got 0x1.9558da87cabaap-1 want 0x1.9558da87cabacp-1.  */
+/* Fast implementation of scalar atan2. Largest errors are when y and x are
+   close together. The greatest observed error is 2.28 ULP:
+   atan2(-0x1.5915b1498e82fp+732, 0x1.54d11ef838826p+732)
+   got -0x1.954f42f1fa841p-1 want -0x1.954f42f1fa843p-1.  */
 double
 atan2 (double y, double x)
 {

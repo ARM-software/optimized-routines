@@ -74,7 +74,7 @@ t erfcf  0x1p-26    0x1p5  40000
 t erfcf -0x1p-26   -0x1p3  40000
 t erfcf  0          inf    40000
 
-L=1.74
+L=1.78
 t atan2     -10.0      10.0               50000
 t atan2      -1.0       1.0               40000
 t atan2       0.0       1.0               40000
@@ -484,7 +484,7 @@ L_erf=1.26
 L_erff=0.76
 # TODO tighten this once __v_atan2 is fixed
 L_atan2=2.9
-L_atan=2.15
+L_atan=1.73
 L_atan2f=2.46
 L_atanf=2.5
 L_log1pf=1.53
@@ -499,10 +499,9 @@ L_sve_cos=1.61
 L_sve_sinf=1.40
 L_sve_sin=2.03
 L_sve_atanf=2.9
-L_sve_atan=1.7
+L_sve_atan=1.73
 L_sve_atan2f=2.45
-# TODO tighten this once __sv_atan2 is fixed
-L_sve_atan2=2.0
+L_sve_atan2=1.73
 L_sve_log10=1.97
 L_sve_log10f=2.82
 L_sve_logf=2.85
