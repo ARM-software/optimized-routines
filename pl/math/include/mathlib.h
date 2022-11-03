@@ -17,6 +17,7 @@ float erff (float);
 float expm1f (float);
 float log10f (float);
 float log1pf (float);
+float sinhf (float);
 float tanf (float);
 
 double acosh (double);

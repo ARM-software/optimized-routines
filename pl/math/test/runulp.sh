@@ -163,6 +163,14 @@ t expm1f -0       -0x1p-23       1000
 t expm1f  0x1p-23  0x1.644716p6  100000
 t expm1f -0x1p-23 -0x1.9bbabcp+6 100000
 
+L=1.76
+t sinhf  0              0x1.62e43p+6  100000
+t sinhf -0             -0x1.62e43p+6  100000
+t sinhf  0x1.62e43p+6   0x1.65a9fap+6 100
+t sinhf -0x1.62e43p+6  -0x1.65a9fap+6 100
+t sinhf  0x1.65a9fap+6  inf           100
+t sinhf -0x1.65a9fap+6 -inf           100
+
 done
 
 # vector functions
