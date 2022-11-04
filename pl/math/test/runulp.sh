@@ -150,7 +150,7 @@ t acoshf 2      0x1p64 100000
 t acoshf 0x1p64 inf    100000
 t acoshf -0     -inf    10000
 
-L=2.14
+L=2.19
 t acosh 0        1       10000
 t acosh 1        2       100000
 t acosh 2        0x1p511 100000

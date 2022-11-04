@@ -33,9 +33,9 @@ log1p (double);
 			      want 0x1.71a06f50c34b6p+0.
 
    0 <= x <= 2: Calculate the result using log1p. For x < 1, acosh(x) is
-   undefined. For 1 <= x <= 2, the largest observed error is 2.63 ULP:
-   acosh(0x1.072462f3df186p+0) got 0x1.e2a700043edabp-3
-			      want 0x1.e2a700043edaep-3.  */
+   undefined. For 1 <= x <= 2, the largest observed error is 2.69 ULP:
+   acosh(0x1.073528248093p+0) got 0x1.e4d9bd20684f3p-3
+			     want 0x1.e4d9bd20684f6p-3.  */
 double
 acosh (double x)
 {
