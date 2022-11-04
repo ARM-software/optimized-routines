@@ -69,6 +69,12 @@ ifeq ($(WANT_SVE_MATH), 1)
 endif
 math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH)
 
+# If defined to 1, set errno in math functions according to ISO C.  Many math
+# libraries do not set errno, so this is 0 by default.  It may need to be
+# set to 1 if math.h has (math_errhandling & MATH_ERRNO) != 0.
+WANT_ERRNO = 0
+math-cflags += -DWANT_ERRNO=$(WANT_ERRNO)
+
 # Disable fenv checks
 #math-ulpflags = -q -f
 #math-testflags = -nostatus
