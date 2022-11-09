@@ -75,10 +75,28 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZVD1_WRAP(func) static double Z_##func(double x) { return _ZGVnN2v_##func(argd(x))[0]; }
 #define ZVD2_WRAP(func) static double Z_##func(double x, double y) { return _ZGVnN2vv_##func(argd(x), argd(y))[0]; }
 
-#define ZVNF1_WRAP(func) VNF1_WRAP(func) ZVF1_WRAP(func)
-#define ZVNF2_WRAP(func) VNF2_WRAP(func) ZVF2_WRAP(func)
-#define ZVND1_WRAP(func) VND1_WRAP(func) ZVD1_WRAP(func)
-#define ZVND2_WRAP(func) VND2_WRAP(func) ZVD2_WRAP(func)
+#ifdef __vpcs
+
+#define ZVNF1_WRAP(func) VF1_WRAP(func) VNF1_WRAP(func) ZVF1_WRAP(func)
+#define ZVNF2_WRAP(func) VF2_WRAP(func) VNF2_WRAP(func) ZVF2_WRAP(func)
+#define ZVND1_WRAP(func) VD1_WRAP(func) VND1_WRAP(func) ZVD1_WRAP(func)
+#define ZVND2_WRAP(func) VD2_WRAP(func) VND2_WRAP(func) ZVD2_WRAP(func)
+
+#elif __aarch64__
+
+#define ZVNF1_WRAP(func) VF1_WRAP(func) VNF1_WRAP(func)
+#define ZVNF2_WRAP(func) VF2_WRAP(func) VNF2_WRAP(func)
+#define ZVND1_WRAP(func) VD1_WRAP(func) VND1_WRAP(func)
+#define ZVND2_WRAP(func) VD2_WRAP(func) VND2_WRAP(func)
+
+#else
+
+#define ZVNF1_WRAP(func) VF1_WRAP(func)
+#define ZVNF2_WRAP(func) VF2_WRAP(func)
+#define ZVND1_WRAP(func) VD1_WRAP(func)
+#define ZVND2_WRAP(func) VD2_WRAP(func)
+
+#endif
 
 #define SVF1_WRAP(func) static float sv_##func##f(float x) { return svretf(__sv_##func##f_x(svargf(x), svptrue_b32())); }
 #define SVF2_WRAP(func) static float sv_##func##f(float x, float y) { return svretf(__sv_##func##f_x(svargf(x), svargf(y), svptrue_b32())); }
@@ -96,28 +114,7 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZSVND2_WRAP(func) SVD2_WRAP(func) ZSVD2_WRAP(func)
 
 /* Wrappers for vector functions.  */
-#if __aarch64__ && WANT_VMATH
-VF1_WRAP(asinh)
-VF1_WRAP(atan)
-VF2_WRAP(atan2)
-VF1_WRAP(cosh)
-VF1_WRAP(erf)
-VF1_WRAP(erfc)
-VF1_WRAP(expm1)
-VF1_WRAP(log10)
-VF1_WRAP(log1p)
-VF1_WRAP(log2)
-VF1_WRAP(sinh)
-VF1_WRAP(tan)
-VD1_WRAP(atan)
-VD2_WRAP(atan2)
-VD1_WRAP(erf)
-VD1_WRAP(erfc)
-VD1_WRAP(expm1)
-VD1_WRAP(log10)
-VD1_WRAP(log1p)
-VD1_WRAP(log2)
-#ifdef __vpcs
+#if WANT_VMATH
 ZVNF1_WRAP(asinh)
 ZVNF1_WRAP(atan)
 ZVNF2_WRAP(atan2)
@@ -138,7 +135,6 @@ ZVND1_WRAP(expm1)
 ZVND1_WRAP(log10)
 ZVND1_WRAP(log1p)
 ZVND1_WRAP(log2)
-#endif
 #if WANT_SVE_MATH
 ZSVNF2_WRAP(atan2)
 ZSVNF1_WRAP(atan)
