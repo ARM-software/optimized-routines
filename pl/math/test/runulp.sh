@@ -548,15 +548,22 @@ do
 	do
 		[ -n "$X" ] || continue
 		# fenv checking is enabled by default, but we almost
-		# always want to disable it for vector routines, so a
-		# hack is needed. Pass "fenv" as fourth argument to
-		# prevent -f being added to the run line.
+		# always want to disable it for vector routines. There
+		# are, however, a small number of vector routines in
+		# pl/math which are supposed to set fenv correctly
+		# when WANT_ERRNO is enabled. A hack is needed to
+		# ensure fenv checking is enabled for routines where
+		# this is the case. Pass "fenv" as fourth argument to
+		# prevent -f being added to the run line when
+		# WANT_ERRNO is enabled.
 		f="-f"
-		if [ "$D" = "fenv" ]; then
-		    f=""
-		elif [ ! -z "$D" ]; then
-		    echo "Unrecognised 4th argument: $D"
-		    exit 1
+		if [ $WANT_ERRNO -eq 1 ]; then
+			if [ "$D" = "fenv" ]; then
+				f=""
+			elif [ ! -z "$D" ]; then
+				echo "Unrecognised 4th argument: $D"
+				exit 1
+			fi
 		fi
 		case "$X" in \#*) continue ;; esac
 		t $f $F $X

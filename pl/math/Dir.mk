@@ -128,7 +128,7 @@ check-pl/math-rtest: $(math-host-tools) $(math-tools)
 	cat $(math-rtests) | build/pl/bin/rtest | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
 
 check-pl/math-ulp: $(math-tools)
-	WANT_SVE_MATH=$(WANT_SVE_MATH) ULPFLAGS="$(math-ulpflags)" build/pl/bin/runulp.sh $(EMULATOR)
+	WANT_ERRNO=$(WANT_ERRNO) WANT_SVE_MATH=$(WANT_SVE_MATH) ULPFLAGS="$(math-ulpflags)" build/pl/bin/runulp.sh $(EMULATOR)
 
 check-pl/math: check-pl/math-test check-pl/math-rtest check-pl/math-ulp
 
