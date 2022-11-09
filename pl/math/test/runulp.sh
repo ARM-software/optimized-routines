@@ -384,6 +384,15 @@ range_coshf='
  -0x1.5a92d8p+6 -inf             2000
 '
 
+range_expm1='
+  0                     0x1p-51              1000
+ -0                    -0x1p-51              1000
+  0x1p-51               0x1.63108c75a1937p+9 100000
+ -0x1p-51              -0x1.740bf7c0d927dp+9 100000
+  0x1.63108c75a1937p+9  inf                  100
+ -0x1.740bf7c0d927dp+9 -inf                  100
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -546,6 +555,7 @@ L_log1p=1.97
 L_expm1f=1.02
 L_sinhf=1.76
 L_coshf=1.89
+L_expm1=1.68
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -624,6 +634,10 @@ log2   __s_log2        $runs
 log2   __v_log2        $runv
 log2   __vn_log2       $runvn
 log2   _ZGVnN2v_log2   $runvn
+expm1  __s_expm1       $runs    fenv
+expm1  __v_expm1       $runv    fenv
+expm1  __vn_expm1      $runvn   fenv
+expm1  _ZGVnN2v_expm1  $runvn   fenv
 
 atanf  __s_atanf       $runs
 atanf  __v_atanf       $runv

@@ -400,6 +400,12 @@ v_to_f64_u64 (v_u64_t x)
 {
   return x;
 }
+
+static inline v_s64_t
+v_to_s64_f64 (v_f64_t x)
+{
+  return x;
+}
 /* reinterpret as type1 from type2.  */
 static inline v_u64_t
 v_as_u64_f64 (v_f64_t x)
@@ -760,6 +766,11 @@ static inline v_f64_t
 v_to_f64_u64 (v_u64_t x)
 {
   return (v_f64_t){x[0], x[1]};
+}
+static inline v_s64_t
+v_to_s64_f64 (v_f64_t x)
+{
+  return vcvtq_s64_f64 (x);
 }
 /* reinterpret as type1 from type2.  */
 static inline v_u64_t
