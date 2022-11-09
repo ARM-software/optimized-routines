@@ -179,6 +179,15 @@ t coshf -0             -0x1p-63         100
 t coshf -0             -0x1.5a92d8p+6   80000
 t coshf -0x1.5a92d8p+6 -inf             2000
 
+
+L=1.68
+t expm1  0                     0x1p-51              1000
+t expm1 -0                    -0x1p-51              1000
+t expm1  0x1p-51               0x1.63108c75a1937p+9 100000
+t expm1 -0x1p-51              -0x1.740bf7c0d927dp+9 100000
+t expm1  0x1.63108c75a1937p+9  inf                  100
+t expm1 -0x1.740bf7c0d927dp+9 -inf                  100
+
 done
 
 # vector functions

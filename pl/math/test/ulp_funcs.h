@@ -19,6 +19,7 @@ D1 (asinh)
 D2 (atan2)
 F1 (tan)
 D1 (erfc)
+D1 (expm1)
 D1 (log10)
 D1 (log1p)
 #if WANT_VMATH

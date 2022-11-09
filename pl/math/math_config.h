@@ -550,4 +550,7 @@ extern const struct expf_data
   double poly_scaled[EXPF_POLY_ORDER];
 } __expf_data HIDDEN;
 
+#define EXPM1_POLY_ORDER 11
+extern const double __expm1_poly[EXPM1_POLY_ORDER] HIDDEN;
+
 #endif

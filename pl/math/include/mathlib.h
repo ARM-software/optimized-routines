@@ -25,6 +25,7 @@ double acosh (double);
 double asinh (double);
 double atan2 (double, double);
 double erfc (double);
+double expm1 (double);
 double log10 (double);
 double log1p (double);
 
