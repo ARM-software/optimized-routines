@@ -540,7 +540,7 @@ L_sve_erfc=3.15
 
 while read G F R D
 do
-	[ "$R" = 1 ] || continue
+	[ "$R" = 1 ] && { [[ $G != sve_* ]] || [ $WANT_SVE_MATH -eq 1 ]; } || continue
 	case "$G" in \#*) continue ;; esac
 	eval range="\${range_$G}"
 	eval L="\${L_$G}"
@@ -640,7 +640,6 @@ sinhf  __v_sinhf       $runv    fenv
 sinhf  __vn_sinhf      $runvn   fenv
 sinhf  _ZGVnN4v_sinhf  $runvn   fenv
 
-if [ $WANT_SVE_MATH -eq 1 ]; then
 sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv
 sve_sinf     __sv_sinf         $runsv
@@ -676,7 +675,6 @@ sve_erf    __sv_erf        $runsv
 sve_erf    _ZGVsMxv_erf    $runsv
 sve_erfc   __sv_erfc       $runsv
 sve_erfc   _ZGVsMxv_erfc   $runsv
-fi
 EOF
 
 [ 0 -eq $FAIL ] || {
