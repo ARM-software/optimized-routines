@@ -36,6 +36,7 @@ float __s_expm1f (float);
 float __s_log10f (float);
 float __s_log1pf (float);
 float __s_log2f (float);
+float __s_sinhf (float);
 float __s_tanf (float);
 
 double __s_atan (double);
@@ -74,6 +75,7 @@ __f32x4_t __v_log1pf (__f32x4_t);
 __f64x2_t __v_log1p (__f64x2_t);
 __f32x4_t __v_log2f (__f32x4_t);
 __f64x2_t __v_log2 (__f64x2_t);
+__f32x4_t __v_sinhf (__f32x4_t);
 __f32x4_t __v_tanf (__f32x4_t);
 
 #if __GNUC__ >= 9 || __clang_major__ >= 8
@@ -96,6 +98,7 @@ __vpcs __f32x4_t __vn_log1pf (__f32x4_t);
 __vpcs __f64x2_t __vn_log1p (__f64x2_t);
 __vpcs __f32x4_t __vn_log2f (__f32x4_t);
 __vpcs __f64x2_t __vn_log2 (__f64x2_t);
+__vpcs __f32x4_t __vn_sinhf (__f32x4_t);
 __vpcs __f32x4_t __vn_tanf (__f32x4_t);
 
 /* Vector functions following the vector PCS using ABI names.  */
@@ -115,6 +118,7 @@ __vpcs __f32x4_t _ZGVnN4v_log1pf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_log1p (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_log2f (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_log2 (__f64x2_t);
+__vpcs __f32x4_t _ZGVnN4v_sinhf (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_tanf (__f32x4_t);
 
 #endif

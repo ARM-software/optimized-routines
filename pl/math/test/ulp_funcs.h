@@ -37,6 +37,7 @@ SF1 (log1p)
 SD1 (log1p)
 SF1 (log2)
 SD1 (log2)
+SF1 (sinh)
 SF1 (tan)
 #if __aarch64__
 VF1 (asinh)
@@ -55,6 +56,7 @@ VF1 (log1p)
 VD1 (log1p)
 VF1 (log2)
 VD1 (log2)
+VF1 (sinh)
 VF1 (tan)
 #ifdef __vpcs
 ZVNF1 (asinh)
@@ -73,6 +75,7 @@ ZVNF1 (log1p)
 ZVND1 (log1p)
 ZVNF1 (log2)
 ZVND1 (log2)
+ZVNF1 (sinh)
 ZVNF1 (tan)
 #endif
 #endif

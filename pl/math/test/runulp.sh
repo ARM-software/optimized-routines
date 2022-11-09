@@ -349,6 +349,15 @@ range_expm1f='
  -0x1p-23 -0x1.9bbabcp+6 1000000
 '
 
+range_sinhf='
+  0              0x1.62e43p+6  100000
+ -0             -0x1.62e43p+6  100000
+  0x1.62e43p+6   0x1.65a9fap+6 100
+ -0x1.62e43p+6  -0x1.65a9fap+6 100
+  0x1.65a9fap+6  inf           100
+ -0x1.65a9fap+6 -inf           100
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -509,6 +518,7 @@ L_log2=2.10
 L_tanf=2.7
 L_log1p=1.97
 L_expm1f=1.02
+L_sinhf=1.76
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -539,13 +549,14 @@ do
 		[ -n "$X" ] || continue
 		# fenv checking is enabled by default, but we almost
 		# always want to disable it for vector routines, so a
-		# hack is needed. Pass a fourth argument to prevent -f
-		# being added to the run line.
-		if [ -z "$D" ]
-		then
-		    f="-f"
-		else
+		# hack is needed. Pass "fenv" as fourth argument to
+		# prevent -f being added to the run line.
+		f="-f"
+		if [ "$D" = "fenv" ]; then
 		    f=""
+		elif [ ! -z "$D" ]; then
+		    echo "Unrecognised 4th argument: $D"
+		    exit 1
 		fi
 		case "$X" in \#*) continue ;; esac
 		t $f $F $X
@@ -620,10 +631,14 @@ log1p  __s_log1p       $runs
 log1p  __v_log1p       $runv
 log1p  __vn_log1p      $runvn
 log1p  _ZGVnN2v_log1p  $runvn
-expm1f __s_expm1f      $runs  EF
-expm1f __v_expm1f      $runv  EF
-expm1f __vn_expm1f     $runvn EF
-expm1f _ZGVnN4v_expm1f $runvn EF
+expm1f __s_expm1f      $runs    fenv
+expm1f __v_expm1f      $runv    fenv
+expm1f __vn_expm1f     $runvn   fenv
+expm1f _ZGVnN4v_expm1f $runvn   fenv
+sinhf  __s_sinhf       $runs    fenv
+sinhf  __v_sinhf       $runv    fenv
+sinhf  __vn_sinhf      $runvn   fenv
+sinhf  _ZGVnN4v_sinhf  $runvn   fenv
 
 if [ $WANT_SVE_MATH -eq 1 ]; then
 sve_cosf     __sv_cosf         $runsv
