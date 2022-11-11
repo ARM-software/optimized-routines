@@ -61,7 +61,8 @@ v_f64_t V_NAME (expm1) (v_f64_t x)
     return v_call_f64 (expm1, x, x, v_u64 (-1));
 #else
   /* Large input, NaNs and Infs.  */
-  v_u64_t special = v_cond_u64 (ax >= SpecialBound);
+  v_u64_t special
+    = v_cond_u64 ((ax >= SpecialBound) | (ix == 0x8000000000000000));
 #endif
 
   /* Reduce argument to smaller range:
