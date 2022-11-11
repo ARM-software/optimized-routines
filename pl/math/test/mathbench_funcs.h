@@ -23,8 +23,8 @@
 
 #endif
 
-#define VZSVF(f, a, b) SVF(__sv_##f##_x, a, b) SVF(_ZGVsMsv_##f, a, b)
-#define VZSVD(f, a, b) SVD(__sv_##f##_x, a, b) SVD(_ZGVsMsv_##f, a, b)
+#define VZSVF(f, a, b) SVF(__sv_##f##_x, a, b) SVF(_ZGVsMxv_##f, a, b)
+#define VZSVD(f, a, b) SVD(__sv_##f##_x, a, b) SVD(_ZGVsMxv_##f, a, b)
 
 F (acoshf, 1.0, 10.0)
 F (asinhf, -10.0, 10.0)
@@ -85,25 +85,25 @@ ZVNF (tanf, -3.1, 3.1)
 {"_ZGVnN2vv_atan2", 'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 
 #if WANT_SVE_MATH
-ZSVF (atanf, -3.1, 3.1)
-ZSVD (atan, -3.1, 3.1)
+VZSVF (atanf, -3.1, 3.1)
+VZSVD (atan, -3.1, 3.1)
 {"__sv_atan2f_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_atan2f_wrap}},
 {"_ZGVsMxvv_atan2f", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
 {"__sv_atan2_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_atan2_wrap}},
 {"_ZGVsM2vv_atan2", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
-ZSVF (erff, -4.0, 4.0)
-ZSVD (erf, -4.0, 4.0)
-ZSVD (erfc, -4, 10)
-ZSVF (expf, -9.9, 9.9)
-ZSVF (cosf, -3.1, 3.1)
-ZSVD (cos, -3.1, 3.1)
-ZSVF (sinf, -3.1, 3.1)
-ZSVD (sin, -3.1, 3.1)
-ZSVF (logf, 0.01, 11.1)
-ZSVD (log, 0.01, 11.1)
-ZSVF (log10f, 0.01, 11.1)
-ZSVD (log10, 0.01, 11.1)
-ZSVF (tanf, -3.1, 3.1)
+VZSVF (erff, -4.0, 4.0)
+VZSVD (erf, -4.0, 4.0)
+VZSVD (erfc, -4, 10)
+VZSVF (expf, -9.9, 9.9)
+VZSVF (cosf, -3.1, 3.1)
+VZSVD (cos, -3.1, 3.1)
+VZSVF (sinf, -3.1, 3.1)
+VZSVD (sin, -3.1, 3.1)
+VZSVF (logf, 0.01, 11.1)
+VZSVD (log, 0.01, 11.1)
+VZSVF (log10f, 0.01, 11.1)
+VZSVD (log10, 0.01, 11.1)
+VZSVF (tanf, -3.1, 3.1)
 {"__sv_powif_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_powif_wrap}},
 {"_ZGVsMxvv_powi", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
 {"__sv_powi_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_powi_wrap}},
