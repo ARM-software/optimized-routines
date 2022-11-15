@@ -118,14 +118,14 @@ build/pl/include/test/%.h: $(PLM)/test/%.h
 build/pl/bin/%.sh: $(PLM)/test/%.sh
 	cp $< $@
 
-math-tests := $(wildcard $(PLM)/test/testcases/directed/*.tst)
-math-rtests := $(wildcard $(PLM)/test/testcases/random/*.tst)
+pl-math-tests := $(wildcard $(PLM)/test/testcases/directed/*.tst)
+pl-math-rtests := $(wildcard $(PLM)/test/testcases/random/*.tst)
 
 check-pl/math-test: $(math-tools)
-	cat $(math-tests) | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
+	cat $(pl-math-tests) | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
 
 check-pl/math-rtest: $(math-host-tools) $(math-tools)
-	cat $(math-rtests) | build/pl/bin/rtest | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
+	cat $(pl-math-rtests) | build/pl/bin/rtest | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
 
 check-pl/math-ulp: $(math-tools)
 	WANT_ERRNO=$(WANT_ERRNO) WANT_SVE_MATH=$(WANT_SVE_MATH) ULPFLAGS="$(math-ulpflags)" build/pl/bin/runulp.sh $(EMULATOR)
