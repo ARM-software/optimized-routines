@@ -223,8 +223,9 @@ static int secondcall;
 #if __aarch64__ && WANT_VMATH
 typedef __f32x4_t v_float;
 typedef __f64x2_t v_double;
-static const float fv[2] = {1.0f, -INFINITY};
-static const double dv[2] = {1.0, -INFINITY};
+/* First element of fv and dv may be changed by -c argument.  */
+static float fv[2] = {1.0f, -INFINITY};
+static double dv[2] = {1.0, -INFINITY};
 static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
 static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
 #if WANT_SVE_MATH
@@ -633,6 +634,9 @@ usage (void)
   puts ("-q: quiet.");
   puts ("-m: use mpfr even if faster method is available.");
   puts ("-f: disable fenv testing (rounding modes and exceptions).");
+  puts ("-c: neutral 'control value' to test behaviour when one lane can affect another. \n"
+	"    This should be different from tested input in other lanes, and non-special \n"
+	"    (i.e. should not trigger fenv exceptions). Default is 1.");
   puts ("Supported func:");
   for (const struct fun *f = fun; f->name; f++)
     printf ("\t%s\n", f->name);
@@ -799,6 +803,12 @@ main (int argc, char *argv[])
 		usage ();
 	      conf.rc = argv[0][0];
 	    }
+	  break;
+	case 'c':
+	  argc--;
+	  argv++;
+	  fv[0] = strtof(argv[0], 0);
+	  dv[0] = strtod(argv[0], 0);
 	  break;
 	default:
 	  usage ();
