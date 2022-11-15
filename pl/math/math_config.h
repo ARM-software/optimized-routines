@@ -489,7 +489,7 @@ extern const struct v_log2f_data
 } __v_log2f_data HIDDEN;
 
 #define V_LOG2_TABLE_BITS 7
-#define V_LOG2_POLY_ORDER 7
+#define V_LOG2_POLY_ORDER 6
 extern const struct v_log2_data
 {
   double poly[V_LOG2_POLY_ORDER - 1];

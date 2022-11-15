@@ -13,11 +13,11 @@
 
 const struct v_log2_data __v_log2_data = {
 
-/* Derived from the coefficients in log_data.c for N == 128 && LOG_POLY_ORDER == 7.
+/* Derived from the coefficients in log_data.c for N == 128 && LOG_POLY_ORDER == 6.
    Each coefficient was scaled by log2(e) in extended precision and rounded back to
    double.  */
-.poly = { -0x1.71547652b83p-1,   0x1.ec709dc3a03fep-2, -0x1.71547651bb77bp-2,
-	  0x1.2776c50e7a6a3p-2, -0x1.ec73b0462606bp-3,  0x1.a619832ca8615p-3 },
+.poly = { -0x1.71547652b83p-1,    0x1.ec709dc340953p-2, -0x1.71547651c8f35p-2,
+	   0x1.2777ebe12dda5p-2, -0x1.ec738d616fe26p-3 },
 
 /* Derived from the table in v_log10_data.c. invc is unchanged. log2(c) was
    calculated by scaling log10(c) by log2(10) in extended precision and rounding
