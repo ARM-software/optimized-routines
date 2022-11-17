@@ -15,7 +15,7 @@
  * The memory region may remain untagged if tagging is not enabled.
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #if __ARM_FEATURE_MEMORY_TAGGING
 

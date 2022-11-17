@@ -11,7 +11,7 @@
  *
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #define dstin	x0
 #define src	x1

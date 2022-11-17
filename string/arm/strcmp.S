@@ -12,7 +12,7 @@
    is sufficiently aligned.  Use saturating arithmetic to optimize
    the compares.  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 /* Build Options:
    STRCMP_NO_PRECHECK: Don't run a quick pre-check of the first

@@ -10,4 +10,4 @@
 #endif
 
 /* Include for GNU property notes.  */
-#include "../asmdefs.h"
+#include "asmdefs.h"

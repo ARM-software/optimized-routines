@@ -36,7 +36,7 @@
 #define CHARTSTMASK(c) 1<<(c*8)
 #endif
 	.thumb
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 
 @ ---------------------------------------------------------------------------

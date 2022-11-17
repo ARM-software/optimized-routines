@@ -11,7 +11,7 @@
  * MTE compatible.
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #define dstin		x0
 #define srcin		x1

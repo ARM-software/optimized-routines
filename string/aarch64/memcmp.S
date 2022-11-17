@@ -9,7 +9,7 @@
  * ARMv8-a, AArch64, Advanced SIMD, unaligned accesses.
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #define src1	x0
 #define src2	x1

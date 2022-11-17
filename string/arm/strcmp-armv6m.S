@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #if __ARM_ARCH == 6 && __ARM_ARCH_6M__ >= 1
 

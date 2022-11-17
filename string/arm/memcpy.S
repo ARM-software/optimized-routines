@@ -17,7 +17,7 @@
 
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 	.syntax unified
 	/* This implementation requires ARM state.  */

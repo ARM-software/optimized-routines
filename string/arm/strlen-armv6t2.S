@@ -13,7 +13,7 @@
 
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #ifdef __ARMEB__
 #define S2LO		lsl

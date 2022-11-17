@@ -11,7 +11,7 @@
  * Neon Available.
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 /* Arguments and results.  */
 #define srcin		x0
