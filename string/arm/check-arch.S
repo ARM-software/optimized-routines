@@ -8,3 +8,6 @@
 #if !__arm__
 # error ARCH setting does not match the compiler.
 #endif
+
+/* For attributes that may affect ABI.  */
+#include "asmdefs.h"
