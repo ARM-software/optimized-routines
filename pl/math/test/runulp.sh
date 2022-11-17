@@ -179,7 +179,6 @@ t coshf -0             -0x1p-63         100
 t coshf -0             -0x1.5a92d8p+6   80000
 t coshf -0x1.5a92d8p+6 -inf             2000
 
-
 L=1.68
 t expm1  0                     0x1p-51              1000
 t expm1 -0                    -0x1p-51              1000
@@ -187,6 +186,14 @@ t expm1  0x1p-51               0x1.63108c75a1937p+9 100000
 t expm1 -0x1p-51              -0x1.740bf7c0d927dp+9 100000
 t expm1  0x1.63108c75a1937p+9  inf                  100
 t expm1 -0x1.740bf7c0d927dp+9 -inf                  100
+
+L=2.08
+t sinh  0                    0x1p-51             100
+t sinh -0                   -0x1p-51             100
+t sinh  0x1p-51              0x1.62e42fefa39fp+9 100000
+t sinh -0x1p-51             -0x1.62e42fefa39fp+9 100000
+t sinh  0x1.62e42fefa39fp+9  inf                 1000
+t sinh -0x1.62e42fefa39fp+9 -inf                 1000
 
 done
 
@@ -393,6 +400,15 @@ range_expm1='
  -0x1.740bf7c0d927dp+9 -inf                  100
 '
 
+range_sinh='
+  0                    0x1p-51             100
+ -0                   -0x1p-51             100
+  0x1p-51              0x1.62e42fefa39fp+9 100000
+ -0x1p-51             -0x1.62e42fefa39fp+9 100000
+  0x1.62e42fefa39fp+9  inf                 1000
+ -0x1.62e42fefa39fp+9 -inf                 1000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -556,6 +572,7 @@ L_expm1f=1.02
 L_sinhf=1.76
 L_coshf=1.89
 L_expm1=1.68
+L_sinh=2.08
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -638,6 +655,10 @@ expm1  __s_expm1       $runs    fenv
 expm1  __v_expm1       $runv    fenv
 expm1  __vn_expm1      $runvn   fenv
 expm1  _ZGVnN2v_expm1  $runvn   fenv
+sinh   __s_sinh        $runs    fenv
+sinh   __v_sinh        $runv    fenv
+sinh   __vn_sinh       $runvn   fenv
+sinh   _ZGVnN2v_sinh   $runvn   fenv
 
 atanf  __s_atanf       $runs
 atanf  __v_atanf       $runv

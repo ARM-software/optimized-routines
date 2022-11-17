@@ -55,6 +55,7 @@ D (log1p, -0.9, 10.0)
 D (log2, 0.01, 11.1)
 {"powi", 'd', 0, 0.01, 11.1, {.d = powi_wrap}},
 D (sin, -3.1, 3.1)
+D (sinh, -10.0, 10.0)
 
 #if WANT_VMATH
 ZVNF (asinhf, -10.0, 10.0)
@@ -74,6 +75,7 @@ ZVND (log1p, -0.9, 10.0)
 ZVNF (log2f, 0.01, 11.1)
 ZVND (log2, 0.01, 11.1)
 ZVNF (sinhf, -10.0, 10.0)
+ZVND (sinh, -10.0, 10.0)
 ZVNF (tanf, -3.1, 3.1)
 {"__s_atan2f", 'f', 0, -10.0, 10.0, {.f = __s_atan2f_wrap}},
 {"__s_atan2", 'd', 0, -10.0, 10.0, {.d = __s_atan2_wrap}},
