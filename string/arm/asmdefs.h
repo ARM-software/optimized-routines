@@ -333,7 +333,7 @@
 	bx	lr
 .endm
 
-# clean up expressions in 'last'
+/* Clean up expressions in 'last'.  */
 .macro _preprocess_reglist1 first:req, last:req, push_ip:req, push_lr:req, reglist_op:req
 	.if \last == 0
 	 \reglist_op \first, 0, \push_ip, \push_lr
@@ -364,7 +364,7 @@
 	.endif
 .endm
 
-# clean up expressions in 'first'
+/* Clean up expressions in 'first'.  */
 .macro _preprocess_reglist first:req, last, push_ip=0, push_lr=0, reglist_op:req
 	.ifb \last
 	 _preprocess_reglist \first \first \push_ip \push_lr
