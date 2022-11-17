@@ -195,6 +195,14 @@ t sinh -0x1p-51             -0x1.62e42fefa39fp+9 100000
 t sinh  0x1.62e42fefa39fp+9  inf                 1000
 t sinh -0x1.62e42fefa39fp+9 -inf                 1000
 
+L=1.43
+t cosh  0                     0x1.61da04cbafe44p+9 100000
+t cosh -0                    -0x1.61da04cbafe44p+9 100000
+t cosh  0x1.61da04cbafe44p+9  0x1p10               1000
+t cosh -0x1.61da04cbafe44p+9 -0x1p10               1000
+t cosh  0x1p10                inf                  100
+t cosh -0x1p10               -inf                  100
+
 done
 
 # vector functions
@@ -409,6 +417,13 @@ range_sinh='
  -0x1.62e42fefa39fp+9 -inf                 1000
 '
 
+range_cosh='
+  0        0x1.6p9   100000
+ -0       -0x1.6p9   100000
+  0x1.6p9  inf       1000
+ -0x1.6p9 -inf       1000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -573,6 +588,7 @@ L_sinhf=1.76
 L_coshf=1.89
 L_expm1=1.68
 L_sinh=2.08
+L_cosh=1.43
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -659,6 +675,10 @@ sinh   __s_sinh        $runs    fenv
 sinh   __v_sinh        $runv    fenv
 sinh   __vn_sinh       $runvn   fenv
 sinh   _ZGVnN2v_sinh   $runvn   fenv
+cosh   __s_cosh        $runs    fenv
+cosh   __v_cosh        $runv    fenv
+cosh   __vn_cosh       $runvn   fenv
+cosh   _ZGVnN2v_cosh   $runvn   fenv
 
 atanf  __s_atanf       $runs
 atanf  __v_atanf       $runv
