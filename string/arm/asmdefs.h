@@ -8,15 +8,6 @@
 #ifndef _ASMDEFS_H
 #define _ASMDEFS_H
 
-#define ARM_FNSTART .fnstart
-#if defined (IS_LEAF)
-# define ARM_FNEND \
-  .cantunwind	  \
-  .fnend
-#else
-# define ARM_FNEND .fnend
-#endif
-
 /* Check whether leaf function PAC signing has been requested in the
    -mbranch-protect compile-time option.  */
 #define LEAF_PROTECT_BIT 2
@@ -454,13 +445,12 @@
 	.endif
 .endm
 
-
 #define ENTRY_ALIGN(name, alignment)	\
   .global name;		\
   .type name,%function;	\
   .align alignment;		\
   name:			\
-  ARM_FNSTART;		\
+  .fnstart;		\
   .cfi_startproc;
 
 #define ENTRY(name)	ENTRY_ALIGN(name, 6)
@@ -470,9 +460,16 @@
   .type name,%function;	\
   name:
 
+#if defined (IS_LEAF)
+# define END_UNWIND .cantunwind;
+#else
+# define END_UNWIND
+#endif
+
 #define END(name)	\
   .cfi_endproc;		\
-  ARM_FNEND;		\
+  END_UNWIND		\
+  .fnend;		\
   .size name, .-name;
 
 #define L(l) .L ## l
