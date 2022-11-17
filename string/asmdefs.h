@@ -12,15 +12,12 @@
 
 #define ARM_FNSTART .fnstart
 #if defined (IS_LEAF)
-#define ARM_FNEND \
+# define ARM_FNEND \
   .cantunwind	  \
   .fnend
 #else
-#define ARM_FNEND .fnend
-# endif
-#else
-#define ARM_FNSTART
-#define ARM_FNEND
+# define ARM_FNEND .fnend
+#endif
 
 /* Check whether leaf function PAC signing has been requested in the
    -mbranch-protect compile-time option.  */
@@ -142,16 +139,16 @@
 	 .endif
 	.endif
 #if HAVE_PAC_LEAF
-#if __ARM_FEATURE_BTI_DEFAULT
+# if __ARM_FEATURE_BTI_DEFAULT
 	pacbti	ip, lr, sp
-#else
+# else
 	pac	ip, lr, sp
-#endif /* __ARM_FEATURE_BTI_DEFAULT */
+# endif /* __ARM_FEATURE_BTI_DEFAULT */
 	.cfi_register 143, 12
 #else
-#if __ARM_FEATURE_BTI_DEFAULT
+# if __ARM_FEATURE_BTI_DEFAULT
 	bti
-#endif /* __ARM_FEATURE_BTI_DEFAULT */
+# endif /* __ARM_FEATURE_BTI_DEFAULT */
 #endif /* HAVE_PAC_LEAF */
 	.if \first != -1
 	 .if \last != \first
@@ -458,6 +455,11 @@
 	 _epilogue first=\first, last=\last, push_ip=\push_ip, push_lr=\push_lr
 	.endif
 .endm
+
+#else /* !defined (__arm__) */
+
+#define ARM_FNSTART
+#define ARM_FNEND
 
 #endif
 
