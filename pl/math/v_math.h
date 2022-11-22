@@ -174,6 +174,11 @@ v_abs_f32 (v_f32_t x)
   return __builtin_fabsf (x);
 }
 static inline v_u32_t
+v_bsl_u32 (v_u32_t m, v_u32_t x, v_u32_t y)
+{
+  return (y & ~m) | (x & m);
+}
+static inline v_u32_t
 v_cagt_f32 (v_f32_t x, v_f32_t y)
 {
   return fabsf (x) > fabsf (y);
@@ -534,6 +539,11 @@ static inline v_f32_t
 v_abs_f32 (v_f32_t x)
 {
   return vabsq_f32 (x);
+}
+static inline v_u32_t
+v_bsl_u32 (v_u32_t m, v_u32_t x, v_u32_t y)
+{
+  return vbslq_u32 (m, x, y);
 }
 static inline v_u32_t
 v_cagt_f32 (v_f32_t x, v_f32_t y)
