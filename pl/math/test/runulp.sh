@@ -211,6 +211,10 @@ t atanhf -0       -0x1p-12 500
 t atanhf -0x1p-12 -1       200000
 t atanhf -1       -inf     1000
 
+L=1.03
+t cbrtf  0  inf 1000000
+t cbrtf -0 -inf 1000000
+
 done
 
 # vector functions
@@ -441,6 +445,11 @@ range_atanhf='
  -1       -inf     1000
 '
 
+range_cbrtf='
+  0  inf 1000000
+ -0 -inf 1000000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -607,6 +616,7 @@ L_expm1=1.68
 L_sinh=2.08
 L_cosh=1.43
 L_atanhf=2.59
+L_cbrtf=1.03
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -758,6 +768,10 @@ atanhf __s_atanhf      $runs    fenv -c 0
 atanhf __v_atanhf      $runv    fenv -c 0
 atanhf __vn_atanhf     $runvn   fenv -c 0
 atanhf _ZGVnN4v_atanhf $runvn   fenv -c 0
+cbrtf  __s_cbrtf       $runs    fenv
+cbrtf  __v_cbrtf       $runv    fenv
+cbrtf  __vn_cbrtf      $runvn   fenv
+cbrtf  _ZGVnN4v_cbrtf  $runvn   fenv
 
 sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv

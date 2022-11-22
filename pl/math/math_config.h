@@ -553,4 +553,10 @@ extern const struct expf_data
 #define EXPM1_POLY_ORDER 11
 extern const double __expm1_poly[EXPM1_POLY_ORDER] HIDDEN;
 
+extern const struct cbrtf_data
+{
+  float poly[4];
+  float table[5];
+} __cbrtf_data HIDDEN;
+
 #endif
