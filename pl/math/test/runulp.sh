@@ -600,7 +600,7 @@ L_erf=1.26
 L_erff=0.76
 # TODO tighten this once __v_atan2 is fixed
 L_atan2=2.9
-L_atan=1.73
+L_atan=1.78
 L_atan2f=2.46
 L_atanf=2.5
 L_log1pf=1.53
@@ -623,7 +623,7 @@ L_sve_cos=1.61
 L_sve_sinf=1.40
 L_sve_sin=2.03
 L_sve_atanf=2.9
-L_sve_atan=1.73
+L_sve_atan=1.78
 L_sve_atan2f=2.45
 L_sve_atan2=1.73
 L_sve_log10=1.97
