@@ -356,6 +356,11 @@ v_abs_f64 (v_f64_t x)
   return __builtin_fabs (x);
 }
 static inline v_u64_t
+v_bsl_u64 (v_u64_t m, v_u64_t x, v_u64_t y)
+{
+  return (y & ~m) | (x & m);
+}
+static inline v_u64_t
 v_cagt_f64 (v_f64_t x, v_f64_t y)
 {
   return fabs (x) > fabs (y);
@@ -383,6 +388,11 @@ static inline v_f64_t
 v_sel_f64 (v_u64_t p, v_f64_t x, v_f64_t y)
 {
   return p ? x : y;
+}
+static inline v_f64_t
+v_sqrt_f64 (v_f64_t x)
+{
+  return __builtin_sqrt (x);
 }
 static inline v_s64_t
 v_round_s64 (v_f64_t x)
@@ -728,6 +738,11 @@ v_abs_f64 (v_f64_t x)
   return vabsq_f64 (x);
 }
 static inline v_u64_t
+v_bsl_u64 (v_u64_t m, v_u64_t x, v_u64_t y)
+{
+  return vbslq_u64 (m, x, y);
+}
+static inline v_u64_t
 v_cagt_f64 (v_f64_t x, v_f64_t y)
 {
   return vcagtq_f64 (x, y);
@@ -755,6 +770,11 @@ static inline v_f64_t
 v_sel_f64 (v_u64_t p, v_f64_t x, v_f64_t y)
 {
   return vbslq_f64 (p, x, y);
+}
+static inline v_f64_t
+v_sqrt_f64 (v_f64_t x)
+{
+  return vsqrtq_f64 (x);
 }
 static inline v_s64_t
 v_round_s64 (v_f64_t x)

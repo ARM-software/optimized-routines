@@ -450,6 +450,17 @@ range_cbrtf='
  -0 -inf 1000000
 '
 
+range_asinh='
+  0        0x1p-26 50000
+  0x1p-26  1       50000
+  1        0x1p511 50000
+  0x1p511  inf     40000
+ -0       -0x1p-26 50000
+ -0x1p-26 -1       50000
+ -1       -0x1p511 50000
+ -0x1p511 -inf     40000
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -617,6 +628,7 @@ L_sinh=2.08
 L_cosh=1.43
 L_atanhf=2.59
 L_cbrtf=1.03
+L_asinh=1.54
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -772,6 +784,18 @@ cbrtf  __s_cbrtf       $runs    fenv
 cbrtf  __v_cbrtf       $runv    fenv
 cbrtf  __vn_cbrtf      $runvn   fenv
 cbrtf  _ZGVnN4v_cbrtf  $runvn   fenv
+asinh  __s_asinh       $runs    fenv
+# Test vector asinh 3 times, with control lane < 1, > 1 and special.
+#  Ensures the v_sel is choosing the right option in all cases.
+asinh  __v_asinh       $runv    fenv -c 0.5
+asinh  __vn_asinh      $runvn   fenv -c 0.5
+asinh  _ZGVnN2v_asinh  $runvn   fenv -c 0.5
+asinh  __v_asinh       $runv    fenv -c 2
+asinh  __vn_asinh      $runvn   fenv -c 2
+asinh  _ZGVnN2v_asinh  $runvn   fenv -c 2
+asinh  __v_asinh       $runv    fenv -c 0x1p600
+asinh  __vn_asinh      $runvn   fenv -c 0x1p600
+asinh  _ZGVnN2v_asinh  $runvn   fenv -c 0x1p600
 
 sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv

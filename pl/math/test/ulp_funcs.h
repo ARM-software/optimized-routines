@@ -57,6 +57,7 @@ D1 (log1p)
 D1 (sinh)
 #if WANT_VMATH
 _ZVNF1 (asinh)
+_ZVND1 (asinh)
 _ZVNF1 (atan)
 _ZVND1 (atan)
 _ZVNF2 (atan2)

@@ -62,6 +62,7 @@ D (sinh, -10.0, 10.0)
 
 #if WANT_VMATH
 ZVNF (asinhf, -10.0, 10.0)
+ZVND (asinh, -10.0, 10.0)
 ZVNF (atanf, -10.0, 10.0)
 ZVNF (atanhf, -1.0, 1.0)
 ZVND (atan, -10.0, 10.0)
