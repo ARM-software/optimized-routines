@@ -215,6 +215,14 @@ L=1.03
 t cbrtf  0  inf 1000000
 t cbrtf -0 -inf 1000000
 
+L=2.09
+t tanhf  0              0x1p-23       1000
+t tanhf -0             -0x1p-23       1000
+t tanhf  0x1p-23        0x1.205966p+3 100000
+t tanhf -0x1p-23       -0x1.205966p+3 100000
+t tanhf  0x1.205966p+3  inf           100
+t tanhf -0x1.205966p+3 -inf           100
+
 done
 
 # vector functions
@@ -461,6 +469,15 @@ range_asinh='
  -0x1p511 -inf     40000
 '
 
+range_tanhf='
+  0              0x1p-23       1000
+ -0             -0x1p-23       1000
+  0x1p-23        0x1.205966p+3 100000
+ -0x1p-23       -0x1.205966p+3 100000
+  0x1.205966p+3  inf           100
+ -0x1.205966p+3 -inf           100
+'
+
 range_sve_cosf='
  0    0xffff0000    10000
  0x1p-4    0x1p4    500000
@@ -629,6 +646,7 @@ L_cosh=1.43
 L_atanhf=2.59
 L_cbrtf=1.03
 L_asinh=1.54
+L_tanhf=2.09
 
 L_sve_cosf=1.57
 L_sve_cos=1.61
@@ -796,6 +814,10 @@ asinh  _ZGVnN2v_asinh  $runvn   fenv -c 2
 asinh  __v_asinh       $runv    fenv -c 0x1p600
 asinh  __vn_asinh      $runvn   fenv -c 0x1p600
 asinh  _ZGVnN2v_asinh  $runvn   fenv -c 0x1p600
+tanhf  __s_tanhf       $runs    fenv
+tanhf  __v_tanhf       $runv    fenv
+tanhf  __vn_tanhf      $runvn   fenv
+tanhf  _ZGVnN4v_tanhf  $runvn   fenv
 
 sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv
