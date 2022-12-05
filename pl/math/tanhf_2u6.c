@@ -48,7 +48,7 @@ expm1f_inline (float x)
   p = fmaf (f2, p, f);
 
   /* t = 2^i.  */
-  float t = asfloat ((i << 23) + One);
+  float t = asfloat ((uint32_t) (i + 127) << 23);
   /* expm1(x) ~= p * t + (t - 1).  */
   return fmaf (p, t, t - 1);
 }
