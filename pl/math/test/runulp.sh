@@ -766,10 +766,10 @@ log1pf __s_log1pf      $runs
 log1pf __v_log1pf      $runv
 log1pf __vn_log1pf     $runvn
 log1pf _ZGVnN4v_log1pf $runvn
-asinhf __s_asinhf      $runs
-asinhf __v_asinhf      $runv
-asinhf __vn_asinhf     $runvn
-asinhf _ZGVnN4v_asinhf $runvn
+asinhf __s_asinhf      $runs    fenv
+asinhf __v_asinhf      $runv    fenv
+asinhf __vn_asinhf     $runvn   fenv
+asinhf _ZGVnN4v_asinhf $runvn   fenv
 log2f  __s_log2f       $runs
 log2f  __v_log2f       $runv
 log2f  __vn_log2f      $runvn

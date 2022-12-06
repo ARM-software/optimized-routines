@@ -11,7 +11,6 @@
 #define Ln2 (0x1.62e4p-1f)
 #define One (0x3f8)
 #define ExpM12 (0x398)
-#define QNaN (0x7fc)
 
 #define C(i) __asinhf_data.coeffs[i]
 
@@ -45,10 +44,11 @@ asinhf (float x)
   float ax = asfloat (ia);
   uint32_t sign = ix & ~AbsMask;
 
-  if (ia12 < ExpM12 || ia12 == QNaN)
-    {
-      return x;
-    }
+  if (unlikely (ia12 < ExpM12 || ia == 0x7f800000))
+    return x;
+
+  if (unlikely (ia12 >= 0x7f8))
+    return __math_invalidf (x);
 
   if (ia12 < One)
     {
