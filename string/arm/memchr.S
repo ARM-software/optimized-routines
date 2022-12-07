@@ -129,7 +129,12 @@ __memchr_arm:
 60:  @ We're here because the fast path found a hit - now we have to track down exactly which word it was
 	@ r0 points to the start of the double word after the one that was tested
 	@ r5 has the 00/ff pattern for the first word, r6 has the chained value
-	.cfi_restore_state
+	.cfi_restore_state	@ Standard post-prologue state
+	.cfi_adjust_cfa_offset 16
+	.cfi_rel_offset	4, 0
+	.cfi_rel_offset 5, 4
+	.cfi_rel_offset 6, 8
+	.cfi_rel_offset 7, 12
 	cmp	r5, #0
 	itte	eq
 	moveq	r5, r6		@ the end is in the 2nd word
