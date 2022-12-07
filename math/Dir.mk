@@ -101,7 +101,7 @@ check-math-rtest: $(math-host-tools) $(math-tools)
 	cat $(math-rtests) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(math-testflags)
 
 check-math-ulp: $(math-tools)
-	ULPFLAGS="$(math-ulpflags)" build/bin/runulp.sh $(EMULATOR)
+	ULPFLAGS="$(math-ulpflags)" WANT_SIMD_EXCEPT="$(WANT_SIMD_EXCEPT)" build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp
 

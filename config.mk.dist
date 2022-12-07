@@ -75,6 +75,10 @@ math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH)
 WANT_ERRNO = 0
 math-cflags += -DWANT_ERRNO=$(WANT_ERRNO)
 
+# If set to 1, set fenv in vector math routines.
+WANT_SIMD_EXCEPT = 0
+math-cflags += -DWANT_SIMD_EXCEPT=$(WANT_SIMD_EXCEPT)
+
 # Disable fenv checks
 #math-ulpflags = -q -f
 #math-testflags = -nostatus
