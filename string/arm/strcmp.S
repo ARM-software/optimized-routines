@@ -132,20 +132,7 @@
 #endif
 	.endm
 
-	.p2align	5
-L(strcmp_start_addr):
-	.fnstart
-	.cfi_startproc
-#if STRCMP_NO_PRECHECK == 0
-L(fastpath_exit):
-	sub	r0, r2, r3
-	epilogue push_ip=HAVE_PAC_LEAF
-	nop
-#endif
-	.global __strcmp_arm
-	.type __strcmp_arm,%function
-	.align 0
-__strcmp_arm:
+ENTRY(__strcmp_arm)
 	prologue push_ip=HAVE_PAC_LEAF
 #if STRCMP_NO_PRECHECK == 0
 	ldrb	r2, [src1]
@@ -332,11 +319,18 @@ L(misaligned_exit):
 	ldr	r4, [sp], #16
 	.cfi_restore 4
 	.cfi_adjust_cfa_offset -16
-
 	epilogue push_ip=HAVE_PAC_LEAF
 
 #if STRCMP_NO_PRECHECK == 0
+L(fastpath_exit):
+	.cfi_restore_state
+	.cfi_remember_state
+	sub	r0, r2, r3
+	epilogue push_ip=HAVE_PAC_LEAF
+
 L(aligned_m1):
+	.cfi_restore_state
+	.cfi_remember_state
 	add	src2, src2, #4
 #endif
 L(src1_aligned):
