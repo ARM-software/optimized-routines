@@ -127,6 +127,11 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
   v_u64_t gt1 = v_cond_u64 (top12 >= OneTop);
   v_u64_t special = v_cond_u64 (top12 >= HugeBound);
 
+#if WANT_ERRNO
+  v_u64_t tiny = v_cond_u64 (top12 < TinyBound);
+  special |= tiny;
+#endif
+
   /* Option 1: |x| >= 1.
      Compute asinh(x) according by asinh(x) = log(x + sqrt(x^2 + 1)).
      If WANT_ERRNO is enabled, sidestep special values, which will overflow, by
@@ -154,7 +159,6 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
   if (likely (v_any_u64 (~gt1)))
     {
 #if WANT_ERRNO
-      v_u64_t tiny = v_cond_u64 (top12 < TinyBound);
       ax = v_sel_f64 (tiny | gt1, v_f64 (0), ax);
 #endif
       v_f64_t x2 = ax * ax;
