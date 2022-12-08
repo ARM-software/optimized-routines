@@ -8,7 +8,7 @@
 #include "sv_math.h"
 #if SV_SUPPORTED
 
-#define Scale (8.0f)
+#define Scale (8.0)
 #define AbsMask (0x7fffffffffffffff)
 
 static NOINLINE sv_f64_t
@@ -33,13 +33,14 @@ __sv_erf_x (sv_f64_t x, const svbool_t pg)
     = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, atop, 0x3e30), 0x7ff0 - 0x3e30);
 
   /* Get sign and absolute value.  */
-  sv_f64_t a = svabs_f64_x (pg, x);
+  sv_f64_t a = sv_as_f64_u64 (svand_n_u64_x (pg, ix, AbsMask));
   sv_u64_t sign = svand_n_u64_x (pg, ix, ~AbsMask);
 
   /* i = trunc(Scale*x).  */
-  sv_u64_t i = svcvt_u64_f64_x (pg, svmul_n_f64_x (pg, a, Scale));
+  sv_f64_t a_scale = svmul_n_f64_x (pg, a, Scale);
   /* Saturate index of intervals.  */
-  i = svmin_u64_x (pg, i, sv_u64 (V_ERF_NINTS));
+  svbool_t a_lt_6 = svcmplt_n_u64 (pg, atop, 0x4018);
+  sv_u64_t i = svcvt_u64_f64_m (sv_u64 (V_ERF_NINTS - 1), a_lt_6, a_scale);
 
   /* Load polynomial coefficients.  */
   sv_f64_t P_0 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[0], i);
@@ -56,8 +57,9 @@ __sv_erf_x (sv_f64_t x, const svbool_t pg)
   /* Get shift and scale.  */
   sv_f64_t shift = sv_lookup_f64_x (pg, __v_erf_data.shifts, i);
 
-  /* Transform polynomial variable.  */
-  sv_f64_t z = sv_fma_n_f64_x (pg, Scale, a, shift);
+  /* Transform polynomial variable.
+     Set z = 0 in the boring domain to avoid overflow.  */
+  sv_f64_t z = svmla_f64_m (a_lt_6, shift, sv_f64 (Scale), a);
 
   /* Evaluate polynomial P(z) using level-2 Estrin.  */
   sv_f64_t r1 = sv_fma_f64_x (pg, z, P_1, P_0);
@@ -74,10 +76,6 @@ __sv_erf_x (sv_f64_t x, const svbool_t pg)
 
   sv_f64_t y = sv_fma_f64_x (pg, z4, r5, q2);
   y = sv_fma_f64_x (pg, z4, y, q1);
-
-  /* Saturate y. This works because using the last interval on the boring domain
-     produces y > 1.  */
-  y = svmin_n_f64_x (pg, y, 1.0);
 
   /* y = erf(x) if x > 0, -erf(-x) otherwise.  */
   y = sv_as_f64_u64 (sveor_u64_x (pg, sv_as_u64_f64 (y), sign));
