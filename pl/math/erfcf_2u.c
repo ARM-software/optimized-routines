@@ -21,7 +21,7 @@ approx_erfcf_hi (float x, uint32_t sign, const double *coeff)
 
   /* Polynomial contribution.  */
   double z = (double) fabs (x);
-  float p = (float) eval_poly_horner_lvl2 (z, coeff);
+  float p = (float) eval_poly (z, coeff);
   /* Gaussian contribution.  */
   float e_mx2 = (float) eval_exp_mx2 (z);
 
@@ -34,7 +34,7 @@ approx_erfcf_lo (float x, uint32_t sign, const double *coeff)
 {
   /* Polynomial contribution.  */
   double z = (double) fabs (x);
-  float p = (float) eval_poly_horner_lvl2 (z, coeff);
+  float p = (float) eval_poly (z, coeff);
   /* Gaussian contribution.  */
   float e_mx2 = (float) eval_exp_mx2 (z);
 

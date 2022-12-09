@@ -789,7 +789,7 @@ cbrtf  __vn_cbrtf      $runvn   fenv
 cbrtf  _ZGVnN4v_cbrtf  $runvn   fenv
 asinh  __s_asinh       $runs    fenv
 # Test vector asinh 3 times, with control lane < 1, > 1 and special.
-#  Ensures the v_sel is choosing the right option in all cases.
+# Ensures the v_sel is choosing the right option in all cases.
 asinh  __v_asinh       $runv    fenv -c 0.5
 asinh  __vn_asinh      $runvn   fenv -c 0.5
 asinh  _ZGVnN2v_asinh  $runvn   fenv -c 0.5

@@ -5,6 +5,7 @@
  */
 
 #include "math_config.h"
+#include "hornerf.h"
 
 #define Ln2 (0x1.62e43p-1f)
 #define SignMask (0x80000000)
@@ -21,8 +22,8 @@ eval_poly (float m, uint32_t e)
 {
 #ifdef LOG1PF_2U5
 
-  /* 2.5 ulp variant. Approximate log(1+m) on [-0.25, 0.5] using Estrin
-     scheme.  */
+  /* 2.5 ulp variant. Approximate log(1+m) on [-0.25, 0.5] using
+     slightly modified Estrin scheme (no x^0 term, and x term is just x).  */
   float p_12 = fmaf (m, C (1), C (0));
   float p_34 = fmaf (m, C (3), C (2));
   float p_56 = fmaf (m, C (5), C (4));
@@ -49,15 +50,7 @@ eval_poly (float m, uint32_t e)
      x + C1 * x^2 + C2 * x^3 + C3 * x^4 + ...
      Hence approximation has the form m + m^2 * P(m)
        where P(x) = C1 + C2 * x + C3 * x^2 + ... .  */
-  float p = fmaf (C (8), m, C (7));
-  p = fmaf (p, m, C (6));
-  p = fmaf (p, m, C (5));
-  p = fmaf (p, m, C (4));
-  p = fmaf (p, m, C (3));
-  p = fmaf (p, m, C (2));
-  p = fmaf (p, m, C (1));
-  p = fmaf (p, m, C (0));
-  return fmaf (m, m * p, m);
+  return fmaf (m, m * HORNER_8 (m, C), m);
 
 #else
 #error No log1pf approximation exists with the requested precision. Options are 13 or 25.

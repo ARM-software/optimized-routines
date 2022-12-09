@@ -7,6 +7,7 @@
 
 #include "v_math.h"
 #include "erfcf.h"
+#include "estrin.h"
 
 #if V_SUPPORTED
 
@@ -41,39 +42,12 @@ interval_index (uint32_t ia12)
 #endif
 
 static inline v_f64_t
-v_eval_poly_estrin (v_f64_t z, const double *coeff1, const double *coeff2)
-{
-  v_f64_t z2 = z * z;
-  v_f64_t z4 = z2 * z2;
-  v_f64_t z8 = z4 * z4;
-
-  v_f64_t c0_zc1 = v_fma_f64 (z, C (1), C (0));
-  v_f64_t c2_zc3 = v_fma_f64 (z, C (3), C (2));
-  v_f64_t c4_zc5 = v_fma_f64 (z, C (5), C (4));
-  v_f64_t c6_zc7 = v_fma_f64 (z, C (7), C (6));
-  v_f64_t c8_zc9 = v_fma_f64 (z, C (9), C (8));
-  v_f64_t c10_zc11 = v_fma_f64 (z, C (11), C (10));
-  v_f64_t c12_zc13 = v_fma_f64 (z, C (13), C (12));
-  v_f64_t c14_zc15 = v_fma_f64 (z, C (15), C (14));
-
-  v_f64_t c0_z2c3 = v_fma_f64 (z2, c2_zc3, c0_zc1);
-  v_f64_t c4_z2c7 = v_fma_f64 (z2, c6_zc7, c4_zc5);
-  v_f64_t c8_z2c11 = v_fma_f64 (z2, c10_zc11, c8_zc9);
-  v_f64_t c12_z2c15 = v_fma_f64 (z2, c14_zc15, c12_zc13);
-
-  v_f64_t c0_z4c7 = v_fma_f64 (z4, c4_z2c7, c0_z2c3);
-  v_f64_t c8_z4c15 = v_fma_f64 (z4, c12_z2c15, c8_z2c11);
-
-  return v_fma_f64 (z8, c8_z4c15, c0_z4c7);
-}
-
-#undef C
-
-static inline v_f64_t
 v_approx_erfcf_poly_gauss (v_f64_t x, const double *coeff1,
 			   const double *coeff2)
 {
-  v_f64_t poly = v_eval_poly_estrin (x, coeff1, coeff2);
+  v_f64_t x2 = x * x;
+  v_f64_t x4 = x2 * x2;
+  v_f64_t poly = ESTRIN_15 (x, x2, x4, x4 * x4, C);
   v_f64_t gauss = V_NAME (exp_tail) (-(x * x), v_f64 (0.0));
   return poly * gauss;
 }
@@ -81,7 +55,7 @@ v_approx_erfcf_poly_gauss (v_f64_t x, const double *coeff1,
 static inline float
 approx_poly_gauss (float abs_x, const double *coeff)
 {
-  return (float) (eval_poly_horner_lvl2 (abs_x, coeff) * eval_exp_mx2 (abs_x));
+  return (float) (eval_poly (abs_x, coeff) * eval_exp_mx2 (abs_x));
 }
 
 static v_f32_t

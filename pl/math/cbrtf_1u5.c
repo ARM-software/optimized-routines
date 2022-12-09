@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "math_config.h"
+#include "estrinf.h"
 
 #define AbsMask 0x7fffffff
 #define SignMask 0x80000000
@@ -40,10 +41,7 @@ cbrtf (float x)
   /* p is a rough approximation for cbrt(m) in [0.5, 1.0]. The better this is,
      the less accurate the next stage of the algorithm needs to be. An order-4
      polynomial is enough for one Newton iteration.  */
-  float p_01 = fmaf (C (1), m, C (0));
-  float p_23 = fmaf (C (3), m, C (2));
-  float p = fmaf (m * m, p_23, p_01);
-
+  float p = ESTRIN_3 (m, m * m, C);
   /* One iteration of Newton's method for iteratively approximating cbrt.  */
   float m_by_3 = m / 3;
   float a = fmaf (TwoThirds, p, m_by_3 / (p * p));

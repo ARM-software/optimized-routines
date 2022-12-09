@@ -6,6 +6,8 @@
  */
 
 #include "v_math.h"
+#include "estrinf.h"
+
 #if V_SUPPORTED
 
 /* Constants.  */
@@ -32,13 +34,7 @@ eval_poly (v_f32_t z)
 {
   v_f32_t z2 = z * z;
   v_f32_t z4 = z2 * z2;
-  v_f32_t y_10 = v_fma_f32 (z, poly (1), poly (0));
-  v_f32_t y_32 = v_fma_f32 (z, poly (3), poly (2));
-  v_f32_t y_54 = v_fma_f32 (z, poly (5), poly (4));
-  v_f32_t y_6_54 = v_fma_f32 (z2, poly (6), y_54);
-  v_f32_t y_32_10 = v_fma_f32 (z2, y_32, y_10);
-  v_f32_t y = v_fma_f32 (z4, y_6_54, y_32_10);
-  return y;
+  return ESTRIN_6 (z, z2, z4, poly);
 }
 
 /* Fast implementation of Neon tanf.

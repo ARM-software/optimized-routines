@@ -5,6 +5,7 @@
  */
 
 #include "v_math.h"
+#include "estrin.h"
 
 #if V_SUPPORTED
 
@@ -74,38 +75,6 @@ log_inline (v_f64_t x)
   return y;
 }
 
-static inline v_f64_t
-eval_poly (v_f64_t z)
-{
-  /* Custom polynomial, shared with scalar routine, for calculating asinh(x) in
-     [2^-26, 1]. Evaluated with Estrin scheme.  */
-  v_f64_t p_01 = v_fma_f64 (z, C (1), C (0));
-  v_f64_t p_23 = v_fma_f64 (z, C (3), C (2));
-  v_f64_t p_45 = v_fma_f64 (z, C (5), C (4));
-  v_f64_t p_67 = v_fma_f64 (z, C (7), C (6));
-  v_f64_t p_89 = v_fma_f64 (z, C (9), C (8));
-  v_f64_t p_ab = v_fma_f64 (z, C (11), C (10));
-  v_f64_t p_cd = v_fma_f64 (z, C (13), C (12));
-  v_f64_t p_ef = v_fma_f64 (z, C (15), C (14));
-  v_f64_t p_gh = v_fma_f64 (z, C (17), C (16));
-
-  v_f64_t z2 = z * z;
-  v_f64_t p_03 = v_fma_f64 (z2, p_23, p_01);
-  v_f64_t p_47 = v_fma_f64 (z2, p_67, p_45);
-  v_f64_t p_8b = v_fma_f64 (z2, p_ab, p_89);
-  v_f64_t p_cf = v_fma_f64 (z2, p_ef, p_cd);
-
-  v_f64_t z4 = z2 * z2;
-  v_f64_t p_07 = v_fma_f64 (z4, p_47, p_03);
-  v_f64_t p_8f = v_fma_f64 (z4, p_cf, p_8b);
-
-  v_f64_t z8 = z4 * z4;
-  v_f64_t p_0f = v_fma_f64 (z8, p_8f, p_07);
-
-  v_f64_t z16 = z8 * z8;
-  return v_fma_f64 (z16, p_gh, p_0f);
-}
-
 /* Double-precision implementation of vector asinh(x).
    asinh is very sensitive around 1, so it is impractical to devise a single
    low-cost algorithm which is sufficiently accurate on a wide range of input.
@@ -162,7 +131,10 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
       ax = v_sel_f64 (tiny | gt1, v_f64 (0), ax);
 #endif
       v_f64_t x2 = ax * ax;
-      v_f64_t p = eval_poly (x2);
+      v_f64_t z2 = x2 * x2;
+      v_f64_t z4 = z2 * z2;
+      v_f64_t z8 = z4 * z4;
+      v_f64_t p = ESTRIN_17 (x2, z2, z4, z8, z8 * z8, C);
       option_2 = v_fma_f64 (p, x2 * ax, ax);
 #if WANT_ERRNO
       option_2 = v_sel_f64 (tiny, x, option_2);

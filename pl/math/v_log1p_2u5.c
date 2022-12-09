@@ -7,7 +7,7 @@
 #include "v_math.h"
 #if V_SUPPORTED
 
-#include "log1p_common.h"
+#include "estrin.h"
 
 #define Ln2Hi v_f64 (0x1.62e42fefa3800p-1)
 #define Ln2Lo v_f64 (0x1.ef35793c76730p-45)
@@ -18,6 +18,16 @@
 #define OneTop12 0x3ff
 #define BottomMask 0xffffffff
 #define AbsMask 0x7fffffffffffffff
+#define C(i) v_f64 (__log1p_data.coeffs[i])
+
+static inline v_f64_t
+eval_poly (v_f64_t f)
+{
+  v_f64_t f2 = f * f;
+  v_f64_t f4 = f2 * f2;
+  v_f64_t f8 = f4 * f4;
+  return ESTRIN_18 (f, f2, f4, f8, f8 * f8, C);
+}
 
 VPCS_ATTR
 NOINLINE static v_f64_t

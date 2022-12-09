@@ -5,47 +5,16 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
+#include "estrin.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define ExpM26 0x3e50000000000000 /* asuint64(0x1.0p-26).  */
 #define One 0x3ff0000000000000	  /* asuint64(1.0).  */
 #define Exp511 0x5fe0000000000000 /* asuint64(0x1.0p511).  */
 #define Ln2 0x1.62e42fefa39efp-1
-#define C(i) __asinh_data.poly[i]
 
 double
 optr_aor_log_f64 (double);
-
-static inline double
-eval_poly (double z)
-{
-  /* Evaluate polynomial using Estrin scheme.  */
-  double p_01 = fma (z, C (1), C (0));
-  double p_23 = fma (z, C (3), C (2));
-  double p_45 = fma (z, C (5), C (4));
-  double p_67 = fma (z, C (7), C (6));
-  double p_89 = fma (z, C (9), C (8));
-  double p_ab = fma (z, C (11), C (10));
-  double p_cd = fma (z, C (13), C (12));
-  double p_ef = fma (z, C (15), C (14));
-  double p_gh = fma (z, C (17), C (16));
-
-  double z2 = z * z;
-  double p_03 = fma (z2, p_23, p_01);
-  double p_47 = fma (z2, p_67, p_45);
-  double p_8b = fma (z2, p_ab, p_89);
-  double p_cf = fma (z2, p_ef, p_cd);
-
-  double z4 = z2 * z2;
-  double p_07 = fma (z4, p_47, p_03);
-  double p_8f = fma (z4, p_cf, p_8b);
-
-  double z8 = z4 * z4;
-  double p_0f = fma (z8, p_8f, p_07);
-
-  double z16 = z8 * z8;
-  return fma (z16, p_gh, p_0f);
-}
 
 /* Scalar double-precision asinh implementation. This routine uses different
    approaches on different intervals:
@@ -86,7 +55,11 @@ asinh (double x)
   if (ia < One)
     {
       double x2 = x * x;
-      double p = eval_poly (x2);
+      double z2 = x2 * x2;
+      double z4 = z2 * z2;
+      double z8 = z4 * z4;
+#define C(i) __asinh_data.poly[i]
+      double p = ESTRIN_17 (x2, z2, z4, z8, z8 * z8, C);
       double y = fma (p, x2 * ax, ax);
       return asdouble (asuint64 (y) | sign);
     }

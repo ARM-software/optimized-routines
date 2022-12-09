@@ -5,6 +5,7 @@
  */
 
 #include "math_config.h"
+#include "estrinf.h"
 
 #define AbsMask (0x7fffffff)
 #define SqrtFltMax (0x1.749e96p+10f)
@@ -53,17 +54,7 @@ asinhf (float x)
   if (ia12 < One)
     {
       float x2 = ax * ax;
-      float x4 = x2 * x2;
-
-      float p_01 = fmaf (ax, C (1), C (0));
-      float p_23 = fmaf (ax, C (3), C (2));
-      float p_45 = fmaf (ax, C (5), C (4));
-      float p_67 = fmaf (ax, C (7), C (6));
-
-      float p_03 = fmaf (x2, p_23, p_01);
-      float p_47 = fmaf (x2, p_67, p_45);
-
-      float p = fmaf (x4, p_47, p_03);
+      float p = ESTRIN_7 (ax, x2, x2 * x2, C);
       float y = fmaf (x2, p, ax);
       return asfloat (asuint (y) | sign);
     }

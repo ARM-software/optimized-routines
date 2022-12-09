@@ -7,6 +7,7 @@
 
 #include "math_config.h"
 #include "v_math.h"
+#include "horner.h"
 #if V_SUPPORTED
 
 /* Accurate exponential (vector variant of exp_dd).  */
@@ -54,28 +55,6 @@ lookup (v_u64_t i)
   e.xi[1] = xint[i[1]];
 #endif
   return e;
-}
-
-/* Evaluate order-12 polynomials using pairwise summation and Horner
-   scheme.  */
-static inline v_f64_t
-v_eval_poly (v_f64_t z, struct entry e)
-{
-  v_f64_t r = e.P[12];
-  r = v_fma_f64 (z, r, e.P[11]);
-  r = v_fma_f64 (z, r, e.P[10]);
-  r = v_fma_f64 (z, r, e.P[9]);
-  r = v_fma_f64 (z, r, e.P[8]);
-  r = v_fma_f64 (z, r, e.P[7]);
-  r = v_fma_f64 (z, r, e.P[6]);
-  r = v_fma_f64 (z, r, e.P[5]);
-  r = v_fma_f64 (z, r, e.P[4]);
-  r = v_fma_f64 (z, r, e.P[3]);
-  r = v_fma_f64 (z, r, e.P[2]);
-  r = v_fma_f64 (z, r, e.P[1]);
-  r = v_fma_f64 (z, r, e.P[0]);
-
-  return r;
 }
 
 /* Accurate evaluation of exp(x^2) using compensated product
@@ -154,7 +133,8 @@ v_f64_t V_NAME (erfc) (v_f64_t x)
 
   /* Evaluate Polynomial: P(|x|-x_i).  */
   z = a - dat.xi;
-  p = v_eval_poly (z, dat);
+#define C(i) dat.P[i]
+  p = HORNER_12 (z, C);
 
   /* Evaluate Gaussian: exp(-x^2).  */
   v_f64_t e = v_eval_gauss (a);

@@ -7,7 +7,10 @@
 
 #include <stdint.h>
 #include <math.h>
+
 #include "math_config.h"
+#include "hornerf.h"
+#include "estrinf.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
 #define A __erff_data.erff_poly_A
@@ -26,7 +29,7 @@ top12 (float x)
 float
 erff (float x)
 {
-  float r, x2, u;
+  float r, x2;
 
   /* Get top word.  */
   uint32_t ix = asuint (x);
@@ -54,23 +57,18 @@ erff (float x)
 
       /* Normalized cases (|x| < 0.921875) - Use Horner scheme for x+x*P(x^2).
        */
-      r = A[5];
-      r = fmaf (r, x2, A[4]);
-      r = fmaf (r, x2, A[3]);
-      r = fmaf (r, x2, A[2]);
-      r = fmaf (r, x2, A[1]);
-      r = fmaf (r, x2, A[0]);
-      r = fmaf (r, x, x);
+#define C(i) A[i]
+      r = fmaf (HORNER_5 (x2, C), x, x);
+#undef C
     }
   else if (ia12 < 0x408)
     { /* |x| < 4.0 - Use a custom Estrin scheme.  */
 
       float a = fabsf (x);
       /* Use Estrin scheme on high order (small magnitude) coefficients.  */
-      r = fmaf (B[6], a, B[5]);
-      u = fmaf (B[4], a, B[3]);
-      x2 = x * x;
-      r = fmaf (r, x2, u);
+#define C(i) B[i]
+      r = ESTRIN_3_ (a, x * x, C, 3);
+#undef C
       /* Then switch to pure Horner scheme.  */
       r = fmaf (r, a, B[2]);
       r = fmaf (r, a, B[1]);

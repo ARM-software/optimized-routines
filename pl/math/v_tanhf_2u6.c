@@ -6,6 +6,7 @@
 
 #include "v_math.h"
 #include "mathlib.h"
+#include "estrinf.h"
 
 #if V_SUPPORTED
 
@@ -39,10 +40,7 @@ expm1f_inline (v_f32_t x)
   /* Approximate expm1(f) with polynomial P, expm1(f) ~= f + f^2 * P(f).
      Uses Estrin scheme, where the main __v_expm1f routine uses Horner.  */
   v_f32_t f2 = f * f;
-  v_f32_t p_01 = v_fma_f32 (f, C (1), C (0));
-  v_f32_t p_23 = v_fma_f32 (f, C (3), C (2));
-  v_f32_t p = v_fma_f32 (f2, p_23, p_01);
-  p = v_fma_f32 (f2 * f2, C (4), p);
+  v_f32_t p = ESTRIN_4 (f, f2, f2 * f2, C);
   p = v_fma_f32 (f2, p, f);
 
   /* t = 2^i.  */

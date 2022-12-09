@@ -6,6 +6,7 @@
  */
 
 #include "math_config.h"
+#include "hornerf.h"
 
 #define Shift (0x1.8p23f)
 #define InvLn2 (0x1.715476p+0f)
@@ -59,12 +60,7 @@ expm1f (float x)
 	 x + ax^2 + bx^3 + cx^4 ....
      So we calculate the polynomial P(f) = a + bf + cf^2 + ...
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
-  float p = fmaf (C (4), f, C (3));
-  p = fmaf (p, f, C (2));
-  p = fmaf (p, f, C (1));
-  p = fmaf (p, f, C (0));
-  p = fmaf (f * f, p, f);
-
+  float p = fmaf (f * f, HORNER_4 (f, C), f);
   /* Assemble the result, using a slight rearrangement to achieve acceptable
      accuracy.
      expm1(x) ~= 2^i * (p + 1) - 1

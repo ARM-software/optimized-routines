@@ -10,19 +10,18 @@
 #define PL_MATH_ATANF_COMMON_H
 
 #include "math_config.h"
+#include "estrinf.h"
 
 #if V_SUPPORTED
 
 #include "v_math.h"
 
 #define FLT_T v_f32_t
-#define FMA v_fma_f32
 #define P(i) v_f32 (__atanf_poly_data.poly[i])
 
 #else
 
 #define FLT_T float
-#define FMA fmaf
 #define P(i) __atanf_poly_data.poly[i]
 
 #endif
@@ -42,10 +41,7 @@ eval_poly (FLT_T z, FLT_T az, FLT_T shift)
   FLT_T z4 = z2 * z2;
 
   /* Then assemble polynomial.  */
-  FLT_T y
-    = FMA (z4,
-	   z4 * FMA (z4, (FMA (z2, P (7), P (6))), (FMA (z2, P (5), P (4)))),
-	   FMA (z4, (FMA (z2, P (3), P (2))), (FMA (z2, P (1), P (0)))));
+  FLT_T y = FMA (z4, z4 * ESTRIN_3_ (z2, z4, P, 4), ESTRIN_3 (z2, z4, P));
 
   /* Finalize:
      y = shift + z * P(z^2).  */
