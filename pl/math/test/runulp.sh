@@ -11,7 +11,6 @@ set -eu
 # cd to bin directory.
 cd "${0%/*}"
 
-rmodes='n'
 flags="${ULPFLAGS:--q}"
 emu="$@"
 
@@ -22,20 +21,14 @@ FAIL=0
 PASS=0
 
 t() {
-	[ $r = "n" ] && Lt=$L || Lt=$Ldir
-	$emu ./ulp -r $r -e $Lt $flags "$@" && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
+	$emu ./ulp -e $L $flags "$@" && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
 }
 
 check() {
 	$emu ./ulp -f -q "$@" #>/dev/null
 }
 
-Ldir=0.5
-for r in $rmodes
-do
-
 L=0.6
-Ldir=0.9
 t erff  0      0xffff0000 10000
 t erff  0x1p-127  0x1p-26 40000
 t erff -0x1p-127 -0x1p-26 40000
@@ -44,7 +37,6 @@ t erff -0x1p-26  -0x1p3   40000
 t erff  0         inf     40000
 
 L=0.30
-Ldir=
 t log10f  0      0xffff0000 10000
 t log10f  0x1p-127  0x1p-26 50000
 t log10f  0x1p-26   0x1p3   50000
@@ -52,7 +44,6 @@ t log10f  0x1p-4    0x1p4   50000
 t log10f  0         inf     50000
 
 L=1.11
-Ldir=
 t log10  0 0xffff000000000000 10000
 t log10  0x1p-4    0x1p4      40000
 t log10  0         inf        40000
@@ -64,7 +55,6 @@ t erfc -0x1p-1022 -0x1p-26   40000
 t erfc  0x1p-26    0x1p5     40000
 t erfc -0x1p-26   -0x1p3     40000
 t erfc  0          inf       40000
-Ldir=0.5
 
 L=1.5
 t erfcf  0      0xffff0000 10000
@@ -128,7 +118,6 @@ t log1pf   -0.001     -1.0  50000
 t log1pf     -1.0      inf   5000
 
 L=2.80
-Ldir=
 t tanf  0      0xffff0000 10000
 t tanf  0x1p-127  0x1p-14 50000
 t tanf -0x1p-127 -0x1p-14 50000
@@ -223,11 +212,7 @@ t tanhf -0x1p-23       -0x1.205966p+3 100000
 t tanhf  0x1.205966p+3  inf           100
 t tanhf -0x1.205966p+3 -inf           100
 
-done
-
 # vector functions
-Ldir=0.5
-r='n'
 flags="${ULPFLAGS:--q}"
 runs=
 check __s_log10f 1 && runs=1
