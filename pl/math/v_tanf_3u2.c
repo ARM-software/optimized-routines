@@ -15,8 +15,10 @@
 #define NegPio2_2 (v_f32 (0x1.777a5cp-25f))
 #define NegPio2_3 (v_f32 (0x1.ee59dap-50f))
 #define InvPio2 (v_f32 (0x1.45f306p-1f))
-#define RangeVal (v_f32 (0x1p17f))
+#define RangeVal (0x48000000)  /* asuint32(0x1p17f).  */
+#define TinyBound (0x30000000) /* asuint32 (0x1p-31).  */
 #define Shift (v_f32 (0x1.8p+23f))
+#define AbsMask (v_u32 (0x7fffffff))
 
 #define poly(i) v_f32 (__tanf_poly_data.poly_tan[i])
 
@@ -33,6 +35,13 @@ static inline v_f32_t
 eval_poly (v_f32_t z)
 {
   v_f32_t z2 = z * z;
+#if WANT_ERRNO
+  /* Tiny z (<= 0x1p-31) will underflow when calculating z^4. If errno is to be
+     set correctly, sidestep this by fixing such lanes to 0.  */
+  v_u32_t will_uflow = v_cond_u32 ((v_as_u32_f32 (z) & AbsMask) <= TinyBound);
+  if (unlikely (v_any_u32 (will_uflow)))
+    z2 = v_sel_f32 (will_uflow, v_f32 (0), z2);
+#endif
   v_f32_t z4 = z2 * z2;
   return ESTRIN_6 (z, z2, z4, poly);
 }
@@ -44,8 +53,23 @@ eval_poly (v_f32_t z)
 VPCS_ATTR
 v_f32_t V_NAME (tanf) (v_f32_t x)
 {
-  /* Determine whether input is too large to perform fast regression.  */
-  v_u32_t cmp = v_cage_f32 (x, RangeVal);
+  v_f32_t special_arg = x;
+  v_u32_t ix = v_as_u32_f32 (x);
+  v_u32_t iax = ix & AbsMask;
+
+  /* iax >= RangeVal means x, if not inf or NaN, is too large to perform fast
+     regression.  */
+#if WANT_ERRNO
+  /* If errno is to be set correctly, also special-case tiny input, as this will
+     load to overflow later. Fix any special lanes to 1 to prevent any
+     exceptions being triggered.  */
+  v_u32_t special = v_cond_u32 (iax - TinyBound >= RangeVal - TinyBound);
+  if (unlikely (v_any_u32 (special)))
+    x = v_sel_f32 (special, v_f32 (1.0f), x);
+#else
+  /* Otherwise, special-case large and special values.  */
+  v_u32_t special = v_cond_u32 (iax >= RangeVal);
+#endif
 
   /* n = rint(x/(pi/2)).  */
   v_f32_t q = v_fma_f32 (InvPio2, x, Shift);
@@ -85,10 +109,8 @@ v_f32_t V_NAME (tanf) (v_f32_t x)
      therefore it is fixed here.  */
   y = v_sel_f32 (x == v_f32 (-0.0), x, y);
 
-  /* No need to pass pg to specialcase here since cmp is a strict subset,
-     guaranteed by the cmpge above.  */
-  if (unlikely (v_any_u32 (cmp)))
-    return specialcase (x, y, cmp);
+  if (unlikely (v_any_u32 (special)))
+    return specialcase (special_arg, y, special);
   return y;
 }
 VPCS_ALIAS

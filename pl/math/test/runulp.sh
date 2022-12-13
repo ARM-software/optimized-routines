@@ -759,10 +759,10 @@ log2f  __s_log2f       $runs    fenv
 log2f  __v_log2f       $runv    fenv
 log2f  __vn_log2f      $runvn   fenv
 log2f  _ZGVnN4v_log2f  $runvn   fenv
-tanf  __s_tanf         $runs
-tanf  __v_tanf         $runv
-tanf  __vn_tanf        $runvn
-tanf  _ZGVnN4v_tanf    $runvn
+tanf  __s_tanf         $runs    fenv
+tanf  __v_tanf         $runv    fenv
+tanf  __vn_tanf        $runvn   fenv
+tanf  _ZGVnN4v_tanf    $runvn   fenv
 log1p  __s_log1p       $runs
 log1p  __v_log1p       $runv
 log1p  __vn_log1p      $runvn
