@@ -49,6 +49,11 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
     = v_cond_u64 ((ia >= v_u64 (0x7ff0000000000000))
 		  | (ix >= 0xbff0000000000000) | (ix == 0x8000000000000000));
 
+#if WANT_ERRNO
+  if (unlikely (v_any_u64 (special)))
+    x = v_sel_f64 (special, v_f64 (0), x);
+#endif
+
   /* With x + 1 = t * 2^k (where t = f + 1 and k is chosen such that f
 			   is in [sqrt(2)/2, sqrt(2)]):
      log1p(x) = k*log(2) + log1p(f).
@@ -92,7 +97,7 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
   v_f64_t y = v_fma_f64 (f * f, p, ylo + yhi);
 
   if (unlikely (v_any_u64 (special)))
-    return specialcase (x, y, special);
+    return specialcase (v_as_f64_u64 (ix), y, special);
 
   return y;
 }

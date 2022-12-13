@@ -763,10 +763,10 @@ tanf  __s_tanf         $runs    fenv
 tanf  __v_tanf         $runv    fenv
 tanf  __vn_tanf        $runvn   fenv
 tanf  _ZGVnN4v_tanf    $runvn   fenv
-log1p  __s_log1p       $runs
-log1p  __v_log1p       $runv
-log1p  __vn_log1p      $runvn
-log1p  _ZGVnN2v_log1p  $runvn
+log1p  __s_log1p       $runs    fenv
+log1p  __v_log1p       $runv    fenv
+log1p  __vn_log1p      $runvn   fenv
+log1p  _ZGVnN2v_log1p  $runvn   fenv
 expm1f __s_expm1f      $runs    fenv
 expm1f __v_expm1f      $runv    fenv
 expm1f __vn_expm1f     $runvn   fenv
