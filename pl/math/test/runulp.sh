@@ -747,10 +747,10 @@ log10f __s_log10f      $runs
 log10f __v_log10f      $runv
 log10f __vn_log10f     $runvn
 log10f _ZGVnN4v_log10f $runvn
-log1pf __s_log1pf      $runs
-log1pf __v_log1pf      $runv
-log1pf __vn_log1pf     $runvn
-log1pf _ZGVnN4v_log1pf $runvn
+log1pf __s_log1pf      $runs    fenv
+log1pf __v_log1pf      $runv    fenv
+log1pf __vn_log1pf     $runvn   fenv
+log1pf _ZGVnN4v_log1pf $runvn   fenv
 asinhf __s_asinhf      $runs    fenv
 asinhf __v_asinhf      $runv    fenv
 asinhf __vn_asinhf     $runvn   fenv

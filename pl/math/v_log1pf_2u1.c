@@ -48,8 +48,7 @@ eval_poly (v_f32_t m)
   v_f32_t m4 = m2 * m2;
   v_f32_t p_06 = v_fma_f32 (m4, p_36, p_02);
 
-  v_f32_t m8 = m4 * m4;
-  return v_fma_f32 (m8, p_79, p_06);
+  return v_fma_f32 (m4, m4 * p_79, p_06);
 
 #else
 #error No precision specified for v_log1pf
@@ -60,22 +59,26 @@ static inline float
 handle_special (float x)
 {
   uint32_t ix = asuint (x);
-  if (ix == 0xff800000 || ix > 0xbf800000)
+  uint32_t ia = ix & AbsMask;
+  if (ix == 0xff800000 || ia > 0x7f800000 || ix > 0xbf800000)
     {
-      /* x == -Inf => log1pf(x) = NaN.
-	 x <  -1.0 => log1pf(x) = NaN.  */
+      /* x == -Inf   => log1pf(x) = NaN.
+	 x <  -1.0   => log1pf(x) = NaN.
+	 x == +/-NaN => log1pf(x) = NaN.  */
+#if WANT_ERRNO
+      return __math_invalidf (asfloat (ia));
+#else
       return NAN;
+#endif
     }
   if (ix == 0xbf800000)
     {
       /* x == -1.0 => log1pf(x) = -Inf.  */
+#if WANT_ERRNO
+      return __math_divzerof (ix);
+#else
       return -INFINITY;
-    }
-  uint32_t ia = ix & AbsMask;
-  if (ia >= 0x7f800000)
-    {
-      /* x == +/-NaN => log1pf(x) = NaN, needs to be propagated.  */
-      return asfloat (ia);
+#endif
     }
   /* |x| < TinyBound => log1p(x)  =  x.  */
   return x;
@@ -92,6 +95,14 @@ VPCS_ATTR v_f32_t V_NAME (log1pf) (v_f32_t x)
   v_u32_t special_cases
     = v_cond_u32 (ia12 - v_u32 (TinyBound) >= (0x7f8 - TinyBound))
       | v_cond_u32 (ix >= MinusOne);
+  v_f32_t special_arg = x;
+
+#if WANT_ERRNO
+  if (unlikely (v_any_u32 (special_cases)))
+    /* Side-step special lanes so fenv exceptions are not triggered
+       inadvertently.  */
+    x = v_sel_f32 (special_cases, v_f32 (1), x);
+#endif
 
   /* With x + 1 = t * 2^k (where t = m + 1 and k is chosen such that m
 			   is in [-0.25, 0.5]):
@@ -108,7 +119,7 @@ VPCS_ATTR v_f32_t V_NAME (log1pf) (v_f32_t x)
   v_s32_t k = (v_as_s32_f32 (m) - ThreeQuarters) & v_u32 (0xff800000);
 
   /* Scale x by exponent manipulation.  */
-  v_f32_t m_scale = v_as_f32_u32 (ix - v_as_u32_s32 (k));
+  v_f32_t m_scale = v_as_f32_u32 (v_as_u32_f32 (x) - v_as_u32_s32 (k));
 
   /* Scale up to ensure that the scale factor is representable as normalised
      fp32 number, and scale m down accordingly.  */
@@ -126,9 +137,7 @@ VPCS_ATTR v_f32_t V_NAME (log1pf) (v_f32_t x)
   v_f32_t y = v_fma_f32 (scale_back, v_f32 (Ln2), p);
 
   if (unlikely (v_any_u32 (special_cases)))
-    {
-      return v_call_f32 (handle_special, x, y, special_cases);
-    }
+    return v_call_f32 (handle_special, special_arg, y, special_cases);
   return y;
 }
 VPCS_ALIAS
