@@ -13,19 +13,22 @@
 #define T __v_log2f_data.tab
 #define A __v_log2f_data.poly
 #define OFF 0x3f330000
+#define SubnormLim 0x800000
+#define One v_u32 (0x3f800000)
 
 static float
 handle_special (float x)
 {
+  if (x != x)
+    /* NaN - return NaN but do not trigger invalid.  */
+    return x;
   if (x < 0)
     /* log2f(-anything) = NaN.  */
-    return NAN;
+    return __math_invalidf (x);
   if (x == 0)
     /* log2f(0) = Inf.  */
     return __math_divzerof (1);
-  /* log2f(Inf)  =  Inf
-     log2f(Nan)  =  Nan
-     log2f(-NaN) = -NaN.  */
+  /* log2f(Inf)  =  Inf.  */
   return x;
 }
 
@@ -67,11 +70,19 @@ VPCS_ATTR v_f32_t V_NAME (log2f) (v_f32_t x)
   /* x is +-Inf, +-NaN, 0 or -ve.  */
   v_u32_t special = v_cond_u32 (ix >= 0x7f800000) | v_cond_u32 (ix == 0);
   /* |x| < 2^126 (i.e. x is subnormal).  */
-  v_u32_t subnorm = v_cond_u32 (v_calt_f32 (x, v_f32 (0x1p-126f)));
+  v_u32_t subnorm = v_cond_u32 (ix < SubnormLim);
+
+  /* Sidestep special lanes so they do not inadvertently trigger fenv
+     exceptions. They will be fixed up later.  */
+  if (unlikely (v_any_u32 (special)))
+    ix = v_sel_u32 (special, One, ix);
 
   if (unlikely (v_any_u32 (subnorm)))
-    /* Normalize any subnormals.  */
-    ix = v_as_u32_f32 (v_call_f32 (normalise, x, x, subnorm));
+    {
+      /* Normalize any subnormals.  */
+      v_f32_t tmp_x = v_as_f32_u32 (ix);
+      ix = v_as_u32_f32 (v_call_f32 (normalise, tmp_x, tmp_x, subnorm));
+    }
 
   /* x = 2^k z; where z is in range [OFF,2*OFF] and exact.
      The range is split into N subintervals.

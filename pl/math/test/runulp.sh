@@ -755,10 +755,10 @@ asinhf __s_asinhf      $runs    fenv
 asinhf __v_asinhf      $runv    fenv
 asinhf __vn_asinhf     $runvn   fenv
 asinhf _ZGVnN4v_asinhf $runvn   fenv
-log2f  __s_log2f       $runs
-log2f  __v_log2f       $runv
-log2f  __vn_log2f      $runvn
-log2f  _ZGVnN4v_log2f  $runvn
+log2f  __s_log2f       $runs    fenv
+log2f  __v_log2f       $runv    fenv
+log2f  __vn_log2f      $runvn   fenv
+log2f  _ZGVnN4v_log2f  $runvn   fenv
 tanf  __s_tanf         $runs
 tanf  __v_tanf         $runv
 tanf  __vn_tanf        $runvn
