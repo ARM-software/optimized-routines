@@ -5,10 +5,12 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
-#include "pl_sig.h"
 #include <math.h>
 #include <stdint.h>
+
+#include "math_config.h"
+#include "pl_sig.h"
+#include "pl_test.h"
 
 /* Data associated to logf:
 
@@ -86,11 +88,5 @@ log10f (float x)
   return eval_as_float (y);
 }
 
-// clang-format off
-#if USE_GLIBC_ABI
-strong_alias (log10f, __log10f_finite)
-hidden_alias (log10f, __ieee754_log10f)
-#endif
-
 PL_SIG (S, F, 1, log10, 0.01, 11.1)
-  // clang-format on
+PL_TEST_ULP (log10f, 0.30)

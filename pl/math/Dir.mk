@@ -143,8 +143,37 @@ check-pl/math-test: $(math-tools)
 check-pl/math-rtest: $(math-host-tools) $(math-tools)
 	cat $(pl-math-rtests) | build/pl/bin/rtest | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
 
-check-pl/math-ulp: $(math-tools)
-	WANT_ERRNO=$(WANT_ERRNO) WANT_SVE_MATH=$(WANT_SVE_MATH) ULPFLAGS="$(math-ulpflags)" build/pl/bin/runulp.sh $(EMULATOR)
+ulp-input-dir=$(B)/test/inputs
+
+math-lib-lims = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.ulp,$(basename $(math-lib-srcs)))
+math-lib-aliases = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.alias,$(basename $(math-lib-srcs)))
+
+$(math-lib-lims): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
+$(math-lib-aliases): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
+
+$(ulp-input-dir)/%.ulp: $(PLM)/%.c
+	mkdir -p $(@D)
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_ULP" || true; } > $@
+
+$(ulp-input-dir)/%.alias: $(PLM)/%.c
+	mkdir -p $(@D)
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_ALIAS" || true; } | sed "s/_x / /g"> $@
+
+ulp-lims := $(ulp-input-dir)/limits
+$(ulp-lims): $(math-lib-lims)
+	cat $^ | sed "s/PL_TEST_ULP //g;s/^ *//g" > $@
+
+ulp-aliases := $(ulp-input-dir)/aliases
+$(ulp-aliases): $(math-lib-aliases)
+	cat $^ | sed "s/PL_TEST_ALIAS //g;s/^ *//g" > $@
+
+check-pl/math-ulp: $(math-tools) $(ulp-lims) $(ulp-aliases)
+	WANT_ERRNO=$(WANT_ERRNO) \
+	WANT_SVE_MATH=$(WANT_SVE_MATH) \
+	ULPFLAGS="$(math-ulpflags)" \
+	LIMITS=../../../$(ulp-lims) \
+	ALIASES=../../../$(ulp-aliases) \
+	build/pl/bin/runulp.sh $(EMULATOR)
 
 check-pl/math: check-pl/math-test check-pl/math-rtest check-pl/math-ulp
 

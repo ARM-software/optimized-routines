@@ -7,6 +7,7 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define Half 0x3fe0000000000000
@@ -56,3 +57,4 @@ sinh (double x)
 }
 
 PL_SIG (S, D, 1, sinh, -10.0, 10.0)
+PL_TEST_ULP (sinh, 2.08)

@@ -9,6 +9,7 @@
 #include "horner.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if V_SUPPORTED
 
@@ -157,4 +158,5 @@ v_f64_t V_NAME (erfc) (v_f64_t x)
 VPCS_ALIAS
 
 PL_SIG (V, D, 1, erfc, -6.0, 28.0)
+PL_TEST_ULP (V_NAME (erfc), 3.15)
 #endif

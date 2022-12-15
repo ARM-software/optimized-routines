@@ -7,6 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if SV_SUPPORTED
 
@@ -46,7 +47,8 @@ __sv_atanf_x (sv_f32_t x, const svbool_t pg)
   return sv_as_f32_u32 (sveor_u32_x (pg, sv_as_u32_f32 (y), sign));
 }
 
-strong_alias (__sv_atanf_x, _ZGVsMxv_atanf)
+PL_ALIAS (__sv_atanf_x, _ZGVsMxv_atanf)
 
-  PL_SIG (SV, F, 1, atan, -3.1, 3.1)
+PL_SIG (SV, F, 1, atan, -3.1, 3.1)
+PL_TEST_ULP (__sv_atanf, 2.9)
 #endif

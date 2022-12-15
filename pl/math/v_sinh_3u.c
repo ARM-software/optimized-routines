@@ -7,6 +7,7 @@
 #include "v_math.h"
 #include "mathlib.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define Half 0x3fe0000000000000
@@ -44,4 +45,5 @@ VPCS_ATTR v_f64_t V_NAME (sinh) (v_f64_t x)
 VPCS_ALIAS
 
 PL_SIG (V, D, 1, sinh, -10.0, 10.0)
+PL_TEST_ULP (V_NAME (sinh), 2.08)
 #endif

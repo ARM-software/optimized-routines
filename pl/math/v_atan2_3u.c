@@ -7,6 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if V_SUPPORTED
 
@@ -79,4 +80,6 @@ VPCS_ALIAS
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (V, D, 2, atan2)
+// TODO tighten this once __v_atan2 is fixed
+PL_TEST_ULP (V_NAME (atan2), 2.9)
 #endif

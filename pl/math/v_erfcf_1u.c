@@ -9,6 +9,7 @@
 #include "erfcf.h"
 #include "estrin.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if V_SUPPORTED
 
@@ -172,4 +173,5 @@ v_f32_t V_NAME (erfcf) (v_f32_t x)
 VPCS_ALIAS
 
 PL_SIG (V, F, 1, erfc, -6.0, 28.0)
+PL_TEST_ULP (V_NAME (erfcf), 0.26)
 #endif

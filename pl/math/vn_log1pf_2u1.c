@@ -7,6 +7,6 @@
 #include "include/mathlib.h"
 #ifdef __vpcs
 #define VPCS 1
-#define VPCS_ALIAS strong_alias (__vn_log1pf, _ZGVnN4v_log1pf)
+#define VPCS_ALIAS PL_ALIAS (__vn_log1pf, _ZGVnN4v_log1pf)
 #include "v_log1pf_2u1.c"
 #endif

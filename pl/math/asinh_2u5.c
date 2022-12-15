@@ -7,6 +7,7 @@
 #include "estrin.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define ExpM26 0x3e50000000000000 /* asuint64(0x1.0p-26).  */
@@ -75,3 +76,4 @@ asinh (double x)
 }
 
 PL_SIG (S, D, 1, asinh, -10.0, 10.0)
+PL_TEST_ULP (asinh, 1.54)

@@ -7,6 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if SV_SUPPORTED
 
@@ -71,7 +72,8 @@ __sv_log_x (sv_f64_t x, const svbool_t pg)
   return y;
 }
 
-strong_alias (__sv_log_x, _ZGVsMxv_log);
+PL_ALIAS (__sv_log_x, _ZGVsMxv_log)
 
 PL_SIG (SV, D, 1, log, 0.01, 11.1)
+PL_TEST_ULP (__sv_log, 1.68)
 #endif // SV_SUPPORTED

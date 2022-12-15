@@ -7,6 +7,7 @@
 #include "hornerf.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define Ln2 (0x1.62e43p-1f)
 #define SignMask (0x80000000)
@@ -152,3 +153,4 @@ log1pf (float x)
 }
 
 PL_SIG (S, F, 1, log1p, -0.9, 10.0)
+PL_TEST_ULP (log1pf, 1.52)

@@ -7,6 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if SV_SUPPORTED
 #include "sv_exp_tail.h"
@@ -132,7 +133,8 @@ __sv_erfc_x (sv_f64_t x, const svbool_t pg)
   return y;
 }
 
-strong_alias (__sv_erfc_x, _ZGVsMxv_erfc)
+PL_ALIAS (__sv_erfc_x, _ZGVsMxv_erfc)
 
-  PL_SIG (SV, D, 1, erfc, -4.0, 10.0)
+PL_SIG (SV, D, 1, erfc, -4.0, 10.0)
+PL_TEST_ULP (__sv_erfc, 3.15)
 #endif

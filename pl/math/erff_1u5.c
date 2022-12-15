@@ -8,6 +8,7 @@
 #include "hornerf.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
 #define A __erff_data.erff_poly_A
@@ -98,3 +99,4 @@ erff (float x)
 }
 
 PL_SIG (S, F, 1, erf, -4.0, 4.0)
+PL_TEST_ULP (erff, 0.6)

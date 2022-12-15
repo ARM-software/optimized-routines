@@ -7,6 +7,7 @@
 #include "math_config.h"
 #include "mathlib.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffff
 #define Half 0x3f000000
@@ -77,3 +78,4 @@ atanhf (float x)
 }
 
 PL_SIG (S, F, 1, atanh, -1.0, 1.0)
+PL_TEST_ULP (atanhf, 2.59)

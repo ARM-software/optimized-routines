@@ -10,6 +10,7 @@
 #include "atan_common.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define Pi (0x1.921fb54442d18p+1)
 #define PiOver2 (0x1.921fb54442d18p+0)
@@ -150,3 +151,4 @@ atan2 (double y, double x)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (S, D, 2, atan2)
+PL_TEST_ULP (atan2, 1.78)

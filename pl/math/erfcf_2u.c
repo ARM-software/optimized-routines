@@ -8,6 +8,7 @@
 #include "erfcf.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define P(i) __erfcf_poly_data.poly[i]
 
@@ -123,3 +124,4 @@ erfcf (float x)
 }
 
 PL_SIG (S, F, 1, erfc, -4.0, 10.0)
+PL_TEST_ULP (erfcf, 1.5)

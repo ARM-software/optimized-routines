@@ -8,6 +8,7 @@
 #include "hornerf.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define Shift (0x1.8p23f)
 #define InvLn2 (0x1.715476p+0f)
@@ -72,3 +73,4 @@ expm1f (float x)
 }
 
 PL_SIG (S, F, 1, expm1, -9.9, 9.9)
+PL_TEST_ULP (expm1f, 1.02)

@@ -8,6 +8,7 @@
 #include "math_config.h"
 #include "pairwise_horner.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask (0x7fffffffffffffff)
 
@@ -145,3 +146,4 @@ erfc (double x)
 }
 
 PL_SIG (S, D, 1, erfc, -6.0, 28.0)
+PL_TEST_ULP (erfc, 3.56)

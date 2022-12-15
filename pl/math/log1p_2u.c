@@ -7,6 +7,7 @@
 #include "estrin.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define Ln2Hi 0x1.62e42fefa3800p-1
 #define Ln2Lo 0x1.ef35793c76730p-45
@@ -123,3 +124,4 @@ log1p (double x)
 }
 
 PL_SIG (S, D, 1, log1p, -0.9, 10.0)
+PL_TEST_ULP (log1p, 1.26)

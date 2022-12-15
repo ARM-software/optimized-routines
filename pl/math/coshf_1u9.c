@@ -7,6 +7,7 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffff
 #define TinyBound 0x20000000 /* 0x1p-63: Round to 1 below this.  */
@@ -61,3 +62,4 @@ coshf (float x)
 }
 
 PL_SIG (S, F, 1, cosh, -10.0, 10.0)
+PL_TEST_ULP (coshf, 1.89)

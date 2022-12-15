@@ -6,8 +6,9 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-
+#include "pl_test.h"
 #include "v_exp_tail.h"
+
 #define C1 v_f64 (C1_scal)
 #define C2 v_f64 (C2_scal)
 #define C3 v_f64 (C3_scal)
@@ -85,4 +86,5 @@ VPCS_ATTR v_f64_t V_NAME (cosh) (v_f64_t x)
 VPCS_ALIAS
 
 PL_SIG (V, D, 1, cosh, -10.0, 10.0)
+PL_TEST_ULP (V_NAME (cosh), 1.43)
 #endif

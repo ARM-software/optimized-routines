@@ -8,6 +8,7 @@
 #include "v_math.h"
 #include "include/mathlib.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if V_SUPPORTED
 
@@ -101,4 +102,5 @@ v_f64_t V_NAME (log10) (v_f64_t x)
 VPCS_ALIAS
 
 PL_SIG (V, D, 1, log10, 0.01, 11.1)
+PL_TEST_ULP (V_NAME (log10), 1.97)
 #endif

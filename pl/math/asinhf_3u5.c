@@ -7,6 +7,7 @@
 #include "estrinf.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask (0x7fffffff)
 #define SqrtFltMax (0x1.749e96p+10f)
@@ -69,3 +70,4 @@ asinhf (float x)
 }
 
 PL_SIG (S, F, 1, asinh, -10.0, 10.0)
+PL_TEST_ULP (asinhf, 2.9)

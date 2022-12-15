@@ -7,6 +7,7 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 /* Polynomial coefficients and lookup tables.  */
 #define T __log10_data.tab
@@ -143,3 +144,4 @@ log10l (long double x)
 // clang-format on
 
 PL_SIG (S, D, 1, log10, 0.01, 11.1)
+PL_TEST_ULP (log10, 1.11)

@@ -8,6 +8,7 @@
 #include "estrinf.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffff
 #define SignMask 0x80000000
@@ -61,3 +62,4 @@ cbrtf (float x)
 }
 
 PL_SIG (S, F, 1, cbrt, -10.0, 10.0)
+PL_TEST_ULP (cbrtf, 1.03)

@@ -7,6 +7,7 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define SpecialBound                                                           \
@@ -56,3 +57,4 @@ cosh (double x)
 }
 
 PL_SIG (S, D, 1, cosh, -10.0, 10.0)
+PL_TEST_ULP (cosh, 1.43)

@@ -8,6 +8,7 @@
 #include "v_math.h"
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if V_SUPPORTED
 
@@ -120,4 +121,5 @@ VPCS_ATTR v_f32_t V_NAME (log2f) (v_f32_t x)
 VPCS_ALIAS
 
 PL_SIG (V, F, 1, log2, 0.01, 11.1)
+PL_TEST_ULP (V_NAME (log2f), 2.10)
 #endif

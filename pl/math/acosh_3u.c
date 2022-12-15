@@ -6,6 +6,7 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #define Ln2 (0x1.62e42fefa39efp-1)
 #define MinusZero (0x8000000000000000)
@@ -56,3 +57,4 @@ acosh (double x)
 }
 
 PL_SIG (S, D, 1, acosh, 1.0, 10.0)
+PL_TEST_ULP (acosh, 2.19)

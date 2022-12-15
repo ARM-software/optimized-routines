@@ -6,6 +6,7 @@
  */
 #include "math_config.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 /* Useful constants.  */
 #define NegPio2_1 (-0x1.921fb6p+0f)
@@ -193,3 +194,4 @@ tanf (float x)
 }
 
 PL_SIG (S, F, 1, tan, -3.1, 3.1)
+PL_TEST_ULP (tanf, 2.80)

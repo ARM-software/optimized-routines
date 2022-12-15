@@ -7,6 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
+#include "pl_test.h"
 
 #if SV_SUPPORTED
 
@@ -79,9 +80,9 @@ __sv_atan2_x (sv_f64_t y, sv_f64_t x, const svbool_t pg)
   return ret;
 }
 
-strong_alias (__sv_atan2_x, _ZGVsMxvv_atan2)
+PL_ALIAS (__sv_atan2_x, _ZGVsMxvv_atan2)
 
-  /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.
-   */
-  PL_SIG (SV, D, 2, atan2)
+/* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
+PL_SIG (SV, D, 2, atan2)
+PL_TEST_ULP (__sv_atan2, 1.78)
 #endif
