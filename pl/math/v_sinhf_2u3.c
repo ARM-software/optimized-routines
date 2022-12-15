@@ -45,4 +45,5 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, sinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (sinhf), 1.76)
+PL_TEST_EXPECT_FENV (V_NAME (sinhf), WANT_ERRNO)
 #endif

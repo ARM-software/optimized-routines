@@ -24,7 +24,9 @@ t() {
 	key=$(cat $ALIASES | { grep " $1$" || echo $1; } | awk '{print $1}')
 	L=$(cat $LIMITS | grep "^$key " | awk '{print $2}')
 	[[ $L =~ ^[0-9]+\.[0-9]+$ ]]
-	$emu ./ulp -e $L $flags ${5:-} $1 $2 $3 $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
+	extra_flags="${5:-}"
+	grep -q "^$key$" $FENV || extra_flags="$extra_flags -f"
+	$emu ./ulp -e $L $flags ${extra_flags} $1 $2 $3 $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
 }
 
 check() {
@@ -584,7 +586,7 @@ range_sve_erfc='
    0          inf    40000
 '
 
-while read G F R D A
+while read G F R A
 do
 	[ "$R" = 1 ] && { [[ $G != sve_* ]] || [ $WANT_SVE_MATH -eq 1 ]; } || continue
 	case "$G" in \#*) continue ;; esac
@@ -592,30 +594,8 @@ do
 	while read X
 	do
 		[ -n "$X" ] || continue
-		# fenv checking is enabled by default, but we almost
-		# always want to disable it for vector routines. There
-		# are, however, a small number of vector routines in
-		# pl/math which are supposed to set fenv correctly
-		# when WANT_ERRNO is enabled. A hack is needed to
-		# ensure fenv checking is enabled for routines where
-		# this is the case. Pass "fenv" as fourth argument to
-		# prevent -f being added to the run line when
-		# WANT_ERRNO is enabled.
-		f="-f"
-		if [ $WANT_ERRNO -eq 1 ]; then
-			if [ "$D" = "fenv" ]; then
-				f=""
-			elif [ "$D" = "nofenv" ]; then
-				# Need to pass this if you want additional
-				# arguments but keep fenv checking disabled.
-				f="-f"
-			elif [ ! -z "$D" ]; then
-				echo "Unrecognised 4th argument: $D"
-				exit 1
-			fi
-		fi
 		case "$X" in \#*) continue ;; esac
-		t $F $X "$A $f"
+		t $F $X "$A"
 	done << EOF
 $range
 EOF
@@ -646,18 +626,18 @@ log2   __s_log2        $runs
 log2   __v_log2        $runv
 log2   __vn_log2       $runvn
 log2   _ZGVnN2v_log2   $runvn
-expm1  __s_expm1       $runs    fenv
-expm1  __v_expm1       $runv    fenv
-expm1  __vn_expm1      $runvn   fenv
-expm1  _ZGVnN2v_expm1  $runvn   fenv
-sinh   __s_sinh        $runs    fenv
-sinh   __v_sinh        $runv    fenv
-sinh   __vn_sinh       $runvn   fenv
-sinh   _ZGVnN2v_sinh   $runvn   fenv
-cosh   __s_cosh        $runs    fenv
-cosh   __v_cosh        $runv    fenv
-cosh   __vn_cosh       $runvn   fenv
-cosh   _ZGVnN2v_cosh   $runvn   fenv
+expm1  __s_expm1       $runs
+expm1  __v_expm1       $runv
+expm1  __vn_expm1      $runvn
+expm1  _ZGVnN2v_expm1  $runvn
+sinh   __s_sinh        $runs
+sinh   __v_sinh        $runv
+sinh   __vn_sinh       $runvn
+sinh   _ZGVnN2v_sinh   $runvn
+cosh   __s_cosh        $runs
+cosh   __v_cosh        $runv
+cosh   __vn_cosh       $runvn
+cosh   _ZGVnN2v_cosh   $runvn
 
 atanf  __s_atanf       $runs
 atanf  __v_atanf       $runv
@@ -679,62 +659,62 @@ log10f __s_log10f      $runs
 log10f __v_log10f      $runv
 log10f __vn_log10f     $runvn
 log10f _ZGVnN4v_log10f $runvn
-log1pf __s_log1pf      $runs    fenv
-log1pf __v_log1pf      $runv    fenv
-log1pf __vn_log1pf     $runvn   fenv
-log1pf _ZGVnN4v_log1pf $runvn   fenv
-asinhf __s_asinhf      $runs    fenv
-asinhf __v_asinhf      $runv    fenv
-asinhf __vn_asinhf     $runvn   fenv
-asinhf _ZGVnN4v_asinhf $runvn   fenv
-log2f  __s_log2f       $runs    fenv
-log2f  __v_log2f       $runv    fenv
-log2f  __vn_log2f      $runvn   fenv
-log2f  _ZGVnN4v_log2f  $runvn   fenv
-tanf  __s_tanf         $runs    fenv
-tanf  __v_tanf         $runv    fenv
-tanf  __vn_tanf        $runvn   fenv
-tanf  _ZGVnN4v_tanf    $runvn   fenv
-log1p  __s_log1p       $runs    fenv
-log1p  __v_log1p       $runv    fenv
-log1p  __vn_log1p      $runvn   fenv
-log1p  _ZGVnN2v_log1p  $runvn   fenv
-expm1f __s_expm1f      $runs    fenv
-expm1f __v_expm1f      $runv    fenv
-expm1f __vn_expm1f     $runvn   fenv
-expm1f _ZGVnN4v_expm1f $runvn   fenv
-sinhf  __s_sinhf       $runs    fenv
-sinhf  __v_sinhf       $runv    fenv
-sinhf  __vn_sinhf      $runvn   fenv
-sinhf  _ZGVnN4v_sinhf  $runvn   fenv
-coshf  __s_coshf       $runs    fenv
-coshf  __v_coshf       $runv    fenv
-coshf  __vn_coshf      $runvn   fenv
-coshf  _ZGVnN4v_coshf  $runvn   fenv
-atanhf __s_atanhf      $runs    fenv -c 0
-atanhf __v_atanhf      $runv    fenv -c 0
-atanhf __vn_atanhf     $runvn   fenv -c 0
-atanhf _ZGVnN4v_atanhf $runvn   fenv -c 0
-cbrtf  __s_cbrtf       $runs    fenv
-cbrtf  __v_cbrtf       $runv    fenv
-cbrtf  __vn_cbrtf      $runvn   fenv
-cbrtf  _ZGVnN4v_cbrtf  $runvn   fenv
-asinh  __s_asinh       $runs    fenv
+log1pf __s_log1pf      $runs
+log1pf __v_log1pf      $runv
+log1pf __vn_log1pf     $runvn
+log1pf _ZGVnN4v_log1pf $runvn
+asinhf __s_asinhf      $runs
+asinhf __v_asinhf      $runv
+asinhf __vn_asinhf     $runvn
+asinhf _ZGVnN4v_asinhf $runvn
+log2f  __s_log2f       $runs
+log2f  __v_log2f       $runv
+log2f  __vn_log2f      $runvn
+log2f  _ZGVnN4v_log2f  $runvn
+tanf  __s_tanf         $runs
+tanf  __v_tanf         $runv
+tanf  __vn_tanf        $runvn
+tanf  _ZGVnN4v_tanf    $runvn
+log1p  __s_log1p       $runs
+log1p  __v_log1p       $runv
+log1p  __vn_log1p      $runvn
+log1p  _ZGVnN2v_log1p  $runvn
+expm1f __s_expm1f      $runs
+expm1f __v_expm1f      $runv
+expm1f __vn_expm1f     $runvn
+expm1f _ZGVnN4v_expm1f $runvn
+sinhf  __s_sinhf       $runs
+sinhf  __v_sinhf       $runv
+sinhf  __vn_sinhf      $runvn
+sinhf  _ZGVnN4v_sinhf  $runvn
+coshf  __s_coshf       $runs
+coshf  __v_coshf       $runv
+coshf  __vn_coshf      $runvn
+coshf  _ZGVnN4v_coshf  $runvn
+atanhf __s_atanhf      $runs  -c 0
+atanhf __v_atanhf      $runv  -c 0
+atanhf __vn_atanhf     $runvn -c 0
+atanhf _ZGVnN4v_atanhf $runvn -c 0
+cbrtf  __s_cbrtf       $runs
+cbrtf  __v_cbrtf       $runv
+cbrtf  __vn_cbrtf      $runvn
+cbrtf  _ZGVnN4v_cbrtf  $runvn
+asinh  __s_asinh       $runs
 # Test vector asinh 3 times, with control lane < 1, > 1 and special.
 # Ensures the v_sel is choosing the right option in all cases.
-asinh  __v_asinh       $runv    fenv -c 0.5
-asinh  __vn_asinh      $runvn   fenv -c 0.5
-asinh  _ZGVnN2v_asinh  $runvn   fenv -c 0.5
-asinh  __v_asinh       $runv    fenv -c 2
-asinh  __vn_asinh      $runvn   fenv -c 2
-asinh  _ZGVnN2v_asinh  $runvn   fenv -c 2
-asinh  __v_asinh       $runv    fenv -c 0x1p600
-asinh  __vn_asinh      $runvn   fenv -c 0x1p600
-asinh  _ZGVnN2v_asinh  $runvn   fenv -c 0x1p600
-tanhf  __s_tanhf       $runs    fenv
-tanhf  __v_tanhf       $runv    fenv
-tanhf  __vn_tanhf      $runvn   fenv
-tanhf  _ZGVnN4v_tanhf  $runvn   fenv
+asinh  __v_asinh       $runv    -c 0.5
+asinh  __vn_asinh      $runvn   -c 0.5
+asinh  _ZGVnN2v_asinh  $runvn   -c 0.5
+asinh  __v_asinh       $runv    -c 2
+asinh  __vn_asinh      $runvn   -c 2
+asinh  _ZGVnN2v_asinh  $runvn   -c 2
+asinh  __v_asinh       $runv    -c 0x1p600
+asinh  __vn_asinh      $runvn   -c 0x1p600
+asinh  _ZGVnN2v_asinh  $runvn   -c 0x1p600
+tanhf  __s_tanhf       $runs
+tanhf  __v_tanhf       $runv
+tanhf  __vn_tanhf      $runvn
+tanhf  _ZGVnN4v_tanhf  $runvn
 
 sve_cosf     __sv_cosf         $runsv
 sve_cosf     _ZGVsMxv_cosf     $runsv

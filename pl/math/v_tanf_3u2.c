@@ -119,4 +119,5 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (V_NAME (tanf), 2.7)
+PL_TEST_EXPECT_FENV (V_NAME (tanf), WANT_ERRNO)
 #endif

@@ -147,17 +147,23 @@ ulp-input-dir=$(B)/test/inputs
 
 math-lib-lims = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.ulp,$(basename $(math-lib-srcs)))
 math-lib-aliases = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.alias,$(basename $(math-lib-srcs)))
+math-lib-fenvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.fenv,$(basename $(math-lib-srcs)))
 
 $(math-lib-lims): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
 $(math-lib-aliases): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
+$(math-lib-fenvs): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
 
 $(ulp-input-dir)/%.ulp: $(PLM)/%.c
 	mkdir -p $(@D)
-	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_ULP" || true; } > $@
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_ULP [^ ]* [^ ]*" || true; } > $@
 
 $(ulp-input-dir)/%.alias: $(PLM)/%.c
 	mkdir -p $(@D)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_ALIAS" || true; } | sed "s/_x / /g"> $@
+
+$(ulp-input-dir)/%.fenv: $(PLM)/%.c
+	mkdir -p $(@D)
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_EXPECT_FENV_ENABLED [^ ]*" || true; } > $@
 
 ulp-lims := $(ulp-input-dir)/limits
 $(ulp-lims): $(math-lib-lims)
@@ -167,12 +173,17 @@ ulp-aliases := $(ulp-input-dir)/aliases
 $(ulp-aliases): $(math-lib-aliases)
 	cat $^ | sed "s/PL_TEST_ALIAS //g;s/^ *//g" > $@
 
-check-pl/math-ulp: $(math-tools) $(ulp-lims) $(ulp-aliases)
+fenv-exps := $(ulp-input-dir)/fenv
+$(fenv-exps): $(math-lib-fenvs)
+	cat $^ | sed "s/PL_TEST_EXPECT_FENV_ENABLED //g;s/^ *//g" > $@
+
+check-pl/math-ulp: $(math-tools) $(ulp-lims) $(ulp-aliases) $(fenv-exps)
 	WANT_ERRNO=$(WANT_ERRNO) \
 	WANT_SVE_MATH=$(WANT_SVE_MATH) \
 	ULPFLAGS="$(math-ulpflags)" \
 	LIMITS=../../../$(ulp-lims) \
 	ALIASES=../../../$(ulp-aliases) \
+	FENV=../../../$(fenv-exps) \
 	build/pl/bin/runulp.sh $(EMULATOR)
 
 check-pl/math: check-pl/math-test check-pl/math-rtest check-pl/math-ulp

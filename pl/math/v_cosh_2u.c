@@ -87,4 +87,5 @@ VPCS_ALIAS
 
 PL_SIG (V, D, 1, cosh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (cosh), 1.43)
+PL_TEST_EXPECT_FENV (V_NAME (cosh), WANT_ERRNO)
 #endif

@@ -86,4 +86,5 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (V_NAME (expm1f), 1.02)
+PL_TEST_EXPECT_FENV (V_NAME (expm1f), WANT_ERRNO)
 #endif

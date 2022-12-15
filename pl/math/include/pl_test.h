@@ -14,3 +14,9 @@
    strong_alias. Use PL_ALIAS instead of strong_alias to make sure the alias is
    also added to the test suite.  */
 #define PL_ALIAS(a, b) strong_alias (a, b)
+
+/* Emit routine name if e == 1 and f is expected to correctly trigger fenv
+   exceptions. e allows declaration to be emitted conditionally upon certain
+   build flags - defer expansion by one pass to allow those flags to be expanded
+   properly.  */
+#define PL_TEST_EXPECT_FENV(f, e)

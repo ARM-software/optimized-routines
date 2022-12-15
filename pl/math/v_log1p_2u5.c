@@ -107,4 +107,5 @@ VPCS_ALIAS
 
 PL_SIG (V, D, 1, log1p, -0.9, 10.0)
 PL_TEST_ULP (V_NAME (log1p), 1.97)
+PL_TEST_EXPECT_FENV (V_NAME (log1p), WANT_ERRNO)
 #endif
