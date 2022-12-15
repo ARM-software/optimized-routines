@@ -5,8 +5,10 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "mathlib.h"
 #include "v_math.h"
+#include "mathlib.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 #define P(i) v_f32 (__v_log10f_poly[i])
@@ -70,4 +72,6 @@ v_f32_t V_NAME (log10f) (v_f32_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, F, 1, log10, 0.01, 11.1)
 #endif

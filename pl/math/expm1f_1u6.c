@@ -5,8 +5,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
 #include "hornerf.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define Shift (0x1.8p23f)
 #define InvLn2 (0x1.715476p+0f)
@@ -69,3 +70,5 @@ expm1f (float x)
   /* expm1(x) ~= 2 * (p * t + (t - 1/2)).  */
   return 2 * fmaf (p, t, t - 0.5f);
 }
+
+PL_SIG (S, F, 1, expm1, -9.9, 9.9)

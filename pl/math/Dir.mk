@@ -54,7 +54,23 @@ $(B)/test/mathtest.o: CFLAGS_PL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
-$(B)/test/ulp.o: $(AOR)/test/ulp.h
+build/pl/include/test/ulp_funcs_gen.h: $(math-lib-srcs)
+	# Replace PL_SIG
+	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=_Z##v##t##a(f)" -P > $@
+
+build/pl/include/test/mathbench_funcs_gen.h: $(math-lib-srcs)
+	# Replace PL_SIG macros with mathbench func entries
+	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=_Z##v##t##a(f, ##__VA_ARGS__)" -P > $@
+
+build/pl/include/test/ulp_wrappers_gen.h: $(math-lib-srcs)
+	# Replace PL_SIG macros with ULP wrapper declarations
+	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=Z##v##N##t##a##_WRAP(f)" -P > $@
+
+$(B)/test/ulp.o: $(AOR)/test/ulp.h build/pl/include/test/ulp_funcs_gen.h build/pl/include/test/ulp_wrappers_gen.h
+$(B)/test/ulp.o: CFLAGS_PL += -I build/pl/include/test
+
+$(B)/test/mathbench.o: build/pl/include/test/mathbench_funcs_gen.h
+$(B)/test/mathbench.o: CFLAGS_PL += -I build/pl/include/test
 
 build/pl/lib/libmathlib.so: $(math-lib-objs:%.o=%.os)
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -shared -o $@ $^

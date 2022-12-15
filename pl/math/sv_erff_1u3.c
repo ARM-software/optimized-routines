@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define AbsMask (0x7fffffff)
@@ -88,4 +90,5 @@ __sv_erff_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_erff_x, _ZGVsMxv_erff)
 
+  PL_SIG (SV, F, 1, erf, -4.0, 4.0)
 #endif

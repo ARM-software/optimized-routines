@@ -4,8 +4,9 @@
  * Copyright (c) 2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-#include "math_config.h"
 #include "estrin.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define ExpM26 0x3e50000000000000 /* asuint64(0x1.0p-26).  */
@@ -72,3 +73,5 @@ asinh (double x)
   return asdouble (asuint64 (optr_aor_log_f64 (ax + sqrt (ax * ax + 1)))
 		   | sign);
 }
+
+PL_SIG (S, D, 1, asinh, -10.0, 10.0)

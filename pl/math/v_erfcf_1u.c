@@ -8,6 +8,7 @@
 #include "v_math.h"
 #include "erfcf.h"
 #include "estrin.h"
+#include "pl_sig.h"
 
 #if V_SUPPORTED
 
@@ -169,4 +170,6 @@ v_f32_t V_NAME (erfcf) (v_f32_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, F, 1, erfc, -6.0, 28.0)
 #endif

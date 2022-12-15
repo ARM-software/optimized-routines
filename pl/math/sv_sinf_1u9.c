@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define A3 (sv_f32 (__sv_sinf_data.coeffs[3]))
@@ -74,4 +76,5 @@ __sv_sinf_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_sinf_x, _ZGVsMxv_sinf)
 
+  PL_SIG (SV, F, 1, sin, -3.1, 3.1)
 #endif

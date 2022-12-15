@@ -7,6 +7,7 @@
 
 #include "v_math.h"
 #include "estrinf.h"
+#include "pl_sig.h"
 
 #if V_SUPPORTED
 
@@ -114,4 +115,6 @@ v_f32_t V_NAME (tanf) (v_f32_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, F, 1, tan, -3.1, 3.1)
 #endif

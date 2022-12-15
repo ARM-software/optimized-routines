@@ -5,9 +5,11 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "v_math.h"
 #include "include/mathlib.h"
 #include "math_config.h"
-#include "v_math.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 VPCS_ATTR v_f32_t V_NAME (expf) (v_f32_t);
@@ -101,4 +103,6 @@ v_f32_t V_NAME (erff) (v_f32_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, F, 1, erf, -4.0, 4.0)
 #endif

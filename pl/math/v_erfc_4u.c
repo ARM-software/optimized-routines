@@ -5,9 +5,11 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
 #include "v_math.h"
 #include "horner.h"
+#include "math_config.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 /* Accurate exponential (vector variant of exp_dd).  */
@@ -153,4 +155,6 @@ v_f64_t V_NAME (erfc) (v_f64_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, D, 1, erfc, -6.0, 28.0)
 #endif

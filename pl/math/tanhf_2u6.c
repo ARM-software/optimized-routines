@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
+#include "pl_sig.h"
 
 #define BoringBound                                                            \
   0x41102cb3 /* 0x1.205966p+3, above which tanhf rounds to 1 (or -1 for        \
@@ -78,3 +79,5 @@ tanhf (float x)
   float q = expm1f_inline (2 * x);
   return q / (q + 2);
 }
+
+PL_SIG (S, F, 1, tanh, -10.0, 10.0)

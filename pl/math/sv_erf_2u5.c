@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define Scale (8.0)
@@ -87,4 +89,5 @@ __sv_erf_x (sv_f64_t x, const svbool_t pg)
 
 strong_alias (__sv_erf_x, _ZGVsMxv_erf)
 
+  PL_SIG (SV, D, 1, erf, -4.0, 4.0)
 #endif

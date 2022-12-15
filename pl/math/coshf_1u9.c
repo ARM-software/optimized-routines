@@ -6,6 +6,7 @@
  */
 
 #include "math_config.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffff
 #define TinyBound 0x20000000 /* 0x1p-63: Round to 1 below this.  */
@@ -58,3 +59,5 @@ coshf (float x)
   float t = optr_aor_exp_f32 (ax);
   return 0.5f * t + 0.5f / t;
 }
+
+PL_SIG (S, F, 1, cosh, -10.0, 10.0)

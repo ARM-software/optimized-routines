@@ -6,6 +6,7 @@
  */
 
 #include "v_math.h"
+#include "pl_sig.h"
 
 #if V_SUPPORTED
 
@@ -98,4 +99,6 @@ v_f64_t V_NAME (expm1) (v_f64_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, D, 1, expm1, -9.9, 9.9)
 #endif

@@ -6,6 +6,7 @@
  */
 
 #include "math_config.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define Half 0x3fe0000000000000
@@ -53,3 +54,5 @@ sinh (double x)
 		    (t + t / (t + 1)) / -2  for x < 0.  */
   return (t + t / (t + 1)) * halfsign;
 }
+
+PL_SIG (S, D, 1, sinh, -10.0, 10.0)

@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define C(i) __sv_expf_poly[i]
@@ -140,4 +142,5 @@ __sv_expf_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_expf_x, _ZGVsMxv_expf)
 
+  PL_SIG (SV, F, 1, exp, -9.9, 9.9)
 #endif // SV_SUPPORTED

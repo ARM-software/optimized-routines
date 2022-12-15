@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
 #include "v_math.h"
+#include "math_config.h"
 #if V_SUPPORTED
 #include "v_exp_tail.h"
 

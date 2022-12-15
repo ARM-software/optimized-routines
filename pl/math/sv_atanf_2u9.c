@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #include "sv_atanf_common.h"
@@ -46,4 +48,5 @@ __sv_atanf_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_atanf_x, _ZGVsMxv_atanf)
 
+  PL_SIG (SV, F, 1, atan, -3.1, 3.1)
 #endif

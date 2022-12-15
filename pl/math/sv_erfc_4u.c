@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
 
 #if SV_SUPPORTED
 #include "sv_exp_tail.h"
@@ -133,4 +134,5 @@ __sv_erfc_x (sv_f64_t x, const svbool_t pg)
 
 strong_alias (__sv_erfc_x, _ZGVsMxv_erfc)
 
+  PL_SIG (SV, D, 1, erfc, -4.0, 10.0)
 #endif

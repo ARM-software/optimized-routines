@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #include "sv_atan_common.h"
@@ -79,4 +81,7 @@ __sv_atan2_x (sv_f64_t y, sv_f64_t x, const svbool_t pg)
 
 strong_alias (__sv_atan2_x, _ZGVsMxvv_atan2)
 
+  /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.
+   */
+  PL_SIG (SV, D, 2, atan2)
 #endif

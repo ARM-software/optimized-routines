@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
 #include "estrinf.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define AbsMask (0x7fffffff)
 #define SqrtFltMax (0x1.749e96p+10f)
@@ -66,3 +67,5 @@ asinhf (float x)
 
   return asfloat (asuint (optr_aor_log_f32 (ax + sqrtf (ax * ax + 1))) | sign);
 }
+
+PL_SIG (S, F, 1, asinh, -10.0, 10.0)

@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
+#include "pl_sig.h"
 
 /* Useful constants.  */
 #define NegPio2_1 (-0x1.921fb6p+0f)
@@ -190,3 +191,5 @@ tanf (float x)
   /* A unified way of assembling the result on both interval types.  */
   return fmaf (scale, p, offset);
 }
+
+PL_SIG (S, F, 1, tan, -3.1, 3.1)

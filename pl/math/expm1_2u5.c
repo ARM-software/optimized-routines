@@ -5,8 +5,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
 #include "estrin.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define InvLn2 0x1.71547652b82fep0
 #define Ln2hi 0x1.62e42fefa39efp-1
@@ -73,3 +74,5 @@ expm1 (double x)
   /* expm1(x) ~= 2 * (p * t + (t - 1/2)).  */
   return 2 * fma (p, t, t - 0.5);
 }
+
+PL_SIG (S, D, 1, expm1, -9.9, 9.9)

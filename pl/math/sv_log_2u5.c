@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define A(i) __sv_log_data.poly[i]
@@ -71,4 +73,5 @@ __sv_log_x (sv_f64_t x, const svbool_t pg)
 
 strong_alias (__sv_log_x, _ZGVsMxv_log);
 
+PL_SIG (SV, D, 1, log, 0.01, 11.1)
 #endif // SV_SUPPORTED

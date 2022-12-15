@@ -6,86 +6,64 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#define _ZSF1(fun, a, b) F(fun##f, a, b)
+#define _ZSD1(f, a, b) D(f, a, b)
+
 #ifdef __vpcs
 
-#define ZVNF(f, a, b) F(__s_##f, a, b) VF(__v_##f, a, b) VNF(__vn_##f, a, b) VNF(_ZGVnN4v_##f, a, b)
-#define ZVND(f, a, b) D(__s_##f, a, b) VD(__v_##f, a, b) VND(__vn_##f, a, b) VND(_ZGVnN2v_##f, a, b)
+#define _ZVF1(fun, a, b) F(__s_##fun##f, a, b) VF(__v_##fun##f, a, b) VNF(__vn_##fun##f, a, b) VNF(_ZGVnN4v_##fun##f, a, b)
+#define _ZVD1(f, a, b) D(__s_##f, a, b) VD(__v_##f, a, b) VND(__vn_##f, a, b) VND(_ZGVnN2v_##f, a, b)
 
 #elif __aarch64__
 
-#define ZVNF(f, a, b) F(__s_##f, a, b) VF(__v_##f, a, b)
-#define ZVND(f, a, b) D(__s_##f, a, b) VD(__v_##f, a, b)
+#define _ZVF1(fun, a, b) F(__s_##fun##f, a, b) VF(__v_##fun##f, a, b)
+#define _ZVD1(f, a, b) D(__s_##f, a, b) VD(__v_##f, a, b)
+
+#elif WANT_VMATH
+
+#define _ZVF1(fun, a, b) F(__s_##fun##f, a, b)
+#define _ZVD1(f, a, b) D(__s_##f, a, b)
 
 #else
 
-#define ZVNF(f, a, b) F(__s_##f, a, b)
-#define ZVND(f, a, b) D(__s_##f, a, b)
+#define _ZVF1(f, a, b)
+#define _ZVD1(f, a, b)
 
 #endif
 
-#define VZSVF(f, a, b) SVF(__sv_##f##_x, a, b) SVF(_ZGVsMxv_##f, a, b)
-#define VZSVD(f, a, b) SVD(__sv_##f##_x, a, b) SVD(_ZGVsMxv_##f, a, b)
+#if WANT_SVE_MATH
 
-F (acoshf, 1.0, 10.0)
-F (asinhf, -10.0, 10.0)
-F (atanf, -10.0, 10.0)
+#define _ZSVF1(fun, a, b) SVF(__sv_##fun##f_x, a, b) SVF(_ZGVsMxv_##fun##f, a, b)
+#define _ZSVD1(f, a, b) SVD(__sv_##f##_x, a, b) SVD(_ZGVsMxv_##f, a, b)
+
+#else
+
+#define _ZSVF1(f, a, b)
+#define _ZSVD1(f, a, b)
+
+#endif
+
+/* No auto-generated wrappers for binary functions - they have be
+   manually defined in mathbench_wrappers.h. We have to define silent
+   macros for them anyway as they will be emitted by PL_SIG.  */
+#define _ZSF2(...)
+#define _ZSD2(...)
+#define _ZVF2(...)
+#define _ZVD2(...)
+#define _ZSVF2(...)
+#define _ZSVD2(...)
+
+#include "mathbench_funcs_gen.h"
+
+/* PL_SIG only emits entries for unary functions, since if a function
+   needs to be wrapped in mathbench there is no way for it to know the
+   same of the wrapper. Add entries for binary functions, or any other
+   exotic signatures that need wrapping, below.  */
+
 {"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
-F (atanhf, -1.0, 1.0)
-F (cbrtf, -10.0, 10.0)
-F (cosf, -3.1, 3.1)
-F (coshf, -10.0, 10.0)
-F (erfcf, -4.0, 10.0)
-F (erff, -4.0, 4.0)
-F (expm1f, -9.9, 9.9)
-F (log10f, 0.01, 11.1)
-F (log1pf, -0.9, 10.0)
-F (log2f, 0.01, 11.1)
-F (sinf, -3.1, 3.1)
-F (sinhf, -10.0, 10.0)
-F (tanf, -3.1, 3.1)
-F (tanhf, -10.0, 10.0)
-
-D (acosh, 1.0, 10.0)
-D (asinh, -10.0, 10.0)
-D (atan, -10.0, 10.0)
 {"atan2", 'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
-D (cos, -3.1, 3.1)
-D (cosh, -10.0, 10.0)
-D (erf, -6,6)
-D (erfc, -6.0, 28.0)
-D (expm1, -9.9, 9.9)
-D (log10, 0.01, 11.1)
-D (log1p, -0.9, 10.0)
-D (log2, 0.01, 11.1)
 {"powi", 'd', 0, 0.01, 11.1, {.d = powi_wrap}},
-D (sin, -3.1, 3.1)
-D (sinh, -10.0, 10.0)
 
-#if WANT_VMATH
-ZVNF (asinhf, -10.0, 10.0)
-ZVND (asinh, -10.0, 10.0)
-ZVNF (atanf, -10.0, 10.0)
-ZVNF (atanhf, -1.0, 1.0)
-ZVND (atan, -10.0, 10.0)
-ZVNF (cbrtf, -10.0, 10.0)
-ZVNF (coshf, -10.0, 10.0)
-ZVND (cosh, -10.0, 10.0)
-ZVNF (erff, -4.0, 4.0)
-ZVND (erf, -6.0, 6.0)
-ZVNF (erfcf, -6.0, 28.0)
-ZVND (erfc, -6.0, 28.0)
-ZVNF (expm1f, -9.9, 9.9)
-ZVND (expm1, -9.9, 9.9)
-ZVNF (log10f, 0.01, 11.1)
-ZVND (log10, 0.01, 11.1)
-ZVNF (log1pf, -0.9, 10.0)
-ZVND (log1p, -0.9, 10.0)
-ZVNF (log2f, 0.01, 11.1)
-ZVND (log2, 0.01, 11.1)
-ZVNF (sinhf, -10.0, 10.0)
-ZVND (sinh, -10.0, 10.0)
-ZVNF (tanf, -3.1, 3.1)
-ZVNF (tanhf, -10.0, 10.0)
 {"__s_atan2f", 'f', 0, -10.0, 10.0, {.f = __s_atan2f_wrap}},
 {"__s_atan2", 'd', 0, -10.0, 10.0, {.d = __s_atan2_wrap}},
 {"__v_atan2f", 'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
@@ -96,30 +74,13 @@ ZVNF (tanhf, -10.0, 10.0)
 {"_ZGVnN2vv_atan2", 'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 
 #if WANT_SVE_MATH
-VZSVF (atanf, -3.1, 3.1)
-VZSVD (atan, -3.1, 3.1)
 {"__sv_atan2f_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_atan2f_wrap}},
 {"_ZGVsMxvv_atan2f", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
 {"__sv_atan2_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_atan2_wrap}},
 {"_ZGVsM2vv_atan2", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
-VZSVF (erff, -4.0, 4.0)
-VZSVD (erf, -4.0, 4.0)
-VZSVD (erfc, -4, 10)
-VZSVF (expf, -9.9, 9.9)
-VZSVF (cosf, -3.1, 3.1)
-VZSVD (cos, -3.1, 3.1)
-VZSVF (sinf, -3.1, 3.1)
-VZSVD (sin, -3.1, 3.1)
-VZSVF (logf, 0.01, 11.1)
-VZSVD (log, 0.01, 11.1)
-VZSVF (log10f, 0.01, 11.1)
-VZSVD (log10, 0.01, 11.1)
-VZSVF (tanf, -3.1, 3.1)
 {"__sv_powif_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_powif_wrap}},
 {"_ZGVsMxvv_powi", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
 {"__sv_powi_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_powi_wrap}},
 {"_ZGVsMxvv_powk", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
-
-#endif
 #endif
   // clang-format on

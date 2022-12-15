@@ -6,6 +6,7 @@
 
 #include "math_config.h"
 #include "mathlib.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffff
 #define Half 0x3f000000
@@ -74,3 +75,5 @@ atanhf (float x)
   float ax = asfloat (iax);
   return halfsign * log1pf_inline ((2 * ax) / (1 - ax));
 }
+
+PL_SIG (S, F, 1, atanh, -1.0, 1.0)

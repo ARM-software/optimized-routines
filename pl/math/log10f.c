@@ -6,6 +6,7 @@
  */
 
 #include "math_config.h"
+#include "pl_sig.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -84,7 +85,12 @@ log10f (float x)
 
   return eval_as_float (y);
 }
+
+// clang-format off
 #if USE_GLIBC_ABI
 strong_alias (log10f, __log10f_finite)
 hidden_alias (log10f, __ieee754_log10f)
 #endif
+
+PL_SIG (S, F, 1, log10, 0.01, 11.1)
+  // clang-format on

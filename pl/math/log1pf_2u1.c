@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
 #include "hornerf.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define Ln2 (0x1.62e43p-1f)
 #define SignMask (0x80000000)
@@ -149,3 +150,5 @@ log1pf (float x)
   /* Apply the scaling back.  */
   return fmaf (scale_back, Ln2, p);
 }
+
+PL_SIG (S, F, 1, log1p, -0.9, 10.0)

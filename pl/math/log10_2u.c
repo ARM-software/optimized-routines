@@ -6,9 +6,7 @@
  */
 
 #include "math_config.h"
-#include <float.h>
-#include <math.h>
-#include <stdint.h>
+#include "pl_sig.h"
 
 /* Polynomial coefficients and lookup tables.  */
 #define T __log10_data.tab
@@ -143,3 +141,5 @@ log10l (long double x)
 #endif
 #endif
 // clang-format on
+
+PL_SIG (S, D, 1, log10, 0.01, 11.1)

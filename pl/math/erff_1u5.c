@@ -4,13 +4,10 @@
  * Copyright (c) 2020-2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-
-#include <stdint.h>
-#include <math.h>
-
-#include "math_config.h"
-#include "hornerf.h"
 #include "estrinf.h"
+#include "hornerf.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
 #define A __erff_data.erff_poly_A
@@ -99,3 +96,5 @@ erff (float x)
     }
   return r;
 }
+
+PL_SIG (S, F, 1, erf, -4.0, 4.0)

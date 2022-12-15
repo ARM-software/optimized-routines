@@ -6,6 +6,7 @@
 
 #include "v_math.h"
 #include "mathlib.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffff
 #define TinyBound 0x20000000 /* 0x1p-63: Round to 1 below this.  */
@@ -59,4 +60,5 @@ VPCS_ATTR v_f32_t V_NAME (coshf) (v_f32_t x)
 }
 VPCS_ALIAS
 
+PL_SIG (V, F, 1, cosh, -10.0, 10.0)
 #endif

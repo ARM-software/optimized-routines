@@ -5,6 +5,8 @@
  */
 
 #include "v_math.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 #define AbsMask 0x7fffffff
@@ -142,4 +144,5 @@ VPCS_ATTR v_f32_t V_NAME (log1pf) (v_f32_t x)
 }
 VPCS_ALIAS
 
+PL_SIG (V, F, 1, log1p, -0.9, 10.0)
 #endif

@@ -5,6 +5,7 @@
  */
 
 #include "math_config.h"
+#include "pl_sig.h"
 
 #define Ln2 (0x1.62e4p-1f)
 #define MinusZero 0x80000000
@@ -50,3 +51,5 @@ acoshf (float x)
   float xm1 = x - 1;
   return log1pf (xm1 + sqrtf (2 * xm1 + xm1 * xm1));
 }
+
+PL_SIG (S, F, 1, acosh, 1.0, 10.0)

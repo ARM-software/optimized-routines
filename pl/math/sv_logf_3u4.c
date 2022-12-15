@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define P(i) __sv_logf_poly[i]
@@ -63,4 +65,5 @@ __sv_logf_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_logf_x, _ZGVsMxv_logf)
 
+  PL_SIG (SV, F, 1, log, 0.01, 11.1)
 #endif // SV_SUPPORTED

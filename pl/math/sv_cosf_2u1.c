@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define NegPio2_1 (sv_f32 (-0x1.921fb6p+0f))
@@ -72,4 +74,5 @@ __sv_cosf_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_cosf_x, _ZGVsMxv_cosf)
 
+  PL_SIG (SV, F, 1, cos, -3.1, 3.1)
 #endif

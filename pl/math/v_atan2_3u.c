@@ -6,6 +6,8 @@
  */
 
 #include "v_math.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 #include "atan_common.h"
@@ -75,4 +77,6 @@ v_f64_t V_NAME (atan2) (v_f64_t y, v_f64_t x)
 }
 VPCS_ALIAS
 
+/* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
+PL_SIG (V, D, 2, atan2)
 #endif

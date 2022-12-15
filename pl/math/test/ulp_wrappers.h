@@ -89,12 +89,19 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZVND1_WRAP(func) VD1_WRAP(func) VND1_WRAP(func)
 #define ZVND2_WRAP(func) VD2_WRAP(func) VND2_WRAP(func)
 
-#else
+#elif WANT_VMATH
 
 #define ZVNF1_WRAP(func) VF1_WRAP(func)
 #define ZVNF2_WRAP(func) VF2_WRAP(func)
 #define ZVND1_WRAP(func) VD1_WRAP(func)
 #define ZVND2_WRAP(func) VD2_WRAP(func)
+
+#else
+
+#define ZVNF1_WRAP(func)
+#define ZVNF2_WRAP(func)
+#define ZVND1_WRAP(func)
+#define ZVND2_WRAP(func)
 
 #endif
 
@@ -108,62 +115,34 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZSVD1_WRAP(func) static double Z_sv_##func(double x) { return svretd(_ZGVsMxv_##func(svargd(x), svptrue_b64())); }
 #define ZSVD2_WRAP(func) static double Z_sv_##func(double x, double y) { return svretd(_ZGVsMxvv_##func(svargd(x), svargd(y), svptrue_b64())); }
 
+#if WANT_SVE_MATH
+
 #define ZSVNF1_WRAP(func) SVF1_WRAP(func) ZSVF1_WRAP(func)
 #define ZSVNF2_WRAP(func) SVF2_WRAP(func) ZSVF2_WRAP(func)
 #define ZSVND1_WRAP(func) SVD1_WRAP(func) ZSVD1_WRAP(func)
 #define ZSVND2_WRAP(func) SVD2_WRAP(func) ZSVD2_WRAP(func)
 
-/* Wrappers for vector functions.  */
-#if WANT_VMATH
-ZVNF1_WRAP(asinh)
-ZVNF1_WRAP(atan)
-ZVNF2_WRAP(atan2)
-ZVNF1_WRAP(atanh)
-ZVNF1_WRAP(cbrt)
-ZVNF1_WRAP(cosh)
-ZVNF1_WRAP(erf)
-ZVNF1_WRAP(erfc)
-ZVNF1_WRAP(expm1)
-ZVNF1_WRAP(log10)
-ZVNF1_WRAP(log1p)
-ZVNF1_WRAP(log2)
-ZVNF1_WRAP(sinh)
-ZVNF1_WRAP(tan)
-ZVNF1_WRAP(tanh)
-ZVND1_WRAP(asinh)
-ZVND1_WRAP(atan)
-ZVND2_WRAP(atan2)
-ZVND1_WRAP(cosh)
-ZVND1_WRAP(erf)
-ZVND1_WRAP(erfc)
-ZVND1_WRAP(expm1)
-ZVND1_WRAP(log10)
-ZVND1_WRAP(log1p)
-ZVND1_WRAP(log2)
-ZVND1_WRAP(sinh)
+#else
+
+#define ZSVNF1_WRAP(func)
+#define ZSVNF2_WRAP(func)
+#define ZSVND1_WRAP(func)
+#define ZSVND2_WRAP(func)
+
+#endif
+
+/* No wrappers for scalar routines, but PL_SIG will emit them.  */
+#define ZSNF1_WRAP(func)
+#define ZSNF2_WRAP(func)
+#define ZSND1_WRAP(func)
+#define ZSND2_WRAP(func)
+
+#include "ulp_wrappers_gen.h"
+
 #if WANT_SVE_MATH
-ZSVNF2_WRAP(atan2)
-ZSVNF1_WRAP(atan)
-ZSVNF1_WRAP(cos)
-ZSVNF1_WRAP(erf)
-ZSVNF1_WRAP(exp)
-ZSVNF1_WRAP(log)
-ZSVNF1_WRAP(log10)
-ZSVNF1_WRAP(sin)
-ZSVNF1_WRAP(tan)
 static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
 static float sv_powif(float x, float y) { return svretf(__sv_powif_x(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
-
-ZSVND2_WRAP(atan2)
-ZSVND1_WRAP(atan)
-ZSVND1_WRAP(cos)
-ZSVND1_WRAP(erf)
-ZSVND1_WRAP(erfc)
-ZSVND1_WRAP(log)
-ZSVND1_WRAP(log10)
-ZSVND1_WRAP(sin)
 static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
 static double sv_powi(double x, double y) { return svretd(__sv_powi_x(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
-#endif
 #endif
 // clang-format on

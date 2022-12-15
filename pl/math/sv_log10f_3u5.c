@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
 
 #if SV_SUPPORTED
 
@@ -75,4 +76,5 @@ __sv_log10f_x (sv_f32_t x, const svbool_t pg)
 
 strong_alias (__sv_log10f_x, _ZGVsMxv_log10f)
 
+  PL_SIG (SV, F, 1, log10, 0.01, 11.1)
 #endif

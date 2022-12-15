@@ -5,8 +5,10 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "include/mathlib.h"
 #include "v_math.h"
+#include "include/mathlib.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 #define InvLn2 v_f64 (0x1.71547652b82fep0)
@@ -85,4 +87,5 @@ v_f64_t V_NAME (log2) (v_f64_t x)
 }
 VPCS_ALIAS
 
+PL_SIG (V, D, 1, log2, 0.01, 11.1)
 #endif

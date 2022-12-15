@@ -5,10 +5,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include <math.h>
-
-#include "math_config.h"
 #include "estrinf.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffff
 #define SignMask 0x80000000
@@ -60,3 +59,5 @@ cbrtf (float x)
      Which can be done easily using ldexpf.  */
   return asfloat (asuint (ldexpf (a * T (2 + e % 3), e / 3)) | sign);
 }
+
+PL_SIG (S, F, 1, cbrt, -10.0, 10.0)

@@ -5,8 +5,9 @@
  */
 
 #include "v_math.h"
-#include "mathlib.h"
 #include "estrinf.h"
+#include "mathlib.h"
+#include "pl_sig.h"
 
 #if V_SUPPORTED
 
@@ -88,4 +89,5 @@ VPCS_ATTR v_f32_t V_NAME (tanhf) (v_f32_t x)
 }
 VPCS_ALIAS
 
+PL_SIG (V, F, 1, tanh, -10.0, 10.0)
 #endif

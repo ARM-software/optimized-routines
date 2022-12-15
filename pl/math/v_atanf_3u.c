@@ -6,6 +6,8 @@
  */
 
 #include "v_math.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 #include "atanf_common.h"
@@ -46,4 +48,6 @@ v_f32_t V_NAME (atanf) (v_f32_t x)
   return y;
 }
 VPCS_ALIAS
+
+PL_SIG (V, F, 1, atan, -10.0, 10.0)
 #endif

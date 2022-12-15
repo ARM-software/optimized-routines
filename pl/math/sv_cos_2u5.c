@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define InvPio2 (sv_f64 (0x1.45f306dc9c882p-1))
@@ -74,4 +76,5 @@ __sv_cos_x (sv_f64_t x, const svbool_t pg)
 
 strong_alias (__sv_cos_x, _ZGVsMxv_cos)
 
+  PL_SIG (SV, D, 1, cos, -3.1, 3.1)
 #endif

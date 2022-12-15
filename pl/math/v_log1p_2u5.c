@@ -5,6 +5,8 @@
  */
 
 #include "v_math.h"
+#include "pl_sig.h"
+
 #if V_SUPPORTED
 
 #include "estrin.h"
@@ -104,4 +106,5 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
 
 VPCS_ALIAS
 
+PL_SIG (V, D, 1, log1p, -0.9, 10.0)
 #endif

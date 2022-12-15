@@ -5,6 +5,7 @@
  */
 
 #include "v_math.h"
+#include "pl_sig.h"
 
 #include "v_exp_tail.h"
 #define C1 v_f64 (C1_scal)
@@ -83,4 +84,5 @@ VPCS_ATTR v_f64_t V_NAME (cosh) (v_f64_t x)
 }
 VPCS_ALIAS
 
+PL_SIG (V, D, 1, cosh, -10.0, 10.0)
 #endif

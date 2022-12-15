@@ -6,6 +6,8 @@
  */
 
 #include "sv_math.h"
+#include "pl_sig.h"
+
 #if SV_SUPPORTED
 
 #define InvPi (sv_f64 (0x1.45f306dc9c883p-2))
@@ -79,4 +81,5 @@ __sv_sin_x (sv_f64_t x, const svbool_t pg)
 
 strong_alias (__sv_sin_x, _ZGVsMxv_sin)
 
+  PL_SIG (SV, D, 1, sin, -3.1, 3.1)
 #endif

@@ -6,6 +6,7 @@
  */
 
 #include "math_config.h"
+#include "pl_sig.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define SpecialBound                                                           \
@@ -53,3 +54,5 @@ cosh (double x)
   double t = __exp_dd (ax, 0);
   return 0.5 * t + 0.5 / t;
 }
+
+PL_SIG (S, D, 1, cosh, -10.0, 10.0)

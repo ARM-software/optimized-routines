@@ -7,8 +7,9 @@
 
 #include <stdbool.h>
 
-#include "math_config.h"
 #include "atanf_common.h"
+#include "math_config.h"
+#include "pl_sig.h"
 
 #define Pi (0x1.921fb6p+1f)
 #define PiOver2 (0x1.921fb6p+0f)
@@ -154,3 +155,6 @@ atan2f (float y, float x)
   /* Account for the sign of x and y.  */
   return asfloat (asuint (ret) ^ sign_xy);
 }
+
+/* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
+PL_SIG (S, F, 2, atan2)

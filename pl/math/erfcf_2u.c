@@ -7,6 +7,7 @@
 
 #include "erfcf.h"
 #include "math_config.h"
+#include "pl_sig.h"
 
 #define P(i) __erfcf_poly_data.poly[i]
 
@@ -120,3 +121,5 @@ erfcf (float x)
     }
   return __math_uflowf (0);
 }
+
+PL_SIG (S, F, 1, erfc, -4.0, 10.0)

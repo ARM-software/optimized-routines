@@ -6,6 +6,7 @@
 
 #include "v_math.h"
 #include "mathlib.h"
+#include "pl_sig.h"
 
 #if V_SUPPORTED
 
@@ -48,4 +49,5 @@ VPCS_ATTR v_f32_t V_NAME (atanhf) (v_f32_t x)
 
 VPCS_ALIAS
 
+PL_SIG (V, F, 1, atanh, -1.0, 1.0)
 #endif
