@@ -174,4 +174,10 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, erfc, -6.0, 28.0)
 PL_TEST_ULP (V_NAME (erfcf), 0.26)
+PL_TEST_INTERVAL (V_NAME (erfcf), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME (erfcf), 0x1p-127, 0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME (erfcf), -0x1p-127, -0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME (erfcf), 0x1p-26, 0x1p5, 40000)
+PL_TEST_INTERVAL (V_NAME (erfcf), -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME (erfcf), 0, inf, 40000)
 #endif

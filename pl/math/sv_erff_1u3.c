@@ -93,4 +93,12 @@ PL_ALIAS (__sv_erff_x, _ZGVsMxv_erff)
 
 PL_SIG (SV, F, 1, erf, -4.0, 4.0)
 PL_TEST_ULP (__sv_erff, 0.76)
+PL_TEST_INTERVAL (__sv_erff, 0, 0x1p-28, 20000)
+PL_TEST_INTERVAL (__sv_erff, 0x1p-28, 1, 60000)
+PL_TEST_INTERVAL (__sv_erff, 1, 0x1p28, 60000)
+PL_TEST_INTERVAL (__sv_erff, 0x1p28, inf, 20000)
+PL_TEST_INTERVAL (__sv_erff, -0, -0x1p-28, 20000)
+PL_TEST_INTERVAL (__sv_erff, -0x1p-28, -1, 60000)
+PL_TEST_INTERVAL (__sv_erff, -1, -0x1p28, 60000)
+PL_TEST_INTERVAL (__sv_erff, -0x1p28, -inf, 20000)
 #endif

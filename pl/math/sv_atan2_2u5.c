@@ -85,4 +85,9 @@ PL_ALIAS (__sv_atan2_x, _ZGVsMxvv_atan2)
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (SV, D, 2, atan2)
 PL_TEST_ULP (__sv_atan2, 1.78)
+PL_TEST_INTERVAL (__sv_atan2, -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (__sv_atan2, -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (__sv_atan2, 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (__sv_atan2, 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (__sv_atan2, 1e6, 1e32, 40000)
 #endif

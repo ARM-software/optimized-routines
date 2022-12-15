@@ -76,4 +76,6 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, log10, 0.01, 11.1)
 PL_TEST_ULP (V_NAME (log10f), 2.81)
+PL_TEST_INTERVAL (V_NAME (log10f), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME (log10f), 0x1p-4, 0x1p4, 500000)
 #endif

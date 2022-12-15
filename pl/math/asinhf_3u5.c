@@ -71,3 +71,7 @@ asinhf (float x)
 
 PL_SIG (S, F, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (asinhf, 2.9)
+PL_TEST_INTERVAL (asinhf, 0, 0x1p-12, 5000)
+PL_TEST_INTERVAL (asinhf, 0x1p-12, 1.0, 50000)
+PL_TEST_INTERVAL (asinhf, 1.0, 0x1p11, 50000)
+PL_TEST_INTERVAL (asinhf, 0x1p11, 0x1p127, 20000)

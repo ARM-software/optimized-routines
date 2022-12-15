@@ -157,4 +157,18 @@ VPCS_ALIAS
 PL_SIG (V, D, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (asinh), 1.54)
 PL_TEST_EXPECT_FENV (V_NAME (asinh), WANT_ERRNO)
+/* Test vector asinh 3 times, with control lane < 1, > 1 and special.
+   Ensures the v_sel is choosing the right option in all cases.  */
+#define V_ASINH_INTERVAL(lo, hi, n)                                            \
+  PL_TEST_INTERVAL_C (V_NAME (asinh), lo, hi, n, 0.5)                          \
+  PL_TEST_INTERVAL_C (V_NAME (asinh), lo, hi, n, 2)                            \
+  PL_TEST_INTERVAL_C (V_NAME (asinh), lo, hi, n, 0x1p600)
+V_ASINH_INTERVAL (0, 0x1p-26, 50000)
+V_ASINH_INTERVAL (0x1p-26, 1, 50000)
+V_ASINH_INTERVAL (1, 0x1p511, 50000)
+V_ASINH_INTERVAL (0x1p511, inf, 40000)
+V_ASINH_INTERVAL (-0, -0x1p-26, 50000)
+V_ASINH_INTERVAL (-0x1p-26, -1, 50000)
+V_ASINH_INTERVAL (-1, -0x1p511, 50000)
+V_ASINH_INTERVAL (-0x1p511, -inf, 40000)
 #endif

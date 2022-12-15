@@ -54,4 +54,9 @@ PL_ALIAS (__sv_atan_x, _ZGVsMxv_atan)
 
 PL_SIG (SV, D, 1, atan, -3.1, 3.1)
 PL_TEST_ULP (__sv_atan, 1.78)
+PL_TEST_INTERVAL (__sv_atan, -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (__sv_atan, -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (__sv_atan, 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (__sv_atan, 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (__sv_atan, 1e6, 1e32, 40000)
 #endif

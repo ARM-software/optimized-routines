@@ -77,4 +77,6 @@ PL_ALIAS (__sv_cosf_x, _ZGVsMxv_cosf)
 
 PL_SIG (SV, F, 1, cos, -3.1, 3.1)
 PL_TEST_ULP (__sv_cosf, 1.57)
+PL_TEST_INTERVAL (__sv_cosf, 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (__sv_cosf, 0x1p-4, 0x1p4, 500000)
 #endif

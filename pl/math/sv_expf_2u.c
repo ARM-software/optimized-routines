@@ -145,4 +145,12 @@ PL_ALIAS (__sv_expf_x, _ZGVsMxv_expf)
 
 PL_SIG (SV, F, 1, exp, -9.9, 9.9)
 PL_TEST_ULP (__sv_expf, 1.46)
+PL_TEST_INTERVAL (__sv_expf, 0, 0x1p-23, 40000)
+PL_TEST_INTERVAL (__sv_expf, 0x1p-23, 1, 50000)
+PL_TEST_INTERVAL (__sv_expf, 1, 0x1p23, 50000)
+PL_TEST_INTERVAL (__sv_expf, 0x1p23, inf, 50000)
+PL_TEST_INTERVAL (__sv_expf, -0, -0x1p-23, 40000)
+PL_TEST_INTERVAL (__sv_expf, -0x1p-23, -1, 50000)
+PL_TEST_INTERVAL (__sv_expf, -1, -0x1p23, 50000)
+PL_TEST_INTERVAL (__sv_expf, -0x1p23, -inf, 50000)
 #endif // SV_SUPPORTED

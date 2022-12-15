@@ -79,4 +79,10 @@ PL_ALIAS (__sv_log10f_x, _ZGVsMxv_log10f)
 
 PL_SIG (SV, F, 1, log10, 0.01, 11.1)
 PL_TEST_ULP (__sv_log10f, 2.82)
+PL_TEST_INTERVAL (__sv_log10f, -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (__sv_log10f, 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (__sv_log10f, 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (__sv_log10f, 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (__sv_log10f, 1.0, 100, 50000)
+PL_TEST_INTERVAL (__sv_log10f, 100, inf, 50000)
 #endif

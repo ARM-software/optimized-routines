@@ -55,3 +55,8 @@ acoshf (float x)
 
 PL_SIG (S, F, 1, acosh, 1.0, 10.0)
 PL_TEST_ULP (acoshf, 2.30)
+PL_TEST_INTERVAL (acoshf, 0, 1, 100)
+PL_TEST_INTERVAL (acoshf, 1, 2, 10000)
+PL_TEST_INTERVAL (acoshf, 2, 0x1p64, 100000)
+PL_TEST_INTERVAL (acoshf, 0x1p64, inf, 100000)
+PL_TEST_INTERVAL (acoshf, -0, -inf, 10000)

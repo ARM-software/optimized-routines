@@ -81,4 +81,9 @@ VPCS_ALIAS
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (V, F, 2, atan2)
 PL_TEST_ULP (V_NAME (atan2f), 2.46)
+PL_TEST_INTERVAL (V_NAME (atan2f), -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (V_NAME (atan2f), -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME (atan2f), 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME (atan2f), 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (V_NAME (atan2f), 1e6, 1e32, 40000)
 #endif

@@ -90,3 +90,8 @@ log10f (float x)
 
 PL_SIG (S, F, 1, log10, 0.01, 11.1)
 PL_TEST_ULP (log10f, 0.30)
+PL_TEST_INTERVAL (log10f, 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (log10f, 0x1p-127, 0x1p-26, 50000)
+PL_TEST_INTERVAL (log10f, 0x1p-26, 0x1p3, 50000)
+PL_TEST_INTERVAL (log10f, 0x1p-4, 0x1p4, 50000)
+PL_TEST_INTERVAL (log10f, 0, inf, 50000)

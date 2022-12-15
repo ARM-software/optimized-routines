@@ -84,4 +84,6 @@ PL_ALIAS (__sv_sin_x, _ZGVsMxv_sin)
 
 PL_SIG (SV, D, 1, sin, -3.1, 3.1)
 PL_TEST_ULP (__sv_sin, 2.03)
+PL_TEST_INTERVAL (__sv_sin, 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (__sv_sin, 0x1p-4, 0x1p4, 500000)
 #endif

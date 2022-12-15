@@ -46,4 +46,10 @@ VPCS_ALIAS
 PL_SIG (V, F, 1, sinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (sinhf), 1.76)
 PL_TEST_EXPECT_FENV (V_NAME (sinhf), WANT_ERRNO)
+PL_TEST_INTERVAL (V_NAME (sinhf), 0, 0x1.62e43p+6, 100000)
+PL_TEST_INTERVAL (V_NAME (sinhf), -0, -0x1.62e43p+6, 100000)
+PL_TEST_INTERVAL (V_NAME (sinhf), 0x1.62e43p+6, 0x1.65a9fap+6, 100)
+PL_TEST_INTERVAL (V_NAME (sinhf), -0x1.62e43p+6, -0x1.65a9fap+6, 100)
+PL_TEST_INTERVAL (V_NAME (sinhf), 0x1.65a9fap+6, inf, 100)
+PL_TEST_INTERVAL (V_NAME (sinhf), -0x1.65a9fap+6, -inf, 100)
 #endif

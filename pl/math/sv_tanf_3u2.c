@@ -103,4 +103,12 @@ PL_ALIAS (__sv_tanf_x, _ZGVsMxv_tanf)
 
 PL_SIG (SV, F, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (__sv_tanf, 2.7)
+PL_TEST_INTERVAL (__sv_tanf, -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (__sv_tanf, 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (__sv_tanf, 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (__sv_tanf, 0x1p-23, 0.7, 50000)
+PL_TEST_INTERVAL (__sv_tanf, 0.7, 1.5, 50000)
+PL_TEST_INTERVAL (__sv_tanf, 1.5, 100, 50000)
+PL_TEST_INTERVAL (__sv_tanf, 100, 0x1p17, 50000)
+PL_TEST_INTERVAL (__sv_tanf, 0x1p17, inf, 50000)
 #endif

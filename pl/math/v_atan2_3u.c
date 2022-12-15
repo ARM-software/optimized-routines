@@ -82,4 +82,9 @@ VPCS_ALIAS
 PL_SIG (V, D, 2, atan2)
 // TODO tighten this once __v_atan2 is fixed
 PL_TEST_ULP (V_NAME (atan2), 2.9)
+PL_TEST_INTERVAL (V_NAME (atan2), -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (V_NAME (atan2), -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME (atan2), 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME (atan2), 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (V_NAME (atan2), 1e6, 1e32, 40000)
 #endif

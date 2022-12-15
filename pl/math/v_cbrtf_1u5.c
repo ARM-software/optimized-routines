@@ -90,4 +90,6 @@ VPCS_ALIAS
 PL_SIG (V, F, 1, cbrt, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (cbrtf), 1.03)
 PL_TEST_EXPECT_FENV (V_NAME (cbrtf), WANT_ERRNO)
+PL_TEST_INTERVAL (V_NAME (cbrtf), 0, inf, 1000000)
+PL_TEST_INTERVAL (V_NAME (cbrtf), -0, -inf, 1000000)
 #endif

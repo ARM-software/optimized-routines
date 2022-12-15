@@ -137,4 +137,10 @@ PL_ALIAS (__sv_erfc_x, _ZGVsMxv_erfc)
 
 PL_SIG (SV, D, 1, erfc, -4.0, 10.0)
 PL_TEST_ULP (__sv_erfc, 3.15)
+PL_TEST_INTERVAL (__sv_erfc, 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (__sv_erfc, 0x1p-127, 0x1p-26, 40000)
+PL_TEST_INTERVAL (__sv_erfc, -0x1p-127, -0x1p-26, 40000)
+PL_TEST_INTERVAL (__sv_erfc, 0x1p-26, 0x1p5, 40000)
+PL_TEST_INTERVAL (__sv_erfc, -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (__sv_erfc, 0, inf, 40000)
 #endif

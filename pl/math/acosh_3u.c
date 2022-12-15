@@ -58,3 +58,8 @@ acosh (double x)
 
 PL_SIG (S, D, 1, acosh, 1.0, 10.0)
 PL_TEST_ULP (acosh, 2.19)
+PL_TEST_INTERVAL (acosh, 0, 1, 10000)
+PL_TEST_INTERVAL (acosh, 1, 2, 100000)
+PL_TEST_INTERVAL (acosh, 2, 0x1p511, 100000)
+PL_TEST_INTERVAL (acosh, 0x1p511, inf, 100000)
+PL_TEST_INTERVAL (acosh, -0, -inf, 10000)

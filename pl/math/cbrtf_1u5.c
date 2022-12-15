@@ -63,3 +63,5 @@ cbrtf (float x)
 
 PL_SIG (S, F, 1, cbrt, -10.0, 10.0)
 PL_TEST_ULP (cbrtf, 1.03)
+PL_TEST_INTERVAL (cbrtf, 0, inf, 1000000)
+PL_TEST_INTERVAL (cbrtf, -0, -inf, 1000000)

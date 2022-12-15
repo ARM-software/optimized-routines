@@ -68,4 +68,10 @@ PL_ALIAS (__sv_logf_x, _ZGVsMxv_logf)
 
 PL_SIG (SV, F, 1, log, 0.01, 11.1)
 PL_TEST_ULP (__sv_logf, 2.85)
+PL_TEST_INTERVAL (__sv_logf, -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (__sv_logf, 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (__sv_logf, 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (__sv_logf, 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (__sv_logf, 1.0, 100, 50000)
+PL_TEST_INTERVAL (__sv_logf, 100, inf, 50000)
 #endif // SV_SUPPORTED

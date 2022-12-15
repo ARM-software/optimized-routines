@@ -27,3 +27,6 @@
 #define PL_TEST_EXPECT_FENV(f, e) PL_TEST_EXPECT_FENV_ (f, e)
 #define PL_TEST_EXPECT_FENV_(f, e) PL_TEST_EXPECT_FENV_##e (f)
 #define PL_TEST_EXPECT_FENV_1(f) PL_TEST_EXPECT_FENV_ENABLED f
+
+#define PL_TEST_INTERVAL(f, lo, hi, n) PL_TEST_INTERVAL f lo hi n
+#define PL_TEST_INTERVAL_C(f, lo, hi, n, c) PL_TEST_INTERVAL f lo hi n c
