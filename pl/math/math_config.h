@@ -476,16 +476,10 @@ extern const struct tanf_poly_data
   float poly_cotan[TANF_Q_POLY_NCOEFFS];
 } __tanf_poly_data HIDDEN;
 
-#define V_LOG2F_TABLE_BITS 4
-#define V_LOG2F_POLY_ORDER 4
+#define V_LOG2F_POLY_NCOEFFS 9
 extern const struct v_log2f_data
 {
-  struct
-  {
-    /* Pad with dummy for quad-aligned memory access.  */
-    float invc_hi, invc_lo, logc, dummy;
-  } tab[1 << V_LOG2F_TABLE_BITS];
-  float poly[V_LOG2F_POLY_ORDER];
+  float poly[V_LOG2F_POLY_NCOEFFS];
 } __v_log2f_data HIDDEN;
 
 #define V_LOG2_TABLE_BITS 7
