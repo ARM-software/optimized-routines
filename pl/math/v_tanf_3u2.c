@@ -37,9 +37,9 @@ static inline v_f32_t
 eval_poly (v_f32_t z)
 {
   v_f32_t z2 = z * z;
-#if WANT_ERRNO
-  /* Tiny z (<= 0x1p-31) will underflow when calculating z^4. If errno is to be
-     set correctly, sidestep this by fixing such lanes to 0.  */
+#if WANT_SIMD_EXCEPT
+  /* Tiny z (<= 0x1p-31) will underflow when calculating z^4. If fp exceptions
+     are to be triggered correctly, sidestep this by fixing such lanes to 0.  */
   v_u32_t will_uflow = v_cond_u32 ((v_as_u32_f32 (z) & AbsMask) <= TinyBound);
   if (unlikely (v_any_u32 (will_uflow)))
     z2 = v_sel_f32 (will_uflow, v_f32 (0), z2);
@@ -61,10 +61,10 @@ v_f32_t V_NAME (tanf) (v_f32_t x)
 
   /* iax >= RangeVal means x, if not inf or NaN, is too large to perform fast
      regression.  */
-#if WANT_ERRNO
-  /* If errno is to be set correctly, also special-case tiny input, as this will
-     load to overflow later. Fix any special lanes to 1 to prevent any
-     exceptions being triggered.  */
+#if WANT_SIMD_EXCEPT
+  /* If fp exceptions are to be triggered correctly, also special-case tiny
+     input, as this will load to overflow later. Fix any special lanes to 1 to
+     prevent any exceptions being triggered.  */
   v_u32_t special = v_cond_u32 (iax - TinyBound >= RangeVal - TinyBound);
   if (unlikely (v_any_u32 (special)))
     x = v_sel_f32 (special, v_f32 (1.0f), x);
@@ -119,7 +119,7 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (V_NAME (tanf), 2.7)
-PL_TEST_EXPECT_FENV (V_NAME (tanf), WANT_ERRNO)
+PL_TEST_EXPECT_FENV (V_NAME (tanf), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME (tanf), -0.0, -0x1p126, 100)
 PL_TEST_INTERVAL (V_NAME (tanf), 0x1p-149, 0x1p-126, 4000)
 PL_TEST_INTERVAL (V_NAME (tanf), 0x1p-126, 0x1p-23, 50000)

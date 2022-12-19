@@ -68,7 +68,7 @@ handle_special (float x)
       /* x == -Inf   => log1pf(x) = NaN.
 	 x <  -1.0   => log1pf(x) = NaN.
 	 x == +/-NaN => log1pf(x) = NaN.  */
-#if WANT_ERRNO
+#if WANT_SIMD_EXCEPT
       return __math_invalidf (asfloat (ia));
 #else
       return NAN;
@@ -77,7 +77,7 @@ handle_special (float x)
   if (ix == 0xbf800000)
     {
       /* x == -1.0 => log1pf(x) = -Inf.  */
-#if WANT_ERRNO
+#if WANT_SIMD_EXCEPT
       return __math_divzerof (ix);
 #else
       return -INFINITY;
@@ -100,7 +100,7 @@ VPCS_ATTR v_f32_t V_NAME (log1pf) (v_f32_t x)
       | v_cond_u32 (ix >= MinusOne);
   v_f32_t special_arg = x;
 
-#if WANT_ERRNO
+#if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (special_cases)))
     /* Side-step special lanes so fenv exceptions are not triggered
        inadvertently.  */
@@ -147,7 +147,7 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, log1p, -0.9, 10.0)
 PL_TEST_ULP (V_NAME (log1pf), 1.53)
-PL_TEST_EXPECT_FENV (V_NAME (log1pf), WANT_ERRNO)
+PL_TEST_EXPECT_FENV (V_NAME (log1pf), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME (log1pf), -10.0, 10.0, 10000)
 PL_TEST_INTERVAL (V_NAME (log1pf), 0.0, 0x1p-23, 30000)
 PL_TEST_INTERVAL (V_NAME (log1pf), 0x1p-23, 0.001, 50000)

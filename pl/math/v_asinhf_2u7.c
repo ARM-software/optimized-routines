@@ -35,7 +35,7 @@ VPCS_ATTR v_f32_t V_NAME (asinhf) (v_f32_t x)
   v_f32_t ax = v_as_f32_u32 (iax);
   v_u32_t special = v_cond_u32 (iax >= BigBound);
 
-#if WANT_ERRNO
+#if WANT_SIMD_EXCEPT
   /* Sidestep tiny and large values to avoid inadvertently triggering
      under/overflow.  */
   special |= v_cond_u32 (iax < TinyBound);
@@ -57,7 +57,7 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (asinhf), 2.17)
-PL_TEST_EXPECT_FENV (V_NAME (asinhf), WANT_ERRNO)
+PL_TEST_EXPECT_FENV (V_NAME (asinhf), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME (asinhf), 0, 0x1p-12, 40000)
 PL_TEST_INTERVAL (V_NAME (asinhf), 0x1p-12, 1.0, 40000)
 PL_TEST_INTERVAL (V_NAME (asinhf), 1.0, 0x1p11, 40000)

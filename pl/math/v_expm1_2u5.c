@@ -55,9 +55,9 @@ v_f64_t V_NAME (expm1) (v_f64_t x)
   v_u64_t ix = v_as_u64_f64 (x);
   v_u64_t ax = ix & AbsMask;
 
-#if WANT_ERRNO
-  /* If errno is to be set correctly, fall back to the scalar variant for all
-     lanes if any of them should trigger an exception.  */
+#if WANT_SIMD_EXCEPT
+  /* If fp exceptions are to be triggered correctly, fall back to the scalar
+     variant for all lanes if any of them should trigger an exception.  */
   v_u64_t special = v_cond_u64 ((ax >= SpecialBound) | (ax <= TinyBound));
   if (unlikely (v_any_u64 (special)))
     return v_call_f64 (expm1, x, x, v_u64 (-1));
@@ -92,7 +92,7 @@ v_f64_t V_NAME (expm1) (v_f64_t x)
   /* expm1(x) ~= p * t + (t - 1).  */
   v_f64_t y = v_fma_f64 (p, t, t - 1);
 
-#if !WANT_ERRNO
+#if !WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (special)))
     return v_call_f64 (expm1, x, y, special);
 #endif
@@ -103,7 +103,7 @@ VPCS_ALIAS
 
 PL_SIG (V, D, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (V_NAME (expm1), 1.68)
-PL_TEST_EXPECT_FENV (V_NAME (expm1), WANT_ERRNO)
+PL_TEST_EXPECT_FENV (V_NAME (expm1), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME (expm1), 0, 0x1p-51, 1000)
 PL_TEST_INTERVAL (V_NAME (expm1), -0, -0x1p-51, 1000)
 PL_TEST_INTERVAL (V_NAME (expm1), 0x1p-51, 0x1.63108c75a1937p+9, 100000)

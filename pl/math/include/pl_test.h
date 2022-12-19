@@ -20,6 +20,7 @@
    build flags - defer expansion by one pass to allow those flags to be expanded
    properly.  */
 #define PL_TEST_EXPECT_FENV(f, e)
+#define PL_TEST_EXPECT_FENV_ALWAYS(f)
 
 #define PL_TEST_INTERVAL(f, lo, hi, n)
 #define PL_TEST_INTERVAL_C(f, lo, hi, n, c)

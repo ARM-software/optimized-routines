@@ -51,7 +51,7 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
     = v_cond_u64 ((ia >= v_u64 (0x7ff0000000000000))
 		  | (ix >= 0xbff0000000000000) | (ix == 0x8000000000000000));
 
-#if WANT_ERRNO
+#if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (special)))
     x = v_sel_f64 (special, v_f64 (0), x);
 #endif
@@ -107,7 +107,7 @@ VPCS_ALIAS
 
 PL_SIG (V, D, 1, log1p, -0.9, 10.0)
 PL_TEST_ULP (V_NAME (log1p), 1.97)
-PL_TEST_EXPECT_FENV (V_NAME (log1p), WANT_ERRNO)
+PL_TEST_EXPECT_FENV (V_NAME (log1p), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME (log1p), -10.0, 10.0, 10000)
 PL_TEST_INTERVAL (V_NAME (log1p), 0.0, 0x1p-23, 50000)
 PL_TEST_INTERVAL (V_NAME (log1p), 0x1p-23, 0.001, 50000)

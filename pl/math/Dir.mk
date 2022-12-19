@@ -200,7 +200,6 @@ $(ulp-itvs): $(ulp-itvs-alias) $(ulp-itvs-noalias)
 	cat $^ | sort -u | sed "s/PL_TEST_INTERVAL //g" > $@
 
 check-pl/math-ulp: $(math-tools) $(ulp-lims) $(ulp-aliases) $(fenv-exps) $(ulp-itvs)
-	WANT_ERRNO=$(WANT_ERRNO) \
 	WANT_SVE_MATH=$(WANT_SVE_MATH) \
 	ULPFLAGS="$(math-ulpflags)" \
 	LIMITS=../../../$(ulp-lims) \

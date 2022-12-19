@@ -10,7 +10,7 @@
    on PL_TEST_ULP to add EXPECT_FENV to all scalar routines.  */
 #if !(V_SUPPORTED || SV_SUPPORTED)
 #define PL_TEST_ULP(f, l)                                                      \
-  PL_TEST_EXPECT_FENV (f, 1)                                                   \
+  PL_TEST_EXPECT_FENV_ALWAYS (f)                                               \
   PL_TEST_ULP f l
 #else
 #define PL_TEST_ULP(f, l) PL_TEST_ULP f l
@@ -27,6 +27,7 @@
 #define PL_TEST_EXPECT_FENV(f, e) PL_TEST_EXPECT_FENV_ (f, e)
 #define PL_TEST_EXPECT_FENV_(f, e) PL_TEST_EXPECT_FENV_##e (f)
 #define PL_TEST_EXPECT_FENV_1(f) PL_TEST_EXPECT_FENV_ENABLED f
+#define PL_TEST_EXPECT_FENV_ALWAYS(f) PL_TEST_EXPECT_FENV (f, 1)
 
 #define PL_TEST_INTERVAL(f, lo, hi, n) PL_TEST_INTERVAL f lo hi n
 #define PL_TEST_INTERVAL_C(f, lo, hi, n, c) PL_TEST_INTERVAL f lo hi n c

@@ -24,6 +24,11 @@
    set to 1 if math.h has (math_errhandling & MATH_ERRNO) != 0.  */
 # define WANT_ERRNO 0
 #endif
+#ifndef WANT_SIMD_EXCEPT
+/* If defined to 1, trigger fp exceptions in vector routines, consistently with
+   behaviour expected from the corresponding scalar routine.  */
+#define WANT_SIMD_EXCEPT 0
+#endif
 
 /* Compiler can inline round as a single instruction.  */
 #ifndef HAVE_FAST_ROUND
