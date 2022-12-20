@@ -558,4 +558,10 @@ extern const struct cbrtf_data
   float table[5];
 } __cbrtf_data HIDDEN;
 
+extern const struct cbrt_data
+{
+  double poly[4];
+  double table[5];
+} __cbrt_data HIDDEN;
+
 #endif
