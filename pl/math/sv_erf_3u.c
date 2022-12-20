@@ -20,10 +20,10 @@ __sv_erf_specialcase (sv_f64_t x, sv_f64_t y, svbool_t cmp)
   return sv_call_f64 (erf, x, y, cmp);
 }
 
-/* Optimized double precision SVE error function erf. Maximum
-   observed error is 2.46 ULP:
-   __sv_erf(0x1.5644782ddd668p+2) got 0x1.ffffffffffeap-1
-				 want 0x1.ffffffffffe9ep-1.  */
+/* Optimized double precision SVE error function erf.
+   Maximum observed error is 2.62 ULP:
+   __sv_erf(0x1.79cab7e3078fap+2) got 0x1.0000000000001p+0
+				 want 0x1.fffffffffffffp-1.  */
 sv_f64_t
 __sv_erf_x (sv_f64_t x, const svbool_t pg)
 {
@@ -91,7 +91,7 @@ __sv_erf_x (sv_f64_t x, const svbool_t pg)
 PL_ALIAS (__sv_erf_x, _ZGVsMxv_erf)
 
 PL_SIG (SV, D, 1, erf, -4.0, 4.0)
-PL_TEST_ULP (__sv_erf, 1.97)
+PL_TEST_ULP (__sv_erf, 2.13)
 PL_TEST_INTERVAL (__sv_erf, 0, 0x1p-28, 20000)
 PL_TEST_INTERVAL (__sv_erf, 0x1p-28, 1, 60000)
 PL_TEST_INTERVAL (__sv_erf, 1, 0x1p28, 60000)
