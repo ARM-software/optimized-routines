@@ -12,6 +12,7 @@
 float acoshf (float);
 float asinhf (float);
 float atan2f (float, float);
+float atanf (float);
 float atanhf (float);
 float cbrtf (float);
 float coshf (float);

@@ -15,6 +15,16 @@
 
 #define PiOver2 v_f32 (0x1.921fb6p+0f)
 #define AbsMask v_u32 (0x7fffffff)
+#define TinyBound 0x308 /* top12(asuint(0x1p-30)).  */
+#define BigBound 0x4e8	/* top12(asuint(0x1p30)).  */
+
+#if WANT_SIMD_EXCEPT
+static NOINLINE v_f32_t
+specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
+{
+  return v_call_f32 (atanf, x, y, special);
+}
+#endif
 
 /* Fast implementation of vector atanf based on
    atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1]
@@ -23,10 +33,19 @@
 VPCS_ATTR
 v_f32_t V_NAME (atanf) (v_f32_t x)
 {
-  /* No need to trigger special case. Small cases, infs and nans
-     are supported by our approximation technique.  */
+  /* Small cases, infs and nans are supported by our approximation technique,
+     but do not set fenv flags correctly. Only trigger special case if we need
+     fenv.  */
   v_u32_t ix = v_as_u32_f32 (x);
   v_u32_t sign = ix & ~AbsMask;
+
+#if WANT_SIMD_EXCEPT
+  v_u32_t ia12 = (ix >> 20) & 0x7ff;
+  v_u32_t special = v_cond_u32 (ia12 - TinyBound > BigBound - TinyBound);
+  /* If any lane is special, fall back to the scalar routine for all lanes.  */
+  if (unlikely (v_any_u32 (special)))
+    return specialcase (x, x, v_u32 (-1));
+#endif
 
   /* Argument reduction:
      y := arctan(x) for x < 1
@@ -52,9 +71,13 @@ VPCS_ALIAS
 
 PL_SIG (V, F, 1, atan, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (atanf), 2.5)
-PL_TEST_INTERVAL (V_NAME (atanf), -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (V_NAME (atanf), -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), 1e6, 1e32, 40000)
+PL_TEST_EXPECT_FENV (V_NAME (atanf), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME (atanf), 0, 0x1p-30, 5000)
+PL_TEST_INTERVAL (V_NAME (atanf), -0, -0x1p-30, 5000)
+PL_TEST_INTERVAL (V_NAME (atanf), 0x1p-30, 1, 40000)
+PL_TEST_INTERVAL (V_NAME (atanf), -0x1p-30, -1, 40000)
+PL_TEST_INTERVAL (V_NAME (atanf), 1, 0x1p30, 40000)
+PL_TEST_INTERVAL (V_NAME (atanf), -1, -0x1p30, 40000)
+PL_TEST_INTERVAL (V_NAME (atanf), 0x1p30, inf, 1000)
+PL_TEST_INTERVAL (V_NAME (atanf), -0x1p30, -inf, 1000)
 #endif
