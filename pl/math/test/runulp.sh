@@ -65,10 +65,12 @@ check -q -f -e 0 __sv_powi   0  inf x -0 -1000 100000 && runsv=1
 check -q -f -e 0 __sv_powi  -0 -inf x -0 -1000 100000 && runsv=1
 fi
 
-cat $INTERVALS | while read F LO HI N C
+while read F LO HI N C
 do
 	t $F $LO $HI $N $C
-done
+done << EOF
+$(cat $INTERVALS)
+EOF
 
 [ 0 -eq $FAIL ] || {
 	echo "FAILED $FAIL PASSED $PASS"
