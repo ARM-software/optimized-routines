@@ -11,9 +11,11 @@
  *
  */
 
-#if __ARM_FEATURE_SVE
-
 #include "asmdefs.h"
+
+#ifdef HAVE_SVE
+
+.arch armv8-a+sve
 
 #define dstin	x0
 #define src	x1
@@ -177,4 +179,5 @@ L(return):
 	ret
 
 END (__memcpy_aarch64_sve)
+
 #endif
