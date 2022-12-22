@@ -15,6 +15,8 @@
 
 #define PiOver2 v_f64 (0x1.921fb54442d18p+0)
 #define AbsMask v_u64 (0x7fffffffffffffff)
+#define TinyBound 0x3e1 /* top12(asuint64(0x1p-30)).  */
+#define BigBound 0x434	/* top12(asuint64(0x1p53)).  */
 
 /* Fast implementation of vector atan.
    Based on atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
@@ -24,10 +26,19 @@
 VPCS_ATTR
 v_f64_t V_NAME (atan) (v_f64_t x)
 {
-  /* No need to trigger special case. Small cases, infs and nans
-     are supported by our approximation technique.  */
+  /* Small cases, infs and nans are supported by our approximation technique,
+     but do not set fenv flags correctly. Only trigger special case if we need
+     fenv.  */
   v_u64_t ix = v_as_u64_f64 (x);
   v_u64_t sign = ix & ~AbsMask;
+
+#if WANT_SIMD_EXCEPT
+  v_u64_t ia12 = (ix >> 52) & 0x7ff;
+  v_u64_t special = v_cond_u64 (ia12 - TinyBound > BigBound - TinyBound);
+  /* If any lane is special, fall back to the scalar routine for all lanes.  */
+  if (unlikely (v_any_u64 (special)))
+    return v_call_f64 (atan, x, v_f64 (0), v_u64 (-1));
+#endif
 
   /* Argument reduction:
      y := arctan(x) for x < 1
@@ -46,16 +57,18 @@ v_f64_t V_NAME (atan) (v_f64_t x)
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
   y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);
-
   return y;
 }
 VPCS_ALIAS
 
 PL_SIG (V, D, 1, atan, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (atan), 1.78)
-PL_TEST_INTERVAL (V_NAME (atan), -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (V_NAME (atan), -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atan), 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atan), 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atan), 1e6, 1e32, 40000)
+PL_TEST_EXPECT_FENV (V_NAME (atan), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME (atan), 0, 0x1p-30, 10000)
+PL_TEST_INTERVAL (V_NAME (atan), -0, -0x1p-30, 1000)
+PL_TEST_INTERVAL (V_NAME (atan), 0x1p-30, 0x1p53, 900000)
+PL_TEST_INTERVAL (V_NAME (atan), -0x1p-30, -0x1p53, 90000)
+PL_TEST_INTERVAL (V_NAME (atan), 0x1p53, inf, 10000)
+PL_TEST_INTERVAL (V_NAME (atan), -0x1p53, -inf, 1000)
+
 #endif

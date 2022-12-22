@@ -27,6 +27,7 @@ float tanhf (float);
 
 double acosh (double);
 double asinh (double);
+double atan (double);
 double atan2 (double, double);
 double cbrt (double);
 double cosh (double);
