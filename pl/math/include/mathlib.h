@@ -56,6 +56,7 @@ float __s_sinhf (float);
 float __s_tanf (float);
 float __s_tanhf (float);
 
+double __s_acosh (double);
 double __s_asinh (double);
 double __s_atan (double);
 double __s_atan2 (double, double);
@@ -84,6 +85,7 @@ typedef __attribute__((__neon_vector_type__(2))) double __f64x2_t;
 
 /* Vector functions following the base PCS.  */
 __f32x4_t __v_acoshf (__f32x4_t);
+__f64x2_t __v_acosh (__f64x2_t);
 __f32x4_t __v_asinhf (__f32x4_t);
 __f64x2_t __v_asinh (__f64x2_t);
 __f32x4_t __v_atanf (__f32x4_t);
@@ -119,6 +121,7 @@ __f64x2_t __v_tanh (__f64x2_t);
 
 /* Vector functions following the vector PCS.  */
 __vpcs __f32x4_t __vn_acoshf (__f32x4_t);
+__vpcs __f64x2_t __vn_acosh (__f64x2_t);
 __vpcs __f32x4_t __vn_asinhf (__f32x4_t);
 __vpcs __f64x2_t __vn_asinh (__f64x2_t);
 __vpcs __f32x4_t __vn_atanf (__f32x4_t);
@@ -151,6 +154,7 @@ __vpcs __f64x2_t __vn_tanh (__f64x2_t);
 
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_acoshf (__f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_acosh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_asinhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_asinh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_atanf (__f32x4_t);
