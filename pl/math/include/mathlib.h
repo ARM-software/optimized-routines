@@ -2,7 +2,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2015-2022, Arm Limited.
+ * Copyright (c) 2015-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

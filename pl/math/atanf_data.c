@@ -1,7 +1,7 @@
 /*
  * Single-precision polynomial coefficients for vector atan(x) and atan2(y,x).
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

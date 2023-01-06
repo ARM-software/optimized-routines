@@ -2,7 +2,7 @@
  * Helper for single-precision routines which calculate log(1 + x) and do not
  * need special-case handling
  *
- * Copyright (c) 2022, Arm Limited.
+ * Copyright (c) 2022-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

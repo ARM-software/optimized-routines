@@ -2,7 +2,7 @@
  * Polynomial coefficients and shifts for double-precision erf(x) vector
  * function.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

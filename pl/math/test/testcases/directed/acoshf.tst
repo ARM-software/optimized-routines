@@ -1,6 +1,6 @@
 ; acoshf.tst
 ;
-; Copyright 2009-2022, Arm Limited.
+; Copyright (c) 2009-2023, Arm Limited.
 ; SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 func=acoshf op1=7fc00001 result=7fc00001 errno=0

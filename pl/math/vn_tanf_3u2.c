@@ -1,7 +1,7 @@
 /*
  * AdvSIMD vector PCS variant of __v_tanf.
  *
- * Copyright (c) 2020-2022, Arm Limited.
+ * Copyright (c) 2020-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "include/mathlib.h"

@@ -1,6 +1,6 @@
 ; cbrtf.tst
 ;
-; Copyright 2009-2022, Arm Limited.
+; Copyright (c) 2009-2023, Arm Limited.
 ; SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 func=cbrtf op1=7f800000 result=7f800000 errno=0

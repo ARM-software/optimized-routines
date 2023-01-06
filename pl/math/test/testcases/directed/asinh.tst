@@ -1,6 +1,6 @@
 ; asinh.tst
 ;
-; Copyright (c) 2022, Arm Limited.
+; Copyright (c) 2022-2023, Arm Limited.
 ; SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 func=asinh op1=7ff80000.00000001 result=7ff80000.00000001 errno=0

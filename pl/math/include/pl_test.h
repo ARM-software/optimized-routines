@@ -3,7 +3,7 @@
  * routine, not the tests. Separate definitions are found in test/pl_test.h
  * which emit test parameters.
  *
- * Copyright (c) 2022, Arm Limited.
+ * Copyright (c) 2022-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception.
  */
 

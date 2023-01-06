@@ -1,6 +1,6 @@
 ; atan2f.tst
 ;
-; Copyright (c) 1999-2022, Arm Limited.
+; Copyright (c) 1999-2023, Arm Limited.
 ; SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 func=atan2f op1=7f800001 op2=7f800001 result=7fc00001 errno=0 status=i

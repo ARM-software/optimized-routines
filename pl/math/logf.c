@@ -1,7 +1,7 @@
 /*
  * Single-precision log function.
  *
- * Copyright (c) 2017-2019, Arm Limited.
+ * Copyright (c) 2017-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

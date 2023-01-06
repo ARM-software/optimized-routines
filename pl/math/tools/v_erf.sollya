@@ -2,7 +2,7 @@
 // To generate coefficients for interval i (0 to 47) do:
 // $ sollya v_erf.sollya $i
 //
-// Copyright (c) 2022, Arm Limited.
+// Copyright (c) 2022-2023, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 scale = 1/8;

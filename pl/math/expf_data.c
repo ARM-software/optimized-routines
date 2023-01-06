@@ -2,7 +2,7 @@
  * Coeffs and table entries for single-precision exp. Copied from
  * math/exp2f_data.c, with EXP2F_TABLE_BITS == 32.
  *
- * Copyright (c) 2017-2022, Arm Limited.
+ * Copyright (c) 2017-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
