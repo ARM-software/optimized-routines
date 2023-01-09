@@ -61,26 +61,26 @@
    exotic signatures that need wrapping, below.  */
 
 {"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
-{"atan2", 'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
-{"powi", 'd', 0, 0.01, 11.1, {.d = powi_wrap}},
+{"atan2",  'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
+{"powi",   'd', 0,  0.01, 11.1, {.d = powi_wrap}},
 
-{"__s_atan2f", 'f', 0, -10.0, 10.0, {.f = __s_atan2f_wrap}},
-{"__s_atan2", 'd', 0, -10.0, 10.0, {.d = __s_atan2_wrap}},
-{"__v_atan2f", 'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
-{"__v_atan2", 'd', 'v', -10.0, 10.0, {.vd = __v_atan2_wrap}},
-{"__vn_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = __vn_atan2f_wrap}},
+{"__s_atan2f",       'f', 0,   -10.0, 10.0, {.f = __s_atan2f_wrap}},
+{"__s_atan2",        'd', 0,   -10.0, 10.0, {.d = __s_atan2_wrap}},
+{"__v_atan2f",       'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
+{"__v_atan2",        'd', 'v', -10.0, 10.0, {.vd = __v_atan2_wrap}},
+{"__vn_atan2f",      'f', 'n', -10.0, 10.0, {.vnf = __vn_atan2f_wrap}},
 {"_ZGVnN4vv_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = _Z_atan2f_wrap}},
-{"__vn_atan2", 'd', 'n', -10.0, 10.0, {.vnd = __vn_atan2_wrap}},
-{"_ZGVnN2vv_atan2", 'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
+{"__vn_atan2",       'd', 'n', -10.0, 10.0, {.vnd = __vn_atan2_wrap}},
+{"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 
 #if WANT_SVE_MATH
-{"__sv_atan2f_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_atan2f_wrap}},
-{"_ZGVsMxvv_atan2f", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
-{"__sv_atan2_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_atan2_wrap}},
-{"_ZGVsM2vv_atan2", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
-{"__sv_powif_x", 'f', 'n', -10.0, 10.0, {.svf = __sv_powif_wrap}},
-{"_ZGVsMxvv_powi", 'f', 'n', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
-{"__sv_powi_x", 'd', 'n', -10.0, 10.0, {.svd = __sv_powi_wrap}},
-{"_ZGVsMxvv_powk", 'd', 'n', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
+{"__sv_atan2f_x",    'f', 's', -10.0, 10.0, {.svf = __sv_atan2f_wrap}},
+{"_ZGVsMxvv_atan2f", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
+{"__sv_atan2_x",     'd', 's', -10.0, 10.0, {.svd = __sv_atan2_wrap}},
+{"_ZGVsM2vv_atan2",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
+{"__sv_powif_x",     'f', 's', -10.0, 10.0, {.svf = __sv_powif_wrap}},
+{"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
+{"__sv_powi_x",      'd', 's', -10.0, 10.0, {.svd = __sv_powi_wrap}},
+{"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
 #endif
   // clang-format on
