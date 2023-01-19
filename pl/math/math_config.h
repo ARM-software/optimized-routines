@@ -564,4 +564,9 @@ extern const struct cbrt_data
   double table[5];
 } __cbrt_data HIDDEN;
 
+extern const struct v_tan_data
+{
+  double neg_half_pi_hi, neg_half_pi_lo;
+  double poly[9];
+} __v_tan_data HIDDEN;
 #endif

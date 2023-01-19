@@ -70,6 +70,7 @@ double __s_log10 (double);
 double __s_log1p (double);
 double __s_log2 (double);
 double __s_sinh (double);
+double __s_tan (double);
 double __s_tanh (double);
 
 #if __aarch64__
@@ -113,6 +114,7 @@ __f64x2_t __v_log2 (__f64x2_t);
 __f32x4_t __v_sinhf (__f32x4_t);
 __f64x2_t __v_sinh (__f64x2_t);
 __f32x4_t __v_tanf (__f32x4_t);
+__f64x2_t __v_tan (__f64x2_t);
 __f32x4_t __v_tanhf (__f32x4_t);
 __f64x2_t __v_tanh (__f64x2_t);
 
@@ -149,6 +151,7 @@ __vpcs __f64x2_t __vn_log2 (__f64x2_t);
 __vpcs __f32x4_t __vn_sinhf (__f32x4_t);
 __vpcs __f64x2_t __vn_sinh (__f64x2_t);
 __vpcs __f32x4_t __vn_tanf (__f32x4_t);
+__vpcs __f64x2_t __vn_tan (__f64x2_t);
 __vpcs __f32x4_t __vn_tanhf (__f32x4_t);
 __vpcs __f64x2_t __vn_tanh (__f64x2_t);
 
@@ -182,6 +185,7 @@ __vpcs __f64x2_t _ZGVnN2v_log2 (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_sinhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_sinh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_tanf (__f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_tan (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_tanhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_tanh (__f64x2_t);
 
