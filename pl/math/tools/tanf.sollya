@@ -6,7 +6,7 @@
 dtype = single;
 
 mthd = 0; // approximate tan
-deg = 6; // poly degree
+deg = 5; // poly degree
 
 // // Uncomment for cotan
 // mthd = 1; // approximate cotan
@@ -38,19 +38,9 @@ if(mthd==0) then {
   F = proc(P) { return x + x^3 * P(x^2); };
   f = (g(sqrt(x))-sqrt(x))/(x*sqrt(x));
   init_poly = 0;
-  deg_init_poly = -1; // a value such that we actually start by building constant coefficient
   // Display info
   print("Approximate g(x) =", g, "as F(x)=", s, ".");
-  // Remez applied to minimise relative error
-  approx_remez = proc(func, poly, d) {
-    return remez(1 - poly / func, deg - d, [a;b], x^d/func(x), 1e-10);
-  };
-  // Iteratively find optimal coeffs
-  poly = init_poly;
-  for i from deg_init_poly+1 to deg do {
-    p = roundcoefficients(approx_remez(f, poly, i), [|dtype ...|]);
-    poly = poly + x^i * coeff(p,0);
-  };
+  poly = fpminimax(f, deg, [|dtype ...|], [a*a;b*b]);
 }
 else if (mthd==1) then {
   s = "1/x + x * P(x^2)";

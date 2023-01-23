@@ -472,7 +472,7 @@ extern const struct log1pf_data
   float coeffs[LOG1PF_NCOEFFS];
 } __log1pf_data HIDDEN;
 
-#define TANF_P_POLY_NCOEFFS 7
+#define TANF_P_POLY_NCOEFFS 6
 /* cotan approach needs order 3 on [0, pi/4] to reach <3.5ulps.  */
 #define TANF_Q_POLY_NCOEFFS 4
 extern const struct tanf_poly_data

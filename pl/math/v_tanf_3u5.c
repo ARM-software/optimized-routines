@@ -17,7 +17,7 @@
 #define NegPio2_2 (v_f32 (0x1.777a5cp-25f))
 #define NegPio2_3 (v_f32 (0x1.ee59dap-50f))
 #define InvPio2 (v_f32 (0x1.45f306p-1f))
-#define RangeVal (0x48000000)  /* asuint32(0x1p17f).  */
+#define RangeVal (0x47000000)  /* asuint32(0x1p15f).  */
 #define TinyBound (0x30000000) /* asuint32 (0x1p-31).  */
 #define Shift (v_f32 (0x1.8p+23f))
 #define AbsMask (v_u32 (0x7fffffff))
@@ -45,13 +45,13 @@ eval_poly (v_f32_t z)
     z2 = v_sel_f32 (will_uflow, v_f32 (0), z2);
 #endif
   v_f32_t z4 = z2 * z2;
-  return ESTRIN_6 (z, z2, z4, poly);
+  return ESTRIN_5 (z, z2, z4, poly);
 }
 
 /* Fast implementation of Neon tanf.
-   Maximum measured error: 3.121ulps.
-   vtanq_f32(0x1.ff3df8p+16) got -0x1.fbb7b8p-1
-			    want -0x1.fbb7b2p-1.  */
+   Maximum error is 3.45 ULP:
+   __v_tanf(-0x1.e5f0cap+13) got 0x1.ff9856p-1
+			    want 0x1.ff9850p-1.  */
 VPCS_ATTR
 v_f32_t V_NAME (tanf) (v_f32_t x)
 {
@@ -118,7 +118,7 @@ v_f32_t V_NAME (tanf) (v_f32_t x)
 VPCS_ALIAS
 
 PL_SIG (V, F, 1, tan, -3.1, 3.1)
-PL_TEST_ULP (V_NAME (tanf), 2.7)
+PL_TEST_ULP (V_NAME (tanf), 2.96)
 PL_TEST_EXPECT_FENV (V_NAME (tanf), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME (tanf), -0.0, -0x1p126, 100)
 PL_TEST_INTERVAL (V_NAME (tanf), 0x1p-149, 0x1p-126, 4000)

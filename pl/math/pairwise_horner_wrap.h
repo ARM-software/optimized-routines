@@ -6,7 +6,7 @@
  */
 
 // clang-format off
-#define  PW_HORNER_1_(x, c,     i) FMA(x,  C(i + 1),                      C(i))
+#define  PW_HORNER_1_(x, c,     i) FMA(x,  c(i + 1),                       c(i))
 #define  PW_HORNER_3_(x, x2, c, i) FMA(x2, PW_HORNER_1_ (x,     c, i + 2), PW_HORNER_1_(x, c, i))
 #define  PW_HORNER_5_(x, x2, c, i) FMA(x2, PW_HORNER_3_ (x, x2, c, i + 2), PW_HORNER_1_(x, c, i))
 #define  PW_HORNER_7_(x, x2, c, i) FMA(x2, PW_HORNER_5_ (x, x2, c, i + 2), PW_HORNER_1_(x, c, i))

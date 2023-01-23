@@ -7,6 +7,7 @@
 #include "math_config.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "pairwise_hornerf.h"
 
 /* Useful constants.  */
 #define NegPio2_1 (-0x1.921fb6p+0f)
@@ -21,28 +22,19 @@
 /* 2PI * 2^-64.  */
 #define Pio2p63 (0x1.921FB54442D18p-62)
 
-#define P __tanf_poly_data.poly_tan
-#define Q __tanf_poly_data.poly_cotan
+#define P(i) __tanf_poly_data.poly_tan[i]
+#define Q(i) __tanf_poly_data.poly_cotan[i]
 
 static inline float
 eval_P (float z)
 {
-  float z2 = z * z;
-  float y_10 = fmaf (z, P[1], P[0]);
-  float y_32 = fmaf (z, P[3], P[2]);
-  float y_54 = fmaf (z, P[5], P[4]);
-  float y_6_54 = fmaf (z2, P[6], y_54);
-  float y_32_10 = fmaf (z2, y_32, y_10);
-  float y = fmaf (z2, z2 * y_6_54, y_32_10);
-  return y;
+  return PAIRWISE_HORNER_5 (z, z * z, P);
 }
 
 static inline float
 eval_Q (float z)
 {
-  float z2 = z * z;
-  float y = fmaf (z2, fmaf (z, Q[3], Q[2]), fmaf (z, Q[1], Q[0]));
-  return y;
+  return PAIRWISE_HORNER_3 (z, z * z, Q);
 }
 
 /* Reduction of the input argument x using Cody-Waite approach, such that x = r
