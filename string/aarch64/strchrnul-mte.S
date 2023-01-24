@@ -1,7 +1,7 @@
 /*
  * strchrnul - find a character or nul in a string
  *
- * Copyright (c) 2020, Arm Limited.
+ * Copyright (c) 2020-2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

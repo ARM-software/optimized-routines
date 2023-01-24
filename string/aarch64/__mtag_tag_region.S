@@ -1,7 +1,7 @@
 /*
  * __mtag_tag_region - tag memory
  *
- * Copyright (c) 2021, Arm Limited.
+ * Copyright (c) 2021-2022, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
