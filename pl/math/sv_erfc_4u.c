@@ -12,6 +12,11 @@
 #if SV_SUPPORTED
 #include "sv_exp_tail.h"
 
+#define SignMask 0x8000000000000000
+#define SmallBound 0x3cd /* 0x1p-50.  */
+#define BigBound 0x432	 /* 0x1p+51.  */
+#define ThirtyTwo 0x404	 /* 32.  */
+
 sv_f64_t __sv_exp_x (sv_f64_t, svbool_t);
 
 static NOINLINE sv_f64_t
@@ -23,7 +28,7 @@ specialcase (sv_f64_t x, sv_f64_t y, svbool_t special)
 static inline sv_u64_t
 lookup_interval_idx (const svbool_t pg, sv_f64_t abs_x)
 {
-  /* Interval index is calculated by (((abs(x) + 1)^4) >> 53) - 1023, bounded by
+  /* Interval index is calculated by (((abs(x) + 1)^4) >> 52) - 1023, bounded by
      the number of polynomials.  */
   sv_f64_t xp1 = svadd_n_f64_x (pg, abs_x, 1);
   xp1 = svmul_f64_x (pg, xp1, xp1);
@@ -101,13 +106,14 @@ __sv_erfc_x (sv_f64_t x, const svbool_t pg)
      the polynomial and index calculation, such that the polynomial evaluates to
      0 in these regions.  */
   /* in_bounds is true for lanes where |x| < 32.  */
-  svbool_t in_bounds = svcmplt_n_u64 (pg, atop, 0x404);
+  svbool_t in_bounds = svcmplt_n_u64 (pg, atop, ThirtyTwo);
   /* boring_zone = 2 for x < 0, 0 otherwise.  */
   sv_f64_t boring_zone
     = sv_as_f64_u64 (svlsl_n_u64_x (pg, svlsr_n_u64_x (pg, ix, 63), 62));
-  /* Very small, nan and inf.  */
+  /* Small and large values (including nan and inf).  */
   svbool_t special_cases
-    = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, atop, 0x3cd), 0x432);
+    = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, atop, SmallBound),
+		     BigBound - SmallBound);
 
   /* erfc(|x|) ~= P_i(|x|-x_i)*exp(-x^2)
 
@@ -116,14 +122,14 @@ __sv_erfc_x (sv_f64_t x, const svbool_t pg)
   sv_u64_t i = lookup_interval_idx (in_bounds, abs_x);
   sv_f64_t x_i = sv_lookup_f64_x (in_bounds, __v_erfc_data.interval_bounds, i);
   sv_f64_t p = sv_eval_poly (in_bounds, svsub_f64_x (pg, abs_x, x_i), i);
-  /* 'copy' sign of x to p, i.e. negate p if x is negative.  */
-  sv_u64_t sign = svbic_n_u64_z (in_bounds, ix, 0x7fffffffffffffff);
+  /* 'copy' sign of x to p.  */
+  sv_u64_t sign = svand_n_u64_z (in_bounds, ix, SignMask);
   p = sv_as_f64_u64 (sveor_u64_z (in_bounds, sv_as_u64_f64 (p), sign));
 
   sv_f64_t e = sv_eval_gauss (in_bounds, abs_x);
 
   /* Assemble result: 2-p*e if x<0, p*e otherwise. No need to conditionally
-     select boring_zone because P[V_ERFC_NINTS-1]=0.  */
+     select boring_zone because value accounted for in polynomial.  */
   sv_f64_t y = sv_fma_f64_x (pg, p, e, boring_zone);
 
   if (unlikely (svptest_any (pg, special_cases)))
@@ -138,9 +144,12 @@ PL_ALIAS (__sv_erfc_x, _ZGVsMxv_erfc)
 PL_SIG (SV, D, 1, erfc, -4.0, 10.0)
 PL_TEST_ULP (__sv_erfc, 3.15)
 PL_TEST_INTERVAL (__sv_erfc, 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (__sv_erfc, 0x1p-127, 0x1p-26, 40000)
-PL_TEST_INTERVAL (__sv_erfc, -0x1p-127, -0x1p-26, 40000)
-PL_TEST_INTERVAL (__sv_erfc, 0x1p-26, 0x1p5, 40000)
-PL_TEST_INTERVAL (__sv_erfc, -0x1p-26, -0x1p3, 40000)
-PL_TEST_INTERVAL (__sv_erfc, 0, inf, 40000)
+PL_TEST_INTERVAL (__sv_erfc, 0, 0x1p-50, 40000)
+PL_TEST_INTERVAL (__sv_erfc, -0, -0x1p-50, 40000)
+PL_TEST_INTERVAL (__sv_erfc, 0x1p-50, 32, 40000)
+PL_TEST_INTERVAL (__sv_erfc, -0x1p-50, -32, 40000)
+PL_TEST_INTERVAL (__sv_erfc, 32, 0x1p51, 40000)
+PL_TEST_INTERVAL (__sv_erfc, -32, -0x1p51, 40000)
+PL_TEST_INTERVAL (__sv_erfc, 0x1p51, inf, 40000)
+PL_TEST_INTERVAL (__sv_erfc, -0x1p51, -inf, 40000)
 #endif
