@@ -184,6 +184,12 @@ sv_as_u32_f32 (sv_f32_t x)
   return svreinterpret_u32_f32 (x);
 }
 
+static inline sv_u32_t
+sv_as_u32_s32 (sv_s32_t x)
+{
+  return svreinterpret_u32_s32 (x);
+}
+
 static inline sv_f32_t
 sv_as_f32_u32 (sv_u32_t x)
 {
@@ -205,7 +211,7 @@ sv_to_f32_s32_x (svbool_t pg, sv_s32_t s)
 static inline sv_s32_t
 sv_to_s32_f32_x (svbool_t pg, sv_f32_t x)
 {
-  return svcvt_s32_f32_x (pg, x);
+  return svcvt_s32_x (pg, x);
 }
 
 static inline sv_f32_t

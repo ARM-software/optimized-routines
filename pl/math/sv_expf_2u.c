@@ -8,6 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "sv_expf_specialcase.h"
 
 #if SV_SUPPORTED
 
@@ -37,50 +38,6 @@ special_case (sv_f32_t x, sv_f32_t y, svbool_t special)
 
 #define Shift (0x1.8p23f) /* 1.5 * 2^23.  */
 #define Thres (126.0f)
-
-/* Special-case handler adapted from Neon variant. Uses s, y and n to produce
-   the final result (normal cases included). It performs an update of all lanes!
-   Therefore:
-   - all previous computation need to be done on all lanes indicated by input
-     pg
-   - we cannot simply apply the special case to the special-case-activated
-     lanes. Besides it is likely that this would not increase performance (no
-     scatter/gather).  */
-static inline sv_f32_t
-specialcase (svbool_t pg, sv_f32_t poly, sv_f32_t n, sv_u32_t e,
-	     svbool_t p_cmp1, sv_f32_t scale)
-{
-  /* s=2^(n/N) may overflow, break it up into s=s1*s2,
-     such that exp = s + s*y can be computed as s1*(s2+s2*y)
-     and s1*s1 overflows only if n>0.  */
-
-  /* If n<=0 then set b to 0x820...0, 0 otherwise.  */
-  svbool_t p_sign = svcmple_n_f32 (pg, n, 0.0f); /* n <= 0.  */
-  sv_u32_t b
-    = svdup_n_u32_z (p_sign, 0x82000000); /* Inactive lanes set to 0.  */
-
-  /* Set s1 to generate overflow depending on sign of exponent n.  */
-  sv_f32_t s1
-    = sv_as_f32_u32 (svadd_n_u32_x (pg, b, 0x7f000000)); /* b + 0x7f000000.  */
-  /* Offset s to avoid overflow in final result if n is below threshold.  */
-  sv_f32_t s2 = sv_as_f32_u32 (
-    svsub_u32_x (pg, e, b)); /* as_u32 (s) - 0x3010...0 + b.  */
-
-  /* |n| > 192 => 2^(n/N) overflows.  */
-  svbool_t p_cmp2 = svacgt_n_f32 (pg, n, 192.0f);
-
-  sv_f32_t r2 = svmul_f32_x (pg, s1, s1);
-  sv_f32_t r1 = sv_fma_f32_x (pg, poly, s2, s2);
-  r1 = svmul_f32_x (pg, r1, s1);
-  sv_f32_t r0 = sv_fma_f32_x (pg, poly, scale, scale);
-
-  /* Apply condition 1 then 2.
-     Returns r2 if cond2 is true, otherwise
-     if cond1 is true then return r1, otherwise return r0.  */
-  sv_f32_t r = svsel_f32 (p_cmp1, r1, r0);
-
-  return svsel_f32 (p_cmp2, r2, r);
-}
 
 #endif
 
@@ -135,7 +92,7 @@ __sv_expf_x (sv_f32_t x, const svbool_t pg)
     return special_case (x, sv_fma_f32_x (pg, poly, scale, scale),
 			 is_special_case);
 #else
-    return specialcase (pg, poly, n, e, is_special_case, scale);
+    return __sv_expf_specialcase (pg, poly, n, e, is_special_case, scale);
 #endif
 
   return sv_fma_f32_x (pg, poly, scale, scale);

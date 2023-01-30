@@ -537,6 +537,12 @@ extern const struct sv_log_data
 #define SV_EXPF_POLY_ORDER 6
 extern const float __sv_expf_poly[SV_EXPF_POLY_ORDER - 1] HIDDEN;
 
+#ifndef SV_EXP2F_USE_FEXPA
+#define SV_EXP2F_USE_FEXPA 0
+#endif
+#define SV_EXP2F_POLY_ORDER 6
+extern const float __sv_exp2f_poly[SV_EXP2F_POLY_ORDER - 1] HIDDEN;
+
 #define EXPM1F_POLY_ORDER 5
 extern const float __expm1f_poly[EXPM1F_POLY_ORDER] HIDDEN;
 
