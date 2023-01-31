@@ -88,6 +88,12 @@ sv_as_f64_u64 (sv_u64_t x)
 }
 
 static inline sv_f64_t
+sv_to_f64_f32_x (svbool_t pg, sv_f32_t x)
+{
+  return svcvt_f64_f32_x (pg, x);
+}
+
+static inline sv_f64_t
 sv_to_f64_s64_x (svbool_t pg, sv_s64_t s)
 {
   return svcvt_f64_x (pg, s);
@@ -196,6 +202,12 @@ sv_as_f32_u32 (sv_u32_t x)
   return svreinterpret_f32_u32 (x);
 }
 
+static inline sv_f32_t
+sv_as_f32_u64 (sv_u64_t x)
+{
+  return svreinterpret_f32_u64 (x);
+}
+
 static inline sv_s32_t
 sv_as_s32_u32 (sv_u32_t x)
 {
@@ -212,6 +224,12 @@ static inline sv_s32_t
 sv_to_s32_f32_x (svbool_t pg, sv_f32_t x)
 {
   return svcvt_s32_x (pg, x);
+}
+
+static inline sv_f32_t
+sv_to_f32_f64_x (svbool_t pg, sv_f64_t s)
+{
+  return svcvt_f32_f64_x (pg, s);
 }
 
 static inline sv_f32_t

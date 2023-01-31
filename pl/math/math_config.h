@@ -394,6 +394,7 @@ extern const struct v_erfc_data
 extern const struct erfcf_poly_data
 {
   double poly[4][ERFCF_POLY_NCOEFFS];
+  double poly_T[ERFCF_POLY_NCOEFFS][4];
 } __erfcf_poly_data HIDDEN;
 
 #define V_EXP_TAIL_TABLE_BITS 8
