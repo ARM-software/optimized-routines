@@ -399,6 +399,15 @@ extern const struct erfcf_poly_data
 #define V_EXP_TAIL_TABLE_BITS 8
 extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
 
+#define V_EXP2_TABLE_BITS 7
+#define V_EXP2_POLY_ORDER 5
+extern const struct v_exp2_data
+{
+  double shift;
+  double poly[EXP2_POLY_ORDER];
+  uint64_t sbits[1 << V_EXP2_TABLE_BITS];
+} __v_exp2_data HIDDEN;
+
 #define V_ERF_NINTS 49
 #define V_ERF_NCOEFFS 10
 extern const struct v_erf_data
