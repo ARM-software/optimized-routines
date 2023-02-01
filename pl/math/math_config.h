@@ -589,4 +589,7 @@ extern const struct v_tan_data
 #define SV_EXP_POLY_ORDER 5
 extern const double __sv_exp_poly[SV_EXP_POLY_ORDER - 1] HIDDEN;
 
+#define ASINF_POLY_ORDER 4
+extern const float __asinf_poly[ASINF_POLY_ORDER + 1] HIDDEN;
+
 #endif
