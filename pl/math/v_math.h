@@ -389,6 +389,11 @@ v_sel_f64 (v_u64_t p, v_f64_t x, v_f64_t y)
 {
   return p ? x : y;
 }
+static inline v_u64_t
+v_sel_u64 (v_u64_t p, v_u64_t x, v_u64_t y)
+{
+  return p ? x : y;
+}
 static inline v_f64_t
 v_sqrt_f64 (v_f64_t x)
 {
@@ -770,6 +775,11 @@ static inline v_f64_t
 v_sel_f64 (v_u64_t p, v_f64_t x, v_f64_t y)
 {
   return vbslq_f64 (p, x, y);
+}
+static inline v_u64_t
+v_sel_u64 (v_u64_t p, v_u64_t x, v_u64_t y)
+{
+  return vbslq_u64 (p, x, y);
 }
 static inline v_f64_t
 v_sqrt_f64 (v_f64_t x)

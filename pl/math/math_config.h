@@ -592,4 +592,7 @@ extern const double __sv_exp_poly[SV_EXP_POLY_ORDER - 1] HIDDEN;
 #define ASINF_POLY_ORDER 4
 extern const float __asinf_poly[ASINF_POLY_ORDER + 1] HIDDEN;
 
+#define ASIN_POLY_ORDER 11
+extern const double __asin_poly[ASIN_POLY_ORDER + 1] HIDDEN;
+
 #endif
