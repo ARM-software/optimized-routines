@@ -5,19 +5,12 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#ifdef __vpcs
+#if defined(__vpcs) && __aarch64__
 
-#define _ZVF1(f) VF1 (f) ZVNF1 (f)
-#define _ZVD1(f) VD1 (f) ZVND1 (f)
-#define _ZVF2(f) VF2 (f) ZVNF2 (f)
-#define _ZVD2(f) VD2 (f) ZVND2 (f)
-
-#elif __aarch64
-
-#define _ZVF1(f) VF1 (f)
-#define _ZVD1(f) VD1 (f)
-#define _ZVF2(f) VF2 (f)
-#define _ZVD2(f) VD2 (f)
+#define _ZVF1(f) ZVNF1 (f)
+#define _ZVD1(f) ZVND1 (f)
+#define _ZVF2(f) ZVNF2 (f)
+#define _ZVD2(f) ZVND2 (f)
 
 #else
 

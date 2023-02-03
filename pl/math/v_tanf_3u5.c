@@ -113,7 +113,7 @@ v_f32_t V_NAME (tanf) (v_f32_t x)
     return specialcase (special_arg, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (tanf), _ZGVnN4v_tanf)
 
 PL_SIG (V, F, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (V_NAME (tanf), 2.96)

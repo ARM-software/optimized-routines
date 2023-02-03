@@ -86,7 +86,7 @@ VPCS_ATTR v_f32_t V_NAME (asinf) (v_f32_t x)
   /* Copy sign.  */
   return v_as_f32_u32 (v_bsl_u32 (v_u32 (AbsMask), v_as_u32_f32 (y), ix));
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (asinf), _ZGVnN4v_asinf)
 
 PL_SIG (V, F, 1, asin, -1.0, 1.0)
 PL_TEST_ULP (V_NAME (asinf), 1.91)

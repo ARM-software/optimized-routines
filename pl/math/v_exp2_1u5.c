@@ -72,7 +72,7 @@ VPCS_ATTR v_f64_t V_NAME (exp2) (v_f64_t x)
      is no spurious underflow here even without fma.  */
   return v_fma_f64 (scale, tmp, scale);
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (exp2), _ZGVnN2v_exp2)
 
 PL_SIG (V, D, 1, exp2, -9.9, 9.9)
 PL_TEST_ULP (V_NAME (exp2), 0.51)

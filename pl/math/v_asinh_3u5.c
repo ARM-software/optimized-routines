@@ -146,7 +146,7 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
     return special_case (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (asinh), _ZGVnN2v_asinh)
 
 PL_SIG (V, D, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (asinh), 2.80)

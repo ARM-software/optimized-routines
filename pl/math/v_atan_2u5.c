@@ -57,7 +57,7 @@ v_f64_t V_NAME (atan) (v_f64_t x)
   y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (atan), _ZGVnN2v_atan)
 
 PL_SIG (V, D, 1, atan, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (atan), 1.78)

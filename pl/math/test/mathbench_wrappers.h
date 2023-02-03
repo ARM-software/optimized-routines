@@ -24,21 +24,7 @@ powi_wrap (double x)
 }
 
 #if WANT_VMATH
-#if __aarch64__
-
-static v_double
-__v_atan2_wrap (v_double x)
-{
-  return __v_atan2 (v_double_dup (5.0), x);
-}
-
-static v_float
-__v_atan2f_wrap (v_float x)
-{
-  return __v_atan2f (v_float_dup (5.0f), x);
-}
-
-#ifdef __vpcs
+#if __aarch64__ && defined(__vpcs)
 
 __vpcs static v_double
 __vn_atan2_wrap (v_double x)
@@ -64,8 +50,7 @@ _Z_atan2f_wrap (v_float x)
   return _ZGVnN4vv_atan2f (v_float_dup (5.0f), x);
 }
 
-#endif // __vpcs
-#endif // __arch64__
+#endif // __arch64__ && __vpcs
 #endif // WANT_VMATH
 
 #if WANT_SVE_MATH

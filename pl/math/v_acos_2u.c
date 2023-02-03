@@ -102,7 +102,7 @@ VPCS_ATTR v_f64_t V_NAME (acos) (v_f64_t x)
 
   return v_fma_f64 (mul, y, add);
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (acos), _ZGVnN2v_acos)
 
 PL_SIG (V, D, 1, acos, -1.0, 1.0)
 PL_TEST_ULP (V_NAME (acos), 1.02)

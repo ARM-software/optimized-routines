@@ -52,7 +52,7 @@ VPCS_ATTR v_f32_t V_NAME (asinhf) (v_f32_t x)
     return specialcase (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (asinhf), _ZGVnN4v_asinhf)
 
 PL_SIG (V, F, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (asinhf), 2.17)

@@ -65,7 +65,7 @@ v_f32_t V_NAME (atanf) (v_f32_t x)
 
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (atanf), _ZGVnN4v_atanf)
 
 PL_SIG (V, F, 1, atan, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (atanf), 2.5)

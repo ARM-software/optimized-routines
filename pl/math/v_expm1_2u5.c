@@ -97,7 +97,7 @@ v_f64_t V_NAME (expm1) (v_f64_t x)
 
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (expm1), _ZGVnN2v_expm1)
 
 PL_SIG (V, D, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (V_NAME (expm1), 1.68)

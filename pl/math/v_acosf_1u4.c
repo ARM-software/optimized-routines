@@ -96,7 +96,7 @@ VPCS_ATTR v_f32_t V_NAME (acosf) (v_f32_t x)
 
   return v_fma_f32 (mul, y, add);
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (acosf), _ZGVnN4v_acosf)
 
 PL_SIG (V, F, 1, acos, -1.0, 1.0)
 PL_TEST_ULP (V_NAME (acosf), 0.82)

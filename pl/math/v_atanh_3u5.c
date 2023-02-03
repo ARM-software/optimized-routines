@@ -45,7 +45,7 @@ v_f64_t V_NAME (atanh) (v_f64_t x)
     return specialcase (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (atanh), _ZGVnN2v_atanh)
 
 PL_SIG (V, D, 1, atanh, -1.0, 1.0)
 PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (atanh))

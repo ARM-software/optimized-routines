@@ -77,4 +77,3 @@ V_NAME(expf) (v_f32_t x)
     return specialcase (poly, n, e, absn, cmp, scale);
   return v_fma_f32 (poly, scale, scale);
 }
-VPCS_ALIAS

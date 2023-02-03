@@ -41,8 +41,6 @@ check atan2 nan nan x -nan -nan
 
 # vector functions
 flags="${ULPFLAGS:--q}"
-runv=
-check __v_log10f 1 && runv=1
 runvn=
 check __vn_log10f 1 && runvn=1
 runsv=

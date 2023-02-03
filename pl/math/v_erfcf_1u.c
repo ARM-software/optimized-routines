@@ -144,7 +144,7 @@ v_f32_t V_NAME (erfcf) (v_f32_t x)
 
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (erfcf), _ZGVnN4v_erfcf)
 
 PL_SIG (V, F, 1, erfc, -6.0, 28.0)
 PL_TEST_ULP (V_NAME (erfcf), 0.26)

@@ -75,26 +75,12 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZVD1_WRAP(func) static double Z_##func(double x) { return _ZGVnN2v_##func(argd(x))[0]; }
 #define ZVD2_WRAP(func) static double Z_##func(double x, double y) { return _ZGVnN2vv_##func(argd(x), argd(y))[0]; }
 
-#ifdef __vpcs
+#if defined(__vpcs) && __aarch64__
 
-#define ZVNF1_WRAP(func) VF1_WRAP(func) VNF1_WRAP(func) ZVF1_WRAP(func)
-#define ZVNF2_WRAP(func) VF2_WRAP(func) VNF2_WRAP(func) ZVF2_WRAP(func)
-#define ZVND1_WRAP(func) VD1_WRAP(func) VND1_WRAP(func) ZVD1_WRAP(func)
-#define ZVND2_WRAP(func) VD2_WRAP(func) VND2_WRAP(func) ZVD2_WRAP(func)
-
-#elif __aarch64__
-
-#define ZVNF1_WRAP(func) VF1_WRAP(func) VNF1_WRAP(func)
-#define ZVNF2_WRAP(func) VF2_WRAP(func) VNF2_WRAP(func)
-#define ZVND1_WRAP(func) VD1_WRAP(func) VND1_WRAP(func)
-#define ZVND2_WRAP(func) VD2_WRAP(func) VND2_WRAP(func)
-
-#elif WANT_VMATH
-
-#define ZVNF1_WRAP(func) VF1_WRAP(func)
-#define ZVNF2_WRAP(func) VF2_WRAP(func)
-#define ZVND1_WRAP(func) VD1_WRAP(func)
-#define ZVND2_WRAP(func) VD2_WRAP(func)
+#define ZVNF1_WRAP(func) VNF1_WRAP(func) ZVF1_WRAP(func)
+#define ZVNF2_WRAP(func) VNF2_WRAP(func) ZVF2_WRAP(func)
+#define ZVND1_WRAP(func) VND1_WRAP(func) ZVD1_WRAP(func)
+#define ZVND2_WRAP(func) VND2_WRAP(func) ZVD2_WRAP(func)
 
 #else
 

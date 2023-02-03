@@ -58,7 +58,7 @@ VPCS_ATTR v_f32_t V_NAME (coshf) (v_f32_t x)
 
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (coshf), _ZGVnN4v_coshf)
 
 PL_SIG (V, F, 1, cosh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (coshf), 1.89)

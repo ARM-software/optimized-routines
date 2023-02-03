@@ -92,7 +92,7 @@ v_f64_t V_NAME (log10) (v_f64_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (log10), _ZGVnN2v_log10)
 
 PL_SIG (V, D, 1, log10, 0.01, 11.1)
 PL_TEST_ULP (V_NAME (log10), 1.97)

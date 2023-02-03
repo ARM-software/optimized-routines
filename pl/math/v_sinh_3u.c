@@ -78,7 +78,7 @@ VPCS_ATTR v_f64_t V_NAME (sinh) (v_f64_t x)
   v_f64_t t = expm1_inline (ax);
   return (t + t / (t + 1)) * halfsign;
 }
-VPCS_ALIAS
+PL_ALIAS (__vn_sinh, _ZGVnN2v_sinh)
 
 PL_SIG (V, D, 1, sinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (sinh), 2.08)

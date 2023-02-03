@@ -14,18 +14,11 @@
 #endif
 #if WANT_VMATH
 
-#if VPCS && __aarch64__
+#if __aarch64__
 #define V_NAME(x) __vn_##x
 #define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
 #else
-#define V_NAME(x) __v_##x
-#endif
-
-#ifndef VPCS_ATTR
-#define VPCS_ATTR
-#endif
-#ifndef VPCS_ALIAS
-#define VPCS_ALIAS
+#error "Cannot build without AArch64"
 #endif
 
 #include <stdint.h>

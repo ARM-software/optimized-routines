@@ -52,7 +52,7 @@ v_f32_t V_NAME (log2f) (v_f32_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (log2f), _ZGVnN4v_log2f)
 
 PL_SIG (V, F, 1, log2, 0.01, 11.1)
 PL_TEST_ULP (V_NAME (log2f), 1.99)

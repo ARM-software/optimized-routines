@@ -102,7 +102,7 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
 
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (log1p), _ZGVnN2v_log1p)
 
 PL_SIG (V, D, 1, log1p, -0.9, 10.0)
 PL_TEST_ULP (V_NAME (log1p), 1.97)

@@ -37,7 +37,7 @@ VPCS_ATTR v_f64_t V_NAME (acosh) (v_f64_t x)
   v_f64_t u = xm1 * (x + 1);
   return log1p_inline (xm1 + v_sqrt_f64 (u));
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (acosh), _ZGVnN2v_acosh)
 
 PL_SIG (V, D, 1, acosh, 1.0, 10.0)
 PL_TEST_ULP (V_NAME (acosh), 2.53)

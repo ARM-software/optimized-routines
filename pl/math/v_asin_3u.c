@@ -93,7 +93,7 @@ VPCS_ATTR v_f64_t V_NAME (asin) (v_f64_t x)
   /* Copy sign.  */
   return v_as_f64_u64 (v_bsl_u64 (v_u64 (AbsMask), v_as_u64_f64 (y), ix));
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (asin), _ZGVnN2v_asin)
 
 PL_SIG (V, D, 1, asin, -1.0, 1.0)
 PL_TEST_ULP (V_NAME (asin), 2.19)

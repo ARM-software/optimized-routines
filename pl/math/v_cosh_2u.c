@@ -82,7 +82,7 @@ VPCS_ATTR v_f64_t V_NAME (cosh) (v_f64_t x)
   v_f64_t t = exp_inline (ax);
   return t * Half + Half / t;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (cosh), _ZGVnN2v_cosh)
 
 PL_SIG (V, D, 1, cosh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (cosh), 1.43)

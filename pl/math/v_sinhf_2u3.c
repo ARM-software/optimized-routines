@@ -53,7 +53,7 @@ VPCS_ATTR v_f32_t V_NAME (sinhf) (v_f32_t x)
   v_f32_t t = expm1f_inline (ax);
   return (t + t / (t + 1)) * halfsign;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (sinhf), _ZGVnN4v_sinhf)
 
 PL_SIG (V, F, 1, sinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (sinhf), 1.76)

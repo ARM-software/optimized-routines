@@ -78,7 +78,7 @@ VPCS_ATTR v_f64_t V_NAME (tanh) (v_f64_t x)
     return special_case (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (tanh), _ZGVnN2v_tanh)
 
 PL_SIG (V, D, 1, tanh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME (tanh), 2.26)

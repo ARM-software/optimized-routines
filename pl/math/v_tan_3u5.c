@@ -86,7 +86,7 @@ v_f64_t V_NAME (tan) (v_f64_t x)
 
   return v_sel_f64 (use_recip, -d, n) / v_sel_f64 (use_recip, n, d);
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (tan), _ZGVnN2v_tan)
 
 PL_SIG (V, D, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (V_NAME (tan), 2.99)

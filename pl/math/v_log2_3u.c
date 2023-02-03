@@ -79,7 +79,7 @@ v_f64_t V_NAME (log2) (v_f64_t x)
     return specialcase (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (log2), _ZGVnN2v_log2)
 
 PL_SIG (V, D, 1, log2, 0.01, 11.1)
 PL_TEST_ULP (V_NAME (log2), 2.09)

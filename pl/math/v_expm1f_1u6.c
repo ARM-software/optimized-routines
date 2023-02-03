@@ -80,7 +80,7 @@ v_f32_t V_NAME (expm1f) (v_f32_t x)
 
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (expm1f), _ZGVnN4v_expm1f)
 
 PL_SIG (V, F, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (V_NAME (expm1f), 1.02)

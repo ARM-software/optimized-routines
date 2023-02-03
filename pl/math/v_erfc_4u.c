@@ -144,7 +144,7 @@ v_f64_t V_NAME (erfc) (v_f64_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (erfc), _ZGVnN2v_erfc)
 
 PL_SIG (V, D, 1, erfc, -6.0, 28.0)
 PL_TEST_ULP (V_NAME (erfc), 3.15)

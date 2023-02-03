@@ -74,7 +74,7 @@ v_f32_t V_NAME (atan2f) (v_f32_t y, v_f32_t x)
 
   return ret;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (atan2f), _ZGVnN4vv_atan2f)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (V, F, 2, atan2)

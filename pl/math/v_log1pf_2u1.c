@@ -142,7 +142,7 @@ VPCS_ATTR v_f32_t V_NAME (log1pf) (v_f32_t x)
     return v_call_f32 (handle_special, special_arg, y, special_cases);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (__vn_log1pf, _ZGVnN4v_log1pf)
 
 PL_SIG (V, F, 1, log1p, -0.9, 10.0)
 PL_TEST_ULP (V_NAME (log1pf), 1.53)

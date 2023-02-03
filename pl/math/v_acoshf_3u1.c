@@ -50,7 +50,7 @@ VPCS_ATTR v_f32_t V_NAME (acoshf) (v_f32_t x)
     return special_case (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (acoshf), _ZGVnN4v_acoshf)
 
 PL_SIG (V, F, 1, acosh, 1.0, 10.0)
 #if WANT_SIMD_EXCEPT

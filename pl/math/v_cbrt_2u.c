@@ -86,7 +86,7 @@ VPCS_ATTR v_f64_t V_NAME (cbrt) (v_f64_t x)
     return specialcase (x, y, special);
   return y;
 }
-VPCS_ALIAS
+PL_ALIAS (V_NAME (cbrt), _ZGVnN2v_cbrt)
 
 PL_TEST_ULP (V_NAME (cbrt), 1.30)
 PL_SIG (V, D, 1, cbrt, -10.0, 10.0)

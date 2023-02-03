@@ -54,45 +54,6 @@ typedef __attribute__((__neon_vector_type__(2))) double __f64x2_t;
 #error Unsupported compiler
 #endif
 
-/* Vector functions following the base PCS.  */
-__f32x4_t __v_acoshf (__f32x4_t);
-__f64x2_t __v_acosh (__f64x2_t);
-__f32x4_t __v_acosf (__f32x4_t);
-__f64x2_t __v_acos (__f64x2_t);
-__f32x4_t __v_asinf (__f32x4_t);
-__f64x2_t __v_asin (__f64x2_t);
-__f32x4_t __v_asinhf (__f32x4_t);
-__f64x2_t __v_asinh (__f64x2_t);
-__f32x4_t __v_atanf (__f32x4_t);
-__f64x2_t __v_atan (__f64x2_t);
-__f32x4_t __v_atan2f (__f32x4_t, __f32x4_t);
-__f64x2_t __v_atan2 (__f64x2_t, __f64x2_t);
-__f32x4_t __v_atanhf (__f32x4_t);
-__f64x2_t __v_atanh (__f64x2_t);
-__f32x4_t __v_cbrtf (__f32x4_t);
-__f64x2_t __v_cbrt (__f64x2_t);
-__f32x4_t __v_coshf (__f32x4_t);
-__f64x2_t __v_cosh (__f64x2_t);
-__f32x4_t __v_erff (__f32x4_t);
-__f64x2_t __v_erf (__f64x2_t);
-__f32x4_t __v_erfcf (__f32x4_t);
-__f64x2_t __v_erfc (__f64x2_t);
-__f64x2_t __v_exp2 (__f64x2_t);
-__f32x4_t __v_expm1f (__f32x4_t);
-__f64x2_t __v_expm1 (__f64x2_t);
-__f32x4_t __v_log10f (__f32x4_t);
-__f64x2_t __v_log10 (__f64x2_t);
-__f32x4_t __v_log1pf (__f32x4_t);
-__f64x2_t __v_log1p (__f64x2_t);
-__f32x4_t __v_log2f (__f32x4_t);
-__f64x2_t __v_log2 (__f64x2_t);
-__f32x4_t __v_sinhf (__f32x4_t);
-__f64x2_t __v_sinh (__f64x2_t);
-__f32x4_t __v_tanf (__f32x4_t);
-__f64x2_t __v_tan (__f64x2_t);
-__f32x4_t __v_tanhf (__f32x4_t);
-__f64x2_t __v_tanh (__f64x2_t);
-
 #if __GNUC__ >= 9 || __clang_major__ >= 8
 #define __vpcs __attribute__((__aarch64_vector_pcs__))
 
