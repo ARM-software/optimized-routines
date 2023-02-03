@@ -7,7 +7,7 @@
 
 #include "math_config.h"
 
-#if V_SUPPORTED
+#if WANT_VMATH
 #define FMA v_fma_f64
 #else
 #define FMA fma

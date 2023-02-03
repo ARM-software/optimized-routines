@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define OneTop 0x3ff	/* top12(asuint64(1.0f)).  */
 #define HugeBound 0x5fe /* top12(asuint64(0x1p511)).  */
 #define TinyBound 0x3e5 /* top12(asuint64(0x1p-26)).  */
@@ -41,15 +39,10 @@ static inline struct entry
 lookup (v_u64_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  e.invc = T (i).invc;
-  e.logc = T (i).logc;
-#else
   e.invc[0] = T (i[0]).invc;
   e.logc[0] = T (i[0]).logc;
   e.invc[1] = T (i[1]).invc;
   e.logc[1] = T (i[1]).logc;
-#endif
   return e;
 }
 
@@ -172,4 +165,3 @@ V_ASINH_INTERVAL (-0, -0x1p-26, 50000)
 V_ASINH_INTERVAL (-0x1p-26, -1, 50000)
 V_ASINH_INTERVAL (-1, -0x1p511, 50000)
 V_ASINH_INTERVAL (-0x1p511, -inf, 40000)
-#endif

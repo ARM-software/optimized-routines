@@ -11,8 +11,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 VPCS_ATTR v_f32_t V_NAME (expf) (v_f32_t);
 
 #define AbsMask v_u32 (0x7fffffff)
@@ -35,10 +33,6 @@ static inline struct entry
 lookup (v_u32_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  for (int j = 0; j < V_ERFF_NCOEFFS; ++j)
-    e.P[j] = __v_erff_data.coeffs[j][i];
-#else
   for (int j = 0; j < V_ERFF_NCOEFFS; ++j)
     {
       e.P[j][0] = __v_erff_data.coeffs[j][i[0]];
@@ -46,7 +40,6 @@ lookup (v_u32_t i)
       e.P[j][2] = __v_erff_data.coeffs[j][i[2]];
       e.P[j][3] = __v_erff_data.coeffs[j][i[3]];
     }
-#endif
   return e;
 }
 
@@ -113,4 +106,3 @@ PL_TEST_INTERVAL (V_NAME (erff), -0x1p-127, -0x1p-26, 40000)
 PL_TEST_INTERVAL (V_NAME (erff), 0x1p-26, 0x1p3, 40000)
 PL_TEST_INTERVAL (V_NAME (erff), -0x1p-26, -0x1p3, 40000)
 PL_TEST_INTERVAL (V_NAME (erff), 0, inf, 40000)
-#endif

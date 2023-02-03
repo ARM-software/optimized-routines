@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #include "atanf_common.h"
 
 /* Useful constants.  */
@@ -86,4 +84,3 @@ PL_TEST_INTERVAL (V_NAME (atan2f), -1.0, 1.0, 40000)
 PL_TEST_INTERVAL (V_NAME (atan2f), 0.0, 1.0, 40000)
 PL_TEST_INTERVAL (V_NAME (atan2f), 1.0, 100.0, 40000)
 PL_TEST_INTERVAL (V_NAME (atan2f), 1e6, 1e32, 40000)
-#endif

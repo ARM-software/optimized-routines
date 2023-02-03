@@ -11,8 +11,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AbsMask v_u64 (0x7fffffffffffffff)
 #define AbsXMax v_f64 (0x1.8p+2)
 #define Scale v_f64 (0x1p+3)
@@ -36,11 +34,6 @@ static inline struct entry
 lookup (v_u64_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  for (int j = 0; j < V_ERF_NCOEFFS; ++j)
-    e.P[j] = __v_erf_data.coeffs[j][i];
-  e.shift = __v_erf_data.shifts[i];
-#else
   for (int j = 0; j < V_ERF_NCOEFFS; ++j)
     {
       e.P[j][0] = __v_erf_data.coeffs[j][i[0]];
@@ -48,7 +41,6 @@ lookup (v_u64_t i)
     }
   e.shift[0] = __v_erf_data.shifts[i[0]];
   e.shift[1] = __v_erf_data.shifts[i[1]];
-#endif
   return e;
 }
 
@@ -72,12 +64,8 @@ v_f64_t V_NAME (erf) (v_f64_t x)
   v_f64_t a = v_min_f64 (v_abs_f64 (x), AbsXMax);
 
   /* Compute index by truncating 8 * a with a=|x| saturated to 6.0.  */
-
-#ifdef SCALAR
-  v_u64_t i = v_trunc_u64 (a * Scale);
-#else
   v_u64_t i = vcvtq_n_u64_f64 (a, 3);
-#endif
+
   /* Get polynomial coefficients and shift parameter using lookup.  */
   struct entry dat = lookup (i);
 
@@ -113,4 +101,3 @@ PL_TEST_INTERVAL (V_NAME (erf), -0x1p-127, -0x1p-26, 40000)
 PL_TEST_INTERVAL (V_NAME (erf), 0x1p-26, 0x1p3, 40000)
 PL_TEST_INTERVAL (V_NAME (erf), -0x1p-26, -0x1p3, 40000)
 PL_TEST_INTERVAL (V_NAME (erf), 0, inf, 40000)
-#endif

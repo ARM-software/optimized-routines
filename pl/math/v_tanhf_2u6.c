@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #include "v_expm1f_inline.h"
 
 #define BoringBound                                                            \
@@ -66,4 +64,3 @@ PL_TEST_INTERVAL (V_NAME (tanhf), 0x1p-23, 0x1.205966p+3, 100000)
 PL_TEST_INTERVAL (V_NAME (tanhf), -0x1p-23, -0x1.205966p+3, 100000)
 PL_TEST_INTERVAL (V_NAME (tanhf), 0x1.205966p+3, inf, 100)
 PL_TEST_INTERVAL (V_NAME (tanhf), -0x1.205966p+3, -inf, 100)
-#endif

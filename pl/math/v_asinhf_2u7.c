@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define SignMask v_u32 (0x80000000)
 #define One v_f32 (1.0f)
 #define BigBound v_u32 (0x5f800000)  /* asuint(0x1p64).  */
@@ -67,4 +65,3 @@ PL_TEST_INTERVAL (V_NAME (asinhf), 0, -0x1p-12, 20000)
 PL_TEST_INTERVAL (V_NAME (asinhf), -0x1p-12, -1.0, 20000)
 PL_TEST_INTERVAL (V_NAME (asinhf), -1.0, -0x1p11, 20000)
 PL_TEST_INTERVAL (V_NAME (asinhf), -0x1p11, -inf, 20000)
-#endif

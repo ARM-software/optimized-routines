@@ -7,24 +7,17 @@
 
 #ifdef __vpcs
 
-#define _ZVF1(f) SF1 (f) VF1 (f) ZVNF1 (f)
-#define _ZVD1(f) SD1 (f) VD1 (f) ZVND1 (f)
-#define _ZVF2(f) SF2 (f) VF2 (f) ZVNF2 (f)
-#define _ZVD2(f) SD2 (f) VD2 (f) ZVND2 (f)
+#define _ZVF1(f) VF1 (f) ZVNF1 (f)
+#define _ZVD1(f) VD1 (f) ZVND1 (f)
+#define _ZVF2(f) VF2 (f) ZVNF2 (f)
+#define _ZVD2(f) VD2 (f) ZVND2 (f)
 
 #elif __aarch64
 
-#define _ZVF1(f) SF1 (f) VF1 (f)
-#define _ZVD1(f) SD1 (f) VD1 (f)
-#define _ZVF2(f) SF2 (f) VF2 (f)
-#define _ZVD2(f) SD2 (f) VD2 (f)
-
-#elif WANT_VMATH
-
-#define _ZVF1(f) SF1 (f)
-#define _ZVD1(f) SD1 (f)
-#define _ZVF2(f) SF2 (f)
-#define _ZVD2(f) SD2 (f)
+#define _ZVF1(f) VF1 (f)
+#define _ZVD1(f) VD1 (f)
+#define _ZVF2(f) VF2 (f)
+#define _ZVD2(f) VD2 (f)
 
 #else
 

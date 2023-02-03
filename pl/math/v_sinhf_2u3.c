@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #include "v_expm1f_inline.h"
 
 #define AbsMask 0x7fffffff
@@ -66,4 +64,3 @@ PL_TEST_INTERVAL (V_NAME (sinhf), TinyBound, BigBound, 100000)
 PL_TEST_INTERVAL (V_NAME (sinhf), -TinyBound, -BigBound, 100000)
 PL_TEST_INTERVAL (V_NAME (sinhf), BigBound, inf, 1000)
 PL_TEST_INTERVAL (V_NAME (sinhf), -BigBound, -inf, 1000)
-#endif

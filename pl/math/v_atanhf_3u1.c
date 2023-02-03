@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #include "v_log1pf_inline.h"
 
 #define AbsMask 0x7fffffff
@@ -59,4 +57,3 @@ PL_TEST_INTERVAL_C (V_NAME (atanhf), 1, inf, 1000, 0)
 PL_TEST_INTERVAL_C (V_NAME (atanhf), -0, -0x1p-12, 500, 0)
 PL_TEST_INTERVAL_C (V_NAME (atanhf), -0x1p-12, -1, 200000, 0)
 PL_TEST_INTERVAL_C (V_NAME (atanhf), -1, -inf, 1000, 0)
-#endif

@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AbsMask 0x7fffffffffffffff
 #define TwoThirds v_f64 (0x1.5555555555555p-1)
 #define TinyBound 0x001 /* top12 (smallest_normal).  */
@@ -95,4 +93,3 @@ PL_SIG (V, D, 1, cbrt, -10.0, 10.0)
 PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (cbrt))
 PL_TEST_INTERVAL (V_NAME (cbrt), 0, inf, 1000000)
 PL_TEST_INTERVAL (V_NAME (cbrt), -0, -inf, 1000000)
-#endif

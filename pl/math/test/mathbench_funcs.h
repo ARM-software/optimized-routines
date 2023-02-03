@@ -11,18 +11,13 @@
 
 #ifdef __vpcs
 
-#define _ZVF1(fun, a, b) F(__s_##fun##f, a, b) VF(__v_##fun##f, a, b) VNF(__vn_##fun##f, a, b) VNF(_ZGVnN4v_##fun##f, a, b)
-#define _ZVD1(f, a, b) D(__s_##f, a, b) VD(__v_##f, a, b) VND(__vn_##f, a, b) VND(_ZGVnN2v_##f, a, b)
+#define _ZVF1(fun, a, b) VF(__v_##fun##f, a, b) VNF(__vn_##fun##f, a, b) VNF(_ZGVnN4v_##fun##f, a, b)
+#define _ZVD1(f, a, b) VD(__v_##f, a, b) VND(__vn_##f, a, b) VND(_ZGVnN2v_##f, a, b)
 
 #elif __aarch64__
 
-#define _ZVF1(fun, a, b) F(__s_##fun##f, a, b) VF(__v_##fun##f, a, b)
-#define _ZVD1(f, a, b) D(__s_##f, a, b) VD(__v_##f, a, b)
-
-#elif WANT_VMATH
-
-#define _ZVF1(fun, a, b) F(__s_##fun##f, a, b)
-#define _ZVD1(f, a, b) D(__s_##f, a, b)
+#define _ZVF1(fun, a, b) VF(__v_##fun##f, a, b)
+#define _ZVD1(f, a, b) VD(__v_##f, a, b)
 
 #else
 
@@ -64,8 +59,6 @@
 {"atan2",  'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
 {"powi",   'd', 0,  0.01, 11.1, {.d = powi_wrap}},
 
-{"__s_atan2f",       'f', 0,   -10.0, 10.0, {.f = __s_atan2f_wrap}},
-{"__s_atan2",        'd', 0,   -10.0, 10.0, {.d = __s_atan2_wrap}},
 {"__v_atan2f",       'f', 'v', -10.0, 10.0, {.vf = __v_atan2f_wrap}},
 {"__v_atan2",        'd', 'v', -10.0, 10.0, {.vd = __v_atan2_wrap}},
 {"__vn_atan2f",      'f', 'n', -10.0, 10.0, {.vnf = __vn_atan2f_wrap}},

@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AllMask v_u64 (0xffffffffffffffff)
 #define AbsMask (0x7fffffffffffffff)
 #define Half v_f64 (0.5)
@@ -106,4 +104,3 @@ PL_TEST_INTERVAL (V_NAME (asin), 0.5, 1.0, 50000)
 PL_TEST_INTERVAL (V_NAME (asin), 1.0, 0x1p11, 50000)
 PL_TEST_INTERVAL (V_NAME (asin), 0x1p11, inf, 20000)
 PL_TEST_INTERVAL (V_NAME (asin), -0, -inf, 20000)
-#endif

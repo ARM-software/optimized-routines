@@ -43,45 +43,6 @@ double log1p (double);
 double sinh (double);
 double tanh (double);
 
-float __s_acoshf (float);
-float __s_acosf (float);
-float __s_asinf (float);
-float __s_asinhf (float);
-float __s_atanf (float);
-float __s_atan2f (float, float);
-float __s_atanhf (float);
-float __s_cbrtf (float);
-float __s_coshf (float);
-float __s_erfcf (float);
-float __s_erff (float);
-float __s_expm1f (float);
-float __s_log10f (float);
-float __s_log1pf (float);
-float __s_log2f (float);
-float __s_sinhf (float);
-float __s_tanf (float);
-float __s_tanhf (float);
-
-double __s_acosh (double);
-double __s_acos (double);
-double __s_asin (double);
-double __s_asinh (double);
-double __s_atan (double);
-double __s_atan2 (double, double);
-double __s_atanh (double);
-double __s_cbrt (double);
-double __s_cosh (double);
-double __s_erf (double);
-double __s_erfc (double);
-double __s_exp2 (double);
-double __s_expm1 (double);
-double __s_log10 (double);
-double __s_log1p (double);
-double __s_log2 (double);
-double __s_sinh (double);
-double __s_tan (double);
-double __s_tanh (double);
-
 #if __aarch64__
 #if __GNUC__ >= 5
 typedef __Float32x4_t __f32x4_t;

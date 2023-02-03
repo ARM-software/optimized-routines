@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AbsMask (0x7fffffff)
 #define Halff v_f32 (0.5f)
 #define PiOver2f v_f32 (0x1.921fb6p+0f)
@@ -99,4 +97,3 @@ PL_TEST_INTERVAL (V_NAME (asinf), 0.5, 1.0, 50000)
 PL_TEST_INTERVAL (V_NAME (asinf), 1.0, 0x1p11, 50000)
 PL_TEST_INTERVAL (V_NAME (asinf), 0x1p11, inf, 20000)
 PL_TEST_INTERVAL (V_NAME (asinf), -0, -inf, 20000)
-#endif

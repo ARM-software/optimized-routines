@@ -23,8 +23,6 @@
 #define One 0x3ff0000000000000
 #define C(i) v_f64 (__expm1_poly[i])
 
-#if V_SUPPORTED
-
 static inline v_f64_t
 expm1_inline (v_f64_t x)
 {
@@ -91,4 +89,3 @@ PL_TEST_INTERVAL (V_NAME (sinh), TinyBound, BigBound, 500000)
 PL_TEST_INTERVAL (V_NAME (sinh), -TinyBound, -BigBound, 500000)
 PL_TEST_INTERVAL (V_NAME (sinh), BigBound, inf, 1000)
 PL_TEST_INTERVAL (V_NAME (sinh), -BigBound, -inf, 1000)
-#endif

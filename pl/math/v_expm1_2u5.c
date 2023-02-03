@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define InvLn2 v_f64 (0x1.71547652b82fep0)
 #define MLn2hi v_f64 (-0x1.62e42fefa39efp-1)
 #define MLn2lo v_f64 (-0x1.abc9e3b39803fp-56)
@@ -110,4 +108,3 @@ PL_TEST_INTERVAL (V_NAME (expm1), 0x1p-51, 0x1.63108c75a1937p+9, 100000)
 PL_TEST_INTERVAL (V_NAME (expm1), -0x1p-51, -0x1.740bf7c0d927dp+9, 100000)
 PL_TEST_INTERVAL (V_NAME (expm1), 0x1.63108c75a1937p+9, inf, 100)
 PL_TEST_INTERVAL (V_NAME (expm1), -0x1.740bf7c0d927dp+9, -inf, 100)
-#endif

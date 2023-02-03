@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define N (1 << V_EXP2_TABLE_BITS)
 
 #define C(i) v_f64 (__v_exp2_data.poly[i])
@@ -85,4 +83,3 @@ PL_TEST_INTERVAL (V_NAME (exp2), BigBound, inf, 1000)
 PL_TEST_INTERVAL (V_NAME (exp2), -0, -TinyBound, 1000)
 PL_TEST_INTERVAL (V_NAME (exp2), -TinyBound, -BigBound, 100000)
 PL_TEST_INTERVAL (V_NAME (exp2), -BigBound, -inf, 1000)
-#endif

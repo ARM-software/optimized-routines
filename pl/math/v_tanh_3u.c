@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AbsMask v_u64 (0x7fffffffffffffff)
 #define InvLn2 v_f64 (0x1.71547652b82fep0)
 #define MLn2hi v_f64 (-0x1.62e42fefa39efp-1)
@@ -91,4 +89,3 @@ PL_TEST_INTERVAL (V_NAME (tanh), TinyBound, BoringBound, 100000)
 PL_TEST_INTERVAL (V_NAME (tanh), -TinyBound, -BoringBound, 100000)
 PL_TEST_INTERVAL (V_NAME (tanh), BoringBound, inf, 1000)
 PL_TEST_INTERVAL (V_NAME (tanh), -BoringBound, -inf, 1000)
-#endif

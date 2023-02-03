@@ -11,8 +11,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 /* Accurate exponential (vector variant of exp_dd).  */
 v_f64_t V_NAME (exp_tail) (v_f64_t, v_f64_t);
 
@@ -44,11 +42,6 @@ static inline struct entry
 lookup (v_u64_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  for (int j = 0; j <= ERFC_POLY_ORDER; ++j)
-    e.P[j] = PX[i][j];
-  e.xi = xint[i];
-#else
   for (int j = 0; j <= ERFC_POLY_ORDER; ++j)
     {
       e.P[j][0] = PX[i[0]][j];
@@ -56,7 +49,6 @@ lookup (v_u64_t i)
     }
   e.xi[0] = xint[i[0]];
   e.xi[1] = xint[i[1]];
-#endif
   return e;
 }
 
@@ -125,12 +117,9 @@ v_f64_t V_NAME (erfc) (v_f64_t x)
   i = (ixp1 >> 52) - v_u64 (1023);
 
   /* Index cannot exceed number of polynomials.  */
-#ifdef SCALAR
-  i = i <= (ERFC_NUM_INTERVALS) ? i : ERFC_NUM_INTERVALS;
-#else
   i = (v_u64_t){i[0] <= ERFC_NUM_INTERVALS ? i[0] : ERFC_NUM_INTERVALS,
 		i[1] <= ERFC_NUM_INTERVALS ? i[1] : ERFC_NUM_INTERVALS};
-#endif
+
   /* Get coeffs of i-th polynomial.  */
   dat = lookup (i);
 
@@ -165,4 +154,3 @@ PL_TEST_INTERVAL (V_NAME (erfc), -0x1p-1022, -0x1p-26, 40000)
 PL_TEST_INTERVAL (V_NAME (erfc), 0x1p-26, 0x1p5, 40000)
 PL_TEST_INTERVAL (V_NAME (erfc), -0x1p-26, -0x1p3, 40000)
 PL_TEST_INTERVAL (V_NAME (erfc), 0, inf, 40000)
-#endif

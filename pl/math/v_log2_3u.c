@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define InvLn2 v_f64 (0x1.71547652b82fep0)
 #define N (1 << V_LOG2_TABLE_BITS)
 #define OFF v_u64 (0x3fe6900900000000)
@@ -27,15 +25,10 @@ static inline struct entry
 lookup (v_u64_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  e.invc = __v_log2_data.tab[i].invc;
-  e.log2c = __v_log2_data.tab[i].log2c;
-#else
   e.invc[0] = __v_log2_data.tab[i[0]].invc;
   e.log2c[0] = __v_log2_data.tab[i[0]].log2c;
   e.invc[1] = __v_log2_data.tab[i[1]].invc;
   e.log2c[1] = __v_log2_data.tab[i[1]].log2c;
-#endif
   return e;
 }
 
@@ -97,4 +90,3 @@ PL_TEST_INTERVAL (V_NAME (log2), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (V_NAME (log2), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (V_NAME (log2), 1.0, 100, 50000)
 PL_TEST_INTERVAL (V_NAME (log2), 100, inf, 50000)
-#endif

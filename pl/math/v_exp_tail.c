@@ -7,7 +7,6 @@
 
 #include "v_math.h"
 #include "math_config.h"
-#if V_SUPPORTED
 #include "v_exp_tail.h"
 
 #define C1 v_f64 (C1_scal)
@@ -72,4 +71,3 @@ v_f64_t V_NAME (exp_tail) (v_f64_t x, v_f64_t xtail)
     return specialcase (s, y, n);
   return v_fma_f64 (y, s, s);
 }
-#endif

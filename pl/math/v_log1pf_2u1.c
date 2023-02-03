@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AbsMask 0x7fffffff
 #define TinyBound 0x340 /* asuint32(0x1p-23). ulp=0.5 at 0x1p-23.  */
 #define MinusOne 0xbf800000
@@ -157,4 +155,3 @@ PL_TEST_INTERVAL (V_NAME (log1pf), 0.0, -0x1p-23, 30000)
 PL_TEST_INTERVAL (V_NAME (log1pf), -0x1p-23, -0.001, 30000)
 PL_TEST_INTERVAL (V_NAME (log1pf), -0.001, -1.0, 50000)
 PL_TEST_INTERVAL (V_NAME (log1pf), -1.0, inf, 1000)
-#endif

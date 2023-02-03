@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define P(i) v_f32 (__v_log10f_poly[i])
 
 #define Ln2 v_f32 (0x1.62e43p-1f) /* 0x3f317218.  */
@@ -79,4 +77,3 @@ PL_TEST_ULP (V_NAME (log10f), 2.81)
 PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (log10f))
 PL_TEST_INTERVAL (V_NAME (log10f), 0, 0xffff0000, 10000)
 PL_TEST_INTERVAL (V_NAME (log10f), 0x1p-4, 0x1p4, 500000)
-#endif

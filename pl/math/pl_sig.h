@@ -9,7 +9,7 @@
 #define PL_DECL_SD1(fun) double fun (double);
 #define PL_DECL_SD2(fun) double fun (double, double);
 
-#if V_SUPPORTED
+#if WANT_VMATH
 #define PL_DECL_VF1(fun) VPCS_ATTR v_f32_t V_NAME (fun##f) (v_f32_t);
 #define PL_DECL_VF2(fun) VPCS_ATTR v_f32_t V_NAME (fun##f) (v_f32_t, v_f32_t);
 #define PL_DECL_VD1(fun) VPCS_ATTR v_f64_t V_NAME (fun) (v_f64_t);
@@ -21,7 +21,7 @@
 #define PL_DECL_VD2(fun)
 #endif
 
-#if SV_SUPPORTED
+#if WANT_SVE_MATH
 #define PL_DECL_SVF1(fun) sv_f32_t __sv_##fun##f_x (sv_f32_t, svbool_t);
 #define PL_DECL_SVF2(fun)                                                      \
   sv_f32_t __sv_##fun##f_x (sv_f32_t, sv_f32_t, svbool_t);

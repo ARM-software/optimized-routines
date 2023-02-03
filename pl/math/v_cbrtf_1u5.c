@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define AbsMask 0x7fffffff
 #define SignMask v_u32 (0x80000000)
 #define TwoThirds v_f32 (0x1.555556p-1f)
@@ -93,4 +91,3 @@ PL_TEST_ULP (V_NAME (cbrtf), 1.03)
 PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (cbrtf))
 PL_TEST_INTERVAL (V_NAME (cbrtf), 0, inf, 1000000)
 PL_TEST_INTERVAL (V_NAME (cbrtf), -0, -inf, 1000000)
-#endif

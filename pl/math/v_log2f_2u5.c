@@ -9,8 +9,6 @@
 #include "pairwise_hornerf.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#if V_SUPPORTED
-
 #define C(i) v_f32 (__v_log2f_data.poly[i])
 
 #define Ln2 v_f32 (0x1.62e43p-1f) /* 0x3f317218 */
@@ -65,4 +63,3 @@ PL_TEST_INTERVAL (V_NAME (log2f), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (V_NAME (log2f), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (V_NAME (log2f), 1.0, 100, 50000)
 PL_TEST_INTERVAL (V_NAME (log2f), 100, inf, 50000)
-#endif

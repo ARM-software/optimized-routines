@@ -13,8 +13,6 @@
 
 #define BigBoundTop 0x5fe /* top12 (asuint64 (0x1p511)).  */
 
-#if V_SUPPORTED
-
 static NOINLINE VPCS_ATTR v_f64_t
 special_case (v_f64_t x)
 {
@@ -48,4 +46,3 @@ PL_TEST_INTERVAL (V_NAME (acosh), 1, 0x1p511, 90000)
 PL_TEST_INTERVAL (V_NAME (acosh), 0x1p511, inf, 10000)
 PL_TEST_INTERVAL (V_NAME (acosh), 0, 1, 1000)
 PL_TEST_INTERVAL (V_NAME (acosh), -0, -inf, 10000)
-#endif

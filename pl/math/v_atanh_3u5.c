@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define WANT_V_LOG1P_K0_SHORTCUT 0
 #include "v_log1p_inline.h"
 
@@ -58,4 +56,3 @@ PL_TEST_INTERVAL_C (V_NAME (atanh), 0x1p-23, 1, 90000, 0)
 PL_TEST_INTERVAL_C (V_NAME (atanh), -0x1p-23, -1, 90000, 0)
 PL_TEST_INTERVAL_C (V_NAME (atanh), 1, inf, 100, 0)
 PL_TEST_INTERVAL_C (V_NAME (atanh), -1, -inf, 100, 0)
-#endif

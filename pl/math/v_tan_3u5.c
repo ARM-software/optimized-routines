@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define MHalfPiHi v_f64 (__v_tan_data.neg_half_pi_hi)
 #define MHalfPiLo v_f64 (__v_tan_data.neg_half_pi_lo)
 #define TwoOverPi v_f64 (0x1.45f306dc9c883p-1)
@@ -99,4 +97,3 @@ PL_TEST_INTERVAL (V_NAME (tan), RangeVal, inf, 5000)
 PL_TEST_INTERVAL (V_NAME (tan), -0, -TinyBound, 5000)
 PL_TEST_INTERVAL (V_NAME (tan), -TinyBound, -RangeVal, 100000)
 PL_TEST_INTERVAL (V_NAME (tan), -RangeVal, -inf, 5000)
-#endif

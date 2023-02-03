@@ -25,8 +25,6 @@
 #define SpecialBound                                                           \
   0x4086000000000000 /* 0x1.6p9, above which exp overflows.  */
 
-#if V_SUPPORTED
-
 static inline v_f64_t
 exp_inline (v_f64_t x)
 {
@@ -93,4 +91,3 @@ PL_TEST_INTERVAL (V_NAME (cosh), 0, 0x1.6p9, 100000)
 PL_TEST_INTERVAL (V_NAME (cosh), -0, -0x1.6p9, 100000)
 PL_TEST_INTERVAL (V_NAME (cosh), 0x1.6p9, inf, 1000)
 PL_TEST_INTERVAL (V_NAME (cosh), -0x1.6p9, -inf, 1000)
-#endif

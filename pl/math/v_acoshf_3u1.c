@@ -12,8 +12,6 @@
 #define One 0x3f800000
 #define SquareLim 0x5f800000 /* asuint(0x1p64).  */
 
-#if V_SUPPORTED
-
 #include "v_log1pf_inline.h"
 
 static NOINLINE VPCS_ATTR v_f32_t
@@ -65,4 +63,3 @@ PL_TEST_INTERVAL (V_NAME (acoshf), 0, 1, 500)
 PL_TEST_INTERVAL (V_NAME (acoshf), 1, SquareLim, 100000)
 PL_TEST_INTERVAL (V_NAME (acoshf), SquareLim, inf, 1000)
 PL_TEST_INTERVAL (V_NAME (acoshf), -0, -inf, 1000)
-#endif

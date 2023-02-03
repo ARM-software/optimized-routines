@@ -26,18 +26,6 @@ powi_wrap (double x)
 #if WANT_VMATH
 #if __aarch64__
 
-static double
-__s_atan2_wrap (double x)
-{
-  return __s_atan2 (5.0, x);
-}
-
-static float
-__s_atan2f_wrap (float x)
-{
-  return __s_atan2f (5.0f, x);
-}
-
 static v_double
 __v_atan2_wrap (v_double x)
 {

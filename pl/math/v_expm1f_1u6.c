@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define Shift v_f32 (0x1.8p23f)
 #define InvLn2 v_f32 (0x1.715476p+0f)
 #define MLn2hi v_f32 (-0x1.62e4p-1f)
@@ -91,4 +89,3 @@ PL_TEST_INTERVAL (V_NAME (expm1f), 0, 0x1p-23, 1000)
 PL_TEST_INTERVAL (V_NAME (expm1f), -0, -0x1p-23, 1000)
 PL_TEST_INTERVAL (V_NAME (expm1f), 0x1p-23, 0x1.644716p6, 1000000)
 PL_TEST_INTERVAL (V_NAME (expm1f), -0x1p-23, -0x1.9bbabcp+6, 1000000)
-#endif

@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #include "atan_common.h"
 
 #define PiOver2 v_f64 (0x1.921fb54442d18p+0)
@@ -87,4 +85,3 @@ PL_TEST_INTERVAL (V_NAME (atan2), -1.0, 1.0, 40000)
 PL_TEST_INTERVAL (V_NAME (atan2), 0.0, 1.0, 40000)
 PL_TEST_INTERVAL (V_NAME (atan2), 1.0, 100.0, 40000)
 PL_TEST_INTERVAL (V_NAME (atan2), 1e6, 1e32, 40000)
-#endif

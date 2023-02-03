@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#if V_SUPPORTED
+#if WANT_VMATH
 #define FMA v_fma_f64
 #else
 #define FMA fma

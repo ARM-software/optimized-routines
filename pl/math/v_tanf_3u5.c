@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 /* Constants.  */
 #define NegPio2_1 (v_f32 (-0x1.921fb6p+0f))
 #define NegPio2_2 (v_f32 (0x1.777a5cp-25f))
@@ -128,4 +126,3 @@ PL_TEST_INTERVAL (V_NAME (tanf), 0.7, 1.5, 50000)
 PL_TEST_INTERVAL (V_NAME (tanf), 1.5, 100, 50000)
 PL_TEST_INTERVAL (V_NAME (tanf), 100, 0x1p17, 50000)
 PL_TEST_INTERVAL (V_NAME (tanf), 0x1p17, inf, 50000)
-#endif

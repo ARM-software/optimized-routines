@@ -12,9 +12,7 @@
 #include "math_config.h"
 #include "estrinf.h"
 
-#if V_SUPPORTED
-
-#include "v_math.h"
+#if WANT_VMATH
 
 #define FLT_T v_f32_t
 #define P(i) v_f32 (__atanf_poly_data.poly[i])

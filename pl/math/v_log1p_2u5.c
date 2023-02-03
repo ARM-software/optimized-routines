@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define Ln2Hi v_f64 (0x1.62e42fefa3800p-1)
 #define Ln2Lo v_f64 (0x1.ef35793c76730p-45)
 #define HfRt2Top 0x3fe6a09e00000000 /* top32(asuint64(sqrt(2)/2)) << 32.  */
@@ -117,4 +115,3 @@ PL_TEST_INTERVAL (V_NAME (log1p), 0.0, -0x1p-23, 50000)
 PL_TEST_INTERVAL (V_NAME (log1p), -0x1p-23, -0.001, 50000)
 PL_TEST_INTERVAL (V_NAME (log1p), -0.001, -1.0, 50000)
 PL_TEST_INTERVAL (V_NAME (log1p), -1.0, inf, 5000)
-#endif

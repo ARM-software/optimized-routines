@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if V_SUPPORTED
-
 #define A(i) v_f64 (__v_log10_data.poly[i])
 #define T(s, i) __v_log10_data.tab[i].s
 #define Ln2 v_f64 (0x1.62e42fefa39efp-1)
@@ -28,15 +26,10 @@ static inline struct entry
 lookup (v_u64_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  e.invc = T (invc, i);
-  e.log10c = T (log10c, i);
-#else
   e.invc[0] = T (invc, i[0]);
   e.log10c[0] = T (log10c, i[0]);
   e.invc[1] = T (invc, i[1]);
   e.log10c[1] = T (log10c, i[1]);
-#endif
   return e;
 }
 
@@ -107,4 +100,3 @@ PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (log10))
 PL_TEST_INTERVAL (V_NAME (log10), 0, 0xffff000000000000, 10000)
 PL_TEST_INTERVAL (V_NAME (log10), 0x1p-4, 0x1p4, 400000)
 PL_TEST_INTERVAL (V_NAME (log10), 0, inf, 400000)
-#endif

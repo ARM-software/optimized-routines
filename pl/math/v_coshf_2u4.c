@@ -17,8 +17,6 @@
 		special case.  */
 #define Half v_f32 (0.5)
 
-#if V_SUPPORTED
-
 v_f32_t V_NAME (expf) (v_f32_t);
 
 /* Single-precision vector cosh, using vector expf.
@@ -71,4 +69,3 @@ PL_TEST_INTERVAL (V_NAME (coshf), 0x1.5a92d8p+6, inf, 2000)
 PL_TEST_INTERVAL (V_NAME (coshf), -0, -0x1p-63, 100)
 PL_TEST_INTERVAL (V_NAME (coshf), -0, -0x1.5a92d8p+6, 80000)
 PL_TEST_INTERVAL (V_NAME (coshf), -0x1.5a92d8p+6, -inf, 2000)
-#endif
