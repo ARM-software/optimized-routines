@@ -8,6 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "sv_estrinf.h"
 
 #if SV_SUPPORTED
 
@@ -18,7 +19,7 @@
 #define Ln2 0x1.62e43p-1f /* 0x3f317218.  */
 #define InvLn10 0x1.bcb7b2p-2f
 
-#define P(i) __v_log10f_poly[i]
+#define P(i) sv_f32 (__v_log10f_poly[i])
 
 static NOINLINE sv_f32_t
 special_case (sv_f32_t x, sv_f32_t y, svbool_t special)
@@ -49,19 +50,10 @@ __sv_log10f_x (sv_f32_t x, const svbool_t pg)
   /* y = log10(1+r) + n*log10(2)
      log10(1+r) ~ r * InvLn(10) + P(r)
      where P(r) is a polynomial. Use order 9 for log10(1+x), i.e. order 8 for
-     log10(1+x)/x, with x in [-1/3, 1/3] (offset=2/3)
-
-     P(r) = r2 * (Q01 + r2 * (Q23 + r2 * (Q45 + r2 * Q67)))
-     and Qij  = Pi + r * Pj.  */
-  sv_f32_t q12 = sv_fma_n_f32_x (pg, P (1), r, sv_f32 (P (0)));
-  sv_f32_t q34 = sv_fma_n_f32_x (pg, P (3), r, sv_f32 (P (2)));
-  sv_f32_t q56 = sv_fma_n_f32_x (pg, P (5), r, sv_f32 (P (4)));
-  sv_f32_t q78 = sv_fma_n_f32_x (pg, P (7), r, sv_f32 (P (6)));
-
+     log10(1+x)/x, with x in [-1/3, 1/3] (offset=2/3) */
   sv_f32_t r2 = svmul_f32_x (pg, r, r);
-  sv_f32_t y = sv_fma_f32_x (pg, q78, r2, q56);
-  y = sv_fma_f32_x (pg, y, r2, q34);
-  y = sv_fma_f32_x (pg, y, r2, q12);
+  sv_f32_t r4 = svmul_f32_x (pg, r2, r2);
+  sv_f32_t y = ESTRIN_7 (pg, r, r2, r4, P);
 
   /* Using p = Log10(2)*n + r*InvLn(10) is slightly faster but less
      accurate.  */

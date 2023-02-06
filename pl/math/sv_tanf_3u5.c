@@ -8,6 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "sv_estrinf.h"
 
 #if SV_SUPPORTED
 
@@ -27,12 +28,7 @@ eval_poly (svbool_t pg, sv_f32_t z)
 {
   sv_f32_t z2 = svmul_f32_x (pg, z, z);
   sv_f32_t z4 = svmul_f32_x (pg, z2, z2);
-  sv_f32_t y_10 = sv_fma_f32_x (pg, z, poly (1), poly (0));
-  sv_f32_t y_32 = sv_fma_f32_x (pg, z, poly (3), poly (2));
-  sv_f32_t y_54 = sv_fma_f32_x (pg, z, poly (5), poly (4));
-  sv_f32_t y_32_10 = sv_fma_f32_x (pg, z2, y_32, y_10);
-  sv_f32_t y = sv_fma_f32_x (pg, z4, y_54, y_32_10);
-  return y;
+  return ESTRIN_5 (pg, z, z2, z4, poly);
 }
 
 static NOINLINE sv_f32_t

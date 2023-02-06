@@ -8,6 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "sv_pairwise_hornerf.h"
 
 #if SV_SUPPORTED
 
@@ -48,15 +49,7 @@ __sv_log2f_x (sv_f32_t x, const svbool_t pg)
   sv_f32_t r2 = svmul_f32_x (pg, r, r);
 
   /* Evaluate polynomial using pairwise Horner scheme.  */
-  sv_f32_t p67 = sv_fma_n_f32_x (pg, P (7), r, sv_f32 (P (6)));
-  sv_f32_t p45 = sv_fma_n_f32_x (pg, P (5), r, sv_f32 (P (4)));
-  sv_f32_t p23 = sv_fma_n_f32_x (pg, P (3), r, sv_f32 (P (2)));
-  sv_f32_t p01 = sv_fma_n_f32_x (pg, P (1), r, sv_f32 (P (0)));
-  sv_f32_t y;
-  y = sv_fma_n_f32_x (pg, P (8), r2, p67);
-  y = sv_fma_f32_x (pg, y, r2, p45);
-  y = sv_fma_f32_x (pg, y, r2, p23);
-  y = sv_fma_f32_x (pg, y, r2, p01);
+  sv_f32_t y = PAIRWISE_HORNER_8 (pg, r, r2, P);
   y = sv_fma_f32_x (pg, y, r, n);
 
   if (unlikely (svptest_any (pg, special)))
