@@ -15,6 +15,9 @@
 #define OFF v_u64 (0x3fe6900900000000)
 #define P(i) v_f64 (__v_log2_data.poly[i])
 
+#define BigBound 0x7ff0000000000000
+#define TinyBound 0x0010000000000000
+
 struct entry
 {
   v_f64_t invc;
@@ -48,9 +51,7 @@ VPCS_ATTR
 v_f64_t V_NAME (log2) (v_f64_t x)
 {
   v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t top = ix >> 48;
-  v_u64_t special
-    = v_cond_u64 (top - v_u64 (0x0010) >= v_u64 (0x7ff0 - 0x0010));
+  v_u64_t special = v_cond_u64 (ix - TinyBound >= BigBound - TinyBound);
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.
