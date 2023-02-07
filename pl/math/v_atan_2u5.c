@@ -22,17 +22,17 @@
    __v_atan(0x1.0005af27c23e9p+0) got 0x1.9225645bdd7c1p-1
 				 want 0x1.9225645bdd7c3p-1.  */
 VPCS_ATTR
-v_f64_t V_NAME (atan) (v_f64_t x)
+float64x2_t V_NAME (atan) (float64x2_t x)
 {
   /* Small cases, infs and nans are supported by our approximation technique,
      but do not set fenv flags correctly. Only trigger special case if we need
      fenv.  */
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t sign = ix & ~AbsMask;
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t sign = ix & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
-  v_u64_t ia12 = (ix >> 52) & 0x7ff;
-  v_u64_t special = v_cond_u64 (ia12 - TinyBound > BigBound - TinyBound);
+  uint64x2_t ia12 = (ix >> 52) & 0x7ff;
+  uint64x2_t special = v_cond_u64 (ia12 - TinyBound > BigBound - TinyBound);
   /* If any lane is special, fall back to the scalar routine for all lanes.  */
   if (unlikely (v_any_u64 (special)))
     return v_call_f64 (atan, x, v_f64 (0), v_u64 (-1));
@@ -42,16 +42,16 @@ v_f64_t V_NAME (atan) (v_f64_t x)
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
-  v_u64_t red = v_cagt_f64 (x, v_f64 (1.0));
+  uint64x2_t red = v_cagt_f64 (x, v_f64 (1.0));
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  v_f64_t z = v_sel_f64 (red, v_div_f64 (v_f64 (-1.0), x), x);
-  v_f64_t shift = v_sel_f64 (red, PiOver2, v_f64 (0.0));
+  float64x2_t z = v_sel_f64 (red, v_div_f64 (v_f64 (-1.0), x), x);
+  float64x2_t shift = v_sel_f64 (red, PiOver2, v_f64 (0.0));
   /* Use absolute value only when needed (odd powers of z).  */
-  v_f64_t az = v_abs_f64 (z);
+  float64x2_t az = v_abs_f64 (z);
   az = v_sel_f64 (red, -az, az);
 
   /* Calculate the polynomial approximation.  */
-  v_f64_t y = eval_poly (z, az, shift);
+  float64x2_t y = eval_poly (z, az, shift);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
   y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);

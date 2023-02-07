@@ -11,7 +11,7 @@
 
 #if WANT_VMATH
 
-#define DBL_T v_f64_t
+#define DBL_T float64x2_t
 #define P(i) v_f64 (__atan_poly_data.poly[i])
 
 #else

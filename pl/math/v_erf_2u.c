@@ -17,8 +17,8 @@
 
 /* Special cases (fall back to scalar calls).  */
 VPCS_ATTR
-NOINLINE static v_f64_t
-specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
+NOINLINE static float64x2_t
+specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 {
   return v_call_f64 (erf, x, y, cmp);
 }
@@ -26,12 +26,12 @@ specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 /* A structure to perform look-up in coeffs and other parameter tables.  */
 struct entry
 {
-  v_f64_t P[V_ERF_NCOEFFS];
-  v_f64_t shift;
+  float64x2_t P[V_ERF_NCOEFFS];
+  float64x2_t shift;
 };
 
 static inline struct entry
-lookup (v_u64_t i)
+lookup (uint64x2_t i)
 {
   struct entry e;
   for (int j = 0; j < V_ERF_NCOEFFS; ++j)
@@ -49,37 +49,37 @@ lookup (v_u64_t i)
    verf(0x1.c5e0c2d5d0543p-4) got 0x1.fe0ed62a54987p-4
 			     want 0x1.fe0ed62a54985p-4.  */
 VPCS_ATTR
-v_f64_t V_NAME (erf) (v_f64_t x)
+float64x2_t V_NAME (erf) (float64x2_t x)
 {
   /* Handle both inf/nan as well as small values (|x|<2^-28)
      If any condition in the lane is true then a loop over
      scalar calls will be performed.  */
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t atop = (ix >> 48) & v_u64 (0x7fff);
-  v_u64_t special_case
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t atop = (ix >> 48) & v_u64 (0x7fff);
+  uint64x2_t special_case
     = v_cond_u64 (atop - v_u64 (0x3e30) >= v_u64 (0x7ff0 - 0x3e30));
 
   /* Get sign and absolute value.  */
-  v_u64_t sign = v_as_u64_f64 (x) & ~AbsMask;
-  v_f64_t a = v_min_f64 (v_abs_f64 (x), AbsXMax);
+  uint64x2_t sign = v_as_u64_f64 (x) & ~AbsMask;
+  float64x2_t a = v_min_f64 (v_abs_f64 (x), AbsXMax);
 
   /* Compute index by truncating 8 * a with a=|x| saturated to 6.0.  */
-  v_u64_t i = vcvtq_n_u64_f64 (a, 3);
+  uint64x2_t i = vcvtq_n_u64_f64 (a, 3);
 
   /* Get polynomial coefficients and shift parameter using lookup.  */
   struct entry dat = lookup (i);
 
   /* Evaluate polynomial on transformed argument.  */
-  v_f64_t z = v_fma_f64 (a, Scale, dat.shift);
+  float64x2_t z = v_fma_f64 (a, Scale, dat.shift);
 
-  v_f64_t r1 = v_fma_f64 (z, dat.P[1], dat.P[0]);
-  v_f64_t r2 = v_fma_f64 (z, dat.P[3], dat.P[2]);
-  v_f64_t r3 = v_fma_f64 (z, dat.P[5], dat.P[4]);
-  v_f64_t r4 = v_fma_f64 (z, dat.P[7], dat.P[6]);
-  v_f64_t r5 = v_fma_f64 (z, dat.P[9], dat.P[8]);
+  float64x2_t r1 = v_fma_f64 (z, dat.P[1], dat.P[0]);
+  float64x2_t r2 = v_fma_f64 (z, dat.P[3], dat.P[2]);
+  float64x2_t r3 = v_fma_f64 (z, dat.P[5], dat.P[4]);
+  float64x2_t r4 = v_fma_f64 (z, dat.P[7], dat.P[6]);
+  float64x2_t r5 = v_fma_f64 (z, dat.P[9], dat.P[8]);
 
-  v_f64_t z2 = z * z;
-  v_f64_t y = v_fma_f64 (z2, r5, r4);
+  float64x2_t z2 = z * z;
+  float64x2_t y = v_fma_f64 (z2, r5, r4);
   y = v_fma_f64 (z2, y, r3);
   y = v_fma_f64 (z2, y, r2);
   y = v_fma_f64 (z2, y, r1);

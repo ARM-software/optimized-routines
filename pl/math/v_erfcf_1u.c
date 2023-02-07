@@ -13,11 +13,11 @@
 
 #define P(ia12) __erfcf_poly_data.poly[interval_index (ia12)]
 
-VPCS_ATTR v_f64_t V_NAME (exp_tail) (v_f64_t, v_f64_t);
+VPCS_ATTR float64x2_t V_NAME (exp_tail) (float64x2_t, float64x2_t);
 
 #ifndef SCALAR
-static VPCS_ATTR NOINLINE v_f32_t
-specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
+static VPCS_ATTR NOINLINE float32x4_t
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
 {
   return v_call_f32 (erfcf, x, y, special);
 }
@@ -36,16 +36,16 @@ interval_index (uint32_t ia12)
 
 /* The C macro wraps the coeffs argument in order to make the
    poynomial evaluation more readable.  */
-#define C(i) ((v_f64_t){coeff1[i], coeff2[i]})
+#define C(i) ((float64x2_t){coeff1[i], coeff2[i]})
 
-static inline v_f64_t
-v_approx_erfcf_poly_gauss (v_f64_t x, const double *coeff1,
+static inline float64x2_t
+v_approx_erfcf_poly_gauss (float64x2_t x, const double *coeff1,
 			   const double *coeff2)
 {
-  v_f64_t x2 = x * x;
-  v_f64_t x4 = x2 * x2;
-  v_f64_t poly = ESTRIN_15 (x, x2, x4, x4 * x4, C);
-  v_f64_t gauss = V_NAME (exp_tail) (-(x * x), v_f64 (0.0));
+  float64x2_t x2 = x * x;
+  float64x2_t x4 = x2 * x2;
+  float64x2_t poly = ESTRIN_15 (x, x2, x4, x4 * x4, C);
+  float64x2_t gauss = V_NAME (exp_tail) (-(x * x), v_f64 (0.0));
   return poly * gauss;
 }
 
@@ -55,8 +55,9 @@ approx_poly_gauss (float abs_x, const double *coeff)
   return (float) (eval_poly (abs_x, coeff) * eval_exp_mx2 (abs_x));
 }
 
-static v_f32_t
-v_approx_erfcf (v_f32_t abs_x, v_u32_t sign, v_u32_t ia12, v_u32_t lanes)
+static float32x4_t
+v_approx_erfcf (float32x4_t abs_x, uint32x4_t sign, uint32x4_t ia12,
+		uint32x4_t lanes)
 {
   float32x2_t lo32 = {0, 0};
   float32x2_t hi32 = {0, 0};
@@ -102,7 +103,7 @@ v_approx_erfcf (v_f32_t abs_x, v_u32_t sign, v_u32_t ia12, v_u32_t lanes)
       hi32[1] = approx_poly_gauss (abs_x[3], P (ia12[3]));
     }
 
-  v_f32_t y = vcombine_f32 (lo32, hi32);
+  float32x4_t y = vcombine_f32 (lo32, hi32);
 
   if (v_any_u32 (sign))
     {
@@ -118,22 +119,22 @@ v_approx_erfcf (v_f32_t abs_x, v_u32_t sign, v_u32_t ia12, v_u32_t lanes)
    __v_erfc(-0x1.08185p-18) got 0x1.00004cp+0 want 0x1.00004ap+0
    +0.249908 ulp err 0.250092.  */
 VPCS_ATTR
-v_f32_t V_NAME (erfcf) (v_f32_t x)
+float32x4_t V_NAME (erfcf) (float32x4_t x)
 {
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_u32_t ia = ix & 0x7fffffff;
-  v_u32_t ia12 = ia >> 20;
-  v_u32_t sign = ix >> 31;
-  v_u32_t inf_ia12 = v_u32 (0x7f8);
+  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ia = ix & 0x7fffffff;
+  uint32x4_t ia12 = ia >> 20;
+  uint32x4_t sign = ix >> 31;
+  uint32x4_t inf_ia12 = v_u32 (0x7f8);
 
-  v_u32_t special_cases
+  uint32x4_t special_cases
     = v_cond_u32 ((ia12 - 0x328) >= ((inf_ia12 & 0x7f8) - 0x328));
-  v_u32_t in_bounds
+  uint32x4_t in_bounds
     = v_cond_u32 ((ia < 0x408ccccd) | (~sign & (ix < 0x4120f5c3)));
-  v_f32_t boring_zone = v_as_f32_u32 (sign << 30);
+  float32x4_t boring_zone = v_as_f32_u32 (sign << 30);
 
-  v_f32_t y = v_approx_erfcf (v_as_f32_u32 (ia), sign, ia12,
-			      in_bounds & ~special_cases);
+  float32x4_t y = v_approx_erfcf (v_as_f32_u32 (ia), sign, ia12,
+				  in_bounds & ~special_cases);
 
   y = vbslq_f32 (~in_bounds, boring_zone, y);
 

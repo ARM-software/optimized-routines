@@ -23,20 +23,20 @@
 #define T(i) __log_data.tab[i]
 #define N (1 << LOG_TABLE_BITS)
 
-static NOINLINE v_f64_t
-special_case (v_f64_t x, v_f64_t y, v_u64_t special)
+static NOINLINE float64x2_t
+special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 {
   return v_call_f64 (asinh, x, y, special);
 }
 
 struct entry
 {
-  v_f64_t invc;
-  v_f64_t logc;
+  float64x2_t invc;
+  float64x2_t logc;
 };
 
 static inline struct entry
-lookup (v_u64_t i)
+lookup (uint64x2_t i)
 {
   struct entry e;
   e.invc[0] = T (i[0]).invc;
@@ -46,25 +46,25 @@ lookup (v_u64_t i)
   return e;
 }
 
-static inline v_f64_t
-log_inline (v_f64_t x)
+static inline float64x2_t
+log_inline (float64x2_t x)
 {
   /* Double-precision vector log, copied from math/v_log.c with some cosmetic
      modification and special-cases removed. See that file for details of the
      algorithm used.  */
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t tmp = ix - OFF;
-  v_u64_t i = (tmp >> (52 - LOG_TABLE_BITS)) % N;
-  v_s64_t k = v_as_s64_u64 (tmp) >> 52;
-  v_u64_t iz = ix - (tmp & 0xfffULL << 52);
-  v_f64_t z = v_as_f64_u64 (iz);
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t tmp = ix - OFF;
+  uint64x2_t i = (tmp >> (52 - LOG_TABLE_BITS)) % N;
+  int64x2_t k = v_as_s64_u64 (tmp) >> 52;
+  uint64x2_t iz = ix - (tmp & 0xfffULL << 52);
+  float64x2_t z = v_as_f64_u64 (iz);
   struct entry e = lookup (i);
-  v_f64_t r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
-  v_f64_t kd = v_to_f64_s64 (k);
-  v_f64_t hi = v_fma_f64 (kd, Ln2, e.logc + r);
-  v_f64_t r2 = r * r;
-  v_f64_t y = v_fma_f64 (A (3), r, A (2));
-  v_f64_t p = v_fma_f64 (A (1), r, A (0));
+  float64x2_t r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
+  float64x2_t kd = v_to_f64_s64 (k);
+  float64x2_t hi = v_fma_f64 (kd, Ln2, e.logc + r);
+  float64x2_t r2 = r * r;
+  float64x2_t y = v_fma_f64 (A (3), r, A (2));
+  float64x2_t p = v_fma_f64 (A (1), r, A (0));
   y = v_fma_f64 (A (4), r2, y);
   y = v_fma_f64 (y, r2, p);
   y = v_fma_f64 (y, r2, hi);
@@ -82,18 +82,18 @@ log_inline (v_f64_t x)
    |x| >= 1:
    __v_asinh(0x1.2cd9d717e2c9bp+0) got 0x1.ffffcfd0e234fp-1
 				  want 0x1.ffffcfd0e2352p-1.  */
-VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
+VPCS_ATTR float64x2_t V_NAME (asinh) (float64x2_t x)
 {
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t iax = ix & AbsMask;
-  v_f64_t ax = v_as_f64_u64 (iax);
-  v_u64_t top12 = iax >> 52;
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t iax = ix & AbsMask;
+  float64x2_t ax = v_as_f64_u64 (iax);
+  uint64x2_t top12 = iax >> 52;
 
-  v_u64_t gt1 = v_cond_u64 (top12 >= OneTop);
-  v_u64_t special = v_cond_u64 (top12 >= HugeBound);
+  uint64x2_t gt1 = v_cond_u64 (top12 >= OneTop);
+  uint64x2_t special = v_cond_u64 (top12 >= HugeBound);
 
 #if WANT_SIMD_EXCEPT
-  v_u64_t tiny = v_cond_u64 (top12 < TinyBound);
+  uint64x2_t tiny = v_cond_u64 (top12 < TinyBound);
   special |= tiny;
 #endif
 
@@ -101,13 +101,13 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
      Compute asinh(x) according by asinh(x) = log(x + sqrt(x^2 + 1)).
      If WANT_SIMD_EXCEPT is enabled, sidestep special values, which will
      overflow, by setting special lanes to 1. These will be fixed later.  */
-  v_f64_t option_1 = v_f64 (0);
+  float64x2_t option_1 = v_f64 (0);
   if (likely (v_any_u64 (gt1)))
     {
 #if WANT_SIMD_EXCEPT
-      v_f64_t xm = v_sel_f64 (special, v_f64 (1), ax);
+      float64x2_t xm = v_sel_f64 (special, v_f64 (1), ax);
 #else
-      v_f64_t xm = ax;
+      float64x2_t xm = ax;
 #endif
       option_1 = log_inline (xm + v_sqrt_f64 (xm * xm + 1));
     }
@@ -120,17 +120,17 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
      special-case. The largest observed error in this region is 1.47 ULPs:
      __v_asinh(0x1.fdfcd00cc1e6ap-1) got 0x1.c1d6bf874019bp-1
 				    want 0x1.c1d6bf874019cp-1.  */
-  v_f64_t option_2 = v_f64 (0);
+  float64x2_t option_2 = v_f64 (0);
   if (likely (v_any_u64 (~gt1)))
     {
 #if WANT_SIMD_EXCEPT
       ax = v_sel_f64 (tiny | gt1, v_f64 (0), ax);
 #endif
-      v_f64_t x2 = ax * ax;
-      v_f64_t z2 = x2 * x2;
-      v_f64_t z4 = z2 * z2;
-      v_f64_t z8 = z4 * z4;
-      v_f64_t p = ESTRIN_17 (x2, z2, z4, z8, z8 * z8, C);
+      float64x2_t x2 = ax * ax;
+      float64x2_t z2 = x2 * x2;
+      float64x2_t z4 = z2 * z2;
+      float64x2_t z8 = z4 * z4;
+      float64x2_t p = ESTRIN_17 (x2, z2, z4, z8, z8 * z8, C);
       option_2 = v_fma_f64 (p, x2 * ax, ax);
 #if WANT_SIMD_EXCEPT
       option_2 = v_sel_f64 (tiny, x, option_2);
@@ -138,7 +138,7 @@ VPCS_ATTR v_f64_t V_NAME (asinh) (v_f64_t x)
     }
 
   /* Choose the right option for each lane.  */
-  v_f64_t y = v_sel_f64 (gt1, option_1, option_2);
+  float64x2_t y = v_sel_f64 (gt1, option_1, option_2);
   /* Copy sign.  */
   y = v_as_f64_u64 (v_bsl_u64 (AbsMask, v_as_u64_f64 (y), ix));
 

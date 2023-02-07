@@ -21,18 +21,18 @@
 #define AbsMask 0x7fffffffffffffff
 #define C(i) v_f64 (__log1p_data.coeffs[i])
 
-static inline v_f64_t
-eval_poly (v_f64_t f)
+static inline float64x2_t
+eval_poly (float64x2_t f)
 {
-  v_f64_t f2 = f * f;
-  v_f64_t f4 = f2 * f2;
-  v_f64_t f8 = f4 * f4;
+  float64x2_t f2 = f * f;
+  float64x2_t f4 = f2 * f2;
+  float64x2_t f8 = f4 * f4;
   return ESTRIN_18 (f, f2, f4, f8, f8 * f8, C);
 }
 
 VPCS_ATTR
-NOINLINE static v_f64_t
-specialcase (v_f64_t x, v_f64_t y, v_u64_t special)
+NOINLINE static float64x2_t
+specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
 {
   return v_call_f64 (log1p, x, y, special);
 }
@@ -42,11 +42,11 @@ specialcase (v_f64_t x, v_f64_t y, v_u64_t special)
    and no narrowing for f and k. Maximum observed error is 2.46 ULP:
     __v_log1p(0x1.654a1307242a4p+11) got 0x1.fd5565fb590f4p+2
 				    want 0x1.fd5565fb590f6p+2 .  */
-VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
+VPCS_ATTR float64x2_t V_NAME (log1p) (float64x2_t x)
 {
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t ia = ix & AbsMask;
-  v_u64_t special
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ia = ix & AbsMask;
+  uint64x2_t special
     = v_cond_u64 ((ia >= v_u64 (0x7ff0000000000000))
 		  | (ix >= 0xbff0000000000000) | (ix == 0x8000000000000000));
 
@@ -70,20 +70,20 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
      The scalar algorithm casts down to 32-bit at this point to calculate k and
      u_red. We stay in double-width to obtain f and k, using the same constants
      as the scalar algorithm but shifted left by 32.  */
-  v_f64_t m = x + 1;
-  v_u64_t mi = v_as_u64_f64 (m);
-  v_u64_t u = mi + OneMHfRt2Top;
+  float64x2_t m = x + 1;
+  uint64x2_t mi = v_as_u64_f64 (m);
+  uint64x2_t u = mi + OneMHfRt2Top;
 
-  v_s64_t ki = v_as_s64_u64 (u >> 52) - OneTop12;
-  v_f64_t k = v_to_f64_s64 (ki);
+  int64x2_t ki = v_as_s64_u64 (u >> 52) - OneTop12;
+  float64x2_t k = v_to_f64_s64 (ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
-  v_u64_t utop = (u & 0x000fffff00000000) + HfRt2Top;
-  v_u64_t u_red = utop | (mi & BottomMask);
-  v_f64_t f = v_as_f64_u64 (u_red) - 1;
+  uint64x2_t utop = (u & 0x000fffff00000000) + HfRt2Top;
+  uint64x2_t u_red = utop | (mi & BottomMask);
+  float64x2_t f = v_as_f64_u64 (u_red) - 1;
 
   /* Correction term c/m.  */
-  v_f64_t cm = (x - (m - 1)) / m;
+  float64x2_t cm = (x - (m - 1)) / m;
 
   /* Approximate log1p(x) on the reduced input using a polynomial. Because
    log1p(0)=0 we choose an approximation of the form:
@@ -91,11 +91,11 @@ VPCS_ATTR v_f64_t V_NAME (log1p) (v_f64_t x)
    Hence approximation has the form f + f^2 * P(f)
       where P(x) = C0 + C1*x + C2x^2 + ...
    Assembling this all correctly is dealt with at the final step.  */
-  v_f64_t p = eval_poly (f);
+  float64x2_t p = eval_poly (f);
 
-  v_f64_t ylo = v_fma_f64 (k, Ln2Lo, cm);
-  v_f64_t yhi = v_fma_f64 (k, Ln2Hi, f);
-  v_f64_t y = v_fma_f64 (f * f, p, ylo + yhi);
+  float64x2_t ylo = v_fma_f64 (k, Ln2Lo, cm);
+  float64x2_t yhi = v_fma_f64 (k, Ln2Hi, f);
+  float64x2_t y = v_fma_f64 (f * f, p, ylo + yhi);
 
   if (unlikely (v_any_u64 (special)))
     return specialcase (v_as_f64_u64 (ix), y, special);

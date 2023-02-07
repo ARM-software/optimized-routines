@@ -19,8 +19,8 @@
 
 /* Call scalar exp2 as a fallback.  */
 VPCS_ATTR
-static NOINLINE v_f64_t
-specialcase (v_f64_t x)
+static NOINLINE float64x2_t
+specialcase (float64x2_t x)
 {
   return v_call_f64 (exp2, x, x, v_u64 (-1));
 }
@@ -30,12 +30,12 @@ specialcase (v_f64_t x)
    v_exp2(-0x1.8c68c2231567ap-2)
 	 got 0x1.8780e9885f8e3p-1
 	want 0x1.8780e9885f8e2p-1.  */
-VPCS_ATTR v_f64_t V_NAME (exp2) (v_f64_t x)
+VPCS_ATTR float64x2_t V_NAME (exp2) (float64x2_t x)
 {
-  v_u64_t abstop = v_as_u64_f64 (x) & 0x7ff0000000000000;
+  uint64x2_t abstop = v_as_u64_f64 (x) & 0x7ff0000000000000;
 
   /* abstop - 0x1p-54 >= 512.0 - 0x1p-54.  */
-  v_u64_t uoflow = v_cond_u64 (abstop - TinyBound >= BigBound - TinyBound);
+  uint64x2_t uoflow = v_cond_u64 (abstop - TinyBound >= BigBound - TinyBound);
 
   /* When any special cases (underflow, overflow, large x) are possible,
      fall back to scalar.  */
@@ -46,28 +46,28 @@ VPCS_ATTR v_f64_t V_NAME (exp2) (v_f64_t x)
 
   /* exp2(x) = 2^(k/N) * 2^r, with 2^r in [2^(-1/2N),2^(1/2N)].  */
   /* x = k/N + r, with int k and r in [-1/2N, 1/2N].  */
-  v_f64_t kd = x + __v_exp2_data.shift;
-  v_u64_t ki = v_as_u64_f64 (kd); /* k.  */
+  float64x2_t kd = x + __v_exp2_data.shift;
+  uint64x2_t ki = v_as_u64_f64 (kd); /* k.  */
   kd -= __v_exp2_data.shift;	  /* k/N for int k.  */
-  v_f64_t r = x - kd;
-  v_f64_t r2 = r * r;
+  float64x2_t r = x - kd;
+  float64x2_t r2 = r * r;
 
   /* 2^(k/N) ~= scale.  */
   /* n % N <=> n & (N-1) since N is a power of 2.  */
-  v_u64_t idx = ki & (N - 1);
-  v_u64_t tab_sbits = v_lookup_u64 (__v_exp2_data.sbits, idx);
-  v_u64_t top = ki << (52 - V_EXP2_TABLE_BITS);
+  uint64x2_t idx = ki & (N - 1);
+  uint64x2_t tab_sbits = v_lookup_u64 (__v_exp2_data.sbits, idx);
+  uint64x2_t top = ki << (52 - V_EXP2_TABLE_BITS);
   /* This is only a valid scale when -1023*N < k < 1024*N.  */
-  v_u64_t sbits = tab_sbits + top;
+  uint64x2_t sbits = tab_sbits + top;
 
   /* exp2(x) = 2^(k/N) * 2^r ~= scale + scale * (2^r - 1).  */
   /* Use offset version of Estrin wrapper to evaluate from C1 onwards.
      We avoid forming r2*r2 to avoid overflow.  */
-  v_f64_t p1234 = ESTRIN_3_ (r, r2, C, 1);
-  v_f64_t p0 = r * v_f64 (__v_exp2_data.poly[0]);
-  v_f64_t tmp = v_fma_f64 (r2, p1234, p0);
+  float64x2_t p1234 = ESTRIN_3_ (r, r2, C, 1);
+  float64x2_t p0 = r * v_f64 (__v_exp2_data.poly[0]);
+  float64x2_t tmp = v_fma_f64 (r2, p1234, p0);
 
-  v_f64_t scale = v_as_f64_u64 (sbits);
+  float64x2_t scale = v_as_f64_u64 (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-65 and scale > 2^-928, so there
      is no spurious underflow here even without fma.  */
   return v_fma_f64 (scale, tmp, scale);

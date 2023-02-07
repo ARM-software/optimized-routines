@@ -22,8 +22,8 @@
 #define P(i) v_f32 (__asinf_poly[i])
 
 #if WANT_SIMD_EXCEPT
-static NOINLINE v_f32_t
-specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
+static NOINLINE float32x4_t
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
 {
   return v_call_f32 (asinf, x, y, special);
 }
@@ -49,15 +49,15 @@ specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
 
    The largest observed error in this region is 2.41 ulps,
      __v_asinf(0x1.00203ep-1) got 0x1.0c3a64p-1 want 0x1.0c3a6p-1.  */
-VPCS_ATTR v_f32_t V_NAME (asinf) (v_f32_t x)
+VPCS_ATTR float32x4_t V_NAME (asinf) (float32x4_t x)
 {
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_u32_t ia = ix & AbsMask;
+  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ia = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
   /* Special values need to be computed with scalar fallbacks so
      that appropriate fp exceptions are raised.  */
-  v_u32_t special = v_cond_u32 (ia - Small > One - Small);
+  uint32x4_t special = v_cond_u32 (ia - Small > One - Small);
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, x, v_u32 (0xffffffff));
 #else
@@ -65,23 +65,23 @@ VPCS_ATTR v_f32_t V_NAME (asinf) (v_f32_t x)
   ix = v_sel_u32 (v_cond_u32 (x < MOnef), v_u32 (0), ix);
 #endif
 
-  v_f32_t ax = v_as_f32_u32 (ia);
-  v_u32_t a_lt_half = v_cond_u32 (ia < Half);
+  float32x4_t ax = v_as_f32_u32 (ia);
+  uint32x4_t a_lt_half = v_cond_u32 (ia < Half);
 
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5
      z = (1 - |x|) / 2 and y = sqrt(z), if |x| >= 0.5.  */
-  v_f32_t z2 = v_sel_f32 (a_lt_half, x * x, v_fma_f32 (-Halff, ax, Halff));
-  v_f32_t z = v_sel_f32 (a_lt_half, ax, v_sqrt_f32 (z2));
+  float32x4_t z2 = v_sel_f32 (a_lt_half, x * x, v_fma_f32 (-Halff, ax, Halff));
+  float32x4_t z = v_sel_f32 (a_lt_half, ax, v_sqrt_f32 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
-  v_f32_t p = HORNER_4 (z2, P);
+  float32x4_t p = HORNER_4 (z2, P);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = v_fma_f32 (z * z2, p, z);
 
   /* asin(|x|) = Q(|x|)         , for |x| < 0.5
 	       = pi/2 - 2 Q(|x|), for |x| >= 0.5.  */
-  v_f32_t y = v_sel_f32 (a_lt_half, p, v_fma_f32 (-Twof, p, PiOver2f));
+  float32x4_t y = v_sel_f32 (a_lt_half, p, v_fma_f32 (-Twof, p, PiOver2f));
 
   /* Copy sign.  */
   return v_as_f32_u32 (v_bsl_u32 (v_u32 (AbsMask), v_as_u32_f32 (y), ix));

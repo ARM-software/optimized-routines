@@ -18,8 +18,8 @@
 #define One 0x3ff0000000000000
 
 VPCS_ATTR
-NOINLINE static v_f64_t
-specialcase (v_f64_t x, v_f64_t y, v_u64_t special)
+NOINLINE static float64x2_t
+specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
 {
   return v_call_f64 (atanh, x, y, special);
 }
@@ -29,17 +29,17 @@ specialcase (v_f64_t x, v_f64_t y, v_u64_t special)
    __v_atanh(0x1.ffae6288b601p-6) got 0x1.ffd8ff31b5019p-6
 				 want 0x1.ffd8ff31b501cp-6.  */
 VPCS_ATTR
-v_f64_t V_NAME (atanh) (v_f64_t x)
+float64x2_t V_NAME (atanh) (float64x2_t x)
 {
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t sign = ix & ~AbsMask;
-  v_u64_t ia = ix & AbsMask;
-  v_u64_t special = v_cond_u64 (ia >= One);
-  v_f64_t halfsign = v_as_f64_u64 (sign | Half);
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t sign = ix & ~AbsMask;
+  uint64x2_t ia = ix & AbsMask;
+  uint64x2_t special = v_cond_u64 (ia >= One);
+  float64x2_t halfsign = v_as_f64_u64 (sign | Half);
 
   /* Mask special lanes with 0 to prevent spurious underflow.  */
-  v_f64_t ax = v_sel_f64 (special, v_f64 (0), v_as_f64_u64 (ia));
-  v_f64_t y = halfsign * log1p_inline ((2 * ax) / (1 - ax));
+  float64x2_t ax = v_sel_f64 (special, v_f64 (0), v_as_f64_u64 (ia));
+  float64x2_t y = halfsign * log1p_inline ((2 * ax) / (1 - ax));
 
   if (unlikely (v_any_u64 (special)))
     return specialcase (x, y, special);

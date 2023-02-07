@@ -14,7 +14,7 @@
 
 #if WANT_VMATH
 
-#define FLT_T v_f32_t
+#define FLT_T float32x4_t
 #define P(i) v_f32 (__atanf_poly_data.poly[i])
 
 #else

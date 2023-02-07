@@ -21,8 +21,8 @@
 
 /* Special cases (fall back to scalar calls).  */
 VPCS_ATTR
-NOINLINE static v_f64_t
-specialcase (v_f64_t x)
+NOINLINE static float64x2_t
+specialcase (float64x2_t x)
 {
   return v_call_f64 (tan, x, x, v_u64 (-1));
 }
@@ -32,9 +32,9 @@ specialcase (v_f64_t x)
    __v_tan(0x1.4457047ef78d8p+20) got -0x1.f6ccd8ecf7dedp+37
 				 want -0x1.f6ccd8ecf7deap+37.   */
 VPCS_ATTR
-v_f64_t V_NAME (tan) (v_f64_t x)
+float64x2_t V_NAME (tan) (float64x2_t x)
 {
-  v_u64_t iax = v_as_u64_f64 (x) & AbsMask;
+  uint64x2_t iax = v_as_u64_f64 (x) & AbsMask;
 
   /* Our argument reduction cannot calculate q with sufficient accuracy for very
      large inputs. Fall back to scalar routine for all lanes if any are too
@@ -49,12 +49,12 @@ v_f64_t V_NAME (tan) (v_f64_t x)
     return specialcase (x);
 
   /* q = nearest integer to 2 * x / pi.  */
-  v_f64_t q = v_fma_f64 (x, TwoOverPi, Shift) - Shift;
-  v_s64_t qi = v_to_s64_f64 (q);
+  float64x2_t q = v_fma_f64 (x, TwoOverPi, Shift) - Shift;
+  int64x2_t qi = v_to_s64_f64 (q);
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
-  v_f64_t r = x;
+  float64x2_t r = x;
   r = v_fma_f64 (q, MHalfPiHi, r);
   r = v_fma_f64 (q, MHalfPiLo, r);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
@@ -67,9 +67,9 @@ v_f64_t V_NAME (tan) (v_f64_t x)
      Hence we first approximate P(r) = C1 + C2 * r^2 + C3 * r^4 + ...
      Then compute the approximation by:
      tan(r) ~= r + r^3 * (C0 + r^2 * P(r)).  */
-  v_f64_t r2 = r * r, r4 = r2 * r2, r8 = r4 * r4;
+  float64x2_t r2 = r * r, r4 = r2 * r2, r8 = r4 * r4;
   /* Use offset version of Estrin wrapper to evaluate from C1 onwards.  */
-  v_f64_t p = ESTRIN_7_ (r2, r4, r8, C, 1);
+  float64x2_t p = ESTRIN_7_ (r2, r4, r8, C, 1);
   p = v_fma_f64 (p, r2, C (0));
   p = v_fma_f64 (r2, p * r, r);
 
@@ -79,10 +79,10 @@ v_f64_t V_NAME (tan) (v_f64_t x)
      tan(x) = 1 / (tan(pi/2 - x))
      to assemble result using change-of-sign and conditional selection of
      numerator/denominator, dependent on odd/even-ness of q (hence quadrant). */
-  v_f64_t n = v_fma_f64 (p, p, v_f64 (-1));
-  v_f64_t d = p * 2;
+  float64x2_t n = v_fma_f64 (p, p, v_f64 (-1));
+  float64x2_t d = p * 2;
 
-  v_u64_t use_recip = v_cond_u64 ((v_as_u64_s64 (qi) & 1) == 0);
+  uint64x2_t use_recip = v_cond_u64 ((v_as_u64_s64 (qi) & 1) == 0);
 
   return v_sel_f64 (use_recip, -d, n) / v_sel_f64 (use_recip, n, d);
 }

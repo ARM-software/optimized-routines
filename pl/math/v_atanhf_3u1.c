@@ -21,26 +21,26 @@
    The maximum error is 3.08 ULP:
    __v_atanhf(0x1.ff215p-5) got 0x1.ffcb7cp-5
 			   want 0x1.ffcb82p-5.  */
-VPCS_ATTR v_f32_t V_NAME (atanhf) (v_f32_t x)
+VPCS_ATTR float32x4_t V_NAME (atanhf) (float32x4_t x)
 {
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_f32_t halfsign
+  uint32x4_t ix = v_as_u32_f32 (x);
+  float32x4_t halfsign
     = v_as_f32_u32 (v_bsl_u32 (v_u32 (AbsMask), v_u32 (Half), ix));
-  v_u32_t iax = ix & AbsMask;
+  uint32x4_t iax = ix & AbsMask;
 
-  v_f32_t ax = v_as_f32_u32 (iax);
+  float32x4_t ax = v_as_f32_u32 (iax);
 
 #if WANT_SIMD_EXCEPT
-  v_u32_t special = v_cond_u32 ((iax >= One) | (iax <= TinyBound));
+  uint32x4_t special = v_cond_u32 ((iax >= One) | (iax <= TinyBound));
   /* Side-step special cases by setting those lanes to 0, which will trigger no
      exceptions. These will be fixed up later.  */
   if (unlikely (v_any_u32 (special)))
     ax = v_sel_f32 (special, v_f32 (0), ax);
 #else
-  v_u32_t special = v_cond_u32 (iax >= One);
+  uint32x4_t special = v_cond_u32 (iax >= One);
 #endif
 
-  v_f32_t y = halfsign * log1pf_inline ((2 * ax) / (1 - ax));
+  float32x4_t y = halfsign * log1pf_inline ((2 * ax) / (1 - ax));
 
   if (unlikely (v_any_u32 (special)))
     return v_call_f32 (atanhf, x, y, special);

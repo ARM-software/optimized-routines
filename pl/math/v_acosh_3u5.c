@@ -13,8 +13,8 @@
 
 #define BigBoundTop 0x5fe /* top12 (asuint64 (0x1p511)).  */
 
-static NOINLINE VPCS_ATTR v_f64_t
-special_case (v_f64_t x)
+static NOINLINE VPCS_ATTR float64x2_t
+special_case (float64x2_t x)
 {
   return v_call_f64 (acosh, x, x, v_u64 (-1));
 }
@@ -24,17 +24,17 @@ special_case (v_f64_t x)
    argument to log1p falls in the k=0 interval, i.e. x close to 1:
    __v_acosh(0x1.00798aaf80739p+0) got 0x1.f2d6d823bc9dfp-5
 				  want 0x1.f2d6d823bc9e2p-5.  */
-VPCS_ATTR v_f64_t V_NAME (acosh) (v_f64_t x)
+VPCS_ATTR float64x2_t V_NAME (acosh) (float64x2_t x)
 {
-  v_u64_t itop = v_as_u64_f64 (x) >> 52;
-  v_u64_t special = v_cond_u64 ((itop - OneTop) >= (BigBoundTop - OneTop));
+  uint64x2_t itop = v_as_u64_f64 (x) >> 52;
+  uint64x2_t special = v_cond_u64 ((itop - OneTop) >= (BigBoundTop - OneTop));
 
   /* Fall back to scalar routine for all lanes if any of them are special.  */
   if (unlikely (v_any_u64 (special)))
     return special_case (x);
 
-  v_f64_t xm1 = x - 1;
-  v_f64_t u = xm1 * (x + 1);
+  float64x2_t xm1 = x - 1;
+  float64x2_t u = xm1 * (x + 1);
   return log1p_inline (xm1 + v_sqrt_f64 (u));
 }
 PL_ALIAS (V_NAME (acosh), _ZGVnN2v_acosh)

@@ -23,8 +23,8 @@
 
 #define C(i) v_f64 (__log1p_data.coeffs[i])
 
-static inline v_f64_t
-log1p_inline (v_f64_t x)
+static inline float64x2_t
+log1p_inline (float64x2_t x)
 {
   /* Helper for calculating log(x + 1). Copied from v_log1p_2u5.c, with several
      modifications:
@@ -35,20 +35,20 @@ log1p_inline (v_f64_t x)
        0. This feature is enabled by defining WANT_V_LOG1P_K0_SHORTCUT as 1 in
        the source of the caller before including this file.
      See v_log1pf_2u1.c for details of the algorithm.  */
-  v_f64_t m = x + 1;
-  v_u64_t mi = v_as_u64_f64 (m);
-  v_u64_t u = mi + OneMHfRt2Top;
+  float64x2_t m = x + 1;
+  uint64x2_t mi = v_as_u64_f64 (m);
+  uint64x2_t u = mi + OneMHfRt2Top;
 
-  v_s64_t ki = v_as_s64_u64 (u >> 52) - OneTop;
-  v_f64_t k = v_to_f64_s64 (ki);
+  int64x2_t ki = v_as_s64_u64 (u >> 52) - OneTop;
+  float64x2_t k = v_to_f64_s64 (ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
-  v_u64_t utop = (u & 0x000fffff00000000) + HfRt2Top;
-  v_u64_t u_red = utop | (mi & BottomMask);
-  v_f64_t f = v_as_f64_u64 (u_red) - 1;
+  uint64x2_t utop = (u & 0x000fffff00000000) + HfRt2Top;
+  uint64x2_t u_red = utop | (mi & BottomMask);
+  float64x2_t f = v_as_f64_u64 (u_red) - 1;
 
   /* Correction term c/m.  */
-  v_f64_t cm = (x - (m - 1)) / m;
+  float64x2_t cm = (x - (m - 1)) / m;
 
 #ifndef WANT_V_LOG1P_K0_SHORTCUT
 #error                                                                         \
@@ -56,7 +56,7 @@ log1p_inline (v_f64_t x)
 #elif WANT_V_LOG1P_K0_SHORTCUT
   /* Shortcut if k is 0 - set correction term to 0 and f to x. The result is
      that the approximation is solely the polynomial. */
-  v_u64_t k0 = k == 0;
+  uint64x2_t k0 = k == 0;
   if (unlikely (v_any_u64 (k0)))
     {
       cm = v_sel_f64 (k0, v_f64 (0), cm);
@@ -65,12 +65,12 @@ log1p_inline (v_f64_t x)
 #endif
 
   /* Approximate log1p(f) on the reduced input using a polynomial.  */
-  v_f64_t f2 = f * f;
-  v_f64_t p = PAIRWISE_HORNER_18 (f, f2, C);
+  float64x2_t f2 = f * f;
+  float64x2_t p = PAIRWISE_HORNER_18 (f, f2, C);
 
   /* Assemble log1p(x) = k * log2 + log1p(f) + c/m.  */
-  v_f64_t ylo = v_fma_f64 (k, Ln2Lo, cm);
-  v_f64_t yhi = v_fma_f64 (k, Ln2Hi, f);
+  float64x2_t ylo = v_fma_f64 (k, Ln2Lo, cm);
+  float64x2_t yhi = v_fma_f64 (k, Ln2Hi, f);
   return v_fma_f64 (f2, p, ylo + yhi);
 }
 

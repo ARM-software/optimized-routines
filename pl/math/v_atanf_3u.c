@@ -17,8 +17,8 @@
 #define BigBound 0x4e8	/* top12(asuint(0x1p30)).  */
 
 #if WANT_SIMD_EXCEPT
-static NOINLINE v_f32_t
-specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
+static NOINLINE float32x4_t
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
 {
   return v_call_f32 (atanf, x, y, special);
 }
@@ -29,17 +29,17 @@ specialcase (v_f32_t x, v_f32_t y, v_u32_t special)
    using z=-1/x and shift = pi/2. Maximum observed error is 2.9ulps:
    v_atanf(0x1.0468f6p+0) got 0x1.967f06p-1 want 0x1.967fp-1.  */
 VPCS_ATTR
-v_f32_t V_NAME (atanf) (v_f32_t x)
+float32x4_t V_NAME (atanf) (float32x4_t x)
 {
   /* Small cases, infs and nans are supported by our approximation technique,
      but do not set fenv flags correctly. Only trigger special case if we need
      fenv.  */
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_u32_t sign = ix & ~AbsMask;
+  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t sign = ix & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
-  v_u32_t ia12 = (ix >> 20) & 0x7ff;
-  v_u32_t special = v_cond_u32 (ia12 - TinyBound > BigBound - TinyBound);
+  uint32x4_t ia12 = (ix >> 20) & 0x7ff;
+  uint32x4_t special = v_cond_u32 (ia12 - TinyBound > BigBound - TinyBound);
   /* If any lane is special, fall back to the scalar routine for all lanes.  */
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, x, v_u32 (-1));
@@ -49,16 +49,16 @@ v_f32_t V_NAME (atanf) (v_f32_t x)
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
-  v_u32_t red = v_cagt_f32 (x, v_f32 (1.0));
+  uint32x4_t red = v_cagt_f32 (x, v_f32 (1.0));
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  v_f32_t z = v_sel_f32 (red, v_div_f32 (v_f32 (-1.0f), x), x);
-  v_f32_t shift = v_sel_f32 (red, PiOver2, v_f32 (0.0f));
+  float32x4_t z = v_sel_f32 (red, v_div_f32 (v_f32 (-1.0f), x), x);
+  float32x4_t shift = v_sel_f32 (red, PiOver2, v_f32 (0.0f));
   /* Use absolute value only when needed (odd powers of z).  */
-  v_f32_t az = v_abs_f32 (z);
+  float32x4_t az = v_abs_f32 (z);
   az = v_sel_f32 (red, -az, az);
 
   /* Calculate the polynomial approximation.  */
-  v_f32_t y = eval_poly (z, az, shift);
+  float32x4_t y = eval_poly (z, az, shift);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
   y = v_as_f32_u32 (v_as_u32_f32 (y) ^ sign);

@@ -21,31 +21,31 @@
 #define TinyBound 0x3e40000000000000   /* asuint64 (0x1p-27).  */
 #define One v_u64 (0x3ff0000000000000)
 
-static inline v_f64_t
-expm1_inline (v_f64_t x)
+static inline float64x2_t
+expm1_inline (float64x2_t x)
 {
   /* Helper routine for calculating exp(x) - 1. Vector port of the helper from
      the scalar variant of tanh.  */
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
-  v_f64_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
-  v_s64_t i = v_to_s64_f64 (j);
-  v_f64_t f = v_fma_f64 (j, MLn2hi, x);
+  float64x2_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
+  int64x2_t i = v_to_s64_f64 (j);
+  float64x2_t f = v_fma_f64 (j, MLn2hi, x);
   f = v_fma_f64 (j, MLn2lo, f);
 
   /* Approximate expm1(f) using polynomial.  */
-  v_f64_t f2 = f * f;
-  v_f64_t f4 = f2 * f2;
-  v_f64_t p = v_fma_f64 (f2, ESTRIN_10 (f, f2, f4, f4 * f4, C), f);
+  float64x2_t f2 = f * f;
+  float64x2_t f4 = f2 * f2;
+  float64x2_t p = v_fma_f64 (f2, ESTRIN_10 (f, f2, f4, f4 * f4, C), f);
 
   /* t = 2 ^ i.  */
-  v_f64_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
+  float64x2_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
   /* expm1(x) = p * t + (t - 1).  */
   return v_fma_f64 (p, t, t - 1);
 }
 
-static NOINLINE v_f64_t
-special_case (v_f64_t x, v_f64_t y, v_u64_t special)
+static NOINLINE float64x2_t
+special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 {
   return v_call_f64 (tanh, x, y, special);
 }
@@ -54,14 +54,15 @@ special_case (v_f64_t x, v_f64_t y, v_u64_t special)
    version of expm1. The greatest observed error is 2.75 ULP:
    __v_tanh(-0x1.c143c3a44e087p-3) got -0x1.ba31ba4691ab7p-3
 				  want -0x1.ba31ba4691ab4p-3.  */
-VPCS_ATTR v_f64_t V_NAME (tanh) (v_f64_t x)
+VPCS_ATTR float64x2_t V_NAME (tanh) (float64x2_t x)
 {
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t ia = ix & AbsMask;
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ia = ix & AbsMask;
 
   /* Trigger special-cases for tiny, boring and infinity/NaN.  */
-  v_u64_t special = v_cond_u64 ((ia - TinyBound) > (BoringBound - TinyBound));
-  v_f64_t u;
+  uint64x2_t special
+    = v_cond_u64 ((ia - TinyBound) > (BoringBound - TinyBound));
+  float64x2_t u;
 
   /* To trigger fp exceptions correctly, set special lanes to a neutral value.
      They will be fixed up later by the special-case handler.  */
@@ -71,8 +72,8 @@ VPCS_ATTR v_f64_t V_NAME (tanh) (v_f64_t x)
     u = x * 2;
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
-  v_f64_t q = expm1_inline (u);
-  v_f64_t y = q / (q + 2);
+  float64x2_t q = expm1_inline (u);
+  float64x2_t y = q / (q + 2);
 
   if (unlikely (v_any_u64 (special)))
     return special_case (x, y, special);

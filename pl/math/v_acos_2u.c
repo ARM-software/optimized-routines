@@ -25,8 +25,8 @@
 #define P(i) v_f64 (__asin_poly[i])
 
 #if WANT_SIMD_EXCEPT
-static NOINLINE v_f64_t
-special_case (v_f64_t x, v_f64_t y, v_u64_t special)
+static NOINLINE float64x2_t
+special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 {
   return v_call_f64 (acos, x, y, special);
 }
@@ -57,14 +57,14 @@ special_case (v_f64_t x, v_f64_t y, v_u64_t special)
    The largest observed error in this region is 1.52 ulps,
    __v_acos(0x1.23d362722f591p-1) got 0x1.edbbedf8a7d6ep-1
 				 want 0x1.edbbedf8a7d6cp-1.  */
-VPCS_ATTR v_f64_t V_NAME (acos) (v_f64_t x)
+VPCS_ATTR float64x2_t V_NAME (acos) (float64x2_t x)
 {
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t ia = ix & AbsMask;
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ia = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
   /* A single comparison for One, Small and QNaN.  */
-  v_u64_t special = v_cond_u64 (ia - Small > Oneu - Small);
+  uint64x2_t special = v_cond_u64 (ia - Small > Oneu - Small);
   if (unlikely (v_any_u64 (special)))
     return special_case (x, x, AllMask);
 #else
@@ -72,20 +72,20 @@ VPCS_ATTR v_f64_t V_NAME (acos) (v_f64_t x)
   ix = v_sel_u64 (v_cond_u64 (x < MOne), v_u64 (0), ix);
 #endif
 
-  v_f64_t ax = v_as_f64_u64 (ia);
-  v_u64_t a_le_half = v_cond_u64 (ia <= Halfu);
+  float64x2_t ax = v_as_f64_u64 (ia);
+  uint64x2_t a_le_half = v_cond_u64 (ia <= Halfu);
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
      z2 = (1 - |x|) / 2 and z = sqrt(z2), if |x| >= 0.5.  */
-  v_f64_t z2 = v_sel_f64 (a_le_half, x * x, v_fma_f64 (-Half, ax, Half));
-  v_f64_t z = v_sel_f64 (a_le_half, ax, v_sqrt_f64 (z2));
+  float64x2_t z2 = v_sel_f64 (a_le_half, x * x, v_fma_f64 (-Half, ax, Half));
+  float64x2_t z = v_sel_f64 (a_le_half, ax, v_sqrt_f64 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
-  v_f64_t z4 = z2 * z2;
-  v_f64_t z8 = z4 * z4;
-  v_f64_t z16 = z8 * z8;
-  v_f64_t p = ESTRIN_11 (z2, z4, z8, z16, P);
+  float64x2_t z4 = z2 * z2;
+  float64x2_t z8 = z4 * z4;
+  float64x2_t z16 = z8 * z8;
+  float64x2_t p = ESTRIN_11 (z2, z4, z8, z16, P);
 
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = v_fma_f64 (z * z2, p, z);
@@ -93,12 +93,13 @@ VPCS_ATTR v_f64_t V_NAME (acos) (v_f64_t x)
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  v_f64_t y = v_as_f64_u64 (v_bsl_u64 (v_u64 (AbsMask), v_as_u64_f64 (p), ix));
+  float64x2_t y
+    = v_as_f64_u64 (v_bsl_u64 (v_u64 (AbsMask), v_as_u64_f64 (p), ix));
 
-  v_u64_t sign = v_cond_u64 (x < 0);
-  v_f64_t off = v_sel_f64 (sign, Pi, v_f64 (0.0));
-  v_f64_t mul = v_sel_f64 (a_le_half, -One, Two);
-  v_f64_t add = v_sel_f64 (a_le_half, PiOver2, off);
+  uint64x2_t sign = v_cond_u64 (x < 0);
+  float64x2_t off = v_sel_f64 (sign, Pi, v_f64 (0.0));
+  float64x2_t mul = v_sel_f64 (a_le_half, -One, Two);
+  float64x2_t add = v_sel_f64 (a_le_half, PiOver2, off);
 
   return v_fma_f64 (mul, y, add);
 }

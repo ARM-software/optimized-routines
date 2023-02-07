@@ -21,26 +21,27 @@
 #define Thres v_f64 (Thres_scal)
 
 VPCS_ATTR
-static v_f64_t
-specialcase (v_f64_t s, v_f64_t y, v_f64_t n)
+static float64x2_t
+specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 {
-  v_f64_t absn = v_abs_f64 (n);
+  float64x2_t absn = v_abs_f64 (n);
 
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
-  v_u64_t b = v_cond_u64 (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
-  v_f64_t s1 = v_as_f64_u64 (v_u64 (0x7000000000000000) - b);
-  v_f64_t s2 = v_as_f64_u64 (v_as_u64_f64 (s) - v_u64 (0x3010000000000000) + b);
-  v_u64_t cmp = v_cond_u64 (absn > v_f64 (1280.0 * N));
-  v_f64_t r1 = s1 * s1;
-  v_f64_t r0 = v_fma_f64 (y, s2, s2) * s1;
+  uint64x2_t b = v_cond_u64 (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
+  float64x2_t s1 = v_as_f64_u64 (v_u64 (0x7000000000000000) - b);
+  float64x2_t s2
+    = v_as_f64_u64 (v_as_u64_f64 (s) - v_u64 (0x3010000000000000) + b);
+  uint64x2_t cmp = v_cond_u64 (absn > v_f64 (1280.0 * N));
+  float64x2_t r1 = s1 * s1;
+  float64x2_t r0 = v_fma_f64 (y, s2, s2) * s1;
   return v_as_f64_u64 ((cmp & v_as_u64_f64 (r1)) | (~cmp & v_as_u64_f64 (r0)));
 }
 
 VPCS_ATTR
-v_f64_t V_NAME (exp_tail) (v_f64_t x, v_f64_t xtail)
+float64x2_t V_NAME (exp_tail) (float64x2_t x, float64x2_t xtail)
 {
-  v_f64_t n, r, s, y, z;
-  v_u64_t cmp, u, e, i;
+  float64x2_t n, r, s, y, z;
+  uint64x2_t cmp, u, e, i;
 
   cmp = v_cond_u64 (v_abs_f64 (x) > Thres);
 

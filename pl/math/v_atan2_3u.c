@@ -16,15 +16,15 @@
 
 /* Special cases i.e. 0, infinity, NaN (fall back to scalar calls).  */
 VPCS_ATTR
-NOINLINE static v_f64_t
-specialcase (v_f64_t y, v_f64_t x, v_f64_t ret, v_u64_t cmp)
+NOINLINE static float64x2_t
+specialcase (float64x2_t y, float64x2_t x, float64x2_t ret, uint64x2_t cmp)
 {
   return v_call2_f64 (atan2, y, x, ret, cmp);
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */
-static inline v_u64_t
-zeroinfnan (v_u64_t i)
+static inline uint64x2_t
+zeroinfnan (uint64x2_t i)
 {
   return v_cond_u64 (2 * i - 1 >= v_u64 (2 * asuint64 (INFINITY) - 1));
 }
@@ -35,34 +35,34 @@ zeroinfnan (v_u64_t i)
 	got 0x1.92d628ab678ccp-1
        want 0x1.92d628ab678cfp-1.  */
 VPCS_ATTR
-v_f64_t V_NAME (atan2) (v_f64_t y, v_f64_t x)
+float64x2_t V_NAME (atan2) (float64x2_t y, float64x2_t x)
 {
-  v_u64_t ix = v_as_u64_f64 (x);
-  v_u64_t iy = v_as_u64_f64 (y);
+  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t iy = v_as_u64_f64 (y);
 
-  v_u64_t special_cases = zeroinfnan (ix) | zeroinfnan (iy);
+  uint64x2_t special_cases = zeroinfnan (ix) | zeroinfnan (iy);
 
-  v_u64_t sign_x = ix & SignMask;
-  v_u64_t sign_y = iy & SignMask;
-  v_u64_t sign_xy = sign_x ^ sign_y;
+  uint64x2_t sign_x = ix & SignMask;
+  uint64x2_t sign_y = iy & SignMask;
+  uint64x2_t sign_xy = sign_x ^ sign_y;
 
-  v_f64_t ax = v_abs_f64 (x);
-  v_f64_t ay = v_abs_f64 (y);
+  float64x2_t ax = v_abs_f64 (x);
+  float64x2_t ay = v_abs_f64 (y);
 
-  v_u64_t pred_xlt0 = x < 0.0;
-  v_u64_t pred_aygtax = ay > ax;
+  uint64x2_t pred_xlt0 = x < 0.0;
+  uint64x2_t pred_aygtax = ay > ax;
 
   /* Set up z for call to atan.  */
-  v_f64_t n = v_sel_f64 (pred_aygtax, -ax, ay);
-  v_f64_t d = v_sel_f64 (pred_aygtax, ay, ax);
-  v_f64_t z = v_div_f64 (n, d);
+  float64x2_t n = v_sel_f64 (pred_aygtax, -ax, ay);
+  float64x2_t d = v_sel_f64 (pred_aygtax, ay, ax);
+  float64x2_t z = v_div_f64 (n, d);
 
   /* Work out the correct shift.  */
-  v_f64_t shift = v_sel_f64 (pred_xlt0, v_f64 (-2.0), v_f64 (0.0));
+  float64x2_t shift = v_sel_f64 (pred_xlt0, v_f64 (-2.0), v_f64 (0.0));
   shift = v_sel_f64 (pred_aygtax, shift + 1.0, shift);
   shift *= PiOver2;
 
-  v_f64_t ret = eval_poly (z, z, shift);
+  float64x2_t ret = eval_poly (z, z, shift);
 
   /* Account for the sign of x and y.  */
   ret = v_as_f64_u64 (v_as_u64_f64 (ret) ^ sign_xy);

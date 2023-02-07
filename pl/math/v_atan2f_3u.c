@@ -17,15 +17,15 @@
 
 /* Special cases i.e. 0, infinity and nan (fall back to scalar calls).  */
 VPCS_ATTR
-NOINLINE static v_f32_t
-specialcase (v_f32_t y, v_f32_t x, v_f32_t ret, v_u32_t cmp)
+NOINLINE static float32x4_t
+specialcase (float32x4_t y, float32x4_t x, float32x4_t ret, uint32x4_t cmp)
 {
   return v_call2_f32 (atan2f, y, x, ret, cmp);
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */
-static inline v_u32_t
-zeroinfnan (v_u32_t i)
+static inline uint32x4_t
+zeroinfnan (uint32x4_t i)
 {
   return v_cond_u32 (2 * i - 1 >= v_u32 (2 * 0x7f800000lu - 1));
 }
@@ -35,34 +35,34 @@ zeroinfnan (v_u32_t i)
    v_atan2(0x1.93836cp+6, 0x1.8cae1p+6) got 0x1.967f06p-1
 				       want 0x1.967f00p-1.  */
 VPCS_ATTR
-v_f32_t V_NAME (atan2f) (v_f32_t y, v_f32_t x)
+float32x4_t V_NAME (atan2f) (float32x4_t y, float32x4_t x)
 {
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_u32_t iy = v_as_u32_f32 (y);
+  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t iy = v_as_u32_f32 (y);
 
-  v_u32_t special_cases = zeroinfnan (ix) | zeroinfnan (iy);
+  uint32x4_t special_cases = zeroinfnan (ix) | zeroinfnan (iy);
 
-  v_u32_t sign_x = ix & SignMask;
-  v_u32_t sign_y = iy & SignMask;
-  v_u32_t sign_xy = sign_x ^ sign_y;
+  uint32x4_t sign_x = ix & SignMask;
+  uint32x4_t sign_y = iy & SignMask;
+  uint32x4_t sign_xy = sign_x ^ sign_y;
 
-  v_f32_t ax = v_abs_f32 (x);
-  v_f32_t ay = v_abs_f32 (y);
+  float32x4_t ax = v_abs_f32 (x);
+  float32x4_t ay = v_abs_f32 (y);
 
-  v_u32_t pred_xlt0 = x < 0.0f;
-  v_u32_t pred_aygtax = ay > ax;
+  uint32x4_t pred_xlt0 = x < 0.0f;
+  uint32x4_t pred_aygtax = ay > ax;
 
   /* Set up z for call to atanf.  */
-  v_f32_t n = v_sel_f32 (pred_aygtax, -ax, ay);
-  v_f32_t d = v_sel_f32 (pred_aygtax, ay, ax);
-  v_f32_t z = v_div_f32 (n, d);
+  float32x4_t n = v_sel_f32 (pred_aygtax, -ax, ay);
+  float32x4_t d = v_sel_f32 (pred_aygtax, ay, ax);
+  float32x4_t z = v_div_f32 (n, d);
 
   /* Work out the correct shift.  */
-  v_f32_t shift = v_sel_f32 (pred_xlt0, v_f32 (-2.0f), v_f32 (0.0f));
+  float32x4_t shift = v_sel_f32 (pred_xlt0, v_f32 (-2.0f), v_f32 (0.0f));
   shift = v_sel_f32 (pred_aygtax, shift + 1.0f, shift);
   shift *= PiOver2;
 
-  v_f32_t ret = eval_poly (z, z, shift);
+  float32x4_t ret = eval_poly (z, z, shift);
 
   /* Account for the sign of y.  */
   ret = v_as_f32_u32 (v_as_u32_f32 (ret) ^ sign_xy);

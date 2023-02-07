@@ -17,17 +17,17 @@
 		special case.  */
 #define Half v_f32 (0.5)
 
-v_f32_t V_NAME (expf) (v_f32_t);
+float32x4_t V_NAME (expf) (float32x4_t);
 
 /* Single-precision vector cosh, using vector expf.
    Maximum error is 2.38 ULP:
    __v_coshf(0x1.e8001ep+1) got 0x1.6a491ep+4 want 0x1.6a4922p+4.  */
-VPCS_ATTR v_f32_t V_NAME (coshf) (v_f32_t x)
+VPCS_ATTR float32x4_t V_NAME (coshf) (float32x4_t x)
 {
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_u32_t iax = ix & AbsMask;
-  v_f32_t ax = v_as_f32_u32 (iax);
-  v_u32_t special = v_cond_u32 (iax >= SpecialBound);
+  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t iax = ix & AbsMask;
+  float32x4_t ax = v_as_f32_u32 (iax);
+  uint32x4_t special = v_cond_u32 (iax >= SpecialBound);
 
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered correctly, fall back to the scalar
@@ -36,7 +36,7 @@ VPCS_ATTR v_f32_t V_NAME (coshf) (v_f32_t x)
   if (unlikely (v_any_u32 (special)))
     return v_call_f32 (coshf, x, x, v_u32 (-1));
 
-  v_u32_t tiny = v_cond_u32 (iax <= TinyBound);
+  uint32x4_t tiny = v_cond_u32 (iax <= TinyBound);
   /* If any input is tiny, avoid underflow exception by fixing tiny lanes of
      input to 1, which will generate no exceptions, and then also fixing tiny
      lanes of output to 1 just before return.  */
@@ -45,8 +45,8 @@ VPCS_ATTR v_f32_t V_NAME (coshf) (v_f32_t x)
 #endif
 
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */
-  v_f32_t t = V_NAME (expf) (ax);
-  v_f32_t y = t * Half + Half / t;
+  float32x4_t t = V_NAME (expf) (ax);
+  float32x4_t y = t * Half + Half / t;
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (tiny)))

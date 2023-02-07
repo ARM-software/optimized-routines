@@ -21,12 +21,12 @@
 
 struct entry
 {
-  v_f64_t invc;
-  v_f64_t log10c;
+  float64x2_t invc;
+  float64x2_t log10c;
 };
 
 static inline struct entry
-lookup (v_u64_t i)
+lookup (uint64x2_t i)
 {
   struct entry e;
   e.invc[0] = T (invc, i[0]);
@@ -37,8 +37,8 @@ lookup (v_u64_t i)
 }
 
 VPCS_ATTR
-inline static v_f64_t
-specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
+inline static float64x2_t
+specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 {
   return v_call_f64 (log10, x, y, cmp);
 }
@@ -50,11 +50,11 @@ specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 				    want 0x1.fff6be3cae4b9p-6
      -0.459999 ulp err 1.96.  */
 VPCS_ATTR
-v_f64_t V_NAME (log10) (v_f64_t x)
+float64x2_t V_NAME (log10) (float64x2_t x)
 {
-  v_f64_t z, r, r2, p, y, kd, hi;
-  v_u64_t ix, iz, tmp, i, cmp;
-  v_s64_t k;
+  float64x2_t z, r, r2, p, y, kd, hi;
+  uint64x2_t ix, iz, tmp, i, cmp;
+  int64x2_t k;
   struct entry e;
 
   ix = v_as_u64_f64 (x);
@@ -77,7 +77,7 @@ v_f64_t V_NAME (log10) (v_f64_t x)
   /* hi = r / log(10) + log10(c) + k*log10(2).
      Constants in `v_log10_data.c` are computed (in extended precision) as
      e.log10c := e.logc * ivln10.  */
-  v_f64_t w = v_fma_f64 (r, v_f64 (__v_log10_data.invln10), e.log10c);
+  float64x2_t w = v_fma_f64 (r, v_f64 (__v_log10_data.invln10), e.log10c);
 
   /* y = log10(1+r) + n * log10(2).  */
   hi = v_fma_f64 (kd, v_f64 (__v_log10_data.log10_2), w);

@@ -16,8 +16,8 @@
 		negative).  */
 #define AbsMask 0x7fffffff
 
-static NOINLINE v_f32_t
-special_case (v_f32_t x, v_f32_t y, v_u32_t special)
+static NOINLINE float32x4_t
+special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 {
   return v_call_f32 (tanhf, x, y, special);
 }
@@ -26,28 +26,28 @@ special_case (v_f32_t x, v_f32_t y, v_u32_t special)
    of expm1f. The maximum error is 2.58 ULP:
    __v_tanhf(0x1.fa5eep-5) got 0x1.f9ba02p-5
 			  want 0x1.f9ba08p-5.  */
-VPCS_ATTR v_f32_t V_NAME (tanhf) (v_f32_t x)
+VPCS_ATTR float32x4_t V_NAME (tanhf) (float32x4_t x)
 {
-  v_u32_t ix = v_as_u32_f32 (x);
-  v_u32_t iax = ix & AbsMask;
-  v_u32_t sign = ix & ~AbsMask;
-  v_u32_t is_boring = v_cond_u32 (iax > BoringBound);
-  v_f32_t boring = v_as_f32_u32 (sign | One);
+  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t iax = ix & AbsMask;
+  uint32x4_t sign = ix & ~AbsMask;
+  uint32x4_t is_boring = v_cond_u32 (iax > BoringBound);
+  float32x4_t boring = v_as_f32_u32 (sign | One);
 
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered properly, set all special and boring
      lanes to 1, which will trigger no exceptions, and fix them up later.  */
-  v_u32_t special = v_cond_u32 ((iax > 0x7f800000) | (iax < 0x34000000));
+  uint32x4_t special = v_cond_u32 ((iax > 0x7f800000) | (iax < 0x34000000));
   ix = v_sel_u32 (is_boring, v_u32 (One), ix);
   if (unlikely (v_any_u32 (special)))
     ix = v_sel_u32 (special, v_u32 (One), ix);
 #else
-  v_u32_t special = v_cond_u32 ((iax > 0x7f800000) | (iax == 0));
+  uint32x4_t special = v_cond_u32 ((iax > 0x7f800000) | (iax == 0));
 #endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
-  v_f32_t q = expm1f_inline (2 * v_as_f32_u32 (ix));
-  v_f32_t y = q / (q + 2);
+  float32x4_t q = expm1f_inline (2 * v_as_f32_u32 (ix));
+  float32x4_t y = q / (q + 2);
   y = v_sel_f32 (is_boring, boring, y);
   if (unlikely (v_any_u32 (special)))
     return special_case (x, y, special);

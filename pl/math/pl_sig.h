@@ -10,10 +10,12 @@
 #define PL_DECL_SD2(fun) double fun (double, double);
 
 #if WANT_VMATH
-#define PL_DECL_VF1(fun) VPCS_ATTR v_f32_t V_NAME (fun##f) (v_f32_t);
-#define PL_DECL_VF2(fun) VPCS_ATTR v_f32_t V_NAME (fun##f) (v_f32_t, v_f32_t);
-#define PL_DECL_VD1(fun) VPCS_ATTR v_f64_t V_NAME (fun) (v_f64_t);
-#define PL_DECL_VD2(fun) VPCS_ATTR v_f64_t V_NAME (fun) (v_f64_t, v_f64_t);
+#define PL_DECL_VF1(fun) VPCS_ATTR float32x4_t V_NAME (fun##f) (float32x4_t);
+#define PL_DECL_VF2(fun)                                                       \
+  VPCS_ATTR float32x4_t V_NAME (fun##f) (float32x4_t, float32x4_t);
+#define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME (fun) (float64x2_t);
+#define PL_DECL_VD2(fun)                                                       \
+  VPCS_ATTR float64x2_t V_NAME (fun) (float64x2_t, float64x2_t);
 #else
 #define PL_DECL_VF1(fun)
 #define PL_DECL_VF2(fun)

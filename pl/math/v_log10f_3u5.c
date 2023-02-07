@@ -20,8 +20,8 @@
 #define Off v_u32 (0x3f2aaaab) /* 0.666667.  */
 
 VPCS_ATTR
-NOINLINE static v_f32_t
-specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
+NOINLINE static float32x4_t
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 {
   /* Fall back to scalar code.  */
   return v_call_f32 (log10f, x, y, cmp);
@@ -35,10 +35,10 @@ specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
    __v_log10f(0x1.555c16p+0) got 0x1.ffe2fap-4
 			    want 0x1.ffe2f4p-4 -0.304916 ulp err 2.80492.  */
 VPCS_ATTR
-v_f32_t V_NAME (log10f) (v_f32_t x)
+float32x4_t V_NAME (log10f) (float32x4_t x)
 {
-  v_f32_t n, o, p, q, r, r2, y;
-  v_u32_t u, cmp;
+  float32x4_t n, o, p, q, r, r2, y;
+  uint32x4_t u, cmp;
 
   u = v_as_u32_f32 (x);
   cmp = v_cond_u32 (u - Min >= Max - Min);
