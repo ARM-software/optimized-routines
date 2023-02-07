@@ -15,7 +15,6 @@
 #if WANT_VMATH
 
 #if __aarch64__
-#define V_NAME(x) __vn_##x
 #define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
 #else
 #error "Cannot build without AArch64"

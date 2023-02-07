@@ -35,7 +35,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
    __v_log10f(0x1.555c16p+0) got 0x1.ffe2fap-4
 			    want 0x1.ffe2f4p-4 -0.304916 ulp err 2.80492.  */
 VPCS_ATTR
-float32x4_t V_NAME (log10f) (float32x4_t x)
+float32x4_t V_NAME_F1 (log10) (float32x4_t x)
 {
   float32x4_t n, o, p, q, r, r2, y;
   uint32x4_t u, cmp;
@@ -70,10 +70,9 @@ float32x4_t V_NAME (log10f) (float32x4_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-PL_ALIAS (V_NAME (log10f), _ZGVnN4v_log10f)
 
 PL_SIG (V, F, 1, log10, 0.01, 11.1)
-PL_TEST_ULP (V_NAME (log10f), 2.81)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (log10f))
-PL_TEST_INTERVAL (V_NAME (log10f), 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (V_NAME (log10f), 0x1p-4, 0x1p4, 500000)
+PL_TEST_ULP (V_NAME_F1 (log10), 2.81)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_F1 (log10))
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 0x1p-4, 0x1p4, 500000)

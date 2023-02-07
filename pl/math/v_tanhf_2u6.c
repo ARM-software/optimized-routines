@@ -26,7 +26,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
    of expm1f. The maximum error is 2.58 ULP:
    __v_tanhf(0x1.fa5eep-5) got 0x1.f9ba02p-5
 			  want 0x1.f9ba08p-5.  */
-VPCS_ATTR float32x4_t V_NAME (tanhf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
@@ -53,14 +53,13 @@ VPCS_ATTR float32x4_t V_NAME (tanhf) (float32x4_t x)
     return special_case (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (tanhf), _ZGVnN4v_tanhf)
 
 PL_SIG (V, F, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (tanhf), 2.09)
-PL_TEST_EXPECT_FENV (V_NAME (tanhf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (tanhf), 0, 0x1p-23, 1000)
-PL_TEST_INTERVAL (V_NAME (tanhf), -0, -0x1p-23, 1000)
-PL_TEST_INTERVAL (V_NAME (tanhf), 0x1p-23, 0x1.205966p+3, 100000)
-PL_TEST_INTERVAL (V_NAME (tanhf), -0x1p-23, -0x1.205966p+3, 100000)
-PL_TEST_INTERVAL (V_NAME (tanhf), 0x1.205966p+3, inf, 100)
-PL_TEST_INTERVAL (V_NAME (tanhf), -0x1.205966p+3, -inf, 100)
+PL_TEST_ULP (V_NAME_F1 (tanh), 2.09)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (tanh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (tanh), 0, 0x1p-23, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (tanh), -0, -0x1p-23, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (tanh), 0x1p-23, 0x1.205966p+3, 100000)
+PL_TEST_INTERVAL (V_NAME_F1 (tanh), -0x1p-23, -0x1.205966p+3, 100000)
+PL_TEST_INTERVAL (V_NAME_F1 (tanh), 0x1.205966p+3, inf, 100)
+PL_TEST_INTERVAL (V_NAME_F1 (tanh), -0x1.205966p+3, -inf, 100)

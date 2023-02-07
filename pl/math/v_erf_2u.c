@@ -49,7 +49,7 @@ lookup (uint64x2_t i)
    verf(0x1.c5e0c2d5d0543p-4) got 0x1.fe0ed62a54987p-4
 			     want 0x1.fe0ed62a54985p-4.  */
 VPCS_ATTR
-float64x2_t V_NAME (erf) (float64x2_t x)
+float64x2_t V_NAME_D1 (erf) (float64x2_t x)
 {
   /* Handle both inf/nan as well as small values (|x|<2^-28)
      If any condition in the lane is true then a loop over
@@ -91,13 +91,12 @@ float64x2_t V_NAME (erf) (float64x2_t x)
     return specialcase (x, y, special_case);
   return y;
 }
-PL_ALIAS (V_NAME (erf), _ZGVnN2v_erf)
 
 PL_SIG (V, D, 1, erf, -6.0, 6.0)
-PL_TEST_ULP (V_NAME (erf), 1.26)
-PL_TEST_INTERVAL (V_NAME (erf), 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (V_NAME (erf), 0x1p-127, 0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erf), -0x1p-127, -0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erf), 0x1p-26, 0x1p3, 40000)
-PL_TEST_INTERVAL (V_NAME (erf), -0x1p-26, -0x1p3, 40000)
-PL_TEST_INTERVAL (V_NAME (erf), 0, inf, 40000)
+PL_TEST_ULP (V_NAME_D1 (erf), 1.26)
+PL_TEST_INTERVAL (V_NAME_D1 (erf), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (erf), 0x1p-127, 0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erf), -0x1p-127, -0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erf), 0x1p-26, 0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erf), -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erf), 0, inf, 40000)

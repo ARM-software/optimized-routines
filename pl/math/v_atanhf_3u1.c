@@ -21,7 +21,7 @@
    The maximum error is 3.08 ULP:
    __v_atanhf(0x1.ff215p-5) got 0x1.ffcb7cp-5
 			   want 0x1.ffcb82p-5.  */
-VPCS_ATTR float32x4_t V_NAME (atanhf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   float32x4_t halfsign
@@ -46,14 +46,13 @@ VPCS_ATTR float32x4_t V_NAME (atanhf) (float32x4_t x)
     return v_call_f32 (atanhf, x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (atanhf), _ZGVnN4v_atanhf)
 
 PL_SIG (V, F, 1, atanh, -1.0, 1.0)
-PL_TEST_ULP (V_NAME (atanhf), 2.59)
-PL_TEST_EXPECT_FENV (V_NAME (atanhf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL_C (V_NAME (atanhf), 0, 0x1p-12, 500, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanhf), 0x1p-12, 1, 200000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanhf), 1, inf, 1000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanhf), -0, -0x1p-12, 500, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanhf), -0x1p-12, -1, 200000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanhf), -1, -inf, 1000, 0)
+PL_TEST_ULP (V_NAME_F1 (atanh), 2.59)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (atanh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), 0, 0x1p-12, 500, 0)
+PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), 0x1p-12, 1, 200000, 0)
+PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), 1, inf, 1000, 0)
+PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), -0, -0x1p-12, 500, 0)
+PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), -0x1p-12, -1, 200000, 0)
+PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), -1, -inf, 1000, 0)

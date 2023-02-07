@@ -17,12 +17,12 @@
 		special case.  */
 #define Half v_f32 (0.5)
 
-float32x4_t V_NAME (expf) (float32x4_t);
+float32x4_t __v_expf (float32x4_t);
 
 /* Single-precision vector cosh, using vector expf.
    Maximum error is 2.38 ULP:
    __v_coshf(0x1.e8001ep+1) got 0x1.6a491ep+4 want 0x1.6a4922p+4.  */
-VPCS_ATTR float32x4_t V_NAME (coshf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
@@ -45,7 +45,7 @@ VPCS_ATTR float32x4_t V_NAME (coshf) (float32x4_t x)
 #endif
 
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */
-  float32x4_t t = V_NAME (expf) (ax);
+  float32x4_t t = __v_expf (ax);
   float32x4_t y = t * Half + Half / t;
 
 #if WANT_SIMD_EXCEPT
@@ -58,14 +58,13 @@ VPCS_ATTR float32x4_t V_NAME (coshf) (float32x4_t x)
 
   return y;
 }
-PL_ALIAS (V_NAME (coshf), _ZGVnN4v_coshf)
 
 PL_SIG (V, F, 1, cosh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (coshf), 1.89)
-PL_TEST_EXPECT_FENV (V_NAME (coshf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (coshf), 0, 0x1p-63, 100)
-PL_TEST_INTERVAL (V_NAME (coshf), 0, 0x1.5a92d8p+6, 80000)
-PL_TEST_INTERVAL (V_NAME (coshf), 0x1.5a92d8p+6, inf, 2000)
-PL_TEST_INTERVAL (V_NAME (coshf), -0, -0x1p-63, 100)
-PL_TEST_INTERVAL (V_NAME (coshf), -0, -0x1.5a92d8p+6, 80000)
-PL_TEST_INTERVAL (V_NAME (coshf), -0x1.5a92d8p+6, -inf, 2000)
+PL_TEST_ULP (V_NAME_F1 (cosh), 1.89)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (cosh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (cosh), 0, 0x1p-63, 100)
+PL_TEST_INTERVAL (V_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
+PL_TEST_INTERVAL (V_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)
+PL_TEST_INTERVAL (V_NAME_F1 (cosh), -0, -0x1p-63, 100)
+PL_TEST_INTERVAL (V_NAME_F1 (cosh), -0, -0x1.5a92d8p+6, 80000)
+PL_TEST_INTERVAL (V_NAME_F1 (cosh), -0x1.5a92d8p+6, -inf, 2000)

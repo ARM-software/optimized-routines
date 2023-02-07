@@ -30,7 +30,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
   __v_acoshf(0x1.01f83ep+0) got 0x1.fbc7fap-4
 			   want 0x1.fbc7f4p-4.  */
 
-VPCS_ATTR float32x4_t V_NAME (acoshf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t special = v_cond_u32 ((ix - One) >= (SquareLim - One));
@@ -50,16 +50,15 @@ VPCS_ATTR float32x4_t V_NAME (acoshf) (float32x4_t x)
     return special_case (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (acoshf), _ZGVnN4v_acoshf)
 
 PL_SIG (V, F, 1, acosh, 1.0, 10.0)
 #if WANT_SIMD_EXCEPT
-PL_TEST_ULP (V_NAME (acoshf), 2.29)
+PL_TEST_ULP (V_NAME_F1 (acosh), 2.29)
 #else
-PL_TEST_ULP (V_NAME (acoshf), 2.58)
+PL_TEST_ULP (V_NAME_F1 (acosh), 2.58)
 #endif
-PL_TEST_EXPECT_FENV (V_NAME (acoshf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (acoshf), 0, 1, 500)
-PL_TEST_INTERVAL (V_NAME (acoshf), 1, SquareLim, 100000)
-PL_TEST_INTERVAL (V_NAME (acoshf), SquareLim, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (acoshf), -0, -inf, 1000)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (acosh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (acosh), 0, 1, 500)
+PL_TEST_INTERVAL (V_NAME_F1 (acosh), 1, SquareLim, 100000)
+PL_TEST_INTERVAL (V_NAME_F1 (acosh), SquareLim, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (acosh), -0, -inf, 1000)

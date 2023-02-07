@@ -54,7 +54,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
    version of expm1. The greatest observed error is 2.75 ULP:
    __v_tanh(-0x1.c143c3a44e087p-3) got -0x1.ba31ba4691ab7p-3
 				  want -0x1.ba31ba4691ab4p-3.  */
-VPCS_ATTR float64x2_t V_NAME (tanh) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (tanh) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
@@ -79,14 +79,13 @@ VPCS_ATTR float64x2_t V_NAME (tanh) (float64x2_t x)
     return special_case (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (tanh), _ZGVnN2v_tanh)
 
 PL_SIG (V, D, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (tanh), 2.26)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (tanh))
-PL_TEST_INTERVAL (V_NAME (tanh), 0, TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (tanh), -0, -TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (tanh), TinyBound, BoringBound, 100000)
-PL_TEST_INTERVAL (V_NAME (tanh), -TinyBound, -BoringBound, 100000)
-PL_TEST_INTERVAL (V_NAME (tanh), BoringBound, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (tanh), -BoringBound, -inf, 1000)
+PL_TEST_ULP (V_NAME_D1 (tanh), 2.26)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (tanh))
+PL_TEST_INTERVAL (V_NAME_D1 (tanh), 0, TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (tanh), -0, -TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (tanh), TinyBound, BoringBound, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (tanh), -TinyBound, -BoringBound, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (tanh), BoringBound, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (tanh), -BoringBound, -inf, 1000)

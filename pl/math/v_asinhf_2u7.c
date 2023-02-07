@@ -26,7 +26,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
 /* Single-precision implementation of vector asinh(x), using vector log1p.
    Worst-case error is 2.66 ULP, at roughly +/-0.25:
    __v_asinhf(0x1.01b04p-2) got 0x1.fe163ep-3 want 0x1.fe1638p-3.  */
-VPCS_ATTR float32x4_t V_NAME (asinhf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & ~SignMask;
@@ -52,16 +52,15 @@ VPCS_ATTR float32x4_t V_NAME (asinhf) (float32x4_t x)
     return specialcase (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (asinhf), _ZGVnN4v_asinhf)
 
 PL_SIG (V, F, 1, asinh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (asinhf), 2.17)
-PL_TEST_EXPECT_FENV (V_NAME (asinhf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (asinhf), 0, 0x1p-12, 40000)
-PL_TEST_INTERVAL (V_NAME (asinhf), 0x1p-12, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (asinhf), 1.0, 0x1p11, 40000)
-PL_TEST_INTERVAL (V_NAME (asinhf), 0x1p11, inf, 40000)
-PL_TEST_INTERVAL (V_NAME (asinhf), 0, -0x1p-12, 20000)
-PL_TEST_INTERVAL (V_NAME (asinhf), -0x1p-12, -1.0, 20000)
-PL_TEST_INTERVAL (V_NAME (asinhf), -1.0, -0x1p11, 20000)
-PL_TEST_INTERVAL (V_NAME (asinhf), -0x1p11, -inf, 20000)
+PL_TEST_ULP (V_NAME_F1 (asinh), 2.17)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (asinh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), 0, 0x1p-12, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), 0x1p-12, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), 1.0, 0x1p11, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), 0x1p11, inf, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), 0, -0x1p-12, 20000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), -0x1p-12, -1.0, 20000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), -1.0, -0x1p11, 20000)
+PL_TEST_INTERVAL (V_NAME_F1 (asinh), -0x1p11, -inf, 20000)

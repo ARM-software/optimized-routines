@@ -54,7 +54,7 @@ special_case (float64x2_t x)
    The greatest observed error is 2.57 ULP:
    sinh(0x1.9fb1d49d1d58bp-2) got 0x1.ab34e59d678dcp-2
 			     want 0x1.ab34e59d678d9p-2.  */
-VPCS_ATTR float64x2_t V_NAME (sinh) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (sinh) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
@@ -78,14 +78,13 @@ VPCS_ATTR float64x2_t V_NAME (sinh) (float64x2_t x)
   float64x2_t t = expm1_inline (ax);
   return (t + t / (t + 1)) * halfsign;
 }
-PL_ALIAS (__vn_sinh, _ZGVnN2v_sinh)
 
 PL_SIG (V, D, 1, sinh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (sinh), 2.08)
-PL_TEST_EXPECT_FENV (V_NAME (sinh), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (sinh), 0, TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (sinh), -0, -TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (sinh), TinyBound, BigBound, 500000)
-PL_TEST_INTERVAL (V_NAME (sinh), -TinyBound, -BigBound, 500000)
-PL_TEST_INTERVAL (V_NAME (sinh), BigBound, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (sinh), -BigBound, -inf, 1000)
+PL_TEST_ULP (V_NAME_D1 (sinh), 2.08)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (sinh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (sinh), 0, TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (sinh), -0, -TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (sinh), TinyBound, BigBound, 500000)
+PL_TEST_INTERVAL (V_NAME_D1 (sinh), -TinyBound, -BigBound, 500000)
+PL_TEST_INTERVAL (V_NAME_D1 (sinh), BigBound, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (sinh), -BigBound, -inf, 1000)

@@ -50,7 +50,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 				    want 0x1.fff6be3cae4b9p-6
      -0.459999 ulp err 1.96.  */
 VPCS_ATTR
-float64x2_t V_NAME (log10) (float64x2_t x)
+float64x2_t V_NAME_D1 (log10) (float64x2_t x)
 {
   float64x2_t z, r, r2, p, y, kd, hi;
   uint64x2_t ix, iz, tmp, i, cmp;
@@ -94,11 +94,10 @@ float64x2_t V_NAME (log10) (float64x2_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-PL_ALIAS (V_NAME (log10), _ZGVnN2v_log10)
 
 PL_SIG (V, D, 1, log10, 0.01, 11.1)
-PL_TEST_ULP (V_NAME (log10), 1.97)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (log10))
-PL_TEST_INTERVAL (V_NAME (log10), 0, 0xffff000000000000, 10000)
-PL_TEST_INTERVAL (V_NAME (log10), 0x1p-4, 0x1p4, 400000)
-PL_TEST_INTERVAL (V_NAME (log10), 0, inf, 400000)
+PL_TEST_ULP (V_NAME_D1 (log10), 1.97)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (log10))
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0, 0xffff000000000000, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0x1p-4, 0x1p4, 400000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0, inf, 400000)

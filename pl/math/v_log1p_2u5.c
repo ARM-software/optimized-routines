@@ -42,7 +42,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
    and no narrowing for f and k. Maximum observed error is 2.46 ULP:
     __v_log1p(0x1.654a1307242a4p+11) got 0x1.fd5565fb590f4p+2
 				    want 0x1.fd5565fb590f6p+2 .  */
-VPCS_ATTR float64x2_t V_NAME (log1p) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
@@ -102,16 +102,15 @@ VPCS_ATTR float64x2_t V_NAME (log1p) (float64x2_t x)
 
   return y;
 }
-PL_ALIAS (V_NAME (log1p), _ZGVnN2v_log1p)
 
 PL_SIG (V, D, 1, log1p, -0.9, 10.0)
-PL_TEST_ULP (V_NAME (log1p), 1.97)
-PL_TEST_EXPECT_FENV (V_NAME (log1p), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (log1p), -10.0, 10.0, 10000)
-PL_TEST_INTERVAL (V_NAME (log1p), 0.0, 0x1p-23, 50000)
-PL_TEST_INTERVAL (V_NAME (log1p), 0x1p-23, 0.001, 50000)
-PL_TEST_INTERVAL (V_NAME (log1p), 0.001, 1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (log1p), 0.0, -0x1p-23, 50000)
-PL_TEST_INTERVAL (V_NAME (log1p), -0x1p-23, -0.001, 50000)
-PL_TEST_INTERVAL (V_NAME (log1p), -0.001, -1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (log1p), -1.0, inf, 5000)
+PL_TEST_ULP (V_NAME_D1 (log1p), 1.97)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (log1p), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), -10.0, 10.0, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), 0.0, 0x1p-23, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), 0x1p-23, 0.001, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), 0.001, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), 0.0, -0x1p-23, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), -0x1p-23, -0.001, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), -0.001, -1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log1p), -1.0, inf, 5000)

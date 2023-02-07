@@ -57,7 +57,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
    The largest observed error in this region is 1.52 ulps,
    __v_acos(0x1.23d362722f591p-1) got 0x1.edbbedf8a7d6ep-1
 				 want 0x1.edbbedf8a7d6cp-1.  */
-VPCS_ATTR float64x2_t V_NAME (acos) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (acos) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
@@ -103,14 +103,13 @@ VPCS_ATTR float64x2_t V_NAME (acos) (float64x2_t x)
 
   return v_fma_f64 (mul, y, add);
 }
-PL_ALIAS (V_NAME (acos), _ZGVnN2v_acos)
 
 PL_SIG (V, D, 1, acos, -1.0, 1.0)
-PL_TEST_ULP (V_NAME (acos), 1.02)
-PL_TEST_EXPECT_FENV (V_NAME (acos), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (acos), 0, Small, 5000)
-PL_TEST_INTERVAL (V_NAME (acos), Small, 0.5, 50000)
-PL_TEST_INTERVAL (V_NAME (acos), 0.5, 1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (acos), 1.0, 0x1p11, 50000)
-PL_TEST_INTERVAL (V_NAME (acos), 0x1p11, inf, 20000)
-PL_TEST_INTERVAL (V_NAME (acos), -0, -inf, 20000)
+PL_TEST_ULP (V_NAME_D1 (acos), 1.02)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (acos), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (acos), 0, Small, 5000)
+PL_TEST_INTERVAL (V_NAME_D1 (acos), Small, 0.5, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (acos), 0.5, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (acos), 1.0, 0x1p11, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (acos), 0x1p11, inf, 20000)
+PL_TEST_INTERVAL (V_NAME_D1 (acos), -0, -inf, 20000)

@@ -11,8 +11,8 @@
 
 #if defined(__vpcs) && __aarch64__
 
-#define _ZVF1(fun, a, b) VNF(__vn_##fun##f, a, b) VNF(_ZGVnN4v_##fun##f, a, b)
-#define _ZVD1(f, a, b) VND(__vn_##f, a, b) VND(_ZGVnN2v_##f, a, b)
+#define _ZVF1(fun, a, b) VNF(_ZGVnN4v_##fun##f, a, b)
+#define _ZVD1(f, a, b) VND(_ZGVnN2v_##f, a, b)
 
 #else
 
@@ -54,9 +54,7 @@
 {"atan2",  'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
 {"powi",   'd', 0,  0.01, 11.1, {.d = powi_wrap}},
 
-{"__vn_atan2f",      'f', 'n', -10.0, 10.0, {.vnf = __vn_atan2f_wrap}},
 {"_ZGVnN4vv_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = _Z_atan2f_wrap}},
-{"__vn_atan2",       'd', 'n', -10.0, 10.0, {.vnd = __vn_atan2_wrap}},
 {"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 
 #if WANT_SVE_MATH

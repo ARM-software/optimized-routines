@@ -13,7 +13,7 @@
 
 #define P(ia12) __erfcf_poly_data.poly[interval_index (ia12)]
 
-VPCS_ATTR float64x2_t V_NAME (exp_tail) (float64x2_t, float64x2_t);
+VPCS_ATTR float64x2_t __v_exp_tail (float64x2_t, float64x2_t);
 
 #ifndef SCALAR
 static VPCS_ATTR NOINLINE float32x4_t
@@ -45,7 +45,7 @@ v_approx_erfcf_poly_gauss (float64x2_t x, const double *coeff1,
   float64x2_t x2 = x * x;
   float64x2_t x4 = x2 * x2;
   float64x2_t poly = ESTRIN_15 (x, x2, x4, x4 * x4, C);
-  float64x2_t gauss = V_NAME (exp_tail) (-(x * x), v_f64 (0.0));
+  float64x2_t gauss = __v_exp_tail (-(x * x), v_f64 (0.0));
   return poly * gauss;
 }
 
@@ -119,7 +119,7 @@ v_approx_erfcf (float32x4_t abs_x, uint32x4_t sign, uint32x4_t ia12,
    __v_erfc(-0x1.08185p-18) got 0x1.00004cp+0 want 0x1.00004ap+0
    +0.249908 ulp err 0.250092.  */
 VPCS_ATTR
-float32x4_t V_NAME (erfcf) (float32x4_t x)
+float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t ia = ix & 0x7fffffff;
@@ -145,13 +145,12 @@ float32x4_t V_NAME (erfcf) (float32x4_t x)
 
   return y;
 }
-PL_ALIAS (V_NAME (erfcf), _ZGVnN4v_erfcf)
 
 PL_SIG (V, F, 1, erfc, -6.0, 28.0)
-PL_TEST_ULP (V_NAME (erfcf), 0.26)
-PL_TEST_INTERVAL (V_NAME (erfcf), 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (V_NAME (erfcf), 0x1p-127, 0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erfcf), -0x1p-127, -0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erfcf), 0x1p-26, 0x1p5, 40000)
-PL_TEST_INTERVAL (V_NAME (erfcf), -0x1p-26, -0x1p3, 40000)
-PL_TEST_INTERVAL (V_NAME (erfcf), 0, inf, 40000)
+PL_TEST_ULP (V_NAME_F1 (erfc), 0.26)
+PL_TEST_INTERVAL (V_NAME_F1 (erfc), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME_F1 (erfc), 0x1p-127, 0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erfc), -0x1p-127, -0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erfc), 0x1p-26, 0x1p5, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erfc), -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erfc), 0, inf, 40000)

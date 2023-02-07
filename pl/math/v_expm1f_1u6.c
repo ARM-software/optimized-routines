@@ -27,7 +27,7 @@
    expm1f(0x1.8baa96p-2) got 0x1.e2fb9p-2
 			want 0x1.e2fb94p-2.  */
 VPCS_ATTR
-float32x4_t V_NAME (expm1f) (float32x4_t x)
+float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t ax = ix & AbsMask;
@@ -80,12 +80,11 @@ float32x4_t V_NAME (expm1f) (float32x4_t x)
 
   return y;
 }
-PL_ALIAS (V_NAME (expm1f), _ZGVnN4v_expm1f)
 
 PL_SIG (V, F, 1, expm1, -9.9, 9.9)
-PL_TEST_ULP (V_NAME (expm1f), 1.02)
-PL_TEST_EXPECT_FENV (V_NAME (expm1f), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (expm1f), 0, 0x1p-23, 1000)
-PL_TEST_INTERVAL (V_NAME (expm1f), -0, -0x1p-23, 1000)
-PL_TEST_INTERVAL (V_NAME (expm1f), 0x1p-23, 0x1.644716p6, 1000000)
-PL_TEST_INTERVAL (V_NAME (expm1f), -0x1p-23, -0x1.9bbabcp+6, 1000000)
+PL_TEST_ULP (V_NAME_F1 (expm1), 1.02)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (expm1), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), 0, 0x1p-23, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0, -0x1p-23, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), 0x1p-23, 0x1.644716p6, 1000000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0x1p-23, -0x1.9bbabcp+6, 1000000)

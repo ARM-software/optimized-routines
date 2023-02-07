@@ -11,7 +11,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-VPCS_ATTR float32x4_t V_NAME (expf) (float32x4_t);
+VPCS_ATTR float32x4_t __v_expf (float32x4_t);
 
 #define AbsMask v_u32 (0x7fffffff)
 
@@ -48,7 +48,7 @@ lookup (uint32x4_t i)
    v_erff(-0x1.dc59fap-1) got -0x1.9f9c88p-1
 			 want -0x1.9f9c8ap-1.  */
 VPCS_ATTR
-float32x4_t V_NAME (erff) (float32x4_t x)
+float32x4_t V_NAME_F1 (erf) (float32x4_t x)
 {
   /* Handle both inf/nan as well as small values (|x|<2^-28). If any condition
      in the lane is true then a loop over scalar calls will be performed.  */
@@ -84,7 +84,7 @@ float32x4_t V_NAME (erff) (float32x4_t x)
 
   /* y = |x| + |x|*P(|x|)        if |x| < 0.921875
      1 - exp (-(|x|+|x|*P(x^2))) otherwise.  */
-  float32x4_t y = v_sel_f32 (red, r, v_f32 (1.0f) - V_NAME (expf) (-r));
+  float32x4_t y = v_sel_f32 (red, r, v_f32 (1.0f) - __v_expf (-r));
 
   /* Boring domain (absolute value is required to get the sign of erf(-nan)
      right).  */
@@ -97,13 +97,12 @@ float32x4_t V_NAME (erff) (float32x4_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-PL_ALIAS (V_NAME (erff), _ZGVnN4v_erff)
 
 PL_SIG (V, F, 1, erf, -4.0, 4.0)
-PL_TEST_ULP (V_NAME (erff), 0.76)
-PL_TEST_INTERVAL (V_NAME (erff), 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (V_NAME (erff), 0x1p-127, 0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erff), -0x1p-127, -0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erff), 0x1p-26, 0x1p3, 40000)
-PL_TEST_INTERVAL (V_NAME (erff), -0x1p-26, -0x1p3, 40000)
-PL_TEST_INTERVAL (V_NAME (erff), 0, inf, 40000)
+PL_TEST_ULP (V_NAME_F1 (erf), 0.76)
+PL_TEST_INTERVAL (V_NAME_F1 (erf), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME_F1 (erf), 0x1p-127, 0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erf), -0x1p-127, -0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erf), 0x1p-26, 0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erf), -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (erf), 0, inf, 40000)

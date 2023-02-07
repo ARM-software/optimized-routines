@@ -44,7 +44,8 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
 }
 
 VPCS_ATTR
-float32x4_t V_NAME (expf) (float32x4_t x)
+float32x4_t
+__v_expf (float32x4_t x)
 {
   float32x4_t n, r, r2, scale, p, q, poly, absn, z;
   uint32x4_t cmp, e;

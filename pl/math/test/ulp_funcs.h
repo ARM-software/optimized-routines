@@ -7,10 +7,10 @@
 
 #if defined(__vpcs) && __aarch64__
 
-#define _ZVF1(f) ZVNF1 (f)
-#define _ZVD1(f) ZVND1 (f)
-#define _ZVF2(f) ZVNF2 (f)
-#define _ZVD2(f) ZVND2 (f)
+#define _ZVF1(f) ZVF1 (f)
+#define _ZVD1(f) ZVD1 (f)
+#define _ZVF2(f) ZVF2 (f)
+#define _ZVD2(f) ZVD2 (f)
 
 #else
 

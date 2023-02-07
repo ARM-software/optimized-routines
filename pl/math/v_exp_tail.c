@@ -38,7 +38,8 @@ specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 }
 
 VPCS_ATTR
-float64x2_t V_NAME (exp_tail) (float64x2_t x, float64x2_t xtail)
+float64x2_t
+__v_exp_tail (float64x2_t x, float64x2_t xtail)
 {
   float64x2_t n, r, s, y, z;
   uint64x2_t cmp, u, e, i;

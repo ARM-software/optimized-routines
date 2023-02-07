@@ -22,7 +22,7 @@
    __v_atan(0x1.0005af27c23e9p+0) got 0x1.9225645bdd7c1p-1
 				 want 0x1.9225645bdd7c3p-1.  */
 VPCS_ATTR
-float64x2_t V_NAME (atan) (float64x2_t x)
+float64x2_t V_NAME_D1 (atan) (float64x2_t x)
 {
   /* Small cases, infs and nans are supported by our approximation technique,
      but do not set fenv flags correctly. Only trigger special case if we need
@@ -57,15 +57,13 @@ float64x2_t V_NAME (atan) (float64x2_t x)
   y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);
   return y;
 }
-PL_ALIAS (V_NAME (atan), _ZGVnN2v_atan)
 
 PL_SIG (V, D, 1, atan, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (atan), 1.78)
-PL_TEST_EXPECT_FENV (V_NAME (atan), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (atan), 0, 0x1p-30, 10000)
-PL_TEST_INTERVAL (V_NAME (atan), -0, -0x1p-30, 1000)
-PL_TEST_INTERVAL (V_NAME (atan), 0x1p-30, 0x1p53, 900000)
-PL_TEST_INTERVAL (V_NAME (atan), -0x1p-30, -0x1p53, 90000)
-PL_TEST_INTERVAL (V_NAME (atan), 0x1p53, inf, 10000)
-PL_TEST_INTERVAL (V_NAME (atan), -0x1p53, -inf, 1000)
-
+PL_TEST_ULP (V_NAME_D1 (atan), 1.78)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (atan), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (atan), 0, 0x1p-30, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (atan), -0, -0x1p-30, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (atan), 0x1p-30, 0x1p53, 900000)
+PL_TEST_INTERVAL (V_NAME_D1 (atan), -0x1p-30, -0x1p53, 90000)
+PL_TEST_INTERVAL (V_NAME_D1 (atan), 0x1p53, inf, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (atan), -0x1p53, -inf, 1000)

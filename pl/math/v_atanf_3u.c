@@ -29,7 +29,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
    using z=-1/x and shift = pi/2. Maximum observed error is 2.9ulps:
    v_atanf(0x1.0468f6p+0) got 0x1.967f06p-1 want 0x1.967fp-1.  */
 VPCS_ATTR
-float32x4_t V_NAME (atanf) (float32x4_t x)
+float32x4_t V_NAME_F1 (atan) (float32x4_t x)
 {
   /* Small cases, infs and nans are supported by our approximation technique,
      but do not set fenv flags correctly. Only trigger special case if we need
@@ -65,16 +65,15 @@ float32x4_t V_NAME (atanf) (float32x4_t x)
 
   return y;
 }
-PL_ALIAS (V_NAME (atanf), _ZGVnN4v_atanf)
 
 PL_SIG (V, F, 1, atan, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (atanf), 2.5)
-PL_TEST_EXPECT_FENV (V_NAME (atanf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (atanf), 0, 0x1p-30, 5000)
-PL_TEST_INTERVAL (V_NAME (atanf), -0, -0x1p-30, 5000)
-PL_TEST_INTERVAL (V_NAME (atanf), 0x1p-30, 1, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), -0x1p-30, -1, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), 1, 0x1p30, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), -1, -0x1p30, 40000)
-PL_TEST_INTERVAL (V_NAME (atanf), 0x1p30, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (atanf), -0x1p30, -inf, 1000)
+PL_TEST_ULP (V_NAME_F1 (atan), 2.5)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (atan), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), 0, 0x1p-30, 5000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), -0, -0x1p-30, 5000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), 0x1p-30, 1, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), -0x1p-30, -1, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), 1, 0x1p30, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), -1, -0x1p30, 40000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), 0x1p30, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (atan), -0x1p30, -inf, 1000)

@@ -90,7 +90,7 @@ handle_special (float x)
    the same as for the scalar algorithm, i.e. worst-case error when using Estrin
    is roughly 2.02 ULP:
    log1pf(0x1.21e13ap-2) got 0x1.fe8028p-3 want 0x1.fe802cp-3.  */
-VPCS_ATTR float32x4_t V_NAME (log1pf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t ia12 = (ix >> 20) & v_u32 (0x7f8);
@@ -142,16 +142,15 @@ VPCS_ATTR float32x4_t V_NAME (log1pf) (float32x4_t x)
     return v_call_f32 (handle_special, special_arg, y, special_cases);
   return y;
 }
-PL_ALIAS (__vn_log1pf, _ZGVnN4v_log1pf)
 
 PL_SIG (V, F, 1, log1p, -0.9, 10.0)
-PL_TEST_ULP (V_NAME (log1pf), 1.53)
-PL_TEST_EXPECT_FENV (V_NAME (log1pf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (log1pf), -10.0, 10.0, 10000)
-PL_TEST_INTERVAL (V_NAME (log1pf), 0.0, 0x1p-23, 30000)
-PL_TEST_INTERVAL (V_NAME (log1pf), 0x1p-23, 0.001, 50000)
-PL_TEST_INTERVAL (V_NAME (log1pf), 0.001, 1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (log1pf), 0.0, -0x1p-23, 30000)
-PL_TEST_INTERVAL (V_NAME (log1pf), -0x1p-23, -0.001, 30000)
-PL_TEST_INTERVAL (V_NAME (log1pf), -0.001, -1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (log1pf), -1.0, inf, 1000)
+PL_TEST_ULP (V_NAME_F1 (log1p), 1.53)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (log1p), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), -10.0, 10.0, 10000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), 0.0, 0x1p-23, 30000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), 0x1p-23, 0.001, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), 0.001, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), 0.0, -0x1p-23, 30000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), -0x1p-23, -0.001, 30000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), -0.001, -1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (log1p), -1.0, inf, 1000)

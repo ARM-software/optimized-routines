@@ -48,7 +48,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
    __v_log2(0x1.0b556b093869bp+0) got 0x1.fffb34198d9dap-5
 				 want 0x1.fffb34198d9ddp-5.  */
 VPCS_ATTR
-float64x2_t V_NAME (log2) (float64x2_t x)
+float64x2_t V_NAME_D1 (log2) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t special = v_cond_u64 (ix - TinyBound >= BigBound - TinyBound);
@@ -80,14 +80,13 @@ float64x2_t V_NAME (log2) (float64x2_t x)
     return specialcase (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (log2), _ZGVnN2v_log2)
 
 PL_SIG (V, D, 1, log2, 0.01, 11.1)
-PL_TEST_ULP (V_NAME (log2), 2.09)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (log2))
-PL_TEST_INTERVAL (V_NAME (log2), -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (V_NAME (log2), 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (V_NAME (log2), 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (V_NAME (log2), 0x1p-23, 1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (log2), 1.0, 100, 50000)
-PL_TEST_INTERVAL (V_NAME (log2), 100, inf, 50000)
+PL_TEST_ULP (V_NAME_D1 (log2), 2.09)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (log2))
+PL_TEST_INTERVAL (V_NAME_D1 (log2), -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (V_NAME_D1 (log2), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (V_NAME_D1 (log2), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log2), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log2), 1.0, 100, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log2), 100, inf, 50000)

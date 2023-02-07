@@ -12,7 +12,7 @@
 #include "pl_test.h"
 
 /* Accurate exponential (vector variant of exp_dd).  */
-float64x2_t V_NAME (exp_tail) (float64x2_t, float64x2_t);
+float64x2_t __v_exp_tail (float64x2_t, float64x2_t);
 
 #define One v_f64 (1.0)
 #define AbsMask v_u64 (0x7fffffffffffffff)
@@ -73,7 +73,7 @@ v_eval_gauss (float64x2_t a)
   e2 = v_fma_f64 (-a_lo, a_lo, e2);
 
   /* Fast and accurate evaluation of exp(-a2 + e2) where e2 << a2.  */
-  return V_NAME (exp_tail) (-a2, e2);
+  return __v_exp_tail (-a2, e2);
 }
 
 /* Optimized double precision vector complementary error function erfc.
@@ -81,7 +81,7 @@ v_eval_gauss (float64x2_t a)
    __v_erfc(0x1.4792573ee6cc7p+2) got 0x1.ff3f4c8e200d5p-42
 				 want 0x1.ff3f4c8e200d9p-42.  */
 VPCS_ATTR
-float64x2_t V_NAME (erfc) (float64x2_t x)
+float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
 {
   float64x2_t z, p, y;
   uint64x2_t ix, atop, sign, i, cmp;
@@ -144,13 +144,12 @@ float64x2_t V_NAME (erfc) (float64x2_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-PL_ALIAS (V_NAME (erfc), _ZGVnN2v_erfc)
 
 PL_SIG (V, D, 1, erfc, -6.0, 28.0)
-PL_TEST_ULP (V_NAME (erfc), 3.15)
-PL_TEST_INTERVAL (V_NAME (erfc), 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (V_NAME (erfc), 0x1p-1022, 0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erfc), -0x1p-1022, -0x1p-26, 40000)
-PL_TEST_INTERVAL (V_NAME (erfc), 0x1p-26, 0x1p5, 40000)
-PL_TEST_INTERVAL (V_NAME (erfc), -0x1p-26, -0x1p3, 40000)
-PL_TEST_INTERVAL (V_NAME (erfc), 0, inf, 40000)
+PL_TEST_ULP (V_NAME_D1 (erfc), 3.15)
+PL_TEST_INTERVAL (V_NAME_D1 (erfc), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (erfc), 0x1p-1022, 0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erfc), -0x1p-1022, -0x1p-26, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erfc), 0x1p-26, 0x1p5, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erfc), -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (V_NAME_D1 (erfc), 0, inf, 40000)

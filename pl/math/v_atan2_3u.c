@@ -35,7 +35,7 @@ zeroinfnan (uint64x2_t i)
 	got 0x1.92d628ab678ccp-1
        want 0x1.92d628ab678cfp-1.  */
 VPCS_ATTR
-float64x2_t V_NAME (atan2) (float64x2_t y, float64x2_t x)
+float64x2_t V_NAME_D2 (atan2) (float64x2_t y, float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t iy = v_as_u64_f64 (y);
@@ -74,14 +74,13 @@ float64x2_t V_NAME (atan2) (float64x2_t y, float64x2_t x)
 
   return ret;
 }
-PL_ALIAS (V_NAME (atan2), _ZGVnN2vv_atan2)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (V, D, 2, atan2)
 // TODO tighten this once __v_atan2 is fixed
-PL_TEST_ULP (V_NAME (atan2), 2.9)
-PL_TEST_INTERVAL (V_NAME (atan2), -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (V_NAME (atan2), -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atan2), 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atan2), 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (V_NAME (atan2), 1e6, 1e32, 40000)
+PL_TEST_ULP (V_NAME_D2 (atan2), 2.9)
+PL_TEST_INTERVAL (V_NAME_D2 (atan2), -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D2 (atan2), -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME_D2 (atan2), 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (V_NAME_D2 (atan2), 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (V_NAME_D2 (atan2), 1e6, 1e32, 40000)

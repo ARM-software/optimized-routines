@@ -41,8 +41,6 @@ check atan2 nan nan x -nan -nan
 
 # vector functions
 flags="${ULPFLAGS:--q}"
-runvn=
-check __vn_log10f 1 && runvn=1
 runsv=
 if [ $WANT_SVE_MATH -eq 1 ]; then
 check __sv_cosf 0 && runsv=1

@@ -32,7 +32,7 @@ specialcase (float64x2_t x)
    __v_tan(0x1.4457047ef78d8p+20) got -0x1.f6ccd8ecf7dedp+37
 				 want -0x1.f6ccd8ecf7deap+37.   */
 VPCS_ATTR
-float64x2_t V_NAME (tan) (float64x2_t x)
+float64x2_t V_NAME_D1 (tan) (float64x2_t x)
 {
   uint64x2_t iax = v_as_u64_f64 (x) & AbsMask;
 
@@ -86,14 +86,13 @@ float64x2_t V_NAME (tan) (float64x2_t x)
 
   return v_sel_f64 (use_recip, -d, n) / v_sel_f64 (use_recip, n, d);
 }
-PL_ALIAS (V_NAME (tan), _ZGVnN2v_tan)
 
 PL_SIG (V, D, 1, tan, -3.1, 3.1)
-PL_TEST_ULP (V_NAME (tan), 2.99)
-PL_TEST_EXPECT_FENV (V_NAME (tan), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (tan), 0, TinyBound, 5000)
-PL_TEST_INTERVAL (V_NAME (tan), TinyBound, RangeVal, 100000)
-PL_TEST_INTERVAL (V_NAME (tan), RangeVal, inf, 5000)
-PL_TEST_INTERVAL (V_NAME (tan), -0, -TinyBound, 5000)
-PL_TEST_INTERVAL (V_NAME (tan), -TinyBound, -RangeVal, 100000)
-PL_TEST_INTERVAL (V_NAME (tan), -RangeVal, -inf, 5000)
+PL_TEST_ULP (V_NAME_D1 (tan), 2.99)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (tan), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (tan), 0, TinyBound, 5000)
+PL_TEST_INTERVAL (V_NAME_D1 (tan), TinyBound, RangeVal, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (tan), RangeVal, inf, 5000)
+PL_TEST_INTERVAL (V_NAME_D1 (tan), -0, -TinyBound, 5000)
+PL_TEST_INTERVAL (V_NAME_D1 (tan), -TinyBound, -RangeVal, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (tan), -RangeVal, -inf, 5000)

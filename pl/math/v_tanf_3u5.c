@@ -52,7 +52,7 @@ eval_poly (float32x4_t z)
    __v_tanf(-0x1.e5f0cap+13) got 0x1.ff9856p-1
 			    want 0x1.ff9850p-1.  */
 VPCS_ATTR
-float32x4_t V_NAME (tanf) (float32x4_t x)
+float32x4_t V_NAME_F1 (tan) (float32x4_t x)
 {
   float32x4_t special_arg = x;
   uint32x4_t ix = v_as_u32_f32 (x);
@@ -114,16 +114,15 @@ float32x4_t V_NAME (tanf) (float32x4_t x)
     return specialcase (special_arg, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (tanf), _ZGVnN4v_tanf)
 
 PL_SIG (V, F, 1, tan, -3.1, 3.1)
-PL_TEST_ULP (V_NAME (tanf), 2.96)
-PL_TEST_EXPECT_FENV (V_NAME (tanf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (tanf), -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (V_NAME (tanf), 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (V_NAME (tanf), 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (V_NAME (tanf), 0x1p-23, 0.7, 50000)
-PL_TEST_INTERVAL (V_NAME (tanf), 0.7, 1.5, 50000)
-PL_TEST_INTERVAL (V_NAME (tanf), 1.5, 100, 50000)
-PL_TEST_INTERVAL (V_NAME (tanf), 100, 0x1p17, 50000)
-PL_TEST_INTERVAL (V_NAME (tanf), 0x1p17, inf, 50000)
+PL_TEST_ULP (V_NAME_F1 (tan), 2.96)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (tan), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-23, 0.7, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0.7, 1.5, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 1.5, 100, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 100, 0x1p17, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p17, inf, 50000)

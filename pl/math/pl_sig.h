@@ -4,18 +4,24 @@
  * Copyright (c) 2022-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception.
  */
+
+#define V_NAME_F1(fun) _ZGVnN4v_##fun##f
+#define V_NAME_D1(fun) _ZGVnN2v_##fun
+#define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
+#define V_NAME_D2(fun) _ZGVnN2vv_##fun
+
 #define PL_DECL_SF1(fun) float fun##f (float);
 #define PL_DECL_SF2(fun) float fun##f (float, float);
 #define PL_DECL_SD1(fun) double fun (double);
 #define PL_DECL_SD2(fun) double fun (double, double);
 
 #if WANT_VMATH
-#define PL_DECL_VF1(fun) VPCS_ATTR float32x4_t V_NAME (fun##f) (float32x4_t);
+#define PL_DECL_VF1(fun) VPCS_ATTR float32x4_t V_NAME_F1 (fun##f) (float32x4_t);
 #define PL_DECL_VF2(fun)                                                       \
-  VPCS_ATTR float32x4_t V_NAME (fun##f) (float32x4_t, float32x4_t);
-#define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME (fun) (float64x2_t);
+  VPCS_ATTR float32x4_t V_NAME_F2 (fun##f) (float32x4_t, float32x4_t);
+#define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
 #define PL_DECL_VD2(fun)                                                       \
-  VPCS_ATTR float64x2_t V_NAME (fun) (float64x2_t, float64x2_t);
+  VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
 #else
 #define PL_DECL_VF1(fun)
 #define PL_DECL_VF2(fun)

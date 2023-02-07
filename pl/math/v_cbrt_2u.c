@@ -33,7 +33,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
    integer.
    __v_cbrt(0x1.fffff403f0bc6p+1) got 0x1.965fe72821e9bp+0
 				 want 0x1.965fe72821e99p+0.  */
-VPCS_ATTR float64x2_t V_NAME (cbrt) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
@@ -86,10 +86,9 @@ VPCS_ATTR float64x2_t V_NAME (cbrt) (float64x2_t x)
     return specialcase (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (cbrt), _ZGVnN2v_cbrt)
 
-PL_TEST_ULP (V_NAME (cbrt), 1.30)
+PL_TEST_ULP (V_NAME_D1 (cbrt), 1.30)
 PL_SIG (V, D, 1, cbrt, -10.0, 10.0)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (cbrt))
-PL_TEST_INTERVAL (V_NAME (cbrt), 0, inf, 1000000)
-PL_TEST_INTERVAL (V_NAME (cbrt), -0, -inf, 1000000)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (cbrt))
+PL_TEST_INTERVAL (V_NAME_D1 (cbrt), 0, inf, 1000000)
+PL_TEST_INTERVAL (V_NAME_D1 (cbrt), -0, -inf, 1000000)

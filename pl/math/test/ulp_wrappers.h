@@ -60,16 +60,6 @@ static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t
 DECL_POW_INT_REF(ref_powif, double, float, int)
 DECL_POW_INT_REF(ref_powi, long double, double, int)
 
-#define VF1_WRAP(func) static float v_##func##f(float x) { return __v_##func##f(argf(x))[0]; }
-#define VF2_WRAP(func) static float v_##func##f(float x, float y) { return __v_##func##f(argf(x), argf(y))[0]; }
-#define VD1_WRAP(func) static double v_##func(double x) { return __v_##func(argd(x))[0]; }
-#define VD2_WRAP(func) static double v_##func(double x, double y) { return __v_##func(argd(x), argd(y))[0]; }
-
-#define VNF1_WRAP(func) static float vn_##func##f(float x) { return __vn_##func##f(argf(x))[0]; }
-#define VNF2_WRAP(func) static float vn_##func##f(float x, float y) { return __vn_##func##f(argf(x), argf(y))[0]; }
-#define VND1_WRAP(func) static double vn_##func(double x) { return __vn_##func(argd(x))[0]; }
-#define VND2_WRAP(func) static double vn_##func(double x, double y) { return __vn_##func(argd(x), argd(y))[0]; }
-
 #define ZVF1_WRAP(func) static float Z_##func##f(float x) { return _ZGVnN4v_##func##f(argf(x))[0]; }
 #define ZVF2_WRAP(func) static float Z_##func##f(float x, float y) { return _ZGVnN4vv_##func##f(argf(x), argf(y))[0]; }
 #define ZVD1_WRAP(func) static double Z_##func(double x) { return _ZGVnN2v_##func(argd(x))[0]; }
@@ -77,10 +67,10 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #if defined(__vpcs) && __aarch64__
 
-#define ZVNF1_WRAP(func) VNF1_WRAP(func) ZVF1_WRAP(func)
-#define ZVNF2_WRAP(func) VNF2_WRAP(func) ZVF2_WRAP(func)
-#define ZVND1_WRAP(func) VND1_WRAP(func) ZVD1_WRAP(func)
-#define ZVND2_WRAP(func) VND2_WRAP(func) ZVD2_WRAP(func)
+#define ZVNF1_WRAP(func) ZVF1_WRAP(func)
+#define ZVNF2_WRAP(func) ZVF2_WRAP(func)
+#define ZVND1_WRAP(func) ZVD1_WRAP(func)
+#define ZVND2_WRAP(func) ZVD2_WRAP(func)
 
 #else
 

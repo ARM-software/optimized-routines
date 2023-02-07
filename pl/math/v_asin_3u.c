@@ -52,7 +52,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
    The largest observed error in this region is 2.69 ulps,
    __v_asin(0x1.044ac9819f573p-1) got 0x1.110d7e85fdd5p-1
 				 want 0x1.110d7e85fdd53p-1.  */
-VPCS_ATTR float64x2_t V_NAME (asin) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
@@ -93,14 +93,13 @@ VPCS_ATTR float64x2_t V_NAME (asin) (float64x2_t x)
   /* Copy sign.  */
   return v_as_f64_u64 (v_bsl_u64 (v_u64 (AbsMask), v_as_u64_f64 (y), ix));
 }
-PL_ALIAS (V_NAME (asin), _ZGVnN2v_asin)
 
 PL_SIG (V, D, 1, asin, -1.0, 1.0)
-PL_TEST_ULP (V_NAME (asin), 2.19)
-PL_TEST_EXPECT_FENV (V_NAME (asin), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (asin), 0, Small, 5000)
-PL_TEST_INTERVAL (V_NAME (asin), Small, 0.5, 50000)
-PL_TEST_INTERVAL (V_NAME (asin), 0.5, 1.0, 50000)
-PL_TEST_INTERVAL (V_NAME (asin), 1.0, 0x1p11, 50000)
-PL_TEST_INTERVAL (V_NAME (asin), 0x1p11, inf, 20000)
-PL_TEST_INTERVAL (V_NAME (asin), -0, -inf, 20000)
+PL_TEST_ULP (V_NAME_D1 (asin), 2.19)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (asin), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (asin), 0, Small, 5000)
+PL_TEST_INTERVAL (V_NAME_D1 (asin), Small, 0.5, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (asin), 0.5, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (asin), 1.0, 0x1p11, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (asin), 0x1p11, inf, 20000)
+PL_TEST_INTERVAL (V_NAME_D1 (asin), -0, -inf, 20000)

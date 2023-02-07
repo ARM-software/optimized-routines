@@ -24,7 +24,7 @@ special_case (float64x2_t x)
    argument to log1p falls in the k=0 interval, i.e. x close to 1:
    __v_acosh(0x1.00798aaf80739p+0) got 0x1.f2d6d823bc9dfp-5
 				  want 0x1.f2d6d823bc9e2p-5.  */
-VPCS_ATTR float64x2_t V_NAME (acosh) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
 {
   uint64x2_t itop = v_as_u64_f64 (x) >> 52;
   uint64x2_t special = v_cond_u64 ((itop - OneTop) >= (BigBoundTop - OneTop));
@@ -37,12 +37,11 @@ VPCS_ATTR float64x2_t V_NAME (acosh) (float64x2_t x)
   float64x2_t u = xm1 * (x + 1);
   return log1p_inline (xm1 + v_sqrt_f64 (u));
 }
-PL_ALIAS (V_NAME (acosh), _ZGVnN2v_acosh)
 
 PL_SIG (V, D, 1, acosh, 1.0, 10.0)
-PL_TEST_ULP (V_NAME (acosh), 2.53)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (acosh))
-PL_TEST_INTERVAL (V_NAME (acosh), 1, 0x1p511, 90000)
-PL_TEST_INTERVAL (V_NAME (acosh), 0x1p511, inf, 10000)
-PL_TEST_INTERVAL (V_NAME (acosh), 0, 1, 1000)
-PL_TEST_INTERVAL (V_NAME (acosh), -0, -inf, 10000)
+PL_TEST_ULP (V_NAME_D1 (acosh), 2.53)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (acosh))
+PL_TEST_INTERVAL (V_NAME_D1 (acosh), 1, 0x1p511, 90000)
+PL_TEST_INTERVAL (V_NAME_D1 (acosh), 0x1p511, inf, 10000)
+PL_TEST_INTERVAL (V_NAME_D1 (acosh), 0, 1, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (acosh), -0, -inf, 10000)

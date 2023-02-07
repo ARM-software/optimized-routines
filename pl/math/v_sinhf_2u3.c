@@ -28,7 +28,7 @@ special_case (float32x4_t x)
    sinh(x) = (exp(x) - exp(-x)) / 2.
    The maximum error is 2.26 ULP:
    __v_sinhf(0x1.e34a9ep-4) got 0x1.e469ep-4 want 0x1.e469e4p-4.  */
-VPCS_ATTR float32x4_t V_NAME (sinhf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (sinh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
@@ -53,14 +53,13 @@ VPCS_ATTR float32x4_t V_NAME (sinhf) (float32x4_t x)
   float32x4_t t = expm1f_inline (ax);
   return (t + t / (t + 1)) * halfsign;
 }
-PL_ALIAS (V_NAME (sinhf), _ZGVnN4v_sinhf)
 
 PL_SIG (V, F, 1, sinh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (sinhf), 1.76)
-PL_TEST_EXPECT_FENV (V_NAME (sinhf), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (sinhf), 0, TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (sinhf), -0, -TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (sinhf), TinyBound, BigBound, 100000)
-PL_TEST_INTERVAL (V_NAME (sinhf), -TinyBound, -BigBound, 100000)
-PL_TEST_INTERVAL (V_NAME (sinhf), BigBound, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (sinhf), -BigBound, -inf, 1000)
+PL_TEST_ULP (V_NAME_F1 (sinh), 1.76)
+PL_TEST_EXPECT_FENV (V_NAME_F1 (sinh), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_F1 (sinh), 0, TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (sinh), -0, -TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (sinh), TinyBound, BigBound, 100000)
+PL_TEST_INTERVAL (V_NAME_F1 (sinh), -TinyBound, -BigBound, 100000)
+PL_TEST_INTERVAL (V_NAME_F1 (sinh), BigBound, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (sinh), -BigBound, -inf, 1000)

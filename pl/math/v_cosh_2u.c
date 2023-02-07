@@ -66,7 +66,7 @@ exp_inline (float64x2_t x)
    The greatest observed error in the non-special region is 1.54 ULP:
    __v_cosh(0x1.8e205b6ecacf7p+2) got 0x1.f711dcb0c77afp+7
 				 want 0x1.f711dcb0c77b1p+7.  */
-VPCS_ATTR float64x2_t V_NAME (cosh) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (cosh) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
@@ -82,12 +82,11 @@ VPCS_ATTR float64x2_t V_NAME (cosh) (float64x2_t x)
   float64x2_t t = exp_inline (ax);
   return t * Half + Half / t;
 }
-PL_ALIAS (V_NAME (cosh), _ZGVnN2v_cosh)
 
 PL_SIG (V, D, 1, cosh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (cosh), 1.43)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (cosh))
-PL_TEST_INTERVAL (V_NAME (cosh), 0, 0x1.6p9, 100000)
-PL_TEST_INTERVAL (V_NAME (cosh), -0, -0x1.6p9, 100000)
-PL_TEST_INTERVAL (V_NAME (cosh), 0x1.6p9, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (cosh), -0x1.6p9, -inf, 1000)
+PL_TEST_ULP (V_NAME_D1 (cosh), 1.43)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (cosh))
+PL_TEST_INTERVAL (V_NAME_D1 (cosh), 0, 0x1.6p9, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (cosh), -0, -0x1.6p9, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (cosh), 0x1.6p9, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (cosh), -0x1.6p9, -inf, 1000)

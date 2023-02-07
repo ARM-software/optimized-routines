@@ -48,7 +48,7 @@ eval_poly (float64x2_t f, float64x2_t f2)
    __v_expm1(0x1.634ba0c237d7bp-2) got 0x1.a8b9ea8d66e22p-2
 				  want 0x1.a8b9ea8d66e2p-2.  */
 VPCS_ATTR
-float64x2_t V_NAME (expm1) (float64x2_t x)
+float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t ax = ix & AbsMask;
@@ -97,14 +97,13 @@ float64x2_t V_NAME (expm1) (float64x2_t x)
 
   return y;
 }
-PL_ALIAS (V_NAME (expm1), _ZGVnN2v_expm1)
 
 PL_SIG (V, D, 1, expm1, -9.9, 9.9)
-PL_TEST_ULP (V_NAME (expm1), 1.68)
-PL_TEST_EXPECT_FENV (V_NAME (expm1), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME (expm1), 0, 0x1p-51, 1000)
-PL_TEST_INTERVAL (V_NAME (expm1), -0, -0x1p-51, 1000)
-PL_TEST_INTERVAL (V_NAME (expm1), 0x1p-51, 0x1.63108c75a1937p+9, 100000)
-PL_TEST_INTERVAL (V_NAME (expm1), -0x1p-51, -0x1.740bf7c0d927dp+9, 100000)
-PL_TEST_INTERVAL (V_NAME (expm1), 0x1.63108c75a1937p+9, inf, 100)
-PL_TEST_INTERVAL (V_NAME (expm1), -0x1.740bf7c0d927dp+9, -inf, 100)
+PL_TEST_ULP (V_NAME_D1 (expm1), 1.68)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (expm1), WANT_SIMD_EXCEPT)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), 0, 0x1p-51, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), -0, -0x1p-51, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), 0x1p-51, 0x1.63108c75a1937p+9, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), -0x1p-51, -0x1.740bf7c0d927dp+9, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), 0x1.63108c75a1937p+9, inf, 100)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), -0x1.740bf7c0d927dp+9, -inf, 100)

@@ -32,7 +32,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
    exponent is a multiple of 3, for example:
    __v_cbrtf(0x1.81410ep+30) got 0x1.255d96p+10
 			    want 0x1.255d92p+10.  */
-VPCS_ATTR float32x4_t V_NAME (cbrtf) (float32x4_t x)
+VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
@@ -85,10 +85,9 @@ VPCS_ATTR float32x4_t V_NAME (cbrtf) (float32x4_t x)
     return specialcase (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (cbrtf), _ZGVnN4v_cbrtf)
 
 PL_SIG (V, F, 1, cbrt, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (cbrtf), 1.03)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (cbrtf))
-PL_TEST_INTERVAL (V_NAME (cbrtf), 0, inf, 1000000)
-PL_TEST_INTERVAL (V_NAME (cbrtf), -0, -inf, 1000000)
+PL_TEST_ULP (V_NAME_F1 (cbrt), 1.03)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_F1 (cbrt))
+PL_TEST_INTERVAL (V_NAME_F1 (cbrt), 0, inf, 1000000)
+PL_TEST_INTERVAL (V_NAME_F1 (cbrt), -0, -inf, 1000000)

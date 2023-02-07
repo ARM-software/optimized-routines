@@ -82,7 +82,7 @@ log_inline (float64x2_t x)
    |x| >= 1:
    __v_asinh(0x1.2cd9d717e2c9bp+0) got 0x1.ffffcfd0e234fp-1
 				  want 0x1.ffffcfd0e2352p-1.  */
-VPCS_ATTR float64x2_t V_NAME (asinh) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
@@ -146,17 +146,16 @@ VPCS_ATTR float64x2_t V_NAME (asinh) (float64x2_t x)
     return special_case (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (asinh), _ZGVnN2v_asinh)
 
 PL_SIG (V, D, 1, asinh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME (asinh), 2.80)
-PL_TEST_EXPECT_FENV (V_NAME (asinh), WANT_SIMD_EXCEPT)
+PL_TEST_ULP (V_NAME_D1 (asinh), 2.80)
+PL_TEST_EXPECT_FENV (V_NAME_D1 (asinh), WANT_SIMD_EXCEPT)
 /* Test vector asinh 3 times, with control lane < 1, > 1 and special.
    Ensures the v_sel is choosing the right option in all cases.  */
 #define V_ASINH_INTERVAL(lo, hi, n)                                            \
-  PL_TEST_INTERVAL_C (V_NAME (asinh), lo, hi, n, 0.5)                          \
-  PL_TEST_INTERVAL_C (V_NAME (asinh), lo, hi, n, 2)                            \
-  PL_TEST_INTERVAL_C (V_NAME (asinh), lo, hi, n, 0x1p600)
+  PL_TEST_INTERVAL_C (V_NAME_D1 (asinh), lo, hi, n, 0.5)                       \
+  PL_TEST_INTERVAL_C (V_NAME_D1 (asinh), lo, hi, n, 2)                         \
+  PL_TEST_INTERVAL_C (V_NAME_D1 (asinh), lo, hi, n, 0x1p600)
 V_ASINH_INTERVAL (0, 0x1p-26, 50000)
 V_ASINH_INTERVAL (0x1p-26, 1, 50000)
 V_ASINH_INTERVAL (1, 0x1p511, 50000)

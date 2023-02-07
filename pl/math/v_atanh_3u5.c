@@ -29,7 +29,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
    __v_atanh(0x1.ffae6288b601p-6) got 0x1.ffd8ff31b5019p-6
 				 want 0x1.ffd8ff31b501cp-6.  */
 VPCS_ATTR
-float64x2_t V_NAME (atanh) (float64x2_t x)
+float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t sign = ix & ~AbsMask;
@@ -45,14 +45,13 @@ float64x2_t V_NAME (atanh) (float64x2_t x)
     return specialcase (x, y, special);
   return y;
 }
-PL_ALIAS (V_NAME (atanh), _ZGVnN2v_atanh)
 
 PL_SIG (V, D, 1, atanh, -1.0, 1.0)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (atanh))
-PL_TEST_ULP (V_NAME (atanh), 3.32)
-PL_TEST_INTERVAL_C (V_NAME (atanh), 0, 0x1p-23, 10000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanh), -0, -0x1p-23, 10000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanh), 0x1p-23, 1, 90000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanh), -0x1p-23, -1, 90000, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanh), 1, inf, 100, 0)
-PL_TEST_INTERVAL_C (V_NAME (atanh), -1, -inf, 100, 0)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (atanh))
+PL_TEST_ULP (V_NAME_D1 (atanh), 3.32)
+PL_TEST_INTERVAL_C (V_NAME_D1 (atanh), 0, 0x1p-23, 10000, 0)
+PL_TEST_INTERVAL_C (V_NAME_D1 (atanh), -0, -0x1p-23, 10000, 0)
+PL_TEST_INTERVAL_C (V_NAME_D1 (atanh), 0x1p-23, 1, 90000, 0)
+PL_TEST_INTERVAL_C (V_NAME_D1 (atanh), -0x1p-23, -1, 90000, 0)
+PL_TEST_INTERVAL_C (V_NAME_D1 (atanh), 1, inf, 100, 0)
+PL_TEST_INTERVAL_C (V_NAME_D1 (atanh), -1, -inf, 100, 0)

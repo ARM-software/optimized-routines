@@ -27,18 +27,6 @@ powi_wrap (double x)
 #if __aarch64__ && defined(__vpcs)
 
 __vpcs static v_double
-__vn_atan2_wrap (v_double x)
-{
-  return __vn_atan2 (v_double_dup (5.0), x);
-}
-
-__vpcs static v_float
-__vn_atan2f_wrap (v_float x)
-{
-  return __vn_atan2f (v_float_dup (5.0f), x);
-}
-
-__vpcs static v_double
 _Z_atan2_wrap (v_double x)
 {
   return _ZGVnN2vv_atan2 (v_double_dup (5.0), x);

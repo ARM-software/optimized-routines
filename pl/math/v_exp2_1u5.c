@@ -30,7 +30,7 @@ specialcase (float64x2_t x)
    v_exp2(-0x1.8c68c2231567ap-2)
 	 got 0x1.8780e9885f8e3p-1
 	want 0x1.8780e9885f8e2p-1.  */
-VPCS_ATTR float64x2_t V_NAME (exp2) (float64x2_t x)
+VPCS_ATTR float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 {
   uint64x2_t abstop = v_as_u64_f64 (x) & 0x7ff0000000000000;
 
@@ -72,14 +72,13 @@ VPCS_ATTR float64x2_t V_NAME (exp2) (float64x2_t x)
      is no spurious underflow here even without fma.  */
   return v_fma_f64 (scale, tmp, scale);
 }
-PL_ALIAS (V_NAME (exp2), _ZGVnN2v_exp2)
 
 PL_SIG (V, D, 1, exp2, -9.9, 9.9)
-PL_TEST_ULP (V_NAME (exp2), 0.51)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME (exp2))
-PL_TEST_INTERVAL (V_NAME (exp2), 0, TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (exp2), TinyBound, BigBound, 100000)
-PL_TEST_INTERVAL (V_NAME (exp2), BigBound, inf, 1000)
-PL_TEST_INTERVAL (V_NAME (exp2), -0, -TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME (exp2), -TinyBound, -BigBound, 100000)
-PL_TEST_INTERVAL (V_NAME (exp2), -BigBound, -inf, 1000)
+PL_TEST_ULP (V_NAME_D1 (exp2), 0.51)
+PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (exp2))
+PL_TEST_INTERVAL (V_NAME_D1 (exp2), 0, TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (exp2), TinyBound, BigBound, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (exp2), BigBound, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (exp2), -0, -TinyBound, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (exp2), -TinyBound, -BigBound, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (exp2), -BigBound, -inf, 1000)
