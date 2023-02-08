@@ -57,45 +57,6 @@ typedef __attribute__((__neon_vector_type__(2))) double __f64x2_t;
 #if __GNUC__ >= 9 || __clang_major__ >= 8
 #define __vpcs __attribute__((__aarch64_vector_pcs__))
 
-/* Vector functions following the vector PCS.  */
-__vpcs __f32x4_t __vn_acoshf (__f32x4_t);
-__vpcs __f64x2_t __vn_acosh (__f64x2_t);
-__vpcs __f64x2_t __vn_acos (__f64x2_t);
-__vpcs __f32x4_t __vn_acosf (__f32x4_t);
-__vpcs __f64x2_t __vn_asin (__f64x2_t);
-__vpcs __f32x4_t __vn_asinf (__f32x4_t);
-__vpcs __f32x4_t __vn_asinhf (__f32x4_t);
-__vpcs __f64x2_t __vn_asinh (__f64x2_t);
-__vpcs __f32x4_t __vn_atanf (__f32x4_t);
-__vpcs __f64x2_t __vn_atan (__f64x2_t);
-__vpcs __f32x4_t __vn_atan2f (__f32x4_t, __f32x4_t);
-__vpcs __f64x2_t __vn_atan2 (__f64x2_t, __f64x2_t);
-__vpcs __f32x4_t __vn_atanhf (__f32x4_t);
-__vpcs __f64x2_t __vn_atanh (__f64x2_t);
-__vpcs __f32x4_t __vn_cbrtf (__f32x4_t);
-__vpcs __f64x2_t __vn_cbrt (__f64x2_t);
-__vpcs __f32x4_t __vn_coshf (__f32x4_t);
-__vpcs __f64x2_t __vn_cosh (__f64x2_t);
-__vpcs __f32x4_t __vn_erff (__f32x4_t);
-__vpcs __f64x2_t __vn_erf (__f64x2_t);
-__vpcs __f32x4_t __vn_erfcf (__f32x4_t);
-__vpcs __f64x2_t __vn_erfc (__f64x2_t);
-__vpcs __f64x2_t __vn_exp2 (__f64x2_t);
-__vpcs __f32x4_t __vn_expm1f (__f32x4_t);
-__vpcs __f64x2_t __vn_expm1 (__f64x2_t);
-__vpcs __f32x4_t __vn_log10f (__f32x4_t);
-__vpcs __f64x2_t __vn_log10 (__f64x2_t);
-__vpcs __f32x4_t __vn_log1pf (__f32x4_t);
-__vpcs __f64x2_t __vn_log1p (__f64x2_t);
-__vpcs __f32x4_t __vn_log2f (__f32x4_t);
-__vpcs __f64x2_t __vn_log2 (__f64x2_t);
-__vpcs __f32x4_t __vn_sinhf (__f32x4_t);
-__vpcs __f64x2_t __vn_sinh (__f64x2_t);
-__vpcs __f32x4_t __vn_tanf (__f32x4_t);
-__vpcs __f64x2_t __vn_tan (__f64x2_t);
-__vpcs __f32x4_t __vn_tanhf (__f32x4_t);
-__vpcs __f64x2_t __vn_tanh (__f64x2_t);
-
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_acoshf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_acosh (__f64x2_t);
