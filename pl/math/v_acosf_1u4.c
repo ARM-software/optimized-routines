@@ -67,7 +67,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
     return special_case (x, x, v_u32 (0xffffffff));
 #else
   /* Fixing sign of NaN when x < -1.0.  */
-  ix = v_sel_u32 (v_cond_u32 (x < MOnef), v_u32 (0), ix);
+  ix = vbslq_u32 (v_cond_u32 (x < MOnef), v_u32 (0), ix);
 #endif
 
   float32x4_t ax = v_as_f32_u32 (ia);
@@ -76,8 +76,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
      z2 = (1 - |x|) / 2 and z = sqrt(z2), if |x| >= 0.5.  */
-  float32x4_t z2 = v_sel_f32 (a_le_half, x * x, v_fma_f32 (-Halff, ax, Halff));
-  float32x4_t z = v_sel_f32 (a_le_half, ax, v_sqrt_f32 (z2));
+  float32x4_t z2 = vbslq_f32 (a_le_half, x * x, v_fma_f32 (-Halff, ax, Halff));
+  float32x4_t z = vbslq_f32 (a_le_half, ax, vsqrtq_f32 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
   float32x4_t p = HORNER_4 (z2, P);
@@ -88,12 +88,12 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
   float32x4_t y
-    = v_as_f32_u32 (v_bsl_u32 (v_u32 (AbsMask), v_as_u32_f32 (p), ix));
+    = v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_as_u32_f32 (p), ix));
 
   uint32x4_t sign = v_cond_u32 (x < 0);
-  float32x4_t off = v_sel_f32 (sign, Pif, v_f32 (0.0f));
-  float32x4_t mul = v_sel_f32 (a_le_half, -Onef, Twof);
-  float32x4_t add = v_sel_f32 (a_le_half, PiOver2f, off);
+  float32x4_t off = vbslq_f32 (sign, Pif, v_f32 (0.0f));
+  float32x4_t mul = vbslq_f32 (a_le_half, -Onef, Twof);
+  float32x4_t add = vbslq_f32 (a_le_half, PiOver2f, off);
 
   return v_fma_f32 (mul, y, add);
 }

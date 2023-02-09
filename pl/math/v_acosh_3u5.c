@@ -35,7 +35,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
 
   float64x2_t xm1 = x - 1;
   float64x2_t u = xm1 * (x + 1);
-  return log1p_inline (xm1 + v_sqrt_f64 (u));
+  return log1p_inline (xm1 + vsqrtq_f64 (u));
 }
 
 PL_SIG (V, D, 1, acosh, 1.0, 10.0)

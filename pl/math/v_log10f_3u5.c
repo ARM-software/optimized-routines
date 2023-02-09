@@ -45,7 +45,7 @@ float32x4_t V_NAME_F1 (log10) (float32x4_t x)
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u -= Off;
-  n = v_to_f32_s32 (v_as_s32_u32 (u) >> 23); /* signextend.  */
+  n = vcvtq_f32_s32 (v_as_s32_u32 (u) >> 23); /* signextend.  */
   u &= Mask;
   u += Off;
   r = v_as_f32_u32 (u) - v_f32 (1.0f);

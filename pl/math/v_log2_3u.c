@@ -66,7 +66,7 @@ float64x2_t V_NAME_D1 (log2) (float64x2_t x)
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 
   float64x2_t r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
-  float64x2_t kd = v_to_f64_s64 (k);
+  float64x2_t kd = vcvtq_f64_s64 (k);
   float64x2_t w = v_fma_f64 (r, InvLn2, e.log2c);
 
   float64x2_t r2 = r * r;

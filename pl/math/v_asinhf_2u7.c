@@ -39,12 +39,12 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
      under/overflow.  */
   special |= v_cond_u32 (iax < TinyBound);
   if (unlikely (v_any_u32 (special)))
-    ax = v_sel_f32 (special, One, ax);
+    ax = vbslq_f32 (special, One, ax);
 #endif
 
   /* asinh(x) = log(x + sqrt(x * x + 1)).
      For positive x, asinh(x) = log1p(x + x * x / (1 + sqrt(x * x + 1))).  */
-  float32x4_t d = One + v_sqrt_f32 (ax * ax + One);
+  float32x4_t d = One + vsqrtq_f32 (ax * ax + One);
   float32x4_t y = log1pf_inline (ax + ax * ax / d);
   y = v_as_f32_u32 (sign | v_as_u32_f32 (y));
 

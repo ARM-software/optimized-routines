@@ -38,9 +38,9 @@ VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
   /* If fp exceptions are to be triggered properly, set all special and boring
      lanes to 1, which will trigger no exceptions, and fix them up later.  */
   uint32x4_t special = v_cond_u32 ((iax > 0x7f800000) | (iax < 0x34000000));
-  ix = v_sel_u32 (is_boring, v_u32 (One), ix);
+  ix = vbslq_u32 (is_boring, v_u32 (One), ix);
   if (unlikely (v_any_u32 (special)))
-    ix = v_sel_u32 (special, v_u32 (One), ix);
+    ix = vbslq_u32 (special, v_u32 (One), ix);
 #else
   uint32x4_t special = v_cond_u32 ((iax > 0x7f800000) | (iax == 0));
 #endif
@@ -48,7 +48,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
   float32x4_t q = expm1f_inline (2 * v_as_f32_u32 (ix));
   float32x4_t y = q / (q + 2);
-  y = v_sel_f32 (is_boring, boring, y);
+  y = vbslq_f32 (is_boring, boring, y);
   if (unlikely (v_any_u32 (special)))
     return special_case (x, y, special);
   return y;

@@ -25,7 +25,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 {
   uint32x4_t ix = v_as_u32_f32 (x);
   float32x4_t halfsign
-    = v_as_f32_u32 (v_bsl_u32 (v_u32 (AbsMask), v_u32 (Half), ix));
+    = v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_u32 (Half), ix));
   uint32x4_t iax = ix & AbsMask;
 
   float32x4_t ax = v_as_f32_u32 (iax);
@@ -35,7 +35,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
   /* Side-step special cases by setting those lanes to 0, which will trigger no
      exceptions. These will be fixed up later.  */
   if (unlikely (v_any_u32 (special)))
-    ax = v_sel_f32 (special, v_f32 (0), ax);
+    ax = vbslq_f32 (special, v_f32 (0), ax);
 #else
   uint32x4_t special = v_cond_u32 (iax >= One);
 #endif

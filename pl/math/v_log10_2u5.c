@@ -72,7 +72,7 @@ float64x2_t V_NAME_D1 (log10) (float64x2_t x)
 
   /* log10(x) = log1p(z/c-1)/log(10) + log10(c) + k*log10(2).  */
   r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
-  kd = v_to_f64_s64 (k);
+  kd = vcvtq_f64_s64 (k);
 
   /* hi = r / log(10) + log10(c) + k*log10(2).
      Constants in `v_log10_data.c` are computed (in extended precision) as

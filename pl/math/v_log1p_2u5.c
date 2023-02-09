@@ -52,7 +52,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (special)))
-    x = v_sel_f64 (special, v_f64 (0), x);
+    x = vbslq_f64 (special, v_f64 (0), x);
 #endif
 
   /* With x + 1 = t * 2^k (where t = f + 1 and k is chosen such that f
@@ -75,7 +75,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
   uint64x2_t u = mi + OneMHfRt2Top;
 
   int64x2_t ki = v_as_s64_u64 (u >> 52) - OneTop12;
-  float64x2_t k = v_to_f64_s64 (ki);
+  float64x2_t k = vcvtq_f64_s64 (ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
   uint64x2_t utop = (u & 0x000fffff00000000) + HfRt2Top;

@@ -60,17 +60,17 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
   /* Get sign and absolute value.  */
   uint32x4_t sign = ix & ~AbsMask;
   /* |x| < 0.921875.  */
-  uint32x4_t red = v_calt_f32 (x, v_f32 (0.921875f));
+  uint32x4_t red = vcaltq_f32 (x, v_f32 (0.921875f));
   /* |x| > 4.0.  */
-  uint32x4_t bor = v_cagt_f32 (x, v_f32 (4.0f));
+  uint32x4_t bor = vcagtq_f32 (x, v_f32 (4.0f));
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  uint32x4_t i = v_sel_u32 (red, v_u32 (0), v_u32 (1));
+  uint32x4_t i = vbslq_u32 (red, v_u32 (0), v_u32 (1));
 
   /* Get polynomial coefficients.  */
   struct entry dat = lookup (i);
 
-  float32x4_t a = v_abs_f32 (x);
-  float32x4_t z = v_sel_f32 (red, x * x, a);
+  float32x4_t a = vabsq_f32 (x);
+  float32x4_t z = vbslq_f32 (red, x * x, a);
 
   /* Evaluate Polynomial of |x| or x^2.  */
   float32x4_t r = dat.P[6];
@@ -79,16 +79,16 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
   r = v_fma_f32 (z, r, dat.P[3]);
   r = v_fma_f32 (z, r, dat.P[2]);
   r = v_fma_f32 (z, r, dat.P[1]);
-  r = v_sel_f32 (red, r, v_fma_f32 (z, r, dat.P[0]));
+  r = vbslq_f32 (red, r, v_fma_f32 (z, r, dat.P[0]));
   r = v_fma_f32 (a, r, a);
 
   /* y = |x| + |x|*P(|x|)        if |x| < 0.921875
      1 - exp (-(|x|+|x|*P(x^2))) otherwise.  */
-  float32x4_t y = v_sel_f32 (red, r, v_f32 (1.0f) - __v_expf (-r));
+  float32x4_t y = vbslq_f32 (red, r, v_f32 (1.0f) - __v_expf (-r));
 
   /* Boring domain (absolute value is required to get the sign of erf(-nan)
      right).  */
-  y = v_sel_f32 (bor, v_f32 (1.0f), v_abs_f32 (y));
+  y = vbslq_f32 (bor, v_f32 (1.0f), vabsq_f32 (y));
 
   /* y=erf(x) if x>0, -erf(-x) otherwise.  */
   y = v_as_f32_u32 (v_as_u32_f32 (y) ^ sign);

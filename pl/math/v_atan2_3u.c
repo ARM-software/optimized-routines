@@ -46,20 +46,20 @@ float64x2_t V_NAME_D2 (atan2) (float64x2_t y, float64x2_t x)
   uint64x2_t sign_y = iy & SignMask;
   uint64x2_t sign_xy = sign_x ^ sign_y;
 
-  float64x2_t ax = v_abs_f64 (x);
-  float64x2_t ay = v_abs_f64 (y);
+  float64x2_t ax = vabsq_f64 (x);
+  float64x2_t ay = vabsq_f64 (y);
 
   uint64x2_t pred_xlt0 = x < 0.0;
   uint64x2_t pred_aygtax = ay > ax;
 
   /* Set up z for call to atan.  */
-  float64x2_t n = v_sel_f64 (pred_aygtax, -ax, ay);
-  float64x2_t d = v_sel_f64 (pred_aygtax, ay, ax);
-  float64x2_t z = v_div_f64 (n, d);
+  float64x2_t n = vbslq_f64 (pred_aygtax, -ax, ay);
+  float64x2_t d = vbslq_f64 (pred_aygtax, ay, ax);
+  float64x2_t z = vdivq_f64 (n, d);
 
   /* Work out the correct shift.  */
-  float64x2_t shift = v_sel_f64 (pred_xlt0, v_f64 (-2.0), v_f64 (0.0));
-  shift = v_sel_f64 (pred_aygtax, shift + 1.0, shift);
+  float64x2_t shift = vbslq_f64 (pred_xlt0, v_f64 (-2.0), v_f64 (0.0));
+  shift = vbslq_f64 (pred_aygtax, shift + 1.0, shift);
   shift *= PiOver2;
 
   float64x2_t ret = eval_poly (z, z, shift);

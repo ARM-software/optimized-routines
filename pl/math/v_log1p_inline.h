@@ -40,7 +40,7 @@ log1p_inline (float64x2_t x)
   uint64x2_t u = mi + OneMHfRt2Top;
 
   int64x2_t ki = v_as_s64_u64 (u >> 52) - OneTop;
-  float64x2_t k = v_to_f64_s64 (ki);
+  float64x2_t k = vcvtq_f64_s64 (ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
   uint64x2_t utop = (u & 0x000fffff00000000) + HfRt2Top;
@@ -59,8 +59,8 @@ log1p_inline (float64x2_t x)
   uint64x2_t k0 = k == 0;
   if (unlikely (v_any_u64 (k0)))
     {
-      cm = v_sel_f64 (k0, v_f64 (0), cm);
-      f = v_sel_f64 (k0, x, f);
+      cm = vbslq_f64 (k0, v_f64 (0), cm);
+      f = vbslq_f64 (k0, x, f);
     }
 #endif
 

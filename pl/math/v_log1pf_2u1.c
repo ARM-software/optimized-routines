@@ -103,7 +103,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
   if (unlikely (v_any_u32 (special_cases)))
     /* Side-step special lanes so fenv exceptions are not triggered
        inadvertently.  */
-    x = v_sel_f32 (special_cases, v_f32 (1), x);
+    x = vbslq_f32 (special_cases, v_f32 (1), x);
 #endif
 
   /* With x + 1 = t * 2^k (where t = m + 1 and k is chosen such that m
@@ -133,7 +133,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
 
   /* The scale factor to be applied back at the end - by multiplying float(k)
      by 2^-23 we get the unbiased exponent of k.  */
-  float32x4_t scale_back = v_to_f32_s32 (k) * v_f32 (0x1p-23f);
+  float32x4_t scale_back = vcvtq_f32_s32 (k) * v_f32 (0x1p-23f);
 
   /* Apply the scaling back.  */
   float32x4_t y = v_fma_f32 (scale_back, v_f32 (Ln2), p);

@@ -24,7 +24,7 @@ VPCS_ATTR
 static float64x2_t
 specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 {
-  float64x2_t absn = v_abs_f64 (n);
+  float64x2_t absn = vabsq_f64 (n);
 
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   uint64x2_t b = v_cond_u64 (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
@@ -44,7 +44,7 @@ __v_exp_tail (float64x2_t x, float64x2_t xtail)
   float64x2_t n, r, s, y, z;
   uint64x2_t cmp, u, e, i;
 
-  cmp = v_cond_u64 (v_abs_f64 (x) > Thres);
+  cmp = v_cond_u64 (vabsq_f64 (x) > Thres);
 
   /* n = round(x/(ln2/N)).  */
   z = v_fma_f64 (x, InvLn2, Shift);

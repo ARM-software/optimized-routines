@@ -38,13 +38,13 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
 #if WANT_SIMD_EXCEPT
   /* Mask special lanes with 1 to side-step spurious invalid or overflow. Use
      only xm1 to calculate u, as operating on x will trigger invalid for NaN. */
-  float32x4_t xm1 = v_sel_f32 (special, v_f32 (1), x - 1);
+  float32x4_t xm1 = vbslq_f32 (special, v_f32 (1), x - 1);
   float32x4_t u = v_fma_f32 (xm1, xm1, 2 * xm1);
 #else
   float32x4_t xm1 = x - 1;
   float32x4_t u = xm1 * (x + 1.0f);
 #endif
-  float32x4_t y = log1pf_inline (xm1 + v_sqrt_f32 (u));
+  float32x4_t y = log1pf_inline (xm1 + vsqrtq_f32 (u));
 
   if (unlikely (v_any_u32 (special)))
     return special_case (x, y, special);

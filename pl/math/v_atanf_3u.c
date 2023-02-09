@@ -49,13 +49,13 @@ float32x4_t V_NAME_F1 (atan) (float32x4_t x)
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
-  uint32x4_t red = v_cagt_f32 (x, v_f32 (1.0));
+  uint32x4_t red = vcagtq_f32 (x, v_f32 (1.0));
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  float32x4_t z = v_sel_f32 (red, v_div_f32 (v_f32 (-1.0f), x), x);
-  float32x4_t shift = v_sel_f32 (red, PiOver2, v_f32 (0.0f));
+  float32x4_t z = vbslq_f32 (red, vdivq_f32 (v_f32 (-1.0f), x), x);
+  float32x4_t shift = vbslq_f32 (red, PiOver2, v_f32 (0.0f));
   /* Use absolute value only when needed (odd powers of z).  */
-  float32x4_t az = v_abs_f32 (z);
-  az = v_sel_f32 (red, -az, az);
+  float32x4_t az = vabsq_f32 (z);
+  az = vbslq_f32 (red, -az, az);
 
   /* Calculate the polynomial approximation.  */
   float32x4_t y = eval_poly (z, az, shift);

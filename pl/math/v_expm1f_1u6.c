@@ -50,7 +50,7 @@ float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
   float32x4_t j = v_fma_f32 (InvLn2, x, Shift) - Shift;
-  int32x4_t i = v_to_s32_f32 (j);
+  int32x4_t i = vcvtq_s32_f32 (j);
   float32x4_t f = v_fma_f32 (j, MLn2hi, x);
   f = v_fma_f32 (j, MLn2lo, f);
 

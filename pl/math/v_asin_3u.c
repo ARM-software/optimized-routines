@@ -65,7 +65,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
     return special_case (x, x, AllMask);
 #else
   /* Fixing sign of NaN when x < -1.0.  */
-  ix = v_sel_u64 (v_cond_u64 (x < MOne), v_u64 (0), ix);
+  ix = vbslq_u64 (v_cond_u64 (x < MOne), v_u64 (0), ix);
 #endif
 
   float64x2_t ax = v_as_f64_u64 (ia);
@@ -74,8 +74,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5
      z = (1 - |x|) / 2 and y = sqrt(z), if |x| >= 0.5.  */
-  float64x2_t z2 = v_sel_f64 (a_lt_half, x * x, v_fma_f64 (-Half, ax, Half));
-  float64x2_t z = v_sel_f64 (a_lt_half, ax, v_sqrt_f64 (z2));
+  float64x2_t z2 = vbslq_f64 (a_lt_half, x * x, v_fma_f64 (-Half, ax, Half));
+  float64x2_t z = vbslq_f64 (a_lt_half, ax, vsqrtq_f64 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
   float64x2_t z4 = z2 * z2;
@@ -88,10 +88,10 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
 
   /* asin(|x|) = Q(|x|)         , for |x| < 0.5
 	       = pi/2 - 2 Q(|x|), for |x| >= 0.5.  */
-  float64x2_t y = v_sel_f64 (a_lt_half, p, v_fma_f64 (-Two, p, PiOver2));
+  float64x2_t y = vbslq_f64 (a_lt_half, p, v_fma_f64 (-Two, p, PiOver2));
 
   /* Copy sign.  */
-  return v_as_f64_u64 (v_bsl_u64 (v_u64 (AbsMask), v_as_u64_f64 (y), ix));
+  return v_as_f64_u64 (vbslq_u64 (v_u64 (AbsMask), v_as_u64_f64 (y), ix));
 }
 
 PL_SIG (V, D, 1, asin, -1.0, 1.0)

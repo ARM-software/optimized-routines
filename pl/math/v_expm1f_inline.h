@@ -30,7 +30,7 @@ expm1f_inline (float32x4_t x)
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
   float32x4_t j = v_fma_f32 (InvLn2, x, Shift) - Shift;
-  int32x4_t i = v_to_s32_f32 (j);
+  int32x4_t i = vcvtq_s32_f32 (j);
   float32x4_t f = v_fma_f32 (j, MLn2hi, x);
   f = v_fma_f32 (j, MLn2lo, f);
 

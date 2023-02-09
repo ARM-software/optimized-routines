@@ -50,7 +50,7 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
 
   /* q = nearest integer to 2 * x / pi.  */
   float64x2_t q = v_fma_f64 (x, TwoOverPi, Shift) - Shift;
-  int64x2_t qi = v_to_s64_f64 (q);
+  int64x2_t qi = vcvtq_s64_f64 (q);
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
@@ -84,7 +84,7 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
 
   uint64x2_t use_recip = v_cond_u64 ((v_as_u64_s64 (qi) & 1) == 0);
 
-  return v_sel_f64 (use_recip, -d, n) / v_sel_f64 (use_recip, n, d);
+  return vbslq_f64 (use_recip, -d, n) / vbslq_f64 (use_recip, n, d);
 }
 
 PL_SIG (V, D, 1, tan, -3.1, 3.1)

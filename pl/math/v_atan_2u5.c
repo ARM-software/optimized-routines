@@ -42,13 +42,13 @@ float64x2_t V_NAME_D1 (atan) (float64x2_t x)
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
-  uint64x2_t red = v_cagt_f64 (x, v_f64 (1.0));
+  uint64x2_t red = vcagtq_f64 (x, v_f64 (1.0));
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  float64x2_t z = v_sel_f64 (red, v_div_f64 (v_f64 (-1.0), x), x);
-  float64x2_t shift = v_sel_f64 (red, PiOver2, v_f64 (0.0));
+  float64x2_t z = vbslq_f64 (red, vdivq_f64 (v_f64 (-1.0), x), x);
+  float64x2_t shift = vbslq_f64 (red, PiOver2, v_f64 (0.0));
   /* Use absolute value only when needed (odd powers of z).  */
-  float64x2_t az = v_abs_f64 (z);
-  az = v_sel_f64 (red, -az, az);
+  float64x2_t az = vabsq_f64 (z);
+  az = vbslq_f64 (red, -az, az);
 
   /* Calculate the polynomial approximation.  */
   float64x2_t y = eval_poly (z, az, shift);

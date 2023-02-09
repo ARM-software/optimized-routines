@@ -38,7 +38,7 @@ float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
   float64x2_t halfsign = v_as_f64_u64 (sign | Half);
 
   /* Mask special lanes with 0 to prevent spurious underflow.  */
-  float64x2_t ax = v_sel_f64 (special, v_f64 (0), v_as_f64_u64 (ia));
+  float64x2_t ax = vbslq_f64 (special, v_f64 (0), v_as_f64_u64 (ia));
   float64x2_t y = halfsign * log1p_inline ((2 * ax) / (1 - ax));
 
   if (unlikely (v_any_u64 (special)))

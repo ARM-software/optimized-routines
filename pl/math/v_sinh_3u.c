@@ -31,7 +31,7 @@ expm1_inline (float64x2_t x)
      where i = round(x / ln2)
      and   f = x - i * ln2 (f in [-ln2/2, ln2/2]).  */
   float64x2_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
-  int64x2_t i = v_to_s64_f64 (j);
+  int64x2_t i = vcvtq_s64_f64 (j);
   float64x2_t f = v_fma_f64 (j, MLn2hi, x);
   f = v_fma_f64 (j, MLn2lo, f);
   /* Approximate expm1(f) using polynomial.  */

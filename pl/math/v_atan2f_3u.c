@@ -46,20 +46,20 @@ float32x4_t V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
   uint32x4_t sign_y = iy & SignMask;
   uint32x4_t sign_xy = sign_x ^ sign_y;
 
-  float32x4_t ax = v_abs_f32 (x);
-  float32x4_t ay = v_abs_f32 (y);
+  float32x4_t ax = vabsq_f32 (x);
+  float32x4_t ay = vabsq_f32 (y);
 
   uint32x4_t pred_xlt0 = x < 0.0f;
   uint32x4_t pred_aygtax = ay > ax;
 
   /* Set up z for call to atanf.  */
-  float32x4_t n = v_sel_f32 (pred_aygtax, -ax, ay);
-  float32x4_t d = v_sel_f32 (pred_aygtax, ay, ax);
-  float32x4_t z = v_div_f32 (n, d);
+  float32x4_t n = vbslq_f32 (pred_aygtax, -ax, ay);
+  float32x4_t d = vbslq_f32 (pred_aygtax, ay, ax);
+  float32x4_t z = vdivq_f32 (n, d);
 
   /* Work out the correct shift.  */
-  float32x4_t shift = v_sel_f32 (pred_xlt0, v_f32 (-2.0f), v_f32 (0.0f));
-  shift = v_sel_f32 (pred_aygtax, shift + 1.0f, shift);
+  float32x4_t shift = vbslq_f32 (pred_xlt0, v_f32 (-2.0f), v_f32 (0.0f));
+  shift = vbslq_f32 (pred_aygtax, shift + 1.0f, shift);
   shift *= PiOver2;
 
   float32x4_t ret = eval_poly (z, z, shift);

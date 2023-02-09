@@ -29,7 +29,7 @@ expm1_inline (float64x2_t x)
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
   float64x2_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
-  int64x2_t i = v_to_s64_f64 (j);
+  int64x2_t i = vcvtq_s64_f64 (j);
   float64x2_t f = v_fma_f64 (j, MLn2hi, x);
   f = v_fma_f64 (j, MLn2lo, f);
 
@@ -67,7 +67,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (tanh) (float64x2_t x)
   /* To trigger fp exceptions correctly, set special lanes to a neutral value.
      They will be fixed up later by the special-case handler.  */
   if (unlikely (v_any_u64 (special)))
-    u = v_sel_f64 (special, v_f64 (1), x) * 2;
+    u = vbslq_f64 (special, v_f64 (1), x) * 2;
   else
     u = x * 2;
 

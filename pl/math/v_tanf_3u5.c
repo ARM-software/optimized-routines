@@ -41,7 +41,7 @@ eval_poly (float32x4_t z)
   uint32x4_t will_uflow
     = v_cond_u32 ((v_as_u32_f32 (z) & AbsMask) <= TinyBound);
   if (unlikely (v_any_u32 (will_uflow)))
-    z2 = v_sel_f32 (will_uflow, v_f32 (0), z2);
+    z2 = vbslq_f32 (will_uflow, v_f32 (0), z2);
 #endif
   float32x4_t z4 = z2 * z2;
   return ESTRIN_5 (z, z2, z4, poly);
@@ -66,7 +66,7 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
      prevent any exceptions being triggered.  */
   uint32x4_t special = v_cond_u32 (iax - TinyBound >= RangeVal - TinyBound);
   if (unlikely (v_any_u32 (special)))
-    x = v_sel_f32 (special, v_f32 (1.0f), x);
+    x = vbslq_f32 (special, v_f32 (1.0f), x);
 #else
   /* Otherwise, special-case large and special values.  */
   uint32x4_t special = v_cond_u32 (iax >= RangeVal);
@@ -76,7 +76,7 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
   float32x4_t q = v_fma_f32 (InvPio2, x, Shift);
   float32x4_t n = q - Shift;
   /* n is representable as a signed integer, simply convert it.  */
-  int32x4_t in = v_round_s32 (n);
+  int32x4_t in = vcvtaq_s32_f32 (n);
   /* Determine if x lives in an interval, where |tan(x)| grows to infinity.  */
   int32x4_t alt = in & 1;
   uint32x4_t pred_alt = (alt != 0);
@@ -95,7 +95,7 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
        the same polynomial approximation of tan as above.  */
 
   /* Perform additional reduction if required.  */
-  float32x4_t z = v_sel_f32 (pred_alt, -r, r);
+  float32x4_t z = vbslq_f32 (pred_alt, -r, r);
 
   /* Evaluate polynomial approximation of tangent on [-pi/4, pi/4].  */
   float32x4_t z2 = r * r;
@@ -103,12 +103,12 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
   float32x4_t y = v_fma_f32 (z * z2, p, z);
 
   /* Compute reciprocal and apply if required.  */
-  float32x4_t inv_y = v_div_f32 (v_f32 (1.0f), y);
-  y = v_sel_f32 (pred_alt, inv_y, y);
+  float32x4_t inv_y = vdivq_f32 (v_f32 (1.0f), y);
+  y = vbslq_f32 (pred_alt, inv_y, y);
 
   /* Fast reduction does not handle the x = -0.0 case well,
      therefore it is fixed here.  */
-  y = v_sel_f32 (x == v_f32 (-0.0), x, y);
+  y = vbslq_f32 (x == v_f32 (-0.0), x, y);
 
   if (unlikely (v_any_u32 (special)))
     return specialcase (special_arg, y, special);

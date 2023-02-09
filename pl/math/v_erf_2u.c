@@ -61,7 +61,7 @@ float64x2_t V_NAME_D1 (erf) (float64x2_t x)
 
   /* Get sign and absolute value.  */
   uint64x2_t sign = v_as_u64_f64 (x) & ~AbsMask;
-  float64x2_t a = v_min_f64 (v_abs_f64 (x), AbsXMax);
+  float64x2_t a = vminq_f64 (vabsq_f64 (x), AbsXMax);
 
   /* Compute index by truncating 8 * a with a=|x| saturated to 6.0.  */
   uint64x2_t i = vcvtq_n_u64_f64 (a, 3);

@@ -79,7 +79,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
   /* Vector version of ldexpf.  */
   float32x4_t y = v_as_f32_u32 ((v_as_u32_s32 (ey + 127) << 23)) * my;
   /* Copy sign.  */
-  y = v_as_f32_u32 (v_bsl_u32 (SignMask, ix, v_as_u32_f32 (y)));
+  y = v_as_f32_u32 (vbslq_u32 (SignMask, ix, v_as_u32_f32 (y)));
 
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, y, special);

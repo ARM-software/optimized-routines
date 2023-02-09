@@ -41,7 +41,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
      input to 1, which will generate no exceptions, and then also fixing tiny
      lanes of output to 1 just before return.  */
   if (unlikely (v_any_u32 (tiny)))
-    ax = v_sel_f32 (tiny, v_f32 (1), ax);
+    ax = vbslq_f32 (tiny, v_f32 (1), ax);
 #endif
 
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */
@@ -50,7 +50,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (tiny)))
-    return v_sel_f32 (tiny, v_f32 (1), y);
+    return vbslq_f32 (tiny, v_f32 (1), y);
 #else
   if (unlikely (v_any_u32 (special)))
     return v_call_f32 (coshf, x, y, special);

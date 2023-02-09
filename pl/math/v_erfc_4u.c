@@ -105,7 +105,7 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
 
   /* erfc(|x|) = P(|x|-x_i)*exp(-x^2).  */
 
-  float64x2_t a = v_abs_f64 (x);
+  float64x2_t a = vabsq_f64 (x);
 
   /* Interval bounds are a logarithmic scale, i.e. interval n has
      lower bound 2^(n/4) - 1. Use the exponent of (|x|+1)^4 to obtain

@@ -48,7 +48,7 @@ log1pf_inline (float32x4_t x)
   float32x4_t m_scale = v_as_f32_u32 (v_as_u32_f32 (x) - k)
 			+ v_fma_f32 (v_f32 (0.25f), s, v_f32 (-1.0f));
   float32x4_t p = eval_poly (m_scale);
-  float32x4_t scale_back = v_to_f32_u32 (k) * 0x1.0p-23f;
+  float32x4_t scale_back = vcvtq_f32_u32 (k) * 0x1.0p-23f;
   return v_fma_f32 (scale_back, Ln2, p);
 }
 

@@ -60,13 +60,13 @@ __v_expf (float32x4_t x)
   e = v_as_u32_f32 (z) << 23;
 #else
   z = x * InvLn2;
-  n = v_round_f32 (z);
+  n = vrndaq_f32 (z);
   r = v_fma_f32 (n, -Ln2hi, x);
   r = v_fma_f32 (n, -Ln2lo, r);
-  e = v_as_u32_s32 (v_round_s32 (z)) << 23;
+  e = v_as_u32_s32 (vcvtaq_s32_f32 (z)) << 23;
 #endif
   scale = v_as_f32_u32 (e + v_u32 (0x3f800000));
-  absn = v_abs_f32 (n);
+  absn = vabsq_f32 (n);
   cmp = v_cond_u32 (absn > v_f32 (126.0f));
   r2 = r * r;
   p = v_fma_f32 (C0, r, C1);

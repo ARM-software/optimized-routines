@@ -71,7 +71,7 @@ float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
   float64x2_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
-  int64x2_t i = v_to_s64_f64 (j);
+  int64x2_t i = vcvtq_s64_f64 (j);
   float64x2_t f = v_fma_f64 (j, MLn2hi, x);
   f = v_fma_f64 (j, MLn2lo, f);
 
