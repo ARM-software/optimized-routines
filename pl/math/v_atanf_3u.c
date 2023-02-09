@@ -39,7 +39,7 @@ float32x4_t V_NAME_F1 (atan) (float32x4_t x)
 
 #if WANT_SIMD_EXCEPT
   uint32x4_t ia12 = (ix >> 20) & 0x7ff;
-  uint32x4_t special = v_cond_u32 (ia12 - TinyBound > BigBound - TinyBound);
+  uint32x4_t special = ia12 - TinyBound > BigBound - TinyBound;
   /* If any lane is special, fall back to the scalar routine for all lanes.  */
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, x, v_u32 (-1));

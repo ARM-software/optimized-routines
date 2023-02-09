@@ -37,9 +37,9 @@ VPCS_ATTR float32x4_t V_NAME_F1 (sinh) (float32x4_t x)
   float32x4_t halfsign = v_as_f32_u32 (sign | Half);
 
 #if WANT_SIMD_EXCEPT
-  uint32x4_t special = v_cond_u32 ((iax - TinyBound) >= (BigBound - TinyBound));
+  uint32x4_t special = (iax - TinyBound) >= (BigBound - TinyBound);
 #else
-  uint32x4_t special = v_cond_u32 (iax >= BigBound);
+  uint32x4_t special = iax >= BigBound;
 #endif
 
   /* Fall back to the scalar variant for all lanes if any of them should trigger

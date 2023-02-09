@@ -31,18 +31,18 @@ VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
   uint32x4_t sign = ix & ~AbsMask;
-  uint32x4_t is_boring = v_cond_u32 (iax > BoringBound);
+  uint32x4_t is_boring = iax > BoringBound;
   float32x4_t boring = v_as_f32_u32 (sign | One);
 
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered properly, set all special and boring
      lanes to 1, which will trigger no exceptions, and fix them up later.  */
-  uint32x4_t special = v_cond_u32 ((iax > 0x7f800000) | (iax < 0x34000000));
+  uint32x4_t special = (iax > 0x7f800000) | (iax < 0x34000000);
   ix = vbslq_u32 (is_boring, v_u32 (One), ix);
   if (unlikely (v_any_u32 (special)))
     ix = vbslq_u32 (special, v_u32 (One), ix);
 #else
-  uint32x4_t special = v_cond_u32 ((iax > 0x7f800000) | (iax == 0));
+  uint32x4_t special = (iax > 0x7f800000) | (iax == 0);
 #endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */

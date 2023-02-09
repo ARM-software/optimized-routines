@@ -32,12 +32,12 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
   uint32x4_t iax = ix & ~SignMask;
   uint32x4_t sign = ix & SignMask;
   float32x4_t ax = v_as_f32_u32 (iax);
-  uint32x4_t special = v_cond_u32 (iax >= BigBound);
+  uint32x4_t special = iax >= BigBound;
 
 #if WANT_SIMD_EXCEPT
   /* Sidestep tiny and large values to avoid inadvertently triggering
      under/overflow.  */
-  special |= v_cond_u32 (iax < TinyBound);
+  special |= iax < TinyBound;
   if (unlikely (v_any_u32 (special)))
     ax = vbslq_f32 (special, One, ax);
 #endif

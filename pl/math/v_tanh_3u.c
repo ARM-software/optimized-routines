@@ -60,8 +60,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (tanh) (float64x2_t x)
   uint64x2_t ia = ix & AbsMask;
 
   /* Trigger special-cases for tiny, boring and infinity/NaN.  */
-  uint64x2_t special
-    = v_cond_u64 ((ia - TinyBound) > (BoringBound - TinyBound));
+  uint64x2_t special = (ia - TinyBound) > (BoringBound - TinyBound);
   float64x2_t u;
 
   /* To trigger fp exceptions correctly, set special lanes to a neutral value.

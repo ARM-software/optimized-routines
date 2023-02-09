@@ -54,8 +54,7 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
      in the lane is true then a loop over scalar calls will be performed.  */
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t atop = (ix >> 16) & v_u32 (0x7fff);
-  uint32x4_t cmp
-    = v_cond_u32 (atop - v_u32 (0x3180) >= v_u32 (0x7ff0 - 0x3180));
+  uint32x4_t cmp = atop - v_u32 (0x3180) >= v_u32 (0x7ff0 - 0x3180);
 
   /* Get sign and absolute value.  */
   uint32x4_t sign = ix & ~AbsMask;

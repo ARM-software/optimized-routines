@@ -36,12 +36,12 @@ float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
   /* If fp exceptions are to be triggered correctly, fall back to the scalar
      variant for all lanes if any of them should trigger an exception.  */
   uint32x4_t special
-    = v_cond_u32 ((ax >= SpecialBound) | (ix == 0x80000000) | (ax < TinyBound));
+    = (ax >= SpecialBound) | (ix == 0x80000000) | (ax < TinyBound);
   if (unlikely (v_any_u32 (special)))
     return v_call_f32 (expm1f, x, x, v_u32 (0xffffffff));
 #else
   /* Handles very large values (+ve and -ve), +/-NaN, +/-Inf and -0.  */
-  uint32x4_t special = v_cond_u32 ((ax >= SpecialBound) | (ix == 0x80000000));
+  uint32x4_t special = (ax >= SpecialBound) | (ix == 0x80000000);
 #endif
 
   /* Reduce argument to smaller range:

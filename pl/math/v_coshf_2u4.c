@@ -27,7 +27,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
   float32x4_t ax = v_as_f32_u32 (iax);
-  uint32x4_t special = v_cond_u32 (iax >= SpecialBound);
+  uint32x4_t special = iax >= SpecialBound;
 
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered correctly, fall back to the scalar
@@ -36,7 +36,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
   if (unlikely (v_any_u32 (special)))
     return v_call_f32 (coshf, x, x, v_u32 (-1));
 
-  uint32x4_t tiny = v_cond_u32 (iax <= TinyBound);
+  uint32x4_t tiny = iax <= TinyBound;
   /* If any input is tiny, avoid underflow exception by fixing tiny lanes of
      input to 1, which will generate no exceptions, and then also fixing tiny
      lanes of output to 1 just before return.  */

@@ -91,13 +91,13 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
   float64x2_t fac = v_as_f64_u64 ((ix >> 63) << 62);
   /* Use 12-bit for small, nan and inf case detection.  */
   atop = (ix >> 52) & 0x7ff;
-  cmp = v_cond_u64 (atop - v_u64 (0x3cd) >= v_u64 (0x7ff - 0x3cd));
+  cmp = atop - v_u64 (0x3cd) >= v_u64 (0x7ff - 0x3cd);
 
   struct entry dat;
 
   /* All entries of the vector are out of bounds, take a short path.
      Use smallest possible number above 28 representable in 12 bits.  */
-  uint64x2_t out_of_bounds = v_cond_u64 (atop >= v_u64 (0x404));
+  uint64x2_t out_of_bounds = atop >= v_u64 (0x404);
 
   /* Use sign to produce either 0 if x > 0, 2 otherwise.  */
   if (v_all_u64 (out_of_bounds) && likely (v_any_u64 (~cmp)))

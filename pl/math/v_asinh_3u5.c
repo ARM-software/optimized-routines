@@ -89,11 +89,11 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   float64x2_t ax = v_as_f64_u64 (iax);
   uint64x2_t top12 = iax >> 52;
 
-  uint64x2_t gt1 = v_cond_u64 (top12 >= OneTop);
-  uint64x2_t special = v_cond_u64 (top12 >= HugeBound);
+  uint64x2_t gt1 = top12 >= OneTop;
+  uint64x2_t special = top12 >= HugeBound;
 
 #if WANT_SIMD_EXCEPT
-  uint64x2_t tiny = v_cond_u64 (top12 < TinyBound);
+  uint64x2_t tiny = top12 < TinyBound;
   special |= tiny;
 #endif
 

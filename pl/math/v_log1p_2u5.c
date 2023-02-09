@@ -46,9 +46,9 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
-  uint64x2_t special
-    = v_cond_u64 ((ia >= v_u64 (0x7ff0000000000000))
-		  | (ix >= 0xbff0000000000000) | (ix == 0x8000000000000000));
+  uint64x2_t special = (ia >= v_u64 (0x7ff0000000000000))
+		       | (ix >= 0xbff0000000000000)
+		       | (ix == 0x8000000000000000);
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (special)))

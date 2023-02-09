@@ -138,18 +138,12 @@ v_set_s32 (int32x4_t *x, int i, s32_t v)
   (*x)[i] = v;
 }
 
-/* true if any elements of a v_cond result is non-zero.  */
+/* true if any elements of a vector compare result is non-zero.  */
 static inline int
 v_any_u32 (uint32x4_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
-}
-/* to wrap the result of relational operators.  */
-static inline uint32x4_t
-v_cond_u32 (uint32x4_t x)
-{
-  return x;
 }
 static inline float32x4_t
 v_fma_f32 (float32x4_t x, float32x4_t y, float32x4_t z)
@@ -263,25 +257,19 @@ v_set_f64 (float64x2_t *x, int i, f64_t v)
 {
   (*x)[i] = v;
 }
-/* true if any elements of a v_cond result is non-zero.  */
+/* true if any elements of a vector compare result is non-zero.  */
 static inline int
 v_any_u64 (uint64x2_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (x) != 0;
 }
-/* true if all elements of a v_cond result is 1.  */
+/* true if all elements of a vector compare result is 1.  */
 static inline int
 v_all_u64 (uint64x2_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_s64 (vreinterpretq_s64_u64 (x)) == -2;
-}
-/* to wrap the result of relational operators.  */
-static inline uint64x2_t
-v_cond_u64 (uint64x2_t x)
-{
-  return x;
 }
 static inline float64x2_t
 v_fma_f64 (float64x2_t x, float64x2_t y, float64x2_t z)

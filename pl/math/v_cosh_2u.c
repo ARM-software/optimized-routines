@@ -70,7 +70,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cosh) (float64x2_t x)
 {
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
-  uint64x2_t special = v_cond_u64 (iax > SpecialBound);
+  uint64x2_t special = iax > SpecialBound;
 
   /* If any inputs are special, fall back to scalar for all lanes.  */
   if (unlikely (v_any_u64 (special)))

@@ -60,16 +60,16 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
 #if WANT_SIMD_EXCEPT
   /* Special values need to be computed with scalar fallbacks so
      that appropriate exceptions are raised.  */
-  uint64x2_t special = v_cond_u64 (ia - Small > One - Small);
+  uint64x2_t special = ia - Small > One - Small;
   if (unlikely (v_any_u64 (special)))
     return special_case (x, x, AllMask);
 #else
   /* Fixing sign of NaN when x < -1.0.  */
-  ix = vbslq_u64 (v_cond_u64 (x < MOne), v_u64 (0), ix);
+  ix = vbslq_u64 (x < MOne, v_u64 (0), ix);
 #endif
 
   float64x2_t ax = v_as_f64_u64 (ia);
-  uint64x2_t a_lt_half = v_cond_u64 (ia < Halfu);
+  uint64x2_t a_lt_half = ia < Halfu;
 
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5

@@ -32,7 +32,7 @@ float64x2_t V_NAME_D1 (atan) (float64x2_t x)
 
 #if WANT_SIMD_EXCEPT
   uint64x2_t ia12 = (ix >> 52) & 0x7ff;
-  uint64x2_t special = v_cond_u64 (ia12 - TinyBound > BigBound - TinyBound);
+  uint64x2_t special = ia12 - TinyBound > BigBound - TinyBound;
   /* If any lane is special, fall back to the scalar routine for all lanes.  */
   if (unlikely (v_any_u64 (special)))
     return v_call_f64 (atan, x, v_f64 (0), v_u64 (-1));

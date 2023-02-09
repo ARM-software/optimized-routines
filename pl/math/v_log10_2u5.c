@@ -58,7 +58,7 @@ float64x2_t V_NAME_D1 (log10) (float64x2_t x)
   struct entry e;
 
   ix = v_as_u64_f64 (x);
-  cmp = v_cond_u64 (ix - TinyBound >= BigBound - TinyBound);
+  cmp = ix - TinyBound >= BigBound - TinyBound;
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.

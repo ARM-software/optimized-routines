@@ -64,16 +64,16 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acos) (float64x2_t x)
 
 #if WANT_SIMD_EXCEPT
   /* A single comparison for One, Small and QNaN.  */
-  uint64x2_t special = v_cond_u64 (ia - Small > Oneu - Small);
+  uint64x2_t special = ia - Small > Oneu - Small;
   if (unlikely (v_any_u64 (special)))
     return special_case (x, x, AllMask);
 #else
   /* Fixing sign of NaN when x < -1.0.  */
-  ix = vbslq_u64 (v_cond_u64 (x < MOne), v_u64 (0), ix);
+  ix = vbslq_u64 (x < MOne, v_u64 (0), ix);
 #endif
 
   float64x2_t ax = v_as_f64_u64 (ia);
-  uint64x2_t a_le_half = v_cond_u64 (ia <= Halfu);
+  uint64x2_t a_le_half = ia <= Halfu;
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
@@ -96,7 +96,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acos) (float64x2_t x)
   float64x2_t y
     = v_as_f64_u64 (vbslq_u64 (v_u64 (AbsMask), v_as_u64_f64 (p), ix));
 
-  uint64x2_t sign = v_cond_u64 (x < 0);
+  uint64x2_t sign = x < 0;
   float64x2_t off = vbslq_f64 (sign, Pi, v_f64 (0.0));
   float64x2_t mul = vbslq_f64 (a_le_half, -One, Two);
   float64x2_t add = vbslq_f64 (a_le_half, PiOver2, off);

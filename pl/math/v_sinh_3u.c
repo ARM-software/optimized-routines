@@ -63,9 +63,9 @@ VPCS_ATTR float64x2_t V_NAME_D1 (sinh) (float64x2_t x)
   float64x2_t halfsign = v_as_f64_u64 (sign | Half);
 
 #if WANT_SIMD_EXCEPT
-  uint64x2_t special = v_cond_u64 ((iax - TinyBound) >= (BigBound - TinyBound));
+  uint64x2_t special = (iax - TinyBound) >= (BigBound - TinyBound);
 #else
-  uint64x2_t special = v_cond_u64 (iax >= BigBound);
+  uint64x2_t special = iax >= BigBound;
 #endif
 
   /* Fall back to scalar variant for all lanes if any of them are special.  */

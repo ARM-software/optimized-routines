@@ -56,13 +56,12 @@ float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered correctly, fall back to the scalar
      variant for all lanes if any of them should trigger an exception.  */
-  uint64x2_t special = v_cond_u64 ((ax >= SpecialBound) | (ax <= TinyBound));
+  uint64x2_t special = (ax >= SpecialBound) | (ax <= TinyBound);
   if (unlikely (v_any_u64 (special)))
     return v_call_f64 (expm1, x, x, v_u64 (-1));
 #else
   /* Large input, NaNs and Infs.  */
-  uint64x2_t special
-    = v_cond_u64 ((ax >= SpecialBound) | (ix == 0x8000000000000000));
+  uint64x2_t special = (ax >= SpecialBound) | (ix == 0x8000000000000000);
 #endif
 
   /* Reduce argument to smaller range:

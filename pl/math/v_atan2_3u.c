@@ -26,7 +26,7 @@ specialcase (float64x2_t y, float64x2_t x, float64x2_t ret, uint64x2_t cmp)
 static inline uint64x2_t
 zeroinfnan (uint64x2_t i)
 {
-  return v_cond_u64 (2 * i - 1 >= v_u64 (2 * asuint64 (INFINITY) - 1));
+  return (2 * i - 1) >= v_u64 (2 * asuint64 (INFINITY) - 1);
 }
 
 /* Fast implementation of vector atan2.

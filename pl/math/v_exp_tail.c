@@ -27,11 +27,11 @@ specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
   float64x2_t absn = vabsq_f64 (n);
 
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
-  uint64x2_t b = v_cond_u64 (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
+  uint64x2_t b = (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
   float64x2_t s1 = v_as_f64_u64 (v_u64 (0x7000000000000000) - b);
   float64x2_t s2
     = v_as_f64_u64 (v_as_u64_f64 (s) - v_u64 (0x3010000000000000) + b);
-  uint64x2_t cmp = v_cond_u64 (absn > v_f64 (1280.0 * N));
+  uint64x2_t cmp = absn > v_f64 (1280.0 * N);
   float64x2_t r1 = s1 * s1;
   float64x2_t r0 = v_fma_f64 (y, s2, s2) * s1;
   return v_as_f64_u64 ((cmp & v_as_u64_f64 (r1)) | (~cmp & v_as_u64_f64 (r0)));
@@ -44,7 +44,7 @@ __v_exp_tail (float64x2_t x, float64x2_t xtail)
   float64x2_t n, r, s, y, z;
   uint64x2_t cmp, u, e, i;
 
-  cmp = v_cond_u64 (vabsq_f64 (x) > Thres);
+  cmp = vabsq_f64 (x) > Thres;
 
   /* n = round(x/(ln2/N)).  */
   z = v_fma_f64 (x, InvLn2, Shift);

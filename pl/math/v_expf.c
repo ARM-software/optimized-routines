@@ -32,10 +32,10 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
 	     uint32x4_t cmp1, float32x4_t scale)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
-  uint32x4_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
+  uint32x4_t b = (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
   float32x4_t s1 = v_as_f32_u32 (v_u32 (0x7f000000) + b);
   float32x4_t s2 = v_as_f32_u32 (e - b);
-  uint32x4_t cmp2 = v_cond_u32 (absn > v_f32 (192.0f));
+  uint32x4_t cmp2 = absn > v_f32 (192.0f);
   uint32x4_t r2 = v_as_u32_f32 (s1 * s1);
   uint32x4_t r1 = v_as_u32_f32 (v_fma_f32 (poly, s2, s2) * s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
@@ -67,7 +67,7 @@ __v_expf (float32x4_t x)
 #endif
   scale = v_as_f32_u32 (e + v_u32 (0x3f800000));
   absn = vabsq_f32 (n);
-  cmp = v_cond_u32 (absn > v_f32 (126.0f));
+  cmp = absn > v_f32 (126.0f);
   r2 = r * r;
   p = v_fma_f32 (C0, r, C1);
   q = v_fma_f32 (C2, r, C3);

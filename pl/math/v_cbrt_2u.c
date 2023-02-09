@@ -40,7 +40,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
   uint64x2_t ia12 = iax >> 52;
 
   /* Subnormal, +/-0 and special values.  */
-  uint64x2_t special = v_cond_u64 ((ia12 < TinyBound) | (ia12 >= BigBound));
+  uint64x2_t special = (ia12 < TinyBound) | (ia12 >= BigBound);
 
   /* Decompose |x| into m * 2^e, where m is in [0.5, 1.0]. This is a vector
      version of frexp, which gets subnormal values wrong - these have to be

@@ -35,7 +35,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   uint64x2_t abstop = v_as_u64_f64 (x) & 0x7ff0000000000000;
 
   /* abstop - 0x1p-54 >= 512.0 - 0x1p-54.  */
-  uint64x2_t uoflow = v_cond_u64 (abstop - TinyBound >= BigBound - TinyBound);
+  uint64x2_t uoflow = abstop - TinyBound >= BigBound - TinyBound;
 
   /* When any special cases (underflow, overflow, large x) are possible,
      fall back to scalar.  */

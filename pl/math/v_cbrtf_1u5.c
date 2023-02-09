@@ -38,8 +38,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
   uint32x4_t iax = ix & AbsMask;
 
   /* Subnormal, +/-0 and special values.  */
-  uint32x4_t special
-    = v_cond_u32 ((iax < SmallestNormal) | (iax >= 0x7f800000));
+  uint32x4_t special = (iax < SmallestNormal) | (iax >= 0x7f800000);
 
   /* Decompose |x| into m * 2^e, where m is in [0.5, 1.0]. This is a vector
      version of frexpf, which gets subnormal values wrong - these have to be

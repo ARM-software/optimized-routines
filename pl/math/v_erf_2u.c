@@ -56,8 +56,7 @@ float64x2_t V_NAME_D1 (erf) (float64x2_t x)
      scalar calls will be performed.  */
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t atop = (ix >> 48) & v_u64 (0x7fff);
-  uint64x2_t special_case
-    = v_cond_u64 (atop - v_u64 (0x3e30) >= v_u64 (0x7ff0 - 0x3e30));
+  uint64x2_t special_case = atop - v_u64 (0x3e30) >= v_u64 (0x7ff0 - 0x3e30);
 
   /* Get sign and absolute value.  */
   uint64x2_t sign = v_as_u64_f64 (x) & ~AbsMask;

@@ -27,7 +27,7 @@ special_case (float64x2_t x)
 VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
 {
   uint64x2_t itop = v_as_u64_f64 (x) >> 52;
-  uint64x2_t special = v_cond_u64 ((itop - OneTop) >= (BigBoundTop - OneTop));
+  uint64x2_t special = (itop - OneTop) >= (BigBoundTop - OneTop);
 
   /* Fall back to scalar routine for all lanes if any of them are special.  */
   if (unlikely (v_any_u64 (special)))

@@ -27,7 +27,7 @@ specialcase (float32x4_t y, float32x4_t x, float32x4_t ret, uint32x4_t cmp)
 static inline uint32x4_t
 zeroinfnan (uint32x4_t i)
 {
-  return v_cond_u32 (2 * i - 1 >= v_u32 (2 * 0x7f800000lu - 1));
+  return (2 * i - 1) >= v_u32 (2 * 0x7f800000lu - 1);
 }
 
 /* Fast implementation of vector atan2f. Maximum observed error is

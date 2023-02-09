@@ -62,16 +62,16 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
 
 #if WANT_SIMD_EXCEPT
   /* A single comparison for One, Small and QNaN.  */
-  uint32x4_t special = v_cond_u32 (ia - Small > One - Small);
+  uint32x4_t special = ia - Small > One - Small;
   if (unlikely (v_any_u32 (special)))
     return special_case (x, x, v_u32 (0xffffffff));
 #else
   /* Fixing sign of NaN when x < -1.0.  */
-  ix = vbslq_u32 (v_cond_u32 (x < MOnef), v_u32 (0), ix);
+  ix = vbslq_u32 (x < MOnef, v_u32 (0), ix);
 #endif
 
   float32x4_t ax = v_as_f32_u32 (ia);
-  uint32x4_t a_le_half = v_cond_u32 (ia <= Half);
+  uint32x4_t a_le_half = ia <= Half;
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
@@ -90,7 +90,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
   float32x4_t y
     = v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_as_u32_f32 (p), ix));
 
-  uint32x4_t sign = v_cond_u32 (x < 0);
+  uint32x4_t sign = x < 0;
   float32x4_t off = vbslq_f32 (sign, Pif, v_f32 (0.0f));
   float32x4_t mul = vbslq_f32 (a_le_half, -Onef, Twof);
   float32x4_t add = vbslq_f32 (a_le_half, PiOver2f, off);

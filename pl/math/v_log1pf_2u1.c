@@ -95,8 +95,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
   uint32x4_t ix = v_as_u32_f32 (x);
   uint32x4_t ia12 = (ix >> 20) & v_u32 (0x7f8);
   uint32x4_t special_cases
-    = v_cond_u32 (ia12 - v_u32 (TinyBound) >= (0x7f8 - TinyBound))
-      | v_cond_u32 (ix >= MinusOne);
+    = (ia12 - v_u32 (TinyBound) >= 0x7f8 - TinyBound) | (ix >= MinusOne);
   float32x4_t special_arg = x;
 
 #if WANT_SIMD_EXCEPT

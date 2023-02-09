@@ -82,7 +82,7 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
   float64x2_t n = v_fma_f64 (p, p, v_f64 (-1));
   float64x2_t d = p * 2;
 
-  uint64x2_t use_recip = v_cond_u64 ((v_as_u64_s64 (qi) & 1) == 0);
+  uint64x2_t use_recip = (v_as_u64_s64 (qi) & 1) == 0;
 
   return vbslq_f64 (use_recip, -d, n) / vbslq_f64 (use_recip, n, d);
 }

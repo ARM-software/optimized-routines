@@ -57,16 +57,16 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asin) (float32x4_t x)
 #if WANT_SIMD_EXCEPT
   /* Special values need to be computed with scalar fallbacks so
      that appropriate fp exceptions are raised.  */
-  uint32x4_t special = v_cond_u32 (ia - Small > One - Small);
+  uint32x4_t special = ia - Small > One - Small;
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, x, v_u32 (0xffffffff));
 #else
   /* Fixing sign of NaN when x < -1.0.  */
-  ix = vbslq_u32 (v_cond_u32 (x < MOnef), v_u32 (0), ix);
+  ix = vbslq_u32 (x < MOnef, v_u32 (0), ix);
 #endif
 
   float32x4_t ax = v_as_f32_u32 (ia);
-  uint32x4_t a_lt_half = v_cond_u32 (ia < Half);
+  uint32x4_t a_lt_half = ia < Half;
 
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5

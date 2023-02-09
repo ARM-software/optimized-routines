@@ -34,7 +34,7 @@ float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
   uint64x2_t ix = v_as_u64_f64 (x);
   uint64x2_t sign = ix & ~AbsMask;
   uint64x2_t ia = ix & AbsMask;
-  uint64x2_t special = v_cond_u64 (ia >= One);
+  uint64x2_t special = ia >= One;
   float64x2_t halfsign = v_as_f64_u64 (sign | Half);
 
   /* Mask special lanes with 0 to prevent spurious underflow.  */

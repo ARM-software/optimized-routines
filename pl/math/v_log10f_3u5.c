@@ -41,7 +41,7 @@ float32x4_t V_NAME_F1 (log10) (float32x4_t x)
   uint32x4_t u, cmp;
 
   u = v_as_u32_f32 (x);
-  cmp = v_cond_u32 (u - Min >= Max - Min);
+  cmp = u - Min >= Max - Min;
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u -= Off;

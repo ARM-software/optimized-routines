@@ -127,10 +127,8 @@ float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
   uint32x4_t sign = ix >> 31;
   uint32x4_t inf_ia12 = v_u32 (0x7f8);
 
-  uint32x4_t special_cases
-    = v_cond_u32 ((ia12 - 0x328) >= ((inf_ia12 & 0x7f8) - 0x328));
-  uint32x4_t in_bounds
-    = v_cond_u32 ((ia < 0x408ccccd) | (~sign & (ix < 0x4120f5c3)));
+  uint32x4_t special_cases = (ia12 - 0x328) >= ((inf_ia12 & 0x7f8) - 0x328);
+  uint32x4_t in_bounds = (ia < 0x408ccccd) | (~sign & (ix < 0x4120f5c3));
   float32x4_t boring_zone = v_as_f32_u32 (sign << 30);
 
   float32x4_t y = v_approx_erfcf (v_as_f32_u32 (ia), sign, ia12,

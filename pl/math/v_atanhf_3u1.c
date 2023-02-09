@@ -31,13 +31,13 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
   float32x4_t ax = v_as_f32_u32 (iax);
 
 #if WANT_SIMD_EXCEPT
-  uint32x4_t special = v_cond_u32 ((iax >= One) | (iax <= TinyBound));
+  uint32x4_t special = (iax >= One) | (iax <= TinyBound);
   /* Side-step special cases by setting those lanes to 0, which will trigger no
      exceptions. These will be fixed up later.  */
   if (unlikely (v_any_u32 (special)))
     ax = vbslq_f32 (special, v_f32 (0), ax);
 #else
-  uint32x4_t special = v_cond_u32 (iax >= One);
+  uint32x4_t special = iax >= One;
 #endif
 
   float32x4_t y = halfsign * log1pf_inline ((2 * ax) / (1 - ax));
