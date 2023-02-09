@@ -24,8 +24,8 @@
 #define Shift (sv_f32 (0x1.8p+23f))
 #define AbsMask (0x7fffffff)
 
-static NOINLINE sv_f32_t
-__sv_sinf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
+static NOINLINE svfloat32_t
+__sv_sinf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (sinf, x, y, cmp);
 }
@@ -35,11 +35,11 @@ __sv_sinf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
    This maximum error is achieved at multiple values in [-2^18, 2^18]
    but one example is:
    __sv_sinf(0x1.9247a4p+0) got 0x1.fffff6p-1 want 0x1.fffffap-1.  */
-sv_f32_t
-__sv_sinf_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_sinf_x (svfloat32_t x, const svbool_t pg)
 {
-  sv_f32_t n, r, r2, y;
-  sv_u32_t sign, odd;
+  svfloat32_t n, r, r2, y;
+  svuint32_t sign, odd;
   svbool_t cmp;
 
   r = sv_as_f32_u32 (svand_n_u32_x (pg, sv_as_u32_f32 (x), AbsMask));

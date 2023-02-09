@@ -23,13 +23,13 @@
    error is 2.27 ulps:
    __sv_atan(0x1.0005af27c23e9p+0) got 0x1.9225645bdd7c1p-1
 				  want 0x1.9225645bdd7c3p-1.  */
-sv_f64_t
-__sv_atan_x (sv_f64_t x, const svbool_t pg)
+svfloat64_t
+__sv_atan_x (svfloat64_t x, const svbool_t pg)
 {
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  sv_u64_t ix = sv_as_u64_f64 (x);
-  sv_u64_t sign = svand_n_u64_x (pg, ix, ~AbsMask);
+  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t sign = svand_n_u64_x (pg, ix, ~AbsMask);
 
   /* Argument reduction:
      y := arctan(x) for x < 1
@@ -37,12 +37,12 @@ __sv_atan_x (sv_f64_t x, const svbool_t pg)
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
   svbool_t red = svacgt_n_f64 (pg, x, 1.0);
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  sv_f64_t z = svsel_f64 (red, svdiv_f64_x (pg, sv_f64 (-1.0), x), x);
+  svfloat64_t z = svsel_f64 (red, svdiv_f64_x (pg, sv_f64 (-1.0), x), x);
   /* Use absolute value only when needed (odd powers of z).  */
-  sv_f64_t az = svabs_f64_x (pg, z);
+  svfloat64_t az = svabs_f64_x (pg, z);
   az = svneg_f64_m (az, red, az);
 
-  sv_f64_t y = __sv_atan_common (pg, red, z, az, PiOver2);
+  svfloat64_t y = __sv_atan_common (pg, red, z, az, PiOver2);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
   y = sv_as_f64_u64 (sveor_u64_x (pg, sv_as_u64_f64 (y), sign));

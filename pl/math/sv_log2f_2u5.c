@@ -20,8 +20,8 @@
 #define Mask (0x007fffff)
 #define Off (0x3f2aaaab) /* 0.666667.  */
 
-static NOINLINE sv_f32_t
-specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
+static NOINLINE svfloat32_t
+specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (log2f, x, y, cmp);
 }
@@ -30,26 +30,26 @@ specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
    and polynomial as Neon log2f. Maximum error is 2.48 ULPs:
    __sv_log2f(0x1.558174p+0) got 0x1.a9be84p-2
 			    want 0x1.a9be8p-2.  */
-sv_f32_t
-__sv_log2f_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_log2f_x (svfloat32_t x, const svbool_t pg)
 {
-  sv_u32_t u = sv_as_u32_f32 (x);
+  svuint32_t u = sv_as_u32_f32 (x);
   svbool_t special
     = svcmpge_u32 (pg, svsub_n_u32_x (pg, u, Min), sv_u32 (Max - Min));
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = svsub_n_u32_x (pg, u, Off);
-  sv_f32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (u),
-						   23)); /* Sign-extend.  */
+  svfloat32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (u),
+						      23)); /* Sign-extend.  */
   u = svand_n_u32_x (pg, u, Mask);
   u = svadd_n_u32_x (pg, u, Off);
-  sv_f32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (u), 1.0f);
+  svfloat32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (u), 1.0f);
 
   /* y = log2(1+r) + n.  */
-  sv_f32_t r2 = svmul_f32_x (pg, r, r);
+  svfloat32_t r2 = svmul_f32_x (pg, r, r);
 
   /* Evaluate polynomial using pairwise Horner scheme.  */
-  sv_f32_t y = PAIRWISE_HORNER_8 (pg, r, r2, P);
+  svfloat32_t y = PAIRWISE_HORNER_8 (pg, r, r2, P);
   y = sv_fma_f32_x (pg, y, r, n);
 
   if (unlikely (svptest_any (pg, special)))

@@ -22,8 +22,8 @@
   (0x1.5d5e2ap+6f) /* Roughly 87.3. For x < -Thres, the result is subnormal    \
 		      and not handled correctly by FEXPA.  */
 
-static NOINLINE sv_f32_t
-special_case (sv_f32_t x, sv_f32_t y, svbool_t special)
+static NOINLINE svfloat32_t
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 {
   /* The special-case handler from the Neon routine does not handle subnormals
      in a way that is compatible with FEXPA. For the FEXPA variant we just fall
@@ -47,33 +47,34 @@ special_case (sv_f32_t x, sv_f32_t y, svbool_t special)
    Worst case error without FEXPA is 1.96 ULPs.
    __sv_exp2f(0x1.ff7338p-2) got 0x1.69e764p+0
 			    want 0x1.69e768p+0.  */
-sv_f32_t
-__sv_exp2f_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_exp2f_x (svfloat32_t x, const svbool_t pg)
 {
   /* exp2(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
     x = n + r, with r in [-1/2, 1/2].  */
-  sv_f32_t z = svadd_f32_x (pg, x, Shift);
-  sv_f32_t n = svsub_f32_x (pg, z, Shift);
-  sv_f32_t r = svsub_f32_x (pg, x, n);
+  svfloat32_t z = svadd_f32_x (pg, x, Shift);
+  svfloat32_t n = svsub_f32_x (pg, z, Shift);
+  svfloat32_t r = svsub_f32_x (pg, x, n);
 
 #if SV_EXP2F_USE_FEXPA
   /* NaNs also need special handling with FEXPA.  */
   svbool_t is_special_case
     = svorr_b_z (pg, svacgt_n_f32 (pg, x, Thres), svcmpne_f32 (pg, x, x));
-  sv_f32_t scale = svexpa_f32 (sv_as_u32_f32 (z));
+  svfloat32_t scale = svexpa_f32 (sv_as_u32_f32 (z));
 #else
-  sv_u32_t e = svlsl_n_u32_x (pg, sv_as_u32_s32 (sv_to_s32_f32_x (pg, n)), 23);
+  svuint32_t e
+    = svlsl_n_u32_x (pg, sv_as_u32_s32 (sv_to_s32_f32_x (pg, n)), 23);
   svbool_t is_special_case = svacgt_n_f32 (pg, n, Thres);
-  sv_f32_t scale = sv_as_f32_u32 (svadd_n_u32_x (pg, e, 0x3f800000));
+  svfloat32_t scale = sv_as_f32_u32 (svadd_n_u32_x (pg, e, 0x3f800000));
 #endif
 
   /* Polynomial evaluation: poly(r) ~ exp(r)-1.  */
-  sv_f32_t r2 = svmul_f32_x (pg, r, r);
-  sv_f32_t p = sv_fma_n_f32_x (pg, C (0), r, sv_f32 (C (1)));
-  sv_f32_t q = sv_fma_n_f32_x (pg, C (2), r, sv_f32 (C (3)));
+  svfloat32_t r2 = svmul_f32_x (pg, r, r);
+  svfloat32_t p = sv_fma_n_f32_x (pg, C (0), r, sv_f32 (C (1)));
+  svfloat32_t q = sv_fma_n_f32_x (pg, C (2), r, sv_f32 (C (3)));
   q = sv_fma_f32_x (pg, p, r2, q);
   p = svmul_n_f32_x (pg, r, C (4));
-  sv_f32_t poly = sv_fma_f32_x (pg, q, r2, p);
+  svfloat32_t poly = sv_fma_f32_x (pg, q, r2, p);
 
   if (unlikely (svptest_any (pg, is_special_case)))
     {

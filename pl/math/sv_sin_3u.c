@@ -21,8 +21,8 @@
 #define RangeVal (sv_f64 (0x1p23))
 #define AbsMask (0x7fffffffffffffff)
 
-static NOINLINE sv_f64_t
-__sv_sin_specialcase (sv_f64_t x, sv_f64_t y, svbool_t cmp)
+static NOINLINE svfloat64_t
+__sv_sin_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
   return sv_call_f64 (sin, x, y, cmp);
 }
@@ -32,11 +32,11 @@ __sv_sin_specialcase (sv_f64_t x, sv_f64_t y, svbool_t cmp)
    Maximum observed error in 2.52 ULP:
    __sv_sin(0x1.2d2b00df69661p+19) got 0x1.10ace8f3e786bp-40
 				  want 0x1.10ace8f3e7868p-40.  */
-sv_f64_t
-__sv_sin_x (sv_f64_t x, const svbool_t pg)
+svfloat64_t
+__sv_sin_x (svfloat64_t x, const svbool_t pg)
 {
-  sv_f64_t n, r, r2, y;
-  sv_u64_t sign;
+  svfloat64_t n, r, r2, y;
+  svuint64_t sign;
   svbool_t cmp;
 
   r = sv_as_f64_u64 (svand_n_u64_x (pg, sv_as_u64_f64 (x), AbsMask));
@@ -44,7 +44,7 @@ __sv_sin_x (sv_f64_t x, const svbool_t pg)
   cmp = svcmpge_u64 (pg, sv_as_u64_f64 (r), sv_as_u64_f64 (RangeVal));
 
   /* n = rint(|x|/(pi/2)).  */
-  sv_f64_t q = sv_fma_f64_x (pg, InvPio2, r, Shift);
+  svfloat64_t q = sv_fma_f64_x (pg, InvPio2, r, Shift);
   n = svsub_f64_x (pg, q, Shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
@@ -53,7 +53,7 @@ __sv_sin_x (sv_f64_t x, const svbool_t pg)
   r = sv_fma_f64_x (pg, NegPio2_3, n, r);
 
   /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
-  sv_f64_t f = svtssel_f64 (r, sv_as_u64_f64 (q));
+  svfloat64_t f = svtssel_f64 (r, sv_as_u64_f64 (q));
 
   /* sin(r) poly approx.  */
   r2 = svtsmul_f64 (r, sv_as_u64_f64 (q));

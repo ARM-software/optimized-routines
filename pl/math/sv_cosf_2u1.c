@@ -22,8 +22,8 @@
 #define Shift (sv_f32 (0x1.800002p+23f))
 #define AbsMask (0x7fffffff)
 
-static NOINLINE sv_f32_t
-__sv_cosf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
+static NOINLINE svfloat32_t
+__sv_cosf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (cosf, x, y, cmp);
 }
@@ -33,17 +33,17 @@ __sv_cosf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
    Maximum measured error: 2.06 ULPs.
    __sv_cosf(0x1.dea2f2p+19) got 0x1.fffe7ap-6
 			    want 0x1.fffe76p-6.  */
-sv_f32_t
-__sv_cosf_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_cosf_x (svfloat32_t x, const svbool_t pg)
 {
-  sv_f32_t n, r, r2, y;
+  svfloat32_t n, r, r2, y;
   svbool_t cmp;
 
   r = sv_as_f32_u32 (svand_n_u32_x (pg, sv_as_u32_f32 (x), AbsMask));
   cmp = svcmpge_u32 (pg, sv_as_u32_f32 (r), sv_as_u32_f32 (RangeVal));
 
   /* n = rint(|x|/(pi/2)).  */
-  sv_f32_t q = sv_fma_f32_x (pg, InvPio2, r, Shift);
+  svfloat32_t q = sv_fma_f32_x (pg, InvPio2, r, Shift);
   n = svsub_f32_x (pg, q, Shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
@@ -52,7 +52,7 @@ __sv_cosf_x (sv_f32_t x, const svbool_t pg)
   r = sv_fma_f32_x (pg, NegPio2_3, n, r);
 
   /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
-  sv_f32_t f = svtssel_f32 (r, sv_as_u32_f32 (q));
+  svfloat32_t f = svtssel_f32 (r, sv_as_u32_f32 (q));
 
   /* cos(r) poly approx.  */
   r2 = svtsmul_f32 (r, sv_as_u32_f32 (q));

@@ -14,21 +14,21 @@
 
 /* Polynomial used in fast SVE atan(x) and atan2(y,x) implementations
    The order 19 polynomial P approximates (atan(sqrt(x))-sqrt(x))/x^(3/2).  */
-static inline sv_f64_t
-__sv_atan_common (svbool_t pg, svbool_t red, sv_f64_t z, sv_f64_t az,
-		  sv_f64_t shift)
+static inline svfloat64_t
+__sv_atan_common (svbool_t pg, svbool_t red, svfloat64_t z, svfloat64_t az,
+		  svfloat64_t shift)
 {
   /* Use split Estrin scheme for P(z^2) with deg(P)=19. */
-  sv_f64_t z2 = svmul_f64_x (pg, z, z);
-  sv_f64_t x2 = svmul_f64_x (pg, z2, z2);
-  sv_f64_t x4 = svmul_f64_x (pg, x2, x2);
-  sv_f64_t x8 = svmul_f64_x (pg, x4, x4);
+  svfloat64_t z2 = svmul_f64_x (pg, z, z);
+  svfloat64_t x2 = svmul_f64_x (pg, z2, z2);
+  svfloat64_t x4 = svmul_f64_x (pg, x2, x2);
+  svfloat64_t x8 = svmul_f64_x (pg, x4, x4);
 
-  sv_f64_t y = FMA (pg, ESTRIN_11_ (pg, z2, x2, x4, x8, P, 8), x8,
-		    ESTRIN_7 (pg, z2, x2, x4, P));
+  svfloat64_t y = FMA (pg, ESTRIN_11_ (pg, z2, x2, x4, x8, P, 8), x8,
+		       ESTRIN_7 (pg, z2, x2, x4, P));
 
   /* Finalize. y = shift + z + z^3 * P(z^2).  */
-  sv_f64_t z3 = svmul_f64_x (pg, z2, az);
+  svfloat64_t z3 = svmul_f64_x (pg, z2, az);
   y = sv_fma_f64_x (pg, y, z3, az);
 
   /* Apply shift as indicated by `red` predicate.  */

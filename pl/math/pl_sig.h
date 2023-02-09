@@ -30,12 +30,12 @@
 #endif
 
 #if WANT_SVE_MATH
-#define PL_DECL_SVF1(fun) sv_f32_t __sv_##fun##f_x (sv_f32_t, svbool_t);
+#define PL_DECL_SVF1(fun) svfloat32_t __sv_##fun##f_x (svfloat32_t, svbool_t);
 #define PL_DECL_SVF2(fun)                                                      \
-  sv_f32_t __sv_##fun##f_x (sv_f32_t, sv_f32_t, svbool_t);
-#define PL_DECL_SVD1(fun) sv_f64_t __sv_##fun##_x (sv_f64_t, svbool_t);
+  svfloat32_t __sv_##fun##f_x (svfloat32_t, svfloat32_t, svbool_t);
+#define PL_DECL_SVD1(fun) svfloat64_t __sv_##fun##_x (svfloat64_t, svbool_t);
 #define PL_DECL_SVD2(fun)                                                      \
-  sv_f64_t __sv_##fun##_x (sv_f64_t, sv_f64_t, svbool_t);
+  svfloat64_t __sv_##fun##_x (svfloat64_t, svfloat64_t, svbool_t);
 #else
 #define PL_DECL_SVF1(fun)
 #define PL_DECL_SVF2(fun)

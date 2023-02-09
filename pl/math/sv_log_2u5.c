@@ -19,8 +19,8 @@
 double
 optr_aor_log_f64 (double);
 
-static NOINLINE sv_f64_t
-__sv_log_specialcase (sv_f64_t x, sv_f64_t y, svbool_t cmp)
+static NOINLINE svfloat64_t
+__sv_log_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
   return sv_call_f64 (optr_aor_log_f64, x, y, cmp);
 }
@@ -29,40 +29,40 @@ __sv_log_specialcase (sv_f64_t x, sv_f64_t y, svbool_t cmp)
    Maximum measured error is 2.17 ulp:
    __sv_log(0x1.a6129884398a3p+0) got 0x1.ffffff1cca043p-2
 				 want 0x1.ffffff1cca045p-2.  */
-sv_f64_t
-__sv_log_x (sv_f64_t x, const svbool_t pg)
+svfloat64_t
+__sv_log_x (svfloat64_t x, const svbool_t pg)
 {
-  sv_u64_t ix = sv_as_u64_f64 (x);
-  sv_u64_t top = svlsr_n_u64_x (pg, ix, 48);
+  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t top = svlsr_n_u64_x (pg, ix, 48);
   svbool_t cmp = svcmpge_u64 (pg, svsub_n_u64_x (pg, top, 0x0010),
 			      sv_u64 (0x7ff0 - 0x0010));
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
-  sv_u64_t tmp = svsub_n_u64_x (pg, ix, OFF);
+  svuint64_t tmp = svsub_n_u64_x (pg, ix, OFF);
   /* Equivalent to (tmp >> (52 - SV_LOG_TABLE_BITS)) % N, since N is a power
      of 2.  */
-  sv_u64_t i
+  svuint64_t i
     = svand_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, (52 - SV_LOG_TABLE_BITS)),
 		     N - 1);
-  sv_s64_t k
+  svint64_t k
     = svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52); /* Arithmetic shift.  */
-  sv_u64_t iz = svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52));
-  sv_f64_t z = sv_as_f64_u64 (iz);
+  svuint64_t iz = svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52));
+  svfloat64_t z = sv_as_f64_u64 (iz);
   /* Lookup in 2 global lists (length N).  */
-  sv_f64_t invc = sv_lookup_f64_x (pg, __sv_log_data.invc, i);
-  sv_f64_t logc = sv_lookup_f64_x (pg, __sv_log_data.logc, i);
+  svfloat64_t invc = sv_lookup_f64_x (pg, __sv_log_data.invc, i);
+  svfloat64_t logc = sv_lookup_f64_x (pg, __sv_log_data.logc, i);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
-  sv_f64_t r = sv_fma_f64_x (pg, z, invc, sv_f64 (-1.0));
-  sv_f64_t kd = sv_to_f64_s64_x (pg, k);
+  svfloat64_t r = sv_fma_f64_x (pg, z, invc, sv_f64 (-1.0));
+  svfloat64_t kd = sv_to_f64_s64_x (pg, k);
   /* hi = r + log(c) + k*Ln2.  */
-  sv_f64_t hi = sv_fma_n_f64_x (pg, Ln2, kd, svadd_f64_x (pg, logc, r));
+  svfloat64_t hi = sv_fma_n_f64_x (pg, Ln2, kd, svadd_f64_x (pg, logc, r));
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
-  sv_f64_t r2 = svmul_f64_x (pg, r, r);
-  sv_f64_t y = sv_fma_n_f64_x (pg, A (3), r, sv_f64 (A (2)));
-  sv_f64_t p = sv_fma_n_f64_x (pg, A (1), r, sv_f64 (A (0)));
+  svfloat64_t r2 = svmul_f64_x (pg, r, r);
+  svfloat64_t y = sv_fma_n_f64_x (pg, A (3), r, sv_f64 (A (2)));
+  svfloat64_t p = sv_fma_n_f64_x (pg, A (1), r, sv_f64 (A (0)));
   y = sv_fma_n_f64_x (pg, A (4), r2, y);
   y = sv_fma_f64_x (pg, y, r2, p);
   y = sv_fma_f64_x (pg, y, r2, hi);

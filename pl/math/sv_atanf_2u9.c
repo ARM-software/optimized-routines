@@ -22,13 +22,13 @@
    Largest observed error is 2.9 ULP, close to +/-1.0:
    __sv_atanf(0x1.0468f6p+0) got -0x1.967f06p-1
 			    want -0x1.967fp-1.  */
-sv_f32_t
-__sv_atanf_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_atanf_x (svfloat32_t x, const svbool_t pg)
 {
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  sv_u32_t ix = sv_as_u32_f32 (x);
-  sv_u32_t sign = svand_n_u32_x (pg, ix, ~AbsMask);
+  svuint32_t ix = sv_as_u32_f32 (x);
+  svuint32_t sign = svand_n_u32_x (pg, ix, ~AbsMask);
 
   /* Argument reduction:
      y := arctan(x) for x < 1
@@ -36,12 +36,12 @@ __sv_atanf_x (sv_f32_t x, const svbool_t pg)
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
   svbool_t red = svacgt_n_f32 (pg, x, 1.0f);
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  sv_f32_t z = svsel_f32 (red, svdiv_f32_x (pg, sv_f32 (-1.0f), x), x);
+  svfloat32_t z = svsel_f32 (red, svdiv_f32_x (pg, sv_f32 (-1.0f), x), x);
   /* Use absolute value only when needed (odd powers of z).  */
-  sv_f32_t az = svabs_f32_x (pg, z);
+  svfloat32_t az = svabs_f32_x (pg, z);
   az = svneg_f32_m (az, red, az);
 
-  sv_f32_t y = __sv_atanf_common (pg, red, z, az, PiOver2);
+  svfloat32_t y = __sv_atanf_common (pg, red, z, az, PiOver2);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
   return sv_as_f32_u32 (sveor_u32_x (pg, sv_as_u32_f32 (y), sign));

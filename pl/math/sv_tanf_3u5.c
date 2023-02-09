@@ -23,16 +23,16 @@
 #define poly(i) sv_f32 (__tanf_poly_data.poly_tan[i])
 
 /* Use full Estrin's scheme to evaluate polynomial.  */
-static inline sv_f32_t
-eval_poly (svbool_t pg, sv_f32_t z)
+static inline svfloat32_t
+eval_poly (svbool_t pg, svfloat32_t z)
 {
-  sv_f32_t z2 = svmul_f32_x (pg, z, z);
-  sv_f32_t z4 = svmul_f32_x (pg, z2, z2);
+  svfloat32_t z2 = svmul_f32_x (pg, z, z);
+  svfloat32_t z4 = svmul_f32_x (pg, z2, z2);
   return ESTRIN_5 (pg, z, z2, z4, poly);
 }
 
-static NOINLINE sv_f32_t
-__sv_tanf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
+static NOINLINE svfloat32_t
+__sv_tanf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (tanf, x, y, cmp);
 }
@@ -41,24 +41,24 @@ __sv_tanf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
    Maximum error is 3.45 ULP:
    __sv_tanf(-0x1.e5f0cap+13) got 0x1.ff9856p-1
 			     want 0x1.ff9850p-1.  */
-sv_f32_t
-__sv_tanf_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_tanf_x (svfloat32_t x, const svbool_t pg)
 {
   /* Determine whether input is too large to perform fast regression.  */
   svbool_t cmp = svacge_f32 (pg, x, RangeVal);
   svbool_t pred_minuszero = svcmpeq_f32 (pg, x, sv_f32 (-0.0));
 
   /* n = rint(x/(pi/2)).  */
-  sv_f32_t q = sv_fma_f32_x (pg, InvPio2, x, Shift);
-  sv_f32_t n = svsub_f32_x (pg, q, Shift);
+  svfloat32_t q = sv_fma_f32_x (pg, InvPio2, x, Shift);
+  svfloat32_t n = svsub_f32_x (pg, q, Shift);
   /* n is already a signed integer, simply convert it.  */
-  sv_s32_t in = sv_to_s32_f32_x (pg, n);
+  svint32_t in = sv_to_s32_f32_x (pg, n);
   /* Determine if x lives in an interval, where |tan(x)| grows to infinity.  */
-  sv_s32_t alt = svand_s32_x (pg, in, sv_s32 (1));
+  svint32_t alt = svand_s32_x (pg, in, sv_s32 (1));
   svbool_t pred_alt = svcmpne_s32 (pg, alt, sv_s32 (0));
 
   /* r = x - n * (pi/2)  (range reduction into 0 .. pi/4).  */
-  sv_f32_t r;
+  svfloat32_t r;
   r = sv_fma_f32_x (pg, NegPio2_1, n, x);
   r = sv_fma_f32_x (pg, NegPio2_2, n, r);
   r = sv_fma_f32_x (pg, NegPio2_3, n, r);
@@ -71,15 +71,15 @@ __sv_tanf_x (sv_f32_t x, const svbool_t pg)
        the same polynomial approximation of tan as above.  */
 
   /* Perform additional reduction if required.  */
-  sv_f32_t z = svneg_f32_m (r, pred_alt, r);
+  svfloat32_t z = svneg_f32_m (r, pred_alt, r);
 
   /* Evaluate polynomial approximation of tangent on [-pi/4, pi/4].  */
-  sv_f32_t z2 = svmul_f32_x (pg, z, z);
-  sv_f32_t p = eval_poly (pg, z2);
-  sv_f32_t y = sv_fma_f32_x (pg, svmul_f32_x (pg, z, z2), p, z);
+  svfloat32_t z2 = svmul_f32_x (pg, z, z);
+  svfloat32_t p = eval_poly (pg, z2);
+  svfloat32_t y = sv_fma_f32_x (pg, svmul_f32_x (pg, z, z2), p, z);
 
   /* Transform result back, if necessary.  */
-  sv_f32_t inv_y = svdiv_f32_x (pg, sv_f32 (1.0f), y);
+  svfloat32_t inv_y = svdiv_f32_x (pg, sv_f32 (1.0f), y);
   y = svsel_f32 (pred_alt, inv_y, y);
 
   /* Fast reduction does not handle the x = -0.0 case well,

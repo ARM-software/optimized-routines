@@ -21,8 +21,8 @@
 
 #define P(i) sv_f32 (__v_log10f_poly[i])
 
-static NOINLINE sv_f32_t
-special_case (sv_f32_t x, sv_f32_t y, svbool_t special)
+static NOINLINE svfloat32_t
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 {
   return sv_call_f32 (log10f, x, y, special);
 }
@@ -31,33 +31,33 @@ special_case (sv_f32_t x, sv_f32_t y, svbool_t special)
    polynomial as v_log10f. Maximum error is 3.31ulps:
    __sv_log10f(0x1.555c16p+0) got 0x1.ffe2fap-4
 			     want 0x1.ffe2f4p-4.  */
-sv_f32_t
-__sv_log10f_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_log10f_x (svfloat32_t x, const svbool_t pg)
 {
-  sv_u32_t ix = sv_as_u32_f32 (x);
+  svuint32_t ix = sv_as_u32_f32 (x);
   svbool_t special_cases
     = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, ix, SpecialCaseMin),
 		     SpecialCaseMax - SpecialCaseMin);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   ix = svsub_n_u32_x (pg, ix, Offset);
-  sv_f32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (ix),
-						   23)); /* signextend.  */
+  svfloat32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (ix),
+						      23)); /* signextend.  */
   ix = svand_n_u32_x (pg, ix, Mask);
   ix = svadd_n_u32_x (pg, ix, Offset);
-  sv_f32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (ix), 1.0f);
+  svfloat32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (ix), 1.0f);
 
   /* y = log10(1+r) + n*log10(2)
      log10(1+r) ~ r * InvLn(10) + P(r)
      where P(r) is a polynomial. Use order 9 for log10(1+x), i.e. order 8 for
      log10(1+x)/x, with x in [-1/3, 1/3] (offset=2/3) */
-  sv_f32_t r2 = svmul_f32_x (pg, r, r);
-  sv_f32_t r4 = svmul_f32_x (pg, r2, r2);
-  sv_f32_t y = ESTRIN_7 (pg, r, r2, r4, P);
+  svfloat32_t r2 = svmul_f32_x (pg, r, r);
+  svfloat32_t r4 = svmul_f32_x (pg, r2, r2);
+  svfloat32_t y = ESTRIN_7 (pg, r, r2, r4, P);
 
   /* Using p = Log10(2)*n + r*InvLn(10) is slightly faster but less
      accurate.  */
-  sv_f32_t p = sv_fma_n_f32_x (pg, Ln2, n, r);
+  svfloat32_t p = sv_fma_n_f32_x (pg, Ln2, n, r);
   y = sv_fma_f32_x (pg, y, r2, svmul_n_f32_x (pg, p, InvLn10));
 
   if (unlikely (svptest_any (pg, special_cases)))

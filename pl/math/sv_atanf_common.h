@@ -17,22 +17,22 @@
 
 /* Polynomial used in fast SVE atanf(x) and atan2f(y,x) implementations
    The order 7 polynomial P approximates (f(sqrt(x))-sqrt(x))/x^(3/2).  */
-static inline sv_f32_t
-__sv_atanf_common (svbool_t pg, svbool_t red, sv_f32_t z, sv_f32_t az,
-		   sv_f32_t shift)
+static inline svfloat32_t
+__sv_atanf_common (svbool_t pg, svbool_t red, svfloat32_t z, svfloat32_t az,
+		   svfloat32_t shift)
 {
   /* Use split Estrin scheme for P(z^2) with deg(P)=7. */
 
   /* First compute square powers of z.  */
-  sv_f32_t z2 = svmul_f32_x (pg, z, z);
-  sv_f32_t z4 = svmul_f32_x (pg, z2, z2);
-  sv_f32_t z8 = svmul_f32_x (pg, z4, z4);
+  svfloat32_t z2 = svmul_f32_x (pg, z, z);
+  svfloat32_t z4 = svmul_f32_x (pg, z2, z2);
+  svfloat32_t z8 = svmul_f32_x (pg, z4, z4);
 
   /* Then assemble polynomial.  */
-  sv_f32_t y = ESTRIN_7 (pg, z2, z4, z8, P);
+  svfloat32_t y = ESTRIN_7 (pg, z2, z4, z8, P);
 
   /* Finalize. y = shift + z + z^3 * P(z^2).  */
-  sv_f32_t z3 = svmul_f32_x (pg, z2, az);
+  svfloat32_t z3 = svmul_f32_x (pg, z2, az);
   y = sv_fma_f32_x (pg, y, z3, az);
 
   /* Apply shift as indicated by 'red' predicate.  */

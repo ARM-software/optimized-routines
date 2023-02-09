@@ -22,8 +22,8 @@
 float
 optr_aor_log_f32 (float);
 
-static NOINLINE sv_f32_t
-__sv_logf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
+static NOINLINE svfloat32_t
+__sv_logf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (optr_aor_log_f32, x, y, cmp);
 }
@@ -32,27 +32,27 @@ __sv_logf_specialcase (sv_f32_t x, sv_f32_t y, svbool_t cmp)
    as the Neon routine in math/. Maximum error is 3.34 ULPs:
    __sv_logf(0x1.557298p+0) got 0x1.26edecp-2
 			   want 0x1.26ede6p-2.  */
-sv_f32_t
-__sv_logf_x (sv_f32_t x, const svbool_t pg)
+svfloat32_t
+__sv_logf_x (svfloat32_t x, const svbool_t pg)
 {
-  sv_u32_t u = sv_as_u32_f32 (x);
+  svuint32_t u = sv_as_u32_f32 (x);
   svbool_t cmp
     = svcmpge_u32 (pg, svsub_n_u32_x (pg, u, Min), sv_u32 (Max - Min));
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = svsub_n_u32_x (pg, u, Off);
-  sv_f32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (u),
-						   23)); /* Sign-extend.  */
+  svfloat32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (u),
+						      23)); /* Sign-extend.  */
   u = svand_n_u32_x (pg, u, Mask);
   u = svadd_n_u32_x (pg, u, Off);
-  sv_f32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (u), 1.0f);
+  svfloat32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (u), 1.0f);
 
   /* y = log(1+r) + n*ln2.  */
-  sv_f32_t r2 = svmul_f32_x (pg, r, r);
+  svfloat32_t r2 = svmul_f32_x (pg, r, r);
   /* n*ln2 + r + r2*(P6 + r*P5 + r2*(P4 + r*P3 + r2*(P2 + r*P1 + r2*P0))).  */
-  sv_f32_t p = sv_fma_n_f32_x (pg, P (1), r, sv_f32 (P (2)));
-  sv_f32_t q = sv_fma_n_f32_x (pg, P (3), r, sv_f32 (P (4)));
-  sv_f32_t y = sv_fma_n_f32_x (pg, P (5), r, sv_f32 (P (6)));
+  svfloat32_t p = sv_fma_n_f32_x (pg, P (1), r, sv_f32 (P (2)));
+  svfloat32_t q = sv_fma_n_f32_x (pg, P (3), r, sv_f32 (P (4)));
+  svfloat32_t y = sv_fma_n_f32_x (pg, P (5), r, sv_f32 (P (6)));
   p = sv_fma_n_f32_x (pg, P (0), r2, p);
   q = sv_fma_f32_x (pg, p, r2, q);
   y = sv_fma_f32_x (pg, q, r2, y);
