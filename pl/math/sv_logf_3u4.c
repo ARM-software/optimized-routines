@@ -41,7 +41,7 @@ __sv_logf_x (svfloat32_t x, const svbool_t pg)
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = svsub_n_u32_x (pg, u, Off);
-  svfloat32_t n = sv_to_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (u),
+  svfloat32_t n = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (u),
 						      23)); /* Sign-extend.  */
   u = svand_n_u32_x (pg, u, Mask);
   u = svadd_n_u32_x (pg, u, Off);

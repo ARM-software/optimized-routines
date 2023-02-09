@@ -51,12 +51,12 @@ __sv_log_x (svfloat64_t x, const svbool_t pg)
   svuint64_t iz = svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52));
   svfloat64_t z = sv_as_f64_u64 (iz);
   /* Lookup in 2 global lists (length N).  */
-  svfloat64_t invc = sv_lookup_f64_x (pg, __sv_log_data.invc, i);
-  svfloat64_t logc = sv_lookup_f64_x (pg, __sv_log_data.logc, i);
+  svfloat64_t invc = svld1_gather_u64index_f64 (pg, __sv_log_data.invc, i);
+  svfloat64_t logc = svld1_gather_u64index_f64 (pg, __sv_log_data.logc, i);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
   svfloat64_t r = sv_fma_f64_x (pg, z, invc, sv_f64 (-1.0));
-  svfloat64_t kd = sv_to_f64_s64_x (pg, k);
+  svfloat64_t kd = svcvt_f64_s64_x (pg, k);
   /* hi = r + log(c) + k*Ln2.  */
   svfloat64_t hi = sv_fma_n_f64_x (pg, Ln2, kd, svadd_f64_x (pg, logc, r));
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */

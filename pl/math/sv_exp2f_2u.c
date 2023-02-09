@@ -63,7 +63,7 @@ __sv_exp2f_x (svfloat32_t x, const svbool_t pg)
   svfloat32_t scale = svexpa_f32 (sv_as_u32_f32 (z));
 #else
   svuint32_t e
-    = svlsl_n_u32_x (pg, sv_as_u32_s32 (sv_to_s32_f32_x (pg, n)), 23);
+    = svlsl_n_u32_x (pg, sv_as_u32_s32 (svcvt_s32_f32_x (pg, n)), 23);
   svbool_t is_special_case = svacgt_n_f32 (pg, n, Thres);
   svfloat32_t scale = sv_as_f32_u32 (svadd_n_u32_x (pg, e, 0x3f800000));
 #endif

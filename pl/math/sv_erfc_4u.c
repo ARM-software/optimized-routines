@@ -44,11 +44,11 @@ sv_eval_poly (const svbool_t pg, svfloat64_t z, svuint64_t idx)
 {
   svuint64_t offset = svmul_n_u64_x (pg, idx, ERFC_POLY_ORDER + 1);
   const double *base = &__v_erfc_data.poly[0][12];
-  svfloat64_t r = sv_lookup_f64_x (pg, base, offset);
+  svfloat64_t r = svld1_gather_u64index_f64 (pg, base, offset);
   for (int i = 0; i < ERFC_POLY_ORDER; i++)
     {
       base--;
-      svfloat64_t c = sv_lookup_f64_x (pg, base, offset);
+      svfloat64_t c = svld1_gather_u64index_f64 (pg, base, offset);
       r = sv_fma_f64_x (pg, z, r, c);
     }
   return r;
@@ -121,7 +121,7 @@ __sv_erfc_x (svfloat64_t x, const svbool_t pg)
      v_erfc_data.c. i is chosen based on which interval x falls in.  */
   svuint64_t i = lookup_interval_idx (in_bounds, abs_x);
   svfloat64_t x_i
-    = sv_lookup_f64_x (in_bounds, __v_erfc_data.interval_bounds, i);
+    = svld1_gather_u64index_f64 (in_bounds, __v_erfc_data.interval_bounds, i);
   svfloat64_t p = sv_eval_poly (in_bounds, svsub_f64_x (pg, abs_x, x_i), i);
   /* 'copy' sign of x to p.  */
   svuint64_t sign = svand_n_u64_z (in_bounds, ix, SignMask);

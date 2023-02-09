@@ -80,18 +80,6 @@ sv_as_f64_u64 (svuint64_t x)
 }
 
 static inline svfloat64_t
-sv_to_f64_f32_x (svbool_t pg, svfloat32_t x)
-{
-  return svcvt_f64_f32_x (pg, x);
-}
-
-static inline svfloat64_t
-sv_to_f64_s64_x (svbool_t pg, svint64_t s)
-{
-  return svcvt_f64_x (pg, s);
-}
-
-static inline svfloat64_t
 sv_call_f64 (f64_t (*f) (f64_t), svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
   svbool_t p = svpfirst (cmp, svpfalse ());
@@ -121,20 +109,6 @@ sv_call2_f64 (f64_t (*f) (f64_t, f64_t), svfloat64_t x1, svfloat64_t x2,
       p = svpnext_b64 (cmp, p);
     }
   return y;
-}
-
-/* Load array of uint64_t into svuint64_t.  */
-static inline svuint64_t
-sv_lookup_u64_x (svbool_t pg, const u64_t *tab, svuint64_t idx)
-{
-  return svld1_gather_u64index_u64 (pg, tab, idx);
-}
-
-/* Load array of double into svfloat64_t.  */
-static inline svfloat64_t
-sv_lookup_f64_x (svbool_t pg, const f64_t *tab, svuint64_t idx)
-{
-  return svld1_gather_u64index_f64 (pg, tab, idx);
 }
 
 static inline svuint64_t
@@ -204,24 +178,6 @@ static inline svint32_t
 sv_as_s32_u32 (svuint32_t x)
 {
   return svreinterpret_s32_u32 (x);
-}
-
-static inline svfloat32_t
-sv_to_f32_s32_x (svbool_t pg, svint32_t s)
-{
-  return svcvt_f32_x (pg, s);
-}
-
-static inline svint32_t
-sv_to_s32_f32_x (svbool_t pg, svfloat32_t x)
-{
-  return svcvt_s32_x (pg, x);
-}
-
-static inline svfloat32_t
-sv_to_f32_f64_x (svbool_t pg, svfloat64_t s)
-{
-  return svcvt_f32_f64_x (pg, s);
 }
 
 static inline svfloat32_t

@@ -46,19 +46,19 @@ __sv_erf_x (svfloat64_t x, const svbool_t pg)
   svuint64_t i = svcvt_u64_f64_m (sv_u64 (V_ERF_NINTS - 1), a_lt_6, a_scale);
 
   /* Load polynomial coefficients.  */
-  svfloat64_t P_0 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[0], i);
-  svfloat64_t P_1 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[1], i);
-  svfloat64_t P_2 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[2], i);
-  svfloat64_t P_3 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[3], i);
-  svfloat64_t P_4 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[4], i);
-  svfloat64_t P_5 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[5], i);
-  svfloat64_t P_6 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[6], i);
-  svfloat64_t P_7 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[7], i);
-  svfloat64_t P_8 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[8], i);
-  svfloat64_t P_9 = sv_lookup_f64_x (pg, __v_erf_data.coeffs[9], i);
+  svfloat64_t P_0 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[0], i);
+  svfloat64_t P_1 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[1], i);
+  svfloat64_t P_2 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[2], i);
+  svfloat64_t P_3 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[3], i);
+  svfloat64_t P_4 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[4], i);
+  svfloat64_t P_5 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[5], i);
+  svfloat64_t P_6 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[6], i);
+  svfloat64_t P_7 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[7], i);
+  svfloat64_t P_8 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[8], i);
+  svfloat64_t P_9 = svld1_gather_u64index_f64 (pg, __v_erf_data.coeffs[9], i);
 
   /* Get shift and scale.  */
-  svfloat64_t shift = sv_lookup_f64_x (pg, __v_erf_data.shifts, i);
+  svfloat64_t shift = svld1_gather_u64index_f64 (pg, __v_erf_data.shifts, i);
 
   /* Transform polynomial variable.
      Set z = 0 in the boring domain to avoid overflow.  */

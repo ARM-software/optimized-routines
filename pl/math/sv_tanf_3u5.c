@@ -52,7 +52,7 @@ __sv_tanf_x (svfloat32_t x, const svbool_t pg)
   svfloat32_t q = sv_fma_f32_x (pg, InvPio2, x, Shift);
   svfloat32_t n = svsub_f32_x (pg, q, Shift);
   /* n is already a signed integer, simply convert it.  */
-  svint32_t in = sv_to_s32_f32_x (pg, n);
+  svint32_t in = svcvt_s32_f32_x (pg, n);
   /* Determine if x lives in an interval, where |tan(x)| grows to infinity.  */
   svint32_t alt = svand_s32_x (pg, in, sv_s32 (1));
   svbool_t pred_alt = svcmpne_s32 (pg, alt, sv_s32 (0));

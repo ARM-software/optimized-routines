@@ -43,13 +43,15 @@ __sv_log2_x (svfloat64_t x, const svbool_t pg)
   svuint64_t i
     = sv_mod_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - V_LOG2_TABLE_BITS), N);
   svfloat64_t k
-    = sv_to_f64_s64_x (pg, svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52));
+    = svcvt_f64_s64_x (pg, svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52));
   svfloat64_t z = sv_as_f64_u64 (
     svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
 
   svuint64_t idx = svmul_n_u64_x (pg, i, 2);
-  svfloat64_t invc = sv_lookup_f64_x (pg, &__v_log2_data.tab[0].invc, idx);
-  svfloat64_t log2c = sv_lookup_f64_x (pg, &__v_log2_data.tab[0].log2c, idx);
+  svfloat64_t invc
+    = svld1_gather_u64index_f64 (pg, &__v_log2_data.tab[0].invc, idx);
+  svfloat64_t log2c
+    = svld1_gather_u64index_f64 (pg, &__v_log2_data.tab[0].log2c, idx);
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 

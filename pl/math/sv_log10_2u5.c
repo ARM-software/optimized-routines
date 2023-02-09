@@ -42,15 +42,17 @@ __sv_log10_x (svfloat64_t x, const svbool_t pg)
   svuint64_t i
     = sv_mod_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - V_LOG10_TABLE_BITS), N);
   svfloat64_t k
-    = sv_to_f64_s64_x (pg, svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52));
+    = svcvt_f64_s64_x (pg, svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52));
   svfloat64_t z = sv_as_f64_u64 (
     svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
 
   /* log(x) = k*log(2) + log(c) + log(z/c).  */
 
   svuint64_t idx = svmul_n_u64_x (pg, i, 2);
-  svfloat64_t invc = sv_lookup_f64_x (pg, &__v_log10_data.tab[0].invc, idx);
-  svfloat64_t logc = sv_lookup_f64_x (pg, &__v_log10_data.tab[0].log10c, idx);
+  svfloat64_t invc
+    = svld1_gather_u64index_f64 (pg, &__v_log10_data.tab[0].invc, idx);
+  svfloat64_t logc
+    = svld1_gather_u64index_f64 (pg, &__v_log10_data.tab[0].log10c, idx);
 
   /* We approximate log(z/c) with a polynomial P(x) ~= log(x + 1):
      r = z/c - 1 (we look up precomputed 1/c)

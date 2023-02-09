@@ -65,7 +65,7 @@ sv_exp_tail (const svbool_t pg, svfloat64_t x, svfloat64_t xtail)
   y = sv_fma_f64_x (pg, y, r, xtail);
 
   /* s = 2^(n/N).  */
-  u = sv_lookup_u64_x (pg, Tab, i);
+  u = svld1_gather_u64index_u64 (pg, Tab, i);
   svfloat64_t s = sv_as_f64_u64 (svadd_u64_x (pg, u, e));
 
   svbool_t cmp = svcmpgt_n_f64 (pg, svabs_f64_x (pg, x), Thres);

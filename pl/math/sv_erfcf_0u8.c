@@ -101,10 +101,10 @@ sv_approx_erfcf (svfloat32_t abs_x, svuint32_t sign, svuint32_t ia12,
      calculated in double precision. Separate top and bottom halves of input
      into separate vectors and convert to double.  */
   svfloat64_t lo
-    = sv_to_f64_f32_x (svptrue_b64 (),
+    = svcvt_f64_f32_x (svptrue_b64 (),
 		       sv_as_f32_u64 (svunpklo_u64 (sv_as_u32_f32 (abs_x))));
   svfloat64_t hi
-    = sv_to_f64_f32_x (svptrue_b64 (),
+    = svcvt_f64_f32_x (svptrue_b64 (),
 		       sv_as_f32_u64 (svunpkhi_u64 (sv_as_u32_f32 (abs_x))));
 
   /* Have to do the same with pg and the interval indexes.  */
@@ -129,8 +129,8 @@ sv_approx_erfcf (svfloat32_t abs_x, svuint32_t sign, svuint32_t ia12,
   hi = svmul_f64_x (pg_hi, poly_hi, exp_mx2_hi);
 
   /* Convert back to single-precision and interleave.  */
-  svfloat32_t lo_32 = sv_to_f32_f64_x (svptrue_b32 (), lo);
-  svfloat32_t hi_32 = sv_to_f32_f64_x (svptrue_b32 (), hi);
+  svfloat32_t lo_32 = svcvt_f32_f64_x (svptrue_b32 (), lo);
+  svfloat32_t hi_32 = svcvt_f32_f64_x (svptrue_b32 (), hi);
   svfloat32_t y = svuzp1_f32 (lo_32, hi_32);
 
   /* Replace y with 2 - y for negative input.  */
