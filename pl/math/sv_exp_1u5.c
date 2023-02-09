@@ -58,10 +58,9 @@ specialcase (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 }
 
 /* SVE exp algorithm. Maximum measured error is 1.01ulps:
-   __sv_exp(0x1.4619d7b04da41p+6) got 0x1.885d9acc41da7p+117
+   SV_NAME_D1 (exp)(0x1.4619d7b04da41p+6) got 0x1.885d9acc41da7p+117
 				 want 0x1.885d9acc41da6p+117.  */
-svfloat64_t
-__sv_exp_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 {
   svbool_t special = svacgt_n_f64 (pg, x, Thres);
   svbool_t isnan = svcmpne_f64 (pg, x, x);
@@ -122,17 +121,15 @@ __sv_exp_x (svfloat64_t x, const svbool_t pg)
   return sv_fma_f64_x (pg, y, s, s);
 }
 
-PL_ALIAS (__sv_exp_x, _ZGVsMxv_exp)
-
 PL_SIG (SV, D, 1, exp, -9.9, 9.9)
-PL_TEST_ULP (__sv_exp, 1.46)
-PL_TEST_INTERVAL (__sv_exp, 0, 0x1p-23, 40000)
-PL_TEST_INTERVAL (__sv_exp, 0x1p-23, 1, 50000)
-PL_TEST_INTERVAL (__sv_exp, 1, 0x1p23, 50000)
-PL_TEST_INTERVAL (__sv_exp, 0x1p23, inf, 50000)
-PL_TEST_INTERVAL (__sv_exp, -0, -0x1p-23, 40000)
-PL_TEST_INTERVAL (__sv_exp, -0x1p-23, -1, 50000)
-PL_TEST_INTERVAL (__sv_exp, -1, -0x1p23, 50000)
-PL_TEST_INTERVAL (__sv_exp, -0x1p23, -inf, 50000)
+PL_TEST_ULP (SV_NAME_D1 (exp), 1.46)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), 0, 0x1p-23, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), 0x1p-23, 1, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), 1, 0x1p23, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), 0x1p23, inf, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), -0, -0x1p-23, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), -0x1p-23, -1, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), -1, -0x1p23, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (exp), -0x1p23, -inf, 50000)
 
 #endif // SV_SUPPORTED

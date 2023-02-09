@@ -34,9 +34,8 @@ __sv_sinf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
    Maximum error: 1.89 ULPs.
    This maximum error is achieved at multiple values in [-2^18, 2^18]
    but one example is:
-   __sv_sinf(0x1.9247a4p+0) got 0x1.fffff6p-1 want 0x1.fffffap-1.  */
-svfloat32_t
-__sv_sinf_x (svfloat32_t x, const svbool_t pg)
+   SV_NAME_F1 (sin)(0x1.9247a4p+0) got 0x1.fffff6p-1 want 0x1.fffffap-1.  */
+svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 {
   svfloat32_t n, r, r2, y;
   svuint32_t sign, odd;
@@ -75,10 +74,8 @@ __sv_sinf_x (svfloat32_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_sinf_x, _ZGVsMxv_sinf)
-
 PL_SIG (SV, F, 1, sin, -3.1, 3.1)
-PL_TEST_ULP (__sv_sinf, 1.40)
-PL_TEST_INTERVAL (__sv_sinf, 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (__sv_sinf, 0x1p-4, 0x1p4, 500000)
+PL_TEST_ULP (SV_NAME_F1 (sin), 1.40)
+PL_TEST_INTERVAL (SV_NAME_F1 (sin), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (SV_NAME_F1 (sin), 0x1p-4, 0x1p4, 500000)
 #endif

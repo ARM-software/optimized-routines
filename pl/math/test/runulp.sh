@@ -43,20 +43,16 @@ check atan2 nan nan x -nan -nan
 flags="${ULPFLAGS:--q}"
 runsv=
 if [ $WANT_SVE_MATH -eq 1 ]; then
-check __sv_cosf 0 && runsv=1
-check __sv_cos  0 && runsv=1
-check __sv_sinf 0 && runsv=1
-check __sv_sin 0 && runsv=1
 # No guarantees about powi accuracy, so regression-test for exactness
 # w.r.t. the custom reference impl in ulp_wrappers.h
-check -q -f -e 0 __sv_powif  0  inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 __sv_powif -0 -inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 __sv_powif  0  inf x -0 -1000 100000 && runsv=1
-check -q -f -e 0 __sv_powif -0 -inf x -0 -1000 100000 && runsv=1
-check -q -f -e 0 __sv_powi   0  inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 __sv_powi  -0 -inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 __sv_powi   0  inf x -0 -1000 100000 && runsv=1
-check -q -f -e 0 __sv_powi  -0 -inf x -0 -1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powi  0  inf x  0  1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x  0  1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powi  0  inf x -0 -1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x -0 -1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powk  0  inf x  0  1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x  0  1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powk  0  inf x -0 -1000 100000 && runsv=1
+check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x -0 -1000 100000 && runsv=1
 fi
 
 while read F LO HI N C

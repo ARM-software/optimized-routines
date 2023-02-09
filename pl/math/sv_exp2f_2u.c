@@ -41,14 +41,13 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
    for exp2f from math/.
 
    Worst case error with FEXPA enabled is 1.04 ULPs.
-   __sv_exp2f(0x1.943b9p-1) got 0x1.ba7eb2p+0
+   SV_NAME_F1 (exp2)(0x1.943b9p-1) got 0x1.ba7eb2p+0
 	  want 0x1.ba7ebp+0
 
    Worst case error without FEXPA is 1.96 ULPs.
-   __sv_exp2f(0x1.ff7338p-2) got 0x1.69e764p+0
+   SV_NAME_F1 (exp2)(0x1.ff7338p-2) got 0x1.69e764p+0
 			    want 0x1.69e768p+0.  */
-svfloat32_t
-__sv_exp2f_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
 {
   /* exp2(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
     x = n + r, with r in [-1/2, 1/2].  */
@@ -90,21 +89,19 @@ __sv_exp2f_x (svfloat32_t x, const svbool_t pg)
   return sv_fma_f32_x (pg, poly, scale, scale);
 }
 
-PL_ALIAS (__sv_exp2f_x, _ZGVsMxv_exp2f)
-
 PL_SIG (SV, F, 1, exp2, -9.9, 9.9)
-PL_TEST_ULP (__sv_exp2f, 1.47)
-PL_TEST_INTERVAL (__sv_exp2f, 0, Thres, 40000)
-PL_TEST_INTERVAL (__sv_exp2f, Thres, 1, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, 1, Thres, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, Thres, inf, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, -0, -0x1p-23, 40000)
-PL_TEST_INTERVAL (__sv_exp2f, -0x1p-23, -1, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, -1, -0x1p23, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, -0x1p23, -inf, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, -0, ScaleThres, 40000)
-PL_TEST_INTERVAL (__sv_exp2f, ScaleThres, -1, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, -1, ScaleThres, 50000)
-PL_TEST_INTERVAL (__sv_exp2f, ScaleThres, -inf, 50000)
+PL_TEST_ULP (SV_NAME_F1 (exp2), 1.47)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), 0, Thres, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), Thres, 1, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), 1, Thres, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), Thres, inf, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0, -0x1p-23, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0x1p-23, -1, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -1, -0x1p23, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0x1p23, -inf, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0, ScaleThres, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), ScaleThres, -1, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -1, ScaleThres, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp2), ScaleThres, -inf, 50000)
 
 #endif

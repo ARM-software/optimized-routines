@@ -20,10 +20,9 @@
    atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
    z=-1/x and shift = pi/2.
    Largest observed error is 2.9 ULP, close to +/-1.0:
-   __sv_atanf(0x1.0468f6p+0) got -0x1.967f06p-1
+   SV_NAME_F1 (atan)(0x1.0468f6p+0) got -0x1.967f06p-1
 			    want -0x1.967fp-1.  */
-svfloat32_t
-__sv_atanf_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
 {
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
@@ -47,13 +46,11 @@ __sv_atanf_x (svfloat32_t x, const svbool_t pg)
   return sv_as_f32_u32 (sveor_u32_x (pg, sv_as_u32_f32 (y), sign));
 }
 
-PL_ALIAS (__sv_atanf_x, _ZGVsMxv_atanf)
-
 PL_SIG (SV, F, 1, atan, -3.1, 3.1)
-PL_TEST_ULP (__sv_atanf, 2.9)
-PL_TEST_INTERVAL (__sv_atanf, -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (__sv_atanf, -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (__sv_atanf, 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (__sv_atanf, 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (__sv_atanf, 1e6, 1e32, 40000)
+PL_TEST_ULP (SV_NAME_F1 (atan), 2.9)
+PL_TEST_INTERVAL (SV_NAME_F1 (atan), -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (atan), -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (atan), 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (atan), 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (atan), 1e6, 1e32, 40000)
 #endif

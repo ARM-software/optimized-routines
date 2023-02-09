@@ -24,10 +24,9 @@ specialcase (svfloat64_t x, svfloat64_t y, svbool_t special)
 }
 
 /* SVE log10 algorithm. Maximum measured error is 2.46 ulps.
-   __sv_log10(0x1.131956cd4b627p+0) got 0x1.fffbdf6eaa669p-6
+   SV_NAME_D1 (log10)(0x1.131956cd4b627p+0) got 0x1.fffbdf6eaa669p-6
 				   want 0x1.fffbdf6eaa667p-6.  */
-svfloat64_t
-__sv_log10_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
 {
   svuint64_t ix = sv_as_u64_f64 (x);
   svuint64_t top = svlsr_n_u64_x (pg, ix, 48);
@@ -78,14 +77,12 @@ __sv_log10_x (svfloat64_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_log10_x, _ZGVsMxv_log10)
-
 PL_SIG (SV, D, 1, log10, 0.01, 11.1)
-PL_TEST_ULP (__sv_log10, 1.97)
-PL_TEST_INTERVAL (__sv_log10, -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (__sv_log10, 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (__sv_log10, 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (__sv_log10, 0x1p-23, 1.0, 50000)
-PL_TEST_INTERVAL (__sv_log10, 1.0, 100, 50000)
-PL_TEST_INTERVAL (__sv_log10, 100, inf, 50000)
+PL_TEST_ULP (SV_NAME_D1 (log10), 1.97)
+PL_TEST_INTERVAL (SV_NAME_D1 (log10), -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (SV_NAME_D1 (log10), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log10), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log10), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log10), 1.0, 100, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log10), 100, inf, 50000)
 #endif

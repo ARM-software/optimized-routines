@@ -10,6 +10,11 @@
 #define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
 #define V_NAME_D2(fun) _ZGVnN2vv_##fun
 
+#define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
+#define SV_NAME_D1(fun) _ZGVsMxv_##fun
+#define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
+#define SV_NAME_D2(fun) _ZGVsMxvv_##fun
+
 #define PL_DECL_SF1(fun) float fun##f (float);
 #define PL_DECL_SF2(fun) float fun##f (float, float);
 #define PL_DECL_SD1(fun) double fun (double);
@@ -30,12 +35,12 @@
 #endif
 
 #if WANT_SVE_MATH
-#define PL_DECL_SVF1(fun) svfloat32_t __sv_##fun##f_x (svfloat32_t, svbool_t);
+#define PL_DECL_SVF1(fun) svfloat32_t SV_NAME_F1 (fun) (svfloat32_t, svbool_t);
 #define PL_DECL_SVF2(fun)                                                      \
-  svfloat32_t __sv_##fun##f_x (svfloat32_t, svfloat32_t, svbool_t);
-#define PL_DECL_SVD1(fun) svfloat64_t __sv_##fun##_x (svfloat64_t, svbool_t);
+  svfloat32_t SV_NAME_F2 (fun) (svfloat32_t, svfloat32_t, svbool_t);
+#define PL_DECL_SVD1(fun) svfloat64_t SV_NAME_D1 (fun) (svfloat64_t, svbool_t);
 #define PL_DECL_SVD2(fun)                                                      \
-  svfloat64_t __sv_##fun##_x (svfloat64_t, svfloat64_t, svbool_t);
+  svfloat64_t SV_NAME_D2 (fun) (svfloat64_t, svfloat64_t, svbool_t);
 #else
 #define PL_DECL_SVF1(fun)
 #define PL_DECL_SVF2(fun)

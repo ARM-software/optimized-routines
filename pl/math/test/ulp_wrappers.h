@@ -81,11 +81,6 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #endif
 
-#define SVF1_WRAP(func) static float sv_##func##f(float x) { return svretf(__sv_##func##f_x(svargf(x), svptrue_b32())); }
-#define SVF2_WRAP(func) static float sv_##func##f(float x, float y) { return svretf(__sv_##func##f_x(svargf(x), svargf(y), svptrue_b32())); }
-#define SVD1_WRAP(func) static double sv_##func(double x) { return svretd(__sv_##func##_x(svargd(x), svptrue_b64())); }
-#define SVD2_WRAP(func) static double sv_##func(double x, double y) { return svretd(__sv_##func##_x(svargd(x), svargd(y), svptrue_b64())); }
-
 #define ZSVF1_WRAP(func) static float Z_sv_##func##f(float x) { return svretf(_ZGVsMxv_##func##f(svargf(x), svptrue_b32())); }
 #define ZSVF2_WRAP(func) static float Z_sv_##func##f(float x, float y) { return svretf(_ZGVsMxvv_##func##f(svargf(x), svargf(y), svptrue_b32())); }
 #define ZSVD1_WRAP(func) static double Z_sv_##func(double x) { return svretd(_ZGVsMxv_##func(svargd(x), svptrue_b64())); }
@@ -93,10 +88,10 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #if WANT_SVE_MATH
 
-#define ZSVNF1_WRAP(func) SVF1_WRAP(func) ZSVF1_WRAP(func)
-#define ZSVNF2_WRAP(func) SVF2_WRAP(func) ZSVF2_WRAP(func)
-#define ZSVND1_WRAP(func) SVD1_WRAP(func) ZSVD1_WRAP(func)
-#define ZSVND2_WRAP(func) SVD2_WRAP(func) ZSVD2_WRAP(func)
+#define ZSVNF1_WRAP(func) ZSVF1_WRAP(func)
+#define ZSVNF2_WRAP(func) ZSVF2_WRAP(func)
+#define ZSVND1_WRAP(func) ZSVD1_WRAP(func)
+#define ZSVND2_WRAP(func) ZSVD2_WRAP(func)
 
 #else
 
@@ -117,8 +112,6 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #if WANT_SVE_MATH
 static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
-static float sv_powif(float x, float y) { return svretf(__sv_powif_x(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
 static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
-static double sv_powi(double x, double y) { return svretd(__sv_powi_x(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
 #endif
 // clang-format on

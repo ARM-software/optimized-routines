@@ -36,10 +36,9 @@ zeroinfnan (svuint32_t i, const svbool_t pg)
 /* Fast implementation of SVE atan2f based on atan(x) ~ shift + z + z^3 * P(z^2)
    with reduction to [0,1] using z=1/x and shift = pi/2.
    Maximum observed error is 2.95 ULP:
-   __sv_atan2f(0x1.93836cp+6, 0x1.8cae1p+6) got 0x1.967f06p-1
+   SV_NAME_F2 (atan2)(0x1.93836cp+6, 0x1.8cae1p+6) got 0x1.967f06p-1
 					   want 0x1.967f00p-1.  */
-svfloat32_t
-__sv_atan2f_x (svfloat32_t y, svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x, const svbool_t pg)
 {
   svuint32_t ix = sv_as_u32_f32 (x);
   svuint32_t iy = sv_as_u32_f32 (y);
@@ -81,14 +80,12 @@ __sv_atan2f_x (svfloat32_t y, svfloat32_t x, const svbool_t pg)
   return ret;
 }
 
-PL_ALIAS (__sv_atan2f_x, _ZGVsMxvv_atan2f)
-
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (SV, F, 2, atan2)
-PL_TEST_ULP (__sv_atan2f, 2.45)
-PL_TEST_INTERVAL (__sv_atan2f, -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (__sv_atan2f, -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (__sv_atan2f, 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (__sv_atan2f, 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (__sv_atan2f, 1e6, 1e32, 40000)
+PL_TEST_ULP (SV_NAME_F2 (atan2), 2.45)
+PL_TEST_INTERVAL (SV_NAME_F2 (atan2), -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_F2 (atan2), -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_F2 (atan2), 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_F2 (atan2), 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_F2 (atan2), 1e6, 1e32, 40000)
 #endif

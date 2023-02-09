@@ -22,10 +22,9 @@ __sv_erf_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 
 /* Optimized double precision SVE error function erf.
    Maximum observed error is 2.62 ULP:
-   __sv_erf(0x1.79cab7e3078fap+2) got 0x1.0000000000001p+0
+   SV_NAME_D1 (erf)(0x1.79cab7e3078fap+2) got 0x1.0000000000001p+0
 				 want 0x1.fffffffffffffp-1.  */
-svfloat64_t
-__sv_erf_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
 {
   /* Use top 16 bits to test for special cases and small values.  */
   svuint64_t ix = sv_as_u64_f64 (x);
@@ -88,16 +87,14 @@ __sv_erf_x (svfloat64_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_erf_x, _ZGVsMxv_erf)
-
 PL_SIG (SV, D, 1, erf, -4.0, 4.0)
-PL_TEST_ULP (__sv_erf, 2.13)
-PL_TEST_INTERVAL (__sv_erf, 0, 0x1p-28, 20000)
-PL_TEST_INTERVAL (__sv_erf, 0x1p-28, 1, 60000)
-PL_TEST_INTERVAL (__sv_erf, 1, 0x1p28, 60000)
-PL_TEST_INTERVAL (__sv_erf, 0x1p28, inf, 20000)
-PL_TEST_INTERVAL (__sv_erf, -0, -0x1p-28, 20000)
-PL_TEST_INTERVAL (__sv_erf, -0x1p-28, -1, 60000)
-PL_TEST_INTERVAL (__sv_erf, -1, -0x1p28, 60000)
-PL_TEST_INTERVAL (__sv_erf, -0x1p28, -inf, 20000)
+PL_TEST_ULP (SV_NAME_D1 (erf), 2.13)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), 0, 0x1p-28, 20000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), 0x1p-28, 1, 60000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), 1, 0x1p28, 60000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), 0x1p28, inf, 20000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), -0, -0x1p-28, 20000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), -0x1p-28, -1, 60000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), -1, -0x1p28, 60000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erf), -0x1p28, -inf, 20000)
 #endif

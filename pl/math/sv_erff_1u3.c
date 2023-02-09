@@ -19,13 +19,12 @@ __sv_erff_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
   return sv_call_f32 (erff, x, y, cmp);
 }
 
-svfloat32_t __sv_expf_x (svbool_t, svfloat32_t);
+svfloat32_t SV_NAME_F1 (exp) (svfloat32_t, svbool_t);
 
 /* Optimized single precision vector erf. Worst-case error is 1.25 ULP:
-   __sv_erff(0x1.dc59fap-1) got 0x1.9f9c88p-1
+   SV_NAME_F1 (erf)(0x1.dc59fap-1) got 0x1.9f9c88p-1
 			   want 0x1.9f9c8ap-1.  */
-svfloat32_t
-__sv_erff_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t ix = sv_as_u32_f32 (x);
   svuint32_t atop = svand_n_u32_x (pg, svlsr_n_u32_x (pg, ix, 16), 0x7fff);
@@ -74,7 +73,7 @@ __sv_erff_x (svfloat32_t x, const svbool_t pg)
 
   /* y = |x| + |x| * P(x^2)               if |x| < 0.921875
      y = 1 - exp (-(|x| + |x| * P(|x|)))  otherwise.  */
-  svfloat32_t y = __sv_expf_x (pg, svneg_f32_x (pg, r));
+  svfloat32_t y = SV_NAME_F1 (exp) (svneg_f32_x (pg, r), pg);
   y = svsel_f32 (red, r, svsubr_n_f32_x (pg, y, 1.0));
 
   /* Boring domain (absolute value is required to get the sign of erf(-nan)
@@ -89,16 +88,14 @@ __sv_erff_x (svfloat32_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_erff_x, _ZGVsMxv_erff)
-
 PL_SIG (SV, F, 1, erf, -4.0, 4.0)
-PL_TEST_ULP (__sv_erff, 0.76)
-PL_TEST_INTERVAL (__sv_erff, 0, 0x1p-28, 20000)
-PL_TEST_INTERVAL (__sv_erff, 0x1p-28, 1, 60000)
-PL_TEST_INTERVAL (__sv_erff, 1, 0x1p28, 60000)
-PL_TEST_INTERVAL (__sv_erff, 0x1p28, inf, 20000)
-PL_TEST_INTERVAL (__sv_erff, -0, -0x1p-28, 20000)
-PL_TEST_INTERVAL (__sv_erff, -0x1p-28, -1, 60000)
-PL_TEST_INTERVAL (__sv_erff, -1, -0x1p28, 60000)
-PL_TEST_INTERVAL (__sv_erff, -0x1p28, -inf, 20000)
+PL_TEST_ULP (SV_NAME_F1 (erf), 0.76)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), 0, 0x1p-28, 20000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), 0x1p-28, 1, 60000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), 1, 0x1p28, 60000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), 0x1p28, inf, 20000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), -0, -0x1p-28, 20000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), -0x1p-28, -1, 60000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), -1, -0x1p28, 60000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erf), -0x1p28, -inf, 20000)
 #endif

@@ -23,8 +23,8 @@
 
 #if WANT_SVE_MATH
 
-#define _ZSVF1(fun, a, b) SVF(__sv_##fun##f_x, a, b) SVF(_ZGVsMxv_##fun##f, a, b)
-#define _ZSVD1(f, a, b) SVD(__sv_##f##_x, a, b) SVD(_ZGVsMxv_##f, a, b)
+#define _ZSVF1(fun, a, b) SVF(_ZGVsMxv_##fun##f, a, b)
+#define _ZSVD1(f, a, b) SVD(_ZGVsMxv_##f, a, b)
 
 #else
 
@@ -58,13 +58,9 @@
 {"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 
 #if WANT_SVE_MATH
-{"__sv_atan2f_x",    'f', 's', -10.0, 10.0, {.svf = __sv_atan2f_wrap}},
 {"_ZGVsMxvv_atan2f", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
-{"__sv_atan2_x",     'd', 's', -10.0, 10.0, {.svd = __sv_atan2_wrap}},
 {"_ZGVsM2vv_atan2",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
-{"__sv_powif_x",     'f', 's', -10.0, 10.0, {.svf = __sv_powif_wrap}},
 {"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
-{"__sv_powi_x",      'd', 's', -10.0, 10.0, {.svd = __sv_powi_wrap}},
 {"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
 #endif
   // clang-format on

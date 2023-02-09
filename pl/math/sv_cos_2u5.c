@@ -31,10 +31,9 @@ __sv_cos_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 /* A fast SVE implementation of cos based on trigonometric
    instructions (FTMAD, FTSSEL, FTSMUL).
    Maximum measured error: 2.108 ULPs.
-   __sv_cos(0x1.9b0ba158c98f3p+7) got -0x1.fddd4c65c7f07p-3
+   SV_NAME_D1 (cos)(0x1.9b0ba158c98f3p+7) got -0x1.fddd4c65c7f07p-3
 				 want -0x1.fddd4c65c7f05p-3.  */
-svfloat64_t
-__sv_cos_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
 {
   svfloat64_t n, r, r2, y;
   svbool_t cmp;
@@ -75,10 +74,8 @@ __sv_cos_x (svfloat64_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_cos_x, _ZGVsMxv_cos)
-
 PL_SIG (SV, D, 1, cos, -3.1, 3.1)
-PL_TEST_ULP (__sv_cos, 1.61)
-PL_TEST_INTERVAL (__sv_cos, 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (__sv_cos, 0x1p-4, 0x1p4, 500000)
+PL_TEST_ULP (SV_NAME_D1 (cos), 1.61)
+PL_TEST_INTERVAL (SV_NAME_D1 (cos), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (SV_NAME_D1 (cos), 0x1p-4, 0x1p4, 500000)
 #endif

@@ -37,8 +37,7 @@ zeroinfnan (svuint64_t i, const svbool_t pg)
    x are reasonably close together. The greatest observed error is 2.28 ULP:
    sv_atan2(-0x1.5915b1498e82fp+732, 0x1.54d11ef838826p+732)
    got -0x1.954f42f1fa841p-1 want -0x1.954f42f1fa843p-1.  */
-svfloat64_t
-__sv_atan2_x (svfloat64_t y, svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x, const svbool_t pg)
 {
   svuint64_t ix = sv_as_u64_f64 (x);
   svuint64_t iy = sv_as_u64_f64 (y);
@@ -80,14 +79,12 @@ __sv_atan2_x (svfloat64_t y, svfloat64_t x, const svbool_t pg)
   return ret;
 }
 
-PL_ALIAS (__sv_atan2_x, _ZGVsMxvv_atan2)
-
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (SV, D, 2, atan2)
-PL_TEST_ULP (__sv_atan2, 1.78)
-PL_TEST_INTERVAL (__sv_atan2, -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (__sv_atan2, -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (__sv_atan2, 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (__sv_atan2, 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (__sv_atan2, 1e6, 1e32, 40000)
+PL_TEST_ULP (SV_NAME_D2 (atan2), 1.78)
+PL_TEST_INTERVAL (SV_NAME_D2 (atan2), -10.0, 10.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_D2 (atan2), -1.0, 1.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_D2 (atan2), 0.0, 1.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_D2 (atan2), 1.0, 100.0, 40000)
+PL_TEST_INTERVAL (SV_NAME_D2 (atan2), 1e6, 1e32, 40000)
 #endif

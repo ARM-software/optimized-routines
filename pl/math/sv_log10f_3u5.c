@@ -29,10 +29,9 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 
 /* Optimised implementation of SVE log10f using the same algorithm and
    polynomial as v_log10f. Maximum error is 3.31ulps:
-   __sv_log10f(0x1.555c16p+0) got 0x1.ffe2fap-4
+   SV_NAME_F1 (log10)(0x1.555c16p+0) got 0x1.ffe2fap-4
 			     want 0x1.ffe2f4p-4.  */
-svfloat32_t
-__sv_log10f_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t ix = sv_as_u32_f32 (x);
   svbool_t special_cases
@@ -67,14 +66,12 @@ __sv_log10f_x (svfloat32_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_log10f_x, _ZGVsMxv_log10f)
-
 PL_SIG (SV, F, 1, log10, 0.01, 11.1)
-PL_TEST_ULP (__sv_log10f, 2.82)
-PL_TEST_INTERVAL (__sv_log10f, -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (__sv_log10f, 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (__sv_log10f, 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (__sv_log10f, 0x1p-23, 1.0, 50000)
-PL_TEST_INTERVAL (__sv_log10f, 1.0, 100, 50000)
-PL_TEST_INTERVAL (__sv_log10f, 100, inf, 50000)
+PL_TEST_ULP (SV_NAME_F1 (log10), 2.82)
+PL_TEST_INTERVAL (SV_NAME_F1 (log10), -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (SV_NAME_F1 (log10), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log10), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log10), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log10), 1.0, 100, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log10), 100, inf, 50000)
 #endif

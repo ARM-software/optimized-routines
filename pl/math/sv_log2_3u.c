@@ -27,8 +27,7 @@ specialcase (svfloat64_t x, svfloat64_t y, const svbool_t cmp)
    The maximum observed error is 2.58 ULP:
    __v_log2(0x1.0b556b093869bp+0) got 0x1.fffb34198d9dap-5
 				 want 0x1.fffb34198d9ddp-5.  */
-svfloat64_t
-__sv_log2_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
 {
   svuint64_t ix = sv_as_u64_f64 (x);
   svuint64_t top = svlsr_n_u64_x (pg, ix, 48);
@@ -72,16 +71,14 @@ __sv_log2_x (svfloat64_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_log2_x, _ZGVsMxv_log2)
-
 PL_SIG (SV, D, 1, log2, 0.01, 11.1)
-PL_TEST_ULP (__sv_log2, 2.09)
-PL_TEST_EXPECT_FENV_ALWAYS (__sv_log2)
-PL_TEST_INTERVAL (__sv_log2, -0.0, -0x1p126, 1000)
-PL_TEST_INTERVAL (__sv_log2, 0.0, 0x1p-126, 4000)
-PL_TEST_INTERVAL (__sv_log2, 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (__sv_log2, 0x1p-23, 1.0, 50000)
-PL_TEST_INTERVAL (__sv_log2, 1.0, 100, 50000)
-PL_TEST_INTERVAL (__sv_log2, 100, inf, 50000)
+PL_TEST_ULP (SV_NAME_D1 (log2), 2.09)
+PL_TEST_EXPECT_FENV_ALWAYS (SV_NAME_D1 (log2))
+PL_TEST_INTERVAL (SV_NAME_D1 (log2), -0.0, -0x1p126, 1000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log2), 0.0, 0x1p-126, 4000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log2), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log2), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log2), 1.0, 100, 50000)
+PL_TEST_INTERVAL (SV_NAME_D1 (log2), 100, inf, 50000)
 
 #endif

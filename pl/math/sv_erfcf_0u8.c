@@ -13,7 +13,7 @@
 
 #define P __erfcf_poly_data.poly_T
 
-svfloat64_t __sv_exp_x (svbool_t, svfloat64_t);
+svfloat64_t SV_NAME_D1 (exp) (svfloat64_t, svbool_t);
 
 static NOINLINE svfloat32_t
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -121,9 +121,9 @@ sv_approx_erfcf (svfloat32_t abs_x, svuint32_t sign, svuint32_t ia12,
   svfloat64_t poly_hi = sv_eval_poly_estrin (pg_hi, hi, idx_hi);
 
   svfloat64_t exp_mx2_lo
-    = __sv_exp_x (pg_lo, svneg_f64_x (pg_lo, svmul_f64_x (pg, lo, lo)));
+    = SV_NAME_D1 (exp) (svneg_f64_x (pg_lo, svmul_f64_x (pg, lo, lo)), pg_lo);
   svfloat64_t exp_mx2_hi
-    = __sv_exp_x (pg_hi, svneg_f64_x (pg_hi, svmul_f64_x (pg, hi, hi)));
+    = SV_NAME_D1 (exp) (svneg_f64_x (pg_hi, svmul_f64_x (pg, hi, hi)), pg_lo);
 
   lo = svmul_f64_x (pg_lo, poly_lo, exp_mx2_lo);
   hi = svmul_f64_x (pg_hi, poly_hi, exp_mx2_hi);
@@ -141,10 +141,9 @@ sv_approx_erfcf (svfloat32_t abs_x, svuint32_t sign, svuint32_t ia12,
 /* Optimized single-precision vector complementary error function
    erfcf. Max measured error: 0.75 ULP. Greatest errors observed between -2^23
    and -2^17, for example:
-   __sv_erfcf(-0x1.6b5a36p-18) got 0x1.000068p+0
+   SV_NAME_F1 (erfc)(-0x1.6b5a36p-18) got 0x1.000068p+0
 			      want 0x1.000066p+0.  */
-svfloat32_t
-__sv_erfcf_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t ix = sv_as_u32_f32 (x);
   svuint32_t ia = svand_n_u32_x (pg, ix, 0x7fffffff);
@@ -178,16 +177,14 @@ __sv_erfcf_x (svfloat32_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_erfcf_x, _ZGVsMxv_erfcf)
-
 PL_SIG (SV, F, 1, erfc, -4.0, 10.0)
-PL_TEST_ULP (__sv_erfcf, 0.26)
-PL_TEST_INTERVAL (__sv_erfcf, 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (__sv_erfcf, 0x1p-127, 0x1p-26, 40000)
-PL_TEST_INTERVAL (__sv_erfcf, -0x1p-127, -0x1p-26, 40000)
-PL_TEST_INTERVAL (__sv_erfcf, 0x1p-26, 0x1p5, 40000)
-PL_TEST_INTERVAL (__sv_erfcf, -0x1p-26, -0x1p3, 40000)
-PL_TEST_INTERVAL (__sv_erfcf, 0, inf, 40000)
-PL_TEST_INTERVAL (__sv_erfcf, -0, -inf, 40000)
+PL_TEST_ULP (SV_NAME_F1 (erfc), 0.26)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), 0x1p-127, 0x1p-26, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), -0x1p-127, -0x1p-26, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), 0x1p-26, 0x1p5, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), -0x1p-26, -0x1p3, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), 0, inf, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (erfc), -0, -inf, 40000)
 
 #endif // SV_SUPPORTED

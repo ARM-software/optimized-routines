@@ -17,8 +17,6 @@
 #define BigBound 0x432	 /* 0x1p+51.  */
 #define ThirtyTwo 0x404	 /* 32.  */
 
-svfloat64_t __sv_exp_x (svfloat64_t, svbool_t);
-
 static NOINLINE svfloat64_t
 specialcase (svfloat64_t x, svfloat64_t y, svbool_t special)
 {
@@ -85,10 +83,9 @@ sv_eval_gauss (const svbool_t pg, svfloat64_t abs_x)
 
 /* Optimized double precision vector complementary error function erfc.
    Maximum measured error is 3.64 ULP:
-   __sv_erfc(0x1.4792573ee6cc7p+2) got 0x1.ff3f4c8e200d5p-42
+   SV_NAME_D1 (erfc)(0x1.4792573ee6cc7p+2) got 0x1.ff3f4c8e200d5p-42
 				  want 0x1.ff3f4c8e200d9p-42.  */
-svfloat64_t
-__sv_erfc_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (erfc) (svfloat64_t x, const svbool_t pg)
 {
   svuint64_t ix = sv_as_u64_f64 (x);
   svfloat64_t abs_x = svabs_f64_x (pg, x);
@@ -140,17 +137,15 @@ __sv_erfc_x (svfloat64_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_erfc_x, _ZGVsMxv_erfc)
-
 PL_SIG (SV, D, 1, erfc, -4.0, 10.0)
-PL_TEST_ULP (__sv_erfc, 3.15)
-PL_TEST_INTERVAL (__sv_erfc, 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (__sv_erfc, 0, 0x1p-50, 40000)
-PL_TEST_INTERVAL (__sv_erfc, -0, -0x1p-50, 40000)
-PL_TEST_INTERVAL (__sv_erfc, 0x1p-50, 32, 40000)
-PL_TEST_INTERVAL (__sv_erfc, -0x1p-50, -32, 40000)
-PL_TEST_INTERVAL (__sv_erfc, 32, 0x1p51, 40000)
-PL_TEST_INTERVAL (__sv_erfc, -32, -0x1p51, 40000)
-PL_TEST_INTERVAL (__sv_erfc, 0x1p51, inf, 40000)
-PL_TEST_INTERVAL (__sv_erfc, -0x1p51, -inf, 40000)
+PL_TEST_ULP (SV_NAME_D1 (erfc), 3.15)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 0, 0x1p-50, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), -0, -0x1p-50, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 0x1p-50, 32, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), -0x1p-50, -32, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 32, 0x1p51, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), -32, -0x1p51, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 0x1p51, inf, 40000)
+PL_TEST_INTERVAL (SV_NAME_D1 (erfc), -0x1p51, -inf, 40000)
 #endif

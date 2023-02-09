@@ -47,14 +47,13 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
    SV_EXPF_USE_FEXPA.
 
    Worst-case error of the default algorithm is 1.95 ulp:
-   __sv_expf(-0x1.4cb74ap+2) got 0x1.6a022cp-8
+   SV_NAME_F1 (exp)(-0x1.4cb74ap+2) got 0x1.6a022cp-8
 			     want 0x1.6a023p-8.
 
    Worst-case error when using FEXPA is 1.04 ulp:
-   __sv_expf(0x1.a8eda4p+1) got 0x1.ba74bcp+4
+   SV_NAME_F1 (exp)(0x1.a8eda4p+1) got 0x1.ba74bcp+4
 			   want 0x1.ba74bap+4.  */
-svfloat32_t
-__sv_expf_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 {
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
@@ -98,16 +97,14 @@ __sv_expf_x (svfloat32_t x, const svbool_t pg)
   return sv_fma_f32_x (pg, poly, scale, scale);
 }
 
-PL_ALIAS (__sv_expf_x, _ZGVsMxv_expf)
-
 PL_SIG (SV, F, 1, exp, -9.9, 9.9)
-PL_TEST_ULP (__sv_expf, 1.46)
-PL_TEST_INTERVAL (__sv_expf, 0, 0x1p-23, 40000)
-PL_TEST_INTERVAL (__sv_expf, 0x1p-23, 1, 50000)
-PL_TEST_INTERVAL (__sv_expf, 1, 0x1p23, 50000)
-PL_TEST_INTERVAL (__sv_expf, 0x1p23, inf, 50000)
-PL_TEST_INTERVAL (__sv_expf, -0, -0x1p-23, 40000)
-PL_TEST_INTERVAL (__sv_expf, -0x1p-23, -1, 50000)
-PL_TEST_INTERVAL (__sv_expf, -1, -0x1p23, 50000)
-PL_TEST_INTERVAL (__sv_expf, -0x1p23, -inf, 50000)
+PL_TEST_ULP (SV_NAME_F1 (exp), 1.46)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), 0, 0x1p-23, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), 0x1p-23, 1, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), 1, 0x1p23, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), 0x1p23, inf, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), -0, -0x1p-23, 40000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), -0x1p-23, -1, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), -1, -0x1p23, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (exp), -0x1p23, -inf, 50000)
 #endif // SV_SUPPORTED

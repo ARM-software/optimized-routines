@@ -13,7 +13,7 @@
    importance than performance, hence we provide no estimate for worst-case
    error.  */
 svfloat64_t
-__sv_powi_x (svfloat64_t as, svint64_t ns, svbool_t p)
+_ZGVsMxvv_powk (svfloat64_t as, svint64_t ns, svbool_t p)
 {
   /* Compute powi by successive squaring, right to left.  */
   svfloat64_t acc = svdup_n_f64 (1.0);
@@ -47,7 +47,5 @@ __sv_powi_x (svfloat64_t as, svint64_t ns, svbool_t p)
 
   return acc;
 }
-
-strong_alias (__sv_powi_x, _ZGVsMxvv_powk)
 
 #endif // SV_SUPPORTED

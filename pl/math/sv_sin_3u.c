@@ -30,10 +30,9 @@ __sv_sin_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 /* A fast SVE implementation of sin based on trigonometric
    instructions (FTMAD, FTSSEL, FTSMUL).
    Maximum observed error in 2.52 ULP:
-   __sv_sin(0x1.2d2b00df69661p+19) got 0x1.10ace8f3e786bp-40
+   SV_NAME_D1 (sin)(0x1.2d2b00df69661p+19) got 0x1.10ace8f3e786bp-40
 				  want 0x1.10ace8f3e7868p-40.  */
-svfloat64_t
-__sv_sin_x (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 {
   svfloat64_t n, r, r2, y;
   svuint64_t sign;
@@ -80,10 +79,8 @@ __sv_sin_x (svfloat64_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_sin_x, _ZGVsMxv_sin)
-
 PL_SIG (SV, D, 1, sin, -3.1, 3.1)
-PL_TEST_ULP (__sv_sin, 2.03)
-PL_TEST_INTERVAL (__sv_sin, 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (__sv_sin, 0x1p-4, 0x1p4, 500000)
+PL_TEST_ULP (SV_NAME_D1 (sin), 2.03)
+PL_TEST_INTERVAL (SV_NAME_D1 (sin), 0, 0xffff0000, 10000)
+PL_TEST_INTERVAL (SV_NAME_D1 (sin), 0x1p-4, 0x1p4, 500000)
 #endif

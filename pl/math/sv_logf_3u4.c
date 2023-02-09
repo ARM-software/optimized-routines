@@ -30,10 +30,9 @@ __sv_logf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 
 /* Optimised implementation of SVE logf, using the same algorithm and polynomial
    as the Neon routine in math/. Maximum error is 3.34 ULPs:
-   __sv_logf(0x1.557298p+0) got 0x1.26edecp-2
+   SV_NAME_F1 (log)(0x1.557298p+0) got 0x1.26edecp-2
 			   want 0x1.26ede6p-2.  */
-svfloat32_t
-__sv_logf_x (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t u = sv_as_u32_f32 (x);
   svbool_t cmp
@@ -64,14 +63,12 @@ __sv_logf_x (svfloat32_t x, const svbool_t pg)
   return y;
 }
 
-PL_ALIAS (__sv_logf_x, _ZGVsMxv_logf)
-
 PL_SIG (SV, F, 1, log, 0.01, 11.1)
-PL_TEST_ULP (__sv_logf, 2.85)
-PL_TEST_INTERVAL (__sv_logf, -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (__sv_logf, 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (__sv_logf, 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (__sv_logf, 0x1p-23, 1.0, 50000)
-PL_TEST_INTERVAL (__sv_logf, 1.0, 100, 50000)
-PL_TEST_INTERVAL (__sv_logf, 100, inf, 50000)
+PL_TEST_ULP (SV_NAME_F1 (log), 2.85)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), -0.0, -0x1p126, 100)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), 1.0, 100, 50000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), 100, inf, 50000)
 #endif // SV_SUPPORTED

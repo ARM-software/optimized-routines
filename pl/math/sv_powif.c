@@ -13,7 +13,7 @@
    importance than performance, hence we provide no estimate for worst-case
    error.  */
 svfloat32_t
-__sv_powif_x (svfloat32_t as, svint32_t ns, svbool_t p)
+_ZGVsMxvv_powi (svfloat32_t as, svint32_t ns, svbool_t p)
 {
   /* Compute powi by successive squaring, right to left.  */
   svfloat32_t acc = svdup_n_f32 (1.f);
@@ -47,8 +47,5 @@ __sv_powif_x (svfloat32_t as, svint32_t ns, svbool_t p)
 
   return acc;
 }
-
-/* Note no trailing f for ZGV... name - 64-bit integer version is powk.  */
-strong_alias (__sv_powif_x, _ZGVsMxvv_powi)
 
 #endif // SV_SUPPORTED
