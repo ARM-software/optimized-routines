@@ -529,6 +529,31 @@ extern const struct v_log10_data
 #define V_LOG10F_POLY_ORDER 9
 extern const float __v_log10f_poly[V_LOG10F_POLY_ORDER - 1] HIDDEN;
 
+/* Some data for SVE pow's internal exp and log.  */
+#define SV_POW_EXP_TABLE_BITS 8
+#define SV_POW_EXP_POLY_ORDER 4
+extern const struct sv_pow_exp_data
+{
+  double invln2N;
+  double shift;
+  double negln2hiN;
+  double negln2loN;
+  double poly[4]; /* Last four coefficients.  */
+  uint64_t sbits[1 << SV_POW_EXP_TABLE_BITS];
+} __sv_pow_exp_data HIDDEN;
+
+#define SV_POW_LOG_TABLE_BITS 7
+#define SV_POW_LOG_POLY_ORDER 8
+extern const struct sv_pow_log_data
+{
+  double ln2hi;
+  double ln2lo;
+  double poly[SV_POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
+  double invc[1 << SV_POW_LOG_TABLE_BITS];
+  double logc[1 << SV_POW_LOG_TABLE_BITS];
+  double logctail[1 << SV_POW_LOG_TABLE_BITS];
+} __sv_pow_log_data HIDDEN;
+
 #define SV_LOGF_POLY_ORDER 8
 extern const float __sv_logf_poly[SV_LOGF_POLY_ORDER - 1] HIDDEN;
 

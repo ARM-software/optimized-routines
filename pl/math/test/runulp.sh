@@ -27,7 +27,13 @@ t() {
 	extra_flags=""
 	[[ -z "${5:-}" ]] || extra_flags="$extra_flags -c $5"
 	grep -q "^$key$" $FENV || extra_flags="$extra_flags -f"
-	$emu ./ulp -e $L $flags ${extra_flags} $1 $2 $3 $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
+	IFS=',' read -ra LO <<< "$2"
+	IFS=',' read -ra HI <<< "$3"
+	ITV="${LO[0]} ${HI[0]}"
+	for i in "${!LO[@]}"; do
+	[[ "$i" -eq "0" ]] || ITV="$ITV x ${LO[$i]} ${HI[$i]}"
+	done
+	$emu ./ulp -e $L $flags ${extra_flags} $1 $ITV $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
 }
 
 check() {

@@ -67,4 +67,22 @@ _Z_sv_powk_wrap (sv_double x, sv_bool pg)
   return _ZGVsMxvv_powk (x, svcvt_s64_f64_x (pg, x), pg);
 }
 
+static sv_double
+xy_Z_sv_pow (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_pow (x, x, pg);
+}
+
+static sv_double
+x_Z_sv_pow (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_pow (x, svdup_n_f64 (23.4), pg);
+}
+
+static sv_double
+y_Z_sv_pow (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_pow (svdup_n_f64 (2.34), x, pg);
+}
+
 #endif // WANT_SVE_MATH
