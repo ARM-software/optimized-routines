@@ -59,7 +59,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 				 want 0x1.edbbedf8a7d6cp-1.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (acos) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -72,7 +72,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acos) (float64x2_t x)
   ix = vbslq_u64 (x < MOne, v_u64 (0), ix);
 #endif
 
-  float64x2_t ax = v_as_f64_u64 (ia);
+  float64x2_t ax = vreinterpretq_f64_u64 (ia);
   uint64x2_t a_le_half = ia <= Halfu;
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
@@ -93,8 +93,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acos) (float64x2_t x)
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  float64x2_t y
-    = v_as_f64_u64 (vbslq_u64 (v_u64 (AbsMask), v_as_u64_f64 (p), ix));
+  float64x2_t y = vreinterpretq_f64_u64 (
+    vbslq_u64 (v_u64 (AbsMask), vreinterpretq_u64_f64 (p), ix));
 
   uint64x2_t sign = x < 0;
   float64x2_t off = vbslq_f64 (sign, Pi, v_f64 (0.0));

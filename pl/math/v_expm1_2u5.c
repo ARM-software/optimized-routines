@@ -50,7 +50,7 @@ eval_poly (float64x2_t f, float64x2_t f2)
 VPCS_ATTR
 float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t ax = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -85,7 +85,7 @@ float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
   /* Assemble the result.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
-  float64x2_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
+  float64x2_t t = vreinterpretq_f64_u64 (vreinterpretq_u64_s64 (i << 52) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
   float64x2_t y = vfmaq_f64 (t - 1, p, t);
 

@@ -54,12 +54,12 @@ float64x2_t V_NAME_D1 (erf) (float64x2_t x)
   /* Handle both inf/nan as well as small values (|x|<2^-28)
      If any condition in the lane is true then a loop over
      scalar calls will be performed.  */
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t atop = (ix >> 48) & v_u64 (0x7fff);
   uint64x2_t special_case = atop - v_u64 (0x3e30) >= v_u64 (0x7ff0 - 0x3e30);
 
   /* Get sign and absolute value.  */
-  uint64x2_t sign = v_as_u64_f64 (x) & ~AbsMask;
+  uint64x2_t sign = vreinterpretq_u64_f64 (x) & ~AbsMask;
   float64x2_t a = vminq_f64 (vabsq_f64 (x), AbsXMax);
 
   /* Compute index by truncating 8 * a with a=|x| saturated to 6.0.  */
@@ -84,7 +84,7 @@ float64x2_t V_NAME_D1 (erf) (float64x2_t x)
   y = vfmaq_f64 (r1, z2, y);
 
   /* y=erf(x) if x>0, -erf(-x) otherwise.  */
-  y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);
+  y = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (y) ^ sign);
 
   if (unlikely (v_any_u64 (special_case)))
     return specialcase (x, y, special_case);

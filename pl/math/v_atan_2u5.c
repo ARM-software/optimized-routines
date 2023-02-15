@@ -27,7 +27,7 @@ float64x2_t V_NAME_D1 (atan) (float64x2_t x)
   /* Small cases, infs and nans are supported by our approximation technique,
      but do not set fenv flags correctly. Only trigger special case if we need
      fenv.  */
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t sign = ix & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -54,7 +54,7 @@ float64x2_t V_NAME_D1 (atan) (float64x2_t x)
   float64x2_t y = eval_poly (z, az, shift);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
-  y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);
+  y = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (y) ^ sign);
   return y;
 }
 

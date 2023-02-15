@@ -39,7 +39,7 @@ expm1_inline (float64x2_t x)
   float64x2_t p = vfmaq_f64 (f, f2, ESTRIN_10 (f, f2, f4, f4 * f4, C));
 
   /* t = 2 ^ i.  */
-  float64x2_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
+  float64x2_t t = vreinterpretq_f64_u64 (vreinterpretq_u64_s64 (i << 52) + One);
   /* expm1(x) = p * t + (t - 1).  */
   return vfmaq_f64 (t - 1, p, t);
 }
@@ -56,7 +56,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 				  want -0x1.ba31ba4691ab4p-3.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (tanh) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
 
   /* Trigger special-cases for tiny, boring and infinity/NaN.  */

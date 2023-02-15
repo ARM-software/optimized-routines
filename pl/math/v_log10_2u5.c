@@ -57,7 +57,7 @@ float64x2_t V_NAME_D1 (log10) (float64x2_t x)
   int64x2_t k;
   struct entry e;
 
-  ix = v_as_u64_f64 (x);
+  ix = vreinterpretq_u64_f64 (x);
   cmp = ix - TinyBound >= BigBound - TinyBound;
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
@@ -65,9 +65,9 @@ float64x2_t V_NAME_D1 (log10) (float64x2_t x)
      The ith subinterval contains z and c is near its center.  */
   tmp = ix - OFF;
   i = (tmp >> (52 - V_LOG10_TABLE_BITS)) % N;
-  k = v_as_s64_u64 (tmp) >> 52; /* arithmetic shift.  */
+  k = vreinterpretq_s64_u64 (tmp) >> 52; /* arithmetic shift.  */
   iz = ix - (tmp & v_u64 (0xfffULL << 52));
-  z = v_as_f64_u64 (iz);
+  z = vreinterpretq_f64_u64 (iz);
   e = lookup (i);
 
   /* log10(x) = log1p(z/c-1)/log(10) + log10(c) + k*log10(2).  */

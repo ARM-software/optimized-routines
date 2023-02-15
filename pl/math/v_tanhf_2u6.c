@@ -28,11 +28,11 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 			  want 0x1.f9ba08p-5.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
   uint32x4_t sign = ix & ~AbsMask;
   uint32x4_t is_boring = iax > BoringBound;
-  float32x4_t boring = v_as_f32_u32 (sign | One);
+  float32x4_t boring = vreinterpretq_f32_u32 (sign | One);
 
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered properly, set all special and boring
@@ -46,7 +46,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
 #endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
-  float32x4_t q = expm1f_inline (2 * v_as_f32_u32 (ix));
+  float32x4_t q = expm1f_inline (2 * vreinterpretq_f32_u32 (ix));
   float32x4_t y = q / (q + 2);
   y = vbslq_f32 (is_boring, boring, y);
   if (unlikely (v_any_u32 (special)))

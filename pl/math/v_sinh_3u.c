@@ -38,7 +38,7 @@ expm1_inline (float64x2_t x)
   float64x2_t f2 = f * f, f4 = f2 * f2, f8 = f4 * f4;
   float64x2_t p = vfmaq_f64 (f, f2, ESTRIN_10 (f, f2, f4, f8, C));
   /* t = 2^i.  */
-  float64x2_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
+  float64x2_t t = vreinterpretq_f64_u64 (vreinterpretq_u64_s64 (i << 52) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
   return vfmaq_f64 (t - 1, p, t);
 }
@@ -56,11 +56,11 @@ special_case (float64x2_t x)
 			     want 0x1.ab34e59d678d9p-2.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (sinh) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
-  float64x2_t ax = v_as_f64_u64 (iax);
+  float64x2_t ax = vreinterpretq_f64_u64 (iax);
   uint64x2_t sign = ix & ~AbsMask;
-  float64x2_t halfsign = v_as_f64_u64 (sign | Half);
+  float64x2_t halfsign = vreinterpretq_f64_u64 (sign | Half);
 
 #if WANT_SIMD_EXCEPT
   uint64x2_t special = (iax - TinyBound) >= (BigBound - TinyBound);

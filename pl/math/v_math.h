@@ -145,57 +145,6 @@ v_any_u32 (uint32x4_t x)
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
 }
-/* reinterpret as type1 from type2.  */
-static inline uint32x4_t
-v_as_u32_f32 (float32x4_t x)
-{
-  union
-  {
-    float32x4_t f;
-    uint32x4_t u;
-  } r = {x};
-  return r.u;
-}
-static inline int32x4_t
-v_as_s32_f32 (float32x4_t x)
-{
-  union
-  {
-    float32x4_t f;
-    int32x4_t u;
-  } r = {x};
-  return r.u;
-}
-static inline float32x4_t
-v_as_f32_u32 (uint32x4_t x)
-{
-  union
-  {
-    uint32x4_t u;
-    float32x4_t f;
-  } r = {x};
-  return r.f;
-}
-static inline int32x4_t
-v_as_s32_u32 (uint32x4_t x)
-{
-  union
-  {
-    uint32x4_t u;
-    int32x4_t i;
-  } r = {x};
-  return r.i;
-}
-static inline uint32x4_t
-v_as_u32_s32 (int32x4_t x)
-{
-  union
-  {
-    int32x4_t i;
-    uint32x4_t u;
-  } r = {x};
-  return r.u;
-}
 static inline float32x4_t
 v_lookup_f32 (const f32_t *tab, uint32x4_t idx)
 {
@@ -265,47 +214,6 @@ v_all_u64 (uint64x2_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_s64 (vreinterpretq_s64_u64 (x)) == -2;
-}
-/* reinterpret as type1 from type2.  */
-static inline uint64x2_t
-v_as_u64_f64 (float64x2_t x)
-{
-  union
-  {
-    float64x2_t f;
-    uint64x2_t u;
-  } r = {x};
-  return r.u;
-}
-static inline float64x2_t
-v_as_f64_u64 (uint64x2_t x)
-{
-  union
-  {
-    uint64x2_t u;
-    float64x2_t f;
-  } r = {x};
-  return r.f;
-}
-static inline int64x2_t
-v_as_s64_u64 (uint64x2_t x)
-{
-  union
-  {
-    uint64x2_t u;
-    int64x2_t i;
-  } r = {x};
-  return r.i;
-}
-static inline uint64x2_t
-v_as_u64_s64 (int64x2_t x)
-{
-  union
-  {
-    int64x2_t i;
-    uint64x2_t u;
-  } r = {x};
-  return r.u;
 }
 static inline float64x2_t
 v_lookup_f64 (const f64_t *tab, uint64x2_t idx)

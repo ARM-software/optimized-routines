@@ -34,7 +34,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
 			    want 0x1.255d92p+10.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
 
   /* Subnormal, +/-0 and special values.  */
@@ -43,8 +43,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
   /* Decompose |x| into m * 2^e, where m is in [0.5, 1.0]. This is a vector
      version of frexpf, which gets subnormal values wrong - these have to be
      special-cased as a result.  */
-  float32x4_t m = v_as_f32_u32 ((iax & MantissaMask) | HalfExp);
-  int32x4_t e = v_as_s32_u32 (iax >> 23) - 126;
+  float32x4_t m = vreinterpretq_f32_u32 ((iax & MantissaMask) | HalfExp);
+  int32x4_t e = vreinterpretq_s32_u32 (iax >> 23) - 126;
 
   /* p is a rough approximation for cbrt(m) in [0.5, 1.0]. The better this is,
      the less accurate the next stage of the algorithm needs to be. An order-4
@@ -73,12 +73,14 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
      cbrt(x) = cbrt(m) * t * 2 ^ round(e / 3) * sign.  */
 
   int32x4_t ey = e / 3;
-  float32x4_t my = a * T (v_as_u32_s32 (e % 3 + 2));
+  float32x4_t my = a * T (vreinterpretq_u32_s32 (e % 3 + 2));
 
   /* Vector version of ldexpf.  */
-  float32x4_t y = v_as_f32_u32 ((v_as_u32_s32 (ey + 127) << 23)) * my;
+  float32x4_t y
+    = vreinterpretq_f32_u32 ((vreinterpretq_u32_s32 (ey + 127) << 23)) * my;
   /* Copy sign.  */
-  y = v_as_f32_u32 (vbslq_u32 (SignMask, ix, v_as_u32_f32 (y)));
+  y = vreinterpretq_f32_u32 (
+    vbslq_u32 (SignMask, ix, vreinterpretq_u32_f32 (y)));
 
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, y, special);

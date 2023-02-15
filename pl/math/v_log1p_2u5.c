@@ -44,7 +44,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
 				    want 0x1.fd5565fb590f6p+2 .  */
 VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t ia = ix & AbsMask;
   uint64x2_t special = (ia >= v_u64 (0x7ff0000000000000))
 		       | (ix >= 0xbff0000000000000)
@@ -71,16 +71,16 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
      u_red. We stay in double-width to obtain f and k, using the same constants
      as the scalar algorithm but shifted left by 32.  */
   float64x2_t m = x + 1;
-  uint64x2_t mi = v_as_u64_f64 (m);
+  uint64x2_t mi = vreinterpretq_u64_f64 (m);
   uint64x2_t u = mi + OneMHfRt2Top;
 
-  int64x2_t ki = v_as_s64_u64 (u >> 52) - OneTop12;
+  int64x2_t ki = vreinterpretq_s64_u64 (u >> 52) - OneTop12;
   float64x2_t k = vcvtq_f64_s64 (ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
   uint64x2_t utop = (u & 0x000fffff00000000) + HfRt2Top;
   uint64x2_t u_red = utop | (mi & BottomMask);
-  float64x2_t f = v_as_f64_u64 (u_red) - 1;
+  float64x2_t f = vreinterpretq_f64_u64 (u_red) - 1;
 
   /* Correction term c/m.  */
   float64x2_t cm = (x - (m - 1)) / m;
@@ -98,7 +98,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
   float64x2_t y = vfmaq_f64 (ylo + yhi, f * f, p);
 
   if (unlikely (v_any_u64 (special)))
-    return specialcase (v_as_f64_u64 (ix), y, special);
+    return specialcase (vreinterpretq_f64_u64 (ix), y, special);
 
   return y;
 }

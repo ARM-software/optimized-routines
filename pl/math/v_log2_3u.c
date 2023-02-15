@@ -50,7 +50,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 VPCS_ATTR
 float64x2_t V_NAME_D1 (log2) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t special = ix - TinyBound >= BigBound - TinyBound;
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
@@ -58,9 +58,9 @@ float64x2_t V_NAME_D1 (log2) (float64x2_t x)
      The ith subinterval contains z and c is near its center.  */
   uint64x2_t tmp = ix - OFF;
   uint64x2_t i = (tmp >> (52 - V_LOG2_TABLE_BITS)) % N;
-  int64x2_t k = v_as_s64_u64 (tmp) >> 52; /* arithmetic shift.  */
+  int64x2_t k = vreinterpretq_s64_u64 (tmp) >> 52; /* arithmetic shift.  */
   uint64x2_t iz = ix - (tmp & v_u64 (0xfffULL << 52));
-  float64x2_t z = v_as_f64_u64 (iz);
+  float64x2_t z = vreinterpretq_f64_u64 (iz);
   struct entry e = lookup (i);
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */

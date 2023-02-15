@@ -34,7 +34,7 @@ specialcase (float64x2_t x)
 VPCS_ATTR
 float64x2_t V_NAME_D1 (tan) (float64x2_t x)
 {
-  uint64x2_t iax = v_as_u64_f64 (x) & AbsMask;
+  uint64x2_t iax = vreinterpretq_u64_f64 (x) & AbsMask;
 
   /* Our argument reduction cannot calculate q with sufficient accuracy for very
      large inputs. Fall back to scalar routine for all lanes if any are too
@@ -82,7 +82,7 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
   float64x2_t n = vfmaq_f64 (v_f64 (-1), p, p);
   float64x2_t d = p * 2;
 
-  uint64x2_t use_recip = (v_as_u64_s64 (qi) & 1) == 0;
+  uint64x2_t use_recip = (vreinterpretq_u64_s64 (qi) & 1) == 0;
 
   return vbslq_f64 (use_recip, -d, n) / vbslq_f64 (use_recip, n, d);
 }

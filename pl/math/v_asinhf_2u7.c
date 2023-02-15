@@ -28,10 +28,10 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
    __v_asinhf(0x1.01b04p-2) got 0x1.fe163ep-3 want 0x1.fe1638p-3.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t iax = ix & ~SignMask;
   uint32x4_t sign = ix & SignMask;
-  float32x4_t ax = v_as_f32_u32 (iax);
+  float32x4_t ax = vreinterpretq_f32_u32 (iax);
   uint32x4_t special = iax >= BigBound;
 
 #if WANT_SIMD_EXCEPT
@@ -46,7 +46,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
      For positive x, asinh(x) = log1p(x + x * x / (1 + sqrt(x * x + 1))).  */
   float32x4_t d = One + vsqrtq_f32 (ax * ax + One);
   float32x4_t y = log1pf_inline (ax + ax * ax / d);
-  y = v_as_f32_u32 (sign | v_as_u32_f32 (y));
+  y = vreinterpretq_f32_u32 (sign | vreinterpretq_u32_f32 (y));
 
   if (unlikely (v_any_u32 (special)))
     return specialcase (x, y, special);

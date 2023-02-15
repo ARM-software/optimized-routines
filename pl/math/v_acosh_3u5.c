@@ -26,7 +26,7 @@ special_case (float64x2_t x)
 				  want 0x1.f2d6d823bc9e2p-5.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
 {
-  uint64x2_t itop = v_as_u64_f64 (x) >> 52;
+  uint64x2_t itop = vreinterpretq_u64_f64 (x) >> 52;
   uint64x2_t special = (itop - OneTop) >= (BigBoundTop - OneTop);
 
   /* Fall back to scalar routine for all lanes if any of them are special.  */

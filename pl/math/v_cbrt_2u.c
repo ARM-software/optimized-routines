@@ -35,7 +35,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t special)
 				 want 0x1.965fe72821e99p+0.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
   uint64x2_t ia12 = iax >> 52;
 
@@ -45,8 +45,9 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
   /* Decompose |x| into m * 2^e, where m is in [0.5, 1.0]. This is a vector
      version of frexp, which gets subnormal values wrong - these have to be
      special-cased as a result.  */
-  float64x2_t m = v_as_f64_u64 (vbslq_u64 (MantissaMask, iax, HalfExp));
-  int64x2_t e = v_as_s64_u64 (iax >> 52) - 1022;
+  float64x2_t m
+    = vreinterpretq_f64_u64 (vbslq_u64 (MantissaMask, iax, HalfExp));
+  int64x2_t e = vreinterpretq_s64_u64 (iax >> 52) - 1022;
 
   /* Calculate rough approximation for cbrt(m) in [0.5, 1.0], starting point for
      Newton iterations.  */
@@ -75,12 +76,14 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
      cbrt(x) = cbrt(m) * t * 2 ^ round(e / 3) * sign.  */
 
   int64x2_t ey = e / 3;
-  float64x2_t my = a * T (v_as_u64_s64 (e % 3 + 2));
+  float64x2_t my = a * T (vreinterpretq_u64_s64 (e % 3 + 2));
 
   /* Vector version of ldexp.  */
-  float64x2_t y = v_as_f64_u64 ((v_as_u64_s64 (ey + 1023) << 52)) * my;
+  float64x2_t y
+    = vreinterpretq_f64_u64 ((vreinterpretq_u64_s64 (ey + 1023) << 52)) * my;
   /* Copy sign.  */
-  y = v_as_f64_u64 (vbslq_u64 (v_u64 (AbsMask), v_as_u64_f64 (y), ix));
+  y = vreinterpretq_f64_u64 (
+    vbslq_u64 (v_u64 (AbsMask), vreinterpretq_u64_f64 (y), ix));
 
   if (unlikely (v_any_u64 (special)))
     return specialcase (x, y, special);

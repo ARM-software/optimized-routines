@@ -23,12 +23,12 @@
 			   want 0x1.ffcb82p-5.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   float32x4_t halfsign
-    = v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_u32 (Half), ix));
+    = vreinterpretq_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_u32 (Half), ix));
   uint32x4_t iax = ix & AbsMask;
 
-  float32x4_t ax = v_as_f32_u32 (iax);
+  float32x4_t ax = vreinterpretq_f32_u32 (iax);
 
 #if WANT_SIMD_EXCEPT
   uint32x4_t special = (iax >= One) | (iax <= TinyBound);

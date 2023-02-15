@@ -24,9 +24,9 @@ float32x4_t __v_expf (float32x4_t);
    __v_coshf(0x1.e8001ep+1) got 0x1.6a491ep+4 want 0x1.6a4922p+4.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
-  float32x4_t ax = v_as_f32_u32 (iax);
+  float32x4_t ax = vreinterpretq_f32_u32 (iax);
   uint32x4_t special = iax >= SpecialBound;
 
 #if WANT_SIMD_EXCEPT

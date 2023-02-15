@@ -51,7 +51,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t special)
      __v_asinf(0x1.00203ep-1) got 0x1.0c3a64p-1 want 0x1.0c3a6p-1.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (asin) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ia = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -65,7 +65,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asin) (float32x4_t x)
   ix = vbslq_u32 (x < MOnef, v_u32 (0), ix);
 #endif
 
-  float32x4_t ax = v_as_f32_u32 (ia);
+  float32x4_t ax = vreinterpretq_f32_u32 (ia);
   uint32x4_t a_lt_half = ia < Half;
 
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
@@ -84,7 +84,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asin) (float32x4_t x)
   float32x4_t y = vbslq_f32 (a_lt_half, p, vfmaq_f32 (PiOver2f, -Twof, p));
 
   /* Copy sign.  */
-  return v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_as_u32_f32 (y), ix));
+  return vreinterpretq_f32_u32 (
+    vbslq_u32 (v_u32 (AbsMask), vreinterpretq_u32_f32 (y), ix));
 }
 
 PL_SIG (V, F, 1, asin, -1.0, 1.0)

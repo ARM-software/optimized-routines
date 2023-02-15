@@ -32,7 +32,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 
 VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t special = (ix - One) >= (SquareLim - One);
 
 #if WANT_SIMD_EXCEPT

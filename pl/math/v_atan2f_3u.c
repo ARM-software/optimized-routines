@@ -37,8 +37,8 @@ zeroinfnan (uint32x4_t i)
 VPCS_ATTR
 float32x4_t V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
-  uint32x4_t iy = v_as_u32_f32 (y);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
+  uint32x4_t iy = vreinterpretq_u32_f32 (y);
 
   uint32x4_t special_cases = zeroinfnan (ix) | zeroinfnan (iy);
 
@@ -65,7 +65,7 @@ float32x4_t V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
   float32x4_t ret = eval_poly (z, z, shift);
 
   /* Account for the sign of y.  */
-  ret = v_as_f32_u32 (v_as_u32_f32 (ret) ^ sign_xy);
+  ret = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (ret) ^ sign_xy);
 
   if (unlikely (v_any_u32 (special_cases)))
     {

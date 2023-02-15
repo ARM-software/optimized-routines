@@ -92,7 +92,7 @@ handle_special (float x)
    log1pf(0x1.21e13ap-2) got 0x1.fe8028p-3 want 0x1.fe802cp-3.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ia12 = (ix >> 20) & v_u32 (0x7f8);
   uint32x4_t special_cases
     = (ia12 - v_u32 (TinyBound) >= 0x7f8 - TinyBound) | (ix >= MinusOne);
@@ -117,14 +117,16 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
   float32x4_t m = x + v_f32 (1.0f);
 
   /* Choose k to scale x to the range [-1/4, 1/2].  */
-  int32x4_t k = (v_as_s32_f32 (m) - ThreeQuarters) & v_u32 (0xff800000);
+  int32x4_t k
+    = (vreinterpretq_s32_f32 (m) - ThreeQuarters) & v_u32 (0xff800000);
 
   /* Scale x by exponent manipulation.  */
-  float32x4_t m_scale = v_as_f32_u32 (v_as_u32_f32 (x) - v_as_u32_s32 (k));
+  float32x4_t m_scale = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (x)
+					       - vreinterpretq_u32_s32 (k));
 
   /* Scale up to ensure that the scale factor is representable as normalised
      fp32 number, and scale m down accordingly.  */
-  float32x4_t s = v_as_f32_u32 (v_u32 (Four) - k);
+  float32x4_t s = vreinterpretq_f32_u32 (v_u32 (Four) - k);
   m_scale = m_scale + vfmaq_f32 (v_f32 (-1.0f), v_f32 (0.25f), s);
 
   /* Evaluate polynomial on the reduced interval.  */

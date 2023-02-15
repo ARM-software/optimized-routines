@@ -41,7 +41,7 @@ expm1f_inline (float32x4_t x)
   p = vfmaq_f32 (f, f2, p);
 
   /* t = 2^i.  */
-  float32x4_t t = v_as_f32_u32 (v_as_u32_s32 (i << 23) + One);
+  float32x4_t t = vreinterpretq_f32_u32 (vreinterpretq_u32_s32 (i << 23) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
   return vfmaq_f32 (t - 1, p, t);
 }

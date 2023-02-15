@@ -32,7 +32,7 @@ specialcase (float64x2_t x)
 	want 0x1.8780e9885f8e2p-1.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 {
-  uint64x2_t abstop = v_as_u64_f64 (x) & 0x7ff0000000000000;
+  uint64x2_t abstop = vreinterpretq_u64_f64 (x) & 0x7ff0000000000000;
 
   /* abstop - 0x1p-54 >= 512.0 - 0x1p-54.  */
   uint64x2_t uoflow = abstop - TinyBound >= BigBound - TinyBound;
@@ -47,7 +47,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   /* exp2(x) = 2^(k/N) * 2^r, with 2^r in [2^(-1/2N),2^(1/2N)].  */
   /* x = k/N + r, with int k and r in [-1/2N, 1/2N].  */
   float64x2_t kd = x + __v_exp2_data.shift;
-  uint64x2_t ki = v_as_u64_f64 (kd); /* k.  */
+  uint64x2_t ki = vreinterpretq_u64_f64 (kd); /* k.  */
   kd -= __v_exp2_data.shift;	  /* k/N for int k.  */
   float64x2_t r = x - kd;
   float64x2_t r2 = r * r;
@@ -67,7 +67,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   float64x2_t p0 = r * v_f64 (__v_exp2_data.poly[0]);
   float64x2_t tmp = vfmaq_f64 (p0, r2, p1234);
 
-  float64x2_t scale = v_as_f64_u64 (sbits);
+  float64x2_t scale = vreinterpretq_f64_u64 (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-65 and scale > 2^-928, so there
      is no spurious underflow here even without fma.  */
   return vfmaq_f64 (scale, scale, tmp);

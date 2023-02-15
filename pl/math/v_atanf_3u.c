@@ -34,7 +34,7 @@ float32x4_t V_NAME_F1 (atan) (float32x4_t x)
   /* Small cases, infs and nans are supported by our approximation technique,
      but do not set fenv flags correctly. Only trigger special case if we need
      fenv.  */
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t sign = ix & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -61,7 +61,7 @@ float32x4_t V_NAME_F1 (atan) (float32x4_t x)
   float32x4_t y = eval_poly (z, az, shift);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
-  y = v_as_f32_u32 (v_as_u32_f32 (y) ^ sign);
+  y = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (y) ^ sign);
 
   return y;
 }

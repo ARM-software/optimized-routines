@@ -29,7 +29,7 @@
 VPCS_ATTR
 float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ax = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -69,7 +69,7 @@ float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
   /* Assemble the result.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
-  float32x4_t t = v_as_f32_u32 (v_as_u32_s32 (i << 23) + One);
+  float32x4_t t = vreinterpretq_f32_u32 (vreinterpretq_u32_s32 (i << 23) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
   float32x4_t y = vfmaq_f32 (t - 1, p, t);
 

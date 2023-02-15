@@ -121,7 +121,7 @@ v_approx_erfcf (float32x4_t abs_x, uint32x4_t sign, uint32x4_t ia12,
 VPCS_ATTR
 float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ia = ix & 0x7fffffff;
   uint32x4_t ia12 = ia >> 20;
   uint32x4_t sign = ix >> 31;
@@ -129,9 +129,9 @@ float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
 
   uint32x4_t special_cases = (ia12 - 0x328) >= ((inf_ia12 & 0x7f8) - 0x328);
   uint32x4_t in_bounds = (ia < 0x408ccccd) | (~sign & (ix < 0x4120f5c3));
-  float32x4_t boring_zone = v_as_f32_u32 (sign << 30);
+  float32x4_t boring_zone = vreinterpretq_f32_u32 (sign << 30);
 
-  float32x4_t y = v_approx_erfcf (v_as_f32_u32 (ia), sign, ia12,
+  float32x4_t y = v_approx_erfcf (vreinterpretq_f32_u32 (ia), sign, ia12,
 				  in_bounds & ~special_cases);
 
   y = vbslq_f32 (~in_bounds, boring_zone, y);

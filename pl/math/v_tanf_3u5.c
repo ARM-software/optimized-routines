@@ -38,7 +38,7 @@ eval_poly (float32x4_t z)
 #if WANT_SIMD_EXCEPT
   /* Tiny z (<= 0x1p-31) will underflow when calculating z^4. If fp exceptions
      are to be triggered correctly, sidestep this by fixing such lanes to 0.  */
-  uint32x4_t will_uflow = (v_as_u32_f32 (z) & AbsMask) <= TinyBound;
+  uint32x4_t will_uflow = (vreinterpretq_u32_f32 (z) & AbsMask) <= TinyBound;
   if (unlikely (v_any_u32 (will_uflow)))
     z2 = vbslq_f32 (will_uflow, v_f32 (0), z2);
 #endif
@@ -54,7 +54,7 @@ VPCS_ATTR
 float32x4_t V_NAME_F1 (tan) (float32x4_t x)
 {
   float32x4_t special_arg = x;
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
 
   /* iax >= RangeVal means x, if not inf or NaN, is too large to perform fast

@@ -36,16 +36,16 @@ log1p_inline (float64x2_t x)
        the source of the caller before including this file.
      See v_log1pf_2u1.c for details of the algorithm.  */
   float64x2_t m = x + 1;
-  uint64x2_t mi = v_as_u64_f64 (m);
+  uint64x2_t mi = vreinterpretq_u64_f64 (m);
   uint64x2_t u = mi + OneMHfRt2Top;
 
-  int64x2_t ki = v_as_s64_u64 (u >> 52) - OneTop;
+  int64x2_t ki = vreinterpretq_s64_u64 (u >> 52) - OneTop;
   float64x2_t k = vcvtq_f64_s64 (ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
   uint64x2_t utop = (u & 0x000fffff00000000) + HfRt2Top;
   uint64x2_t u_red = utop | (mi & BottomMask);
-  float64x2_t f = v_as_f64_u64 (u_red) - 1;
+  float64x2_t f = vreinterpretq_f64_u64 (u_red) - 1;
 
   /* Correction term c/m.  */
   float64x2_t cm = (x - (m - 1)) / m;

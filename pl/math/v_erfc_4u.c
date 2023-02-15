@@ -86,9 +86,9 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
   float64x2_t z, p, y;
   uint64x2_t ix, atop, sign, i, cmp;
 
-  ix = v_as_u64_f64 (x);
+  ix = vreinterpretq_u64_f64 (x);
   /* Compute fac as early as possible in order to get best performance.  */
-  float64x2_t fac = v_as_f64_u64 ((ix >> 63) << 62);
+  float64x2_t fac = vreinterpretq_f64_u64 ((ix >> 63) << 62);
   /* Use 12-bit for small, nan and inf case detection.  */
   atop = (ix >> 52) & 0x7ff;
   cmp = atop - v_u64 (0x3cd) >= v_u64 (0x7ff - 0x3cd);
@@ -113,7 +113,7 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
   float64x2_t xp1 = a + v_f64 (1.0);
   xp1 = xp1 * xp1;
   xp1 = xp1 * xp1;
-  uint64x2_t ixp1 = v_as_u64_f64 (xp1);
+  uint64x2_t ixp1 = vreinterpretq_u64_f64 (xp1);
   i = (ixp1 >> 52) - v_u64 (1023);
 
   /* Index cannot exceed number of polynomials.  */
@@ -132,8 +132,8 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
   float64x2_t e = v_eval_gauss (a);
 
   /* Copy sign.  */
-  sign = v_as_u64_f64 (x) & ~AbsMask;
-  p = v_as_f64_u64 (v_as_u64_f64 (p) ^ sign);
+  sign = vreinterpretq_u64_f64 (x) & ~AbsMask;
+  p = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (p) ^ sign);
 
   /* Assemble result as 2.0 - p * e if x < 0, p * e otherwise.  */
   y = vfmaq_f64 (fac, p, e);

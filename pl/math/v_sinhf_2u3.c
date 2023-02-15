@@ -30,11 +30,11 @@ special_case (float32x4_t x)
    __v_sinhf(0x1.e34a9ep-4) got 0x1.e469ep-4 want 0x1.e469e4p-4.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (sinh) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t iax = ix & AbsMask;
-  float32x4_t ax = v_as_f32_u32 (iax);
+  float32x4_t ax = vreinterpretq_f32_u32 (iax);
   uint32x4_t sign = ix & ~AbsMask;
-  float32x4_t halfsign = v_as_f32_u32 (sign | Half);
+  float32x4_t halfsign = vreinterpretq_f32_u32 (sign | Half);
 
 #if WANT_SIMD_EXCEPT
   uint32x4_t special = (iax - TinyBound) >= (BigBound - TinyBound);

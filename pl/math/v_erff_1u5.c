@@ -52,7 +52,7 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
 {
   /* Handle both inf/nan as well as small values (|x|<2^-28). If any condition
      in the lane is true then a loop over scalar calls will be performed.  */
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t atop = (ix >> 16) & v_u32 (0x7fff);
   uint32x4_t cmp = atop - v_u32 (0x3180) >= v_u32 (0x7ff0 - 0x3180);
 
@@ -90,7 +90,7 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
   y = vbslq_f32 (bor, v_f32 (1.0f), vabsq_f32 (y));
 
   /* y=erf(x) if x>0, -erf(-x) otherwise.  */
-  y = v_as_f32_u32 (v_as_u32_f32 (y) ^ sign);
+  y = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (y) ^ sign);
 
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, cmp);

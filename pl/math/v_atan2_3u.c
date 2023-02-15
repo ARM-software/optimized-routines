@@ -37,8 +37,8 @@ zeroinfnan (uint64x2_t i)
 VPCS_ATTR
 float64x2_t V_NAME_D2 (atan2) (float64x2_t y, float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
-  uint64x2_t iy = v_as_u64_f64 (y);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
+  uint64x2_t iy = vreinterpretq_u64_f64 (y);
 
   uint64x2_t special_cases = zeroinfnan (ix) | zeroinfnan (iy);
 
@@ -65,7 +65,7 @@ float64x2_t V_NAME_D2 (atan2) (float64x2_t y, float64x2_t x)
   float64x2_t ret = eval_poly (z, z, shift);
 
   /* Account for the sign of x and y.  */
-  ret = v_as_f64_u64 (v_as_u64_f64 (ret) ^ sign_xy);
+  ret = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (ret) ^ sign_xy);
 
   if (unlikely (v_any_u64 (special_cases)))
     {

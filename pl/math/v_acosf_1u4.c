@@ -57,7 +57,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 			   want 0x1.feb32ep-1.  */
 VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
 {
-  uint32x4_t ix = v_as_u32_f32 (x);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ia = ix & AbsMask;
 
 #if WANT_SIMD_EXCEPT
@@ -70,7 +70,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
   ix = vbslq_u32 (x < MOnef, v_u32 (0), ix);
 #endif
 
-  float32x4_t ax = v_as_f32_u32 (ia);
+  float32x4_t ax = vreinterpretq_f32_u32 (ia);
   uint32x4_t a_le_half = ia <= Half;
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
@@ -87,8 +87,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  float32x4_t y
-    = v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_as_u32_f32 (p), ix));
+  float32x4_t y = vreinterpretq_f32_u32 (
+    vbslq_u32 (v_u32 (AbsMask), vreinterpretq_u32_f32 (p), ix));
 
   uint32x4_t sign = x < 0;
   float32x4_t off = vbslq_f32 (sign, Pif, v_f32 (0.0f));

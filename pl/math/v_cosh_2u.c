@@ -33,7 +33,7 @@ exp_inline (float64x2_t x)
 
   /* n = round(x/(ln2/N)).  */
   float64x2_t z = vfmaq_f64 (Shift, x, InvLn2);
-  uint64x2_t u = v_as_u64_f64 (z);
+  uint64x2_t u = vreinterpretq_u64_f64 (z);
   float64x2_t n = z - Shift;
 
   /* r = x - n*ln2/N.  */
@@ -51,7 +51,7 @@ exp_inline (float64x2_t x)
 
   /* s = 2^(n/N).  */
   u = v_lookup_u64 (Tab, i);
-  float64x2_t s = v_as_f64_u64 (u + e);
+  float64x2_t s = vreinterpretq_f64_u64 (u + e);
 
   return vfmaq_f64 (s, y, s);
 }
@@ -68,7 +68,7 @@ exp_inline (float64x2_t x)
 				 want 0x1.f711dcb0c77b1p+7.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (cosh) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
   uint64x2_t special = iax > SpecialBound;
 
@@ -76,7 +76,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cosh) (float64x2_t x)
   if (unlikely (v_any_u64 (special)))
     return v_call_f64 (cosh, x, x, v_u64 (-1));
 
-  float64x2_t ax = v_as_f64_u64 (iax);
+  float64x2_t ax = vreinterpretq_f64_u64 (iax);
   /* Up to the point that exp overflows, we can use it to calculate cosh by
      exp(|x|) / 2 + 1 / (2 * exp(|x|)).  */
   float64x2_t t = exp_inline (ax);

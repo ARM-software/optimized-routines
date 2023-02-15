@@ -52,12 +52,12 @@ log_inline (float64x2_t x)
   /* Double-precision vector log, copied from math/v_log.c with some cosmetic
      modification and special-cases removed. See that file for details of the
      algorithm used.  */
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t tmp = ix - OFF;
   uint64x2_t i = (tmp >> (52 - LOG_TABLE_BITS)) % N;
-  int64x2_t k = v_as_s64_u64 (tmp) >> 52;
+  int64x2_t k = vreinterpretq_s64_u64 (tmp) >> 52;
   uint64x2_t iz = ix - (tmp & 0xfffULL << 52);
-  float64x2_t z = v_as_f64_u64 (iz);
+  float64x2_t z = vreinterpretq_f64_u64 (iz);
   struct entry e = lookup (i);
   float64x2_t r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   float64x2_t kd = vcvtq_f64_s64 (k);
@@ -84,9 +84,9 @@ log_inline (float64x2_t x)
 				  want 0x1.ffffcfd0e2352p-1.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 {
-  uint64x2_t ix = v_as_u64_f64 (x);
+  uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t iax = ix & AbsMask;
-  float64x2_t ax = v_as_f64_u64 (iax);
+  float64x2_t ax = vreinterpretq_f64_u64 (iax);
   uint64x2_t top12 = iax >> 52;
 
   uint64x2_t gt1 = top12 >= OneTop;
@@ -140,7 +140,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   /* Choose the right option for each lane.  */
   float64x2_t y = vbslq_f64 (gt1, option_1, option_2);
   /* Copy sign.  */
-  y = v_as_f64_u64 (vbslq_u64 (AbsMask, v_as_u64_f64 (y), ix));
+  y = vreinterpretq_f64_u64 (
+    vbslq_u64 (AbsMask, vreinterpretq_u64_f64 (y), ix));
 
   if (unlikely (v_any_u64 (special)))
     return special_case (x, y, special);
