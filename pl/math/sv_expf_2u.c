@@ -71,11 +71,11 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
   /* NaNs also need special handling with FEXPA.  */
   svbool_t is_special_case
     = svorr_b_z (pg, svacgt_n_f32 (pg, x, Thres), svcmpne_f32 (pg, x, x));
-  svfloat32_t scale = svexpa_f32 (sv_as_u32_f32 (z));
+  svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 #else
-  svuint32_t e = svlsl_n_u32_x (pg, sv_as_u32_f32 (z), 23);
+  svuint32_t e = svlsl_n_u32_x (pg, svreinterpret_u32_f32 (z), 23);
   svbool_t is_special_case = svacgt_n_f32 (pg, n, Thres);
-  svfloat32_t scale = sv_as_f32_u32 (svadd_n_u32_x (pg, e, 0x3f800000));
+  svfloat32_t scale = svreinterpret_f32_u32 (svadd_n_u32_x (pg, e, 0x3f800000));
 #endif
 
   /* y = exp(r) - 1 ~= r + C1 r^2 + C2 r^3 + C3 r^4.  */

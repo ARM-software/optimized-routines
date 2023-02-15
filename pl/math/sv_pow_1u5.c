@@ -91,7 +91,7 @@ top12 (double x)
 static inline svuint64_t
 sv_top12 (svfloat64_t x)
 {
-  return svlsr_n_u64_x (svptrue_b64 (), sv_as_u64_f64 (x), 52);
+  return svlsr_n_u64_x (svptrue_b64 (), svreinterpret_u64_f64 (x), 52);
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */
@@ -161,10 +161,10 @@ sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail)
   svuint64_t i
     = svand_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - SV_POW_LOG_TABLE_BITS),
 		   sv_u64 (N_LOG - 1));
-  svint64_t k = svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52);
+  svint64_t k = svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52);
   svuint64_t iz
     = svsub_u64_x (pg, ix, svand_u64_x (pg, tmp, sv_u64 (0xfffULL << 52)));
-  svfloat64_t z = sv_as_f64_u64 (iz);
+  svfloat64_t z = svreinterpret_f64_u64 (iz);
   svfloat64_t kd = svcvt_f64_s64_x (pg, k);
 
   /* log(x) = k*Ln2 + log(c) + log1p(z/c-1).  */
@@ -275,7 +275,7 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
   svfloat64_t z = svmul_f64_x (pg, sv_f64 (InvLn2N), x);
   /* z - kd is in [-1, 1] in non-nearest rounding modes.  */
   svfloat64_t kd = svadd_f64_x (pg, z, sv_f64 (Shift));
-  svuint64_t ki = sv_as_u64_f64 (kd);
+  svuint64_t ki = svreinterpret_u64_f64 (kd);
   kd = svsub_f64_x (pg, kd, sv_f64 (Shift));
   svfloat64_t r = svmla_f64_x (pg, svmla_f64_x (pg, x, kd, sv_f64 (NegLn2hiN)),
 			       kd, sv_f64 (NegLn2loN));
@@ -294,7 +294,7 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
   svfloat64_t tmp = svmla_f64_x (pg, sv_f64 (C3), r, sv_f64 (C4));
   tmp = svmla_f64_x (pg, sv_f64 (C2), r, tmp);
   tmp = svmla_f64_x (pg, r, r2, tmp);
-  svfloat64_t scale = sv_as_f64_u64 (sbits);
+  svfloat64_t scale = svreinterpret_f64_u64 (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
   z = svmla_f64_x (pg, scale, scale, tmp);
@@ -304,7 +304,7 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
     z = sv_call_specialcase (specialcase, tmp, sbits, ki, z, special);
 
   /* Handle underflow and overflow.  */
-  svuint64_t sign_bit = svlsr_n_u64_x (pg, sv_as_u64_f64 (x), 63);
+  svuint64_t sign_bit = svlsr_n_u64_x (pg, svreinterpret_u64_f64 (x), 63);
   svbool_t x_is_neg = svcmpne_n_u64 (pg, sign_bit, 0);
   svbool_t is_biased = svcmpne_n_u64 (pg, sign_bias, 0);
   svfloat64_t res_uoflow
@@ -352,8 +352,8 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
   /* This preamble handles special case conditions used in the final scalar
      fallbacks. It also updates ix and sign_bias, that are used in the core
      computation too, i.e., exp( y * log (x) ).  */
-  svuint64_t vix0 = sv_as_u64_f64 (x);
-  svuint64_t viy0 = sv_as_u64_f64 (y);
+  svuint64_t vix0 = svreinterpret_u64_f64 (x);
+  svuint64_t viy0 = svreinterpret_u64_f64 (y);
   svuint64_t vtopx0 = svlsr_n_u64_x (svptrue_b64 (), vix0, 52);
   svuint64_t vtopy0 = svlsr_n_u64_x (svptrue_b64 (), viy0, 52);
   svuint64_t vabstopx0 = svand_n_u64_x (pg, vtopx0, 0x7ff);
@@ -394,7 +394,8 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
       /* Normalize subnormal x so exponent becomes negative.  */
       svbool_t topx_is_null = svcmpeq_n_u64 (xsmall, vtopx1, 0);
 
-      svuint64_t vix_norm = sv_as_u64_f64 (svmul_n_f64_m (xsmall, x, 0x1p52));
+      svuint64_t vix_norm =
+	svreinterpret_u64_f64 (svmul_n_f64_m (xsmall, x, 0x1p52));
       vix_norm = svand_n_u64_m (xsmall, vix_norm, 0x7fffffffffffffff);
       vix_norm = svsub_n_u64_m (xsmall, vix_norm, 52ULL << 52);
       vix = svsel_u64 (topx_is_null, vix_norm, vix);

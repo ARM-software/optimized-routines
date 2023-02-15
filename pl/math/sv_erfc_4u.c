@@ -32,7 +32,8 @@ lookup_interval_idx (const svbool_t pg, svfloat64_t abs_x)
   xp1 = svmul_f64_x (pg, xp1, xp1);
   xp1 = svmul_f64_x (pg, xp1, xp1);
   svuint64_t interval_idx
-    = svsub_n_u64_x (pg, svlsr_n_u64_x (pg, sv_as_u64_f64 (xp1), 52), 1023);
+    = svsub_n_u64_x (pg, svlsr_n_u64_x (pg, svreinterpret_u64_f64 (xp1), 52),
+		     1023);
   return svsel_u64 (svcmple_n_u64 (pg, interval_idx, ERFC_NUM_INTERVALS),
 		    interval_idx, sv_u64 (ERFC_NUM_INTERVALS));
 }
@@ -87,9 +88,9 @@ sv_eval_gauss (const svbool_t pg, svfloat64_t abs_x)
 				  want 0x1.ff3f4c8e200d9p-42.  */
 svfloat64_t SV_NAME_D1 (erfc) (svfloat64_t x, const svbool_t pg)
 {
-  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t ix = svreinterpret_u64_f64 (x);
   svfloat64_t abs_x = svabs_f64_x (pg, x);
-  svuint64_t atop = svlsr_n_u64_x (pg, sv_as_u64_f64 (abs_x), 52);
+  svuint64_t atop = svlsr_n_u64_x (pg, svreinterpret_u64_f64 (abs_x), 52);
 
   /* Outside of the 'interesting' bounds, [-6, 28], +ve goes to 0, -ve goes
      to 2. As long as the polynomial is 0 in the boring zone, we can assemble
@@ -105,8 +106,8 @@ svfloat64_t SV_NAME_D1 (erfc) (svfloat64_t x, const svbool_t pg)
   /* in_bounds is true for lanes where |x| < 32.  */
   svbool_t in_bounds = svcmplt_n_u64 (pg, atop, ThirtyTwo);
   /* boring_zone = 2 for x < 0, 0 otherwise.  */
-  svfloat64_t boring_zone
-    = sv_as_f64_u64 (svlsl_n_u64_x (pg, svlsr_n_u64_x (pg, ix, 63), 62));
+  svfloat64_t boring_zone = svreinterpret_f64_u64 (
+    svlsl_n_u64_x (pg, svlsr_n_u64_x (pg, ix, 63), 62));
   /* Small and large values (including nan and inf).  */
   svbool_t special_cases
     = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, atop, SmallBound),
@@ -122,7 +123,8 @@ svfloat64_t SV_NAME_D1 (erfc) (svfloat64_t x, const svbool_t pg)
   svfloat64_t p = sv_eval_poly (in_bounds, svsub_f64_x (pg, abs_x, x_i), i);
   /* 'copy' sign of x to p.  */
   svuint64_t sign = svand_n_u64_z (in_bounds, ix, SignMask);
-  p = sv_as_f64_u64 (sveor_u64_z (in_bounds, sv_as_u64_f64 (p), sign));
+  p = svreinterpret_f64_u64 (
+    sveor_u64_z (in_bounds, svreinterpret_u64_f64 (p), sign));
 
   svfloat64_t e = sv_eval_gauss (in_bounds, abs_x);
 

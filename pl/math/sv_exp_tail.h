@@ -34,10 +34,10 @@ sv_exp_tail_special_case (svbool_t pg, svfloat64_t s, svfloat64_t y,
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   svuint64_t b = svsel_u64 (svcmple_n_f64 (pg, n, 0),
 			    sv_u64 (0x6000000000000000), sv_u64 (0));
-  svfloat64_t s1 = sv_as_f64_u64 (svsubr_n_u64_x (pg, b, 0x7000000000000000));
-  svfloat64_t s2 = sv_as_f64_u64 (
-    svadd_u64_x (pg, svsub_n_u64_x (pg, sv_as_u64_f64 (s), 0x3010000000000000),
-		 b));
+  svfloat64_t s1
+    = svreinterpret_f64_u64 (svsubr_n_u64_x (pg, b, 0x7000000000000000));
+  svfloat64_t s2 = svreinterpret_f64_u64 (svadd_u64_x (
+    pg, svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), 0x3010000000000000), b));
 
   svbool_t cmp = svcmpgt_n_f64 (pg, absn, 1280.0 * N);
   svfloat64_t r1 = svmul_f64_x (pg, s1, s1);
@@ -55,7 +55,7 @@ sv_exp_tail (const svbool_t pg, svfloat64_t x, svfloat64_t xtail)
   svfloat64_t r = svmla_n_f64_x (pg, x, n, MinusLn2hi);
   r = svmla_n_f64_x (pg, r, n, MinusLn2lo);
 
-  svuint64_t u = sv_as_u64_f64 (z);
+  svuint64_t u = svreinterpret_u64_f64 (z);
   svuint64_t e = svlsl_n_u64_x (pg, u, 52 - V_EXP_TAIL_TABLE_BITS);
   svuint64_t i = svand_n_u64_x (pg, u, IndexMask);
 
@@ -66,7 +66,7 @@ sv_exp_tail (const svbool_t pg, svfloat64_t x, svfloat64_t xtail)
 
   /* s = 2^(n/N).  */
   u = svld1_gather_u64index_u64 (pg, Tab, i);
-  svfloat64_t s = sv_as_f64_u64 (svadd_u64_x (pg, u, e));
+  svfloat64_t s = svreinterpret_f64_u64 (svadd_u64_x (pg, u, e));
 
   svbool_t cmp = svcmpgt_n_f64 (pg, svabs_f64_x (pg, x), Thres);
   if (unlikely (svptest_any (pg, cmp)))

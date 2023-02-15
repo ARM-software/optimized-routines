@@ -41,13 +41,15 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
   svuint32_t sign, odd;
   svbool_t cmp;
 
-  r = sv_as_f32_u32 (svand_n_u32_x (pg, sv_as_u32_f32 (x), AbsMask));
-  sign = svand_n_u32_x (pg, sv_as_u32_f32 (x), ~AbsMask);
-  cmp = svcmpge_u32 (pg, sv_as_u32_f32 (r), sv_as_u32_f32 (RangeVal));
+  r = svreinterpret_f32_u32 (
+    svand_n_u32_x (pg, svreinterpret_u32_f32 (x), AbsMask));
+  sign = svand_n_u32_x (pg, svreinterpret_u32_f32 (x), ~AbsMask);
+  cmp = svcmpge_u32 (pg, svreinterpret_u32_f32 (r),
+		     svreinterpret_u32_f32 (RangeVal));
 
   /* n = rint(|x|/pi).  */
   n = svmla_f32_x (pg, Shift, r, InvPi);
-  odd = svlsl_n_u32_x (pg, sv_as_u32_f32 (n), 31);
+  odd = svlsl_n_u32_x (pg, svreinterpret_u32_f32 (n), 31);
   n = svsub_f32_x (pg, n, Shift);
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
@@ -64,8 +66,8 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
   y = svmla_f32_x (pg, r, r, svmul_f32_x (pg, y, r2));
 
   /* sign = y^sign^odd.  */
-  y = sv_as_f32_u32 (
-    sveor_u32_x (pg, sv_as_u32_f32 (y), sveor_u32_x (pg, sign, odd)));
+  y = svreinterpret_f32_u32 (
+    sveor_u32_x (pg, svreinterpret_u32_f32 (y), sveor_u32_x (pg, sign, odd)));
 
   /* No need to pass pg to specialcase here since cmp is a strict subset,
      guaranteed by the cmpge above.  */

@@ -27,7 +27,7 @@ svfloat64_t SV_NAME_D1 (atan) (svfloat64_t x, const svbool_t pg)
 {
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t ix = svreinterpret_u64_f64 (x);
   svuint64_t sign = svand_n_u64_x (pg, ix, ~AbsMask);
 
   /* Argument reduction:
@@ -44,7 +44,7 @@ svfloat64_t SV_NAME_D1 (atan) (svfloat64_t x, const svbool_t pg)
   svfloat64_t y = __sv_atan_common (pg, red, z, az, PiOver2);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
-  y = sv_as_f64_u64 (sveor_u64_x (pg, sv_as_u64_f64 (y), sign));
+  y = svreinterpret_f64_u64 (sveor_u64_x (pg, svreinterpret_u64_f64 (y), sign));
 
   return y;
 }

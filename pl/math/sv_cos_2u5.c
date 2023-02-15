@@ -38,8 +38,10 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
   svfloat64_t n, r, r2, y;
   svbool_t cmp;
 
-  r = sv_as_f64_u64 (svand_n_u64_x (pg, sv_as_u64_f64 (x), AbsMask));
-  cmp = svcmpge_u64 (pg, sv_as_u64_f64 (r), sv_as_u64_f64 (RangeVal));
+  r = svreinterpret_f64_u64 (
+    svand_n_u64_x (pg, svreinterpret_u64_f64 (x), AbsMask));
+  cmp = svcmpge_u64 (pg, svreinterpret_u64_f64 (r),
+		     svreinterpret_u64_f64 (RangeVal));
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat64_t q = svmla_f64_x (pg, Shift, r, InvPio2);
@@ -51,7 +53,7 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
   r = svmla_f64_x (pg, r, n, NegPio2_3);
 
   /* cos(r) poly approx.  */
-  r2 = svtsmul_f64 (r, sv_as_u64_f64 (q));
+  r2 = svtsmul_f64 (r, svreinterpret_u64_f64 (q));
   y = sv_f64 (0.0);
   y = svtmad_f64 (y, r2, 7);
   y = svtmad_f64 (y, r2, 6);
@@ -63,7 +65,7 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
   y = svtmad_f64 (y, r2, 0);
 
   /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
-  svfloat64_t f = svtssel_f64 (r, sv_as_u64_f64 (q));
+  svfloat64_t f = svtssel_f64 (r, svreinterpret_u64_f64 (q));
   /* Apply factor.  */
   y = svmul_f64_x (pg, f, y);
 

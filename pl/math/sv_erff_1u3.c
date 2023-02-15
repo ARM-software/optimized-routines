@@ -26,7 +26,7 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t, svbool_t);
 			   want 0x1.9f9c8ap-1.  */
 svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
 {
-  svuint32_t ix = sv_as_u32_f32 (x);
+  svuint32_t ix = svreinterpret_u32_f32 (x);
   svuint32_t atop = svand_n_u32_x (pg, svlsr_n_u32_x (pg, ix, 16), 0x7fff);
   /* Handle both inf/nan as well as small values (|x|<2^-28).  */
   svbool_t cmp
@@ -81,7 +81,7 @@ svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
   y = svsel_f32 (bor, sv_f32 (1.0f), svabs_f32_x (pg, y));
 
   /* y = erf(x) if x>0, -erf(-x) otherwise.  */
-  y = sv_as_f32_u32 (sveor_u32_x (pg, sv_as_u32_f32 (y), sign));
+  y = svreinterpret_f32_u32 (sveor_u32_x (pg, svreinterpret_u32_f32 (y), sign));
 
   if (unlikely (svptest_any (pg, cmp)))
     return __sv_erff_specialcase (x, y, cmp);

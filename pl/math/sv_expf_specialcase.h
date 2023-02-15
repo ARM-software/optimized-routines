@@ -33,10 +33,10 @@ __sv_expf_specialcase (svbool_t pg, svfloat32_t poly, svfloat32_t n,
     = svdup_n_u32_z (p_sign, 0x82000000); /* Inactive lanes set to 0.  */
 
   /* Set s1 to generate overflow depending on sign of exponent n.  */
-  svfloat32_t s1
-    = sv_as_f32_u32 (svadd_n_u32_x (pg, b, 0x7f000000)); /* b + 0x7f000000.  */
+  svfloat32_t s1 = svreinterpret_f32_u32 (
+    svadd_n_u32_x (pg, b, 0x7f000000)); /* b + 0x7f000000.  */
   /* Offset s to avoid overflow in final result if n is below threshold.  */
-  svfloat32_t s2 = sv_as_f32_u32 (
+  svfloat32_t s2 = svreinterpret_f32_u32 (
     svsub_u32_x (pg, e, b)); /* as_u32 (s) - 0x3010...0 + b.  */
 
   /* |n| > 192 => 2^(n/N) overflows.  */

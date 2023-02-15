@@ -39,8 +39,8 @@ zeroinfnan (svuint64_t i, const svbool_t pg)
    got -0x1.954f42f1fa841p-1 want -0x1.954f42f1fa843p-1.  */
 svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x, const svbool_t pg)
 {
-  svuint64_t ix = sv_as_u64_f64 (x);
-  svuint64_t iy = sv_as_u64_f64 (y);
+  svuint64_t ix = svreinterpret_u64_f64 (x);
+  svuint64_t iy = svreinterpret_u64_f64 (y);
 
   svbool_t cmp_x = zeroinfnan (ix, pg);
   svbool_t cmp_y = zeroinfnan (iy, pg);
@@ -69,7 +69,8 @@ svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x, const svbool_t pg)
   svfloat64_t ret = __sv_atan_common (pg, pg, z, z, shift);
 
   /* Account for the sign of x and y.  */
-  ret = sv_as_f64_u64 (sveor_u64_x (pg, sv_as_u64_f64 (ret), sign_xy));
+  ret = svreinterpret_f64_u64 (
+    sveor_u64_x (pg, svreinterpret_u64_f64 (ret), sign_xy));
 
   if (unlikely (svptest_any (pg, cmp_xy)))
     {

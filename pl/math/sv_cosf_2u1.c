@@ -38,8 +38,10 @@ svfloat32_t SV_NAME_F1 (cos) (svfloat32_t x, const svbool_t pg)
   svfloat32_t n, r, r2, y;
   svbool_t cmp;
 
-  r = sv_as_f32_u32 (svand_n_u32_x (pg, sv_as_u32_f32 (x), AbsMask));
-  cmp = svcmpge_u32 (pg, sv_as_u32_f32 (r), sv_as_u32_f32 (RangeVal));
+  r = svreinterpret_f32_u32 (
+    svand_n_u32_x (pg, svreinterpret_u32_f32 (x), AbsMask));
+  cmp = svcmpge_u32 (pg, svreinterpret_u32_f32 (r),
+		     svreinterpret_u32_f32 (RangeVal));
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat32_t q = svmla_f32_x (pg, Shift, r, InvPio2);
@@ -51,10 +53,10 @@ svfloat32_t SV_NAME_F1 (cos) (svfloat32_t x, const svbool_t pg)
   r = svmla_f32_x (pg, r, n, NegPio2_3);
 
   /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
-  svfloat32_t f = svtssel_f32 (r, sv_as_u32_f32 (q));
+  svfloat32_t f = svtssel_f32 (r, svreinterpret_u32_f32 (q));
 
   /* cos(r) poly approx.  */
-  r2 = svtsmul_f32 (r, sv_as_u32_f32 (q));
+  r2 = svtsmul_f32 (r, svreinterpret_u32_f32 (q));
   y = sv_f32 (0.0f);
   y = svtmad_f32 (y, r2, 4);
   y = svtmad_f32 (y, r2, 3);

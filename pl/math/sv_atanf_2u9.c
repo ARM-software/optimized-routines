@@ -26,7 +26,7 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
 {
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  svuint32_t ix = sv_as_u32_f32 (x);
+  svuint32_t ix = svreinterpret_u32_f32 (x);
   svuint32_t sign = svand_n_u32_x (pg, ix, ~AbsMask);
 
   /* Argument reduction:
@@ -43,7 +43,8 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
   svfloat32_t y = __sv_atanf_common (pg, red, z, az, PiOver2);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
-  return sv_as_f32_u32 (sveor_u32_x (pg, sv_as_u32_f32 (y), sign));
+  return svreinterpret_f32_u32 (
+    sveor_u32_x (pg, svreinterpret_u32_f32 (y), sign));
 }
 
 PL_SIG (SV, F, 1, atan, -3.1, 3.1)

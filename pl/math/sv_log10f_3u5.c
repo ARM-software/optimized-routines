@@ -33,18 +33,19 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 			     want 0x1.ffe2f4p-4.  */
 svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
 {
-  svuint32_t ix = sv_as_u32_f32 (x);
+  svuint32_t ix = svreinterpret_u32_f32 (x);
   svbool_t special_cases
     = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, ix, SpecialCaseMin),
 		     SpecialCaseMax - SpecialCaseMin);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   ix = svsub_n_u32_x (pg, ix, Offset);
-  svfloat32_t n = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, sv_as_s32_u32 (ix),
-						      23)); /* signextend.  */
+  svfloat32_t n
+    = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, svreinterpret_s32_u32 (ix),
+					  23)); /* signextend.  */
   ix = svand_n_u32_x (pg, ix, Mask);
   ix = svadd_n_u32_x (pg, ix, Offset);
-  svfloat32_t r = svsub_n_f32_x (pg, sv_as_f32_u32 (ix), 1.0f);
+  svfloat32_t r = svsub_n_f32_x (pg, svreinterpret_f32_u32 (ix), 1.0f);
 
   /* y = log10(1+r) + n*log10(2)
      log10(1+r) ~ r * InvLn(10) + P(r)

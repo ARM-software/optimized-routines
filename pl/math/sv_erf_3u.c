@@ -27,7 +27,7 @@ __sv_erf_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
 {
   /* Use top 16 bits to test for special cases and small values.  */
-  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t ix = svreinterpret_u64_f64 (x);
   svuint64_t atop = svand_n_u64_x (pg, svlsr_n_u64_x (pg, ix, 48), 0x7fff);
 
   /* Handle both inf/nan as well as small values (|x|<2^-28).  */
@@ -35,7 +35,7 @@ svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
     = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, atop, 0x3e30), 0x7ff0 - 0x3e30);
 
   /* Get sign and absolute value.  */
-  svfloat64_t a = sv_as_f64_u64 (svand_n_u64_x (pg, ix, AbsMask));
+  svfloat64_t a = svreinterpret_f64_u64 (svand_n_u64_x (pg, ix, AbsMask));
   svuint64_t sign = svand_n_u64_x (pg, ix, ~AbsMask);
 
   /* i = trunc(Scale*x).  */
@@ -80,7 +80,7 @@ svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
   y = svmla_f64_x (pg, q1, y, z4);
 
   /* y = erf(x) if x > 0, -erf(-x) otherwise.  */
-  y = sv_as_f64_u64 (sveor_u64_x (pg, sv_as_u64_f64 (y), sign));
+  y = svreinterpret_f64_u64 (sveor_u64_x (pg, svreinterpret_u64_f64 (y), sign));
 
   if (unlikely (svptest_any (pg, cmp)))
     return __sv_erf_specialcase (x, y, cmp);

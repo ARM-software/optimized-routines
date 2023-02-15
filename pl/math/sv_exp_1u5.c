@@ -40,12 +40,12 @@ specialcase (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 		     0x6000000000000000); /* Inactive lanes set to 0.  */
 
   /* Set s1 to generate overflow depending on sign of exponent n.  */
-  svfloat64_t s1 = sv_as_f64_u64 (
+  svfloat64_t s1 = svreinterpret_f64_u64 (
     svsubr_n_u64_x (pg, b, 0x7000000000000000)); /* 0x70...0 - b.  */
   /* Offset s to avoid overflow in final result if n is below threshold.  */
-  svfloat64_t s2 = sv_as_f64_u64 (
-    svadd_u64_x (pg, svsub_n_u64_x (pg, sv_as_u64_f64 (s), 0x3010000000000000),
-		 b)); /* as_u64 (s) - 0x3010...0 + b.  */
+  svfloat64_t s2 = svreinterpret_f64_u64 (svadd_u64_x (
+    pg, svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), 0x3010000000000000),
+    b)); /* as_u64 (s) - 0x3010...0 + b.  */
 
   /* |n| > 1280 => 2^(n) overflows.  */
   svbool_t p_cmp = svcmpgt_n_f64 (pg, absn, 1280.0);
@@ -82,7 +82,7 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
      1, such that once these bits are moved to the exponent of the output of
      FEXPA, we get the exponent of 2^n right, i.e. we get 2^m.  */
   svfloat64_t z = svmla_n_f64_x (pg, sv_f64 (Shift), x, InvLn2);
-  svuint64_t u = sv_as_u64_f64 (z);
+  svuint64_t u = svreinterpret_u64_f64 (z);
   svfloat64_t n = svsub_n_f64_x (pg, z, Shift);
 
   /* r = x - n * ln2, r is in [-ln2/(2N), ln2/(2N)].  */
@@ -113,7 +113,8 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
       svuint64_t e
 	= svand_n_u64_x (pg, svlsl_n_u64_x (pg, u, 46), 0x8000000000000000);
       /* Copy sign to s.  */
-      s = sv_as_f64_u64 (svadd_u64_x (pg, e, sv_as_u64_f64 (s)));
+      s = svreinterpret_f64_u64 (
+	svadd_u64_x (pg, e, svreinterpret_u64_f64 (s)));
       return specialcase (pg, s, y, n);
     }
 

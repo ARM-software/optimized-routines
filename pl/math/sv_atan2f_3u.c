@@ -40,8 +40,8 @@ zeroinfnan (svuint32_t i, const svbool_t pg)
 					   want 0x1.967f00p-1.  */
 svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x, const svbool_t pg)
 {
-  svuint32_t ix = sv_as_u32_f32 (x);
-  svuint32_t iy = sv_as_u32_f32 (y);
+  svuint32_t ix = svreinterpret_u32_f32 (x);
+  svuint32_t iy = svreinterpret_u32_f32 (y);
 
   svbool_t cmp_x = zeroinfnan (ix, pg);
   svbool_t cmp_y = zeroinfnan (iy, pg);
@@ -70,7 +70,8 @@ svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x, const svbool_t pg)
   svfloat32_t ret = __sv_atanf_common (pg, pg, z, z, shift);
 
   /* Account for the sign of x and y.  */
-  ret = sv_as_f32_u32 (sveor_u32_x (pg, sv_as_u32_f32 (ret), sign_xy));
+  ret = svreinterpret_f32_u32 (
+    sveor_u32_x (pg, svreinterpret_u32_f32 (ret), sign_xy));
 
   if (unlikely (svptest_any (pg, cmp_xy)))
     {

@@ -28,7 +28,7 @@ specialcase (svfloat64_t x, svfloat64_t y, svbool_t special)
 				   want 0x1.fffbdf6eaa667p-6.  */
 svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
 {
-  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t ix = svreinterpret_u64_f64 (x);
   svuint64_t top = svlsr_n_u64_x (pg, ix, 48);
 
   svbool_t is_special_case
@@ -41,8 +41,8 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
   svuint64_t i
     = sv_mod_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - V_LOG10_TABLE_BITS), N);
   svfloat64_t k
-    = svcvt_f64_s64_x (pg, svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52));
-  svfloat64_t z = sv_as_f64_u64 (
+    = svcvt_f64_s64_x (pg, svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52));
+  svfloat64_t z = svreinterpret_f64_u64 (
     svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
 
   /* log(x) = k*log(2) + log(c) + log(z/c).  */

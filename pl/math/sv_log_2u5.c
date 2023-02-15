@@ -31,7 +31,7 @@ __sv_log_specialcase (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 				 want 0x1.ffffff1cca045p-2.  */
 svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
 {
-  svuint64_t ix = sv_as_u64_f64 (x);
+  svuint64_t ix = svreinterpret_u64_f64 (x);
   svuint64_t top = svlsr_n_u64_x (pg, ix, 48);
   svbool_t cmp = svcmpge_u64 (pg, svsub_n_u64_x (pg, top, 0x0010),
 			      sv_u64 (0x7ff0 - 0x0010));
@@ -45,10 +45,10 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
   svuint64_t i
     = svand_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, (52 - SV_LOG_TABLE_BITS)),
 		     N - 1);
-  svint64_t k
-    = svasr_n_s64_x (pg, sv_as_s64_u64 (tmp), 52); /* Arithmetic shift.  */
+  svint64_t k = svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp),
+			       52); /* Arithmetic shift.  */
   svuint64_t iz = svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52));
-  svfloat64_t z = sv_as_f64_u64 (iz);
+  svfloat64_t z = svreinterpret_f64_u64 (iz);
   /* Lookup in 2 global lists (length N).  */
   svfloat64_t invc = svld1_gather_u64index_f64 (pg, __sv_log_data.invc, i);
   svfloat64_t logc = svld1_gather_u64index_f64 (pg, __sv_log_data.logc, i);

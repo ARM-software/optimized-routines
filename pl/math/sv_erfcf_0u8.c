@@ -101,11 +101,11 @@ sv_approx_erfcf (svfloat32_t abs_x, svuint32_t sign, svuint32_t ia12,
      calculated in double precision. Separate top and bottom halves of input
      into separate vectors and convert to double.  */
   svfloat64_t lo
-    = svcvt_f64_f32_x (svptrue_b64 (),
-		       sv_as_f32_u64 (svunpklo_u64 (sv_as_u32_f32 (abs_x))));
+    = svcvt_f64_f32_x (svptrue_b64 (), svreinterpret_f32_u64 (svunpklo_u64 (
+					 svreinterpret_u32_f32 (abs_x))));
   svfloat64_t hi
-    = svcvt_f64_f32_x (svptrue_b64 (),
-		       sv_as_f32_u64 (svunpkhi_u64 (sv_as_u32_f32 (abs_x))));
+    = svcvt_f64_f32_x (svptrue_b64 (), svreinterpret_f32_u64 (svunpkhi_u64 (
+					 svreinterpret_u32_f32 (abs_x))));
 
   /* Have to do the same with pg and the interval indexes.  */
   svbool_t pg_lo = svunpklo_b (pg);
@@ -145,7 +145,7 @@ sv_approx_erfcf (svfloat32_t abs_x, svuint32_t sign, svuint32_t ia12,
 			      want 0x1.000066p+0.  */
 svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg)
 {
-  svuint32_t ix = sv_as_u32_f32 (x);
+  svuint32_t ix = svreinterpret_u32_f32 (x);
   svuint32_t ia = svand_n_u32_x (pg, ix, 0x7fffffff);
   svuint32_t ia12 = svlsr_n_u32_x (pg, ia, 20);
   svuint32_t sign = svlsr_n_u32_x (pg, ix, 31);
@@ -164,11 +164,12 @@ svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg)
 
   /* erfcf(x) = 0 for x < -4.4
      erfcf(x) = 2 for x > 10.06.  */
-  svfloat32_t boring_zone = sv_as_f32_u32 (svlsl_n_u32_x (pg, sign, 30));
+  svfloat32_t boring_zone
+    = svreinterpret_f32_u32 (svlsl_n_u32_x (pg, sign, 30));
 
   svfloat32_t y
     = svsel_f32 (in_bounds,
-		 sv_approx_erfcf (sv_as_f32_u32 (ia), sign, ia12, pg),
+		 sv_approx_erfcf (svreinterpret_f32_u32 (ia), sign, ia12, pg),
 		 boring_zone);
 
   if (unlikely (svptest_any (pg, special_cases)))

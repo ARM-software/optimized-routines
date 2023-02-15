@@ -48,24 +48,6 @@ sv_f64 (f64_t x)
   return svdup_n_f64 (x);
 }
 
-static inline svint64_t
-sv_as_s64_u64 (svuint64_t x)
-{
-  return svreinterpret_s64_u64 (x);
-}
-
-static inline svuint64_t
-sv_as_u64_f64 (svfloat64_t x)
-{
-  return svreinterpret_u64_f64 (x);
-}
-
-static inline svfloat64_t
-sv_as_f64_u64 (svuint64_t x)
-{
-  return svreinterpret_f64_u64 (x);
-}
-
 static inline svfloat64_t
 sv_call_f64 (f64_t (*f) (f64_t), svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
@@ -122,36 +104,6 @@ static inline svfloat32_t
 sv_f32 (f32_t x)
 {
   return svdup_n_f32 (x);
-}
-
-static inline svuint32_t
-sv_as_u32_f32 (svfloat32_t x)
-{
-  return svreinterpret_u32_f32 (x);
-}
-
-static inline svuint32_t
-sv_as_u32_s32 (svint32_t x)
-{
-  return svreinterpret_u32_s32 (x);
-}
-
-static inline svfloat32_t
-sv_as_f32_u32 (svuint32_t x)
-{
-  return svreinterpret_f32_u32 (x);
-}
-
-static inline svfloat32_t
-sv_as_f32_u64 (svuint64_t x)
-{
-  return svreinterpret_f32_u64 (x);
-}
-
-static inline svint32_t
-sv_as_s32_u32 (svuint32_t x)
-{
-  return svreinterpret_s32_u32 (x);
 }
 
 static inline svfloat32_t
