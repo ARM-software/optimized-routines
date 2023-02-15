@@ -33,7 +33,7 @@ __sv_atanf_common (svbool_t pg, svbool_t red, svfloat32_t z, svfloat32_t az,
 
   /* Finalize. y = shift + z + z^3 * P(z^2).  */
   svfloat32_t z3 = svmul_f32_x (pg, z2, az);
-  y = sv_fma_f32_x (pg, y, z3, az);
+  y = svmla_f32_x (pg, az, z3, y);
 
   /* Apply shift as indicated by 'red' predicate.  */
   y = svadd_f32_m (red, y, shift);

@@ -69,16 +69,16 @@ svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
 
   /* Polynomial evaluation: poly(r) ~ exp(r)-1.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
-  svfloat32_t p = sv_fma_n_f32_x (pg, C (0), r, sv_f32 (C (1)));
-  svfloat32_t q = sv_fma_n_f32_x (pg, C (2), r, sv_f32 (C (3)));
-  q = sv_fma_f32_x (pg, p, r2, q);
+  svfloat32_t p = svmla_n_f32_x (pg, sv_f32 (C (1)), r, C (0));
+  svfloat32_t q = svmla_n_f32_x (pg, sv_f32 (C (3)), r, C (2));
+  q = svmla_f32_x (pg, q, r2, p);
   p = svmul_n_f32_x (pg, r, C (4));
-  svfloat32_t poly = sv_fma_f32_x (pg, q, r2, p);
+  svfloat32_t poly = svmla_f32_x (pg, p, r2, q);
 
   if (unlikely (svptest_any (pg, is_special_case)))
     {
 #if SV_EXP2F_USE_FEXPA
-      return special_case (x, sv_fma_f32_x (pg, poly, scale, scale),
+      return special_case (x, svmla_f32_x (pg, scale, scale, poly),
 			   is_special_case);
 
 #else
@@ -86,7 +86,7 @@ svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
 
 #endif
     }
-  return sv_fma_f32_x (pg, poly, scale, scale);
+  return svmla_f32_x (pg, scale, scale, poly);
 }
 
 PL_SIG (SV, F, 1, exp2, -9.9, 9.9)

@@ -29,7 +29,7 @@ __sv_atan_common (svbool_t pg, svbool_t red, svfloat64_t z, svfloat64_t az,
 
   /* Finalize. y = shift + z + z^3 * P(z^2).  */
   svfloat64_t z3 = svmul_f64_x (pg, z2, az);
-  y = sv_fma_f64_x (pg, y, z3, az);
+  y = svmla_f64_x (pg, az, z3, y);
 
   /* Apply shift as indicated by `red` predicate.  */
   y = svadd_f64_m (red, y, shift);

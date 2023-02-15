@@ -47,7 +47,7 @@ sv_eval_poly (const svbool_t pg, svfloat64_t z, svuint64_t idx)
     {
       base--;
       svfloat64_t c = svld1_gather_u64index_f64 (pg, base, offset);
-      r = sv_fma_f64_x (pg, z, r, c);
+      r = svmla_f64_x (pg, c, r, z);
     }
   return r;
 }
@@ -63,9 +63,9 @@ sv_eval_gauss (const svbool_t pg, svfloat64_t abs_x)
   /* Split abs_x into (a_hi + a_lo), where a_hi is the 'large' component and
      a_lo is the 'small' component.  */
   const svfloat64_t scale = sv_f64 (0x1.0000002p27);
-  svfloat64_t a_hi = svneg_f64_x (pg, sv_fma_f64_x (pg, scale, abs_x,
-						    svneg_f64_x (pg, abs_x)));
-  a_hi = sv_fma_f64_x (pg, scale, abs_x, a_hi);
+  svfloat64_t a_hi
+    = svneg_f64_x (pg, svmla_f64_x (pg, svneg_f64_x (pg, abs_x), abs_x, scale));
+  a_hi = svmla_f64_x (pg, a_hi, abs_x, scale);
   svfloat64_t a_lo = svsub_f64_x (pg, abs_x, a_hi);
 
   svfloat64_t a_hi_neg = svneg_f64_x (pg, a_hi);
@@ -73,10 +73,10 @@ sv_eval_gauss (const svbool_t pg, svfloat64_t abs_x)
 
   /* We can then estimate the error in abs_x^2 by computing (abs_x * abs_x) -
      (a_hi + a_lo) * (a_hi + a_lo).  */
-  svfloat64_t e2 = sv_fma_f64_x (pg, a_hi_neg, a_hi, a2);
-  e2 = sv_fma_f64_x (pg, a_hi_neg, a_lo, e2);
-  e2 = sv_fma_f64_x (pg, a_lo_neg, a_hi, e2);
-  e2 = sv_fma_f64_x (pg, a_lo_neg, a_lo, e2);
+  svfloat64_t e2 = svmla_f64_x (pg, a2, a_hi, a_hi_neg);
+  e2 = svmla_f64_x (pg, e2, a_lo, a_hi_neg);
+  e2 = svmla_f64_x (pg, e2, a_hi, a_lo_neg);
+  e2 = svmla_f64_x (pg, e2, a_lo, a_lo_neg);
 
   return sv_exp_tail (pg, svneg_f64_x (pg, a2), e2);
 }
@@ -128,7 +128,7 @@ svfloat64_t SV_NAME_D1 (erfc) (svfloat64_t x, const svbool_t pg)
 
   /* Assemble result: 2-p*e if x<0, p*e otherwise. No need to conditionally
      select boring_zone because value accounted for in polynomial.  */
-  svfloat64_t y = sv_fma_f64_x (pg, p, e, boring_zone);
+  svfloat64_t y = svmla_f64_x (pg, boring_zone, e, p);
 
   if (unlikely (svptest_any (pg, special_cases)))
     {

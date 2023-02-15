@@ -48,19 +48,6 @@ sv_f64 (f64_t x)
   return svdup_n_f64 (x);
 }
 
-static inline svfloat64_t
-sv_fma_f64_x (svbool_t pg, svfloat64_t x, svfloat64_t y, svfloat64_t z)
-{
-  return svmla_f64_x (pg, z, x, y);
-}
-
-/* res = z + x * y with x scalar. */
-static inline svfloat64_t
-sv_fma_n_f64_x (svbool_t pg, f64_t x, svfloat64_t y, svfloat64_t z)
-{
-  return svmla_n_f64_x (pg, z, y, x);
-}
-
 static inline svint64_t
 sv_as_s64_u64 (svuint64_t x)
 {
@@ -135,19 +122,6 @@ static inline svfloat32_t
 sv_f32 (f32_t x)
 {
   return svdup_n_f32 (x);
-}
-
-static inline svfloat32_t
-sv_fma_f32_x (svbool_t pg, svfloat32_t x, svfloat32_t y, svfloat32_t z)
-{
-  return svmla_f32_x (pg, z, x, y);
-}
-
-/* res = z + x * y with x scalar.  */
-static inline svfloat32_t
-sv_fma_n_f32_x (svbool_t pg, f32_t x, svfloat32_t y, svfloat32_t z)
-{
-  return svmla_n_f32_x (pg, z, y, x);
 }
 
 static inline svuint32_t

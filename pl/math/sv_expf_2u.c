@@ -59,12 +59,12 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
 
   /* n = round(x/(ln2/N)).  */
-  svfloat32_t z = sv_fma_n_f32_x (pg, InvLn2, x, sv_f32 (Shift));
+  svfloat32_t z = svmla_n_f32_x (pg, sv_f32 (Shift), x, InvLn2);
   svfloat32_t n = svsub_n_f32_x (pg, z, Shift);
 
   /* r = x - n*ln2/N.  */
-  svfloat32_t r = sv_fma_n_f32_x (pg, -Ln2hi, n, x);
-  r = sv_fma_n_f32_x (pg, -Ln2lo, n, r);
+  svfloat32_t r = svmla_n_f32_x (pg, x, n, -Ln2hi);
+  r = svmla_n_f32_x (pg, r, n, -Ln2lo);
 
 /* scale = 2^(n/N).  */
 #if SV_EXPF_USE_FEXPA
@@ -80,21 +80,21 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 
   /* y = exp(r) - 1 ~= r + C1 r^2 + C2 r^3 + C3 r^4.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
-  svfloat32_t p = sv_fma_n_f32_x (pg, C (0), r, sv_f32 (C (1)));
-  svfloat32_t q = sv_fma_n_f32_x (pg, C (2), r, sv_f32 (C (3)));
-  q = sv_fma_f32_x (pg, p, r2, q);
+  svfloat32_t p = svmla_n_f32_x (pg, sv_f32 (C (1)), r, C (0));
+  svfloat32_t q = svmla_n_f32_x (pg, sv_f32 (C (3)), r, C (2));
+  q = svmla_f32_x (pg, q, r2, p);
   p = svmul_n_f32_x (pg, r, C (4));
-  svfloat32_t poly = sv_fma_f32_x (pg, q, r2, p);
+  svfloat32_t poly = svmla_f32_x (pg, p, r2, q);
 
   if (unlikely (svptest_any (pg, is_special_case)))
 #if SV_EXPF_USE_FEXPA
-    return special_case (x, sv_fma_f32_x (pg, poly, scale, scale),
+    return special_case (x, svmla_f32_x (pg, scale, scale, poly),
 			 is_special_case);
 #else
     return __sv_expf_specialcase (pg, poly, n, e, is_special_case, scale);
 #endif
 
-  return sv_fma_f32_x (pg, poly, scale, scale);
+  return svmla_f32_x (pg, scale, scale, poly);
 }
 
 PL_SIG (SV, F, 1, exp, -9.9, 9.9)

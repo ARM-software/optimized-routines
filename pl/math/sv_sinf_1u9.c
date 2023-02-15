@@ -46,22 +46,22 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
   cmp = svcmpge_u32 (pg, sv_as_u32_f32 (r), sv_as_u32_f32 (RangeVal));
 
   /* n = rint(|x|/pi).  */
-  n = sv_fma_f32_x (pg, InvPi, r, Shift);
+  n = svmla_f32_x (pg, Shift, r, InvPi);
   odd = svlsl_n_u32_x (pg, sv_as_u32_f32 (n), 31);
   n = svsub_f32_x (pg, n, Shift);
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = sv_fma_f32_x (pg, NegPi1, n, r);
-  r = sv_fma_f32_x (pg, NegPi2, n, r);
-  r = sv_fma_f32_x (pg, NegPi3, n, r);
+  r = svmla_f32_x (pg, r, n, NegPi1);
+  r = svmla_f32_x (pg, r, n, NegPi2);
+  r = svmla_f32_x (pg, r, n, NegPi3);
 
   /* sin(r) approx using a degree 9 polynomial from the Taylor series
      expansion. Note that only the odd terms of this are non-zero.  */
   r2 = svmul_f32_x (pg, r, r);
-  y = sv_fma_f32_x (pg, A9, r2, A7);
-  y = sv_fma_f32_x (pg, y, r2, A5);
-  y = sv_fma_f32_x (pg, y, r2, A3);
-  y = sv_fma_f32_x (pg, svmul_f32_x (pg, y, r2), r, r);
+  y = svmla_f32_x (pg, A7, r2, A9);
+  y = svmla_f32_x (pg, A5, r2, y);
+  y = svmla_f32_x (pg, A3, r2, y);
+  y = svmla_f32_x (pg, r, r, svmul_f32_x (pg, y, r2));
 
   /* sign = y^sign^odd.  */
   y = sv_as_f32_u32 (

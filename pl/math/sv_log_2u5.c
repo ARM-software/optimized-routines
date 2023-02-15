@@ -54,17 +54,17 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
   svfloat64_t logc = svld1_gather_u64index_f64 (pg, __sv_log_data.logc, i);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
-  svfloat64_t r = sv_fma_f64_x (pg, z, invc, sv_f64 (-1.0));
+  svfloat64_t r = svmla_f64_x (pg, sv_f64 (-1.0), invc, z);
   svfloat64_t kd = svcvt_f64_s64_x (pg, k);
   /* hi = r + log(c) + k*Ln2.  */
-  svfloat64_t hi = sv_fma_n_f64_x (pg, Ln2, kd, svadd_f64_x (pg, logc, r));
+  svfloat64_t hi = svmla_n_f64_x (pg, svadd_f64_x (pg, logc, r), kd, Ln2);
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t y = sv_fma_n_f64_x (pg, A (3), r, sv_f64 (A (2)));
-  svfloat64_t p = sv_fma_n_f64_x (pg, A (1), r, sv_f64 (A (0)));
-  y = sv_fma_n_f64_x (pg, A (4), r2, y);
-  y = sv_fma_f64_x (pg, y, r2, p);
-  y = sv_fma_f64_x (pg, y, r2, hi);
+  svfloat64_t y = svmla_n_f64_x (pg, sv_f64 (A (2)), r, A (3));
+  svfloat64_t p = svmla_n_f64_x (pg, sv_f64 (A (0)), r, A (1));
+  y = svmla_n_f64_x (pg, y, r2, A (4));
+  y = svmla_f64_x (pg, p, r2, y);
+  y = svmla_f64_x (pg, hi, r2, y);
 
   if (unlikely (svptest_any (pg, cmp)))
     return __sv_log_specialcase (x, y, cmp);

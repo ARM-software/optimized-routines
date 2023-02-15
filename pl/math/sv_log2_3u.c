@@ -54,15 +54,15 @@ svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 
-  svfloat64_t r = sv_fma_f64_x (pg, z, invc, sv_f64 (-1.0));
-  svfloat64_t w = sv_fma_f64_x (pg, r, InvLn2, log2c);
+  svfloat64_t r = svmla_f64_x (pg, sv_f64 (-1.0), invc, z);
+  svfloat64_t w = svmla_f64_x (pg, log2c, InvLn2, r);
 
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t p_23 = sv_fma_f64_x (pg, P (3), r, P (2));
-  svfloat64_t p_01 = sv_fma_f64_x (pg, P (1), r, P (0));
-  svfloat64_t y = sv_fma_f64_x (pg, P (4), r2, p_23);
-  y = sv_fma_f64_x (pg, y, r2, p_01);
-  y = sv_fma_f64_x (pg, y, r2, svadd_f64_x (pg, k, w));
+  svfloat64_t p_23 = svmla_f64_x (pg, P (2), r, P (3));
+  svfloat64_t p_01 = svmla_f64_x (pg, P (0), r, P (1));
+  svfloat64_t y = svmla_f64_x (pg, p_23, r2, P (4));
+  y = svmla_f64_x (pg, p_01, r2, y);
+  y = svmla_f64_x (pg, svadd_f64_x (pg, k, w), r2, y);
 
   if (unlikely (svptest_any (pg, special)))
     {

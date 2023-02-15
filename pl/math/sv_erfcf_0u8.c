@@ -47,7 +47,7 @@ estrin_lvl1 (svbool_t pg, svfloat64_t x, svuint64_t idx, u64_t i, u64_t j)
       b = svsel_f64 (usehi, b_hi, b);
     }
 
-  return sv_fma_f64_x (pg, x, b, a);
+  return svmla_f64_x (pg, a, b, x);
 }
 
 static inline svfloat64_t
@@ -66,15 +66,15 @@ sv_eval_poly_estrin (svbool_t pg, svfloat64_t z, svuint64_t idx)
   svfloat64_t p_12_13 = estrin_lvl1 (pg, z, idx, 12, 13);
   svfloat64_t p_14_15 = estrin_lvl1 (pg, z, idx, 14, 15);
 
-  svfloat64_t p_0_3 = sv_fma_f64_x (pg, z2, p_2_3, p_0_1);
-  svfloat64_t p_4_7 = sv_fma_f64_x (pg, z2, p_6_7, p_4_5);
-  svfloat64_t p_8_11 = sv_fma_f64_x (pg, z2, p_10_11, p_8_9);
-  svfloat64_t p_12_15 = sv_fma_f64_x (pg, z2, p_14_15, p_12_13);
+  svfloat64_t p_0_3 = svmla_f64_x (pg, p_0_1, p_2_3, z2);
+  svfloat64_t p_4_7 = svmla_f64_x (pg, p_4_5, p_6_7, z2);
+  svfloat64_t p_8_11 = svmla_f64_x (pg, p_8_9, p_10_11, z2);
+  svfloat64_t p_12_15 = svmla_f64_x (pg, p_12_13, p_14_15, z2);
 
-  svfloat64_t p_0_7 = sv_fma_f64_x (pg, z4, p_4_7, p_0_3);
-  svfloat64_t p_8_15 = sv_fma_f64_x (pg, z4, p_12_15, p_8_11);
+  svfloat64_t p_0_7 = svmla_f64_x (pg, p_0_3, p_4_7, z4);
+  svfloat64_t p_8_15 = svmla_f64_x (pg, p_8_11, p_12_15, z4);
 
-  svfloat64_t p_0_15 = sv_fma_f64_x (pg, z8, p_8_15, p_0_7);
+  svfloat64_t p_0_15 = svmla_f64_x (pg, p_0_7, p_8_15, z8);
   return p_0_15;
 }
 

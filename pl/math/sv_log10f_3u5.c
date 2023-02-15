@@ -56,8 +56,8 @@ svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
 
   /* Using p = Log10(2)*n + r*InvLn(10) is slightly faster but less
      accurate.  */
-  svfloat32_t p = sv_fma_n_f32_x (pg, Ln2, n, r);
-  y = sv_fma_f32_x (pg, y, r2, svmul_n_f32_x (pg, p, InvLn10));
+  svfloat32_t p = svmla_n_f32_x (pg, r, n, Ln2);
+  y = svmla_f32_x (pg, svmul_n_f32_x (pg, p, InvLn10), r2, y);
 
   if (unlikely (svptest_any (pg, special_cases)))
     {

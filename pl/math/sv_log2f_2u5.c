@@ -49,7 +49,7 @@ svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
 
   /* Evaluate polynomial using pairwise Horner scheme.  */
   svfloat32_t y = PAIRWISE_HORNER_8 (pg, r, r2, P);
-  y = sv_fma_f32_x (pg, y, r, n);
+  y = svmla_f32_x (pg, n, r, y);
 
   if (unlikely (svptest_any (pg, special)))
     return specialcase (x, y, special);

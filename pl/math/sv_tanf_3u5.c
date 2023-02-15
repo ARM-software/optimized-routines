@@ -48,7 +48,7 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
   svbool_t pred_minuszero = svcmpeq_f32 (pg, x, sv_f32 (-0.0));
 
   /* n = rint(x/(pi/2)).  */
-  svfloat32_t q = sv_fma_f32_x (pg, InvPio2, x, Shift);
+  svfloat32_t q = svmla_f32_x (pg, Shift, x, InvPio2);
   svfloat32_t n = svsub_f32_x (pg, q, Shift);
   /* n is already a signed integer, simply convert it.  */
   svint32_t in = svcvt_s32_f32_x (pg, n);
@@ -58,9 +58,9 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
 
   /* r = x - n * (pi/2)  (range reduction into 0 .. pi/4).  */
   svfloat32_t r;
-  r = sv_fma_f32_x (pg, NegPio2_1, n, x);
-  r = sv_fma_f32_x (pg, NegPio2_2, n, r);
-  r = sv_fma_f32_x (pg, NegPio2_3, n, r);
+  r = svmla_f32_x (pg, x, n, NegPio2_1);
+  r = svmla_f32_x (pg, r, n, NegPio2_2);
+  r = svmla_f32_x (pg, r, n, NegPio2_3);
 
   /* If x lives in an interval, where |tan(x)|
      - is finite, then use a polynomial approximation of the form
@@ -75,7 +75,7 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
   /* Evaluate polynomial approximation of tangent on [-pi/4, pi/4].  */
   svfloat32_t z2 = svmul_f32_x (pg, z, z);
   svfloat32_t p = eval_poly (pg, z2);
-  svfloat32_t y = sv_fma_f32_x (pg, svmul_f32_x (pg, z, z2), p, z);
+  svfloat32_t y = svmla_f32_x (pg, z, p, svmul_f32_x (pg, z, z2));
 
   /* Transform result back, if necessary.  */
   svfloat32_t inv_y = svdiv_f32_x (pg, sv_f32 (1.0f), y);

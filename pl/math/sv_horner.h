@@ -7,7 +7,7 @@
  */
 
 #if SV_SUPPORTED
-#define FMA sv_fma_f64_x
+#define FMA(pg, x, y, z) svmla_f64_x (pg, z, x, y)
 #define VECTOR sv_f64
 #endif
 

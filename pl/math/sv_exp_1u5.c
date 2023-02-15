@@ -51,7 +51,7 @@ specialcase (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
   svbool_t p_cmp = svcmpgt_n_f64 (pg, absn, 1280.0);
 
   svfloat64_t r1 = svmul_f64_x (pg, s1, s1);
-  svfloat64_t r2 = sv_fma_f64_x (pg, y, s2, s2);
+  svfloat64_t r2 = svmla_f64_x (pg, s2, s2, y);
   svfloat64_t r0 = svmul_f64_x (pg, r2, s1);
 
   return svsel_f64 (p_cmp, r1, r0);
@@ -81,20 +81,20 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
      We add 1023 to the modified shift value in order to set bits 16:6 of u to
      1, such that once these bits are moved to the exponent of the output of
      FEXPA, we get the exponent of 2^n right, i.e. we get 2^m.  */
-  svfloat64_t z = sv_fma_n_f64_x (pg, InvLn2, x, sv_f64 (Shift));
+  svfloat64_t z = svmla_n_f64_x (pg, sv_f64 (Shift), x, InvLn2);
   svuint64_t u = sv_as_u64_f64 (z);
   svfloat64_t n = svsub_n_f64_x (pg, z, Shift);
 
   /* r = x - n * ln2, r is in [-ln2/(2N), ln2/(2N)].  */
-  svfloat64_t r = sv_fma_n_f64_x (pg, -Ln2hi, n, x);
-  r = sv_fma_n_f64_x (pg, -Ln2lo, n, r);
+  svfloat64_t r = svmla_n_f64_x (pg, x, n, -Ln2hi);
+  r = svmla_n_f64_x (pg, r, n, -Ln2lo);
 
   /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5.  */
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t c2_c3r = sv_fma_n_f64_x (pg, C (3), r, sv_f64 (C (2)));
-  svfloat64_t c0_c1r = sv_fma_n_f64_x (pg, C (1), r, sv_f64 (C (0)));
-  svfloat64_t c0_to_3 = sv_fma_f64_x (pg, r2, c2_c3r, c0_c1r);
-  svfloat64_t y = sv_fma_f64_x (pg, r2, c0_to_3, r);
+  svfloat64_t c2_c3r = svmla_n_f64_x (pg, sv_f64 (C (2)), r, C (3));
+  svfloat64_t c0_c1r = svmla_n_f64_x (pg, sv_f64 (C (0)), r, C (1));
+  svfloat64_t c0_to_3 = svmla_f64_x (pg, c0_c1r, c2_c3r, r2);
+  svfloat64_t y = svmla_f64_x (pg, r, c0_to_3, r2);
 
   /* s = 2^n, computed using FEXPA. FEXPA does not propagate NaNs, so for
      consistent NaN handling we have to manually propagate them. This comes at
@@ -118,7 +118,7 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
     }
 
   /* No special case.  */
-  return sv_fma_f64_x (pg, y, s, s);
+  return svmla_f64_x (pg, s, s, y);
 }
 
 PL_SIG (SV, D, 1, exp, -9.9, 9.9)

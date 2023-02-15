@@ -43,9 +43,9 @@ __sv_expf_specialcase (svbool_t pg, svfloat32_t poly, svfloat32_t n,
   svbool_t p_cmp2 = svacgt_n_f32 (pg, n, ScaleThres);
 
   svfloat32_t r2 = svmul_f32_x (pg, s1, s1);
-  svfloat32_t r1 = sv_fma_f32_x (pg, poly, s2, s2);
+  svfloat32_t r1 = svmla_f32_x (pg, s2, s2, poly);
   r1 = svmul_f32_x (pg, r1, s1);
-  svfloat32_t r0 = sv_fma_f32_x (pg, poly, scale, scale);
+  svfloat32_t r0 = svmla_f32_x (pg, scale, scale, poly);
 
   /* Apply condition 1 then 2.
      Returns r2 if cond2 is true, otherwise

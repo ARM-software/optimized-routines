@@ -64,20 +64,20 @@ svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
   svfloat64_t z = svmla_f64_m (a_lt_6, shift, sv_f64 (Scale), a);
 
   /* Evaluate polynomial P(z) using level-2 Estrin.  */
-  svfloat64_t r1 = sv_fma_f64_x (pg, z, P_1, P_0);
-  svfloat64_t r2 = sv_fma_f64_x (pg, z, P_3, P_2);
-  svfloat64_t r3 = sv_fma_f64_x (pg, z, P_5, P_4);
-  svfloat64_t r4 = sv_fma_f64_x (pg, z, P_7, P_6);
-  svfloat64_t r5 = sv_fma_f64_x (pg, z, P_9, P_8);
+  svfloat64_t r1 = svmla_f64_x (pg, P_0, P_1, z);
+  svfloat64_t r2 = svmla_f64_x (pg, P_2, P_3, z);
+  svfloat64_t r3 = svmla_f64_x (pg, P_4, P_5, z);
+  svfloat64_t r4 = svmla_f64_x (pg, P_6, P_7, z);
+  svfloat64_t r5 = svmla_f64_x (pg, P_8, P_9, z);
 
   svfloat64_t z2 = svmul_f64_x (pg, z, z);
   svfloat64_t z4 = svmul_f64_x (pg, z2, z2);
 
-  svfloat64_t q2 = sv_fma_f64_x (pg, r4, z2, r3);
-  svfloat64_t q1 = sv_fma_f64_x (pg, r2, z2, r1);
+  svfloat64_t q2 = svmla_f64_x (pg, r3, z2, r4);
+  svfloat64_t q1 = svmla_f64_x (pg, r1, z2, r2);
 
-  svfloat64_t y = sv_fma_f64_x (pg, z4, r5, q2);
-  y = sv_fma_f64_x (pg, z4, y, q1);
+  svfloat64_t y = svmla_f64_x (pg, q2, r5, z4);
+  y = svmla_f64_x (pg, q1, y, z4);
 
   /* y = erf(x) if x > 0, -erf(-x) otherwise.  */
   y = sv_as_f64_u64 (sveor_u64_x (pg, sv_as_u64_f64 (y), sign));

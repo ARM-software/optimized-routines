@@ -49,14 +49,14 @@ svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
   /* y = log(1+r) + n*ln2.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
   /* n*ln2 + r + r2*(P6 + r*P5 + r2*(P4 + r*P3 + r2*(P2 + r*P1 + r2*P0))).  */
-  svfloat32_t p = sv_fma_n_f32_x (pg, P (1), r, sv_f32 (P (2)));
-  svfloat32_t q = sv_fma_n_f32_x (pg, P (3), r, sv_f32 (P (4)));
-  svfloat32_t y = sv_fma_n_f32_x (pg, P (5), r, sv_f32 (P (6)));
-  p = sv_fma_n_f32_x (pg, P (0), r2, p);
-  q = sv_fma_f32_x (pg, p, r2, q);
-  y = sv_fma_f32_x (pg, q, r2, y);
-  p = sv_fma_n_f32_x (pg, Ln2, n, r);
-  y = sv_fma_f32_x (pg, y, r2, p);
+  svfloat32_t p = svmla_n_f32_x (pg, sv_f32 (P (2)), r, P (1));
+  svfloat32_t q = svmla_n_f32_x (pg, sv_f32 (P (4)), r, P (3));
+  svfloat32_t y = svmla_n_f32_x (pg, sv_f32 (P (6)), r, P (5));
+  p = svmla_n_f32_x (pg, p, r2, P (0));
+  q = svmla_f32_x (pg, q, r2, p);
+  y = svmla_f32_x (pg, y, r2, q);
+  p = svmla_n_f32_x (pg, r, n, Ln2);
+  y = svmla_f32_x (pg, p, r2, y);
 
   if (unlikely (svptest_any (pg, cmp)))
     return __sv_logf_specialcase (x, y, cmp);

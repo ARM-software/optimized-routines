@@ -60,16 +60,16 @@ svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
   svfloat32_t z = svmul_f32_m (red, a, a);
 
   /* Evaluate polynomial on |x| or x^2.  */
-  svfloat32_t r = sv_fma_f32_x (pg, z, p6, p5);
-  r = sv_fma_f32_x (pg, z, r, p4);
-  r = sv_fma_f32_x (pg, z, r, p3);
-  r = sv_fma_f32_x (pg, z, r, p2);
-  r = sv_fma_f32_x (pg, z, r, p1);
+  svfloat32_t r = svmla_f32_x (pg, p5, p6, z);
+  r = svmla_f32_x (pg, p4, r, z);
+  r = svmla_f32_x (pg, p3, r, z);
+  r = svmla_f32_x (pg, p2, r, z);
+  r = svmla_f32_x (pg, p1, r, z);
   /* Use merging svmad for last operation - apply first coefficient if not
      reduced, otherwise r is propagated unchanged. This is because the reduced
      polynomial has lower order than the non-reduced.  */
   r = svmad_n_f32_m (svnot_b_z (pg, red), r, z, base[1]);
-  r = sv_fma_f32_x (pg, a, r, a);
+  r = svmla_f32_x (pg, a, r, a);
 
   /* y = |x| + |x| * P(x^2)               if |x| < 0.921875
      y = 1 - exp (-(|x| + |x| * P(|x|)))  otherwise.  */

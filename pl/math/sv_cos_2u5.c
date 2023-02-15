@@ -42,13 +42,13 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
   cmp = svcmpge_u64 (pg, sv_as_u64_f64 (r), sv_as_u64_f64 (RangeVal));
 
   /* n = rint(|x|/(pi/2)).  */
-  svfloat64_t q = sv_fma_f64_x (pg, InvPio2, r, Shift);
+  svfloat64_t q = svmla_f64_x (pg, Shift, r, InvPio2);
   n = svsub_f64_x (pg, q, Shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
-  r = sv_fma_f64_x (pg, NegPio2_1, n, r);
-  r = sv_fma_f64_x (pg, NegPio2_2, n, r);
-  r = sv_fma_f64_x (pg, NegPio2_3, n, r);
+  r = svmla_f64_x (pg, r, n, NegPio2_1);
+  r = svmla_f64_x (pg, r, n, NegPio2_2);
+  r = svmla_f64_x (pg, r, n, NegPio2_3);
 
   /* cos(r) poly approx.  */
   r2 = svtsmul_f64 (r, sv_as_u64_f64 (q));

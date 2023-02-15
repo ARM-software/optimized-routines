@@ -41,7 +41,7 @@ sv_exp_tail_special_case (svbool_t pg, svfloat64_t s, svfloat64_t y,
 
   svbool_t cmp = svcmpgt_n_f64 (pg, absn, 1280.0 * N);
   svfloat64_t r1 = svmul_f64_x (pg, s1, s1);
-  svfloat64_t r0 = svmul_f64_x (pg, sv_fma_f64_x (pg, y, s2, s2), s1);
+  svfloat64_t r0 = svmul_f64_x (pg, svmla_f64_x (pg, s2, s2, y), s1);
   return svsel_f64 (cmp, r1, r0);
 }
 
@@ -49,20 +49,20 @@ static inline svfloat64_t
 sv_exp_tail (const svbool_t pg, svfloat64_t x, svfloat64_t xtail)
 {
   /* Calculate exp(x + xtail).  */
-  svfloat64_t z = sv_fma_n_f64_x (pg, InvLn2_scal, x, Shift);
+  svfloat64_t z = svmla_n_f64_x (pg, Shift, x, InvLn2_scal);
   svfloat64_t n = svsub_f64_x (pg, z, Shift);
 
-  svfloat64_t r = sv_fma_n_f64_x (pg, MinusLn2hi, n, x);
-  r = sv_fma_n_f64_x (pg, MinusLn2lo, n, r);
+  svfloat64_t r = svmla_n_f64_x (pg, x, n, MinusLn2hi);
+  r = svmla_n_f64_x (pg, r, n, MinusLn2lo);
 
   svuint64_t u = sv_as_u64_f64 (z);
   svuint64_t e = svlsl_n_u64_x (pg, u, 52 - V_EXP_TAIL_TABLE_BITS);
   svuint64_t i = svand_n_u64_x (pg, u, IndexMask);
 
-  svfloat64_t y = sv_fma_f64_x (pg, C3, r, C2);
-  y = sv_fma_f64_x (pg, y, r, C1);
-  y = sv_fma_f64_x (pg, y, r, sv_f64 (1.0));
-  y = sv_fma_f64_x (pg, y, r, xtail);
+  svfloat64_t y = svmla_f64_x (pg, C2, r, C3);
+  y = svmla_f64_x (pg, C1, r, y);
+  y = svmla_f64_x (pg, sv_f64 (1.0), r, y);
+  y = svmla_f64_x (pg, xtail, r, y);
 
   /* s = 2^(n/N).  */
   u = svld1_gather_u64index_u64 (pg, Tab, i);
@@ -73,7 +73,7 @@ sv_exp_tail (const svbool_t pg, svfloat64_t x, svfloat64_t xtail)
     {
       return sv_exp_tail_special_case (pg, s, y, n);
     }
-  return sv_fma_f64_x (pg, y, s, s);
+  return svmla_f64_x (pg, s, s, y);
 }
 
 #endif
