@@ -74,7 +74,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5
      z = (1 - |x|) / 2 and y = sqrt(z), if |x| >= 0.5.  */
-  float64x2_t z2 = vbslq_f64 (a_lt_half, x * x, v_fma_f64 (-Half, ax, Half));
+  float64x2_t z2 = vbslq_f64 (a_lt_half, x * x, vfmaq_f64 (Half, -Half, ax));
   float64x2_t z = vbslq_f64 (a_lt_half, ax, vsqrtq_f64 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
@@ -84,11 +84,11 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
   float64x2_t p = ESTRIN_11 (z2, z4, z8, z16, P);
 
   /* Finalize polynomial: z + z * z2 * P(z2).  */
-  p = v_fma_f64 (z * z2, p, z);
+  p = vfmaq_f64 (z, z * z2, p);
 
   /* asin(|x|) = Q(|x|)         , for |x| < 0.5
 	       = pi/2 - 2 Q(|x|), for |x| >= 0.5.  */
-  float64x2_t y = vbslq_f64 (a_lt_half, p, v_fma_f64 (-Two, p, PiOver2));
+  float64x2_t y = vbslq_f64 (a_lt_half, p, vfmaq_f64 (PiOver2, -Two, p));
 
   /* Copy sign.  */
   return v_as_f64_u64 (vbslq_u64 (v_u64 (AbsMask), v_as_u64_f64 (y), ix));

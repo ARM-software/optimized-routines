@@ -71,24 +71,24 @@ float64x2_t V_NAME_D1 (log10) (float64x2_t x)
   e = lookup (i);
 
   /* log10(x) = log1p(z/c-1)/log(10) + log10(c) + k*log10(2).  */
-  r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
+  r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   kd = vcvtq_f64_s64 (k);
 
   /* hi = r / log(10) + log10(c) + k*log10(2).
      Constants in `v_log10_data.c` are computed (in extended precision) as
      e.log10c := e.logc * ivln10.  */
-  float64x2_t w = v_fma_f64 (r, v_f64 (__v_log10_data.invln10), e.log10c);
+  float64x2_t w = vfmaq_f64 (e.log10c, r, v_f64 (__v_log10_data.invln10));
 
   /* y = log10(1+r) + n * log10(2).  */
-  hi = v_fma_f64 (kd, v_f64 (__v_log10_data.log10_2), w);
+  hi = vfmaq_f64 (w, kd, v_f64 (__v_log10_data.log10_2));
 
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   r2 = r * r;
-  y = v_fma_f64 (A (3), r, A (2));
-  p = v_fma_f64 (A (1), r, A (0));
-  y = v_fma_f64 (A (4), r2, y);
-  y = v_fma_f64 (y, r2, p);
-  y = v_fma_f64 (y, r2, hi);
+  y = vfmaq_f64 (A (2), A (3), r);
+  p = vfmaq_f64 (A (0), A (1), r);
+  y = vfmaq_f64 (y, A (4), r2);
+  y = vfmaq_f64 (p, y, r2);
+  y = vfmaq_f64 (hi, y, r2);
 
   if (unlikely (v_any_u64 (cmp)))
     return specialcase (x, y, cmp);

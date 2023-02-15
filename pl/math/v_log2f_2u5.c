@@ -46,7 +46,7 @@ float32x4_t V_NAME_F1 (log2) (float32x4_t x)
   /* y = log2(1+r) + n.  */
   float32x4_t r2 = r * r;
   float32x4_t p = PAIRWISE_HORNER_8 (r, r2, C);
-  float32x4_t y = v_fma_f32 (p, r, n);
+  float32x4_t y = vfmaq_f32 (n, p, r);
 
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, cmp);

@@ -37,9 +37,9 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
   float32x4_t s2 = v_as_f32_u32 (e - b);
   uint32x4_t cmp2 = absn > v_f32 (192.0f);
   uint32x4_t r2 = v_as_u32_f32 (s1 * s1);
-  uint32x4_t r1 = v_as_u32_f32 (v_fma_f32 (poly, s2, s2) * s1);
+  uint32x4_t r1 = v_as_u32_f32 (vfmaq_f32 (s2, poly, s2) * s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
-  uint32x4_t r0 = v_as_u32_f32 (v_fma_f32 (poly, scale, scale));
+  uint32x4_t r0 = v_as_u32_f32 (vfmaq_f32 (scale, poly, scale));
   return v_as_f32_u32 ((cmp2 & r2) | (~cmp2 & cmp1 & r1) | (~cmp1 & r0));
 }
 
@@ -53,28 +53,28 @@ __v_expf (float32x4_t x)
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
 #if 1
-  z = v_fma_f32 (x, InvLn2, Shift);
+  z = vfmaq_f32 (Shift, x, InvLn2);
   n = z - Shift;
-  r = v_fma_f32 (n, -Ln2hi, x);
-  r = v_fma_f32 (n, -Ln2lo, r);
+  r = vfmaq_f32 (x, n, -Ln2hi);
+  r = vfmaq_f32 (r, n, -Ln2lo);
   e = v_as_u32_f32 (z) << 23;
 #else
   z = x * InvLn2;
   n = vrndaq_f32 (z);
-  r = v_fma_f32 (n, -Ln2hi, x);
-  r = v_fma_f32 (n, -Ln2lo, r);
+  r = vfmaq_f32 (x, n, -Ln2hi);
+  r = vfmaq_f32 (r, n, -Ln2lo);
   e = v_as_u32_s32 (vcvtaq_s32_f32 (z)) << 23;
 #endif
   scale = v_as_f32_u32 (e + v_u32 (0x3f800000));
   absn = vabsq_f32 (n);
   cmp = absn > v_f32 (126.0f);
   r2 = r * r;
-  p = v_fma_f32 (C0, r, C1);
-  q = v_fma_f32 (C2, r, C3);
-  q = v_fma_f32 (p, r2, q);
+  p = vfmaq_f32 (C1, C0, r);
+  q = vfmaq_f32 (C3, C2, r);
+  q = vfmaq_f32 (q, p, r2);
   p = C4 * r;
-  poly = v_fma_f32 (q, r2, p);
+  poly = vfmaq_f32 (p, q, r2);
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (poly, n, e, absn, cmp, scale);
-  return v_fma_f32 (poly, scale, scale);
+  return vfmaq_f32 (scale, poly, scale);
 }

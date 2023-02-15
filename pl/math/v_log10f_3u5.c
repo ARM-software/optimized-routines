@@ -54,17 +54,17 @@ float32x4_t V_NAME_F1 (log10) (float32x4_t x)
   r2 = r * r;
   /* (n*ln2 + r)*InvLn10 + r2*(P0 + r*P1 + r2*(P2 + r*P3 + r2*(P4 + r*P5 +
      r2*(P6+r*P7))).  */
-  o = v_fma_f32 (P (7), r, P (6));
-  p = v_fma_f32 (P (5), r, P (4));
-  q = v_fma_f32 (P (3), r, P (2));
-  y = v_fma_f32 (P (1), r, P (0));
-  p = v_fma_f32 (o, r2, p);
-  q = v_fma_f32 (p, r2, q);
-  y = v_fma_f32 (q, r2, y);
+  o = vfmaq_f32 (P (6), P (7), r);
+  p = vfmaq_f32 (P (4), P (5), r);
+  q = vfmaq_f32 (P (2), P (3), r);
+  y = vfmaq_f32 (P (0), P (1), r);
+  p = vfmaq_f32 (p, o, r2);
+  q = vfmaq_f32 (q, p, r2);
+  y = vfmaq_f32 (y, q, r2);
   /* Using p = Log10(2)*n + r*InvLn(10) is slightly faster
      but less accurate.  */
-  p = v_fma_f32 (Ln2, n, r);
-  y = v_fma_f32 (y, r2, p * InvLn10);
+  p = vfmaq_f32 (r, Ln2, n);
+  y = vfmaq_f32 (p * InvLn10, y, r2);
 
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, cmp);

@@ -65,16 +65,16 @@ float64x2_t V_NAME_D1 (log2) (float64x2_t x)
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 
-  float64x2_t r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
+  float64x2_t r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   float64x2_t kd = vcvtq_f64_s64 (k);
-  float64x2_t w = v_fma_f64 (r, InvLn2, e.log2c);
+  float64x2_t w = vfmaq_f64 (e.log2c, r, InvLn2);
 
   float64x2_t r2 = r * r;
-  float64x2_t p_23 = v_fma_f64 (P (3), r, P (2));
-  float64x2_t p_01 = v_fma_f64 (P (1), r, P (0));
-  float64x2_t y = v_fma_f64 (P (4), r2, p_23);
-  y = v_fma_f64 (r2, y, p_01);
-  y = v_fma_f64 (r2, y, kd + w);
+  float64x2_t p_23 = vfmaq_f64 (P (2), P (3), r);
+  float64x2_t p_01 = vfmaq_f64 (P (0), P (1), r);
+  float64x2_t y = vfmaq_f64 (p_23, P (4), r2);
+  y = vfmaq_f64 (p_01, r2, y);
+  y = vfmaq_f64 (kd + w, r2, y);
 
   if (unlikely (v_any_u64 (special)))
     return specialcase (x, y, special);

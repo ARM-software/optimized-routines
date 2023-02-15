@@ -49,14 +49,14 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
     return specialcase (x);
 
   /* q = nearest integer to 2 * x / pi.  */
-  float64x2_t q = v_fma_f64 (x, TwoOverPi, Shift) - Shift;
+  float64x2_t q = vfmaq_f64 (Shift, x, TwoOverPi) - Shift;
   int64x2_t qi = vcvtq_s64_f64 (q);
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
   float64x2_t r = x;
-  r = v_fma_f64 (q, MHalfPiHi, r);
-  r = v_fma_f64 (q, MHalfPiLo, r);
+  r = vfmaq_f64 (r, q, MHalfPiHi);
+  r = vfmaq_f64 (r, q, MHalfPiLo);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
      formula.  */
   r = r * 0.5;
@@ -70,8 +70,8 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
   float64x2_t r2 = r * r, r4 = r2 * r2, r8 = r4 * r4;
   /* Use offset version of Estrin wrapper to evaluate from C1 onwards.  */
   float64x2_t p = ESTRIN_7_ (r2, r4, r8, C, 1);
-  p = v_fma_f64 (p, r2, C (0));
-  p = v_fma_f64 (r2, p * r, r);
+  p = vfmaq_f64 (C (0), p, r2);
+  p = vfmaq_f64 (r, r2, p * r);
 
   /* Recombination uses double-angle formula:
      tan(2x) = 2 * tan(x) / (1 - (tan(x))^2)
@@ -79,7 +79,7 @@ float64x2_t V_NAME_D1 (tan) (float64x2_t x)
      tan(x) = 1 / (tan(pi/2 - x))
      to assemble result using change-of-sign and conditional selection of
      numerator/denominator, dependent on odd/even-ness of q (hence quadrant). */
-  float64x2_t n = v_fma_f64 (p, p, v_f64 (-1));
+  float64x2_t n = vfmaq_f64 (v_f64 (-1), p, p);
   float64x2_t d = p * 2;
 
   uint64x2_t use_recip = (v_as_u64_s64 (qi) & 1) == 0;

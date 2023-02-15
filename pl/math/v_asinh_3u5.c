@@ -59,15 +59,15 @@ log_inline (float64x2_t x)
   uint64x2_t iz = ix - (tmp & 0xfffULL << 52);
   float64x2_t z = v_as_f64_u64 (iz);
   struct entry e = lookup (i);
-  float64x2_t r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
+  float64x2_t r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   float64x2_t kd = vcvtq_f64_s64 (k);
-  float64x2_t hi = v_fma_f64 (kd, Ln2, e.logc + r);
+  float64x2_t hi = vfmaq_f64 (e.logc + r, kd, Ln2);
   float64x2_t r2 = r * r;
-  float64x2_t y = v_fma_f64 (A (3), r, A (2));
-  float64x2_t p = v_fma_f64 (A (1), r, A (0));
-  y = v_fma_f64 (A (4), r2, y);
-  y = v_fma_f64 (y, r2, p);
-  y = v_fma_f64 (y, r2, hi);
+  float64x2_t y = vfmaq_f64 (A (2), A (3), r);
+  float64x2_t p = vfmaq_f64 (A (0), A (1), r);
+  y = vfmaq_f64 (y, A (4), r2);
+  y = vfmaq_f64 (p, y, r2);
+  y = vfmaq_f64 (hi, y, r2);
   return y;
 }
 
@@ -131,7 +131,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
       float64x2_t z4 = z2 * z2;
       float64x2_t z8 = z4 * z4;
       float64x2_t p = ESTRIN_17 (x2, z2, z4, z8, z8 * z8, C);
-      option_2 = v_fma_f64 (p, x2 * ax, ax);
+      option_2 = vfmaq_f64 (ax, p, x2 * ax);
 #if WANT_SIMD_EXCEPT
       option_2 = vbslq_f64 (tiny, x, option_2);
 #endif

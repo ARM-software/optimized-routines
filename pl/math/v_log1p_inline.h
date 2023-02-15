@@ -69,9 +69,9 @@ log1p_inline (float64x2_t x)
   float64x2_t p = PAIRWISE_HORNER_18 (f, f2, C);
 
   /* Assemble log1p(x) = k * log2 + log1p(f) + c/m.  */
-  float64x2_t ylo = v_fma_f64 (k, Ln2Lo, cm);
-  float64x2_t yhi = v_fma_f64 (k, Ln2Hi, f);
-  return v_fma_f64 (f2, p, ylo + yhi);
+  float64x2_t ylo = vfmaq_f64 (cm, k, Ln2Lo);
+  float64x2_t yhi = vfmaq_f64 (f, k, Ln2Hi);
+  return vfmaq_f64 (ylo + yhi, f2, p);
 }
 
 #endif // PL_MATH_V_LOG1P_INLINE_H

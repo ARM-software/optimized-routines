@@ -71,17 +71,17 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asin) (float32x4_t x)
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5
      z = (1 - |x|) / 2 and y = sqrt(z), if |x| >= 0.5.  */
-  float32x4_t z2 = vbslq_f32 (a_lt_half, x * x, v_fma_f32 (-Halff, ax, Halff));
+  float32x4_t z2 = vbslq_f32 (a_lt_half, x * x, vfmaq_f32 (Halff, -Halff, ax));
   float32x4_t z = vbslq_f32 (a_lt_half, ax, vsqrtq_f32 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
   float32x4_t p = HORNER_4 (z2, P);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
-  p = v_fma_f32 (z * z2, p, z);
+  p = vfmaq_f32 (z, z * z2, p);
 
   /* asin(|x|) = Q(|x|)         , for |x| < 0.5
 	       = pi/2 - 2 Q(|x|), for |x| >= 0.5.  */
-  float32x4_t y = vbslq_f32 (a_lt_half, p, v_fma_f32 (-Twof, p, PiOver2f));
+  float32x4_t y = vbslq_f32 (a_lt_half, p, vfmaq_f32 (PiOver2f, -Twof, p));
 
   /* Copy sign.  */
   return v_as_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_as_u32_f32 (y), ix));

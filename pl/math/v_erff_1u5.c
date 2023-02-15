@@ -73,13 +73,13 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
 
   /* Evaluate Polynomial of |x| or x^2.  */
   float32x4_t r = dat.P[6];
-  r = v_fma_f32 (z, r, dat.P[5]);
-  r = v_fma_f32 (z, r, dat.P[4]);
-  r = v_fma_f32 (z, r, dat.P[3]);
-  r = v_fma_f32 (z, r, dat.P[2]);
-  r = v_fma_f32 (z, r, dat.P[1]);
-  r = vbslq_f32 (red, r, v_fma_f32 (z, r, dat.P[0]));
-  r = v_fma_f32 (a, r, a);
+  r = vfmaq_f32 (dat.P[5], z, r);
+  r = vfmaq_f32 (dat.P[4], z, r);
+  r = vfmaq_f32 (dat.P[3], z, r);
+  r = vfmaq_f32 (dat.P[2], z, r);
+  r = vfmaq_f32 (dat.P[1], z, r);
+  r = vbslq_f32 (red, r, vfmaq_f32 (dat.P[0], z, r));
+  r = vfmaq_f32 (a, a, r);
 
   /* y = |x| + |x|*P(|x|)        if |x| < 0.921875
      1 - exp (-(|x|+|x|*P(x^2))) otherwise.  */

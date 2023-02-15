@@ -32,28 +32,28 @@ exp_inline (float64x2_t x)
      special-case handling or tail.  */
 
   /* n = round(x/(ln2/N)).  */
-  float64x2_t z = v_fma_f64 (x, InvLn2, Shift);
+  float64x2_t z = vfmaq_f64 (Shift, x, InvLn2);
   uint64x2_t u = v_as_u64_f64 (z);
   float64x2_t n = z - Shift;
 
   /* r = x - n*ln2/N.  */
   float64x2_t r = x;
-  r = v_fma_f64 (-Ln2hi, n, r);
-  r = v_fma_f64 (-Ln2lo, n, r);
+  r = vfmaq_f64 (r, -Ln2hi, n);
+  r = vfmaq_f64 (r, -Ln2lo, n);
 
   uint64x2_t e = u << (52 - V_EXP_TAIL_TABLE_BITS);
   uint64x2_t i = u & IndexMask;
 
   /* y = tail + exp(r) - 1 ~= r + C1 r^2 + C2 r^3 + C3 r^4.  */
-  float64x2_t y = v_fma_f64 (C3, r, C2);
-  y = v_fma_f64 (y, r, C1);
-  y = v_fma_f64 (y, r, v_f64 (1)) * r;
+  float64x2_t y = vfmaq_f64 (C2, C3, r);
+  y = vfmaq_f64 (C1, y, r);
+  y = vfmaq_f64 (v_f64 (1), y, r) * r;
 
   /* s = 2^(n/N).  */
   u = v_lookup_u64 (Tab, i);
   float64x2_t s = v_as_f64_u64 (u + e);
 
-  return v_fma_f64 (y, s, s);
+  return vfmaq_f64 (s, y, s);
 }
 
 /* Approximation for vector double-precision cosh(x) using exp_inline.

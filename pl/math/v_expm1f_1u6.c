@@ -49,10 +49,10 @@ float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
      and f = x - i * ln2, then f is in [-ln2/2, ln2/2].
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
-  float32x4_t j = v_fma_f32 (InvLn2, x, Shift) - Shift;
+  float32x4_t j = vfmaq_f32 (Shift, InvLn2, x) - Shift;
   int32x4_t i = vcvtq_s32_f32 (j);
-  float32x4_t f = v_fma_f32 (j, MLn2hi, x);
-  f = v_fma_f32 (j, MLn2lo, f);
+  float32x4_t f = vfmaq_f32 (x, j, MLn2hi);
+  f = vfmaq_f32 (f, j, MLn2lo);
 
   /* Approximate expm1(f) using polynomial.
      Taylor expansion for expm1(x) has the form:
@@ -60,18 +60,18 @@ float32x4_t V_NAME_F1 (expm1) (float32x4_t x)
      So we calculate the polynomial P(f) = a + bf + cf^2 + ...
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
 
-  float32x4_t p = v_fma_f32 (C (4), f, C (3));
-  p = v_fma_f32 (p, f, C (2));
-  p = v_fma_f32 (p, f, C (1));
-  p = v_fma_f32 (p, f, C (0));
-  p = v_fma_f32 (f * f, p, f);
+  float32x4_t p = vfmaq_f32 (C (3), C (4), f);
+  p = vfmaq_f32 (C (2), p, f);
+  p = vfmaq_f32 (C (1), p, f);
+  p = vfmaq_f32 (C (0), p, f);
+  p = vfmaq_f32 (f, f * f, p);
 
   /* Assemble the result.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
   float32x4_t t = v_as_f32_u32 (v_as_u32_s32 (i << 23) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
-  float32x4_t y = v_fma_f32 (p, t, t - 1);
+  float32x4_t y = vfmaq_f32 (t - 1, p, t);
 
 #if !WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (special)))

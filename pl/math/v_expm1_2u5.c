@@ -28,19 +28,19 @@ static inline float64x2_t
 eval_poly (float64x2_t f, float64x2_t f2)
 {
   /* Evaluate custom polynomial using Estrin scheme.  */
-  float64x2_t p_01 = v_fma_f64 (f, C (1), C (0));
-  float64x2_t p_23 = v_fma_f64 (f, C (3), C (2));
-  float64x2_t p_45 = v_fma_f64 (f, C (5), C (4));
-  float64x2_t p_67 = v_fma_f64 (f, C (7), C (6));
-  float64x2_t p_89 = v_fma_f64 (f, C (9), C (8));
+  float64x2_t p_01 = vfmaq_f64 (C (0), f, C (1));
+  float64x2_t p_23 = vfmaq_f64 (C (2), f, C (3));
+  float64x2_t p_45 = vfmaq_f64 (C (4), f, C (5));
+  float64x2_t p_67 = vfmaq_f64 (C (6), f, C (7));
+  float64x2_t p_89 = vfmaq_f64 (C (8), f, C (9));
 
-  float64x2_t p_03 = v_fma_f64 (f2, p_23, p_01);
-  float64x2_t p_47 = v_fma_f64 (f2, p_67, p_45);
-  float64x2_t p_8a = v_fma_f64 (f2, C (10), p_89);
+  float64x2_t p_03 = vfmaq_f64 (p_01, f2, p_23);
+  float64x2_t p_47 = vfmaq_f64 (p_45, f2, p_67);
+  float64x2_t p_8a = vfmaq_f64 (p_89, f2, C (10));
 
   float64x2_t f4 = f2 * f2;
-  float64x2_t p_07 = v_fma_f64 (f4, p_47, p_03);
-  return v_fma_f64 (f4 * f4, p_8a, p_07);
+  float64x2_t p_07 = vfmaq_f64 (p_03, f4, p_47);
+  return vfmaq_f64 (p_07, f4 * f4, p_8a);
 }
 
 /* Double-precision vector exp(x) - 1 function.
@@ -69,10 +69,10 @@ float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
      and f = x - i * ln2, then f is in [-ln2/2, ln2/2].
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
-  float64x2_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
+  float64x2_t j = vfmaq_f64 (Shift, InvLn2, x) - Shift;
   int64x2_t i = vcvtq_s64_f64 (j);
-  float64x2_t f = v_fma_f64 (j, MLn2hi, x);
-  f = v_fma_f64 (j, MLn2lo, f);
+  float64x2_t f = vfmaq_f64 (x, j, MLn2hi);
+  f = vfmaq_f64 (f, j, MLn2lo);
 
   /* Approximate expm1(f) using polynomial.
      Taylor expansion for expm1(x) has the form:
@@ -80,14 +80,14 @@ float64x2_t V_NAME_D1 (expm1) (float64x2_t x)
      So we calculate the polynomial P(f) = a + bf + cf^2 + ...
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
   float64x2_t f2 = f * f;
-  float64x2_t p = v_fma_f64 (f2, eval_poly (f, f2), f);
+  float64x2_t p = vfmaq_f64 (f, f2, eval_poly (f, f2));
 
   /* Assemble the result.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
   float64x2_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
-  float64x2_t y = v_fma_f64 (p, t, t - 1);
+  float64x2_t y = vfmaq_f64 (t - 1, p, t);
 
 #if !WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (special)))

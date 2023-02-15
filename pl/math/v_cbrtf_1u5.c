@@ -49,13 +49,13 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
   /* p is a rough approximation for cbrt(m) in [0.5, 1.0]. The better this is,
      the less accurate the next stage of the algorithm needs to be. An order-4
      polynomial is enough for one Newton iteration.  */
-  float32x4_t p_01 = v_fma_f32 (C (1), m, C (0));
-  float32x4_t p_23 = v_fma_f32 (C (3), m, C (2));
-  float32x4_t p = v_fma_f32 (m * m, p_23, p_01);
+  float32x4_t p_01 = vfmaq_f32 (C (0), C (1), m);
+  float32x4_t p_23 = vfmaq_f32 (C (2), C (3), m);
+  float32x4_t p = vfmaq_f32 (p_01, m * m, p_23);
 
   /* One iteration of Newton's method for iteratively approximating cbrt.  */
   float32x4_t m_by_3 = m / 3;
-  float32x4_t a = v_fma_f32 (TwoThirds, p, m_by_3 / (p * p));
+  float32x4_t a = vfmaq_f32 (m_by_3 / (p * p), TwoThirds, p);
 
   /* Assemble the result by the following:
 

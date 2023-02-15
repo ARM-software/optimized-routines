@@ -69,19 +69,19 @@ float64x2_t V_NAME_D1 (erf) (float64x2_t x)
   struct entry dat = lookup (i);
 
   /* Evaluate polynomial on transformed argument.  */
-  float64x2_t z = v_fma_f64 (a, Scale, dat.shift);
+  float64x2_t z = vfmaq_f64 (dat.shift, a, Scale);
 
-  float64x2_t r1 = v_fma_f64 (z, dat.P[1], dat.P[0]);
-  float64x2_t r2 = v_fma_f64 (z, dat.P[3], dat.P[2]);
-  float64x2_t r3 = v_fma_f64 (z, dat.P[5], dat.P[4]);
-  float64x2_t r4 = v_fma_f64 (z, dat.P[7], dat.P[6]);
-  float64x2_t r5 = v_fma_f64 (z, dat.P[9], dat.P[8]);
+  float64x2_t r1 = vfmaq_f64 (dat.P[0], z, dat.P[1]);
+  float64x2_t r2 = vfmaq_f64 (dat.P[2], z, dat.P[3]);
+  float64x2_t r3 = vfmaq_f64 (dat.P[4], z, dat.P[5]);
+  float64x2_t r4 = vfmaq_f64 (dat.P[6], z, dat.P[7]);
+  float64x2_t r5 = vfmaq_f64 (dat.P[8], z, dat.P[9]);
 
   float64x2_t z2 = z * z;
-  float64x2_t y = v_fma_f64 (z2, r5, r4);
-  y = v_fma_f64 (z2, y, r3);
-  y = v_fma_f64 (z2, y, r2);
-  y = v_fma_f64 (z2, y, r1);
+  float64x2_t y = vfmaq_f64 (r4, z2, r5);
+  y = vfmaq_f64 (r3, z2, y);
+  y = vfmaq_f64 (r2, z2, y);
+  y = vfmaq_f64 (r1, z2, y);
 
   /* y=erf(x) if x>0, -erf(-x) otherwise.  */
   y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign);

@@ -39,7 +39,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
   /* Mask special lanes with 1 to side-step spurious invalid or overflow. Use
      only xm1 to calculate u, as operating on x will trigger invalid for NaN. */
   float32x4_t xm1 = vbslq_f32 (special, v_f32 (1), x - 1);
-  float32x4_t u = v_fma_f32 (xm1, xm1, 2 * xm1);
+  float32x4_t u = vfmaq_f32 (2 * xm1, xm1, xm1);
 #else
   float32x4_t xm1 = x - 1;
   float32x4_t u = xm1 * (x + 1.0f);

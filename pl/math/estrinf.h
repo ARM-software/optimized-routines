@@ -6,7 +6,7 @@
  */
 
 #if WANT_VMATH
-#define FMA v_fma_f32
+#define FMA(x, y, z) vfmaq_f32 (z, x, y)
 #else
 #define FMA fmaf
 #endif

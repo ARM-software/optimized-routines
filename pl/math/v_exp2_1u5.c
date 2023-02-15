@@ -65,12 +65,12 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
      We avoid forming r2*r2 to avoid overflow.  */
   float64x2_t p1234 = ESTRIN_3_ (r, r2, C, 1);
   float64x2_t p0 = r * v_f64 (__v_exp2_data.poly[0]);
-  float64x2_t tmp = v_fma_f64 (r2, p1234, p0);
+  float64x2_t tmp = vfmaq_f64 (p0, r2, p1234);
 
   float64x2_t scale = v_as_f64_u64 (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-65 and scale > 2^-928, so there
      is no spurious underflow here even without fma.  */
-  return v_fma_f64 (scale, tmp, scale);
+  return vfmaq_f64 (scale, scale, tmp);
 }
 
 PL_SIG (V, D, 1, exp2, -9.9, 9.9)

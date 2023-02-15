@@ -72,7 +72,7 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
 #endif
 
   /* n = rint(x/(pi/2)).  */
-  float32x4_t q = v_fma_f32 (InvPio2, x, Shift);
+  float32x4_t q = vfmaq_f32 (Shift, InvPio2, x);
   float32x4_t n = q - Shift;
   /* n is representable as a signed integer, simply convert it.  */
   int32x4_t in = vcvtaq_s32_f32 (n);
@@ -82,9 +82,9 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
 
   /* r = x - n * (pi/2)  (range reduction into -pi./4 .. pi/4).  */
   float32x4_t r;
-  r = v_fma_f32 (NegPio2_1, n, x);
-  r = v_fma_f32 (NegPio2_2, n, r);
-  r = v_fma_f32 (NegPio2_3, n, r);
+  r = vfmaq_f32 (x, NegPio2_1, n);
+  r = vfmaq_f32 (r, NegPio2_2, n);
+  r = vfmaq_f32 (r, NegPio2_3, n);
 
   /* If x lives in an interval, where |tan(x)|
      - is finite, then use a polynomial approximation of the form
@@ -99,7 +99,7 @@ float32x4_t V_NAME_F1 (tan) (float32x4_t x)
   /* Evaluate polynomial approximation of tangent on [-pi/4, pi/4].  */
   float32x4_t z2 = r * r;
   float32x4_t p = eval_poly (z2);
-  float32x4_t y = v_fma_f32 (z * z2, p, z);
+  float32x4_t y = vfmaq_f32 (z, z * z2, p);
 
   /* Compute reciprocal and apply if required.  */
   float32x4_t inv_y = vdivq_f32 (v_f32 (1.0f), y);

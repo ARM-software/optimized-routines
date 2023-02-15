@@ -62,15 +62,15 @@ v_eval_gauss (float64x2_t a)
   float64x2_t a2 = a * a;
 
   /* TwoProduct (Dekker) applied to a * a.  */
-  float64x2_t a_hi = -v_fma_f64 (Scale, a, -a);
-  a_hi = v_fma_f64 (Scale, a, a_hi);
+  float64x2_t a_hi = -vfmaq_f64 (-a, Scale, a);
+  a_hi = vfmaq_f64 (a_hi, Scale, a);
   float64x2_t a_lo = a - a_hi;
 
   /* Now assemble error term.  */
-  e2 = v_fma_f64 (-a_hi, a_hi, a2);
-  e2 = v_fma_f64 (-a_hi, a_lo, e2);
-  e2 = v_fma_f64 (-a_lo, a_hi, e2);
-  e2 = v_fma_f64 (-a_lo, a_lo, e2);
+  e2 = vfmaq_f64 (a2, -a_hi, a_hi);
+  e2 = vfmaq_f64 (e2, -a_hi, a_lo);
+  e2 = vfmaq_f64 (e2, -a_lo, a_hi);
+  e2 = vfmaq_f64 (e2, -a_lo, a_lo);
 
   /* Fast and accurate evaluation of exp(-a2 + e2) where e2 << a2.  */
   return __v_exp_tail (-a2, e2);
@@ -136,7 +136,7 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
   p = v_as_f64_u64 (v_as_u64_f64 (p) ^ sign);
 
   /* Assemble result as 2.0 - p * e if x < 0, p * e otherwise.  */
-  y = v_fma_f64 (p, e, fac);
+  y = vfmaq_f64 (fac, p, e);
 
   /* No need to fix value of y if x is out of bound, as
      P[ERFC_NUM_INTERVALS]=0.  */

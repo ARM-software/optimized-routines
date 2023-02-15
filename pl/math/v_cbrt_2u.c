@@ -50,14 +50,14 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
 
   /* Calculate rough approximation for cbrt(m) in [0.5, 1.0], starting point for
      Newton iterations.  */
-  float64x2_t p_01 = v_fma_f64 (C (1), m, C (0));
-  float64x2_t p_23 = v_fma_f64 (C (3), m, C (2));
-  float64x2_t p = v_fma_f64 (m * m, p_23, p_01);
+  float64x2_t p_01 = vfmaq_f64 (C (0), C (1), m);
+  float64x2_t p_23 = vfmaq_f64 (C (2), C (3), m);
+  float64x2_t p = vfmaq_f64 (p_01, m * m, p_23);
 
   /* Two iterations of Newton's method for iteratively approximating cbrt.  */
   float64x2_t m_by_3 = m / 3;
-  float64x2_t a = v_fma_f64 (TwoThirds, p, m_by_3 / (p * p));
-  a = v_fma_f64 (TwoThirds, a, m_by_3 / (a * a));
+  float64x2_t a = vfmaq_f64 (m_by_3 / (p * p), TwoThirds, p);
+  a = vfmaq_f64 (m_by_3 / (a * a), TwoThirds, a);
 
   /* Assemble the result by the following:
 

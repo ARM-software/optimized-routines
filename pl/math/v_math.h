@@ -145,11 +145,6 @@ v_any_u32 (uint32x4_t x)
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
 }
-static inline float32x4_t
-v_fma_f32 (float32x4_t x, float32x4_t y, float32x4_t z)
-{
-  return vfmaq_f32 (z, x, y);
-}
 /* reinterpret as type1 from type2.  */
 static inline uint32x4_t
 v_as_u32_f32 (float32x4_t x)
@@ -270,11 +265,6 @@ v_all_u64 (uint64x2_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_s64 (vreinterpretq_s64_u64 (x)) == -2;
-}
-static inline float64x2_t
-v_fma_f64 (float64x2_t x, float64x2_t y, float64x2_t z)
-{
-  return vfmaq_f64 (z, x, y);
 }
 /* reinterpret as type1 from type2.  */
 static inline uint64x2_t

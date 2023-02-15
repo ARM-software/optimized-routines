@@ -93,9 +93,9 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
    Assembling this all correctly is dealt with at the final step.  */
   float64x2_t p = eval_poly (f);
 
-  float64x2_t ylo = v_fma_f64 (k, Ln2Lo, cm);
-  float64x2_t yhi = v_fma_f64 (k, Ln2Hi, f);
-  float64x2_t y = v_fma_f64 (f * f, p, ylo + yhi);
+  float64x2_t ylo = vfmaq_f64 (cm, k, Ln2Lo);
+  float64x2_t yhi = vfmaq_f64 (f, k, Ln2Hi);
+  float64x2_t y = vfmaq_f64 (ylo + yhi, f * f, p);
 
   if (unlikely (v_any_u64 (special)))
     return specialcase (v_as_f64_u64 (ix), y, special);

@@ -30,17 +30,17 @@ expm1_inline (float64x2_t x)
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where i = round(x / ln2)
      and   f = x - i * ln2 (f in [-ln2/2, ln2/2]).  */
-  float64x2_t j = v_fma_f64 (InvLn2, x, Shift) - Shift;
+  float64x2_t j = vfmaq_f64 (Shift, InvLn2, x) - Shift;
   int64x2_t i = vcvtq_s64_f64 (j);
-  float64x2_t f = v_fma_f64 (j, MLn2hi, x);
-  f = v_fma_f64 (j, MLn2lo, f);
+  float64x2_t f = vfmaq_f64 (x, j, MLn2hi);
+  f = vfmaq_f64 (f, j, MLn2lo);
   /* Approximate expm1(f) using polynomial.  */
   float64x2_t f2 = f * f, f4 = f2 * f2, f8 = f4 * f4;
-  float64x2_t p = v_fma_f64 (f2, ESTRIN_10 (f, f2, f4, f8, C), f);
+  float64x2_t p = vfmaq_f64 (f, f2, ESTRIN_10 (f, f2, f4, f8, C));
   /* t = 2^i.  */
   float64x2_t t = v_as_f64_u64 (v_as_u64_s64 (i << 52) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
-  return v_fma_f64 (p, t, t - 1);
+  return vfmaq_f64 (t - 1, p, t);
 }
 
 static NOINLINE VPCS_ATTR float64x2_t

@@ -29,21 +29,21 @@ expm1f_inline (float32x4_t x)
      calling routine should handle special values if required.  */
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
-  float32x4_t j = v_fma_f32 (InvLn2, x, Shift) - Shift;
+  float32x4_t j = vfmaq_f32 (Shift, InvLn2, x) - Shift;
   int32x4_t i = vcvtq_s32_f32 (j);
-  float32x4_t f = v_fma_f32 (j, MLn2hi, x);
-  f = v_fma_f32 (j, MLn2lo, f);
+  float32x4_t f = vfmaq_f32 (x, j, MLn2hi);
+  f = vfmaq_f32 (f, j, MLn2lo);
 
   /* Approximate expm1(f) with polynomial P, expm1(f) ~= f + f^2 * P(f).
      Uses Estrin scheme, where the main __v_expm1f routine uses Horner.  */
   float32x4_t f2 = f * f;
   float32x4_t p = ESTRIN_4 (f, f2, f2 * f2, C);
-  p = v_fma_f32 (f2, p, f);
+  p = vfmaq_f32 (f, f2, p);
 
   /* t = 2^i.  */
   float32x4_t t = v_as_f32_u32 (v_as_u32_s32 (i << 23) + One);
   /* expm1(x) ~= p * t + (t - 1).  */
-  return v_fma_f32 (p, t, t - 1);
+  return vfmaq_f32 (t - 1, p, t);
 }
 
 #endif // PL_MATH_V_EXPM1F_INLINE_H
