@@ -80,6 +80,23 @@ svisodd (svbool_t pg, svfloat64_t x)
   return svisnotint (pg, y);
 }
 
+/* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
+   the bit representation of a non-zero finite floating-point value.  */
+static inline int
+checkint (uint64_t iy)
+{
+  int e = iy >> 52 & 0x7ff;
+  if (e < 0x3ff)
+    return 0;
+  if (e > 0x3ff + 52)
+    return 2;
+  if (iy & ((1ULL << (0x3ff + 52 - e)) - 1))
+    return 0;
+  if (iy & (1ULL << (0x3ff + 52 - e)))
+    return 1;
+  return 2;
+}
+
 /* Top 12 bits of a double (sign and exponent bits).  */
 static inline uint32_t
 top12 (double x)
@@ -99,6 +116,14 @@ static inline int
 zeroinfnan (uint64_t i)
 {
   return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
+}
+
+/* Returns 1 if input is the bit representation of 0, infinity or nan.  */
+static inline svbool_t
+sv_zeroinfnan (svbool_t pg, svuint64_t i)
+{
+  return svcmpge_n_u64 (pg, svsub_n_u64_x (pg, svmul_n_u64_x (pg, i, 2), 1),
+			2 * asuint64 (INFINITY) - 1);
 }
 
 /* The following 2 routines differ from regular sv_call routines defined in
@@ -328,7 +353,7 @@ pow_sc (double x, double y, uint64_t ix, uint64_t iy, double z)
       if (2 * iy == 0)
 	return issignaling_inline (x) ? x + y : 1.0;
       if (ix == asuint64 (1.0))
-	return 1.0;
+	return issignaling_inline (y) ? x + y : 1.0;
       if (2 * ix > 2 * asuint64 (INFINITY) || 2 * iy > 2 * asuint64 (INFINITY))
 	return x + y;
       if (2 * ix == 2 * asuint64 (1.0))
@@ -340,6 +365,8 @@ pow_sc (double x, double y, uint64_t ix, uint64_t iy, double z)
   if (unlikely (zeroinfnan (ix)))
     {
       double_t x2 = x * x;
+      if (ix >> 63 && checkint (iy) == 1)
+	x2 = -x2;
       /* Without the barrier some versions of clang hoist the 1/x2 and
 	 thus division by zero exception can be signaled spuriously.  */
       return (iy >> 63) ? opt_barrier_double (1 / x2) : x2;
@@ -355,9 +382,6 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
   svuint64_t vix0 = svreinterpret_u64_f64 (x);
   svuint64_t viy0 = svreinterpret_u64_f64 (y);
   svuint64_t vtopx0 = svlsr_n_u64_x (svptrue_b64 (), vix0, 52);
-  svuint64_t vtopy0 = svlsr_n_u64_x (svptrue_b64 (), viy0, 52);
-  svuint64_t vabstopx0 = svand_n_u64_x (pg, vtopx0, 0x7ff);
-  svuint64_t vabstopy0 = svand_n_u64_x (pg, vtopy0, 0x7ff);
 
   /* Negative x cases.  */
   svuint64_t sign_bit = svlsr_n_u64_m (pg, vix0, 63);
@@ -383,19 +407,20 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
     }
 
   /* Special cases of x or y: zero, inf and nan.  */
-  svbool_t xspecial = svcmpge_n_u64 (pg, vabstopx0, 0x7ff);
-  svbool_t yspecial = svcmpge_n_u64 (pg, vabstopy0, 0x7ff);
+  svbool_t xspecial = sv_zeroinfnan (pg, vix0);
+  svbool_t yspecial = sv_zeroinfnan (pg, viy0);
   svbool_t special = svorr_b_z (pg, xspecial, yspecial);
 
   /* Small cases of x: |x| < 0x1p-126.  */
+  svuint64_t vabstopx0 = svand_n_u64_x (pg, vtopx0, 0x7ff);
   svbool_t xsmall = svcmplt_n_u64 (pg, vabstopx0, 0x001);
   if (unlikely (svptest_any (pg, xsmall)))
     {
       /* Normalize subnormal x so exponent becomes negative.  */
       svbool_t topx_is_null = svcmpeq_n_u64 (xsmall, vtopx1, 0);
 
-      svuint64_t vix_norm =
-	svreinterpret_u64_f64 (svmul_n_f64_m (xsmall, x, 0x1p52));
+      svuint64_t vix_norm
+	= svreinterpret_u64_f64 (svmul_n_f64_m (xsmall, x, 0x1p52));
       vix_norm = svand_n_u64_m (xsmall, vix_norm, 0x7fffffffffffffff);
       vix_norm = svsub_n_u64_m (xsmall, vix_norm, 52ULL << 52);
       vix = svsel_u64 (topx_is_null, vix_norm, vix);
@@ -423,8 +448,8 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 }
 
 PL_SIG (SV, D, 2, pow)
-PL_TEST_ULP (SV_NAME_D2 (pow), 1.05)
-// Wide intervals spanning the whole domain but shared between x and y.
+PL_TEST_ULP (SV_NAME_D2 (pow), 0.55)
+/* Wide intervals spanning the whole domain but shared between x and y.  */
 #define SV_POW_INTERVAL(lo, hi, n)                                             \
   PL_TEST_INTERVAL (SV_NAME_D2 (pow), lo, hi, n)                               \
   PL_TEST_INTERVAL (SV_NAME_D2 (pow), -lo, -hi, n)
@@ -434,7 +459,7 @@ SV_POW_INTERVAL (0x1p-65, 1, 50000)
 SV_POW_INTERVAL (1, 0x1p63, 50000)
 SV_POW_INTERVAL (0x1p63, inf, 5000)
 SV_POW_INTERVAL (0, inf, 1000)
-// x~1 or y~1
+/* x~1 or y~1.  */
 #define SV_POW_INTERVAL2(xlo, xhi, ylo, yhi, n)                                \
   PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), xlo, xhi, ylo, yhi, n)                  \
   PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), xlo, xhi, -ylo, -yhi, n)                \
@@ -443,22 +468,28 @@ SV_POW_INTERVAL (0, inf, 1000)
 SV_POW_INTERVAL2 (0x1p-1, 0x1p1, 0x1p-10, 0x1p10, 10000)
 SV_POW_INTERVAL2 (0x1.ep-1, 0x1.1p0, 0x1p8, 0x1p16, 10000)
 SV_POW_INTERVAL2 (0x1p-500, 0x1p500, 0x1p-1, 0x1p1, 10000)
-// around argmaxs
+/* around estimated argmaxs of ULP error.  */
 SV_POW_INTERVAL2 (0x1p-300, 0x1p-200, 0x1p-20, 0x1p-10, 10000)
 SV_POW_INTERVAL2 (0x1p50, 0x1p100, 0x1p-20, 0x1p-10, 10000)
-// x is negative, y is odd or even integer, or y is real not integer.
+/* x is negative, y is odd or even integer, or y is real not integer.  */
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), -0.0, -10.0, 3.0, 3.0, 10000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), -0.0, -10.0, 4.0, 4.0, 10000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), -0.0, -10.0, 0.0, 10.0, 10000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 0.0, 10.0, -0.0, -10.0, 10000)
-// 1.0^y.
+/* |x| is inf, y is odd or even integer, or y is real not integer.  */
+SV_POW_INTERVAL2 (inf, inf, 0.5, 0.5, 1)
+SV_POW_INTERVAL2 (inf, inf, 1.0, 1.0, 1)
+SV_POW_INTERVAL2 (inf, inf, 2.0, 2.0, 1)
+SV_POW_INTERVAL2 (inf, inf, 3.0, 3.0, 1)
+/* 0.0^y.  */
+SV_POW_INTERVAL2 (0.0, 0.0, 0.0, 0x1p120, 1000)
+/* 1.0^y.  */
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, 0.0, 0x1p-50, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, 0x1p-50, 1.0, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, 1.0, 0x1p100, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)
-// nan^-nan.
+/* nan^-nan.  */
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), nan, nan, -nan, -nan, 1)
-// For some NaNs, AOR pow algorithm will get the sign of nan^-nan wrong.
-// This should be fixed, but the test on the sign of NaNs could be relaxed
-// since we already know the current test could have false positives.
+/* For some NaNs, AOR pow algorithm will get the sign of nan^-nan wrong.
+   There are plans to relax the requirements on NaNs.  */
 #endif
