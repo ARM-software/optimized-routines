@@ -40,10 +40,12 @@ check() {
 	$emu ./ulp -f -q "$@" #>/dev/null
 }
 
-# Regression-test for correct NaN handling in atan2
-check atan2 0x1p-1022 0x1p-1000 x 0 0x1p-1022 40000
-check atan2 0x1.7887a0a717aefp+1017 0x1.7887a0a717aefp+1017 x -nan -nan
-check atan2 nan nan x -nan -nan
+if [ "$FUNC" == "atan2" ] || [ -z "$FUNC" ]; then
+    # Regression-test for correct NaN handling in atan2
+    check atan2 0x1p-1022 0x1p-1000 x 0 0x1p-1022 40000
+    check atan2 0x1.7887a0a717aefp+1017 0x1.7887a0a717aefp+1017 x -nan -nan
+    check atan2 nan nan x -nan -nan
+fi
 
 # vector functions
 flags="${ULPFLAGS:--q}"
@@ -65,7 +67,7 @@ while read F LO HI N C
 do
 	t $F $LO $HI $N $C
 done << EOF
-$(cat $INTERVALS)
+$(cat $INTERVALS | grep "\b$FUNC\b")
 EOF
 
 [ 0 -eq $FAIL ] || {

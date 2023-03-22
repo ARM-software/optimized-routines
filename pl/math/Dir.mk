@@ -206,6 +206,7 @@ check-pl/math-ulp: $(math-tools) $(ulp-lims) $(ulp-aliases) $(fenv-exps) $(ulp-i
 	ALIASES=../../../$(ulp-aliases) \
 	INTERVALS=../../../$(ulp-itvs) \
 	FENV=../../../$(fenv-exps) \
+	FUNC=$(func) \
 	build/pl/bin/runulp.sh $(EMULATOR)
 
 check-pl/math: check-pl/math-test check-pl/math-rtest check-pl/math-ulp
