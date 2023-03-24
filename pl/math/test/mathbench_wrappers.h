@@ -38,6 +38,24 @@ _Z_atan2f_wrap (v_float x)
   return _ZGVnN4vv_atan2f (v_float_dup (5.0f), x);
 }
 
+__vpcs static v_double
+xy_Z_pow (v_double x)
+{
+  return _ZGVnN2vv_pow (x, x);
+}
+
+__vpcs static v_double
+x_Z_pow (v_double x)
+{
+  return _ZGVnN2vv_pow (x, v_double_dup (23.4));
+}
+
+__vpcs static v_double
+y_Z_pow (v_double x)
+{
+  return _ZGVnN2vv_pow (v_double_dup (2.34), x);
+}
+
 #endif // __arch64__ && __vpcs
 #endif // WANT_VMATH
 

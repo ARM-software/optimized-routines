@@ -89,6 +89,7 @@ __vpcs __f32x4_t _ZGVnN4v_log1pf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_log1p (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_log2f (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_log2 (__f64x2_t);
+__vpcs __f64x2_t _ZGVnN2vv_pow (__f64x2_t, __f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_sinhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_sinh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_tanf (__f32x4_t);

@@ -33,28 +33,28 @@
      got 0x1.f7116284221fcp-1
     want 0x1.f7116284221fdp-1.  */
 
-/* Data is defined in pl/math/sv_pow_log_data.c.  */
-#define INVC __sv_pow_log_data.invc
-#define LOGC __sv_pow_log_data.logc
-#define LOGCTAIL __sv_pow_log_data.logctail
-#define A __sv_pow_log_data.poly
-#define Ln2hi __sv_pow_log_data.ln2hi
-#define Ln2lo __sv_pow_log_data.ln2lo
-#define N_LOG (1 << SV_POW_LOG_TABLE_BITS)
+/* Data is defined in pl/math/v_pow_log_data.c.  */
+#define INVC __v_pow_log_data.invc
+#define LOGC __v_pow_log_data.logc
+#define LOGCTAIL __v_pow_log_data.logctail
+#define A __v_pow_log_data.poly
+#define Ln2hi __v_pow_log_data.ln2hi
+#define Ln2lo __v_pow_log_data.ln2lo
+#define N_LOG (1 << V_POW_LOG_TABLE_BITS)
 #define OFF 0x3fe6955500000000
 
-/* Data is defined in pl/math/sv_pow_exp_data.c.  */
-#define InvLn2N __sv_pow_exp_data.invln2N
-#define NegLn2hiN __sv_pow_exp_data.negln2hiN
-#define NegLn2loN __sv_pow_exp_data.negln2loN
-#define Shift __sv_pow_exp_data.shift
-#define SBits __sv_pow_exp_data.sbits
-#define C2 __sv_pow_exp_data.poly[5 - SV_POW_EXP_POLY_ORDER]
-#define C3 __sv_pow_exp_data.poly[6 - SV_POW_EXP_POLY_ORDER]
-#define C4 __sv_pow_exp_data.poly[7 - SV_POW_EXP_POLY_ORDER]
-#define C5 __sv_pow_exp_data.poly[8 - SV_POW_EXP_POLY_ORDER]
-#define N_EXP (1 << SV_POW_EXP_TABLE_BITS)
-#define SIGN_BIAS (0x800 << SV_POW_EXP_TABLE_BITS)
+/* Data is defined in pl/math/v_pow_exp_data.c.  */
+#define InvLn2N __v_pow_exp_data.invln2N
+#define NegLn2hiN __v_pow_exp_data.negln2hiN
+#define NegLn2loN __v_pow_exp_data.negln2loN
+#define Shift __v_pow_exp_data.shift
+#define SBits __v_pow_exp_data.sbits
+#define C2 __v_pow_exp_data.poly[5 - V_POW_EXP_POLY_ORDER]
+#define C3 __v_pow_exp_data.poly[6 - V_POW_EXP_POLY_ORDER]
+#define C4 __v_pow_exp_data.poly[7 - V_POW_EXP_POLY_ORDER]
+#define C5 __v_pow_exp_data.poly[8 - V_POW_EXP_POLY_ORDER]
+#define N_EXP (1 << V_POW_EXP_TABLE_BITS)
+#define SIGN_BIAS (0x800 << V_POW_EXP_TABLE_BITS)
 
 /* Helper routines.  */
 
@@ -184,7 +184,7 @@ sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail)
      The ith subinterval contains z and c is near its center.  */
   svuint64_t tmp = svsub_u64_x (pg, ix, sv_u64 (OFF));
   svuint64_t i
-    = svand_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - SV_POW_LOG_TABLE_BITS),
+    = svand_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - V_POW_LOG_TABLE_BITS),
 		   sv_u64 (N_LOG - 1));
   svint64_t k = svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52);
   svuint64_t iz
@@ -309,7 +309,7 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
   /* 2^(k/N) ~= scale.  */
   svuint64_t idx = svand_u64_x (pg, ki, sv_u64 (N_EXP - 1));
   svuint64_t top = svlsl_n_u64_x (pg, svadd_u64_x (pg, ki, sign_bias),
-				  52 - SV_POW_EXP_TABLE_BITS);
+				  52 - V_POW_EXP_TABLE_BITS);
   /* This is only a valid scale when -1023*N < k < 1024*N.  */
   svuint64_t sbits = svld1_gather_u64index_u64 (pg, SBits, idx);
   sbits = svadd_u64_x (pg, sbits, top);

@@ -7,9 +7,9 @@
 
 #include "math_config.h"
 
-#define N (1 << SV_POW_LOG_TABLE_BITS)
+#define N (1 << V_POW_LOG_TABLE_BITS)
 
-const struct sv_pow_log_data __sv_pow_log_data = {
+const struct v_pow_log_data __v_pow_log_data = {
 .ln2hi = 0x1.62e42fefa3800p-1,
 .ln2lo = 0x1.ef35793c76730p-45,
 .poly = {

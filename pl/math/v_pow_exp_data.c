@@ -7,9 +7,9 @@
 
 #include "math_config.h"
 
-#define N (1 << SV_POW_EXP_TABLE_BITS)
+#define N (1 << V_POW_EXP_TABLE_BITS)
 
-const struct sv_pow_exp_data __sv_pow_exp_data = {
+const struct v_pow_exp_data __v_pow_exp_data = {
 // N/ln2
 .invln2N = 0x1.71547652b82fep0 * N,
 // -ln2/N
@@ -28,8 +28,7 @@ const struct sv_pow_exp_data __sv_pow_exp_data = {
 0x1.5555576a5adcep-5,
 },
 // 2^(k/N) ~= H[k]*(1 + T[k]) for int k in [0,N)
-// tab[2*k] = asuint64(T[k])
-// tab[2*k+1] = asuint64(H[k]) - (k << 52)/N
+// sbits[k] = asuint64(H[k]) - (k << 52)/N
 .sbits = {
 0x3ff0000000000000,
 0x3feffb1afa5abcbf,
