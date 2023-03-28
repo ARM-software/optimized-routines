@@ -103,6 +103,7 @@ __vpcs __f64x2_t _ZGVnN2v_tanh (__f64x2_t);
 #include <arm_sve.h>
 svfloat32_t _ZGVsMxv_acoshf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_asinhf (svfloat32_t, svbool_t);
+svfloat64_t _ZGVsMxv_asinh (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxvv_atan2f (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_atanf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_atan (svfloat64_t, svbool_t);
