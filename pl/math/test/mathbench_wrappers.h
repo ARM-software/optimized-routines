@@ -85,6 +85,24 @@ _Z_sv_powk_wrap (sv_double x, sv_bool pg)
   return _ZGVsMxvv_powk (x, svcvt_s64_f64_x (pg, x), pg);
 }
 
+static sv_float
+xy_Z_sv_powf (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_powf (x, x, pg);
+}
+
+static sv_float
+x_Z_sv_powf (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_powf (x, svdup_n_f32 (23.4f), pg);
+}
+
+static sv_float
+y_Z_sv_powf (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_powf (svdup_n_f32 (2.34f), x, pg);
+}
+
 static sv_double
 xy_Z_sv_pow (sv_double x, sv_bool pg)
 {

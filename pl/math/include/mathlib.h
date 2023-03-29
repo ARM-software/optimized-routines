@@ -126,6 +126,7 @@ svfloat32_t _ZGVsMxv_log2f (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_log2 (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxvv_powi(svfloat32_t, svint32_t, svbool_t);
 svfloat64_t _ZGVsMxvv_powk(svfloat64_t, svint64_t, svbool_t);
+svfloat32_t _ZGVsMxvv_powf (svfloat32_t, svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxvv_pow (svfloat64_t, svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_sinf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_sin (svfloat64_t, svbool_t);
