@@ -126,35 +126,8 @@ sv_zeroinfnan (svbool_t pg, svuint64_t i)
 			2 * asuint64 (INFINITY) - 1);
 }
 
-/* The following 2 routines differ from regular sv_call routines defined in
-   sv_math.h in the way detailed in the comments below.  */
-
-/* Scalar fallback for special case routines with f64_t(*f)(f64_t, f64_t, u64_t,
-   u64_t, f64_t) signature. The input argument y is passed to the scalar
-   routine.  */
-static inline svfloat64_t
-sv_call_pow_sc (f64_t (*f) (f64_t, f64_t, u64_t, u64_t, f64_t), svfloat64_t x1,
-		svfloat64_t x2, svuint64_t u1, svuint64_t u2, svfloat64_t y,
-		svbool_t cmp)
-{
-  svbool_t p = svpfirst (cmp, svpfalse ());
-  while (svptest_any (cmp, p))
-    {
-      f64_t sx1 = svclastb_n_f64 (p, 0, x1);
-      f64_t sx2 = svclastb_n_f64 (p, 0, x2);
-      u64_t su1 = svclastb_n_u64 (p, 0, u1);
-      u64_t su2 = svclastb_n_u64 (p, 0, u2);
-      f64_t elem = svclastb_n_f64 (p, 0, y);
-      elem = (*f) (sx1, sx2, su1, su2, elem);
-      svfloat64_t y2 = svdup_n_f64 (elem);
-      y = svsel_f64 (p, y2, y);
-      p = svpnext_b64 (cmp, p);
-    }
-  return y;
-}
-
 /* Scalar fallback for special case routines with f64_t(*f)(f64_t, u64_t, u64_t)
-   signature. The input argument x1 is passed to the scalar routine.  */
+   signature.  */
 static inline svfloat64_t
 sv_call_specialcase (f64_t (*f) (f64_t, u64_t, u64_t), svfloat64_t x1,
 		     svuint64_t u1, svuint64_t u2, svfloat64_t y, svbool_t cmp)
@@ -162,10 +135,10 @@ sv_call_specialcase (f64_t (*f) (f64_t, u64_t, u64_t), svfloat64_t x1,
   svbool_t p = svpfirst (cmp, svpfalse ());
   while (svptest_any (cmp, p))
     {
-      f64_t elem = svclastb_n_f64 (p, 0, x1);
+      f64_t sx1 = svclastb_n_f64 (p, 0, x1);
       u64_t su1 = svclastb_n_u64 (p, 0, u1);
       u64_t su2 = svclastb_n_u64 (p, 0, u2);
-      elem = (*f) (elem, su1, su2);
+      f64_t elem = (*f) (sx1, su1, su2);
       svfloat64_t y2 = svdup_n_f64 (elem);
       y = svsel_f64 (p, y2, y);
       p = svpnext_b64 (cmp, p);
@@ -345,8 +318,10 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
 }
 
 static inline double
-pow_sc (double x, double y, uint64_t ix, uint64_t iy, double z)
+pow_sc (double x, double y)
 {
+  uint64_t ix = asuint64 (x);
+  uint64_t iy = asuint64 (y);
   /* Special cases: |x| or |y| is 0, inf or nan.  */
   if (unlikely (zeroinfnan (iy)))
     {
@@ -371,7 +346,7 @@ pow_sc (double x, double y, uint64_t ix, uint64_t iy, double z)
 	 thus division by zero exception can be signaled spuriously.  */
       return (iy >> 63) ? opt_barrier_double (1 / x2) : x2;
     }
-  return z;
+  return x;
 }
 
 svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
@@ -442,7 +417,7 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 
   /* Cases of zero/inf/nan x or y.  */
   if (unlikely (svptest_any (pg, special)))
-    vz = sv_call_pow_sc (pow_sc, x, y, vix0, viy0, vz, special);
+    vz = sv_call2_f64 (pow_sc, x, y, vz, special);
 
   return vz;
 }
