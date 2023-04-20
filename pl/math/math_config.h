@@ -508,12 +508,6 @@ extern const struct v_log2_data
   } tab[1 << V_LOG2_TABLE_BITS];
 } __v_log2_data HIDDEN;
 
-#define V_SINF_NCOEFFS 4
-extern const struct sv_sinf_data
-{
-  float coeffs[V_SINF_NCOEFFS];
-} __sv_sinf_data HIDDEN;
-
 #define V_LOG10_TABLE_BITS 7
 #define V_LOG10_POLY_ORDER 6
 extern const struct v_log10_data
