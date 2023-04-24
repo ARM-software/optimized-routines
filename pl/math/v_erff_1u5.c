@@ -5,13 +5,11 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "v_expf_inline.h"
 #include "v_math.h"
-#include "include/mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-
-VPCS_ATTR float32x4_t __v_expf (float32x4_t);
 
 #define AbsMask v_u32 (0x7fffffff)
 
@@ -83,7 +81,7 @@ float32x4_t V_NAME_F1 (erf) (float32x4_t x)
 
   /* y = |x| + |x|*P(|x|)        if |x| < 0.921875
      1 - exp (-(|x|+|x|*P(x^2))) otherwise.  */
-  float32x4_t y = vbslq_f32 (red, r, v_f32 (1.0f) - __v_expf (-r));
+  float32x4_t y = vbslq_f32 (red, r, v_f32 (1.0f) - v_expf_inline (-r));
 
   /* Boring domain (absolute value is required to get the sign of erf(-nan)
      right).  */

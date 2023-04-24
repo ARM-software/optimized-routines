@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "v_expf_inline.h"
 #include "v_math.h"
 #include "mathlib.h"
 #include "pl_sig.h"
@@ -16,8 +17,6 @@
   0x42ad496c /* 0x1.5a92d8p+6: expf overflows above this, so have to use       \
 		special case.  */
 #define Half v_f32 (0.5)
-
-float32x4_t __v_expf (float32x4_t);
 
 /* Single-precision vector cosh, using vector expf.
    Maximum error is 2.38 ULP:
@@ -45,7 +44,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cosh) (float32x4_t x)
 #endif
 
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */
-  float32x4_t t = __v_expf (ax);
+  float32x4_t t = v_expf_inline (ax);
   float32x4_t y = t * Half + Half / t;
 
 #if WANT_SIMD_EXCEPT
