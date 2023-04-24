@@ -377,6 +377,10 @@ extern const struct exp_data
   uint64_t tab[2*(1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
 
+/* Copied from math/v_exp.h for use in exp_tail.  */
+#define V_EXP_TAIL_TABLE_BITS 8
+extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
+
 #define ERFC_NUM_INTERVALS 20
 #define ERFC_POLY_ORDER 12
 extern const struct erfc_data

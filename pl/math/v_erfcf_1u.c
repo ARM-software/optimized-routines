@@ -11,9 +11,10 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define P(ia12) __erfcf_poly_data.poly[interval_index (ia12)]
+#define WANT_V_EXP_TAIL_SPECIALCASE 0
+#include "v_exp_tail_inline.h"
 
-VPCS_ATTR float64x2_t __v_exp_tail (float64x2_t, float64x2_t);
+#define P(ia12) __erfcf_poly_data.poly[interval_index (ia12)]
 
 #ifndef SCALAR
 static VPCS_ATTR NOINLINE float32x4_t
@@ -45,7 +46,7 @@ v_approx_erfcf_poly_gauss (float64x2_t x, const double *coeff1,
   float64x2_t x2 = x * x;
   float64x2_t x4 = x2 * x2;
   float64x2_t poly = ESTRIN_15 (x, x2, x4, x4 * x4, C);
-  float64x2_t gauss = __v_exp_tail (-(x * x), v_f64 (0.0));
+  float64x2_t gauss = v_exp_tail_inline (-(x * x), v_f64 (0.0));
   return poly * gauss;
 }
 

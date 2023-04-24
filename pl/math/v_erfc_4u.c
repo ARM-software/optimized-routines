@@ -11,8 +11,8 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-/* Accurate exponential (vector variant of exp_dd).  */
-float64x2_t __v_exp_tail (float64x2_t, float64x2_t);
+#define WANT_V_EXP_TAIL_SPECIALCASE 1
+#include "v_exp_tail_inline.h"
 
 #define One v_f64 (1.0)
 #define AbsMask v_u64 (0x7fffffffffffffff)
@@ -73,7 +73,7 @@ v_eval_gauss (float64x2_t a)
   e2 = vfmaq_f64 (e2, -a_lo, a_lo);
 
   /* Fast and accurate evaluation of exp(-a2 + e2) where e2 << a2.  */
-  return __v_exp_tail (-a2, e2);
+  return v_exp_tail_inline (-a2, e2);
 }
 
 /* Optimized double precision vector complementary error function erfc.
