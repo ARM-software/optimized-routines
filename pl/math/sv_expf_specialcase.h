@@ -9,7 +9,9 @@
 
 #if SV_SUPPORTED
 
-#define ScaleThres (192.0f)
+#define ScaleThres 192.0f
+#define SpecialOffset 0x82000000
+#define SpecialBias 0x7f000000
 
 /* Special-case handler adapted from Neon variant for expf/exp2f.
    Uses s, y and n to produce the final result (normal cases included).
@@ -30,14 +32,13 @@ __sv_expf_specialcase (svbool_t pg, svfloat32_t poly, svfloat32_t n,
   /* If n<=0 then set b to 0x820...0, 0 otherwise.  */
   svbool_t p_sign = svcmple_n_f32 (pg, n, 0.0f); /* n <= 0.  */
   svuint32_t b
-    = svdup_n_u32_z (p_sign, 0x82000000); /* Inactive lanes set to 0.  */
+    = svdup_n_u32_z (p_sign, SpecialOffset); /* Inactive lanes set to 0.  */
 
   /* Set s1 to generate overflow depending on sign of exponent n.  */
   svfloat32_t s1 = svreinterpret_f32_u32 (
-    svadd_n_u32_x (pg, b, 0x7f000000)); /* b + 0x7f000000.  */
+    svadd_n_u32_x (pg, b, SpecialBias)); /* b + 0x7f000000.  */
   /* Offset s to avoid overflow in final result if n is below threshold.  */
-  svfloat32_t s2 = svreinterpret_f32_u32 (
-    svsub_u32_x (pg, e, b)); /* as_u32 (s) - 0x3010...0 + b.  */
+  svfloat32_t s2 = svreinterpret_f32_u32 (svsub_u32_x (pg, e, b));
 
   /* |n| > 192 => 2^(n/N) overflows.  */
   svbool_t p_cmp2 = svacgt_n_f32 (pg, n, ScaleThres);

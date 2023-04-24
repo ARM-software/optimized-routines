@@ -13,7 +13,6 @@
 #if SV_SUPPORTED
 
 #define C(i) __sv_exp2f_poly[i]
-#define ScaleThres (192.0f)
 
 #if SV_EXP2F_USE_FEXPA
 

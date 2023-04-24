@@ -563,8 +563,6 @@ extern const struct sv_log_data
 #ifndef SV_EXPF_USE_FEXPA
 #define SV_EXPF_USE_FEXPA 0
 #endif
-#define SV_EXPF_POLY_ORDER 6
-extern const float __sv_expf_poly[SV_EXPF_POLY_ORDER - 1] HIDDEN;
 
 #ifndef SV_EXP2F_USE_FEXPA
 #define SV_EXP2F_USE_FEXPA 0
@@ -604,9 +602,6 @@ extern const struct v_tan_data
   double neg_half_pi_hi, neg_half_pi_lo;
   double poly[9];
 } __v_tan_data HIDDEN;
-
-#define SV_EXP_POLY_ORDER 5
-extern const double __sv_exp_poly[SV_EXP_POLY_ORDER - 1] HIDDEN;
 
 #define ASINF_POLY_ORDER 4
 extern const float __asinf_poly[ASINF_POLY_ORDER + 1] HIDDEN;
