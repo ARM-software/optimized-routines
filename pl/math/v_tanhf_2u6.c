@@ -15,6 +15,7 @@
   0x41102cb3 /* 0x1.205966p+3, above which tanhf rounds to 1 (or -1 for        \
 		negative).  */
 #define AbsMask 0x7fffffff
+#define One 0x3f800000
 
 static NOINLINE float32x4_t
 special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
