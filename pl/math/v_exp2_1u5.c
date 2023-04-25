@@ -37,7 +37,7 @@ static const volatile struct v_exp2_local_data data = {
 static inline uint64x2_t
 lookup_sbits (uint64x2_t i)
 {
-  return (uint64x2_t){__v_exp2_data.sbits[i[0]], __v_exp2_data.sbits[i[1]]};
+  return (uint64x2_t){__v_exp2_data[i[0]], __v_exp2_data[i[1]]};
 }
 
 /* Call scalar exp2 as a fallback.  */

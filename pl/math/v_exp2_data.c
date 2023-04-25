@@ -7,20 +7,8 @@
 
 #include "math_config.h"
 
-#define N (1 << V_EXP2_TABLE_BITS)
-
 // clang-format off
-
-const struct v_exp2_data __v_exp2_data = {
-
-/* Shift, coefficients and sbits entries taken from exp_data.c for N == 128
-   and EXP2_POLY_ORDER == 5.  */
-.shift = 0x1.8p52 / N,
-
-.poly = { 0x1.62e42fefa39efp-1, 0x1.ebfbdff82c424p-3, 0x1.c6b08d70cf4b5p-5,
-	  0x1.3b2abd24650ccp-7, 0x1.5d7e09b4e3a84p-10 },
-
-.sbits = {
+const uint64_t __v_exp2_data[] = {
  0x3ff0000000000000,
  0x3feff63da9fb3335,
  0x3fefec9a3e778061,
@@ -148,6 +136,6 @@ const struct v_exp2_data __v_exp2_data = {
  0x3fefd0765b6e4540,
  0x3fefdbfdad9cbe14,
  0x3fefe7c1819e90d8,
- 0x3feff3c22b8f71f1}
+ 0x3feff3c22b8f71f1
 };
 // clang-format on
