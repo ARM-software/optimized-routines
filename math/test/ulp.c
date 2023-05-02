@@ -358,10 +358,6 @@ static const struct fun fun[] = {
 #define ZVNF2(x) VNF2 (x) ZVF2 (x)
 #define ZVND1(x) VND1 (x) ZVD1 (x)
 #define ZVND2(x) VND2 (x) ZVD2 (x)
-#define SF1(x) F (__s_##x##f, __s_##x##f, x, mpfr_##x, 1, 1, f1, 0)
-#define SF2(x) F (__s_##x##f, __s_##x##f, x, mpfr_##x, 2, 1, f2, 0)
-#define SD1(x) F (__s_##x, __s_##x, x##l, mpfr_##x, 1, 0, d1, 0)
-#define SD2(x) F (__s_##x, __s_##x, x##l, mpfr_##x, 2, 0, d2, 0)
 /* SVE routines.  */
 #define SVF1(x) F (__sv_##x##f, sv_##x##f, x, mpfr_##x, 1, 1, f1, 0)
 #define SVF2(x) F (__sv_##x##f, sv_##x##f, x, mpfr_##x, 2, 1, f2, 0)

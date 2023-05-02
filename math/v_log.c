@@ -8,7 +8,6 @@
 #include "mathlib.h"
 #include "v_math.h"
 #include "v_log.h"
-#if V_SUPPORTED
 
 /* Worst-case error: 1.17 + 0.5 ulp.  */
 
@@ -40,15 +39,10 @@ static inline struct entry
 lookup (v_u64_t i)
 {
   struct entry e;
-#ifdef SCALAR
-  e.invc = __v_log_data[i].invc;
-  e.logc = __v_log_data[i].logc;
-#else
   e.invc[0] = __v_log_data[i[0]].invc;
   e.logc[0] = __v_log_data[i[0]].logc;
   e.invc[1] = __v_log_data[i[1]].invc;
   e.logc[1] = __v_log_data[i[1]].logc;
-#endif
   return e;
 }
 
@@ -101,4 +95,3 @@ V_NAME(log) (v_f64_t x)
   return y;
 }
 VPCS_ALIAS
-#endif

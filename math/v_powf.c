@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 
 #define Min v_u32 (0x00800000)
 #define Max v_u32 (0x7f800000)
@@ -232,4 +231,3 @@ V_NAME(powf) (v_f32_t x, v_f32_t y)
   return ret;
 }
 VPCS_ALIAS
-#endif

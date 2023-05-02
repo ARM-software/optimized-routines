@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 
 static const double Poly[] = {
 /* worst-case error is 3.5 ulp.
@@ -100,4 +99,3 @@ V_NAME(sin) (v_f64_t x)
   return y;
 }
 VPCS_ALIAS
-#endif

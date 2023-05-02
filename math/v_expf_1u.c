@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 
 static const float Poly[] = {
   /*  maxerr: 0.36565 +0.5 ulp.  */
@@ -77,4 +76,3 @@ V_NAME(expf_1u) (v_f32_t x)
     return specialcase (poly, n, e, absn);
   return scale * poly;
 }
-#endif

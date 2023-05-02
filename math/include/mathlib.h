@@ -23,21 +23,6 @@ double log (double);
 double log2 (double);
 double pow (double, double);
 
-/* Scalar functions using the vector algorithm with identical result.  */
-float __s_sinf (float);
-float __s_cosf (float);
-float __s_expf (float);
-float __s_expf_1u (float);
-float __s_exp2f (float);
-float __s_exp2f_1u (float);
-float __s_logf (float);
-float __s_powf (float, float);
-double __s_sin (double);
-double __s_cos (double);
-double __s_exp (double);
-double __s_log (double);
-double __s_pow (double, double);
-
 #if __aarch64__
 #if __GNUC__ >= 5
 typedef __Float32x4_t __f32x4_t;

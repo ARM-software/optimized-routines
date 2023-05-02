@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 #include "v_exp.h"
 
 #if V_EXP_TABLE_BITS == 7
@@ -125,4 +124,3 @@ V_NAME(exp) (v_f64_t x)
   return v_fma_f64 (y, s, s);
 }
 VPCS_ALIAS
-#endif

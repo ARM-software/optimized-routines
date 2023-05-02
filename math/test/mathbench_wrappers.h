@@ -46,17 +46,6 @@ xy__v_pow (v_double x)
 }
 #endif // __aarch64__
 
-static float
-xy__s_powf (float x)
-{
-  return __s_powf (x, x);
-}
-
-static double
-xy__s_pow (double x)
-{
-  return __s_pow (x, x);
-}
 #endif // WANT_VMATH
 
 static double

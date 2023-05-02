@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 
 static const float Poly[] = {
   /* 1.886 ulp error */
@@ -81,4 +80,3 @@ V_NAME(cosf) (v_f32_t x)
   return y;
 }
 VPCS_ALIAS
-#endif

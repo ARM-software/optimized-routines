@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 
 VPCS_ATTR
 v_f64_t
@@ -24,4 +23,3 @@ V_NAME(pow) (v_f64_t x, v_f64_t y)
   return z;
 }
 VPCS_ALIAS
-#endif

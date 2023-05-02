@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#if V_SUPPORTED
 
 static const float Poly[] = {
   /* maxerr: 1.45358 +0.5 ulp.  */
@@ -119,4 +118,3 @@ V_NAME(expf) (v_f32_t x)
   return v_fma_f32 (poly, scale, scale);
 }
 VPCS_ALIAS
-#endif
