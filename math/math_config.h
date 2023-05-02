@@ -92,6 +92,22 @@
 # define unlikely(x) (x)
 #endif
 
+/* Symbol renames to avoid libc conflicts.  */
+#define __math_oflowf arm_math_oflowf
+#define __math_uflowf arm_math_uflowf
+#define __math_may_uflowf arm_math_may_uflowf
+#define __math_divzerof arm_math_divzerof
+#define __math_oflow arm_math_oflow
+#define __math_uflow arm_math_uflow
+#define __math_may_uflow arm_math_may_uflow
+#define __math_divzero arm_math_divzero
+#define __math_invalidf arm_math_invalidf
+#define __math_invalid arm_math_invalid
+#define __math_check_oflow arm_math_check_oflow
+#define __math_check_uflow arm_math_check_uflow
+#define __math_check_oflowf arm_math_check_oflowf
+#define __math_check_uflowf arm_math_check_uflowf
+
 #if HAVE_FAST_ROUND
 /* When set, the roundtoint and converttoint functions are provided with
    the semantics documented below.  */
