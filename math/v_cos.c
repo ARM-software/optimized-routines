@@ -48,8 +48,9 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
   float64x2_t n, r, r2, y;
   uint64x2_t odd, cmp;
 
-  r = v_as_f64_u64 (v_as_u64_f64 (x) & AbsMask);
-  cmp = v_cond_u64 (v_as_u64_f64 (r) >= v_as_u64_f64 (RangeVal));
+  r = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (x) & AbsMask);
+  cmp = v_cond_u64 (vreinterpretq_u64_f64 (r)
+		    >= vreinterpretq_u64_f64 (RangeVal));
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (cmp)))
@@ -61,7 +62,7 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
 
   /* n = rint((|x|+pi/2)/pi) - 0.5.  */
   n = v_fma_f64 (InvPi, r + HalfPi, Shift);
-  odd = v_as_u64_f64 (n) << 63;
+  odd = vreinterpretq_u64_f64 (n) << 63;
   n -= Shift;
   n -= v_f64 (0.5);
 
@@ -81,7 +82,7 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
   y = v_fma_f64 (y * r2, r, r);
 
   /* sign.  */
-  y = v_as_f64_u64 (v_as_u64_f64 (y) ^ odd);
+  y = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (y) ^ odd);
 
   if (unlikely (v_any_u64 (cmp)))
     return specialcase (x, y, cmp);

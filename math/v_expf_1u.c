@@ -32,12 +32,13 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
   uint32x4_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x83000000);
-  float32x4_t s1 = v_as_f32_u32 (v_u32 (0x7f000000) + b);
-  float32x4_t s2 = v_as_f32_u32 (e - b);
+  float32x4_t s1 = vreinterpretq_f32_u32 (v_u32 (0x7f000000) + b);
+  float32x4_t s2 = vreinterpretq_f32_u32 (e - b);
   uint32x4_t cmp = v_cond_u32 (absn > v_f32 (192.0f));
   float32x4_t r1 = s1 * s1;
   float32x4_t r0 = poly * s1 * s2;
-  return v_as_f32_u32 ((cmp & v_as_u32_f32 (r1)) | (~cmp & v_as_u32_f32 (r0)));
+  return vreinterpretq_f32_u32 ((cmp & vreinterpretq_u32_f32 (r1))
+				| (~cmp & vreinterpretq_u32_f32 (r0)));
 }
 
 float32x4_t VPCS_ATTR V_NAME (expf_1u) (float32x4_t x)
@@ -52,15 +53,15 @@ float32x4_t VPCS_ATTR V_NAME (expf_1u) (float32x4_t x)
   n = z - Shift;
   r = v_fma_f32 (n, -Ln2hi, x);
   r = v_fma_f32 (n, -Ln2lo, r);
-  e = v_as_u32_f32 (z) << 23;
+  e = vreinterpretq_u32_f32 (z) << 23;
 #else
   z = x * InvLn2;
   n = v_round_f32 (z);
   r = v_fma_f32 (n, -Ln2hi, x);
   r = v_fma_f32 (n, -Ln2lo, r);
-  e = v_as_u32_s32 (v_round_s32 (z)) << 23;
+  e = vreinterpretq_u32_s32 (v_round_s32 (z)) << 23;
 #endif
-  scale = v_as_f32_u32 (e + v_u32 (0x3f800000));
+  scale = vreinterpretq_f32_u32 (e + v_u32 (0x3f800000));
   absn = v_abs_f32 (n);
   cmp = v_cond_u32 (absn > v_f32 (126.0f));
   poly = v_fma_f32 (C0, r, C1);

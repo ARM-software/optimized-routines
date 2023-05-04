@@ -40,8 +40,9 @@ float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
   float32x4_t n, r, r2, y;
   uint32x4_t odd, cmp;
 
-  r = v_as_f32_u32 (v_as_u32_f32 (x) & AbsMask);
-  cmp = v_cond_u32 (v_as_u32_f32 (r) >= v_as_u32_f32 (RangeVal));
+  r = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (x) & AbsMask);
+  cmp = v_cond_u32 (vreinterpretq_u32_f32 (r)
+		    >= vreinterpretq_u32_f32 (RangeVal));
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (cmp)))
@@ -53,7 +54,7 @@ float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
 
   /* n = rint((|x|+pi/2)/pi) - 0.5 */
   n = v_fma_f32 (InvPi, r + HalfPi, Shift);
-  odd = v_as_u32_f32 (n) << 31;
+  odd = vreinterpretq_u32_f32 (n) << 31;
   n -= Shift;
   n -= v_f32 (0.5f);
 
@@ -70,7 +71,7 @@ float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
   y = v_fma_f32 (y * r2, r, r);
 
   /* sign fix */
-  y = v_as_f32_u32 (v_as_u32_f32 (y) ^ odd);
+  y = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (y) ^ odd);
 
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, cmp);

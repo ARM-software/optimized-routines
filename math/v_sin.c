@@ -53,9 +53,9 @@ float64x2_t VPCS_ATTR V_NAME (sin) (float64x2_t x)
   float64x2_t n, r, r2, y;
   uint64x2_t sign, odd, cmp, ir;
 
-  ir = v_as_u64_f64 (x) & AbsMask;
-  r = v_as_f64_u64 (ir);
-  sign = v_as_u64_f64 (x) & ~AbsMask;
+  ir = vreinterpretq_u64_f64 (x) & AbsMask;
+  r = vreinterpretq_f64_u64 (ir);
+  sign = vreinterpretq_u64_f64 (x) & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
   /* Detect |x| <= 0x1p-509 or |x| >= RangeVal. If fenv exceptions are to be
@@ -65,12 +65,12 @@ float64x2_t VPCS_ATTR V_NAME (sin) (float64x2_t x)
   if (unlikely (v_any_u64 (cmp)))
     r = v_sel_f64 (cmp, v_f64 (1), r);
 #else
-  cmp = v_cond_u64 (ir >= v_as_u64_f64 (RangeVal));
+  cmp = v_cond_u64 (ir >= vreinterpretq_u64_f64 (RangeVal));
 #endif
 
   /* n = rint(|x|/pi).  */
   n = v_fma_f64 (InvPi, r, Shift);
-  odd = v_as_u64_f64 (n) << 63;
+  odd = vreinterpretq_u64_f64 (n) << 63;
   n -= Shift;
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
@@ -89,7 +89,7 @@ float64x2_t VPCS_ATTR V_NAME (sin) (float64x2_t x)
   y = v_fma_f64 (y * r2, r, r);
 
   /* sign.  */
-  y = v_as_f64_u64 (v_as_u64_f64 (y) ^ sign ^ odd);
+  y = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (y) ^ sign ^ odd);
 
   if (unlikely (v_any_u64 (cmp)))
     return specialcase (x, y, cmp);

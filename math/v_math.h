@@ -218,47 +218,6 @@ v_to_f32_u32 (uint32x4_t x)
 {
   return (float32x4_t){x[0], x[1], x[2], x[3]};
 }
-/* reinterpret as type1 from type2.  */
-static inline uint32x4_t
-v_as_u32_f32 (float32x4_t x)
-{
-  union
-  {
-    float32x4_t f;
-    uint32x4_t u;
-  } r = {x};
-  return r.u;
-}
-static inline float32x4_t
-v_as_f32_u32 (uint32x4_t x)
-{
-  union
-  {
-    uint32x4_t u;
-    float32x4_t f;
-  } r = {x};
-  return r.f;
-}
-static inline int32x4_t
-v_as_s32_u32 (uint32x4_t x)
-{
-  union
-  {
-    uint32x4_t u;
-    int32x4_t i;
-  } r = {x};
-  return r.i;
-}
-static inline uint32x4_t
-v_as_u32_s32 (int32x4_t x)
-{
-  union
-  {
-    int32x4_t i;
-    uint32x4_t u;
-  } r = {x};
-  return r.u;
-}
 static inline float32x4_t
 v_lookup_f32 (const float *tab, uint32x4_t idx)
 {
@@ -363,47 +322,6 @@ static inline float64x2_t
 v_to_f64_u64 (uint64x2_t x)
 {
   return (float64x2_t){x[0], x[1]};
-}
-/* reinterpret as type1 from type2.  */
-static inline uint64x2_t
-v_as_u64_f64 (float64x2_t x)
-{
-  union
-  {
-    float64x2_t f;
-    uint64x2_t u;
-  } r = {x};
-  return r.u;
-}
-static inline float64x2_t
-v_as_f64_u64 (uint64x2_t x)
-{
-  union
-  {
-    uint64x2_t u;
-    float64x2_t f;
-  } r = {x};
-  return r.f;
-}
-static inline int64x2_t
-v_as_s64_u64 (uint64x2_t x)
-{
-  union
-  {
-    uint64x2_t u;
-    int64x2_t i;
-  } r = {x};
-  return r.i;
-}
-static inline uint64x2_t
-v_as_u64_s64 (int64x2_t x)
-{
-  union
-  {
-    int64x2_t i;
-    uint64x2_t u;
-  } r = {x};
-  return r.u;
 }
 static inline float64x2_t
 v_lookup_f64 (const double *tab, uint64x2_t idx)

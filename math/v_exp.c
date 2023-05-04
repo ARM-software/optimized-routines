@@ -60,13 +60,14 @@ specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   uint64x2_t b = v_cond_u64 (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
-  float64x2_t s1 = v_as_f64_u64 (v_u64 (0x7000000000000000) - b);
-  float64x2_t s2
-    = v_as_f64_u64 (v_as_u64_f64 (s) - v_u64 (0x3010000000000000) + b);
+  float64x2_t s1 = vreinterpretq_f64_u64 (v_u64 (0x7000000000000000) - b);
+  float64x2_t s2 = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (s)
+					  - v_u64 (0x3010000000000000) + b);
   uint64x2_t cmp = v_cond_u64 (absn > v_f64 (1280.0 * N));
   float64x2_t r1 = s1 * s1;
   float64x2_t r0 = v_fma_f64 (y, s2, s2) * s1;
-  return v_as_f64_u64 ((cmp & v_as_u64_f64 (r1)) | (~cmp & v_as_u64_f64 (r0)));
+  return vreinterpretq_f64_u64 ((cmp & vreinterpretq_u64_f64 (r1))
+				| (~cmp & vreinterpretq_u64_f64 (r0)));
 }
 
 #endif
@@ -81,7 +82,7 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
      specialcase to fix special lanes later. This is only necessary if fenv
      exceptions are to be triggered correctly.  */
   float64x2_t xm = x;
-  cmp = v_cond_u64 ((v_as_u64_f64 (v_abs_f64 (x)) >> 52) - TinyBound
+  cmp = v_cond_u64 ((vreinterpretq_u64_f64 (v_abs_f64 (x)) >> 52) - TinyBound
 		    >= BigBound - TinyBound);
   if (unlikely (v_any_u64 (cmp)))
     x = v_sel_f64 (cmp, v_f64 (1), x);
@@ -91,7 +92,7 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
 
   /* n = round(x/(ln2/N)).  */
   z = v_fma_f64 (x, InvLn2, Shift);
-  u = v_as_u64_f64 (z);
+  u = vreinterpretq_u64_f64 (z);
   n = z - Shift;
 
   /* r = x - n*ln2/N.  */
@@ -110,7 +111,7 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
 
   /* s = 2^(n/N).  */
   u = v_lookup_u64 (Tab, i);
-  s = v_as_f64_u64 (u + e);
+  s = vreinterpretq_f64_u64 (u + e);
 
   if (unlikely (v_any_u64 (cmp)))
 #if WANT_SIMD_EXCEPT

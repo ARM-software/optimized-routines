@@ -40,25 +40,26 @@ float32x4_t VPCS_ATTR V_NAME (sinf) (float32x4_t x)
   float32x4_t n, r, r2, y;
   uint32x4_t sign, odd, cmp, ir;
 
-  ir = v_as_u32_f32 (x) & AbsMask;
-  r = v_as_f32_u32 (ir);
-  sign = v_as_u32_f32 (x) & ~AbsMask;
+  ir = vreinterpretq_u32_f32 (x) & AbsMask;
+  r = vreinterpretq_f32_u32 (ir);
+  sign = vreinterpretq_u32_f32 (x) & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
-  cmp = v_cond_u32 ((ir - v_as_u32_f32 (TinyBound)
-		     >= v_as_u32_f32 (RangeVal) - v_as_u32_f32 (TinyBound)));
+  cmp = v_cond_u32 (
+    (ir - vreinterpretq_u32_f32 (TinyBound)
+     >= vreinterpretq_u32_f32 (RangeVal) - vreinterpretq_u32_f32 (TinyBound)));
   if (unlikely (v_any_u32 (cmp)))
     /* If fenv exceptions are to be triggered correctly, set any special lanes
        to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
        specialcase later.  */
     r = v_sel_f32 (cmp, v_f32 (1), r);
 #else
-  cmp = v_cond_u32 (ir >= v_as_u32_f32 (RangeVal));
+  cmp = v_cond_u32 (ir >= vreinterpretq_u32_f32 (RangeVal));
 #endif
 
   /* n = rint(|x|/pi) */
   n = v_fma_f32 (InvPi, r, Shift);
-  odd = v_as_u32_f32 (n) << 31;
+  odd = vreinterpretq_u32_f32 (n) << 31;
   n -= Shift;
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2) */
@@ -74,7 +75,7 @@ float32x4_t VPCS_ATTR V_NAME (sinf) (float32x4_t x)
   y = v_fma_f32 (y * r2, r, r);
 
   /* sign fix */
-  y = v_as_f32_u32 (v_as_u32_f32 (y) ^ sign ^ odd);
+  y = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (y) ^ sign ^ odd);
 
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, cmp);

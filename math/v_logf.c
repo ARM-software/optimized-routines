@@ -39,15 +39,15 @@ float32x4_t VPCS_ATTR V_NAME (logf) (float32x4_t x)
   float32x4_t n, p, q, r, r2, y;
   uint32x4_t u, cmp;
 
-  u = v_as_u32_f32 (x);
+  u = vreinterpretq_u32_f32 (x);
   cmp = v_cond_u32 (u - Min >= Max - Min);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3 */
   u -= Off;
-  n = v_to_f32_s32 (v_as_s32_u32 (u) >> 23); /* signextend */
+  n = v_to_f32_s32 (vreinterpretq_s32_u32 (u) >> 23); /* signextend.  */
   u &= Mask;
   u += Off;
-  r = v_as_f32_u32 (u) - v_f32 (1.0f);
+  r = vreinterpretq_f32_u32 (u) - v_f32 (1.0f);
 
   /* y = log(1+r) + n*ln2.  */
   r2 = r * r;

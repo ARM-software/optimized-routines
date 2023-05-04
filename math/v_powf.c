@@ -147,13 +147,13 @@ float32x4_t VPCS_ATTR V_NAME (powf) (float32x4_t x, float32x4_t y)
   int32x4_t k;
   float32x4_t ret;
 
-  u = v_as_u32_f32 (x);
+  u = vreinterpretq_u32_f32 (x);
   cmp = v_cond_u32 (u - Min >= Max - Min);
   tmp = u - OFF;
   i = (tmp >> (23 - TBITS)) % (1 << TBITS);
   top = tmp & 0xff800000;
   iz = u - top;
-  k = v_as_s32_u32 (top) >> (23 - SBITS); /* arithmetic shift */
+  k = vreinterpretq_s32_u32 (top) >> (23 - SBITS); /* arithmetic shift.  */
 
   for (int lane = 0; lane < v_lanes32 (); lane++)
     {
