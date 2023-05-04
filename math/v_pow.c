@@ -1,16 +1,14 @@
 /*
  * Double-precision vector pow function.
  *
- * Copyright (c) 2020, Arm Limited.
+ * Copyright (c) 2020-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "mathlib.h"
 #include "v_math.h"
 
-VPCS_ATTR
-v_f64_t
-V_NAME(pow) (v_f64_t x, v_f64_t y)
+v_f64_t VPCS_ATTR V_NAME (pow) (v_f64_t x, v_f64_t y)
 {
   v_f64_t z;
   for (int lane = 0; lane < v_lanes64 (); lane++)

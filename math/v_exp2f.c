@@ -1,7 +1,7 @@
 /*
  * Single-precision vector 2^x function.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,8 +29,7 @@ static const float Poly[] = {
 #define TinyBound 0x20000000 /* asuint (0x1p-63).  */
 #define BigBound 0x42800000  /* asuint (0x1p6).  */
 
-VPCS_ATTR
-static NOINLINE v_f32_t
+static v_f32_t VPCS_ATTR NOINLINE
 specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 {
   /* If fenv exceptions are to be triggered correctly, fall back to the scalar
@@ -40,9 +39,9 @@ specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 
 #else
 
-VPCS_ATTR
-static v_f32_t
-specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn, v_u32_t cmp1, v_f32_t scale)
+static v_f32_t VPCS_ATTR NOINLINE
+specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn, v_u32_t cmp1,
+	     v_f32_t scale)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
   v_u32_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
@@ -58,9 +57,7 @@ specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn, v_u32_t cmp1, v_f
 
 #endif
 
-VPCS_ATTR
-v_f32_t
-V_NAME(exp2f) (v_f32_t x)
+v_f32_t VPCS_ATTR V_NAME (exp2f) (v_f32_t x)
 {
   v_f32_t n, r, r2, scale, p, q, poly;
   v_u32_t cmp, e;

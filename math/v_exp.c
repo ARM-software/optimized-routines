@@ -1,7 +1,7 @@
 /*
  * Double-precision vector e^x function.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -41,7 +41,7 @@
 #define TinyBound 0x200 /* top12 (asuint64 (0x1p-511)).  */
 #define BigBound 0x408	/* top12 (asuint64 (0x1p9)).  */
 
-VPCS_ATTR static NOINLINE v_f64_t
+static v_f64_t VPCS_ATTR NOINLINE
 specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 {
   /* If fenv exceptions are to be triggered correctly, fall back to the scalar
@@ -53,8 +53,7 @@ specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 
 #define Thres v_f64 (704.0)
 
-VPCS_ATTR
-static v_f64_t
+static v_f64_t VPCS_ATTR NOINLINE
 specialcase (v_f64_t s, v_f64_t y, v_f64_t n)
 {
   v_f64_t absn = v_abs_f64 (n);
@@ -71,9 +70,7 @@ specialcase (v_f64_t s, v_f64_t y, v_f64_t n)
 
 #endif
 
-VPCS_ATTR
-v_f64_t
-V_NAME(exp) (v_f64_t x)
+v_f64_t VPCS_ATTR V_NAME (exp) (v_f64_t x)
 {
   v_f64_t n, r, r2, s, y, z;
   v_u64_t cmp, u, e, i;

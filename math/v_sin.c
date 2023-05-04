@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sin function.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -42,16 +42,13 @@ static const double Poly[] = {
 #define RangeVal v_f64 (0x1p23)
 #endif
 
-VPCS_ATTR
-__attribute__ ((noinline)) static v_f64_t
+static v_f64_t VPCS_ATTR NOINLINE
 specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 {
   return v_call_f64 (sin, x, y, cmp);
 }
 
-VPCS_ATTR
-v_f64_t
-V_NAME(sin) (v_f64_t x)
+v_f64_t VPCS_ATTR V_NAME (sin) (v_f64_t x)
 {
   v_f64_t n, r, r2, y;
   v_u64_t sign, odd, cmp, ir;

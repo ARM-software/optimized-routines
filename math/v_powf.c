@@ -1,7 +1,7 @@
 /*
  * Single-precision vector powf function.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -135,16 +135,13 @@ static const struct v_exp2f_data v__exp2f_data = {
   },
 };
 
-VPCS_ATTR
-__attribute__ ((noinline)) static v_f32_t
+static v_f32_t VPCS_ATTR NOINLINE
 specialcase (v_f32_t x, v_f32_t y, v_f32_t ret, v_u32_t cmp)
 {
   return v_call2_f32 (powf, x, y, ret, cmp);
 }
 
-VPCS_ATTR
-v_f32_t
-V_NAME(powf) (v_f32_t x, v_f32_t y)
+v_f32_t VPCS_ATTR V_NAME (powf) (v_f32_t x, v_f32_t y)
 {
   v_u32_t u, tmp, cmp, i, top, iz;
   v_s32_t k;

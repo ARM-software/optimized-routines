@@ -1,7 +1,7 @@
 /*
  * Double-precision vector log(x) function.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -46,16 +46,13 @@ lookup (v_u64_t i)
   return e;
 }
 
-VPCS_ATTR
-__attribute__ ((noinline)) static v_f64_t
+static v_f64_t VPCS_ATTR NOINLINE
 specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 {
   return v_call_f64 (log, x, y, cmp);
 }
 
-VPCS_ATTR
-v_f64_t
-V_NAME(log) (v_f64_t x)
+v_f64_t VPCS_ATTR V_NAME (log) (v_f64_t x)
 {
   v_f64_t z, r, r2, p, y, kd, hi;
   v_u64_t ix, iz, tmp, top, i, cmp;

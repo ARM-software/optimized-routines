@@ -1,7 +1,7 @@
 /*
  * Single-precision vector log function.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -27,17 +27,14 @@ static const float Poly[] = {
 #define Mask v_u32 (0x007fffff)
 #define Off v_u32 (0x3f2aaaab) /* 0.666667 */
 
-VPCS_ATTR
-__attribute__ ((noinline)) static v_f32_t
+static v_f32_t VPCS_ATTR NOINLINE
 specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 {
   /* Fall back to scalar code.  */
   return v_call_f32 (logf, x, y, cmp);
 }
 
-VPCS_ATTR
-v_f32_t
-V_NAME(logf) (v_f32_t x)
+v_f32_t VPCS_ATTR V_NAME (logf) (v_f32_t x)
 {
   v_f32_t n, p, q, r, r2, y;
   v_u32_t u, cmp;

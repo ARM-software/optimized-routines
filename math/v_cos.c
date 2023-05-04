@@ -1,7 +1,7 @@
 /*
  * Double-precision vector cos function.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,16 +37,13 @@ static const double Poly[] = {
 #define RangeVal v_f64 (0x1p23)
 #define AbsMask v_u64 (0x7fffffffffffffff)
 
-VPCS_ATTR
-__attribute__ ((noinline)) static v_f64_t
+static v_f64_t VPCS_ATTR NOINLINE
 specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
 {
   return v_call_f64 (cos, x, y, cmp);
 }
 
-VPCS_ATTR
-v_f64_t
-V_NAME(cos) (v_f64_t x)
+v_f64_t VPCS_ATTR V_NAME (cos) (v_f64_t x)
 {
   v_f64_t n, r, r2, y;
   v_u64_t odd, cmp;

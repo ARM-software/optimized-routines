@@ -1,7 +1,7 @@
 /*
  * Single-precision vector 2^x function.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -24,8 +24,7 @@ static const float Poly[] = {
 #define Ln2hi v_f32 (0x1.62e4p-1f)
 #define Ln2lo v_f32 (0x1.7f7d1cp-20f)
 
-VPCS_ATTR
-static v_f32_t
+static v_f32_t VPCS_ATTR NOINLINE
 specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
@@ -38,9 +37,7 @@ specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn)
   return v_as_f32_u32 ((cmp & v_as_u32_f32 (r1)) | (~cmp & v_as_u32_f32 (r0)));
 }
 
-VPCS_ATTR
-v_f32_t
-V_NAME(exp2f_1u) (v_f32_t x)
+v_f32_t VPCS_ATTR V_NAME (exp2f_1u) (v_f32_t x)
 {
   v_f32_t n, r, scale, poly, absn;
   v_u32_t cmp, e;

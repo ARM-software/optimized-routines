@@ -1,7 +1,7 @@
 /*
  * Single-precision vector sin function.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -28,17 +28,14 @@ static const float Poly[] = {
 #define Shift v_f32 (0x1.8p+23f)
 #define AbsMask v_u32 (0x7fffffff)
 
-VPCS_ATTR
-static v_f32_t
+static v_f32_t VPCS_ATTR NOINLINE
 specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 {
   /* Fall back to scalar code.  */
   return v_call_f32 (sinf, x, y, cmp);
 }
 
-VPCS_ATTR
-v_f32_t
-V_NAME(sinf) (v_f32_t x)
+v_f32_t VPCS_ATTR V_NAME (sinf) (v_f32_t x)
 {
   v_f32_t n, r, r2, y;
   v_u32_t sign, odd, cmp, ir;
