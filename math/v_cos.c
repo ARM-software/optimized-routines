@@ -56,7 +56,7 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
     /* If fenv exceptions are to be triggered correctly, set any special lanes
        to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
        specialcase later.  */
-    r = v_sel_f64 (cmp, v_f64 (1.0), r);
+    r = vbslq_f64 (cmp, v_f64 (1.0), r);
 #endif
 
   /* n = rint((|x|+pi/2)/pi) - 0.5.  */

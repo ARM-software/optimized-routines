@@ -52,7 +52,7 @@ float32x4_t VPCS_ATTR V_NAME (sinf) (float32x4_t x)
     /* If fenv exceptions are to be triggered correctly, set any special lanes
        to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
        specialcase later.  */
-    r = v_sel_f32 (cmp, v_f32 (1), r);
+    r = vbslq_f32 (cmp, v_f32 (1), r);
 #else
   cmp = ir >= vreinterpretq_u32_f32 (RangeVal);
 #endif

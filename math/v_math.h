@@ -177,29 +177,9 @@ v_any_u32 (uint32x4_t x)
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
 }
 static inline float32x4_t
-v_abs_f32 (float32x4_t x)
-{
-  return vabsq_f32 (x);
-}
-static inline float32x4_t
 v_fma_f32 (float32x4_t x, float32x4_t y, float32x4_t z)
 {
   return vfmaq_f32 (z, x, y);
-}
-static inline float32x4_t
-v_round_f32 (float32x4_t x)
-{
-  return vrndaq_f32 (x);
-}
-static inline int32x4_t
-v_round_s32 (float32x4_t x)
-{
-  return vcvtaq_s32_f32 (x);
-}
-static inline float32x4_t
-v_sel_f32 (uint32x4_t p, float32x4_t x, float32x4_t y)
-{
-  return vbslq_f32 (p, x, y);
 }
 /* convert to type1 from type2.  */
 static inline float32x4_t
@@ -276,29 +256,9 @@ v_any_u64 (uint64x2_t x)
   return vpaddd_u64 (x) != 0;
 }
 static inline float64x2_t
-v_abs_f64 (float64x2_t x)
-{
-  return vabsq_f64 (x);
-}
-static inline float64x2_t
 v_fma_f64 (float64x2_t x, float64x2_t y, float64x2_t z)
 {
   return vfmaq_f64 (z, x, y);
-}
-static inline float64x2_t
-v_round_f64 (float64x2_t x)
-{
-  return vrndaq_f64 (x);
-}
-static inline int64x2_t
-v_round_s64 (float64x2_t x)
-{
-  return vcvtaq_s64_f64 (x);
-}
-static inline float64x2_t
-v_sel_f64 (uint64x2_t p, float64x2_t x, float64x2_t y)
-{
-  return vbslq_f64 (p, x, y);
 }
 /* convert to type1 from type2.  */
 static inline float64x2_t

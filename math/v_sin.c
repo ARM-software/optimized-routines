@@ -63,7 +63,7 @@ float64x2_t VPCS_ATTR V_NAME (sin) (float64x2_t x)
      fenv). These lanes will be fixed by specialcase later.  */
   cmp = (ir >> 52) - TinyBound >= Thresh;
   if (unlikely (v_any_u64 (cmp)))
-    r = v_sel_f64 (cmp, v_f64 (1), r);
+    r = vbslq_f64 (cmp, v_f64 (1), r);
 #else
   cmp = ir >= vreinterpretq_u64_f64 (RangeVal);
 #endif

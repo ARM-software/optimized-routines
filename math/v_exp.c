@@ -56,7 +56,7 @@ specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 static float64x2_t VPCS_ATTR NOINLINE
 specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 {
-  float64x2_t absn = v_abs_f64 (n);
+  float64x2_t absn = vabsq_f64 (n);
 
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   uint64x2_t b = (n <= v_f64 (0.0)) & v_u64 (0x6000000000000000);
@@ -82,12 +82,12 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
      specialcase to fix special lanes later. This is only necessary if fenv
      exceptions are to be triggered correctly.  */
   float64x2_t xm = x;
-  cmp = (vreinterpretq_u64_f64 (v_abs_f64 (x)) >> 52) - TinyBound
+  cmp = (vreinterpretq_u64_f64 (vabsq_f64 (x)) >> 52) - TinyBound
 	>= BigBound - TinyBound;
   if (unlikely (v_any_u64 (cmp)))
-    x = v_sel_f64 (cmp, v_f64 (1), x);
+    x = vbslq_f64 (cmp, v_f64 (1), x);
 #else
-  cmp = v_abs_f64 (x) > Thres;
+  cmp = vabsq_f64 (x) > Thres;
 #endif
 
   /* n = round(x/(ln2/N)).  */

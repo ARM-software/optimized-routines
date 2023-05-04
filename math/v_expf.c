@@ -74,7 +74,7 @@ float32x4_t VPCS_ATTR V_NAME (expf) (float32x4_t x)
      specialcase to fix special lanes later. This is only necessary if fenv
      exceptions are to be triggered correctly.  */
   if (unlikely (v_any_u32 (cmp)))
-    x = v_sel_f32 (cmp, v_f32 (1), x);
+    x = vbslq_f32 (cmp, v_f32 (1), x);
 #endif
 
     /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
@@ -87,15 +87,15 @@ float32x4_t VPCS_ATTR V_NAME (expf) (float32x4_t x)
   e = vreinterpretq_u32_f32 (z) << 23;
 #else
   z = x * InvLn2;
-  n = v_round_f32 (z);
+  n = vrndaq_f32 (z);
   r = v_fma_f32 (n, -Ln2hi, x);
   r = v_fma_f32 (n, -Ln2lo, r);
-  e = vreinterpretq_u32_s32 (v_round_s32 (z)) << 23;
+  e = vreinterpretq_u32_s32 (vcvtaq_s32_f32 (z)) << 23;
 #endif
   scale = vreinterpretq_f32_u32 (e + v_u32 (0x3f800000));
 
 #if !WANT_SIMD_EXCEPT
-  float32x4_t absn = v_abs_f32 (n);
+  float32x4_t absn = vabsq_f32 (n);
   cmp = absn > v_f32 (126.0f);
 #endif
 
