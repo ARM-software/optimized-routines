@@ -60,25 +60,25 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
 #endif
 
   /* n = rint((|x|+pi/2)/pi) - 0.5.  */
-  n = v_fma_f64 (InvPi, r + HalfPi, Shift);
+  n = vfmaq_f64 (Shift, InvPi, r + HalfPi);
   odd = vreinterpretq_u64_f64 (n) << 63;
   n -= Shift;
   n -= v_f64 (0.5);
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = v_fma_f64 (-Pi1, n, r);
-  r = v_fma_f64 (-Pi2, n, r);
-  r = v_fma_f64 (-Pi3, n, r);
+  r = vfmaq_f64 (r, -Pi1, n);
+  r = vfmaq_f64 (r, -Pi2, n);
+  r = vfmaq_f64 (r, -Pi3, n);
 
   /* sin(r) poly approx.  */
   r2 = r * r;
-  y = v_fma_f64 (C7, r2, C6);
-  y = v_fma_f64 (y, r2, C5);
-  y = v_fma_f64 (y, r2, C4);
-  y = v_fma_f64 (y, r2, C3);
-  y = v_fma_f64 (y, r2, C2);
-  y = v_fma_f64 (y, r2, C1);
-  y = v_fma_f64 (y * r2, r, r);
+  y = vfmaq_f64 (C6, C7, r2);
+  y = vfmaq_f64 (C5, y, r2);
+  y = vfmaq_f64 (C4, y, r2);
+  y = vfmaq_f64 (C3, y, r2);
+  y = vfmaq_f64 (C2, y, r2);
+  y = vfmaq_f64 (C1, y, r2);
+  y = vfmaq_f64 (r, y * r2, r);
 
   /* sign.  */
   y = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (y) ^ odd);

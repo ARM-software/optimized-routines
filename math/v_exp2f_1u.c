@@ -59,12 +59,12 @@ float32x4_t VPCS_ATTR V_NAME (exp2f_1u) (float32x4_t x)
   scale = vreinterpretq_f32_u32 (e + v_u32 (0x3f800000));
   absn = vabsq_f32 (n);
   cmp = absn > v_f32 (126.0f);
-  poly = v_fma_f32 (C0, r, C1);
-  poly = v_fma_f32 (poly, r, C2);
-  poly = v_fma_f32 (poly, r, C3);
-  poly = v_fma_f32 (poly, r, C4);
-  poly = v_fma_f32 (poly, r, C5);
-  poly = v_fma_f32 (poly, r, v_f32 (1.0f));
+  poly = vfmaq_f32 (C1, C0, r);
+  poly = vfmaq_f32 (C2, poly, r);
+  poly = vfmaq_f32 (C3, poly, r);
+  poly = vfmaq_f32 (C4, poly, r);
+  poly = vfmaq_f32 (C5, poly, r);
+  poly = vfmaq_f32 (v_f32 (1.0f), poly, r);
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (poly, n, e, absn);
   return scale * poly;

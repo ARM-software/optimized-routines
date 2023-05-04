@@ -65,7 +65,7 @@ specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 					  - v_u64 (0x3010000000000000) + b);
   uint64x2_t cmp = absn > v_f64 (1280.0 * N);
   float64x2_t r1 = s1 * s1;
-  float64x2_t r0 = v_fma_f64 (y, s2, s2) * s1;
+  float64x2_t r0 = vfmaq_f64 (s2, y, s2) * s1;
   return vreinterpretq_f64_u64 ((cmp & vreinterpretq_u64_f64 (r1))
 				| (~cmp & vreinterpretq_u64_f64 (r0)));
 }
@@ -91,23 +91,23 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
 #endif
 
   /* n = round(x/(ln2/N)).  */
-  z = v_fma_f64 (x, InvLn2, Shift);
+  z = vfmaq_f64 (Shift, x, InvLn2);
   u = vreinterpretq_u64_f64 (z);
   n = z - Shift;
 
   /* r = x - n*ln2/N.  */
   r = x;
-  r = v_fma_f64 (-Ln2hi, n, r);
-  r = v_fma_f64 (-Ln2lo, n, r);
+  r = vfmaq_f64 (r, -Ln2hi, n);
+  r = vfmaq_f64 (r, -Ln2lo, n);
 
   e = u << (52 - V_EXP_TABLE_BITS);
   i = u & IndexMask;
 
   /* y = exp(r) - 1 ~= r + C1 r^2 + C2 r^3 + C3 r^4.  */
   r2 = r * r;
-  y = v_fma_f64 (C2, r, C1);
-  y = v_fma_f64 (C3, r2, y);
-  y = v_fma_f64 (y, r2, r);
+  y = vfmaq_f64 (C1, C2, r);
+  y = vfmaq_f64 (y, C3, r2);
+  y = vfmaq_f64 (r, y, r2);
 
   /* s = 2^(n/N).  */
   u = v_lookup_u64 (Tab, i);
@@ -115,11 +115,11 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
 
   if (unlikely (v_any_u64 (cmp)))
 #if WANT_SIMD_EXCEPT
-    return specialcase (xm, v_fma_f64 (y, s, s), cmp);
+    return specialcase (xm, vfmaq_f64 (s, y, s), cmp);
 #else
     return specialcase (s, y, n);
 #endif
 
-  return v_fma_f64 (y, s, s);
+  return vfmaq_f64 (s, y, s);
 }
 VPCS_ALIAS

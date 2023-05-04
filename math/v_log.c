@@ -71,18 +71,18 @@ float64x2_t VPCS_ATTR V_NAME (log) (float64x2_t x)
   e = lookup (i);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
-  r = v_fma_f64 (z, e.invc, v_f64 (-1.0));
+  r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   kd = v_to_f64_s64 (k);
 
   /* hi = r + log(c) + k*Ln2.  */
-  hi = v_fma_f64 (kd, Ln2, e.logc + r);
+  hi = vfmaq_f64 (e.logc + r, kd, Ln2);
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   r2 = r * r;
-  y = v_fma_f64 (A3, r, A2);
-  p = v_fma_f64 (A1, r, A0);
-  y = v_fma_f64 (A4, r2, y);
-  y = v_fma_f64 (y, r2, p);
-  y = v_fma_f64 (y, r2, hi);
+  y = vfmaq_f64 (A2, A3, r);
+  p = vfmaq_f64 (A0, A1, r);
+  y = vfmaq_f64 (y, A4, r2);
+  y = vfmaq_f64 (p, y, r2);
+  y = vfmaq_f64 (hi, y, r2);
 
   if (unlikely (v_any_u64 (cmp)))
     return specialcase (x, y, cmp);

@@ -52,14 +52,14 @@ float32x4_t VPCS_ATTR V_NAME (logf) (float32x4_t x)
   /* y = log(1+r) + n*ln2.  */
   r2 = r * r;
   /* n*ln2 + r + r2*(P1 + r*P2 + r2*(P3 + r*P4 + r2*(P5 + r*P6 + r2*P7))).  */
-  p = v_fma_f32 (P6, r, P5);
-  q = v_fma_f32 (P4, r, P3);
-  y = v_fma_f32 (P2, r, P1);
-  p = v_fma_f32 (P7, r2, p);
-  q = v_fma_f32 (p, r2, q);
-  y = v_fma_f32 (q, r2, y);
-  p = v_fma_f32 (Ln2, n, r);
-  y = v_fma_f32 (y, r2, p);
+  p = vfmaq_f32 (P5, P6, r);
+  q = vfmaq_f32 (P3, P4, r);
+  y = vfmaq_f32 (P1, P2, r);
+  p = vfmaq_f32 (p, P7, r2);
+  q = vfmaq_f32 (q, p, r2);
+  y = vfmaq_f32 (y, q, r2);
+  p = vfmaq_f32 (r, Ln2, n);
+  y = vfmaq_f32 (p, y, r2);
 
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, cmp);

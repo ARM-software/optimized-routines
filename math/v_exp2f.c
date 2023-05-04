@@ -49,9 +49,9 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
   float32x4_t s2 = vreinterpretq_f32_u32 (e - b);
   uint32x4_t cmp2 = absn > v_f32 (192.0f);
   uint32x4_t r2 = vreinterpretq_u32_f32 (s1 * s1);
-  uint32x4_t r1 = vreinterpretq_u32_f32 (v_fma_f32 (poly, s2, s2) * s1);
+  uint32x4_t r1 = vreinterpretq_u32_f32 (vfmaq_f32 (s2, poly, s2) * s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
-  uint32x4_t r0 = vreinterpretq_u32_f32 (v_fma_f32 (poly, scale, scale));
+  uint32x4_t r0 = vreinterpretq_u32_f32 (vfmaq_f32 (scale, poly, scale));
   return vreinterpretq_f32_u32 ((cmp2 & r2) | (~cmp2 & cmp1 & r1)
 				| (~cmp1 & r0));
 }
@@ -95,19 +95,19 @@ float32x4_t VPCS_ATTR V_NAME (exp2f) (float32x4_t x)
 #endif
 
   r2 = r * r;
-  p = v_fma_f32 (C0, r, C1);
-  q = v_fma_f32 (C2, r, C3);
-  q = v_fma_f32 (p, r2, q);
+  p = vfmaq_f32 (C1, C0, r);
+  q = vfmaq_f32 (C3, C2, r);
+  q = vfmaq_f32 (q, p, r2);
   p = C4 * r;
-  poly = v_fma_f32 (q, r2, p);
+  poly = vfmaq_f32 (p, q, r2);
 
   if (unlikely (v_any_u32 (cmp)))
 #if WANT_SIMD_EXCEPT
-    return specialcase (xm, v_fma_f32 (poly, scale, scale), cmp);
+    return specialcase (xm, vfmaq_f32 (scale, poly, scale), cmp);
 #else
     return specialcase (poly, n, e, absn, cmp, scale);
 #endif
 
-  return v_fma_f32 (poly, scale, scale);
+  return vfmaq_f32 (scale, poly, scale);
 }
 VPCS_ALIAS

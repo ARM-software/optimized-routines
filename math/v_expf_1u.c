@@ -49,27 +49,27 @@ float32x4_t VPCS_ATTR V_NAME (expf_1u) (float32x4_t x)
   /* exp(x) = 2^n * poly(r), with poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
 #if 1
-  z = v_fma_f32 (x, InvLn2, Shift);
+  z = vfmaq_f32 (Shift, x, InvLn2);
   n = z - Shift;
-  r = v_fma_f32 (n, -Ln2hi, x);
-  r = v_fma_f32 (n, -Ln2lo, r);
+  r = vfmaq_f32 (x, n, -Ln2hi);
+  r = vfmaq_f32 (r, n, -Ln2lo);
   e = vreinterpretq_u32_f32 (z) << 23;
 #else
   z = x * InvLn2;
   n = vrndaq_f32 (z);
-  r = v_fma_f32 (n, -Ln2hi, x);
-  r = v_fma_f32 (n, -Ln2lo, r);
+  r = vfmaq_f32 (x, n, -Ln2hi);
+  r = vfmaq_f32 (r, n, -Ln2lo);
   e = vreinterpretq_u32_s32 (vcvtaq_s32_f32 (z)) << 23;
 #endif
   scale = vreinterpretq_f32_u32 (e + v_u32 (0x3f800000));
   absn = vabsq_f32 (n);
   cmp = absn > v_f32 (126.0f);
-  poly = v_fma_f32 (C0, r, C1);
-  poly = v_fma_f32 (poly, r, C2);
-  poly = v_fma_f32 (poly, r, C3);
-  poly = v_fma_f32 (poly, r, C4);
-  poly = v_fma_f32 (poly, r, v_f32 (1.0f));
-  poly = v_fma_f32 (poly, r, v_f32 (1.0f));
+  poly = vfmaq_f32 (C1, C0, r);
+  poly = vfmaq_f32 (C2, poly, r);
+  poly = vfmaq_f32 (C3, poly, r);
+  poly = vfmaq_f32 (C4, poly, r);
+  poly = vfmaq_f32 (v_f32 (1.0f), poly, r);
+  poly = vfmaq_f32 (v_f32 (1.0f), poly, r);
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (poly, n, e, absn);
   return scale * poly;
