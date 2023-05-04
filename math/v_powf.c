@@ -135,17 +135,17 @@ static const struct v_exp2f_data v__exp2f_data = {
   },
 };
 
-static v_f32_t VPCS_ATTR NOINLINE
-specialcase (v_f32_t x, v_f32_t y, v_f32_t ret, v_u32_t cmp)
+static float32x4_t VPCS_ATTR NOINLINE
+specialcase (float32x4_t x, float32x4_t y, float32x4_t ret, uint32x4_t cmp)
 {
   return v_call2_f32 (powf, x, y, ret, cmp);
 }
 
-v_f32_t VPCS_ATTR V_NAME (powf) (v_f32_t x, v_f32_t y)
+float32x4_t VPCS_ATTR V_NAME (powf) (float32x4_t x, float32x4_t y)
 {
-  v_u32_t u, tmp, cmp, i, top, iz;
-  v_s32_t k;
-  v_f32_t ret;
+  uint32x4_t u, tmp, cmp, i, top, iz;
+  int32x4_t k;
+  float32x4_t ret;
 
   u = v_as_u32_f32 (x);
   cmp = v_cond_u32 (u - Min >= Max - Min);

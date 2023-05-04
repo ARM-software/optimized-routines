@@ -28,17 +28,17 @@ static const float Poly[] = {
 #define AbsMask v_u32 (0x7fffffff)
 #define HalfPi v_f32 (0x1.921fb6p0f)
 
-static v_f32_t VPCS_ATTR NOINLINE
-specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
+static float32x4_t VPCS_ATTR NOINLINE
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 {
   /* Fall back to scalar code.  */
   return v_call_f32 (cosf, x, y, cmp);
 }
 
-v_f32_t VPCS_ATTR V_NAME (cosf) (v_f32_t x)
+float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
 {
-  v_f32_t n, r, r2, y;
-  v_u32_t odd, cmp;
+  float32x4_t n, r, r2, y;
+  uint32x4_t odd, cmp;
 
   r = v_as_f32_u32 (v_as_u32_f32 (x) & AbsMask);
   cmp = v_cond_u32 (v_as_u32_f32 (r) >= v_as_u32_f32 (RangeVal));

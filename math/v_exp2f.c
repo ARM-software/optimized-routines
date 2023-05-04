@@ -29,8 +29,8 @@ static const float Poly[] = {
 #define TinyBound 0x20000000 /* asuint (0x1p-63).  */
 #define BigBound 0x42800000  /* asuint (0x1p6).  */
 
-static v_f32_t VPCS_ATTR NOINLINE
-specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
+static float32x4_t VPCS_ATTR NOINLINE
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 {
   /* If fenv exceptions are to be triggered correctly, fall back to the scalar
      routine to special lanes.  */
@@ -39,33 +39,33 @@ specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
 
 #else
 
-static v_f32_t VPCS_ATTR NOINLINE
-specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn, v_u32_t cmp1,
-	     v_f32_t scale)
+static float32x4_t VPCS_ATTR NOINLINE
+specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
+	     uint32x4_t cmp1, float32x4_t scale)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
-  v_u32_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
-  v_f32_t s1 = v_as_f32_u32 (v_u32 (0x7f000000) + b);
-  v_f32_t s2 = v_as_f32_u32 (e - b);
-  v_u32_t cmp2 = v_cond_u32 (absn > v_f32 (192.0f));
-  v_u32_t r2 = v_as_u32_f32 (s1 * s1);
-  v_u32_t r1 = v_as_u32_f32 (v_fma_f32 (poly, s2, s2) * s1);
+  uint32x4_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
+  float32x4_t s1 = v_as_f32_u32 (v_u32 (0x7f000000) + b);
+  float32x4_t s2 = v_as_f32_u32 (e - b);
+  uint32x4_t cmp2 = v_cond_u32 (absn > v_f32 (192.0f));
+  uint32x4_t r2 = v_as_u32_f32 (s1 * s1);
+  uint32x4_t r1 = v_as_u32_f32 (v_fma_f32 (poly, s2, s2) * s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
-  v_u32_t r0 = v_as_u32_f32 (v_fma_f32 (poly, scale, scale));
+  uint32x4_t r0 = v_as_u32_f32 (v_fma_f32 (poly, scale, scale));
   return v_as_f32_u32 ((cmp2 & r2) | (~cmp2 & cmp1 & r1) | (~cmp1 & r0));
 }
 
 #endif
 
-v_f32_t VPCS_ATTR V_NAME (exp2f) (v_f32_t x)
+float32x4_t VPCS_ATTR V_NAME (exp2f) (float32x4_t x)
 {
-  v_f32_t n, r, r2, scale, p, q, poly;
-  v_u32_t cmp, e;
+  float32x4_t n, r, r2, scale, p, q, poly;
+  uint32x4_t cmp, e;
 
 #if WANT_SIMD_EXCEPT
   cmp = v_cond_u32 ((v_as_u32_f32 (x) & 0x7fffffff) - TinyBound
 		    >= BigBound - TinyBound);
-  v_f32_t xm = x;
+  float32x4_t xm = x;
   /* If any lanes are special, mask them with 1 and retain a copy of x to allow
      specialcase to fix special lanes later. This is only necessary if fenv
      exceptions are to be triggered correctly.  */
@@ -76,7 +76,7 @@ v_f32_t VPCS_ATTR V_NAME (exp2f) (v_f32_t x)
     /* exp2(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
        x = n + r, with r in [-1/2, 1/2].  */
 #if 0
-  v_f32_t z;
+  float32x4_t z;
   z = x + Shift;
   n = z - Shift;
   r = x - n;
@@ -89,7 +89,7 @@ v_f32_t VPCS_ATTR V_NAME (exp2f) (v_f32_t x)
   scale = v_as_f32_u32 (e + v_u32 (0x3f800000));
 
 #if !WANT_SIMD_EXCEPT
-  v_f32_t absn = v_abs_f32 (n);
+  float32x4_t absn = v_abs_f32 (n);
   cmp = v_cond_u32 (absn > v_f32 (126.0f));
 #endif
 

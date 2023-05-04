@@ -37,16 +37,16 @@ static const double Poly[] = {
 #define RangeVal v_f64 (0x1p23)
 #define AbsMask v_u64 (0x7fffffffffffffff)
 
-static v_f64_t VPCS_ATTR NOINLINE
-specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
+static float64x2_t VPCS_ATTR NOINLINE
+specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 {
   return v_call_f64 (cos, x, y, cmp);
 }
 
-v_f64_t VPCS_ATTR V_NAME (cos) (v_f64_t x)
+float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
 {
-  v_f64_t n, r, r2, y;
-  v_u64_t odd, cmp;
+  float64x2_t n, r, r2, y;
+  uint64x2_t odd, cmp;
 
   r = v_as_f64_u64 (v_as_u64_f64 (x) & AbsMask);
   cmp = v_cond_u64 (v_as_u64_f64 (r) >= v_as_u64_f64 (RangeVal));

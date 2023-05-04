@@ -24,28 +24,28 @@ static const float Poly[] = {
 #define Ln2hi v_f32 (0x1.62e4p-1f)
 #define Ln2lo v_f32 (0x1.7f7d1cp-20f)
 
-static v_f32_t VPCS_ATTR NOINLINE
-specialcase (v_f32_t poly, v_f32_t n, v_u32_t e, v_f32_t absn)
+static float32x4_t VPCS_ATTR NOINLINE
+specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
-  v_u32_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x83000000);
-  v_f32_t s1 = v_as_f32_u32 (v_u32 (0x7f000000) + b);
-  v_f32_t s2 = v_as_f32_u32 (e - b);
-  v_u32_t cmp = v_cond_u32 (absn > v_f32 (192.0f));
-  v_f32_t r1 = s1 * s1;
-  v_f32_t r0 = poly * s1 * s2;
+  uint32x4_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x83000000);
+  float32x4_t s1 = v_as_f32_u32 (v_u32 (0x7f000000) + b);
+  float32x4_t s2 = v_as_f32_u32 (e - b);
+  uint32x4_t cmp = v_cond_u32 (absn > v_f32 (192.0f));
+  float32x4_t r1 = s1 * s1;
+  float32x4_t r0 = poly * s1 * s2;
   return v_as_f32_u32 ((cmp & v_as_u32_f32 (r1)) | (~cmp & v_as_u32_f32 (r0)));
 }
 
-v_f32_t VPCS_ATTR V_NAME (exp2f_1u) (v_f32_t x)
+float32x4_t VPCS_ATTR V_NAME (exp2f_1u) (float32x4_t x)
 {
-  v_f32_t n, r, scale, poly, absn;
-  v_u32_t cmp, e;
+  float32x4_t n, r, scale, poly, absn;
+  uint32x4_t cmp, e;
 
   /* exp2(x) = 2^n * poly(r), with poly(r) in [1/sqrt(2),sqrt(2)]
      x = n + r, with r in [-1/2, 1/2].  */
 #if 0
-  v_f32_t z;
+  float32x4_t z;
   z = x + Shift;
   n = z - Shift;
   r = x - n;

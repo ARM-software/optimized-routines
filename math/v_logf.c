@@ -27,17 +27,17 @@ static const float Poly[] = {
 #define Mask v_u32 (0x007fffff)
 #define Off v_u32 (0x3f2aaaab) /* 0.666667 */
 
-static v_f32_t VPCS_ATTR NOINLINE
-specialcase (v_f32_t x, v_f32_t y, v_u32_t cmp)
+static float32x4_t VPCS_ATTR NOINLINE
+specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 {
   /* Fall back to scalar code.  */
   return v_call_f32 (logf, x, y, cmp);
 }
 
-v_f32_t VPCS_ATTR V_NAME (logf) (v_f32_t x)
+float32x4_t VPCS_ATTR V_NAME (logf) (float32x4_t x)
 {
-  v_f32_t n, p, q, r, r2, y;
-  v_u32_t u, cmp;
+  float32x4_t n, p, q, r, r2, y;
+  uint32x4_t u, cmp;
 
   u = v_as_u32_f32 (x);
   cmp = v_cond_u32 (u - Min >= Max - Min);

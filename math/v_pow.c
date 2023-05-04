@@ -8,14 +8,14 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-v_f64_t VPCS_ATTR V_NAME (pow) (v_f64_t x, v_f64_t y)
+float64x2_t VPCS_ATTR V_NAME (pow) (float64x2_t x, float64x2_t y)
 {
-  v_f64_t z;
+  float64x2_t z;
   for (int lane = 0; lane < v_lanes64 (); lane++)
     {
-      f64_t sx = v_get_f64 (x, lane);
-      f64_t sy = v_get_f64 (y, lane);
-      f64_t sz = pow (sx, sy);
+      double sx = v_get_f64 (x, lane);
+      double sy = v_get_f64 (y, lane);
+      double sz = pow (sx, sy);
       v_set_f64 (&z, lane, sz);
     }
   return z;

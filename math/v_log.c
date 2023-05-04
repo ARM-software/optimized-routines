@@ -11,13 +11,10 @@
 
 /* Worst-case error: 1.17 + 0.5 ulp.  */
 
-static const f64_t Poly[] = {
+static const double Poly[] = {
   /* rel error: 0x1.6272e588p-56 in [ -0x1.fc1p-9 0x1.009p-8 ].  */
-  -0x1.ffffffffffff7p-2,
-   0x1.55555555170d4p-2,
-  -0x1.0000000399c27p-2,
-   0x1.999b2e90e94cap-3,
-  -0x1.554e550bd501ep-3,
+  -0x1.ffffffffffff7p-2, 0x1.55555555170d4p-2,	-0x1.0000000399c27p-2,
+  0x1.999b2e90e94cap-3,	 -0x1.554e550bd501ep-3,
 };
 
 #define A0 v_f64 (Poly[0])
@@ -31,12 +28,12 @@ static const f64_t Poly[] = {
 
 struct entry
 {
-  v_f64_t invc;
-  v_f64_t logc;
+  float64x2_t invc;
+  float64x2_t logc;
 };
 
 static inline struct entry
-lookup (v_u64_t i)
+lookup (uint64x2_t i)
 {
   struct entry e;
   e.invc[0] = __v_log_data[i[0]].invc;
@@ -46,17 +43,17 @@ lookup (v_u64_t i)
   return e;
 }
 
-static v_f64_t VPCS_ATTR NOINLINE
-specialcase (v_f64_t x, v_f64_t y, v_u64_t cmp)
+static float64x2_t VPCS_ATTR NOINLINE
+specialcase (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 {
   return v_call_f64 (log, x, y, cmp);
 }
 
-v_f64_t VPCS_ATTR V_NAME (log) (v_f64_t x)
+float64x2_t VPCS_ATTR V_NAME (log) (float64x2_t x)
 {
-  v_f64_t z, r, r2, p, y, kd, hi;
-  v_u64_t ix, iz, tmp, top, i, cmp;
-  v_s64_t k;
+  float64x2_t z, r, r2, p, y, kd, hi;
+  uint64x2_t ix, iz, tmp, top, i, cmp;
+  int64x2_t k;
   struct entry e;
 
   ix = v_as_u64_f64 (x);
