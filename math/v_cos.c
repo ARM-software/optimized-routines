@@ -49,8 +49,7 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
   uint64x2_t odd, cmp;
 
   r = vreinterpretq_f64_u64 (vreinterpretq_u64_f64 (x) & AbsMask);
-  cmp = v_cond_u64 (vreinterpretq_u64_f64 (r)
-		    >= vreinterpretq_u64_f64 (RangeVal));
+  cmp = vreinterpretq_u64_f64 (r) >= vreinterpretq_u64_f64 (RangeVal);
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (cmp)))

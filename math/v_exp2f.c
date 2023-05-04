@@ -44,10 +44,10 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
 	     uint32x4_t cmp1, float32x4_t scale)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
-  uint32x4_t b = v_cond_u32 (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
+  uint32x4_t b = (n <= v_f32 (0.0f)) & v_u32 (0x82000000);
   float32x4_t s1 = vreinterpretq_f32_u32 (v_u32 (0x7f000000) + b);
   float32x4_t s2 = vreinterpretq_f32_u32 (e - b);
-  uint32x4_t cmp2 = v_cond_u32 (absn > v_f32 (192.0f));
+  uint32x4_t cmp2 = absn > v_f32 (192.0f);
   uint32x4_t r2 = vreinterpretq_u32_f32 (s1 * s1);
   uint32x4_t r1 = vreinterpretq_u32_f32 (v_fma_f32 (poly, s2, s2) * s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
@@ -64,8 +64,8 @@ float32x4_t VPCS_ATTR V_NAME (exp2f) (float32x4_t x)
   uint32x4_t cmp, e;
 
 #if WANT_SIMD_EXCEPT
-  cmp = v_cond_u32 ((vreinterpretq_u32_f32 (x) & 0x7fffffff) - TinyBound
-		    >= BigBound - TinyBound);
+  cmp = (vreinterpretq_u32_f32 (x) & 0x7fffffff) - TinyBound
+	>= BigBound - TinyBound;
   float32x4_t xm = x;
   /* If any lanes are special, mask them with 1 and retain a copy of x to allow
      specialcase to fix special lanes later. This is only necessary if fenv
@@ -91,7 +91,7 @@ float32x4_t VPCS_ATTR V_NAME (exp2f) (float32x4_t x)
 
 #if !WANT_SIMD_EXCEPT
   float32x4_t absn = v_abs_f32 (n);
-  cmp = v_cond_u32 (absn > v_f32 (126.0f));
+  cmp = absn > v_f32 (126.0f);
 #endif
 
   r2 = r * r;

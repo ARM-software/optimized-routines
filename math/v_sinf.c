@@ -45,16 +45,16 @@ float32x4_t VPCS_ATTR V_NAME (sinf) (float32x4_t x)
   sign = vreinterpretq_u32_f32 (x) & ~AbsMask;
 
 #if WANT_SIMD_EXCEPT
-  cmp = v_cond_u32 (
-    (ir - vreinterpretq_u32_f32 (TinyBound)
-     >= vreinterpretq_u32_f32 (RangeVal) - vreinterpretq_u32_f32 (TinyBound)));
+  cmp
+    = (ir - vreinterpretq_u32_f32 (TinyBound)
+       >= vreinterpretq_u32_f32 (RangeVal) - vreinterpretq_u32_f32 (TinyBound));
   if (unlikely (v_any_u32 (cmp)))
     /* If fenv exceptions are to be triggered correctly, set any special lanes
        to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
        specialcase later.  */
     r = v_sel_f32 (cmp, v_f32 (1), r);
 #else
-  cmp = v_cond_u32 (ir >= vreinterpretq_u32_f32 (RangeVal));
+  cmp = ir >= vreinterpretq_u32_f32 (RangeVal);
 #endif
 
   /* n = rint(|x|/pi) */

@@ -41,8 +41,7 @@ float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
   uint32x4_t odd, cmp;
 
   r = vreinterpretq_f32_u32 (vreinterpretq_u32_f32 (x) & AbsMask);
-  cmp = v_cond_u32 (vreinterpretq_u32_f32 (r)
-		    >= vreinterpretq_u32_f32 (RangeVal));
+  cmp = vreinterpretq_u32_f32 (r) >= vreinterpretq_u32_f32 (RangeVal);
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (cmp)))

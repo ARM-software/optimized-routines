@@ -176,12 +176,6 @@ v_any_u32 (uint32x4_t x)
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
 }
-/* to wrap the result of relational operators.  */
-static inline uint32x4_t
-v_cond_u32 (uint32x4_t x)
-{
-  return x;
-}
 static inline float32x4_t
 v_abs_f32 (float32x4_t x)
 {
@@ -280,12 +274,6 @@ v_any_u64 (uint64x2_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (x) != 0;
-}
-/* to wrap the result of relational operators.  */
-static inline uint64x2_t
-v_cond_u64 (uint64x2_t x)
-{
-  return x;
 }
 static inline float64x2_t
 v_abs_f64 (float64x2_t x)

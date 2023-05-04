@@ -148,7 +148,7 @@ float32x4_t VPCS_ATTR V_NAME (powf) (float32x4_t x, float32x4_t y)
   float32x4_t ret;
 
   u = vreinterpretq_u32_f32 (x);
-  cmp = v_cond_u32 (u - Min >= Max - Min);
+  cmp = u - Min >= Max - Min;
   tmp = u - OFF;
   i = (tmp >> (23 - TBITS)) % (1 << TBITS);
   top = tmp & 0xff800000;

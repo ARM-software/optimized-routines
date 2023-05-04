@@ -58,7 +58,7 @@ float64x2_t VPCS_ATTR V_NAME (log) (float64x2_t x)
 
   ix = vreinterpretq_u64_f64 (x);
   top = ix >> 48;
-  cmp = v_cond_u64 (top - v_u64 (0x0010) >= v_u64 (0x7ff0 - 0x0010));
+  cmp = top - v_u64 (0x0010) >= v_u64 (0x7ff0 - 0x0010);
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.
