@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "v_exp.h"
+#include "v_math.h"
 #if WANT_VMATH
 
 #define N (1 << V_EXP_TABLE_BITS)

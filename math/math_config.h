@@ -1,7 +1,7 @@
 /*
  * Configuration for math routines.
  *
- * Copyright (c) 2017-2020, Arm Limited.
+ * Copyright (c) 2017-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -458,5 +458,15 @@ extern const struct erf_data
   double erfc_poly_E[ERFC_POLY_E_NCOEFFS];
   double erfc_poly_F[ERFC_POLY_F_NCOEFFS];
 } __erf_data HIDDEN;
+
+#define V_EXP_TABLE_BITS 7
+extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
+
+#define V_LOG_TABLE_BITS 7
+extern const struct v_log_data
+{
+  double invc[1 << V_LOG_TABLE_BITS];
+  double logc[1 << V_LOG_TABLE_BITS];
+} __v_log_data HIDDEN;
 
 #endif

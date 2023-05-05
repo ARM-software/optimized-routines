@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#include "v_exp.h"
 
 #if V_EXP_TABLE_BITS == 7
 /* maxerr: 1.88 +0.5 ulp

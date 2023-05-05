@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#include "v_log.h"
 
 /* Worst-case error: 1.17 + 0.5 ulp.  */
 
