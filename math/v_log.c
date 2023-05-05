@@ -36,10 +36,10 @@ static inline struct entry
 lookup (uint64x2_t i)
 {
   struct entry e;
-  e.invc[0] = __v_log_data[i[0]].invc;
-  e.logc[0] = __v_log_data[i[0]].logc;
-  e.invc[1] = __v_log_data[i[1]].invc;
-  e.logc[1] = __v_log_data[i[1]].logc;
+  e.invc[0] = __v_log_data.invc[i[0]];
+  e.logc[0] = __v_log_data.logc[i[0]];
+  e.invc[1] = __v_log_data.invc[i[1]];
+  e.logc[1] = __v_log_data.logc[i[1]];
   return e;
 }
 

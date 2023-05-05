@@ -12,7 +12,7 @@
 
 extern const struct v_log_data
 {
-  double invc;
-  double logc;
-} __v_log_data[1 << V_LOG_TABLE_BITS] HIDDEN;
+  double invc[1 << V_LOG_TABLE_BITS];
+  double logc[1 << V_LOG_TABLE_BITS];
+} __v_log_data HIDDEN;
 #endif
