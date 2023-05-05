@@ -124,15 +124,15 @@ powf_specialcase (float x, float y, float z)
 
 /* Scalar fallback for special case routines with custom signature.  */
 static inline svfloat32_t
-sv_call_powf_sc (f32_t (*f) (f32_t, f32_t, f32_t), svfloat32_t x1,
+sv_call_powf_sc (float (*f) (float, float, float), svfloat32_t x1,
 		 svfloat32_t x2, svfloat32_t y, svbool_t cmp)
 {
   svbool_t p = svpfirst (cmp, svpfalse ());
   while (svptest_any (cmp, p))
     {
-      f32_t sx1 = svclastb_n_f32 (p, 0, x1);
-      f32_t sx2 = svclastb_n_f32 (p, 0, x2);
-      f32_t elem = svclastb_n_f32 (p, 0, y);
+      float sx1 = svclastb_n_f32 (p, 0, x1);
+      float sx2 = svclastb_n_f32 (p, 0, x2);
+      float elem = svclastb_n_f32 (p, 0, y);
       elem = (*f) (sx1, sx2, elem);
       svfloat32_t y2 = svdup_n_f32 (elem);
       y = svsel_f32 (p, y2, y);

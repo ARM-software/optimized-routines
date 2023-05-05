@@ -22,7 +22,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 }
 
 static inline svfloat64_t
-estrin_lvl1 (svbool_t pg, svfloat64_t x, svuint64_t idx, u64_t i, u64_t j)
+estrin_lvl1 (svbool_t pg, svfloat64_t x, svuint64_t idx, uint64_t i, uint64_t j)
 {
   svfloat64_t a = svtbl_f64 (svld1_f64 (pg, &P[i][0]), idx);
   svfloat64_t b = svtbl_f64 (svld1_f64 (pg, &P[j][0]), idx);

@@ -126,19 +126,19 @@ sv_zeroinfnan (svbool_t pg, svuint64_t i)
 			2 * asuint64 (INFINITY) - 1);
 }
 
-/* Scalar fallback for special case routines with f64_t(*f)(f64_t, u64_t, u64_t)
-   signature.  */
+/* Scalar fallback for special case routines with double(*f)(double, uint64_t,
+   uint64_t) signature.  */
 static inline svfloat64_t
-sv_call_specialcase (f64_t (*f) (f64_t, u64_t, u64_t), svfloat64_t x1,
+sv_call_specialcase (double (*f) (double, uint64_t, uint64_t), svfloat64_t x1,
 		     svuint64_t u1, svuint64_t u2, svfloat64_t y, svbool_t cmp)
 {
   svbool_t p = svpfirst (cmp, svpfalse ());
   while (svptest_any (cmp, p))
     {
-      f64_t sx1 = svclastb_n_f64 (p, 0, x1);
-      u64_t su1 = svclastb_n_u64 (p, 0, u1);
-      u64_t su2 = svclastb_n_u64 (p, 0, u2);
-      f64_t elem = (*f) (sx1, su1, su2);
+      double sx1 = svclastb_n_f64 (p, 0, x1);
+      uint64_t su1 = svclastb_n_u64 (p, 0, u1);
+      uint64_t su2 = svclastb_n_u64 (p, 0, u2);
+      double elem = (*f) (sx1, su1, su2);
       svfloat64_t y2 = svdup_n_f64 (elem);
       y = svsel_f64 (p, y2, y);
       p = svpnext_b64 (cmp, p);
