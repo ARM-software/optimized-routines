@@ -116,6 +116,17 @@ as_u64_s64 (int64_t x)
 #if __aarch64__
 #include <arm_neon.h>
 
+/* Shorthand helpers for declaring constants.  */
+#define V2(x)                                                                  \
+  {                                                                            \
+    x, x                                                                       \
+  }
+
+#define V4(x)                                                                  \
+  {                                                                            \
+    x, x, x, x                                                                 \
+  }
+
 static inline int
 v_lanes32 (void)
 {
@@ -125,17 +136,17 @@ v_lanes32 (void)
 static inline float32x4_t
 v_f32 (float x)
 {
-  return (float32x4_t){x, x, x, x};
+  return (float32x4_t) V4 (x);
 }
 static inline uint32x4_t
 v_u32 (uint32_t x)
 {
-  return (uint32x4_t){x, x, x, x};
+  return (uint32x4_t) V4 (x);
 }
 static inline int32x4_t
 v_s32 (int32_t x)
 {
-  return (int32x4_t){x, x, x, x};
+  return (int32x4_t) V4 (x);
 }
 static inline float
 v_get_f32 (float32x4_t x, int i)
@@ -221,17 +232,17 @@ v_lanes64 (void)
 static inline float64x2_t
 v_f64 (double x)
 {
-  return (float64x2_t){x, x};
+  return (float64x2_t) V2 (x);
 }
 static inline uint64x2_t
 v_u64 (uint64_t x)
 {
-  return (uint64x2_t){x, x};
+  return (uint64x2_t) V2 (x);
 }
 static inline int64x2_t
 v_s64 (int64_t x)
 {
-  return (int64x2_t){x, x};
+  return (int64x2_t) V2 (x);
 }
 static inline double
 v_get_f64 (float64x2_t x, int i)
