@@ -31,7 +31,7 @@ cbrt (double x)
   uint64_t iax = ix & AbsMask;
   uint64_t sign = ix & ~AbsMask;
 
-  if (unlikely (iax == 0 || iax == 0x7f80000000000000))
+  if (unlikely (iax == 0 || iax == 0x7ff0000000000000))
     return x;
 
   /* |x| = m * 2^e, where m is in [0.5, 1.0].
