@@ -38,7 +38,8 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn)
 				| (~cmp & vreinterpretq_u32_f32 (r0)));
 }
 
-float32x4_t VPCS_ATTR V_NAME (exp2f_1u) (float32x4_t x)
+float32x4_t VPCS_ATTR
+_ZGVnN4v_exp2f_1u (float32x4_t x)
 {
   float32x4_t n, r, scale, poly, absn;
   uint32x4_t cmp, e;

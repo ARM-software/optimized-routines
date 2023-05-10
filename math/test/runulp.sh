@@ -2,7 +2,7 @@
 
 # ULP error check script.
 #
-# Copyright (c) 2019-2022, Arm Limited.
+# Copyright (c) 2019-2023, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 #set -x
@@ -146,10 +146,6 @@ done
 Ldir=0.5
 r='n'
 flags="${ULPFLAGS:--q}"
-runv=
-check __v_exp 1 && runv=1
-runvn=
-check __vn_exp 1 && runvn=1
 
 range_exp='
   0 0xffff000000000000 10000
@@ -227,9 +223,8 @@ L_sinf=1.4
 L_cosf=1.4
 L_powf=2.1
 
-while read G F R D
+while read G F D
 do
-	[ "$R" = 1 ] || continue
 	case "$G" in \#*) continue ;; esac
 	eval range="\${range_$G}"
 	eval L="\${L_$G}"
@@ -252,55 +247,19 @@ $range
 EOF
 done << EOF
 # group symbol run
-exp  __v_exp       $runv
-exp  __vn_exp      $runvn
-exp  _ZGVnN2v_exp  $runvn
-
-log  __v_log       $runv
-log  __vn_log      $runvn
-log  _ZGVnN2v_log  $runvn
-
-pow __v_pow       $runv         -f
-pow __vn_pow      $runvn        -f
-pow _ZGVnN2vv_pow $runvn        -f
-
-sin __v_sin       $runv
-sin __vn_sin      $runvn
-sin _ZGVnN2v_sin  $runvn
-
-cos __v_cos       $runv
-cos __vn_cos      $runvn
-cos _ZGVnN2v_cos  $runvn
-
-expf __v_expf      $runv
-expf __vn_expf     $runvn
-expf _ZGVnN4v_expf $runvn
-
-expf_1u __v_expf_1u   $runv     -f
-expf_1u __vn_expf_1u  $runvn    -f
-
-exp2f __v_exp2f      $runv
-exp2f __vn_exp2f     $runvn
-exp2f _ZGVnN4v_exp2f $runvn
-
-exp2f_1u __v_exp2f_1u  $runv    -f
-exp2f_1u __vn_exp2f_1u $runvn   -f
-
-logf __v_logf      $runv
-logf __vn_logf     $runvn
-logf _ZGVnN4v_logf $runvn
-
-sinf __v_sinf      $runv
-sinf __vn_sinf     $runvn
-sinf _ZGVnN4v_sinf $runvn
-
-cosf __v_cosf      $runv
-cosf __vn_cosf     $runvn
-cosf _ZGVnN4v_cosf $runvn
-
-powf __v_powf       $runv       -f
-powf __vn_powf      $runvn      -f
-powf _ZGVnN4vv_powf $runvn      -f
+exp       _ZGVnN2v_exp
+log       _ZGVnN2v_log
+pow       _ZGVnN2vv_pow      -f
+sin       _ZGVnN2v_sin
+cos       _ZGVnN2v_cos
+expf      _ZGVnN4v_expf
+expf_1u   _ZGVnN4v_expf_1u   -f
+exp2f     _ZGVnN4v_exp2f
+exp2f_1u  _ZGVnN4v_exp2f_1u  -f
+logf      _ZGVnN4v_logf
+sinf      _ZGVnN4v_sinf
+cosf      _ZGVnN4v_cosf
+powf      _ZGVnN4vv_powf     -f
 EOF
 
 [ 0 -eq $FAIL ] || {

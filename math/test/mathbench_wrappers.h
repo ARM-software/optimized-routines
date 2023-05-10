@@ -1,18 +1,10 @@
 /*
  * Function wrappers for mathbench.
  *
- * Copyright (c) 2022, Arm Limited.
+ * Copyright (c) 2022-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-#if WANT_VMATH
-#if __aarch64__
-
-#ifdef __vpcs
-__vpcs static v_float
-xy__vn_powf (v_float x)
-{
-  return __vn_powf (x, x);
-}
+#if WANT_VMATH && __aarch64__
 
 __vpcs static v_float
 xy_Z_powf (v_float x)
@@ -21,32 +13,12 @@ xy_Z_powf (v_float x)
 }
 
 __vpcs static v_double
-xy__vn_pow (v_double x)
-{
-  return __vn_pow (x, x);
-}
-
-__vpcs static v_double
 xy_Z_pow (v_double x)
 {
   return _ZGVnN2vv_pow (x, x);
 }
-#endif // __vpcs
 
-static v_float
-xy__v_powf (v_float x)
-{
-  return __v_powf (x, x);
-}
-
-static v_double
-xy__v_pow (v_double x)
-{
-  return __v_pow (x, x);
-}
-#endif // __aarch64__
-
-#endif // WANT_VMATH
+#endif // WANT_VMATH && __aarch64__
 
 static double
 xypow (double x)

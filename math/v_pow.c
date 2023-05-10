@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-float64x2_t VPCS_ATTR V_NAME (pow) (float64x2_t x, float64x2_t y)
+float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
 {
   float64x2_t z;
   for (int lane = 0; lane < v_lanes64 (); lane++)
@@ -20,4 +20,3 @@ float64x2_t VPCS_ATTR V_NAME (pow) (float64x2_t x, float64x2_t y)
     }
   return z;
 }
-VPCS_ALIAS

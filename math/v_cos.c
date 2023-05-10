@@ -37,7 +37,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
   return v_call_f64 (cos, x, y, cmp);
 }
 
-float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
+float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 {
   float64x2_t n, r, r2, y;
   uint64x2_t odd, cmp;
@@ -81,4 +81,3 @@ float64x2_t VPCS_ATTR V_NAME (cos) (float64x2_t x)
     return special_case (x, y, cmp);
   return y;
 }
-VPCS_ALIAS

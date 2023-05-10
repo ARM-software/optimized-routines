@@ -14,19 +14,16 @@
 #endif
 #if WANT_VMATH
 
-#if VPCS && __aarch64__
-#define V_NAME(x) __vn_##x
+#if __aarch64__
 #define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
 #else
-#define V_NAME(x) __v_##x
+#error "Cannot build without AArch64"
 #endif
 
-#ifndef VPCS_ATTR
-#define VPCS_ATTR
-#endif
-#ifndef VPCS_ALIAS
-#define VPCS_ALIAS
-#endif
+#define V_NAME_F1(fun) _ZGVnN4v_##fun##f
+#define V_NAME_D1(fun) _ZGVnN2v_##fun
+#define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
+#define V_NAME_D2(fun) _ZGVnN2vv_##fun
 
 #include <stdint.h>
 #include "math_config.h"

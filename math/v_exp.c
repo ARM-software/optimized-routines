@@ -71,7 +71,7 @@ specialcase (float64x2_t s, float64x2_t y, float64x2_t n)
 
 #endif
 
-float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
+float64x2_t VPCS_ATTR V_NAME_D1 (exp) (float64x2_t x)
 {
   float64x2_t n, r, r2, s, y, z;
   uint64x2_t cmp, u, e, i;
@@ -121,4 +121,3 @@ float64x2_t VPCS_ATTR V_NAME (exp) (float64x2_t x)
 
   return vfmaq_f64 (s, y, s);
 }
-VPCS_ALIAS

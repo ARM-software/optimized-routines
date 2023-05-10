@@ -34,7 +34,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
   return v_call_f32 (logf, x, y, cmp);
 }
 
-float32x4_t VPCS_ATTR V_NAME (logf) (float32x4_t x)
+float32x4_t VPCS_ATTR V_NAME_F1 (log) (float32x4_t x)
 {
   float32x4_t n, p, q, r, r2, y;
   uint32x4_t u, cmp;
@@ -65,4 +65,3 @@ float32x4_t VPCS_ATTR V_NAME (logf) (float32x4_t x)
     return specialcase (x, y, cmp);
   return y;
 }
-VPCS_ALIAS

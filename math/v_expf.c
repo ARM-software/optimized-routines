@@ -61,7 +61,7 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn,
 
 #endif
 
-float32x4_t VPCS_ATTR V_NAME (expf) (float32x4_t x)
+float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 {
   float32x4_t n, r, r2, scale, p, q, poly, z;
   uint32x4_t cmp, e;
@@ -115,4 +115,3 @@ float32x4_t VPCS_ATTR V_NAME (expf) (float32x4_t x)
 
   return vfmaq_f32 (scale, poly, scale);
 }
-VPCS_ALIAS

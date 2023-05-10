@@ -141,7 +141,7 @@ specialcase (float32x4_t x, float32x4_t y, float32x4_t ret, uint32x4_t cmp)
   return v_call2_f32 (powf, x, y, ret, cmp);
 }
 
-float32x4_t VPCS_ATTR V_NAME (powf) (float32x4_t x, float32x4_t y)
+float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
 {
   uint32x4_t u, tmp, cmp, i, top, iz;
   int32x4_t k;
@@ -227,4 +227,3 @@ float32x4_t VPCS_ATTR V_NAME (powf) (float32x4_t x, float32x4_t y)
     return specialcase (x, y, ret, cmp);
   return ret;
 }
-VPCS_ALIAS

@@ -34,7 +34,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
   return v_call_f32 (cosf, x, y, cmp);
 }
 
-float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
+float32x4_t VPCS_ATTR V_NAME_F1 (cos) (float32x4_t x)
 {
   float32x4_t n, r, r2, y;
   uint32x4_t odd, cmp;
@@ -75,4 +75,3 @@ float32x4_t VPCS_ATTR V_NAME (cosf) (float32x4_t x)
     return special_case (x, y, cmp);
   return y;
 }
-VPCS_ALIAS
