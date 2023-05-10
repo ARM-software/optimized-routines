@@ -36,7 +36,6 @@ static const volatile struct v_expm1_data data
 /* For |x| > BigBound, the final stage of the algorithm overflows so fall back
    to scalar.  */
 #define BigBound 0x40862b7d369a5aa9    /* asuint64(0x1.62b7d369a5aa9p+9).  */
-#define BigBoundNeg 0x408740bf7c0d927d /* asuint64(0x1.740bf7c0d927dp+9).  */
 /* Value below which expm1(x) is within 2 ULP of x.  */
 #define TinyBound 0x3cc0000000000000		/* asuint64(0x1p-51).  */
 #define ExponentBias v_s64 (0x3ff0000000000000) /* asuint64(1.0).  */
@@ -96,7 +95,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
   int64x2_t u = vaddq_s64 (vshlq_n_s64 (i, 52), ExponentBias);
-  float64x2_t t = vreinterpretq_f64_u64 (vreinterpretq_u64_s64 (u));
+  float64x2_t t = vreinterpretq_f64_s64 (u);
   /* expm1(x) ~= p * t + (t - 1).  */
   float64x2_t y = vfmaq_f64 (vsubq_f64 (t, v_f64 (1.0)), p, t);
 
@@ -114,6 +113,6 @@ PL_TEST_EXPECT_FENV (V_NAME_D1 (expm1), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME_D1 (expm1), 0, TinyBound, 1000)
 PL_TEST_INTERVAL (V_NAME_D1 (expm1), -0, -TinyBound, 1000)
 PL_TEST_INTERVAL (V_NAME_D1 (expm1), TinyBound, BigBound, 100000)
-PL_TEST_INTERVAL (V_NAME_D1 (expm1), -TinyBound, -BigBoundNeg, 100000)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), -TinyBound, -BigBound, 100000)
 PL_TEST_INTERVAL (V_NAME_D1 (expm1), BigBound, inf, 100)
-PL_TEST_INTERVAL (V_NAME_D1 (expm1), -BigBoundNeg, -inf, 100)
+PL_TEST_INTERVAL (V_NAME_D1 (expm1), -BigBound, -inf, 100)
