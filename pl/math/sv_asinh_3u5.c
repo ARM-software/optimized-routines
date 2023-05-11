@@ -19,9 +19,9 @@
 #define C(i) sv_f64 (__asinh_data.poly[i])
 
 /* Constants & data for log.  */
-#define A(i) __sv_log_data.poly[i]
+#define A(i) __v_log_data.poly[i]
 #define Ln2 (0x1.62e42fefa39efp-1)
-#define N (1 << SV_LOG_TABLE_BITS)
+#define N (1 << V_LOG_TABLE_BITS)
 #define OFF (0x3fe6900900000000)
 
 static NOINLINE svfloat64_t
@@ -39,13 +39,13 @@ __sv_log_inline (svfloat64_t x, const svbool_t pg)
   svuint64_t ix = svreinterpret_u64_f64 (x);
   svuint64_t tmp = svsub_n_u64_x (pg, ix, OFF);
   svuint64_t i
-    = svand_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, (52 - SV_LOG_TABLE_BITS)),
+    = svand_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, (52 - V_LOG_TABLE_BITS)),
 		     N - 1);
   svint64_t k = svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52);
   svuint64_t iz = svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52));
   svfloat64_t z = svreinterpret_f64_u64 (iz);
-  svfloat64_t invc = svld1_gather_u64index_f64 (pg, __sv_log_data.invc, i);
-  svfloat64_t logc = svld1_gather_u64index_f64 (pg, __sv_log_data.logc, i);
+  svfloat64_t invc = svld1_gather_u64index_f64 (pg, __v_log_data.invc, i);
+  svfloat64_t logc = svld1_gather_u64index_f64 (pg, __v_log_data.logc, i);
   svfloat64_t r = svmla_f64_x (pg, sv_f64 (-1.0), invc, z);
   svfloat64_t kd = svcvt_f64_s64_x (pg, k);
   svfloat64_t hi = svmla_n_f64_x (pg, svadd_f64_x (pg, logc, r), kd, Ln2);

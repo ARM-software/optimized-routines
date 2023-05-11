@@ -19,7 +19,7 @@
 /* Constants & data for log.  */
 #define OFF 0x3fe6000000000000
 #define Ln2 v_f64 (0x1.62e42fefa39efp-1)
-#define A(i) v_f64 (__sv_log_data.poly[i])
+#define A(i) v_f64 (__v_log_data.poly[i])
 #define T(i) __log_data.tab[i]
 #define N (1 << LOG_TABLE_BITS)
 

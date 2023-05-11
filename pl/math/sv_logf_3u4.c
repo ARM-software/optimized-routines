@@ -11,19 +11,34 @@
 
 #if SV_SUPPORTED
 
-#define P(i) __sv_logf_poly[i]
+#define SV_LOGF_POLY_ORDER 8
+struct __sv_logf_data
+{
+  float poly_0135[4];
+  float poly_246[SV_LOGF_POLY_ORDER - (4 + 1)];
+  float ln2;
+};
 
-#define Ln2 (0x1.62e43p-1f) /* 0x3f317218 */
+static struct __sv_logf_data data = {
+  /* Coefficients copied from the Neon routine in math/, then rearranged so that
+     coeffs 0, 1, 3 and 5 can be loaded as a single quad-word, hence used with
+     _lane variant of MLA intrinsic.  */
+  .poly_0135
+  = {-0x1.3e737cp-3f, 0x1.5a9aa2p-3f, 0x1.961348p-3f, 0x1.555d7cp-2f},
+  .poly_246 = {-0x1.4f9934p-3f, -0x1.00187cp-2f, -0x1.ffffc8p-2f},
+  .ln2 = 0x1.62e43p-1f};
+
 #define Min (0x00800000)
 #define Max (0x7f800000)
+#define Thresh (0x7f000000) /* Max - Min.  */
 #define Mask (0x007fffff)
 #define Off (0x3f2aaaab) /* 0.666667 */
 
 float
 optr_aor_log_f32 (float);
 
-static NOINLINE svfloat32_t
-__sv_logf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+static svfloat32_t NOINLINE
+special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (optr_aor_log_f32, x, y, cmp);
 }
@@ -31,12 +46,11 @@ __sv_logf_specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 /* Optimised implementation of SVE logf, using the same algorithm and polynomial
    as the Neon routine in math/. Maximum error is 3.34 ULPs:
    SV_NAME_F1 (log)(0x1.557298p+0) got 0x1.26edecp-2
-			   want 0x1.26ede6p-2.  */
+				  want 0x1.26ede6p-2.  */
 svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t u = svreinterpret_u32_f32 (x);
-  svbool_t cmp
-    = svcmpge_u32 (pg, svsub_n_u32_x (pg, u, Min), sv_u32 (Max - Min));
+  svbool_t cmp = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, u, Min), Thresh);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = svsub_n_u32_x (pg, u, Off);
@@ -50,24 +64,26 @@ svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
   /* y = log(1+r) + n*ln2.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
   /* n*ln2 + r + r2*(P6 + r*P5 + r2*(P4 + r*P3 + r2*(P2 + r*P1 + r2*P0))).  */
-  svfloat32_t p = svmla_n_f32_x (pg, sv_f32 (P (2)), r, P (1));
-  svfloat32_t q = svmla_n_f32_x (pg, sv_f32 (P (4)), r, P (3));
-  svfloat32_t y = svmla_n_f32_x (pg, sv_f32 (P (6)), r, P (5));
-  p = svmla_n_f32_x (pg, p, r2, P (0));
+  svfloat32_t p_0135 = svld1rq_f32 (pg, &data.poly_0135[0]);
+  svfloat32_t p = svmla_lane_f32 (sv_f32 (data.poly_246[0]), r, p_0135, 1);
+  svfloat32_t q = svmla_lane_f32 (sv_f32 (data.poly_246[1]), r, p_0135, 2);
+  svfloat32_t y = svmla_lane_f32 (sv_f32 (data.poly_246[2]), r, p_0135, 3);
+  p = svmla_lane_f32 (p, r2, p_0135, 0);
+
   q = svmla_f32_x (pg, q, r2, p);
   y = svmla_f32_x (pg, y, r2, q);
-  p = svmla_n_f32_x (pg, r, n, Ln2);
+  p = svmla_n_f32_x (pg, r, n, data.ln2);
   y = svmla_f32_x (pg, p, r2, y);
 
   if (unlikely (svptest_any (pg, cmp)))
-    return __sv_logf_specialcase (x, y, cmp);
+    return special_case (x, y, cmp);
   return y;
 }
 
 PL_SIG (SV, F, 1, log, 0.01, 11.1)
 PL_TEST_ULP (SV_NAME_F1 (log), 2.85)
-PL_TEST_INTERVAL (SV_NAME_F1 (log), -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), -0.0, -inf, 100)
+PL_TEST_INTERVAL (SV_NAME_F1 (log), 0, 0x1p-126, 100)
 PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log), 1.0, 100, 50000)

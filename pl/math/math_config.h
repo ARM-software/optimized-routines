@@ -543,17 +543,16 @@ extern const struct sv_powf_log2_data
   double poly[SV_POWF_LOG2_POLY_ORDER];
 } __sv_powf_log2_data HIDDEN;
 
-#define SV_LOGF_POLY_ORDER 8
-extern const float __sv_logf_poly[SV_LOGF_POLY_ORDER - 1] HIDDEN;
-
-#define SV_LOG_POLY_ORDER 6
-#define SV_LOG_TABLE_BITS 7
-extern const struct sv_log_data
+#define V_LOG_POLY_ORDER 6
+#define V_LOG_TABLE_BITS 7
+extern const struct v_log_data
 {
-  double invc[1 << SV_LOG_TABLE_BITS];
-  double logc[1 << SV_LOG_TABLE_BITS];
-  double poly[SV_LOG_POLY_ORDER - 1];
-} __sv_log_data HIDDEN;
+  /* Shared data for vector log and log-derived routines (e.g. asinh).  */
+  double poly[V_LOG_POLY_ORDER - 1];
+  double ln2;
+  double invc[1 << V_LOG_TABLE_BITS];
+  double logc[1 << V_LOG_TABLE_BITS];
+} __v_log_data HIDDEN;
 
 #ifndef SV_EXPF_USE_FEXPA
 #define SV_EXPF_USE_FEXPA 0
