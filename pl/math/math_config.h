@@ -377,9 +377,13 @@ extern const struct exp_data
   uint64_t tab[2*(1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
 
-/* Copied from math/v_exp.h for use in exp_tail.  */
+/* Copied from math/v_exp.h for use in vector exp_tail.  */
 #define V_EXP_TAIL_TABLE_BITS 8
 extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
+
+/* Copied from math/v_exp.h for use in vector exp2.  */
+#define V_EXP_TABLE_BITS 7
+extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 
 #define ERFC_NUM_INTERVALS 20
 #define ERFC_POLY_ORDER 12
@@ -404,9 +408,8 @@ extern const struct erfcf_poly_data
 #define V_EXP_TAIL_TABLE_BITS 8
 extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
 
-#define V_EXP2_POLY_ORDER 5
-#define V_EXP2_TABLE_BITS 7
-extern const uint64_t __v_exp2_data[1 << V_EXP2_TABLE_BITS] HIDDEN;
+#define V_EXP_TABLE_BITS 7
+extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 
 #define V_ERF_NINTS 49
 #define V_ERF_NCOEFFS 10
