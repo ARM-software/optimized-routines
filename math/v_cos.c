@@ -11,7 +11,7 @@
 static const volatile struct __v_cos_data
 {
   float64x2_t poly[7];
-  float64x2_t inv_pi, half_pi, pi_1, pi_2, pi_3, shift;
+  float64x2_t range_val, shift, inv_pi, half_pi, pi_1, pi_2, pi_3;
 } data = {
   /* worst-case error is 3.5 ulp.
      abs error: 0x1.be222a58p-53 in [-pi/2, pi/2].  */
@@ -26,24 +26,26 @@ static const volatile struct __v_cos_data
   .pi_2 = V2 (0x1.1a62633145c06p-53),
   .pi_3 = V2 (0x1.c1cd129024e09p-106),
   .shift = V2 (0x1.8p52),
+  .range_val = V2 (0x1p23)
 };
 
-#define RangeVal v_u64 (0x4160000000000000) /* asuint64(0x1p23).  */
 #define C(i) data.poly[i]
 
 static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
+special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
+  y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
   return v_call_f64 (cos, x, y, cmp);
 }
 
 float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 {
-  float64x2_t n, r, r2, y;
+  float64x2_t n, r, r2, r3, y;
   uint64x2_t odd, cmp;
 
-  r = vabsq_f64 (x);
-  cmp = vcgeq_u64 (vreinterpretq_u64_f64 (r), RangeVal);
+  cmp = vcageq_f64 (data.range_val, x);
+  cmp = vceqzq_u64 (cmp);	/* cmp = ~cmp.  */
+  r = x;
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (cmp)))
@@ -66,18 +68,16 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 
   /* sin(r) poly approx.  */
   r2 = vmulq_f64 (r, r);
+  r3 = vmulq_f64 (r2, r);
   y = vfmaq_f64 (C (5), C (6), r2);
   y = vfmaq_f64 (C (4), y, r2);
   y = vfmaq_f64 (C (3), y, r2);
   y = vfmaq_f64 (C (2), y, r2);
   y = vfmaq_f64 (C (1), y, r2);
   y = vfmaq_f64 (C (0), y, r2);
-  y = vfmaq_f64 (r, vmulq_f64 (y, r2), r);
-
-  /* sign.  */
-  y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
+  y = vfmaq_f64 (r, y, r3);
 
   if (unlikely (v_any_u64 (cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x, y, odd, cmp);
+  return vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
 }

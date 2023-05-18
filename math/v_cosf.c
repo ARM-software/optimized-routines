@@ -11,36 +11,45 @@
 static const volatile struct __v_cosf_data
 {
   float32x4_t poly[4];
-  float32x4_t pi_1, pi_2, pi_3, inv_pi, half_pi, shift;
-} data = {.poly = {/* 1.886 ulp error.  */
-		   V4 (-0x1.555548p-3f), V4 (0x1.110df4p-7f),
-		   V4 (-0x1.9f42eap-13f), V4 (0x1.5b2e76p-19f)},
+  float32x4_t range_val, inv_pi, half_pi, shift, pi_1, pi_2, pi_3;
+} data =
+{
+  .poly =
+    { /* 1.886 ulp error.  */
+      V4 (-0x1.555548p-3f),
+      V4 (0x1.110df4p-7f),
+      V4 (-0x1.9f42eap-13f),
+      V4 (0x1.5b2e76p-19f)
+    },
 
-	  .pi_1 = V4 (0x1.921fb6p+1f),
-	  .pi_2 = V4 (-0x1.777a5cp-24f),
-	  .pi_3 = V4 (-0x1.ee59dap-49f),
+  .pi_1 = V4 (0x1.921fb6p+1f),
+  .pi_2 = V4 (-0x1.777a5cp-24f),
+  .pi_3 = V4 (-0x1.ee59dap-49f),
 
-	  .inv_pi = V4 (0x1.45f306p-2f),
-	  .shift = V4 (0x1.8p+23f),
-	  .half_pi = V4 (0x1.921fb6p0f)};
+  .inv_pi = V4 (0x1.45f306p-2f),
+  .shift = V4 (0x1.8p+23f),
+  .half_pi = V4 (0x1.921fb6p0f),
+  .range_val = V4 (0x1p20f)
+};
 
-#define RangeVal v_u32 (0x49800000) /* asuint32(0x1p20f).  */
 #define C(i) data.poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
+special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
 {
   /* Fall back to scalar code.  */
+  y = vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
   return v_call_f32 (cosf, x, y, cmp);
 }
 
 float32x4_t VPCS_ATTR V_NAME_F1 (cos) (float32x4_t x)
 {
-  float32x4_t n, r, r2, y;
+  float32x4_t n, r, r2, r3, y;
   uint32x4_t odd, cmp;
 
-  r = vabsq_f32 (x);
-  cmp = vcgeq_u32 (vreinterpretq_u32_f32 (r), RangeVal);
+  cmp = vcageq_f32 (data.range_val, x);
+  cmp = vceqzq_u32 (cmp);	/* cmp = ~cmp.  */
+  r = x;
 
 #if WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (cmp)))
@@ -63,15 +72,13 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cos) (float32x4_t x)
 
   /* y = sin(r).  */
   r2 = vmulq_f32 (r, r);
+  r3 = vmulq_f32 (r2, r);
   y = vfmaq_f32 (C (2), C (3), r2);
   y = vfmaq_f32 (C (1), y, r2);
   y = vfmaq_f32 (C (0), y, r2);
-  y = vfmaq_f32 (r, vmulq_f32 (y, r2), r);
-
-  /* sign fix.  */
-  y = vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
+  y = vfmaq_f32 (r, y, r3);
 
   if (unlikely (v_any_u32 (cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x, y, odd, cmp);
+  return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
