@@ -184,17 +184,6 @@ v_any_u32 (uint32x4_t x)
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
 }
-/* convert to type1 from type2.  */
-static inline float32x4_t
-v_to_f32_s32 (int32x4_t x)
-{
-  return (float32x4_t){x[0], x[1], x[2], x[3]};
-}
-static inline float32x4_t
-v_to_f32_u32 (uint32x4_t x)
-{
-  return (float32x4_t){x[0], x[1], x[2], x[3]};
-}
 static inline float32x4_t
 v_lookup_f32 (const float *tab, uint32x4_t idx)
 {
@@ -257,17 +246,6 @@ v_any_u64 (uint64x2_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (x) != 0;
-}
-/* convert to type1 from type2.  */
-static inline float64x2_t
-v_to_f64_s64 (int64x2_t x)
-{
-  return (float64x2_t){x[0], x[1]};
-}
-static inline float64x2_t
-v_to_f64_u64 (uint64x2_t x)
-{
-  return (float64x2_t){x[0], x[1]};
 }
 static inline float64x2_t
 v_lookup_f64 (const double *tab, uint64x2_t idx)
