@@ -4,13 +4,14 @@
  * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
 #include "mathlib.h"
 #include "v_math.h"
 
 static const volatile struct __v_sin_data
 {
   float64x2_t poly[7];
-  float64x2_t inv_pi, pi_1, pi_2, pi_3, shift;
+  float64x2_t range_val, inv_pi, shift, pi_1, pi_2, pi_3;
 } data = {
   .poly = {/* worst-case error is 3.5 ulp.
 	      abs error: 0x1.be222a58p-53 in [-pi/2, pi/2].  */
@@ -19,6 +20,7 @@ static const volatile struct __v_sin_data
 	   V2 (-0x1.ae6361b7254e7p-26), V2 (0x1.60e88a10163f2p-33),
 	   V2 (-0x1.9f4a9c8b21dc9p-41)},
 
+  .range_val = V2 (0x1p23),
   .inv_pi = V2 (0x1.45f306dc9c883p-2),
   .pi_1 = V2 (0x1.921fb54442d18p+1),
   .pi_2 = V2 (0x1.1a62633145c06p-53),
@@ -27,38 +29,36 @@ static const volatile struct __v_sin_data
 };
 
 #if WANT_SIMD_EXCEPT
-#define TinyBound v_u64 (0x2020000000000000) /* asuint64 (0x1p-509).  */
-#define Thresh v_u64 (0x2140000000000000)    /* RangeVal - TinyBound.  */
-#else
-#define RangeVal v_u64 (0x4160000000000000) /* asuint64(0x1p23).  */
+# define TinyBound v_u64 (0x2020000000000000) /* asuint64 (0x1p-509).  */
+# define Thresh v_u64 (0x2140000000000000)    /* RangeVal - TinyBound.  */
 #endif
 
 #define C(i) data.poly[i]
 
 static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
+special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
+  y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
   return v_call_f64 (sin, x, y, cmp);
 }
 
 float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
 {
   float64x2_t n, r, r2, y;
-  uint64x2_t sign, odd, cmp, ir;
-
-  r = vabsq_f64 (x);
-  ir = vreinterpretq_u64_f64 (r);
-  sign = veorq_u64 (ir, vreinterpretq_u64_f64 (x));
+  uint64x2_t odd, cmp;
 
 #if WANT_SIMD_EXCEPT
   /* Detect |x| <= 0x1p-509 or |x| >= RangeVal. If fenv exceptions are to be
      triggered correctly, set any special lanes to 1 (which is neutral w.r.t.
      fenv). These lanes will be fixed by special-case handler later.  */
+  uint64x2_t ir = vreinterpretq_u64_f64 (vabsq_f64 (x));
+
   cmp = vcgeq_u64 (vsubq_u64 (ir, TinyBound), Thresh);
-  if (unlikely (v_any_u64 (cmp)))
-    r = vbslq_f64 (cmp, v_f64 (1), r);
+  r = vbslq_f64 (cmp, vreinterpretq_f64_u64 (cmp), x);
 #else
-  cmp = vcgeq_u64 (ir, RangeVal);
+  r = x;
+  cmp = vcageq_f64 (data.range_val, x);
+  cmp = vceqzq_u64 (cmp);	/* cmp = ~cmp.  */
 #endif
 
   /* n = rint(|x|/pi).  */
@@ -81,11 +81,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
   y = vfmaq_f64 (C (0), y, r2);
   y = vfmaq_f64 (r, vmulq_f64 (y, r2), r);
 
-  /* sign.  */
-  y = vreinterpretq_f64_u64 (
-    veorq_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), sign), odd));
-
   if (unlikely (v_any_u64 (cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x, y, odd, cmp);
+  return vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
 }

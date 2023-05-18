@@ -11,11 +11,16 @@
 static const volatile struct __v_sinf_data
 {
   float32x4_t poly[4];
-  float32x4_t pi_1, pi_2, pi_3, inv_pi, shift;
-} data = {
-  .poly = {/* 1.886 ulp error.  */
-	   V4 (-0x1.555548p-3f), V4 (0x1.110df4p-7f),
-	   V4 (-0x1.9f42eap-13f), V4 (0x1.5b2e76p-19f)},
+  float32x4_t range_val, inv_pi, shift, pi_1, pi_2, pi_3;
+} data =
+{
+  .poly =
+    { /* 1.886 ulp error.  */
+      V4 (-0x1.555548p-3f),
+      V4 (0x1.110df4p-7f),
+      V4 (-0x1.9f42eap-13f),
+      V4 (0x1.5b2e76p-19f)
+    },
 
   .pi_1 = V4 (0x1.921fb6p+1f),
   .pi_2 = V4 (-0x1.777a5cp-24f),
@@ -23,42 +28,40 @@ static const volatile struct __v_sinf_data
 
   .inv_pi = V4 (0x1.45f306p-2f),
   .shift = V4 (0x1.8p+23f),
+  .range_val = V4 (0x1p20f)
 };
 
 #if WANT_SIMD_EXCEPT
-#define TinyBound v_u32 (0x21000000) /* asuint32(0x1p-61f).  */
-#define Thresh v_u32 (0x28800000)    /* RangeVal - TinyBound.  */
-#else
-#define RangeVal v_u32 (0x49800000) /* asuint32(0x1p20f).  */
+# define TinyBound v_u32 (0x21000000) /* asuint32(0x1p-61f).  */
+# define Thresh v_u32 (0x28800000)    /* RangeVal - TinyBound.  */
 #endif
 
 #define C(i) data.poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
+special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
 {
   /* Fall back to scalar code.  */
+  y = vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
   return v_call_f32 (sinf, x, y, cmp);
 }
 
 float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
 {
   float32x4_t n, r, r2, y;
-  uint32x4_t sign, odd, cmp, ir;
-
-  r = vabsq_f32 (x);
-  ir = vreinterpretq_u32_f32 (r);
-  sign = veorq_u32 (ir, vreinterpretq_u32_f32 (x));
+  uint32x4_t odd, cmp;
 
 #if WANT_SIMD_EXCEPT
+  uint32x4_t ir = vreinterpretq_u32_f32 (vabsq_f32 (x));
   cmp = vcgeq_u32 (vsubq_u32 (ir, TinyBound), Thresh);
-  if (unlikely (v_any_u32 (cmp)))
-    /* If fenv exceptions are to be triggered correctly, set any special lanes
-       to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
-       special-case handler later.  */
-    r = vbslq_f32 (cmp, v_f32 (1), r);
+  /* If fenv exceptions are to be triggered correctly, set any special lanes
+     to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
+     special-case handler later.  */
+  r = vbslq_f32 (cmp, vreinterpretq_f32_u32 (cmp), x);
 #else
-  cmp = vcgeq_u32 (ir, RangeVal);
+  r = x;
+  cmp = vcageq_f32 (data.range_val, x);
+  cmp = vceqzq_u32 (cmp);	/* cmp = ~cmp.  */
 #endif
 
   /* n = rint(|x|/pi) */
@@ -78,11 +81,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
   y = vfmaq_f32 (C (0), y, r2);
   y = vfmaq_f32 (r, vmulq_f32 (y, r2), r);
 
-  /* sign fix */
-  y = vreinterpretq_f32_u32 (
-    veorq_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), sign), odd));
-
   if (unlikely (v_any_u32 (cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x, y, odd, cmp);
+  return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
