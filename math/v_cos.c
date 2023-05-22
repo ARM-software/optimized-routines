@@ -10,21 +10,20 @@
 
 static const volatile struct __v_cos_data
 {
-  float64x2_t poly[8];
+  float64x2_t poly[7];
   float64x2_t range_val, shift, inv_pi, half_pi, pi_1, pi_2, pi_3;
 } data =
 {
-  /* Worst-case error is 1.514 ulp in [-pi/2, pi/2].  */
+  /* Worst-case error is 3.3 ulp in [-pi/2, pi/2].  */
   .poly =
     {
-      V2 (-0x1.5555555555555p-3),
-      V2 (0x1.11111111110c1p-7),
-      V2 (-0x1.a01a01a01443bp-13),
-      V2 (0x1.71de3a52583dap-19),
-      V2 (-0x1.ae6454b14b527p-26),
-      V2 (0x1.6123c3ff0435cp-33),
-      V2 (-0x1.ae4128fa984ddp-41),
-      V2 (0x1.87f39c7fd3424p-49)
+      V2 (-0x1.555555555547bp-3),
+      V2 (0x1.1111111108a4dp-7),
+      V2 (-0x1.a01a019936f27p-13),
+      V2 (0x1.71de37a97d93ep-19),
+      V2 (-0x1.ae633919987c6p-26),
+      V2 (0x1.60e277ae07cecp-33),
+      V2 (-0x1.9e9540300a1p-41),
     },
 
   .inv_pi = V2 (0x1.45f306dc9c883p-2),
@@ -47,7 +46,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 
 float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 {
-  float64x2_t n, r, r2, r3, r4, t0, t1, t2, t3, y;
+  float64x2_t n, r, r2, r3, r4, t1, t2, t3, y;
   uint64x2_t odd, cmp;
 
   cmp = vcageq_f64 (data.range_val, x);
@@ -78,12 +77,11 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
   r3 = vmulq_f64 (r2, r);
   r4 = vmulq_f64 (r2, r2);
 
-  t0 = vfmaq_f64 (C (6), C (7), r2);
   t1 = vfmaq_f64 (C (4), C (5), r2);
   t2 = vfmaq_f64 (C (2), C (3), r2);
   t3 = vfmaq_f64 (C (0), C (1), r2);
 
-  y = vfmaq_f64 (t1, t0, r4);
+  y = vfmaq_f64 (t1, C (6), r4);
   y = vfmaq_f64 (t2, y, r4);
   y = vfmaq_f64 (t3, y, r4);
   y = vfmaq_f64 (r, y, r3);
