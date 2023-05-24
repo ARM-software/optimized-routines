@@ -35,8 +35,8 @@ static const volatile struct __v_sin_data
 };
 
 #if WANT_SIMD_EXCEPT
-# define TinyBound v_u64 (0x2020000000000000) /* asuint64 (0x1p-509).  */
-# define Thresh v_u64 (0x2140000000000000)    /* RangeVal - TinyBound.  */
+# define TinyBound v_u64 (0x3000000000000000) /* asuint64 (0x1p-255).  */
+# define Thresh v_u64 (0x1160000000000000)    /* RangeVal - TinyBound.  */
 #endif
 
 #define C(i) data.poly[i]
@@ -54,11 +54,10 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
   uint64x2_t odd, cmp;
 
 #if WANT_SIMD_EXCEPT
-  /* Detect |x| <= 0x1p-509 or |x| >= RangeVal. If fenv exceptions are to be
+  /* Detect |x| <= TinyBound or |x| >= RangeVal. If fenv exceptions are to be
      triggered correctly, set any special lanes to 1 (which is neutral w.r.t.
      fenv). These lanes will be fixed by special-case handler later.  */
   uint64x2_t ir = vreinterpretq_u64_f64 (vabsq_f64 (x));
-
   cmp = vcgeq_u64 (vsubq_u64 (ir, TinyBound), Thresh);
   r = vbslq_f64 (cmp, vreinterpretq_f64_u64 (cmp), x);
 #else

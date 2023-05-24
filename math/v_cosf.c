@@ -47,16 +47,19 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cos) (float32x4_t x)
   float32x4_t n, r, r2, r3, y;
   uint32x4_t odd, cmp;
 
-  cmp = vcageq_f32 (data.range_val, x);
-  cmp = vceqzq_u32 (cmp);	/* cmp = ~cmp.  */
-  r = x;
-
 #if WANT_SIMD_EXCEPT
+  r = vabsq_f32 (x);
+  cmp = vcgeq_u32 (vreinterpretq_u32_f32 (r),
+		   vreinterpretq_u32_f32 (data.range_val));
   if (unlikely (v_any_u32 (cmp)))
     /* If fenv exceptions are to be triggered correctly, set any special lanes
        to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
        special-case handler later.  */
     r = vbslq_f32 (cmp, v_f32 (1.0f), r);
+#else
+  cmp = vcageq_f32 (data.range_val, x);
+  cmp = vceqzq_u32 (cmp);	/* cmp = ~cmp.  */
+  r = x;
 #endif
 
   /* n = rint((|x|+pi/2)/pi) - 0.5.  */
