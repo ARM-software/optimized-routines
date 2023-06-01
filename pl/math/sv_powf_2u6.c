@@ -8,7 +8,6 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#if SV_SUPPORTED
 
 /* The following data is used in the SVE pow core computation
    and special case detection.  */
@@ -361,4 +360,3 @@ PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 1.0, 0x1p100, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)
 /* For some NaNs, AOR powf algorithm will get the sign wrong.
    There are plans to relax the requirements on NaNs.  */
-#endif

@@ -7,8 +7,6 @@
 #include "math_config.h"
 #include "sv_math.h"
 
-#if SV_SUPPORTED
-
 #define ScaleThres 192.0f
 #define SpecialOffset 0x82000000
 #define SpecialBias 0x7f000000
@@ -55,5 +53,3 @@ __sv_expf_specialcase (svbool_t pg, svfloat32_t poly, svfloat32_t n,
 
   return svsel_f32 (p_cmp2, r2, r);
 }
-
-#endif

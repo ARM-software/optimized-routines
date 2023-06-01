@@ -10,8 +10,6 @@
 #include "pl_test.h"
 #include "sv_estrinf.h"
 
-#if SV_SUPPORTED
-
 /* Constants.  */
 #define NegPio2_1 (sv_f32 (-0x1.921fb6p+0f))
 #define NegPio2_2 (sv_f32 (0x1.777a5cp-25f))
@@ -102,4 +100,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0.7, 1.5, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (tan), 1.5, 100, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (tan), 100, 0x1p17, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p17, inf, 50000)
-#endif

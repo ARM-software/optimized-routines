@@ -10,8 +10,6 @@
 #include "pl_test.h"
 #include "sv_estrinf.h"
 
-#if SV_SUPPORTED
-
 #define SpecialCaseMin 0x00800000
 #define SpecialCaseMax 0x7f800000
 #define Offset 0x3f2aaaab /* 0.666667.  */
@@ -75,4 +73,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (log10), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log10), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log10), 1.0, 100, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log10), 100, inf, 50000)
-#endif

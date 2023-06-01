@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#if SV_SUPPORTED
 #define FMA(pg, x, y, z) svmla_f32_x (pg, z, x, y)
-#endif
 
 #include "sv_estrin_wrap.h"

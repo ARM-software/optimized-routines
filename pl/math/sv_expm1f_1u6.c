@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 /* Largest value of x for which expm1(x) should round to -1.  */
 #define SpecialBound 0x1.5ebc4p+6f
 
@@ -99,5 +97,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (expm1), 0, SpecialBound, 1000000)
 PL_TEST_INTERVAL (SV_NAME_F1 (expm1), SpecialBound, inf, 1000)
 PL_TEST_INTERVAL (SV_NAME_F1 (expm1), -0, -SpecialBound, 1000000)
 PL_TEST_INTERVAL (SV_NAME_F1 (expm1), -SpecialBound, -inf, 1000)
-
-#endif

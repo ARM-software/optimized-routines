@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 struct __sv_sin_data
 {
   double inv_pi, half_pi, inv_pi_over_2, pi_over_2_1, pi_over_2_2, pi_over_2_3,
@@ -88,4 +86,3 @@ PL_SIG (SV, D, 1, sin, -3.1, 3.1)
 PL_TEST_ULP (SV_NAME_D1 (sin), 2.03)
 PL_TEST_INTERVAL (SV_NAME_D1 (sin), 0, 0xffff0000, 10000)
 PL_TEST_INTERVAL (SV_NAME_D1 (sin), 0x1p-4, 0x1p4, 500000)
-#endif

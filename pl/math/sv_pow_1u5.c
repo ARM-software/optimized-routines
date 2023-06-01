@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 /* This version share a similar algorithm as AOR scalar pow.
 
    The core computation consists in computing pow(x, y) as
@@ -467,4 +465,3 @@ PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), nan, nan, -nan, -nan, 1)
 /* For some NaNs, AOR pow algorithm will get the sign of nan^-nan wrong.
    There are plans to relax the requirements on NaNs.  */
-#endif

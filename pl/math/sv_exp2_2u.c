@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define N (1 << V_EXP_TABLE_BITS)
 
 #define BigBound 1022
@@ -106,4 +104,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (exp2), UOFlowBound, inf, 1000)
 PL_TEST_INTERVAL (SV_NAME_D1 (exp2), -0, -BigBound, 1000)
 PL_TEST_INTERVAL (SV_NAME_D1 (exp2), -BigBound, -UOFlowBound, 100000)
 PL_TEST_INTERVAL (SV_NAME_D1 (exp2), -UOFlowBound, -inf, 1000)
-#endif

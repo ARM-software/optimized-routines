@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define P __erfcf_poly_data.poly_T
 
 svfloat64_t SV_NAME_D1 (exp) (svfloat64_t, svbool_t);
@@ -187,5 +185,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (erfc), 0x1p-26, 0x1p5, 40000)
 PL_TEST_INTERVAL (SV_NAME_F1 (erfc), -0x1p-26, -0x1p3, 40000)
 PL_TEST_INTERVAL (SV_NAME_F1 (erfc), 0, inf, 40000)
 PL_TEST_INTERVAL (SV_NAME_F1 (erfc), -0, -inf, 40000)
-
-#endif // SV_SUPPORTED

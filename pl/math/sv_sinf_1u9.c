@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 struct __sv_sinf_data
 {
   float poly[4];
@@ -85,4 +83,3 @@ PL_SIG (SV, F, 1, sin, -3.1, 3.1)
 PL_TEST_ULP (SV_NAME_F1 (sin), 1.40)
 PL_TEST_INTERVAL (SV_NAME_F1 (sin), 0, 0xffff0000, 10000)
 PL_TEST_INTERVAL (SV_NAME_F1 (sin), 0x1p-4, 0x1p4, 500000)
-#endif

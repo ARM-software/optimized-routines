@@ -8,6 +8,11 @@ AOR := $(srcdir)/math
 B := build/pl/math
 
 math-lib-srcs := $(wildcard $(PLM)/*.[cS])
+
+ifeq ($(WANT_SVE_MATH), 0)
+math-lib-srcs := $(filter-out $(PLM)/sv_%, $(math-lib-srcs))
+endif
+
 math-test-srcs := \
 	$(AOR)/test/mathtest.c \
 	$(AOR)/test/mathbench.c \

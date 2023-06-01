@@ -10,8 +10,6 @@
 #include "pl_test.h"
 #include "sv_pairwise_hornerf.h"
 
-#if SV_SUPPORTED
-
 #define P(i) __v_log2f_data.poly[i]
 
 #define Ln2 (0x1.62e43p-1f) /* 0x3f317218.  */
@@ -66,5 +64,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (log2), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log2), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log2), 1.0, 100, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log2), 100, inf, 50000)
-
-#endif // SV_SUPPORTED

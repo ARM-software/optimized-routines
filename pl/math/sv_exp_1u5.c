@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define SV_EXP_POLY_ORDER 3
 struct __sv_exp_data
 {
@@ -144,5 +142,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (exp), -0, -0x1p-23, 40000)
 PL_TEST_INTERVAL (SV_NAME_D1 (exp), -0x1p-23, -1, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (exp), -1, -0x1p23, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (exp), -0x1p23, -inf, 50000)
-
-#endif // SV_SUPPORTED

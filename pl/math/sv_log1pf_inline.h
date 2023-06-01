@@ -10,8 +10,6 @@
 #include "math_config.h"
 #include "sv_estrinf.h"
 
-#if SV_SUPPORTED
-
 #define Four 0x40800000
 #define Ln2 0x1.62e43p-1f
 
@@ -50,5 +48,3 @@ sv_log1pf_inline (svfloat32_t x, svbool_t pg)
     = svmul_n_f32_x (pg, svcvt_f32_u32_x (pg, k), 0x1.0p-23f);
   return svmla_n_f32_x (pg, p, scale_back, Ln2);
 }
-
-#endif // SV_SUPPORTED

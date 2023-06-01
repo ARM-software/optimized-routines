@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define SV_EXPM1_POLY_ORDER 10
 #define SpecialBound 0x1.62b7d369a5aa9p+9
 #define ExponentBias 0x3ff0000000000000
@@ -99,4 +97,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (expm1), 0x1p-23, SpecialBound, 200000)
 PL_TEST_INTERVAL (SV_NAME_D1 (expm1), -0x1p-23, -SpecialBound, 200000)
 PL_TEST_INTERVAL (SV_NAME_D1 (expm1), SpecialBound, inf, 1000)
 PL_TEST_INTERVAL (SV_NAME_D1 (expm1), -SpecialBound, -inf, 1000)
-#endif

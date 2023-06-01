@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #include "sv_log1pf_inline.h"
 
 #define SignMask (0x80000000)
@@ -63,5 +61,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (asinh), 0, -0x1p-12, 20000)
 PL_TEST_INTERVAL (SV_NAME_F1 (asinh), -0x1p-12, -1.0, 20000)
 PL_TEST_INTERVAL (SV_NAME_F1 (asinh), -1.0, -0x1p11, 20000)
 PL_TEST_INTERVAL (SV_NAME_F1 (asinh), -0x1p11, -inf, 20000)
-
-#endif

@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 struct sv_cos_data
 {
   double inv_pio2, pio2_1, pio2_2, pio2_3, shift;
@@ -85,4 +83,3 @@ PL_SIG (SV, D, 1, cos, -3.1, 3.1)
 PL_TEST_ULP (SV_NAME_D1 (cos), 1.61)
 PL_TEST_INTERVAL (SV_NAME_D1 (cos), 0, 0xffff0000, 10000)
 PL_TEST_INTERVAL (SV_NAME_D1 (cos), 0x1p-4, 0x1p4, 500000)
-#endif

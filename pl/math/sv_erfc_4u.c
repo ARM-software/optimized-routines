@@ -9,7 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
 #include "sv_exp_tail.h"
 
 #define SignMask 0x8000000000000000
@@ -150,4 +149,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 32, 0x1p51, 40000)
 PL_TEST_INTERVAL (SV_NAME_D1 (erfc), -32, -0x1p51, 40000)
 PL_TEST_INTERVAL (SV_NAME_D1 (erfc), 0x1p51, inf, 40000)
 PL_TEST_INTERVAL (SV_NAME_D1 (erfc), -0x1p51, -inf, 40000)
-#endif

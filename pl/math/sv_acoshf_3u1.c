@@ -8,8 +8,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define SignMask 0x80000000
 #define One 0x3f800000
 #define SquareLim 0x5f800000 /* asuint(0x1p64).  */
@@ -51,5 +49,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (acosh), 0, 1, 500)
 PL_TEST_INTERVAL (SV_NAME_F1 (acosh), 1, SquareLim, 100000)
 PL_TEST_INTERVAL (SV_NAME_F1 (acosh), SquareLim, inf, 1000)
 PL_TEST_INTERVAL (SV_NAME_F1 (acosh), -0, -inf, 1000)
-
-#endif

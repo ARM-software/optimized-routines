@@ -9,7 +9,6 @@
 #define SV_EXP_TAIL_H
 
 #include "sv_math.h"
-#if SV_SUPPORTED
 
 #include "v_exp_tail.h"
 
@@ -76,5 +75,4 @@ sv_exp_tail (const svbool_t pg, svfloat64_t x, svfloat64_t xtail)
   return svmla_f64_x (pg, s, s, y);
 }
 
-#endif
 #endif

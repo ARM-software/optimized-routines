@@ -14,9 +14,6 @@
 #endif
 #if WANT_VMATH
 
-#if WANT_SVE_MATH
-#define SV_SUPPORTED 1
-
 #include <arm_sve.h>
 #include <stdbool.h>
 
@@ -131,6 +128,5 @@ sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
   return y;
 }
 
-#endif
 #endif
 #endif

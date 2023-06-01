@@ -24,7 +24,7 @@ t() {
 	key=$(cat $ALIASES | { grep " $1$" || echo $1; } | awk '{print $1}')
 	L=$(cat $LIMITS | grep "^$key " | awk '{print $2}')
 	[[ $L =~ ^[0-9]+\.[0-9]+$ ]]
-	extra_flags=""
+	extra_flags=
 	[[ -z "${5:-}" ]] || extra_flags="$extra_flags -c $5"
 	grep -q "^$key$" $FENV || extra_flags="$extra_flags -f"
 	IFS=',' read -ra LO <<< "$2"

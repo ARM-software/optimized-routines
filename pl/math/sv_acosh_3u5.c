@@ -8,8 +8,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define WANT_SV_LOG1P_K0_SHORTCUT 1
 #include "sv_log1p_inline.h"
 
@@ -52,4 +50,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (acosh), 1, 0x1p511, 90000)
 PL_TEST_INTERVAL (SV_NAME_D1 (acosh), 0x1p511, inf, 10000)
 PL_TEST_INTERVAL (SV_NAME_D1 (acosh), 0, 1, 1000)
 PL_TEST_INTERVAL (SV_NAME_D1 (acosh), -0, -inf, 10000)
-#endif

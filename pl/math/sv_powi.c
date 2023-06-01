@@ -6,7 +6,6 @@
  */
 
 #include "sv_math.h"
-#if SV_SUPPORTED
 
 /* Optimized double-precision vector powi (double base, long integer power).
    powi is developed for environments in which accuracy is of much less
@@ -47,5 +46,3 @@ _ZGVsMxvv_powk (svfloat64_t as, svint64_t ns, svbool_t p)
 
   return acc;
 }
-
-#endif // SV_SUPPORTED

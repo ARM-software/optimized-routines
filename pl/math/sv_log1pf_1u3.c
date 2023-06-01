@@ -10,8 +10,6 @@
 #include "pl_test.h"
 #include "sv_estrinf.h"
 
-#if SV_SUPPORTED
-
 static struct sv_log1pf_data
 {
   float poly[8];
@@ -104,4 +102,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (log1p), 0x1p-23, 1, 5000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log1p), -0x1p-23, -1, 5000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log1p), 1, inf, 10000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log1p), -1, -inf, 10)
-#endif

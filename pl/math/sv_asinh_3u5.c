@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define OneTop sv_u64 (0x3ff)	 /* top12(asuint64(1.0f)).  */
 #define HugeBound sv_u64 (0x5fe) /* top12(asuint64(0x1p511)).  */
 #define TinyBound (0x3e5)	 /* top12(asuint64(0x1p-26)).  */
@@ -135,4 +133,3 @@ SV_ASINH_INTERVAL (-0, -0x1p-26, 50000)
 SV_ASINH_INTERVAL (-0x1p-26, -1, 50000)
 SV_ASINH_INTERVAL (-1, -0x1p511, 50000)
 SV_ASINH_INTERVAL (-0x1p511, -inf, 40000)
-#endif

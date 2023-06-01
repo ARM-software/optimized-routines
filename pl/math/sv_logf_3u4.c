@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define SV_LOGF_POLY_ORDER 8
 struct __sv_logf_data
 {
@@ -88,4 +86,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log), 1.0, 100, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (log), 100, inf, 50000)
-#endif // SV_SUPPORTED

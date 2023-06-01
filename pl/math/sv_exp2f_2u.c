@@ -10,8 +10,6 @@
 #include "pl_test.h"
 #include "sv_expf_specialcase.h"
 
-#if SV_SUPPORTED
-
 #define C(i) __sv_exp2f_poly[i]
 
 #if SV_EXP2F_USE_FEXPA
@@ -102,5 +100,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0, ScaleThres, 40000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), ScaleThres, -1, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -1, ScaleThres, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), ScaleThres, -inf, 50000)
-
-#endif

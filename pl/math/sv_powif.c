@@ -6,7 +6,6 @@
  */
 
 #include "sv_math.h"
-#if SV_SUPPORTED
 
 /* Optimized single-precision vector powi (float base, integer power).
    powi is developed for environments in which accuracy is of much less
@@ -47,5 +46,3 @@ _ZGVsMxvv_powi (svfloat32_t as, svint32_t ns, svbool_t p)
 
   return acc;
 }
-
-#endif // SV_SUPPORTED

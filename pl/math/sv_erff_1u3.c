@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define AbsMask (0x7fffffff)
 
 static NOINLINE svfloat32_t
@@ -98,4 +96,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (erf), -0, -0x1p-28, 20000)
 PL_TEST_INTERVAL (SV_NAME_F1 (erf), -0x1p-28, -1, 60000)
 PL_TEST_INTERVAL (SV_NAME_F1 (erf), -1, -0x1p28, 60000)
 PL_TEST_INTERVAL (SV_NAME_F1 (erf), -0x1p28, -inf, 20000)
-#endif

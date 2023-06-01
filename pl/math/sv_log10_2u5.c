@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define OFF 0x3fe6900900000000
 #define N (1 << V_LOG10_TABLE_BITS)
 
@@ -85,4 +83,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (log10), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (log10), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (log10), 1.0, 100, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (log10), 100, inf, 50000)
-#endif

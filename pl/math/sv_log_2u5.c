@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define P(i) sv_f64 (__v_log_data.poly[i])
 #define N (1 << V_LOG_TABLE_BITS)
 #define Off (0x3fe6900900000000)
@@ -80,4 +78,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-126, 0x1p-23, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-23, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (log), 1.0, 100, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (log), 100, inf, 50000)
-#endif // SV_SUPPORTED

@@ -10,8 +10,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#if SV_SUPPORTED
-
 #define SV_TAN_POLY_ORDER 8
 static struct sv_tan_data
 {
@@ -102,5 +100,3 @@ PL_TEST_INTERVAL (SV_NAME_D1 (tan), 0, 0x1p23, 500000)
 PL_TEST_INTERVAL (SV_NAME_D1 (tan), 0x1p23, inf, 5000)
 PL_TEST_INTERVAL (SV_NAME_D1 (tan), -0, -0x1p23, 500000)
 PL_TEST_INTERVAL (SV_NAME_D1 (tan), -0x1p23, -inf, 5000)
-
-#endif

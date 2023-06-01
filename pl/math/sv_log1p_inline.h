@@ -11,8 +11,6 @@
 #include "sv_math.h"
 #include "sv_pairwise_horner.h"
 
-#if SV_SUPPORTED
-
 #define Ln2Hi 0x1.62e42fefa3800p-1
 #define Ln2Lo 0x1.ef35793c76730p-45
 #define BottomMask 0xffffffff
@@ -80,5 +78,4 @@ sv_log1p_inline (svfloat64_t x, const svbool_t pg)
   svfloat64_t yhi = svmla_n_f64_x (pg, f, k, Ln2Hi);
   return svmla_f64_x (pg, svadd_f64_x (pg, ylo, yhi), f2, p);
 }
-#endif
 #endif // PL_MATH_SV_LOG1P_INLINE_H

@@ -11,8 +11,6 @@
 #include "pl_test.h"
 #include "sv_expf_specialcase.h"
 
-#if SV_SUPPORTED
-
 #define SV_EXPF_POLY_ORDER 4
 struct __sv_expf_data
 {
@@ -130,4 +128,3 @@ PL_TEST_INTERVAL (SV_NAME_F1 (exp), -0, -0x1p-23, 40000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp), -0x1p-23, -1, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp), -1, -0x1p23, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp), -0x1p23, -inf, 50000)
-#endif // SV_SUPPORTED
