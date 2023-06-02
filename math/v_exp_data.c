@@ -8,11 +8,11 @@
 #include "v_math.h"
 #if WANT_VMATH
 
-#define N (1 << V_EXP_TABLE_BITS)
+# define N (1 << V_EXP_TABLE_BITS)
 
 /* 2^(j/N), j=0..N.  */
 const uint64_t __v_exp_data[] = {
-#if N == 128
+# if N == 128
   0x3ff0000000000000, 0x3feff63da9fb3335, 0x3fefec9a3e778061,
   0x3fefe315e86e7f85, 0x3fefd9b0d3158574, 0x3fefd06b29ddf6de,
   0x3fefc74518759bc8, 0x3fefbe3ecac6f383, 0x3fefb5586cf9890f,
@@ -56,7 +56,7 @@ const uint64_t __v_exp_data[] = {
   0x3fefa4afa2a490da, 0x3fefaf482d8e67f1, 0x3fefba1bee615a27,
   0x3fefc52b376bba97, 0x3fefd0765b6e4540, 0x3fefdbfdad9cbe14,
   0x3fefe7c1819e90d8, 0x3feff3c22b8f71f1,
-#elif N == 256
+# elif N == 256
   0x3ff0000000000000, 0x3feffb1afa5abcbf, 0x3feff63da9fb3335,
   0x3feff168143b0281, 0x3fefec9a3e778061, 0x3fefe7d42e11bbcc,
   0x3fefe315e86e7f85, 0x3fefde5f72f654b1, 0x3fefd9b0d3158574,
@@ -143,6 +143,6 @@ const uint64_t __v_exp_data[] = {
   0x3fefd632798844f8, 0x3fefdbfdad9cbe14, 0x3fefe1d802243c89,
   0x3fefe7c1819e90d8, 0x3fefedba3692d514, 0x3feff3c22b8f71f1,
   0x3feff9d96b2a23d9,
-#endif
+# endif
 };
 #endif

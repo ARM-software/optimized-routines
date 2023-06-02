@@ -14,16 +14,15 @@ static const volatile struct
   float32x4_t ln2, tiny_bound;
   uint32x4_t min_norm, special_bound, off, mantissa_mask;
 } data = {
-  .poly = {/* 3.34 ulp error.  */
-	   V4 (-0x1.3e737cp-3f), V4 (0x1.5a9aa2p-3f), V4 (-0x1.4f9934p-3f),
-	   V4 (0x1.961348p-3f), V4 (-0x1.00187cp-2f), V4 (0x1.555d7cp-2f),
-	   V4 (-0x1.ffffc8p-2f)},
-
+  /* 3.34 ulp error.  */
+  .poly = { V4 (-0x1.3e737cp-3f), V4 (0x1.5a9aa2p-3f), V4 (-0x1.4f9934p-3f),
+	    V4 (0x1.961348p-3f), V4 (-0x1.00187cp-2f), V4 (0x1.555d7cp-2f),
+	    V4 (-0x1.ffffc8p-2f) },
   .ln2 = V4 (0x1.62e43p-1f),
   .tiny_bound = V4 (0x1p-126),
   .min_norm = V4 (0x00800000),
   .special_bound = V4 (0x7f000000), /* asuint32(inf) - min_norm.  */
-  .off = V4 (0x3f2aaaab), /* 0.666667.  */
+  .off = V4 (0x3f2aaaab),	    /* 0.666667.  */
   .mantissa_mask = V4 (0x007fffff)
 };
 
@@ -47,7 +46,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log) (float32x4_t x)
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = vsubq_u32 (u, data.off);
   n = vcvtq_f32_s32 (
-    vshrq_n_s32 (vreinterpretq_s32_u32 (u), 23)); /* signextend.  */
+      vshrq_n_s32 (vreinterpretq_s32_u32 (u), 23)); /* signextend.  */
   u = vandq_u32 (u, data.mantissa_mask);
   u = vaddq_u32 (u, data.off);
   r = vsubq_f32 (vreinterpretq_f32_u32 (u), v_f32 (1.0f));

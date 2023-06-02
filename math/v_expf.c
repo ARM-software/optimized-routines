@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct v_expf_data
+static const volatile struct
 {
   float32x4_t poly[5];
   float32x4_t shift, inv_ln2, ln2_hi, ln2_lo;
@@ -17,9 +17,9 @@ static const volatile struct v_expf_data
   float32x4_t special_bound, scale_thresh;
 #endif
 } data = {
-  .poly = {/* maxerr: 1.45358 +0.5 ulp.  */
-	   V4 (0x1.0e4020p-7f), V4 (0x1.573e2ep-5f), V4 (0x1.555e66p-3f),
-	   V4 (0x1.fffdb6p-2f), V4 (0x1.ffffecp-1f)},
+  /* maxerr: 1.45358 +0.5 ulp.  */
+  .poly = { V4 (0x1.0e4020p-7f), V4 (0x1.573e2ep-5f), V4 (0x1.555e66p-3f),
+	    V4 (0x1.fffdb6p-2f), V4 (0x1.ffffecp-1f) },
   .shift = V4 (0x1.8p23f),
   .inv_ln2 = V4 (0x1.715476p+0f),
   .ln2_hi = V4 (0x1.62e4p-1f),
@@ -35,9 +35,9 @@ static const volatile struct v_expf_data
 
 #if WANT_SIMD_EXCEPT
 
-#define TinyBound v_u32 (0x20000000)	/* asuint (0x1p-63).  */
-#define BigBound v_u32 (0x42800000)	/* asuint (0x1p6).  */
-#define SpecialBound v_u32 (0x22800000) /* BigBound - TinyBound.  */
+# define TinyBound v_u32 (0x20000000)	/* asuint (0x1p-63).  */
+# define BigBound v_u32 (0x42800000)	/* asuint (0x1p6).  */
+# define SpecialBound v_u32 (0x22800000) /* BigBound - TinyBound.  */
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
@@ -49,8 +49,8 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 
 #else
 
-#define SpecialOffset v_u32 (0x82000000)
-#define SpecialBias v_u32 (0x7f000000)
+# define SpecialOffset v_u32 (0x82000000)
+# define SpecialBias v_u32 (0x7f000000)
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
@@ -78,10 +78,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 
 #if WANT_SIMD_EXCEPT
   /* asuint(x) - TinyBound >= BigBound - TinyBound.  */
-  cmp = vcgeq_u32 (vsubq_u32 (vandq_u32 (vreinterpretq_u32_f32 (x),
-					 v_u32 (0x7fffffff)),
-			      TinyBound),
-		   SpecialBound);
+  cmp = vcgeq_u32 (
+      vsubq_u32 (vandq_u32 (vreinterpretq_u32_f32 (x), v_u32 (0x7fffffff)),
+		 TinyBound),
+      SpecialBound);
   float32x4_t xm = x;
   /* If any lanes are special, mask them with 1 and retain a copy of x to allow
      special case handler to fix special lanes later. This is only necessary if

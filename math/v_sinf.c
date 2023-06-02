@@ -8,19 +8,14 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct __v_sinf_data
+static const volatile struct
 {
   float32x4_t poly[4];
   float32x4_t range_val, inv_pi, shift, pi_1, pi_2, pi_3;
-} data =
-{
-  .poly =
-    { /* 1.886 ulp error.  */
-      V4 (-0x1.555548p-3f),
-      V4 (0x1.110df4p-7f),
-      V4 (-0x1.9f42eap-13f),
-      V4 (0x1.5b2e76p-19f)
-    },
+} data = {
+  /* 1.886 ulp error.  */
+  .poly = { V4 (-0x1.555548p-3f), V4 (0x1.110df4p-7f), V4 (-0x1.9f42eap-13f),
+	    V4 (0x1.5b2e76p-19f) },
 
   .pi_1 = V4 (0x1.921fb6p+1f),
   .pi_2 = V4 (-0x1.777a5cp-24f),
@@ -61,7 +56,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
 #else
   r = x;
   cmp = vcageq_f32 (data.range_val, x);
-  cmp = vceqzq_u32 (cmp);	/* cmp = ~cmp.  */
+  cmp = vceqzq_u32 (cmp); /* cmp = ~cmp.  */
 #endif
 
   /* n = rint(|x|/pi) */

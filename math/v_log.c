@@ -13,15 +13,16 @@ static const volatile struct
   float64x2_t poly[5];
   float64x2_t ln2;
   uint64x2_t min_norm, special_bound, sign_exp_mask;
-} data = {.poly = {/* Worst-case error: 1.17 + 0.5 ulp.
-                      Rel error: 0x1.6272e588p-56 in [ -0x1.fc1p-9 0x1.009p-8 ].  */
-		   V2 (-0x1.ffffffffffff7p-2), V2 (0x1.55555555170d4p-2),
-		   V2 (-0x1.0000000399c27p-2), V2 (0x1.999b2e90e94cap-3),
-		   V2 (-0x1.554e550bd501ep-3)},
-	  .ln2 = V2 (0x1.62e42fefa39efp-1),
-	  .min_norm = V2 (0x0010000000000000),
-	  .special_bound = V2 (0x7fe0000000000000), /* asuint64(inf) - min_norm.  */
-	  .sign_exp_mask = V2 (0xfff0000000000000)
+} data = {
+  /* Worst-case error: 1.17 + 0.5 ulp.
+     Rel error: 0x1.6272e588p-56 in [ -0x1.fc1p-9 0x1.009p-8 ].  */
+  .poly = { V2 (-0x1.ffffffffffff7p-2), V2 (0x1.55555555170d4p-2),
+	    V2 (-0x1.0000000399c27p-2), V2 (0x1.999b2e90e94cap-3),
+	    V2 (-0x1.554e550bd501ep-3) },
+  .ln2 = V2 (0x1.62e42fefa39efp-1),
+  .min_norm = V2 (0x0010000000000000),
+  .special_bound = V2 (0x7fe0000000000000), /* asuint64(inf) - min_norm.  */
+  .sign_exp_mask = V2 (0xfff0000000000000)
 };
 
 #define A(i) data.poly[i]

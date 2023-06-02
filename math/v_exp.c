@@ -11,26 +11,27 @@
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask (N - 1)
 
-const static volatile struct v_exp_data
+const static volatile struct
 {
   float64x2_t poly[3];
   float64x2_t inv_ln2, ln2_hi, ln2_lo, shift;
 #if !WANT_SIMD_EXCEPT
   float64x2_t special_bound, scale_thresh;
 #endif
-} data = {.poly = {/* maxerr: 1.88 +0.5 ulp
-		      rel error: 1.4337*2^-53
-		      abs error: 1.4299*2^-53 in [ -ln2/256, ln2/256 ].  */
-		   V2 (0x1.ffffffffffd43p-2), V2 (0x1.55555c75adbb2p-3),
-		   V2 (0x1.55555da646206p-5)},
+} data = {
+  /* maxerr: 1.88 +0.5 ulp
+     rel error: 1.4337*2^-53
+     abs error: 1.4299*2^-53 in [ -ln2/256, ln2/256 ].  */
+  .poly = { V2 (0x1.ffffffffffd43p-2), V2 (0x1.55555c75adbb2p-3),
+	    V2 (0x1.55555da646206p-5) },
 #if !WANT_SIMD_EXCEPT
-	  .scale_thresh = V2 (163840.0), /* 1280.0 * N.  */
-	  .special_bound = V2 (704.0),
+  .scale_thresh = V2 (163840.0), /* 1280.0 * N.  */
+  .special_bound = V2 (704.0),
 #endif
-          .inv_ln2 = V2 (0x1.71547652b82fep7), /* N/ln2.  */
-	  .ln2_hi = V2 (0x1.62e42fefa39efp-8), /* ln2/N.  */
-	  .ln2_lo = V2 (0x1.abc9e3b39803f3p-63),
-	  .shift = V2 (0x1.8p+52)
+  .inv_ln2 = V2 (0x1.71547652b82fep7), /* N/ln2.  */
+  .ln2_hi = V2 (0x1.62e42fefa39efp-8), /* ln2/N.  */
+  .ln2_lo = V2 (0x1.abc9e3b39803f3p-63),
+  .shift = V2 (0x1.8p+52)
 };
 
 #define C(i) data.poly[i]
@@ -38,9 +39,9 @@ const static volatile struct v_exp_data
 
 #if WANT_SIMD_EXCEPT
 
-#define TinyBound v_u64 (0x2000000000000000)	/* asuint64 (0x1p-511).  */
-#define BigBound v_u64 (0x4080000000000000)	/* asuint64 (0x1p9).  */
-#define SpecialBound v_u64 (0x2080000000000000) /* BigBound - TinyBound.  */
+# define TinyBound v_u64 (0x2000000000000000) /* asuint64 (0x1p-511).  */
+# define BigBound v_u64 (0x4080000000000000) /* asuint64 (0x1p9).  */
+# define SpecialBound v_u64 (0x2080000000000000) /* BigBound - TinyBound.  */
 
 static inline float64x2_t VPCS_ATTR
 special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
@@ -52,10 +53,10 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 
 #else
 
-#define SpecialOffset v_u64 (0x6000000000000000) /* 0x1p513.  */
+# define SpecialOffset v_u64 (0x6000000000000000) /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
-#define SpecialBias1 v_u64 (0x7000000000000000)	 /* 0x1p769.  */
-#define SpecialBias2 v_u64 (0x3010000000000000)	 /* 0x1p-254.  */
+# define SpecialBias1 v_u64 (0x7000000000000000) /* 0x1p769.  */
+# define SpecialBias2 v_u64 (0x3010000000000000) /* 0x1p-254.  */
 
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t s, float64x2_t y, float64x2_t n)
@@ -64,7 +65,7 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n)
   uint64x2_t b = vandq_u64 (vcltzq_f64 (n), SpecialOffset);
   float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (SpecialBias1, b));
   float64x2_t s2 = vreinterpretq_f64_u64 (
-    vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), SpecialBias2), b));
+      vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), SpecialBias2), b));
   uint64x2_t cmp = vcagtq_f64 (n, data.scale_thresh);
   float64x2_t r1 = vmulq_f64 (s1, s1);
   float64x2_t r0 = vmulq_f64 (vfmaq_f64 (s2, y, s2), s1);
@@ -110,7 +111,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp) (float64x2_t x)
   y = vfmaq_f64 (r, y, r2);
 
   /* s = 2^(n/N).  */
-  u = (uint64x2_t){Tab[u[0] & IndexMask], Tab[u[1] & IndexMask]};
+  u = (uint64x2_t){ Tab[u[0] & IndexMask], Tab[u[1] & IndexMask] };
   s = vreinterpretq_f64_u64 (vaddq_u64 (u, e));
 
   if (unlikely (v_any_u64 (cmp)))

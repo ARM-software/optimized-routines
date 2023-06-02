@@ -8,24 +8,16 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct __v_cos_data
+static const volatile struct
 {
   float64x2_t poly[7];
   float64x2_t range_val, shift, inv_pi, half_pi, pi_1, pi_2, pi_3;
-} data =
-{
+} data = {
   /* Worst-case error is 3.3 ulp in [-pi/2, pi/2].  */
-  .poly =
-    {
-      V2 (-0x1.555555555547bp-3),
-      V2 (0x1.1111111108a4dp-7),
-      V2 (-0x1.a01a019936f27p-13),
-      V2 (0x1.71de37a97d93ep-19),
-      V2 (-0x1.ae633919987c6p-26),
-      V2 (0x1.60e277ae07cecp-33),
-      V2 (-0x1.9e9540300a1p-41),
-    },
-
+  .poly = { V2 (-0x1.555555555547bp-3), V2 (0x1.1111111108a4dp-7),
+	    V2 (-0x1.a01a019936f27p-13), V2 (0x1.71de37a97d93ep-19),
+	    V2 (-0x1.ae633919987c6p-26), V2 (0x1.60e277ae07cecp-33),
+	    V2 (-0x1.9e9540300a1p-41) },
   .inv_pi = V2 (0x1.45f306dc9c883p-2),
   .half_pi = V2 (0x1.921fb54442d18p+0),
   .pi_1 = V2 (0x1.921fb54442d18p+1),
@@ -60,7 +52,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
     r = vbslq_f64 (cmp, v_f64 (1.0), r);
 #else
   cmp = vcageq_f64 (data.range_val, x);
-  cmp = vceqzq_u64 (cmp);	/* cmp = ~cmp.  */
+  cmp = vceqzq_u64 (cmp); /* cmp = ~cmp.  */
   r = x;
 #endif
 

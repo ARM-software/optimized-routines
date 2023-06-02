@@ -8,23 +8,16 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct __v_sin_data
+static const volatile struct
 {
   float64x2_t poly[7];
   float64x2_t range_val, inv_pi, shift, pi_1, pi_2, pi_3;
-} data =
-{
+} data = {
   /* Worst-case error is 2.8 ulp in [-pi/2, pi/2].  */
-  .poly =
-    {
-      V2 (-0x1.555555555547bp-3),
-      V2 (0x1.1111111108a4dp-7),
-      V2 (-0x1.a01a019936f27p-13),
-      V2 (0x1.71de37a97d93ep-19),
-      V2 (-0x1.ae633919987c6p-26),
-      V2 (0x1.60e277ae07cecp-33),
-      V2 (-0x1.9e9540300a1p-41),
-    },
+  .poly = { V2 (-0x1.555555555547bp-3), V2 (0x1.1111111108a4dp-7),
+	    V2 (-0x1.a01a019936f27p-13), V2 (0x1.71de37a97d93ep-19),
+	    V2 (-0x1.ae633919987c6p-26), V2 (0x1.60e277ae07cecp-33),
+	    V2 (-0x1.9e9540300a1p-41) },
 
   .range_val = V2 (0x1p23),
   .inv_pi = V2 (0x1.45f306dc9c883p-2),
@@ -63,7 +56,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
 #else
   r = x;
   cmp = vcageq_f64 (data.range_val, x);
-  cmp = vceqzq_u64 (cmp);	/* cmp = ~cmp.  */
+  cmp = vceqzq_u64 (cmp); /* cmp = ~cmp.  */
 #endif
 
   /* n = rint(|x|/pi).  */
