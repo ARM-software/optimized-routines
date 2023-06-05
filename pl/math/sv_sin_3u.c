@@ -9,19 +9,20 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-struct __sv_sin_data
+static struct
 {
   double inv_pi, half_pi, inv_pi_over_2, pi_over_2_1, pi_over_2_2, pi_over_2_3,
-    shift;
+      shift;
+} data = {
+  /* Polynomial coefficients are hard-wired in the FTMAD instruction.  */
+  .inv_pi = 0x1.45f306dc9c883p-2,
+  .half_pi = 0x1.921fb54442d18p+0,
+  .inv_pi_over_2 = 0x1.45f306dc9c882p-1,
+  .pi_over_2_1 = 0x1.921fb50000000p+0,
+  .pi_over_2_2 = 0x1.110b460000000p-26,
+  .pi_over_2_3 = 0x1.1a62633145c07p-54,
+  .shift = 0x1.8p52
 };
-
-static struct __sv_sin_data data = {.inv_pi = 0x1.45f306dc9c883p-2,
-				    .half_pi = 0x1.921fb54442d18p+0,
-				    .inv_pi_over_2 = 0x1.45f306dc9c882p-1,
-				    .pi_over_2_1 = 0x1.921fb50000000p+0,
-				    .pi_over_2_2 = 0x1.110b460000000p-26,
-				    .pi_over_2_3 = 0x1.1a62633145c07p-54,
-				    .shift = 0x1.8p52};
 
 #define RangeVal 0x4160000000000000 /* asuint64 (0x1p23).  */
 
@@ -40,7 +41,7 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 {
   svfloat64_t r = svabs_f64_x (pg, x);
   svuint64_t sign
-    = sveor_u64_x (pg, svreinterpret_u64_f64 (x), svreinterpret_u64_f64 (r));
+      = sveor_u64_x (pg, svreinterpret_u64_f64 (x), svreinterpret_u64_f64 (r));
   svbool_t cmp = svcmpge_n_u64 (pg, svreinterpret_u64_f64 (r), RangeVal);
 
   /* Load first two pio2-related constants to one vector.  */
@@ -48,7 +49,7 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat64_t q
-    = svmla_lane_f64 (sv_f64 (data.shift), r, invpio2_and_pio2_1, 0);
+      = svmla_lane_f64 (sv_f64 (data.shift), r, invpio2_and_pio2_1, 0);
   svfloat64_t n = svsub_n_f64_x (pg, q, data.shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
@@ -75,7 +76,8 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   y = svmul_f64_x (pg, f, y);
 
   /* sign = y^sign.  */
-  y = svreinterpret_f64_u64 (sveor_u64_x (pg, svreinterpret_u64_f64 (y), sign));
+  y = svreinterpret_f64_u64 (
+      sveor_u64_x (pg, svreinterpret_u64_f64 (y), sign));
 
   if (unlikely (svptest_any (pg, cmp)))
     return special_case (x, y, cmp);

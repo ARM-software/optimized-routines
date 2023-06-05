@@ -21,31 +21,34 @@
 #define PL_DECL_SD2(fun) double fun (double, double);
 
 #if WANT_VMATH
-#define PL_DECL_VF1(fun) VPCS_ATTR float32x4_t V_NAME_F1 (fun##f) (float32x4_t);
-#define PL_DECL_VF2(fun)                                                       \
-  VPCS_ATTR float32x4_t V_NAME_F2 (fun##f) (float32x4_t, float32x4_t);
-#define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
-#define PL_DECL_VD2(fun)                                                       \
-  VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
+# define PL_DECL_VF1(fun)                                                    \
+    VPCS_ATTR float32x4_t V_NAME_F1 (fun##f) (float32x4_t);
+# define PL_DECL_VF2(fun)                                                    \
+    VPCS_ATTR float32x4_t V_NAME_F2 (fun##f) (float32x4_t, float32x4_t);
+# define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
+# define PL_DECL_VD2(fun)                                                    \
+    VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
 #else
-#define PL_DECL_VF1(fun)
-#define PL_DECL_VF2(fun)
-#define PL_DECL_VD1(fun)
-#define PL_DECL_VD2(fun)
+# define PL_DECL_VF1(fun)
+# define PL_DECL_VF2(fun)
+# define PL_DECL_VD1(fun)
+# define PL_DECL_VD2(fun)
 #endif
 
 #if WANT_SVE_MATH
-#define PL_DECL_SVF1(fun) svfloat32_t SV_NAME_F1 (fun) (svfloat32_t, svbool_t);
-#define PL_DECL_SVF2(fun)                                                      \
-  svfloat32_t SV_NAME_F2 (fun) (svfloat32_t, svfloat32_t, svbool_t);
-#define PL_DECL_SVD1(fun) svfloat64_t SV_NAME_D1 (fun) (svfloat64_t, svbool_t);
-#define PL_DECL_SVD2(fun)                                                      \
-  svfloat64_t SV_NAME_D2 (fun) (svfloat64_t, svfloat64_t, svbool_t);
+# define PL_DECL_SVF1(fun)                                                   \
+    svfloat32_t SV_NAME_F1 (fun) (svfloat32_t, svbool_t);
+# define PL_DECL_SVF2(fun)                                                   \
+    svfloat32_t SV_NAME_F2 (fun) (svfloat32_t, svfloat32_t, svbool_t);
+# define PL_DECL_SVD1(fun)                                                   \
+    svfloat64_t SV_NAME_D1 (fun) (svfloat64_t, svbool_t);
+# define PL_DECL_SVD2(fun)                                                   \
+    svfloat64_t SV_NAME_D2 (fun) (svfloat64_t, svfloat64_t, svbool_t);
 #else
-#define PL_DECL_SVF1(fun)
-#define PL_DECL_SVF2(fun)
-#define PL_DECL_SVD1(fun)
-#define PL_DECL_SVD2(fun)
+# define PL_DECL_SVF1(fun)
+# define PL_DECL_SVF2(fun)
+# define PL_DECL_SVD1(fun)
+# define PL_DECL_SVD2(fun)
 #endif
 
 /* For building the routines, emit function prototype from PL_SIG. This

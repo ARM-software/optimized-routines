@@ -10,14 +10,15 @@
 
 #ifndef WANT_VMATH
 /* Enable the build of vector math code.  */
-#define WANT_VMATH 1
+# define WANT_VMATH 1
 #endif
+
 #if WANT_VMATH
 
-#include <arm_sve.h>
-#include <stdbool.h>
+# include <arm_sve.h>
+# include <stdbool.h>
 
-#include "math_config.h"
+# include "math_config.h"
 
 /* Double precision.  */
 static inline svint64_t
@@ -127,6 +128,6 @@ sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
     }
   return y;
 }
-
 #endif
+
 #endif

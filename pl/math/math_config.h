@@ -13,9 +13,9 @@
 
 #ifndef WANT_ROUNDING
 /* If defined to 1, return correct results for special cases in non-nearest
-   rounding modes (logf (1.0f) returns 0.0f with FE_DOWNWARD rather than -0.0f).
-   This may be set to 0 if there is no fenv support or if math functions only
-   get called in round to nearest mode.  */
+   rounding modes (logf (1.0f) returns 0.0f with FE_DOWNWARD rather than
+   -0.0f). This may be set to 0 if there is no fenv support or if math
+   functions only get called in round to nearest mode.  */
 # define WANT_ROUNDING 1
 #endif
 #ifndef WANT_ERRNO
@@ -27,33 +27,34 @@
 #ifndef WANT_SIMD_EXCEPT
 /* If defined to 1, trigger fp exceptions in vector routines, consistently with
    behaviour expected from the corresponding scalar routine.  */
-#define WANT_SIMD_EXCEPT 0
+# define WANT_SIMD_EXCEPT 0
 #endif
 
 /* Compiler can inline round as a single instruction.  */
 #ifndef HAVE_FAST_ROUND
 # if __aarch64__
-#   define HAVE_FAST_ROUND 1
+#  define HAVE_FAST_ROUND 1
 # else
-#   define HAVE_FAST_ROUND 0
+#  define HAVE_FAST_ROUND 0
 # endif
 #endif
 
 /* Compiler can inline lround, but not (long)round(x).  */
 #ifndef HAVE_FAST_LROUND
-# if __aarch64__ && (100*__GNUC__ + __GNUC_MINOR__) >= 408 && __NO_MATH_ERRNO__
-#   define HAVE_FAST_LROUND 1
+# if __aarch64__ && (100 * __GNUC__ + __GNUC_MINOR__) >= 408                 \
+      && __NO_MATH_ERRNO__
+#  define HAVE_FAST_LROUND 1
 # else
-#   define HAVE_FAST_LROUND 0
+#  define HAVE_FAST_LROUND 0
 # endif
 #endif
 
 /* Compiler can inline fma as a single instruction.  */
 #ifndef HAVE_FAST_FMA
 # if defined FP_FAST_FMA || __aarch64__
-#   define HAVE_FAST_FMA 1
+#  define HAVE_FAST_FMA 1
 # else
-#   define HAVE_FAST_FMA 0
+#  define HAVE_FAST_FMA 0
 # endif
 #endif
 
@@ -62,9 +63,9 @@
    to interpose math functions with both static and dynamic linking.  */
 #ifndef USE_GLIBC_ABI
 # if __GNUC__
-#   define USE_GLIBC_ABI 1
+#  define USE_GLIBC_ABI 1
 # else
-#   define USE_GLIBC_ABI 0
+#  define USE_GLIBC_ABI 0
 # endif
 #endif
 
@@ -76,15 +77,15 @@
 # define likely(x) __builtin_expect (!!(x), 1)
 # define unlikely(x) __builtin_expect (x, 0)
 # if __GNUC__ >= 9
-#   define attribute_copy(f) __attribute__ ((copy (f)))
+#  define attribute_copy(f) __attribute__ ((copy (f)))
 # else
-#   define attribute_copy(f)
+#  define attribute_copy(f)
 # endif
-# define strong_alias(f, a) \
-  extern __typeof (f) a __attribute__ ((alias (#f))) attribute_copy (f);
-# define hidden_alias(f, a) \
-  extern __typeof (f) a __attribute__ ((alias (#f), visibility ("hidden"))) \
-  attribute_copy (f);
+# define strong_alias(f, a)                                                   \
+    extern __typeof (f) a __attribute__ ((alias (#f))) attribute_copy (f);
+# define hidden_alias(f, a)                                                   \
+    extern __typeof (f) a __attribute__ ((alias (#f), visibility ("hidden"))) \
+	attribute_copy (f);
 #else
 # define HIDDEN
 # define NOINLINE
@@ -128,7 +129,7 @@ asuint (float f)
   {
     float f;
     uint32_t i;
-  } u = {f};
+  } u = { f };
   return u.i;
 }
 
@@ -139,7 +140,7 @@ asfloat (uint32_t i)
   {
     uint32_t i;
     float f;
-  } u = {i};
+  } u = { i };
   return u.f;
 }
 
@@ -150,7 +151,7 @@ asuint64 (double f)
   {
     double f;
     uint64_t i;
-  } u = {f};
+  } u = { f };
   return u.i;
 }
 
@@ -161,7 +162,7 @@ asdouble (uint64_t i)
   {
     uint64_t i;
     double f;
-  } u = {i};
+  } u = { i };
   return u.f;
 }
 
@@ -349,9 +350,15 @@ extern const struct log10_data
   double invln10;
   double poly[LOG10_POLY_ORDER - 1]; /* First coefficient is 1/log(10).  */
   double poly1[LOG10_POLY1_ORDER - 1];
-  struct {double invc, logc;} tab[1 << LOG10_TABLE_BITS];
+  struct
+  {
+    double invc, logc;
+  } tab[1 << LOG10_TABLE_BITS];
 #if !HAVE_FAST_FMA
-  struct {double chi, clo;} tab2[1 << LOG10_TABLE_BITS];
+  struct
+  {
+    double chi, clo;
+  } tab2[1 << LOG10_TABLE_BITS];
 #endif
 } __log10_data HIDDEN;
 
@@ -374,7 +381,7 @@ extern const struct exp_data
   double poly[4]; /* Last four coefficients.  */
   double exp2_shift;
   double exp2_poly[EXP2_POLY_ORDER];
-  uint64_t tab[2*(1 << EXP_TABLE_BITS)];
+  uint64_t tab[2 * (1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
 
 /* Copied from math/v_exp.h for use in vector exp_tail.  */
@@ -396,7 +403,7 @@ extern const struct v_erfc_data
 {
   double interval_bounds[ERFC_NUM_INTERVALS + 1];
   double poly[ERFC_NUM_INTERVALS + 1][ERFC_POLY_ORDER + 1];
-}  __v_erfc_data HIDDEN;
+} __v_erfc_data HIDDEN;
 
 #define ERFCF_POLY_NCOEFFS 16
 extern const struct erfcf_poly_data
@@ -558,11 +565,11 @@ extern const struct v_log_data
 } __v_log_data HIDDEN;
 
 #ifndef SV_EXPF_USE_FEXPA
-#define SV_EXPF_USE_FEXPA 0
+# define SV_EXPF_USE_FEXPA 0
 #endif
 
 #ifndef SV_EXP2F_USE_FEXPA
-#define SV_EXP2F_USE_FEXPA 0
+# define SV_EXP2F_USE_FEXPA 0
 #endif
 #define SV_EXP2F_POLY_ORDER 6
 extern const float __sv_exp2f_poly[SV_EXP2F_POLY_ORDER - 1] HIDDEN;

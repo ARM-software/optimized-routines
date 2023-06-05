@@ -9,20 +9,20 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-struct sv_cosf_data
+static struct
 {
   float neg_pio2_1, neg_pio2_2, neg_pio2_3, inv_pio2, shift;
+} data = {
+  /* Polynomial coefficients are hard-wired in FTMAD instructions.  */
+  .neg_pio2_1 = -0x1.921fb6p+0f,
+  .neg_pio2_2 = 0x1.777a5cp-25f,
+  .neg_pio2_3 = 0x1.ee59dap-50f,
+  .inv_pio2 = 0x1.45f306p-1f,
+  /* Original shift used in Neon cosf,
+     plus a contribution to set the bit #0 of q
+     as expected by trigonometric instructions.  */
+  .shift = 0x1.800002p+23f
 };
-
-static struct sv_cosf_data data
-  = {.neg_pio2_1 = -0x1.921fb6p+0f,
-     .neg_pio2_2 = 0x1.777a5cp-25f,
-     .neg_pio2_3 = 0x1.ee59dap-50f,
-     .inv_pio2 = 0x1.45f306p-1f,
-     /* Original shift used in Neon cosf,
-	plus a contribution to set the bit #0 of q
-	as expected by trigonometric instructions.  */
-     .shift = 0x1.800002p+23f};
 
 #define RangeVal 0x49800000 /* asuint32(0x1p20f).  */
 

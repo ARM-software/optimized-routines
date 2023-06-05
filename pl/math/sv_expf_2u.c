@@ -11,23 +11,18 @@
 #include "pl_test.h"
 #include "sv_expf_specialcase.h"
 
-#define SV_EXPF_POLY_ORDER 4
-struct __sv_expf_data
+static struct
 {
-  float poly[SV_EXPF_POLY_ORDER + 1];
+  float poly[5];
   float inv_ln2, ln2_hi, ln2_lo, shift, thres;
-};
-
-static struct __sv_expf_data data = {
+} data = {
   /* Coefficients copied from the polynomial in math/v_expf.c, reversed for
      compatibility with polynomial helpers.  */
-  .poly = {0x1.ffffecp-1f, 0x1.fffdb6p-2f, 0x1.555e66p-3f, 0x1.573e2ep-5f,
-	   0x1.0e4020p-7f},
-
+  .poly = { 0x1.ffffecp-1f, 0x1.fffdb6p-2f, 0x1.555e66p-3f, 0x1.573e2ep-5f,
+	    0x1.0e4020p-7f },
   .inv_ln2 = 0x1.715476p+0f,
   .ln2_hi = 0x1.62e4p-1f,
   .ln2_lo = 0x1.7f7d1cp-20f,
-
 #if SV_EXPF_USE_FEXPA
   /* 1.5*2^17 + 127.  */
   .shift = 0x1.903f8p17f,
@@ -89,14 +84,14 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 /* scale = 2^(n/N).  */
 #if SV_EXPF_USE_FEXPA
   /* NaNs also need special handling with FEXPA.  */
-  svbool_t is_special_case
-    = svorr_b_z (pg, svacgt_n_f32 (pg, x, data.thres), svcmpne_f32 (pg, x, x));
+  svbool_t is_special_case = svorr_b_z (pg, svacgt_n_f32 (pg, x, data.thres),
+					svcmpne_f32 (pg, x, x));
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 #else
   svuint32_t e = svlsl_n_u32_x (pg, svreinterpret_u32_f32 (z), 23);
   svbool_t is_special_case = svacgt_n_f32 (pg, n, data.thres);
   svfloat32_t scale
-    = svreinterpret_f32_u32 (svadd_n_u32_x (pg, e, ExponentBias));
+      = svreinterpret_f32_u32 (svadd_n_u32_x (pg, e, ExponentBias));
 #endif
 
   /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5 + C4 r^6.  */

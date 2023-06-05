@@ -10,23 +10,25 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-struct __sv_sinf_data
+static struct
 {
   float poly[4];
   /* Pi-related values to be loaded as one quad-word and used with
      svmla_lane_f32.  */
   float negpi1, negpi2, negpi3, invpi;
   float shift;
-};
-
-static struct __sv_sinf_data data = {
-  /* Non-zero coefficients from the degree 9 Taylor series expansion of sin.  */
-  .poly = {-0x1.555548p-3f, 0x1.110df4p-7f, -0x1.9f42eap-13f, 0x1.5b2e76p-19f},
+} data = {
+  .poly = {
+    /* Non-zero coefficients from the degree 9 Taylor series expansion of
+       sin.  */
+    -0x1.555548p-3f, 0x1.110df4p-7f, -0x1.9f42eap-13f, 0x1.5b2e76p-19f
+  },
   .negpi1 = -0x1.921fb6p+1f,
   .negpi2 = 0x1.777a5cp-24f,
   .negpi3 = 0x1.ee59dap-49f,
   .invpi = 0x1.45f306p-2f,
-  .shift = 0x1.8p+23f};
+  .shift = 0x1.8p+23f
+};
 
 #define RangeVal 0x49800000 /* asuint32 (0x1p20f).  */
 #define C(i) data.poly[i]
@@ -45,12 +47,12 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 {
   svfloat32_t ax = svabs_f32_x (pg, x);
-  svuint32_t sign
-    = sveor_u32_x (pg, svreinterpret_u32_f32 (x), svreinterpret_u32_f32 (ax));
+  svuint32_t sign = sveor_u32_x (pg, svreinterpret_u32_f32 (x),
+				 svreinterpret_u32_f32 (ax));
   svbool_t cmp = svcmpge_n_u32 (pg, svreinterpret_u32_f32 (ax), RangeVal);
 
-  /* pi_vals are a quad-word of helper values - the first 3 elements contain -pi
-     in extended precision, the last contains 1 / pi.  */
+  /* pi_vals are a quad-word of helper values - the first 3 elements contain
+     -pi in extended precision, the last contains 1 / pi.  */
   svfloat32_t pi_vals = svld1rq_f32 (pg, &data.negpi1);
 
   /* n = rint(|x|/pi).  */
@@ -71,8 +73,8 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
   y = svmla_f32_x (pg, r, r, svmul_f32_x (pg, y, r2));
 
   /* sign = y^sign^odd.  */
-  y = svreinterpret_f32_u32 (
-    sveor_u32_x (pg, svreinterpret_u32_f32 (y), sveor_u32_x (pg, sign, odd)));
+  y = svreinterpret_f32_u32 (sveor_u32_x (pg, svreinterpret_u32_f32 (y),
+					  sveor_u32_x (pg, sign, odd)));
 
   if (unlikely (svptest_any (pg, cmp)))
     return special_case (x, y, cmp);

@@ -6,9 +6,9 @@
  */
 
 #if WANT_VMATH
-#define FMA(x, y, z) vfmaq_f32 (z, x, y)
+# define FMA(x, y, z) vfmaq_f32 (z, x, y)
 #else
-#define FMA fmaf
+# define FMA fmaf
 #endif
 
 #include "horner_wrap.h"

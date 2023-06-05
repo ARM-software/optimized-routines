@@ -9,31 +9,29 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define SV_LOGF_POLY_ORDER 8
-struct __sv_logf_data
+static struct
 {
   float poly_0135[4];
-  float poly_246[SV_LOGF_POLY_ORDER - (4 + 1)];
+  float poly_246[3];
   float ln2;
+} data = {
+  .poly_0135 = {
+    /* Coefficients copied from the Neon routine in math/, then rearranged so
+       that coeffs 0, 1, 3 and 5 can be loaded as a single quad-word, hence used
+       with _lane variant of MLA intrinsic.  */
+    -0x1.3e737cp-3f, 0x1.5a9aa2p-3f, 0x1.961348p-3f, 0x1.555d7cp-2f
+  },
+  .poly_246 = { -0x1.4f9934p-3f, -0x1.00187cp-2f, -0x1.ffffc8p-2f },
+  .ln2 = 0x1.62e43p-1f
 };
-
-static struct __sv_logf_data data = {
-  /* Coefficients copied from the Neon routine in math/, then rearranged so that
-     coeffs 0, 1, 3 and 5 can be loaded as a single quad-word, hence used with
-     _lane variant of MLA intrinsic.  */
-  .poly_0135
-  = {-0x1.3e737cp-3f, 0x1.5a9aa2p-3f, 0x1.961348p-3f, 0x1.555d7cp-2f},
-  .poly_246 = {-0x1.4f9934p-3f, -0x1.00187cp-2f, -0x1.ffffc8p-2f},
-  .ln2 = 0x1.62e43p-1f};
 
 #define Min (0x00800000)
 #define Max (0x7f800000)
 #define Thresh (0x7f000000) /* Max - Min.  */
 #define Mask (0x007fffff)
-#define Off (0x3f2aaaab) /* 0.666667 */
+#define Off (0x3f2aaaab) /* 0.666667.  */
 
-float
-optr_aor_log_f32 (float);
+float optr_aor_log_f32 (float);
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
@@ -41,8 +39,8 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
   return sv_call_f32 (optr_aor_log_f32, x, y, cmp);
 }
 
-/* Optimised implementation of SVE logf, using the same algorithm and polynomial
-   as the Neon routine in math/. Maximum error is 3.34 ULPs:
+/* Optimised implementation of SVE logf, using the same algorithm and
+   polynomial as the Neon routine in math/. Maximum error is 3.34 ULPs:
    SV_NAME_F1 (log)(0x1.557298p+0) got 0x1.26edecp-2
 				  want 0x1.26ede6p-2.  */
 svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
@@ -53,8 +51,8 @@ svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = svsub_n_u32_x (pg, u, Off);
   svfloat32_t n
-    = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, svreinterpret_s32_u32 (u),
-					  23)); /* Sign-extend.  */
+      = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, svreinterpret_s32_u32 (u),
+					    23)); /* Sign-extend.  */
   u = svand_n_u32_x (pg, u, Mask);
   u = svadd_n_u32_x (pg, u, Off);
   svfloat32_t r = svsub_n_f32_x (pg, svreinterpret_f32_u32 (u), 1.0f);

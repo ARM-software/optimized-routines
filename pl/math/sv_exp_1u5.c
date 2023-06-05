@@ -10,11 +10,22 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define SV_EXP_POLY_ORDER 3
-struct __sv_exp_data
+static struct
 {
-  double poly[SV_EXP_POLY_ORDER + 1];
+  double poly[4];
   double ln2_hi, ln2_lo, inv_ln2, shift, thres;
+} data = {
+  /* Coefficients copied from the polynomial for scalar exp in math/,
+     with N == 64 && EXP_POLY_ORDER == 5 && !EXP_POLY_WIDE.  */
+  .poly = { 0x1.fffffffffdbcdp-2, 0x1.555555555444cp-3, 0x1.555573c6a9f7dp-5,
+	    0x1.1111266d28935p-7 },
+  .ln2_hi = 0x1.62e42fefa3800p-1,
+  .ln2_lo = 0x1.ef35793c76730p-45,
+  /* 1/ln2.  */
+  .inv_ln2 = 0x1.71547652b82fep+0,
+  /* 1.5*2^46+1023. This value is further explained below.  */
+  .shift = 0x1.800000000ffc0p+46,
+  .thres = 704.0,
 };
 
 #define C(i) sv_f64 (data.poly[i])
@@ -22,19 +33,6 @@ struct __sv_exp_data
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 #define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
 #define SpecialBias2 0x3010000000000000 /* 0x1p-254.  */
-
-static struct __sv_exp_data data
-  = {.ln2_hi = 0x1.62e42fefa3800p-1,
-     .ln2_lo = 0x1.ef35793c76730p-45,
-     /* 1/ln2.  */
-     .inv_ln2 = 0x1.71547652b82fep+0,
-     /* 1.5*2^46+1023. This value is further explained below.  */
-     .shift = 0x1.800000000ffc0p+46,
-     .thres = 704.0,
-     /* Coefficients copied from the polynomial for scalar exp in math/,
-	with N == 64 && EXP_POLY_ORDER == 5 && !EXP_POLY_WIDE.  */
-     .poly = {0x1.fffffffffdbcdp-2, 0x1.555555555444cp-3, 0x1.555573c6a9f7dp-5,
-	      0x1.1111266d28935p-7}};
 
 /* Update of both special and non-special cases, if any special case is
    detected.  */
@@ -48,16 +46,15 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
   /* If n<=0 then set b to 0x6, 0 otherwise.  */
   svbool_t p_sign = svcmple_n_f64 (pg, n, 0.0); /* n <= 0.  */
   svuint64_t b
-    = svdup_n_u64_z (p_sign, SpecialOffset); /* Inactive lanes set to 0.  */
+      = svdup_n_u64_z (p_sign, SpecialOffset); /* Inactive lanes set to 0.  */
 
   /* Set s1 to generate overflow depending on sign of exponent n.  */
   svfloat64_t s1 = svreinterpret_f64_u64 (
-    svsubr_n_u64_x (pg, b, SpecialBias1)); /* 0x70...0 - b.  */
+      svsubr_n_u64_x (pg, b, SpecialBias1)); /* 0x70...0 - b.  */
   /* Offset s to avoid overflow in final result if n is below threshold.  */
-  svfloat64_t s2 = svreinterpret_f64_u64 (
-    svadd_u64_x (pg,
-		 svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), SpecialBias2),
-		 b)); /* as_u64 (s) - 0x3010...0 + b.  */
+  svfloat64_t s2 = svreinterpret_f64_u64 (svadd_u64_x (
+      pg, svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), SpecialBias2),
+      b)); /* as_u64 (s) - 0x3010...0 + b.  */
 
   /* |n| > 1280 => 2^(n) overflows.  */
   svbool_t p_cmp = svacgt_n_f64 (pg, n, 1280.0);
@@ -78,7 +75,8 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
   svbool_t isnan = svcmpne_f64 (pg, x, x);
 
   /* Use a modifed version of the shift used for flooring, such that x/ln2 is
-     rounded to a multiple of 2^-6=1/64, shift = 1.5 * 2^52 * 2^-6 = 1.5 * 2^46.
+     rounded to a multiple of 2^-6=1/64, shift = 1.5 * 2^52 * 2^-6 = 1.5 *
+     2^46.
 
      n is not an integer but can be written as n = m + i/64, with i and m
      integer, 0 <= i < 64 and m <= n.
@@ -87,8 +85,8 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
      (n=m, i=0), and is incremented every time z (or n) is incremented by 1/64.
      FEXPA expects i in bits 5:0 of the input so it can be used as index into
      FEXPA hardwired table T[i] = 2^(i/64) for i = 0:63, that will in turn
-     populate the mantissa of the output. Therefore, we use u=asuint(z) as input
-     to FEXPA.
+     populate the mantissa of the output. Therefore, we use u=asuint(z) as
+     input to FEXPA.
 
      We add 1023 to the modified shift value in order to set bits 16:6 of u to
      1, such that once these bits are moved to the exponent of the output of
@@ -121,10 +119,10 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 	 special case function so needs to be copied.
 	 e = sign bit of u << 46.  */
       svuint64_t e
-	= svand_n_u64_x (pg, svlsl_n_u64_x (pg, u, 46), 0x8000000000000000);
+	  = svand_n_u64_x (pg, svlsl_n_u64_x (pg, u, 46), 0x8000000000000000);
       /* Copy sign to s.  */
       s = svreinterpret_f64_u64 (
-	svadd_u64_x (pg, e, svreinterpret_u64_f64 (s)));
+	  svadd_u64_x (pg, e, svreinterpret_u64_f64 (s)));
       return special_case (pg, s, y, n);
     }
 
