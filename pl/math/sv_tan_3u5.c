@@ -56,7 +56,7 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
   svfloat64_t r = x;
-  svfloat64_t half_pi = svld1rq_f64 (pg, &data.half_pi_hi);
+  svfloat64_t half_pi = svld1rq_f64 (svptrue_b64 (), &data.half_pi_hi);
   r = svmls_lane_f64 (r, q, half_pi, 0);
   r = svmls_lane_f64 (r, q, half_pi, 1);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle

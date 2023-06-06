@@ -71,7 +71,7 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 
   /* Load some constants in quad-word chunks to minimise memory access (last
      lane is wasted).  */
-  svfloat32_t invln2_and_ln2 = svld1rq_f32 (pg, &data.inv_ln2);
+  svfloat32_t invln2_and_ln2 = svld1rq_f32 (svptrue_b32 (), &data.inv_ln2);
 
   /* n = round(x/(ln2/N)).  */
   svfloat32_t z = svmla_lane_f32 (sv_f32 (data.shift), x, invln2_and_ln2, 0);

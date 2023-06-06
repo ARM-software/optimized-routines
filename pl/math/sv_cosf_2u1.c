@@ -44,7 +44,8 @@ svfloat32_t SV_NAME_F1 (cos) (svfloat32_t x, const svbool_t pg)
     = svcmpge_n_u32 (pg, svreinterpret_u32_f32 (r), RangeVal);
 
   /* Load some constants in quad-word chunks to minimise memory access.  */
-  svfloat32_t negpio2_and_invpio2 = svld1rq_f32 (pg, &data.neg_pio2_1);
+  svfloat32_t negpio2_and_invpio2
+      = svld1rq_f32 (svptrue_b32 (), &data.neg_pio2_1);
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat32_t q

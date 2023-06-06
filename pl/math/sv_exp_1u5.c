@@ -96,7 +96,7 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
   svfloat64_t n = svsub_n_f64_x (pg, z, data.shift);
 
   /* r = x - n * ln2, r is in [-ln2/(2N), ln2/(2N)].  */
-  svfloat64_t ln2 = svld1rq_f64 (pg, &data.ln2_hi);
+  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &data.ln2_hi);
   svfloat64_t r = svmls_lane_f64 (x, n, ln2, 0);
   r = svmls_lane_f64 (r, n, ln2, 1);
 

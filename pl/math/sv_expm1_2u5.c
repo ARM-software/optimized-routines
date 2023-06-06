@@ -61,7 +61,7 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
   svfloat64_t n
     = svsub_f64_x (pg, svmla_n_f64_x (pg, shift, x, data.inv_ln2), shift);
   svint64_t i = svcvt_s64_f64_m (svreinterpret_s64_f64 (x), pnz, n);
-  svfloat64_t ln2 = svld1rq_f64 (pg, &data.ln2_hi);
+  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &data.ln2_hi);
   svfloat64_t f = svmls_lane_f64 (x, n, ln2, 0);
   f = svmls_lane_f64 (f, n, ln2, 1);
 

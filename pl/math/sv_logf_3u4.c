@@ -60,7 +60,7 @@ svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
   /* y = log(1+r) + n*ln2.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
   /* n*ln2 + r + r2*(P6 + r*P5 + r2*(P4 + r*P3 + r2*(P2 + r*P1 + r2*P0))).  */
-  svfloat32_t p_0135 = svld1rq_f32 (pg, &data.poly_0135[0]);
+  svfloat32_t p_0135 = svld1rq_f32 (svptrue_b32 (), &data.poly_0135[0]);
   svfloat32_t p = svmla_lane_f32 (sv_f32 (data.poly_246[0]), r, p_0135, 1);
   svfloat32_t q = svmla_lane_f32 (sv_f32 (data.poly_246[1]), r, p_0135, 2);
   svfloat32_t y = svmla_lane_f32 (sv_f32 (data.poly_246[2]), r, p_0135, 3);

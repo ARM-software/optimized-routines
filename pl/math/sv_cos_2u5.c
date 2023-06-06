@@ -44,8 +44,9 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
       = svcmpge_n_u64 (pg, svreinterpret_u64_f64 (r), RangeVal);
 
   /* Load some constants in quad-word chunks to minimise memory access.  */
-  svfloat64_t invpio2_and_pio2_1 = svld1rq_f64 (pg, &data.inv_pio2);
-  svfloat64_t pio2_23 = svld1rq_f64 (pg, &data.pio2_2);
+  svbool_t ptrue = svptrue_b64 ();
+  svfloat64_t invpio2_and_pio2_1 = svld1rq_f64 (ptrue, &data.inv_pio2);
+  svfloat64_t pio2_23 = svld1rq_f64 (ptrue, &data.pio2_2);
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat64_t q

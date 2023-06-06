@@ -51,7 +51,7 @@ svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
   /* This vector is reliant on layout of sv_expm1f_data - it contains constants
      that can be used with _lane forms of svmla/svmls. Values are:
      [ coeff_2, coeff_4, ln2_hi, ln2_lo ].  */
-  svfloat32_t lane_constants = svld1rq_f32 (pg, &data.c2);
+  svfloat32_t lane_constants = svld1rq_f32 (svptrue_b32 (), &data.c2);
 
   /* Algorithm returns incorrect sign of 0 for x = -0. Use merging predication
      to propagate zero through to result.  */

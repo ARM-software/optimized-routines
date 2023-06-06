@@ -53,7 +53,7 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 
   /* pi_vals are a quad-word of helper values - the first 3 elements contain
      -pi in extended precision, the last contains 1 / pi.  */
-  svfloat32_t pi_vals = svld1rq_f32 (pg, &data.negpi1);
+  svfloat32_t pi_vals = svld1rq_f32 (svptrue_b32 (), &data.negpi1);
 
   /* n = rint(|x|/pi).  */
   svfloat32_t n = svmla_lane_f32 (sv_f32 (data.shift), ax, pi_vals, 3);

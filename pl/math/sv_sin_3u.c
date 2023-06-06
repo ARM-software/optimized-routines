@@ -45,7 +45,8 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   svbool_t cmp = svcmpge_n_u64 (pg, svreinterpret_u64_f64 (r), RangeVal);
 
   /* Load first two pio2-related constants to one vector.  */
-  svfloat64_t invpio2_and_pio2_1 = svld1rq_f64 (pg, &data.inv_pi_over_2);
+  svfloat64_t invpio2_and_pio2_1
+      = svld1rq_f64 (svptrue_b64 (), &data.inv_pi_over_2);
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat64_t q
