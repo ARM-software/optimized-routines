@@ -18,7 +18,7 @@ static struct
   .pio2_1 = 0x1.921fb50000000p+0,
   .pio2_2 = 0x1.110b460000000p-26,
   .pio2_3 = 0x1.1a62633145c07p-54,
-  /* Original shift used in Neon cos,
+  /* Original shift used in AdvSIMD cos,
      plus a contribution to set the bit #0 of q
      as expected by trigonometric instructions.  */
   .shift = 0x1.8000000000001p52

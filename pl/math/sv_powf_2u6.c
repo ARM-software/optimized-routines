@@ -233,11 +233,11 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
 }
 
 /* Implementation of SVE powf.
-   Provides the same accuracy as Neon powf, since it relies on the same
+   Provides the same accuracy as AdvSIMD powf, since it relies on the same
    algorithm. The theoretical maximum error is under 2.60 ULPs.
    Maximum measured error is 2.56 ULPs:
-   _ZGVsMxvv_powf(0x1.004118p+0, 0x1.5d14a4p+16) got 0x1.fd4bp+127
-						want 0x1.fd4b06p+127.  */
+   SV_NAME_F2 (pow) (0x1.004118p+0, 0x1.5d14a4p+16) got 0x1.fd4bp+127
+						   want 0x1.fd4b06p+127.  */
 svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 {
   svuint32_t vix0 = svreinterpret_u32_f32 (x);

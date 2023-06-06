@@ -15,9 +15,8 @@ static struct
   double poly[4];
   double ln2_hi, ln2_lo, inv_ln2, shift, thres;
 } data = {
-  /* Coefficients copied from the polynomial for scalar exp in math/,
-     with N == 64 && EXP_POLY_ORDER == 5 && !EXP_POLY_WIDE.  */
-  .poly = { 0x1.fffffffffdbcdp-2, 0x1.555555555444cp-3, 0x1.555573c6a9f7dp-5,
+  .poly = { /* ulp error: 0.53.  */
+	    0x1.fffffffffdbcdp-2, 0x1.555555555444cp-3, 0x1.555573c6a9f7dp-5,
 	    0x1.1111266d28935p-7 },
   .ln2_hi = 0x1.62e42fefa3800p-1,
   .ln2_lo = 0x1.ef35793c76730p-45,

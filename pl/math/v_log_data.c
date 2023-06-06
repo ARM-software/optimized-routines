@@ -19,11 +19,11 @@ const struct v_log_data __v_log_data = {
 	log(x) = k ln2 + log(c) + poly(z/c - 1)
 
      where z is in [a;2a) which is split into N subintervals (a=0x1.69009p-1,
-     N=128) and log(c) and 1/c for the ith subinterval comes from a lookup
-     table:
+     N=128) and log(c) and 1/c for the ith subinterval comes from two lookup
+     tables:
 
-	tab[i].invc = 1/c
-	tab[i].logc = (double)log(c)
+	invc[i] = 1/c
+	logc[i] = (double)log(c)
 
      where c is near the center of the subinterval and is chosen by trying
      several floating point invc candidates around 1/center and selecting one

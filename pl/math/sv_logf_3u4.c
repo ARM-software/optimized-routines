@@ -16,7 +16,7 @@ static struct
   float ln2;
 } data = {
   .poly_0135 = {
-    /* Coefficients copied from the Neon routine in math/, then rearranged so
+    /* Coefficients copied from the AdvSIMD routine in math/, then rearranged so
        that coeffs 0, 1, 3 and 5 can be loaded as a single quad-word, hence used
        with _lane variant of MLA intrinsic.  */
     -0x1.3e737cp-3f, 0x1.5a9aa2p-3f, 0x1.961348p-3f, 0x1.555d7cp-2f
@@ -40,7 +40,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 }
 
 /* Optimised implementation of SVE logf, using the same algorithm and
-   polynomial as the Neon routine in math/. Maximum error is 3.34 ULPs:
+   polynomial as the AdvSIMD routine. Maximum error is 3.34 ULPs:
    SV_NAME_F1 (log)(0x1.557298p+0) got 0x1.26edecp-2
 				  want 0x1.26ede6p-2.  */
 svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)

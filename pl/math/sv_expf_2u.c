@@ -15,7 +15,7 @@ static struct
   float poly[5];
   float inv_ln2, ln2_hi, ln2_lo, shift, thres;
 } data = {
-  /* Coefficients copied from the polynomial in math/v_expf.c, reversed for
+  /* Coefficients copied from the polynomial in AdvSIMD variant, reversed for
      compatibility with polynomial helpers.  */
   .poly = { 0x1.ffffecp-1f, 0x1.fffdb6p-2f, 0x1.555e66p-3f, 0x1.573e2ep-5f,
 	    0x1.0e4020p-7f },

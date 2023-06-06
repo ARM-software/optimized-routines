@@ -600,7 +600,7 @@ extern const float __asinf_poly[ASINF_POLY_ORDER + 1] HIDDEN;
 #define ASIN_POLY_ORDER 11
 extern const double __asin_poly[ASIN_POLY_ORDER + 1] HIDDEN;
 
-/* Some data for Neon and SVE pow's internal exp and log.  */
+/* Some data for AdvSIMD and SVE pow's internal exp and log.  */
 #define V_POW_EXP_TABLE_BITS 8
 #define V_POW_EXP_POLY_ORDER 4
 extern const struct v_pow_exp_data

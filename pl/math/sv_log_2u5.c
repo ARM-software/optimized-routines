@@ -22,7 +22,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
   return sv_call_f64 (log, x, y, cmp);
 }
 
-/* SVE port of Neon log algorithm from math/.
+/* SVE port of AdvSIMD log algorithm.
    Maximum measured error is 2.17 ulp:
    SV_NAME_D1 (log)(0x1.a6129884398a3p+0) got 0x1.ffffff1cca043p-2
 					 want 0x1.ffffff1cca045p-2.  */
@@ -37,7 +37,7 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   svuint64_t tmp = svsub_n_u64_x (pg, ix, Off);
-  /* Equivalent to (tmp >> (52 - SV_LOG_TABLE_BITS)) % N, since N is a power
+  /* Equivalent to (tmp >> (52 - V_LOG_TABLE_BITS)) % N, since N is a power
      of 2.  */
   svuint64_t i = svand_n_u64_x (
       pg, svlsr_n_u64_x (pg, tmp, (52 - V_LOG_TABLE_BITS)), N - 1);

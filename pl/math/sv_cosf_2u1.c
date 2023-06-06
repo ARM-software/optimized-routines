@@ -18,7 +18,7 @@ static struct
   .neg_pio2_2 = 0x1.777a5cp-25f,
   .neg_pio2_3 = 0x1.ee59dap-50f,
   .inv_pio2 = 0x1.45f306p-1f,
-  /* Original shift used in Neon cosf,
+  /* Original shift used in AdvSIMD cosf,
      plus a contribution to set the bit #0 of q
      as expected by trigonometric instructions.  */
   .shift = 0x1.800002p+23f

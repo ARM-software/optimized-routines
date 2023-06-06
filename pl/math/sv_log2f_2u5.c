@@ -25,7 +25,7 @@ specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 }
 
 /* Optimised implementation of SVE log2f, using the same algorithm
-   and polynomial as Neon log2f. Maximum error is 2.48 ULPs:
+   and polynomial as AdvSIMD log2f. Maximum error is 2.48 ULPs:
    SV_NAME_F1 (log2)(0x1.558174p+0) got 0x1.a9be84p-2
 			    want 0x1.a9be8p-2.  */
 svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)

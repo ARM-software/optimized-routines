@@ -60,7 +60,7 @@ eval_poly (float32x4_t z)
   return ESTRIN_5 (z, z2, z4, C);
 }
 
-/* Fast implementation of Neon tanf.
+/* Fast implementation of AdvSIMD tanf.
    Maximum error is 3.45 ULP:
    __v_tanf(-0x1.e5f0cap+13) got 0x1.ff9856p-1
 			    want 0x1.ff9850p-1.  */

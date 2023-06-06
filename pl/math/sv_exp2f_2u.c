@@ -21,9 +21,8 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 {
   return sv_call_f32 (exp2f, x, y, special);
 }
-/* Single-precision SVE exp2f routine. Implements the Neon algorithm
-   for exp2f from math/.
-
+/* Single-precision SVE exp2f routine. Implements the same algorithm
+   as AdvSIMD exp2f.
    Worst case error is 1.04 ULPs.
    SV_NAME_F1 (exp2)(0x1.943b9p-1) got 0x1.ba7eb2p+0
 				  want 0x1.ba7ebp+0.  */

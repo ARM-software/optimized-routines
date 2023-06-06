@@ -26,7 +26,7 @@ specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 }
 
 /* Fast implementation for single precision log2,
-   relies on same argument reduction as Neon logf.
+   relies on same argument reduction as AdvSIMD logf.
    Maximum error: 2.48 ULPs
    __v_log2f(0x1.558174p+0) got 0x1.a9be84p-2
 			   want 0x1.a9be8p-2.  */
