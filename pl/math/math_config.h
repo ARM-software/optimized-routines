@@ -564,13 +564,6 @@ extern const struct v_log_data
   double logc[1 << V_LOG_TABLE_BITS];
 } __v_log_data HIDDEN;
 
-#ifndef SV_EXPF_USE_FEXPA
-# define SV_EXPF_USE_FEXPA 0
-#endif
-
-#ifndef SV_EXP2F_USE_FEXPA
-# define SV_EXP2F_USE_FEXPA 0
-#endif
 #define SV_EXP2F_POLY_ORDER 6
 extern const float __sv_exp2f_poly[SV_EXP2F_POLY_ORDER - 1] HIDDEN;
 
