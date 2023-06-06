@@ -461,7 +461,3 @@ PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, 0.0, 0x1p-50, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, 0x1p-50, 1.0, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, 1.0, 0x1p100, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)
-/* nan^-nan.  */
-PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), nan, nan, -nan, -nan, 1)
-/* For some NaNs, AOR pow algorithm will get the sign of nan^-nan wrong.
-   There are plans to relax the requirements on NaNs.  */

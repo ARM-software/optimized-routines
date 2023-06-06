@@ -72,7 +72,6 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 {
   svbool_t special = svacgt_n_f64 (pg, x, data.thres);
-  svbool_t isnan = svcmpne_f64 (pg, x, x);
 
   /* Use a modifed version of the shift used for flooring, such that x/ln2 is
      rounded to a multiple of 2^-6=1/64, shift = 1.5 * 2^52 * 2^-6 = 1.5 *
@@ -108,7 +107,6 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
      consistent NaN handling we have to manually propagate them. This comes at
      significant performance cost.  */
   svfloat64_t s = svexpa_f64 (u);
-  s = svsel_f64 (isnan, x, s);
 
   /* Assemble result as exp(x) = 2^n * exp(r).  If |x| > Thresh the
      multiplication may overflow, so use special case routine.  */

@@ -1,7 +1,7 @@
 /*
  * Generic functions for ULP error estimation.
  *
- * Copyright (c) 2019, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -45,9 +45,10 @@ static double RT(ulperr) (RT(float) got, const struct RT(ret) * p, int r)
 
   if (RT(asuint) (got) == RT(asuint) (want))
     return 0.0;
+  if (isnan (got) && isnan (want))
+    /* Ignore sign of NaN.  */
+    return RT (issignaling) (got) == RT (issignaling) (want) ? 0 : INFINITY;
   if (signbit (got) != signbit (want))
-    /* May have false positives with NaN.  */
-    //return isnan(got) && isnan(want) ? 0 : INFINITY;
     return INFINITY;
   if (!isfinite (want) || !isfinite (got))
     {

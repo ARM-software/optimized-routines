@@ -53,9 +53,7 @@ svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
   svfloat32_t r = svsub_f32_x (pg, x, n);
 
 #if SV_EXP2F_USE_FEXPA
-  /* NaNs also need special handling with FEXPA.  */
-  svbool_t is_special_case
-    = svorr_b_z (pg, svacgt_n_f32 (pg, x, Thres), svcmpne_f32 (pg, x, x));
+  svbool_t is_special_case = svacgt_n_f32 (pg, x, Thres);
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 #else
   svuint32_t e

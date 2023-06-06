@@ -16,7 +16,6 @@
 #define Pif v_f32 (0x1.921fb6p+1f)
 #define Twof v_f32 (2.0f)
 #define Onef v_f32 (1.0f)
-#define MOnef v_f32 (-1.0f)
 #define Half (0x3f000000)
 #define One (0x3f800000)
 #define Small (0x32800000) /* 2^-26.  */
@@ -65,9 +64,6 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acos) (float32x4_t x)
   uint32x4_t special = ia - Small > One - Small;
   if (unlikely (v_any_u32 (special)))
     return special_case (x, x, v_u32 (0xffffffff));
-#else
-  /* Fixing sign of NaN when x < -1.0.  */
-  ix = vbslq_u32 (x < MOnef, v_u32 (0), ix);
 #endif
 
   float32x4_t ax = vreinterpretq_f32_u32 (ia);

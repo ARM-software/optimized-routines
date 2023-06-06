@@ -15,7 +15,6 @@
 #define Half v_f64 (0.5)
 #define PiOver2 v_f64 (0x1.921fb54442d18p+0)
 #define Two v_f64 (2.0)
-#define MOne v_f64 (-1.0)
 #define Halfu (0x3fe0000000000000)
 #define One (0x3ff0000000000000)
 #define Small (0x3e50000000000000) /* 2^-12.  */
@@ -63,9 +62,6 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asin) (float64x2_t x)
   uint64x2_t special = ia - Small > One - Small;
   if (unlikely (v_any_u64 (special)))
     return special_case (x, x, AllMask);
-#else
-  /* Fixing sign of NaN when x < -1.0.  */
-  ix = vbslq_u64 (x < MOne, v_u64 (0), ix);
 #endif
 
   float64x2_t ax = vreinterpretq_f64_u64 (ia);
