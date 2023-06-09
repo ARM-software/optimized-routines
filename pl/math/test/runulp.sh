@@ -21,19 +21,19 @@ FAIL=0
 PASS=0
 
 t() {
-	key=$(cat $ALIASES | { grep " $1$" || echo $1; } | awk '{print $1}')
-	L=$(cat $LIMITS | grep "^$key " | awk '{print $2}')
+	routine=$1
+	L=$(cat $LIMITS | grep "^$routine " | awk '{print $2}')
 	[[ $L =~ ^[0-9]+\.[0-9]+$ ]]
 	extra_flags=
 	[[ -z "${5:-}" ]] || extra_flags="$extra_flags -c $5"
-	grep -q "^$key$" $FENV || extra_flags="$extra_flags -f"
+	grep -q "^$routine$" $FENV || extra_flags="$extra_flags -f"
 	IFS=',' read -ra LO <<< "$2"
 	IFS=',' read -ra HI <<< "$3"
 	ITV="${LO[0]} ${HI[0]}"
 	for i in "${!LO[@]}"; do
 	[[ "$i" -eq "0" ]] || ITV="$ITV x ${LO[$i]} ${HI[$i]}"
 	done
-	$emu ./ulp -e $L $flags ${extra_flags} $1 $ITV $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
+	$emu ./ulp -e $L $flags ${extra_flags} $routine $ITV $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
 }
 
 check() {

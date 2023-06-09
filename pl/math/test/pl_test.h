@@ -16,10 +16,6 @@
 #define PL_TEST_ULP(f, l) PL_TEST_ULP f l
 #endif
 
-/* Emit aliases to allow test params to be mapped from aliases back to their
-   aliasees.  */
-#define PL_ALIAS(a, b) PL_TEST_ALIAS a b
-
 /* Emit routine name if e == 1 and f is expected to correctly trigger fenv
    exceptions. e allows declaration to be emitted conditionally upon certain
    build flags - defer expansion by one pass to allow those flags to be expanded
