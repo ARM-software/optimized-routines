@@ -507,26 +507,20 @@ extern const struct v_log2f_data
 } __v_log2f_data HIDDEN;
 
 #define V_LOG2_TABLE_BITS 7
-#define V_LOG2_POLY_ORDER 6
 extern const struct v_log2_data
 {
-  double poly[V_LOG2_POLY_ORDER - 1];
-  struct
-  {
-    double invc, log2c;
-  } tab[1 << V_LOG2_TABLE_BITS];
+  double poly[5];
+  double invc[1 << V_LOG2_TABLE_BITS];
+  double log2c[1 << V_LOG2_TABLE_BITS];
 } __v_log2_data HIDDEN;
 
 #define V_LOG10_TABLE_BITS 7
-#define V_LOG10_POLY_ORDER 6
 extern const struct v_log10_data
 {
-  struct
-  {
-    double invc, log10c;
-  } tab[1 << V_LOG10_TABLE_BITS];
-  double poly[V_LOG10_POLY_ORDER - 1];
+  double poly[5];
   double invln10, log10_2;
+  double invc[1 << V_LOG10_TABLE_BITS];
+  double log10c[1 << V_LOG10_TABLE_BITS];
 } __v_log10_data HIDDEN;
 
 #define V_LOG10F_POLY_ORDER 9

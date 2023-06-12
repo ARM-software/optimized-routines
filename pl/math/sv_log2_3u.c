@@ -13,6 +13,7 @@
 #define N (1 << V_LOG2_TABLE_BITS)
 #define OFF 0x3fe6900900000000
 #define P(i) sv_f64 (__v_log2_data.poly[i])
+#define T(s, i) __v_log2_data.s[i]
 
 NOINLINE static svfloat64_t
 specialcase (svfloat64_t x, svfloat64_t y, const svbool_t cmp)
@@ -44,11 +45,8 @@ svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
   svfloat64_t z = svreinterpret_f64_u64 (
     svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
 
-  svuint64_t idx = svmul_n_u64_x (pg, i, 2);
-  svfloat64_t invc
-    = svld1_gather_u64index_f64 (pg, &__v_log2_data.tab[0].invc, idx);
-  svfloat64_t log2c
-    = svld1_gather_u64index_f64 (pg, &__v_log2_data.tab[0].log2c, idx);
+  svfloat64_t invc = svld1_gather_u64index_f64 (pg, &T (invc, 0), i);
+  svfloat64_t log2c = svld1_gather_u64index_f64 (pg, &T (log2c, 0), i);
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 

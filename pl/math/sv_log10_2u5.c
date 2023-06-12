@@ -14,6 +14,7 @@
 #define N (1 << V_LOG10_TABLE_BITS)
 
 #define A(i) __v_log10_data.poly[i]
+#define T(s, i) __v_log10_data.s[i]
 
 static inline svfloat64_t
 specialcase (svfloat64_t x, svfloat64_t y, svbool_t special)
@@ -44,12 +45,8 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
     svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
 
   /* log(x) = k*log(2) + log(c) + log(z/c).  */
-
-  svuint64_t idx = svmul_n_u64_x (pg, i, 2);
-  svfloat64_t invc
-    = svld1_gather_u64index_f64 (pg, &__v_log10_data.tab[0].invc, idx);
-  svfloat64_t logc
-    = svld1_gather_u64index_f64 (pg, &__v_log10_data.tab[0].log10c, idx);
+  svfloat64_t invc = svld1_gather_u64index_f64 (pg, &T (invc, 0), i);
+  svfloat64_t logc = svld1_gather_u64index_f64 (pg, &T (log10c, 0), i);
 
   /* We approximate log(z/c) with a polynomial P(x) ~= log(x + 1):
      r = z/c - 1 (we look up precomputed 1/c)
