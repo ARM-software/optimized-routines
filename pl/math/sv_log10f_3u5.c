@@ -17,7 +17,7 @@
 #define Ln2 0x1.62e43p-1f /* 0x3f317218.  */
 #define InvLn10 0x1.bcb7b2p-2f
 
-#define P(i) sv_f32 (__v_log10f_poly[i])
+#define P(i) sv_f32 (__sv_log10f_poly[i])
 
 static NOINLINE svfloat32_t
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)

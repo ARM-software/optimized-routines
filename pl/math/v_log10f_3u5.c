@@ -6,68 +6,66 @@
  */
 
 #include "v_math.h"
-#include "mathlib.h"
+#include "pairwise_hornerf.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define P(i) v_f32 (__v_log10f_poly[i])
+static const volatile struct
+{
+  float32x4_t poly[8];
+  float32x4_t inv_ln10, ln2;
+  uint32x4_t min_norm, special_bound, off, mantissa_mask;
+} data = {
+  /* Use order 9 for log10(1+x), i.e. order 8 for log10(1+x)/x, with x in
+      [-1/3, 1/3] (offset=2/3). Max. relative error: 0x1.068ee468p-25.  */
+  .poly = { V4 (-0x1.bcb79cp-3f), V4 (0x1.2879c8p-3f), V4 (-0x1.bcd472p-4f),
+	    V4 (0x1.6408f8p-4f), V4 (-0x1.246f8p-4f), V4 (0x1.f0e514p-5f),
+	    V4 (-0x1.0fc92cp-4f), V4 (0x1.f5f76ap-5f) },
+  .ln2 = V4 (0x1.62e43p-1f),
+  .inv_ln10 = V4 (0x1.bcb7b2p-2f),
+  .min_norm = V4 (0x00800000),
+  .special_bound = V4 (0x7f000000), /* asuint32(inf) - min_norm.  */
+  .off = V4 (0x3f2aaaab),	    /* 0.666667.  */
+  .mantissa_mask = V4 (0x007fffff),
+};
 
-#define Ln2 v_f32 (0x1.62e43p-1f) /* 0x3f317218.  */
-#define InvLn10 v_f32 (0x1.bcb7b2p-2f)
-#define Min v_u32 (0x00800000)
-#define Max v_u32 (0x7f800000)
-#define Mask v_u32 (0x007fffff)
-#define Off v_u32 (0x3f2aaaab) /* 0.666667.  */
+#define P(i) data.poly[i]
 
-VPCS_ATTR
-NOINLINE static float32x4_t
-specialcase (float32x4_t x, float32x4_t y, uint32x4_t cmp)
+static float32x4_t VPCS_ATTR NOINLINE
+special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 {
   /* Fall back to scalar code.  */
   return v_call_f32 (log10f, x, y, cmp);
 }
 
-/* Our fast implementation of v_log10f uses a similar approach as v_logf.
-   With the same offset as v_logf (i.e., 2/3) it delivers about 3.3ulps with
-   order 9. This is more efficient than using a low order polynomial computed in
-   double precision.
+/* Fast implementation of AdvSIMD log10f,
+   uses a similar approach as AdvSIMD logf with the same offset (i.e., 2/3) and
+   an order 9 polynomial.
    Maximum error: 3.305ulps (nearest rounding.)
-   __v_log10f(0x1.555c16p+0) got 0x1.ffe2fap-4
-			    want 0x1.ffe2f4p-4 -0.304916 ulp err 2.80492.  */
-VPCS_ATTR
-float32x4_t V_NAME_F1 (log10) (float32x4_t x)
+   _ZGVnN4v_log10f(0x1.555c16p+0) got 0x1.ffe2fap-4
+				 want 0x1.ffe2f4p-4.  */
+float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
 {
-  float32x4_t n, o, p, q, r, r2, y;
-  uint32x4_t u, cmp;
-
-  u = vreinterpretq_u32_f32 (x);
-  cmp = u - Min >= Max - Min;
+  uint32x4_t u = vreinterpretq_u32_f32 (x);
+  uint32x4_t special
+      = vcgeq_u32 (vsubq_u32 (u, data.min_norm), data.special_bound);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
-  u -= Off;
-  n = vcvtq_f32_s32 (vreinterpretq_s32_u32 (u) >> 23); /* signextend.  */
-  u &= Mask;
-  u += Off;
-  r = vreinterpretq_f32_u32 (u) - v_f32 (1.0f);
+  u = vsubq_u32 (u, data.off);
+  float32x4_t n = vcvtq_f32_s32 (
+      vshrq_n_s32 (vreinterpretq_s32_u32 (u), 23)); /* signextend.  */
+  u = vaddq_u32 (vandq_u32 (u, data.mantissa_mask), data.off);
+  float32x4_t r = vsubq_f32 (vreinterpretq_f32_u32 (u), v_f32 (1.0f));
 
-  /* y = log10(1+r) + n*log10(2).  */
-  r2 = r * r;
-  /* (n*ln2 + r)*InvLn10 + r2*(P0 + r*P1 + r2*(P2 + r*P3 + r2*(P4 + r*P5 +
-     r2*(P6+r*P7))).  */
-  o = vfmaq_f32 (P (6), P (7), r);
-  p = vfmaq_f32 (P (4), P (5), r);
-  q = vfmaq_f32 (P (2), P (3), r);
-  y = vfmaq_f32 (P (0), P (1), r);
-  p = vfmaq_f32 (p, o, r2);
-  q = vfmaq_f32 (q, p, r2);
-  y = vfmaq_f32 (y, q, r2);
-  /* Using p = Log10(2)*n + r*InvLn(10) is slightly faster
-     but less accurate.  */
-  p = vfmaq_f32 (r, Ln2, n);
-  y = vfmaq_f32 (p * InvLn10, y, r2);
+  /* y = log10(1+r) + n * log10(2).  */
+  float32x4_t r2 = vmulq_f32 (r, r);
+  float32x4_t poly = PAIRWISE_HORNER_7 (r, r2, P);
+  /* y = Log10(2) * n + poly * InvLn(10).  */
+  float32x4_t y = vfmaq_f32 (r, data.ln2, n);
+  y = vfmaq_f32 (vmulq_f32 (y, data.inv_ln10), poly, r2);
 
-  if (unlikely (v_any_u32 (cmp)))
-    return specialcase (x, y, cmp);
+  if (unlikely (v_any_u32 (special)))
+    return special_case (x, y, special);
   return y;
 }
 

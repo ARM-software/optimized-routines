@@ -10,7 +10,7 @@
 #include "pl_test.h"
 #include "sv_pairwise_hornerf.h"
 
-#define P(i) __v_log2f_data.poly[i]
+#define P(i) __sv_log2f_poly[i]
 
 #define Ln2 (0x1.62e43p-1f) /* 0x3f317218.  */
 #define Min (0x00800000)
