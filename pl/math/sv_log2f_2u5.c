@@ -8,38 +8,52 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "sv_pairwise_hornerf.h"
 
 #define P(i) __sv_log2f_poly[i]
 
-#define Ln2 (0x1.62e43p-1f) /* 0x3f317218.  */
+static struct
+{
+  float poly_02468[5];
+  float poly_1357[4];
+} data = {
+  .poly_1357 = {
+    /* Coefficients copied from the AdvSIMD routine, then rearranged so that coeffs
+       1, 3, 5 and 7 can be loaded as a single quad-word, hence used with _lane
+       variant of MLA intrinsic.  */
+    -0x1.715458p-1f, -0x1.7171a4p-2f, -0x1.e5143ep-3f, -0x1.c675bp-3f
+  },
+  .poly_02468 = { 0x1.715476p0f, 0x1.ec701cp-2f, 0x1.27a0b8p-2f,
+		  0x1.9d8ecap-3f, 0x1.9e495p-3f },
+};
+
 #define Min (0x00800000)
 #define Max (0x7f800000)
-#define Mask (0x007fffff)
+#define Thres (0x7f000000) /* Max - Min.  */
+#define MantissaMask (0x007fffff)
 #define Off (0x3f2aaaab) /* 0.666667.  */
 
-static NOINLINE svfloat32_t
-specialcase (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+static svfloat32_t NOINLINE
+special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
   return sv_call_f32 (log2f, x, y, cmp);
 }
 
 /* Optimised implementation of SVE log2f, using the same algorithm
-   and polynomial as AdvSIMD log2f. Maximum error is 2.48 ULPs:
+   and polynomial as AdvSIMD log2f.
+   Maximum error is 2.48 ULPs:
    SV_NAME_F1 (log2)(0x1.558174p+0) got 0x1.a9be84p-2
-			    want 0x1.a9be8p-2.  */
+				   want 0x1.a9be8p-2.  */
 svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t u = svreinterpret_u32_f32 (x);
-  svbool_t special
-    = svcmpge_u32 (pg, svsub_n_u32_x (pg, u, Min), sv_u32 (Max - Min));
+  svbool_t special = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, u, Min), Thres);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = svsub_n_u32_x (pg, u, Off);
   svfloat32_t n
-    = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, svreinterpret_s32_u32 (u),
-					  23)); /* Sign-extend.  */
-  u = svand_n_u32_x (pg, u, Mask);
+      = svcvt_f32_s32_x (pg, svasr_n_s32_x (pg, svreinterpret_s32_u32 (u),
+					    23)); /* Sign-extend.  */
+  u = svand_n_u32_x (pg, u, MantissaMask);
   u = svadd_n_u32_x (pg, u, Off);
   svfloat32_t r = svsub_n_f32_x (pg, svreinterpret_f32_u32 (u), 1.0f);
 
@@ -47,11 +61,23 @@ svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
 
   /* Evaluate polynomial using pairwise Horner scheme.  */
-  svfloat32_t y = PAIRWISE_HORNER_8 (pg, r, r2, P);
+  svfloat32_t p_1357 = svld1rq_f32 (pg, &data.poly_1357[0]);
+  svfloat32_t q_01
+      = svmla_lane_f32 (sv_f32 (data.poly_02468[0]), r, p_1357, 0);
+  svfloat32_t q_23
+      = svmla_lane_f32 (sv_f32 (data.poly_02468[1]), r, p_1357, 1);
+  svfloat32_t q_45
+      = svmla_lane_f32 (sv_f32 (data.poly_02468[2]), r, p_1357, 2);
+  svfloat32_t q_67
+      = svmla_lane_f32 (sv_f32 (data.poly_02468[3]), r, p_1357, 3);
+  svfloat32_t y = svmla_f32_x (pg, q_67, r2, sv_f32 (data.poly_02468[4]));
+  y = svmla_f32_x (pg, q_45, r2, y);
+  y = svmla_f32_x (pg, q_23, r2, y);
+  y = svmla_f32_x (pg, q_01, r2, y);
   y = svmla_f32_x (pg, n, r, y);
 
   if (unlikely (svptest_any (pg, special)))
-    return specialcase (x, y, special);
+    return special_case (x, y, special);
   return y;
 }
 

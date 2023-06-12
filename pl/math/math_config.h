@@ -500,13 +500,11 @@ extern const struct tanf_poly_data
   float poly_cotan[TANF_Q_POLY_NCOEFFS];
 } __tanf_poly_data HIDDEN;
 
-#define SV_LOG2F_POLY_ORDER 8
-extern const float __sv_log2f_poly[SV_LOG2F_POLY_ORDER + 1] HIDDEN;
-
 #define V_LOG2_TABLE_BITS 7
 extern const struct v_log2_data
 {
   double poly[5];
+  double invln2;
   double invc[1 << V_LOG2_TABLE_BITS];
   double log2c[1 << V_LOG2_TABLE_BITS];
 } __v_log2_data HIDDEN;
@@ -519,9 +517,6 @@ extern const struct v_log10_data
   double invc[1 << V_LOG10_TABLE_BITS];
   double log10c[1 << V_LOG10_TABLE_BITS];
 } __v_log10_data HIDDEN;
-
-#define SV_LOG10F_POLY_ORDER 9
-extern const float __sv_log10f_poly[SV_LOG10F_POLY_ORDER - 1] HIDDEN;
 
 /* Some data for SVE powf's internal exp and log.  */
 #define SV_POWF_EXP2_TABLE_BITS 5

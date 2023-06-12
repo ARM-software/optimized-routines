@@ -9,39 +9,40 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define InvLn2 sv_f64 (0x1.71547652b82fep0)
 #define N (1 << V_LOG2_TABLE_BITS)
-#define OFF 0x3fe6900900000000
+#define Off 0x3fe6900900000000
+#define Max (0x7ff0000000000000)
+#define Min (0x0010000000000000)
+#define Thresh (0x7fe0000000000000) /* Max - Min.  */
+
 #define P(i) sv_f64 (__v_log2_data.poly[i])
 #define T(s, i) __v_log2_data.s[i]
 
-NOINLINE static svfloat64_t
-specialcase (svfloat64_t x, svfloat64_t y, const svbool_t cmp)
+static svfloat64_t NOINLINE
+special_case (svfloat64_t x, svfloat64_t y, const svbool_t cmp)
 {
   return sv_call_f64 (log2, x, y, cmp);
 }
 
-/* Double-precision SVE log2 routine. Implements the same algorithm as vector
-   log10, with coefficients and table entries scaled in extended precision.
+/* Double-precision SVE log2 routine.
+   Implements the same algorithm as AdvSIMD log10, with coefficients and table
+   entries scaled in extended precision.
    The maximum observed error is 2.58 ULP:
-   __v_log2(0x1.0b556b093869bp+0) got 0x1.fffb34198d9dap-5
-				 want 0x1.fffb34198d9ddp-5.  */
+   SV_NAME_D1 (log2)(0x1.0b556b093869bp+0) got 0x1.fffb34198d9dap-5
+					  want 0x1.fffb34198d9ddp-5.  */
 svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
 {
   svuint64_t ix = svreinterpret_u64_f64 (x);
-  svuint64_t top = svlsr_n_u64_x (pg, ix, 48);
+  svbool_t special = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, ix, Min), Thresh);
 
-  svbool_t special
-    = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, top, 0x0010), 0x7ff0 - 0x0010);
-
-  /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
+  /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
-  svuint64_t tmp = svsub_n_u64_x (pg, ix, OFF);
-  svuint64_t i
-    = sv_mod_n_u64_x (pg, svlsr_n_u64_x (pg, tmp, 52 - V_LOG2_TABLE_BITS), N);
-  svfloat64_t k
-    = svcvt_f64_s64_x (pg, svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52));
+  svuint64_t tmp = svsub_n_u64_x (pg, ix, Off);
+  svuint64_t i = sv_mod_n_u64_x (
+      pg, svlsr_n_u64_x (pg, tmp, 52 - V_LOG2_TABLE_BITS), N);
+  svfloat64_t k = svcvt_f64_s64_x (
+      pg, svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52));
   svfloat64_t z = svreinterpret_f64_u64 (
     svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
 
@@ -51,7 +52,7 @@ svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 
   svfloat64_t r = svmla_f64_x (pg, sv_f64 (-1.0), invc, z);
-  svfloat64_t w = svmla_f64_x (pg, log2c, InvLn2, r);
+  svfloat64_t w = svmla_n_f64_x (pg, log2c, r, __v_log2_data.invln2);
 
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
   svfloat64_t p_23 = svmla_f64_x (pg, P (2), r, P (3));
@@ -61,9 +62,7 @@ svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
   y = svmla_f64_x (pg, svadd_f64_x (pg, k, w), r2, y);
 
   if (unlikely (svptest_any (pg, special)))
-    {
-      return specialcase (x, y, special);
-    }
+    return special_case (x, y, special);
   return y;
 }
 

@@ -17,6 +17,8 @@ const struct v_log2_data __v_log2_data = {
   .poly = { -0x1.71547652b83p-1, 0x1.ec709dc340953p-2, -0x1.71547651c8f35p-2,
 	    0x1.2777ebe12dda5p-2, -0x1.ec738d616fe26p-3 },
 
+  .invln2 = 0x1.71547652b82fep0,
+
   /* Derived from tables in v_log_data.c in a similar way as v_log10_data.c.
      This means invc is unchanged and log2c was calculated by scaling log(c) by
      log2(e) in extended precision and rounding back to double precision.  */
