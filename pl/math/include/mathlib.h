@@ -44,6 +44,8 @@ double log1p (double);
 double sinh (double);
 double tanh (double);
 
+long double exp10l (long double);
+
 #if __aarch64__
 # if __GNUC__ >= 5
 typedef __Float32x4_t __f32x4_t;
@@ -82,6 +84,7 @@ __vpcs __f64x2_t _ZGVnN2v_erf (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_erfcf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_erfc (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_exp10f (__f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_exp10 (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_exp2 (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_expm1f (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_expm1 (__f64x2_t);
