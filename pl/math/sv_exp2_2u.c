@@ -15,16 +15,19 @@
 #define BigBound 1022
 #define UOFlowBound 1280
 
-static struct __sv_exp2_data
+static struct
 {
   double poly[4];
-  double shift, uoflow_bound;
-} data = {.shift = 0x1.8p52 / N,
-	  .uoflow_bound = UOFlowBound,
-	  /* Coefficients are reproducible using math/tools/exp2.sollya with
-	     minimisation of the absolute error.  */
-	  .poly = {0x1.62e42fefa3686p-1, 0x1.ebfbdff82c241p-3,
-		   0x1.c6b09b16de99ap-5, 0x1.3b2abf5571ad8p-7}};
+  double shift, big_bound, uoflow_bound;
+} data = {
+  /* Coefficients are computed using Remez algorithm with
+     minimisation of the absolute error.  */
+  .poly = { 0x1.62e42fefa3686p-1, 0x1.ebfbdff82c241p-3, 0x1.c6b09b16de99ap-5,
+	    0x1.3b2abf5571ad8p-7 },
+  .shift = 0x1.8p52 / N,
+  .uoflow_bound = UOFlowBound,
+  .big_bound = BigBound,
+};
 
 #define C(i) sv_f64 (data.poly[i])
 #define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
@@ -67,7 +70,7 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 				       want 0x1.f8db0d4df721dp-1.  */
 svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
 {
-  svbool_t no_big_scale = svacle_n_f64 (pg, x, BigBound);
+  svbool_t no_big_scale = svacle_n_f64 (pg, x, data.big_bound);
   svbool_t special = svnot_b_z (pg, no_big_scale);
 
   /* Reduce x to k/N + r, where k is integer and r in [-1/2N, 1/2N].  */

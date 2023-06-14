@@ -10,33 +10,26 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-struct v_exp2_data
-{
-  float64x2_t poly[4];
-  float64x2_t shift, uoflow_bound;
-};
-
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask v_u64 (N - 1)
-#define AllMask v_u64 (0xffffffffffffffff)
-#define TinyBound 0x2000000000000000 /* asuint64(0x1p-511).  */
-#define Thres 0x2080000000000000     /* asuint64(512.0) - TinyBound.  */
 #define BigBound 1022.0
 #define UOFlowBound 1280.0
 
-static const volatile struct v_exp2_data data
-  = {.shift = V2 (0x1.8p52 / N),
-     .uoflow_bound = V2 (UOFlowBound),
-     /* Coefficients are reproducible using math/tools/exp2.sollya with
-	minimisation of the absolute error.  */
-     .poly = {V2 (0x1.62e42fefa3686p-1), V2 (0x1.ebfbdff82c241p-3),
-	      V2 (0x1.c6b09b16de99ap-5), V2 (0x1.3b2abf5571ad8p-7)}};
+static const volatile struct
+{
+  float64x2_t poly[4];
+  float64x2_t shift, scale_big_bound, scale_uoflow_bound;
+} data = {
+  /* Coefficients are computed using Remez algorithm with
+     minimisation of the absolute error.  */
+  .poly = { V2 (0x1.62e42fefa3686p-1), V2 (0x1.ebfbdff82c241p-3),
+	    V2 (0x1.c6b09b16de99ap-5), V2 (0x1.3b2abf5571ad8p-7) },
+  .shift = V2 (0x1.8p52 / N),
+  .scale_big_bound = V2 (BigBound),
+  .scale_uoflow_bound = V2 (UOFlowBound),
+};
 
 #define C(i) data.poly[i]
-#define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
-/* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
-#define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
-#define SpecialBias2 0x3010000000000000 /* 0x1p-254.  */
 
 static inline uint64x2_t
 lookup_sbits (uint64x2_t i)
@@ -46,14 +39,22 @@ lookup_sbits (uint64x2_t i)
 
 #if WANT_SIMD_EXCEPT
 
+# define TinyBound 0x2000000000000000 /* asuint64(0x1p-511).  */
+# define Thres 0x2080000000000000     /* asuint64(512.0) - TinyBound.  */
+
 /* Call scalar exp2 as a fallback.  */
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x)
 {
-  return v_call_f64 (exp2, x, x, AllMask);
+  return v_call_f64 (exp2, x, x, v_u64 (0xffffffffffffffff));
 }
 
 #else
+
+# define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
+/* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
+# define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
+# define SpecialBias2 0x3010000000000000 /* 0x1p-254.  */
 
 static float64x2_t VPCS_ATTR
 special_case (float64x2_t s, float64x2_t y, float64x2_t n)
@@ -63,7 +64,7 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n)
   float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (v_u64 (SpecialBias1), b));
   float64x2_t s2 = vreinterpretq_f64_u64 (
     vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), v_u64 (SpecialBias2)), b));
-  uint64x2_t cmp = vcagtq_f64 (n, data.uoflow_bound);
+  uint64x2_t cmp = vcagtq_f64 (n, data.scale_uoflow_bound);
   float64x2_t r1 = vmulq_f64 (s1, s1);
   float64x2_t r0 = vmulq_f64 (vfmaq_f64 (s2, s2, y), s1);
   return vbslq_f64 (cmp, r1, r0);
@@ -87,7 +88,7 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   if (unlikely (v_any_u64 (cmp)))
     return special_case (x);
 #else
-  cmp = vcagtq_f64 (x, v_f64 (BigBound));
+  cmp = vcagtq_f64 (x, data.scale_big_bound);
 #endif
 
   /* n = round(x/N).  */

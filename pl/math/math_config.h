@@ -550,9 +550,6 @@ extern const struct v_log_data
   double logc[1 << V_LOG_TABLE_BITS];
 } __v_log_data HIDDEN;
 
-#define SV_EXP2F_POLY_ORDER 6
-extern const float __sv_exp2f_poly[SV_EXP2F_POLY_ORDER - 1] HIDDEN;
-
 #define EXPM1F_POLY_ORDER 5
 extern const float __expm1f_poly[EXPM1F_POLY_ORDER] HIDDEN;
 
