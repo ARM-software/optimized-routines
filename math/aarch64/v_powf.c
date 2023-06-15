@@ -165,14 +165,14 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
       double invc, logc, z, r, p, y0, logx, ylogx, kd, s;
       uint64_t ki, t;
 
-      si = v_get_u32 (i, lane);
-      siz = v_get_u32 (iz, lane);
-      sk = v_get_s32 (k, lane);
-      sy = v_get_f32 (y, lane);
+      si = vgetq_lane_u32 (i, lane);
+      siz = vgetq_lane_u32 (iz, lane);
+      sk = vgetq_lane_s32 (k, lane);
+      sy = vgetq_lane_f32 (y, lane);
 
       invc = Tlog[si].invc;
       logc = Tlog[si].logc;
-      z = (double) as_f32_u32 (siz);
+      z = (double) asfloat (siz);
 
       /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k */
       r = __builtin_fma (z, invc, -1.0);
@@ -194,11 +194,10 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
       logx = r * logx + y0;
 #endif
       ylogx = sy * logx;
-      v_set_u32 (&cmp, lane,
-		 (as_u64_f64 (ylogx) >> 47 & 0xffff)
-		     >= as_u64_f64 (126.0 * (1 << SBITS)) >> 47
-		   ? 1
-		   : v_get_u32 (cmp, lane));
+      cmp = vsetq_lane_u32 ((asuint64 (ylogx) >> 47 & 0xffff)
+			    >= asuint64 (126.0 * (1 << SBITS)) >> 47
+			    ? 1
+			    : vgetq_lane_u32 (cmp, lane), cmp, lane);
 
       /* N*x = k + r with r in [-1/2, 1/2] */
 #if TOINT_INTRINSICS
@@ -215,13 +214,13 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
       /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1) */
       t = Texp[ki % (1 << SBITS)];
       t += ki << (52 - SBITS);
-      s = as_f64_u64 (t);
+      s = asdouble (t);
       p = C[0];
       p = __builtin_fma (p, r, C[1]);
       p = __builtin_fma (p, r, C[2]);
       p = __builtin_fma (p, s * r, s);
 
-      v_set_f32 (&ret, lane, p);
+      ret = vsetq_lane_f32 (p, ret, lane);
     }
   if (unlikely (v_any_u32 (cmp)))
     return specialcase (x, y, ret, cmp);
