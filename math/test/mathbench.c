@@ -15,11 +15,6 @@
 #include <math.h>
 #include "mathlib.h"
 
-#ifndef WANT_VMATH
-/* Enable the build of vector math code.  */
-# define WANT_VMATH 1
-#endif
-
 /* Number of measurements, best result is reported.  */
 #define MEASURE 60
 /* Array size.  */
@@ -34,7 +29,7 @@ static float Af[N];
 static long measurecount = MEASURE;
 static long itercount = ITER;
 
-#if __aarch64__ && WANT_VMATH
+#ifdef __vpcs
 typedef __f64x2_t v_double;
 
 #define v_double_len() 2
@@ -126,20 +121,6 @@ dummyf (float x)
 {
   return x;
 }
-#if WANT_VMATH
-#if __aarch64__
-static v_double
-__v_dummy (v_double x)
-{
-  return x;
-}
-
-static v_float
-__v_dummyf (v_float x)
-{
-  return x;
-}
-
 #ifdef __vpcs
 __vpcs static v_double
 __vn_dummy (v_double x)
@@ -167,8 +148,6 @@ __sv_dummyf (sv_float x, sv_bool pg)
 }
 
 #endif
-#endif
-#endif
 
 #include "test/mathbench_wrappers.h"
 
@@ -183,8 +162,6 @@ static const struct fun
   {
     double (*d) (double);
     float (*f) (float);
-    v_double (*vd) (v_double);
-    v_float (*vf) (v_float);
 #ifdef __vpcs
     __vpcs v_double (*vnd) (v_double);
     __vpcs v_float (*vnf) (v_float);
@@ -197,18 +174,12 @@ static const struct fun
 } funtab[] = {
 #define D(func, lo, hi) {#func, 'd', 0, lo, hi, {.d = func}},
 #define F(func, lo, hi) {#func, 'f', 0, lo, hi, {.f = func}},
-#define VD(func, lo, hi) {#func, 'd', 'v', lo, hi, {.vd = func}},
-#define VF(func, lo, hi) {#func, 'f', 'v', lo, hi, {.vf = func}},
 #define VND(func, lo, hi) {#func, 'd', 'n', lo, hi, {.vnd = func}},
 #define VNF(func, lo, hi) {#func, 'f', 'n', lo, hi, {.vnf = func}},
 #define SVD(func, lo, hi) {#func, 'd', 's', lo, hi, {.svd = func}},
 #define SVF(func, lo, hi) {#func, 'f', 's', lo, hi, {.svf = func}},
 D (dummy, 1.0, 2.0)
 F (dummyf, 1.0, 2.0)
-#if WANT_VMATH
-#if __aarch64__
-VD (__v_dummy, 1.0, 2.0)
-VF (__v_dummyf, 1.0, 2.0)
 #ifdef __vpcs
 VND (__vn_dummy, 1.0, 2.0)
 VNF (__vn_dummyf, 1.0, 2.0)
@@ -217,14 +188,10 @@ VNF (__vn_dummyf, 1.0, 2.0)
 SVD (__sv_dummy, 1.0, 2.0)
 SVF (__sv_dummyf, 1.0, 2.0)
 #endif
-#endif
-#endif
 #include "test/mathbench_funcs.h"
 {0},
 #undef F
 #undef D
-#undef VF
-#undef VD
 #undef VNF
 #undef VND
 #undef SVF
@@ -325,38 +292,6 @@ runf_latency (float f (float))
   float prev = z;
   for (int i = 0; i < N; i++)
     prev = f (Af[i] + prev * z);
-}
-
-static void
-run_v_thruput (v_double f (v_double))
-{
-  for (int i = 0; i < N; i += v_double_len ())
-    f (v_double_load (A+i));
-}
-
-static void
-runf_v_thruput (v_float f (v_float))
-{
-  for (int i = 0; i < N; i += v_float_len ())
-    f (v_float_load (Af+i));
-}
-
-static void
-run_v_latency (v_double f (v_double))
-{
-  v_double z = v_double_dup (zero);
-  v_double prev = z;
-  for (int i = 0; i < N; i += v_double_len ())
-    prev = f (v_double_load (A+i) + prev * z);
-}
-
-static void
-runf_v_latency (v_float f (v_float))
-{
-  v_float z = v_float_dup (zero);
-  v_float prev = z;
-  for (int i = 0; i < N; i += v_float_len ())
-    prev = f (v_float_load (Af+i) + prev * z);
 }
 
 #ifdef __vpcs
@@ -471,14 +406,6 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_thruput, f->fun.f);
   else if (f->prec == 'f' && type == 'l' && f->vec == 0)
     TIMEIT (runf_latency, f->fun.f);
-  else if (f->prec == 'd' && type == 't' && f->vec == 'v')
-    TIMEIT (run_v_thruput, f->fun.vd);
-  else if (f->prec == 'd' && type == 'l' && f->vec == 'v')
-    TIMEIT (run_v_latency, f->fun.vd);
-  else if (f->prec == 'f' && type == 't' && f->vec == 'v')
-    TIMEIT (runf_v_thruput, f->fun.vf);
-  else if (f->prec == 'f' && type == 'l' && f->vec == 'v')
-    TIMEIT (runf_v_latency, f->fun.vf);
 #ifdef __vpcs
   else if (f->prec == 'd' && type == 't' && f->vec == 'n')
     TIMEIT (run_vn_thruput, f->fun.vnd);

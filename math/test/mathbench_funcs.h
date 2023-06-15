@@ -43,7 +43,6 @@ F (cosf, 3.3, 33.3)
 F (cosf, 100, 1000)
 F (cosf, 1e6, 1e32)
 F (erff, -4.0, 4.0)
-#if WANT_VMATH && __aarch64__
 #ifdef __vpcs
 VND (_ZGVnN2v_exp, -9.9, 9.9)
 VND (_ZGVnN2v_log, 0.01, 11.1)
@@ -58,6 +57,5 @@ VNF (_ZGVnN4v_logf, 0.01, 11.1)
 {"_ZGVnN4vv_powf", 'f', 'n', 0.01, 11.1, {.vnf = xy_Z_powf}},
 VNF (_ZGVnN4v_sinf, -3.1, 3.1)
 VNF (_ZGVnN4v_cosf, -3.1, 3.1)
-#endif
 #endif
   /* clang-format on */

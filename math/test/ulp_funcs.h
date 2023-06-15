@@ -21,7 +21,7 @@
  D1 (log2)
  D2 (pow)
  D1 (erf)
-#if WANT_VMATH && __aarch64__
+#ifdef __vpcs
  F (_ZGVnN4v_sinf, Z_sinf, sin, mpfr_sin, 1, 1, f1, 1)
  F (_ZGVnN4v_cosf, Z_cosf, cos, mpfr_cos, 1, 1, f1, 1)
  F (_ZGVnN4v_expf_1u, Z_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)

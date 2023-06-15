@@ -23,7 +23,6 @@ powi_wrap (double x)
   return __builtin_powi (x, (int) round (x));
 }
 
-#if WANT_VMATH
 #if __aarch64__ && defined(__vpcs)
 
 __vpcs static v_double
@@ -57,7 +56,6 @@ y_Z_pow (v_double x)
 }
 
 #endif // __arch64__ && __vpcs
-#endif // WANT_VMATH
 
 #if WANT_SVE_MATH
 

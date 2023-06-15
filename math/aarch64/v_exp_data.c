@@ -6,7 +6,6 @@
  */
 
 #include "v_math.h"
-#if WANT_VMATH
 
 # define N (1 << V_EXP_TABLE_BITS)
 
@@ -145,4 +144,3 @@ const uint64_t __v_exp_data[] = {
   0x3feff9d96b2a23d9,
 # endif
 };
-#endif

@@ -4,7 +4,8 @@
  * Copyright (c) 2022-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-#if WANT_VMATH && __aarch64__
+
+#ifdef __vpcs
 
 __vpcs static v_float
 xy_Z_powf (v_float x)
@@ -18,7 +19,7 @@ xy_Z_pow (v_double x)
   return _ZGVnN2vv_pow (x, x);
 }
 
-#endif // WANT_VMATH && __aarch64__
+#endif
 
 static double
 xypow (double x)

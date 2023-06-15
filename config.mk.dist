@@ -59,9 +59,6 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 # Use with clang.
 #math-cflags += -ffp-contract=fast
 
-# Disable vector math code
-#math-cflags += -DWANT_VMATH=0
-
 # Disable/enable SVE vector math code and tests
 WANT_SVE_MATH = 0
 ifeq ($(WANT_SVE_MATH), 1)

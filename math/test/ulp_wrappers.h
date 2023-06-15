@@ -18,7 +18,7 @@ static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,
 #endif
 
 /* Wrappers for vector functions.  */
-#if __aarch64__ && WANT_VMATH
+#ifdef __vpcs
 static float Z_sinf(float x) { return _ZGVnN4v_sinf(argf(x))[0]; }
 static float Z_cosf(float x) { return _ZGVnN4v_cosf(argf(x))[0]; }
 static float Z_expf_1u(float x) { return _ZGVnN4v_expf_1u(argf(x))[0]; }

@@ -6,7 +6,6 @@
  */
 
 #include "v_math.h"
-#if WANT_VMATH
 
 # define N (1 << V_LOG_TABLE_BITS)
 
@@ -155,4 +154,3 @@ const struct v_log_data __v_log_data = {
 	    0x1.4be799e20b9c8p-2,  0x1.51ac76a6b79dfp-2,
 	    0x1.57690d5744a45p-2,  0x1.5d1d758e45217p-2 }
 };
-#endif

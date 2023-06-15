@@ -8,17 +8,11 @@
 #ifndef _V_MATH_H
 #define _V_MATH_H
 
-#ifndef WANT_VMATH
-/* Enable the build of vector math code.  */
-# define WANT_VMATH 1
+#if !__aarch64__
+# error "Cannot build without AArch64"
 #endif
-#if WANT_VMATH
 
-#if __aarch64__
 #define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
-#else
-#error "Cannot build without AArch64"
-#endif
 
 #define V_NAME_F1(fun) _ZGVnN4v_##fun##f
 #define V_NAME_D1(fun) _ZGVnN2v_##fun
@@ -26,7 +20,7 @@
 #define V_NAME_D2(fun) _ZGVnN2vv_##fun
 
 #include <stdint.h>
-#include "math_config.h"
+#include "../math_config.h"
 
 /* reinterpret as type1 from type2.  */
 static inline uint32_t
@@ -110,7 +104,6 @@ as_u64_s64 (int64_t x)
   return r.u;
 }
 
-#if __aarch64__
 #include <arm_neon.h>
 
 /* Shorthand helpers for declaring constants.  */
@@ -262,7 +255,5 @@ v_call_f64 (double (*f) (double), float64x2_t x, float64x2_t y, uint64x2_t p)
 {
   return (float64x2_t){p[0] ? f (x[0]) : y[0], p[1] ? f (x[1]) : y[1]};
 }
-#endif
 
-#endif
 #endif

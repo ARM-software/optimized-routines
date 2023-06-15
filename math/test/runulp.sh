@@ -143,6 +143,7 @@ Ldir=0.5
 done
 
 # vector functions
+
 Ldir=0.5
 r='n'
 flags="${ULPFLAGS:--q}"
@@ -244,6 +245,7 @@ do
 		t $D $disable_fenv $F $X
 	done << EOF
 $range
+
 EOF
 done << EOF
 # group symbol run

@@ -7,6 +7,8 @@ S := $(srcdir)/math
 B := build/math
 
 math-lib-srcs := $(wildcard $(S)/*.[cS])
+math-lib-srcs += $(wildcard $(S)/$(ARCH)/*.[cS])
+
 math-test-srcs := \
 	$(S)/test/mathtest.c \
 	$(S)/test/mathbench.c \
