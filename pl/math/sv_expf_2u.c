@@ -6,7 +6,6 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrinf.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -64,10 +63,10 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 
   /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5 + C4 r^6.  */
+  svfloat32_t p12 = svmla_f32_x (pg, C (1), C (2), r);
+  svfloat32_t p34 = svmla_f32_x (pg, C (3), C (4), r);
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
-  /* Evaluate polynomial use hybrid scheme - offset variant of ESTRIN macro for
-     coefficients 1 to 4, and apply most significant coefficient directly.  */
-  svfloat32_t p14 = ESTRIN_3_ (pg, r, r2, C, 1);
+  svfloat32_t p14 = svmla_f32_x (pg, p12, p34, r2);
   svfloat32_t p0 = svmul_f32_x (pg, r, C (0));
   svfloat32_t poly = svmla_f32_x (pg, p0, r2, p14);
 

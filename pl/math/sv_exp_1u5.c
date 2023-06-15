@@ -6,7 +6,6 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -100,7 +99,10 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 
   /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5.  */
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t y = svmla_f64_x (pg, r, ESTRIN_3 (pg, r, r2, C), r2);
+  svfloat64_t p01 = svmla_f64_x (pg, C (0), C (1), r);
+  svfloat64_t p23 = svmla_f64_x (pg, C (2), C (3), r);
+  svfloat64_t p04 = svmla_f64_x (pg, p01, p23, r2);
+  svfloat64_t y = svmla_f64_x (pg, r, p04, r2);
 
   /* s = 2^n, computed using FEXPA. FEXPA does not propagate NaNs, so for
      consistent NaN handling we have to manually propagate them. This comes at

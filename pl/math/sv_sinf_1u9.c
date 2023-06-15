@@ -6,7 +6,6 @@
  */
 
 #include "sv_math.h"
-#include "sv_hornerf.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -31,7 +30,7 @@ static struct
 };
 
 #define RangeVal 0x49800000 /* asuint32 (0x1p20f).  */
-#define C(i) data.poly[i]
+#define C(i) sv_f32 (data.poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
@@ -69,7 +68,10 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
   /* sin(r) approx using a degree 9 polynomial from the Taylor series
      expansion. Note that only the odd terms of this are non-zero.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
-  svfloat32_t y = HORNER_3 (pg, r2, C);
+  svfloat32_t y;
+  y = svmla_f32_x (pg, C (2), r2, C (3));
+  y = svmla_f32_x (pg, C (1), r2, y);
+  y = svmla_f32_x (pg, C (0), r2, y);
   y = svmla_f32_x (pg, r, r, svmul_f32_x (pg, y, r2));
 
   /* sign = y^sign^odd.  */
