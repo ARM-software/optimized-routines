@@ -13,10 +13,10 @@ float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
   float64x2_t z;
   for (int lane = 0; lane < v_lanes64 (); lane++)
     {
-      double sx = vgetq_lane_f64 (x, lane);
-      double sy = vgetq_lane_f64 (y, lane);
+      double sx = x[lane];
+      double sy = y[lane];
       double sz = pow (sx, sy);
-      z = vsetq_lane_f64 (sz, z, lane);
+      z[lane] = sz;
     }
   return z;
 }
