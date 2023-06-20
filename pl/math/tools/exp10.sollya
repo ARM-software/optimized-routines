@@ -4,17 +4,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 // exp10f parameters
-//deg = 5; // poly degree
-//b = log(2)/(2 * log(10)); // interval
-//a = -b;
-//wp = single;
-
-// exp10 parameters
-deg = 4; // poly degree
-N = 128; // table size
+deg = 5; // poly degree
+N = 1; // Neon 1, SVE 64
 b = log(2)/(2 * N * log(10)); // interval
 a = -b;
-wp = D;
+wp = single;
+
+// exp10 parameters
+//deg = 4; // poly degree
+//N = 128; // table size
+//b = log(2)/(2 * N * log(10)); // interval
+//a = -b;
+//wp = D;
 
 
 // find polynomial with minimal relative error
@@ -33,8 +34,8 @@ approx_abs = proc(poly,d) {
 // first coeff is fixed, iteratively find optimal double prec coeffs
 poly = 1;
 for i from 1 to deg do {
-//  p = roundcoefficients(approx(poly,i), [|wp ...|]);
-  p = roundcoefficients(approx_abs(poly,i), [|wp ...|]);
+  p = roundcoefficients(approx(poly,i), [|wp ...|]);
+//  p = roundcoefficients(approx_abs(poly,i), [|wp ...|]);
   poly = poly + x^i*coeff(p,0);
 };
 
@@ -45,10 +46,10 @@ print("in [",a,b,"]");
 print("coeffs:");
 for i from 0 to deg do coeff(poly,i);
 
-log10_2 = round(N * log(10) / log(2), D, RN);
+log10_2 = round(N * log(10) / log(2), wp, RN);
 log2_10 = log(2) / (N * log(10));
-log2_10_hi = round(log2_10, D, RN);
-log2_10_lo = round(log2_10 - log2_10_hi, D, RN);
+log2_10_hi = round(log2_10, wp, RN);
+log2_10_lo = round(log2_10 - log2_10_hi, wp, RN);
 print(log10_2);
 print(log2_10_hi);
 print(log2_10_lo);
