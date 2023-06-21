@@ -10,31 +10,32 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-struct v_tan_data
+static const volatile struct
 {
   float64x2_t poly[9];
   float64x2_t half_pi_hi, half_pi_lo, two_over_pi, shift;
 #if !WANT_SIMD_EXCEPT
   float64x2_t range_val;
 #endif
+} data = {
+  /* Coefficients generated using FPMinimax.  */
+  .poly = { V2 (0x1.5555555555556p-2), V2 (0x1.1111111110a63p-3),
+	    V2 (0x1.ba1ba1bb46414p-5), V2 (0x1.664f47e5b5445p-6),
+	    V2 (0x1.226e5e5ecdfa3p-7), V2 (0x1.d6c7ddbf87047p-9),
+	    V2 (0x1.7ea75d05b583ep-10), V2 (0x1.289f22964a03cp-11),
+	    V2 (0x1.4e4fd14147622p-12) },
+  .half_pi_hi = V2 (0x1.921fb54442d18p0),
+  .half_pi_lo = V2 (0x1.1a62633145c07p-54),
+  .two_over_pi = V2 (0x1.45f306dc9c883p-1),
+  .shift = V2 (0x1.8p52),
+#if !WANT_SIMD_EXCEPT
+  .range_val = V2 (0x1p23),
+#endif
 };
 
-static const volatile struct v_tan_data data
-  = {.half_pi_hi = V2 (0x1.921fb54442d18p0),
-     .half_pi_lo = V2 (0x1.1a62633145c07p-54),
-     .two_over_pi = V2 (0x1.45f306dc9c883p-1),
-     .shift = V2 (0x1.8p52),
-#if !WANT_SIMD_EXCEPT
-     .range_val = V2 (0x1p23),
-#endif
-     .poly = {V2 (0x1.5555555555556p-2), V2 (0x1.1111111110a63p-3),
-	      V2 (0x1.ba1ba1bb46414p-5), V2 (0x1.664f47e5b5445p-6),
-	      V2 (0x1.226e5e5ecdfa3p-7), V2 (0x1.d6c7ddbf87047p-9),
-	      V2 (0x1.7ea75d05b583ep-10), V2 (0x1.289f22964a03cp-11),
-	      V2 (0x1.4e4fd14147622p-12)}};
-
+#define RangeVal 0x4160000000000000  /* asuint64(0x1p23).  */
 #define TinyBound 0x3e50000000000000 /* asuint64(2^-26).  */
-#define Thresh 0x310000000000000     /* asuint64(RangeVal) - TinyBound.  */
+#define Thresh 0x310000000000000     /* RangeVal - TinyBound.  */
 #define C(i) data.poly[i]
 
 /* Special cases (fall back to scalar calls).  */
@@ -58,7 +59,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
   uint64x2_t iax = vreinterpretq_u64_f64 (vabsq_f64 (x));
   /* iax - tiny_bound > range_val - tiny_bound.  */
   uint64x2_t special
-    = vcgtq_u64 (vsubq_u64 (iax, v_u64 (TinyBound)), v_u64 (Thresh));
+      = vcgtq_u64 (vsubq_u64 (iax, v_u64 (TinyBound)), v_u64 (Thresh));
   if (unlikely (v_any_u64 (special)))
     return special_case (x);
 #endif

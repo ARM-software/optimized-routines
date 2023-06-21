@@ -10,26 +10,26 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-struct v_tanf_data
+static const volatile struct
 {
   float32x4_t poly[6];
   float32x4_t neg_half_pi_1, neg_half_pi_2, neg_half_pi_3, two_over_pi, shift;
 #if !WANT_SIMD_EXCEPT
   float32x4_t range_val;
 #endif
-};
-
-static const volatile struct v_tanf_data data
-  = {.neg_half_pi_1 = V4 (-0x1.921fb6p+0f),
-     .neg_half_pi_2 = V4 (0x1.777a5cp-25f),
-     .neg_half_pi_3 = V4 (0x1.ee59dap-50f),
-     .two_over_pi = V4 (0x1.45f306p-1f),
-     .shift = V4 (0x1.8p+23f),
+} data = {
+  /* Coefficients generated using FPMinimax.  */
+  .poly = { V4 (0x1.55555p-2f), V4 (0x1.11166p-3f), V4 (0x1.b88a78p-5f),
+	    V4 (0x1.7b5756p-6f), V4 (0x1.4ef4cep-8f), V4 (0x1.0e1e74p-7f) },
+  .neg_half_pi_1 = V4 (-0x1.921fb6p+0f),
+  .neg_half_pi_2 = V4 (0x1.777a5cp-25f),
+  .neg_half_pi_3 = V4 (0x1.ee59dap-50f),
+  .two_over_pi = V4 (0x1.45f306p-1f),
+  .shift = V4 (0x1.8p+23f),
 #if !WANT_SIMD_EXCEPT
-     .range_val = V4 (0x1p15f),
+  .range_val = V4 (0x1p15f),
 #endif
-     .poly = {V4 (0x1.55555p-2f), V4 (0x1.11166p-3f), V4 (0x1.b88a78p-5f),
-	      V4 (0x1.7b5756p-6f), V4 (0x1.4ef4cep-8f), V4 (0x1.0e1e74p-7f)}};
+};
 
 #define RangeVal v_u32 (0x47000000)  /* asuint32(0x1p15f).  */
 #define TinyBound v_u32 (0x30000000) /* asuint32 (0x1p-31f).  */
