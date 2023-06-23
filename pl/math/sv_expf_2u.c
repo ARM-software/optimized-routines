@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   float poly[5];
   float inv_ln2, ln2_hi, ln2_lo, shift, thres;
@@ -28,7 +28,7 @@ static struct
   .thres = 0x1.5d5e2ap+6f,
 };
 
-#define C(i) sv_f32 (data.poly[i])
+#define C(i) sv_f32 (d->poly[i])
 #define ExponentBias 0x3f800000
 
 static svfloat32_t NOINLINE
@@ -43,23 +43,25 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 				  want 0x1.ba74bap+4.  */
 svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
 
   /* Load some constants in quad-word chunks to minimise memory access (last
      lane is wasted).  */
-  svfloat32_t invln2_and_ln2 = svld1rq_f32 (svptrue_b32 (), &data.inv_ln2);
+  svfloat32_t invln2_and_ln2 = svld1rq_f32 (svptrue_b32 (), &d->inv_ln2);
 
   /* n = round(x/(ln2/N)).  */
-  svfloat32_t z = svmla_lane_f32 (sv_f32 (data.shift), x, invln2_and_ln2, 0);
-  svfloat32_t n = svsub_n_f32_x (pg, z, data.shift);
+  svfloat32_t z = svmla_lane_f32 (sv_f32 (d->shift), x, invln2_and_ln2, 0);
+  svfloat32_t n = svsub_n_f32_x (pg, z, d->shift);
 
   /* r = x - n*ln2/N.  */
   svfloat32_t r = svmls_lane_f32 (x, n, invln2_and_ln2, 1);
   r = svmls_lane_f32 (r, n, invln2_and_ln2, 2);
 
 /* scale = 2^(n/N).  */
-  svbool_t is_special_case = svacgt_n_f32 (pg, x, data.thres);
+  svbool_t is_special_case = svacgt_n_f32 (pg, x, d->thres);
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 
   /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5 + C4 r^6.  */

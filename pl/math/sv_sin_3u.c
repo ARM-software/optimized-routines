@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   double inv_pi, half_pi, inv_pi_over_2, pi_over_2_1, pi_over_2_2, pi_over_2_3,
       shift;
@@ -39,6 +39,8 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 					  want 0x1.10ace8f3e7868p-40.  */
 svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   svfloat64_t r = svabs_f64_x (pg, x);
   svuint64_t sign
       = sveor_u64_x (pg, svreinterpret_u64_f64 (x), svreinterpret_u64_f64 (r));
@@ -46,17 +48,16 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 
   /* Load first two pio2-related constants to one vector.  */
   svfloat64_t invpio2_and_pio2_1
-      = svld1rq_f64 (svptrue_b64 (), &data.inv_pi_over_2);
+      = svld1rq_f64 (svptrue_b64 (), &d->inv_pi_over_2);
 
   /* n = rint(|x|/(pi/2)).  */
-  svfloat64_t q
-      = svmla_lane_f64 (sv_f64 (data.shift), r, invpio2_and_pio2_1, 0);
-  svfloat64_t n = svsub_n_f64_x (pg, q, data.shift);
+  svfloat64_t q = svmla_lane_f64 (sv_f64 (d->shift), r, invpio2_and_pio2_1, 0);
+  svfloat64_t n = svsub_n_f64_x (pg, q, d->shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
   r = svmls_lane_f64 (r, n, invpio2_and_pio2_1, 1);
-  r = svmls_n_f64_x (pg, r, n, data.pi_over_2_2);
-  r = svmls_n_f64_x (pg, r, n, data.pi_over_2_3);
+  r = svmls_n_f64_x (pg, r, n, d->pi_over_2_2);
+  r = svmls_n_f64_x (pg, r, n, d->pi_over_2_3);
 
   /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
   svfloat64_t f = svtssel_f64 (r, svreinterpret_u64_f64 (q));

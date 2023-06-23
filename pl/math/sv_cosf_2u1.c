@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   float neg_pio2_1, neg_pio2_2, neg_pio2_3, inv_pio2, shift;
 } data = {
@@ -39,18 +39,20 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t out_of_bounds)
 				   want 0x1.fffe76p-6.  */
 svfloat32_t SV_NAME_F1 (cos) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   svfloat32_t r = svabs_f32_x (pg, x);
   svbool_t out_of_bounds
     = svcmpge_n_u32 (pg, svreinterpret_u32_f32 (r), RangeVal);
 
   /* Load some constants in quad-word chunks to minimise memory access.  */
   svfloat32_t negpio2_and_invpio2
-      = svld1rq_f32 (svptrue_b32 (), &data.neg_pio2_1);
+      = svld1rq_f32 (svptrue_b32 (), &d->neg_pio2_1);
 
   /* n = rint(|x|/(pi/2)).  */
   svfloat32_t q
-    = svmla_lane_f32 (sv_f32 (data.shift), r, negpio2_and_invpio2, 3);
-  svfloat32_t n = svsub_n_f32_x (pg, q, data.shift);
+      = svmla_lane_f32 (sv_f32 (d->shift), r, negpio2_and_invpio2, 3);
+  svfloat32_t n = svsub_n_f32_x (pg, q, d->shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
   r = svmla_lane_f32 (r, n, negpio2_and_invpio2, 0);

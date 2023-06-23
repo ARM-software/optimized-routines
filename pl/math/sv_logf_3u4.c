@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   float poly_0135[4];
   float poly_246[3];
@@ -45,6 +45,8 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 				  want 0x1.26ede6p-2.  */
 svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   svuint32_t u = svreinterpret_u32_f32 (x);
   svbool_t cmp = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, u, Min), Thresh);
 
@@ -60,15 +62,15 @@ svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
   /* y = log(1+r) + n*ln2.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
   /* n*ln2 + r + r2*(P6 + r*P5 + r2*(P4 + r*P3 + r2*(P2 + r*P1 + r2*P0))).  */
-  svfloat32_t p_0135 = svld1rq_f32 (svptrue_b32 (), &data.poly_0135[0]);
-  svfloat32_t p = svmla_lane_f32 (sv_f32 (data.poly_246[0]), r, p_0135, 1);
-  svfloat32_t q = svmla_lane_f32 (sv_f32 (data.poly_246[1]), r, p_0135, 2);
-  svfloat32_t y = svmla_lane_f32 (sv_f32 (data.poly_246[2]), r, p_0135, 3);
+  svfloat32_t p_0135 = svld1rq_f32 (svptrue_b32 (), &d->poly_0135[0]);
+  svfloat32_t p = svmla_lane_f32 (sv_f32 (d->poly_246[0]), r, p_0135, 1);
+  svfloat32_t q = svmla_lane_f32 (sv_f32 (d->poly_246[1]), r, p_0135, 2);
+  svfloat32_t y = svmla_lane_f32 (sv_f32 (d->poly_246[2]), r, p_0135, 3);
   p = svmla_lane_f32 (p, r2, p_0135, 0);
 
   q = svmla_f32_x (pg, q, r2, p);
   y = svmla_f32_x (pg, y, r2, q);
-  p = svmla_n_f32_x (pg, r, n, data.ln2);
+  p = svmla_n_f32_x (pg, r, n, d->ln2);
   y = svmla_f32_x (pg, p, r2, y);
 
   if (unlikely (svptest_any (pg, cmp)))

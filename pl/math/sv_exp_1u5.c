@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   double poly[4];
   double ln2_hi, ln2_lo, inv_ln2, shift, thres;
@@ -26,7 +26,7 @@ static struct
   .thres = 704.0,
 };
 
-#define C(i) sv_f64 (data.poly[i])
+#define C(i) sv_f64 (d->poly[i])
 #define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 #define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
@@ -69,7 +69,9 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 					 want 0x1.885d9acc41da6p+117.  */
 svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 {
-  svbool_t special = svacgt_n_f64 (pg, x, data.thres);
+  const struct data *d = ptr_barrier (&data);
+
+  svbool_t special = svacgt_n_f64 (pg, x, d->thres);
 
   /* Use a modifed version of the shift used for flooring, such that x/ln2 is
      rounded to a multiple of 2^-6=1/64, shift = 1.5 * 2^52 * 2^-6 = 1.5 *
@@ -88,12 +90,12 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
      We add 1023 to the modified shift value in order to set bits 16:6 of u to
      1, such that once these bits are moved to the exponent of the output of
      FEXPA, we get the exponent of 2^n right, i.e. we get 2^m.  */
-  svfloat64_t z = svmla_n_f64_x (pg, sv_f64 (data.shift), x, data.inv_ln2);
+  svfloat64_t z = svmla_n_f64_x (pg, sv_f64 (d->shift), x, d->inv_ln2);
   svuint64_t u = svreinterpret_u64_f64 (z);
-  svfloat64_t n = svsub_n_f64_x (pg, z, data.shift);
+  svfloat64_t n = svsub_n_f64_x (pg, z, d->shift);
 
   /* r = x - n * ln2, r is in [-ln2/(2N), ln2/(2N)].  */
-  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &data.ln2_hi);
+  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &d->ln2_hi);
   svfloat64_t r = svmls_lane_f64 (x, n, ln2, 0);
   r = svmls_lane_f64 (r, n, ln2, 1);
 

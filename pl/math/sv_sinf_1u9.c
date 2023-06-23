@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   float poly[4];
   /* Pi-related values to be loaded as one quad-word and used with
@@ -30,7 +30,7 @@ static struct
 };
 
 #define RangeVal 0x49800000 /* asuint32 (0x1p20f).  */
-#define C(i) sv_f32 (data.poly[i])
+#define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
@@ -45,6 +45,8 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
    SV_NAME_F1 (sin)(0x1.9247a4p+0) got 0x1.fffff6p-1 want 0x1.fffffap-1.  */
 svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   svfloat32_t ax = svabs_f32_x (pg, x);
   svuint32_t sign = sveor_u32_x (pg, svreinterpret_u32_f32 (x),
 				 svreinterpret_u32_f32 (ax));
@@ -52,12 +54,12 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 
   /* pi_vals are a quad-word of helper values - the first 3 elements contain
      -pi in extended precision, the last contains 1 / pi.  */
-  svfloat32_t pi_vals = svld1rq_f32 (svptrue_b32 (), &data.negpi1);
+  svfloat32_t pi_vals = svld1rq_f32 (svptrue_b32 (), &d->negpi1);
 
   /* n = rint(|x|/pi).  */
-  svfloat32_t n = svmla_lane_f32 (sv_f32 (data.shift), ax, pi_vals, 3);
+  svfloat32_t n = svmla_lane_f32 (sv_f32 (d->shift), ax, pi_vals, 3);
   svuint32_t odd = svlsl_n_u32_x (pg, svreinterpret_u32_f32 (n), 31);
-  n = svsub_n_f32_x (pg, n, data.shift);
+  n = svsub_n_f32_x (pg, n, d->shift);
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
   svfloat32_t r;

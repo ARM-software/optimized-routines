@@ -94,6 +94,15 @@
 # define unlikely(x) (x)
 #endif
 
+/* Return ptr but hide its value from the compiler so accesses through it
+   cannot be optimized based on the contents.  */
+#define ptr_barrier(ptr)                                                      \
+  ({                                                                          \
+    __typeof (ptr) __ptr = (ptr);                                             \
+    __asm("" : "+r"(__ptr));                                                  \
+    __ptr;                                                                    \
+  })
+
 #if HAVE_FAST_ROUND
 /* When set, the roundtoint and converttoint functions are provided with
    the semantics documented below.  */
