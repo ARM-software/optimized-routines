@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct
+static const struct data
 {
   float64x2_t poly[5];
   float64x2_t ln2;
@@ -25,7 +25,7 @@ static const volatile struct
   .sign_exp_mask = V2 (0xfff0000000000000)
 };
 
-#define A(i) data.poly[i]
+#define A(i) d->poly[i]
 #define N (1 << V_LOG_TABLE_BITS)
 #define IndexMask (N - 1)
 #define Off v_u64 (0x3fe6900900000000)
@@ -56,20 +56,21 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 
 float64x2_t VPCS_ATTR V_NAME_D1 (log) (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   float64x2_t z, r, r2, p, y, kd, hi;
   uint64x2_t ix, iz, tmp, cmp;
   int64x2_t k;
   struct entry e;
 
   ix = vreinterpretq_u64_f64 (x);
-  cmp = vcgeq_u64 (vsubq_u64 (ix, data.min_norm), data.special_bound);
+  cmp = vcgeq_u64 (vsubq_u64 (ix, d->min_norm), d->special_bound);
 
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   tmp = vsubq_u64 (ix, Off);
   k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52); /* arithmetic shift.  */
-  iz = vsubq_u64 (ix, vandq_u64 (tmp, data.sign_exp_mask));
+  iz = vsubq_u64 (ix, vandq_u64 (tmp, d->sign_exp_mask));
   z = vreinterpretq_f64_u64 (iz);
   e = lookup (vshrq_n_u64 (tmp, 52 - V_LOG_TABLE_BITS));
 
@@ -78,7 +79,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log) (float64x2_t x)
   kd = vcvtq_f64_s64 (k);
 
   /* hi = r + log(c) + k*Ln2.  */
-  hi = vfmaq_f64 (vaddq_f64 (e.logc, r), kd, data.ln2);
+  hi = vfmaq_f64 (vaddq_f64 (e.logc, r), kd, d->ln2);
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   r2 = vmulq_f64 (r, r);
   y = vfmaq_f64 (A (2), A (3), r);

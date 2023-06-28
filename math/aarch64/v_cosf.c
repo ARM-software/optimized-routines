@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct
+static const struct data
 {
   float32x4_t poly[4];
   float32x4_t range_val, inv_pi, half_pi, shift, pi_1, pi_2, pi_3;
@@ -27,7 +27,7 @@ static const volatile struct
   .range_val = V4 (0x1p20f)
 };
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
@@ -39,34 +39,35 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
 
 float32x4_t VPCS_ATTR V_NAME_F1 (cos) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   float32x4_t n, r, r2, r3, y;
   uint32x4_t odd, cmp;
 
 #if WANT_SIMD_EXCEPT
   r = vabsq_f32 (x);
   cmp = vcgeq_u32 (vreinterpretq_u32_f32 (r),
-		   vreinterpretq_u32_f32 (data.range_val));
+		   vreinterpretq_u32_f32 (d->range_val));
   if (unlikely (v_any_u32 (cmp)))
     /* If fenv exceptions are to be triggered correctly, set any special lanes
        to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
        special-case handler later.  */
     r = vbslq_f32 (cmp, v_f32 (1.0f), r);
 #else
-  cmp = vcageq_f32 (data.range_val, x);
+  cmp = vcageq_f32 (d->range_val, x);
   cmp = vceqzq_u32 (cmp); /* cmp = ~cmp.  */
   r = x;
 #endif
 
   /* n = rint((|x|+pi/2)/pi) - 0.5.  */
-  n = vfmaq_f32 (data.shift, data.inv_pi, vaddq_f32 (r, data.half_pi));
+  n = vfmaq_f32 (d->shift, d->inv_pi, vaddq_f32 (r, d->half_pi));
   odd = vshlq_n_u32 (vreinterpretq_u32_f32 (n), 31);
-  n = vsubq_f32 (n, data.shift);
+  n = vsubq_f32 (n, d->shift);
   n = vsubq_f32 (n, v_f32 (0.5f));
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = vfmsq_f32 (r, data.pi_1, n);
-  r = vfmsq_f32 (r, data.pi_2, n);
-  r = vfmsq_f32 (r, data.pi_3, n);
+  r = vfmsq_f32 (r, d->pi_1, n);
+  r = vfmsq_f32 (r, d->pi_2, n);
+  r = vfmsq_f32 (r, d->pi_3, n);
 
   /* y = sin(r).  */
   r2 = vmulq_f32 (r, r);

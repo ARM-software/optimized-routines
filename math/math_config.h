@@ -92,6 +92,15 @@
 # define unlikely(x) (x)
 #endif
 
+/* Return ptr but hide its value from the compiler so accesses through it
+   cannot be optimized based on the contents.  */
+#define ptr_barrier(ptr)                                                      \
+  ({                                                                          \
+    __typeof (ptr) __ptr = (ptr);                                             \
+    __asm("" : "+r"(__ptr));                                                  \
+    __ptr;                                                                    \
+  })
+
 /* Symbol renames to avoid libc conflicts.  */
 #define __math_oflowf arm_math_oflowf
 #define __math_uflowf arm_math_uflowf

@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct
+static const struct data
 {
   float64x2_t poly[7];
   float64x2_t range_val, inv_pi, shift, pi_1, pi_2, pi_3;
@@ -32,7 +32,7 @@ static const volatile struct
 # define Thresh v_u64 (0x1160000000000000)    /* RangeVal - TinyBound.  */
 #endif
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
@@ -43,6 +43,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 
 float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   float64x2_t n, r, r2, r3, r4, y, t1, t2, t3;
   uint64x2_t odd, cmp, eqz;
 
@@ -55,20 +56,20 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
   r = vbslq_f64 (cmp, vreinterpretq_f64_u64 (cmp), x);
 #else
   r = x;
-  cmp = vcageq_f64 (data.range_val, x);
+  cmp = vcageq_f64 (d->range_val, x);
   cmp = vceqzq_u64 (cmp); /* cmp = ~cmp.  */
 #endif
   eqz = vceqzq_f64 (x);
 
   /* n = rint(|x|/pi).  */
-  n = vfmaq_f64 (data.shift, data.inv_pi, r);
+  n = vfmaq_f64 (d->shift, d->inv_pi, r);
   odd = vshlq_n_u64 (vreinterpretq_u64_f64 (n), 63);
-  n = vsubq_f64 (n, data.shift);
+  n = vsubq_f64 (n, d->shift);
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = vfmsq_f64 (r, data.pi_1, n);
-  r = vfmsq_f64 (r, data.pi_2, n);
-  r = vfmsq_f64 (r, data.pi_3, n);
+  r = vfmsq_f64 (r, d->pi_1, n);
+  r = vfmsq_f64 (r, d->pi_2, n);
+  r = vfmsq_f64 (r, d->pi_3, n);
 
   /* sin(r) poly approx.  */
   r2 = vmulq_f64 (r, r);

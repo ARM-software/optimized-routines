@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct
+static const struct data
 {
   float32x4_t poly[7];
   float32x4_t ln2, tiny_bound;
@@ -26,7 +26,7 @@ static const volatile struct
   .mantissa_mask = V4 (0x007fffff)
 };
 
-#define P(i) data.poly[7 - i]
+#define P(i) d->poly[7 - i]
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
@@ -37,18 +37,19 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 
 float32x4_t VPCS_ATTR V_NAME_F1 (log) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   float32x4_t n, p, q, r, r2, y;
   uint32x4_t u, cmp;
 
   u = vreinterpretq_u32_f32 (x);
-  cmp = vcgeq_u32 (vsubq_u32 (u, data.min_norm), data.special_bound);
+  cmp = vcgeq_u32 (vsubq_u32 (u, d->min_norm), d->special_bound);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
-  u = vsubq_u32 (u, data.off);
+  u = vsubq_u32 (u, d->off);
   n = vcvtq_f32_s32 (
       vshrq_n_s32 (vreinterpretq_s32_u32 (u), 23)); /* signextend.  */
-  u = vandq_u32 (u, data.mantissa_mask);
-  u = vaddq_u32 (u, data.off);
+  u = vandq_u32 (u, d->mantissa_mask);
+  u = vaddq_u32 (u, d->off);
   r = vsubq_f32 (vreinterpretq_f32_u32 (u), v_f32 (1.0f));
 
   /* y = log(1+r) + n*ln2.  */
@@ -60,7 +61,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log) (float32x4_t x)
   p = vfmaq_f32 (p, P (7), r2);
   q = vfmaq_f32 (q, p, r2);
   y = vfmaq_f32 (y, q, r2);
-  p = vfmaq_f32 (r, data.ln2, n);
+  p = vfmaq_f32 (r, d->ln2, n);
   y = vfmaq_f32 (p, y, r2);
 
   if (unlikely (v_any_u32 (cmp)))

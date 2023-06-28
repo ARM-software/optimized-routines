@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 
-static const volatile struct
+static const struct data
 {
   float32x4_t poly[5];
   float32x4_t shift, inv_ln2, ln2_hi, ln2_lo;
@@ -31,7 +31,7 @@ static const volatile struct
 #endif
 };
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 #if WANT_SIMD_EXCEPT
 
@@ -54,13 +54,13 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
-	      float32x4_t scale)
+	      float32x4_t scale, const struct data *d)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
   uint32x4_t b = vandq_u32 (vclezq_f32 (n), SpecialOffset);
   float32x4_t s1 = vreinterpretq_f32_u32 (vaddq_u32 (b, SpecialBias));
   float32x4_t s2 = vreinterpretq_f32_u32 (vsubq_u32 (e, b));
-  uint32x4_t cmp2 = vcagtq_f32 (n, data.scale_thresh);
+  uint32x4_t cmp2 = vcagtq_f32 (n, d->scale_thresh);
   float32x4_t r2 = vmulq_f32 (s1, s1);
   float32x4_t r1 = vmulq_f32 (vfmaq_f32 (s2, poly, s2), s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
@@ -73,6 +73,7 @@ special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
 
 float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   float32x4_t n, r, r2, scale, p, q, poly, z;
   uint32x4_t cmp, e;
 
@@ -92,15 +93,15 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
-  z = vfmaq_f32 (data.shift, x, data.inv_ln2);
-  n = vsubq_f32 (z, data.shift);
-  r = vfmsq_f32 (x, n, data.ln2_hi);
-  r = vfmsq_f32 (r, n, data.ln2_lo);
+  z = vfmaq_f32 (d->shift, x, d->inv_ln2);
+  n = vsubq_f32 (z, d->shift);
+  r = vfmsq_f32 (x, n, d->ln2_hi);
+  r = vfmsq_f32 (r, n, d->ln2_lo);
   e = vshlq_n_u32 (vreinterpretq_u32_f32 (z), 23);
-  scale = vreinterpretq_f32_u32 (vaddq_u32 (e, data.exponent_bias));
+  scale = vreinterpretq_f32_u32 (vaddq_u32 (e, d->exponent_bias));
 
 #if !WANT_SIMD_EXCEPT
-  cmp = vcagtq_f32 (n, data.special_bound);
+  cmp = vcagtq_f32 (n, d->special_bound);
 #endif
 
   r2 = vmulq_f32 (r, r);
@@ -114,7 +115,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 #if WANT_SIMD_EXCEPT
     return special_case (xm, vfmaq_f32 (scale, poly, scale), cmp);
 #else
-    return special_case (poly, n, e, cmp, scale);
+    return special_case (poly, n, e, cmp, scale, d);
 #endif
 
   return vfmaq_f32 (scale, poly, scale);
