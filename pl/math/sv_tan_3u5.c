@@ -10,23 +10,24 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define SV_TAN_POLY_ORDER 8
-static struct sv_tan_data
+static const struct data
 {
-  double poly[SV_TAN_POLY_ORDER + 1];
+  double poly[9];
   double half_pi_hi, half_pi_lo, inv_half_pi, range_val, shift;
-} data
-  = {.poly
-     = {0x1.5555555555556p-2, 0x1.1111111110a63p-3, 0x1.ba1ba1bb46414p-5,
-	0x1.664f47e5b5445p-6, 0x1.226e5e5ecdfa3p-7, 0x1.d6c7ddbf87047p-9,
-	0x1.7ea75d05b583ep-10, 0x1.289f22964a03cp-11, 0x1.4e4fd14147622p-12},
-     .half_pi_hi = 0x1.921fb54442d18p0,
-     .half_pi_lo = 0x1.1a62633145c07p-54,
-     .inv_half_pi = 0x1.45f306dc9c883p-1,
-     .range_val = 0x1p23,
-     .shift = 0x1.8p52};
+} data = {
+  /* Polynomial generated with FPMinimax.  */
+  .poly = { 0x1.5555555555556p-2, 0x1.1111111110a63p-3, 0x1.ba1ba1bb46414p-5,
+	    0x1.664f47e5b5445p-6, 0x1.226e5e5ecdfa3p-7, 0x1.d6c7ddbf87047p-9,
+	    0x1.7ea75d05b583ep-10, 0x1.289f22964a03cp-11,
+	    0x1.4e4fd14147622p-12, },
+  .half_pi_hi = 0x1.921fb54442d18p0,
+  .half_pi_lo = 0x1.1a62633145c07p-54,
+  .inv_half_pi = 0x1.45f306dc9c883p-1,
+  .range_val = 0x1p23,
+  .shift = 0x1.8p52,
+};
 
-#define C(i) sv_f64 (data.poly[i])
+#define C(i) sv_f64 (dat->poly[i])
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x)
@@ -40,23 +41,25 @@ special_case (svfloat64_t x)
 				      want -0x1.f6ccd8ecf7deap+37.  */
 svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
 {
+  const struct data *dat = ptr_barrier (&data);
+
   /* Invert condition to catch NaNs and Infs as well as large values.  */
-  svbool_t special = svnot_b_z (pg, svaclt_n_f64 (pg, x, data.range_val));
+  svbool_t special = svnot_b_z (pg, svaclt_n_f64 (pg, x, dat->range_val));
 
   /* Fallback for all lanes if any are out of bounds.  */
   if (unlikely (svptest_any (pg, special)))
     return special_case (x);
 
   /* q = nearest integer to 2 * x / pi.  */
-  svfloat64_t shift = sv_f64 (data.shift);
-  svfloat64_t q = svmla_n_f64_x (pg, shift, x, data.inv_half_pi);
+  svfloat64_t shift = sv_f64 (dat->shift);
+  svfloat64_t q = svmla_n_f64_x (pg, shift, x, dat->inv_half_pi);
   q = svsub_f64_x (pg, q, shift);
   svint64_t qi = svcvt_s64_f64_x (pg, q);
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
   svfloat64_t r = x;
-  svfloat64_t half_pi = svld1rq_f64 (svptrue_b64 (), &data.half_pi_hi);
+  svfloat64_t half_pi = svld1rq_f64 (svptrue_b64 (), &dat->half_pi_hi);
   r = svmls_lane_f64 (r, q, half_pi, 0);
   r = svmls_lane_f64 (r, q, half_pi, 1);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
