@@ -15,7 +15,7 @@
 #define BigBound 1022.0
 #define UOFlowBound 1280.0
 
-static const volatile struct
+static const struct data
 {
   float64x2_t poly[4];
   float64x2_t shift, scale_big_bound, scale_uoflow_bound;
@@ -29,7 +29,7 @@ static const volatile struct
   .scale_uoflow_bound = V2 (UOFlowBound),
 };
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 static inline uint64x2_t
 lookup_sbits (uint64x2_t i)
@@ -57,14 +57,15 @@ special_case (float64x2_t x)
 # define SpecialBias2 0x3010000000000000 /* 0x1p-254.  */
 
 static float64x2_t VPCS_ATTR
-special_case (float64x2_t s, float64x2_t y, float64x2_t n)
+special_case (float64x2_t s, float64x2_t y, float64x2_t n,
+	      const struct data *d)
 {
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   uint64x2_t b = vandq_u64 (vclezq_f64 (n), v_u64 (SpecialOffset));
   float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (v_u64 (SpecialBias1), b));
   float64x2_t s2 = vreinterpretq_f64_u64 (
     vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), v_u64 (SpecialBias2)), b));
-  uint64x2_t cmp = vcagtq_f64 (n, data.scale_uoflow_bound);
+  uint64x2_t cmp = vcagtq_f64 (n, d->scale_uoflow_bound);
   float64x2_t r1 = vmulq_f64 (s1, s1);
   float64x2_t r0 = vmulq_f64 (vfmaq_f64 (s2, s2, y), s1);
   return vbslq_f64 (cmp, r1, r0);
@@ -79,6 +80,7 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n)
 VPCS_ATTR
 float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint64x2_t cmp;
 #if WANT_SIMD_EXCEPT
   uint64x2_t ia = vreinterpretq_u64_f64 (vabsq_f64 (x));
@@ -88,13 +90,13 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   if (unlikely (v_any_u64 (cmp)))
     return special_case (x);
 #else
-  cmp = vcagtq_f64 (x, data.scale_big_bound);
+  cmp = vcagtq_f64 (x, d->scale_big_bound);
 #endif
 
   /* n = round(x/N).  */
-  float64x2_t z = vaddq_f64 (data.shift, x);
+  float64x2_t z = vaddq_f64 (d->shift, x);
   uint64x2_t u = vreinterpretq_u64_f64 (z);
-  float64x2_t n = vsubq_f64 (z, data.shift);
+  float64x2_t n = vsubq_f64 (z, d->shift);
 
   /* r = x - n/N.  */
   float64x2_t r = vsubq_f64 (x, n);
@@ -112,7 +114,7 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 
 #if !WANT_SIMD_EXCEPT
   if (unlikely (v_any_u64 (cmp)))
-    return special_case (s, y, n);
+    return special_case (s, y, n, d);
 #endif
   return vfmaq_f64 (s, s, y);
 }

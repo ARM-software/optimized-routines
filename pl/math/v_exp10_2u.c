@@ -16,7 +16,7 @@
 /* Value of n above which scale overflows even with special treatment.  */
 #define ScaleBound 163840.0 /* 1280.0 * N.  */
 
-const static volatile struct
+const static struct data
 {
   float64x2_t poly[4];
   float64x2_t log10_2, log2_10_hi, log2_10_lo, shift;
@@ -40,7 +40,7 @@ const static volatile struct
 #endif
 };
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 #define N (1 << V_EXP_TABLE_BITS)
 #define Tab __v_exp_data
 #define IndexMask v_u64 (N - 1)
@@ -67,14 +67,15 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
 # define SpecialBias2 v_u64 (0x3010000000000000)  /* 0x1p-254.  */
 
 static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t s, float64x2_t y, float64x2_t n)
+special_case (float64x2_t s, float64x2_t y, float64x2_t n,
+	      const struct data *d)
 {
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   uint64x2_t b = vandq_u64 (vcltzq_f64 (n), SpecialOffset);
   float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (SpecialBias1, b));
   float64x2_t s2 = vreinterpretq_f64_u64 (
       vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), SpecialBias2), b));
-  uint64x2_t cmp = vcagtq_f64 (n, data.scale_thresh);
+  uint64x2_t cmp = vcagtq_f64 (n, d->scale_thresh);
   float64x2_t r1 = vmulq_f64 (s1, s1);
   float64x2_t r0 = vmulq_f64 (vfmaq_f64 (s2, y, s2), s1);
   return vbslq_f64 (cmp, r1, r0);
@@ -88,6 +89,7 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n)
 				       want 0x1.f8dab6d7fed0ap+5.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint64x2_t cmp;
 #if WANT_SIMD_EXCEPT
   /* If any lanes are special, mask them with 1 and retain a copy of x to allow
@@ -99,18 +101,18 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
   if (unlikely (v_any_u64 (cmp)))
     x = vbslq_f64 (cmp, v_f64 (1), x);
 #else
-  cmp = vcageq_f64 (x, data.special_bound);
+  cmp = vcageq_f64 (x, d->special_bound);
 #endif
 
   /* n = round(x/(log10(2)/N)).  */
-  float64x2_t z = vfmaq_f64 (data.shift, x, data.log10_2);
+  float64x2_t z = vfmaq_f64 (d->shift, x, d->log10_2);
   uint64x2_t u = vreinterpretq_u64_f64 (z);
-  float64x2_t n = vsubq_f64 (z, data.shift);
+  float64x2_t n = vsubq_f64 (z, d->shift);
 
   /* r = x - n*log10(2)/N.  */
   float64x2_t r = x;
-  r = vfmsq_f64 (r, data.log2_10_hi, n);
-  r = vfmsq_f64 (r, data.log2_10_lo, n);
+  r = vfmsq_f64 (r, d->log2_10_hi, n);
+  r = vfmsq_f64 (r, d->log2_10_lo, n);
 
   uint64x2_t e = vshlq_n_u64 (u, 52 - V_EXP_TABLE_BITS);
   uint64x2_t i = vandq_u64 (u, IndexMask);
@@ -127,7 +129,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
 #if WANT_SIMD_EXCEPT
     return special_case (xm, vfmaq_f64 (s, y, s), cmp);
 #else
-    return special_case (s, y, n);
+    return special_case (s, y, n, d);
 #endif
 
   return vfmaq_f64 (s, y, s);

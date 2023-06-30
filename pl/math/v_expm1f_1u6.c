@@ -10,22 +10,19 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define V_EXPM1F_POLY_ORDER 4
-
-struct v_expm1f_data
+static const struct data
 {
-  float32x4_t poly[V_EXPM1F_POLY_ORDER + 1];
+  float32x4_t poly[5];
   float32x4_t invln2, ln2_lo, ln2_hi, shift;
+} data = {
+  /* Generated using fpminimax with degree=5 in [-log(2)/2, log(2)/2].  */
+  .poly = { V4 (0x1.fffffep-2), V4 (0x1.5554aep-3), V4 (0x1.555736p-5),
+	    V4 (0x1.12287cp-7), V4 (0x1.6b55a2p-10) },
+  .invln2 = V4 (0x1.715476p+0f),
+  .ln2_hi = V4 (0x1.62e4p-1f),
+  .ln2_lo = V4 (0x1.7f7d1cp-20f),
+  .shift = V4 (0x1.8p23f),
 };
-
-static const volatile struct v_expm1f_data data
-  = {.invln2 = V4 (0x1.715476p+0f),
-     .ln2_hi = V4 (0x1.62e4p-1f),
-     .ln2_lo = V4 (0x1.7f7d1cp-20f),
-     .shift = V4 (0x1.8p23f),
-     /* Generated using fpminimax, see tools/expm1f.sollya for details.  */
-     .poly = {V4 (0x1.fffffep-2), V4 (0x1.5554aep-3), V4 (0x1.555736p-5),
-	      V4 (0x1.12287cp-7), V4 (0x1.6b55a2p-10)}};
 
 #define AllMask v_u32 (0xffffffff)
 #define AbsMask v_u32 (0x7fffffff)
@@ -35,7 +32,7 @@ static const volatile struct v_expm1f_data data
 #define BigBoundNeg 0x42cddd5e		/* asuint(0x1.9bbabcp+6).  */
 #define TinyBound 0x34000000		/* asuint(0x1p-23).  */
 #define ExponentBias v_s32 (0x3f800000) /* asuint(1.0f).  */
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
@@ -49,6 +46,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 			want 0x1.e2fb94p-2.  */
 float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ax = vandq_u32 (ix, AbsMask);
 
@@ -71,12 +69,11 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
      and f = x - i * ln2, then f is in [-ln2/2, ln2/2].
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
-  float32x4_t j
-    = vsubq_f32 (vfmaq_f32 (data.shift, data.invln2, x), data.shift);
+  float32x4_t j = vsubq_f32 (vfmaq_f32 (d->shift, d->invln2, x), d->shift);
   int32x4_t i = vcvtq_s32_f32 (j);
   float32x4_t f;
-  f = vfmsq_f32 (x, j, data.ln2_hi);
-  f = vfmsq_f32 (f, j, data.ln2_lo);
+  f = vfmsq_f32 (x, j, d->ln2_hi);
+  f = vfmsq_f32 (f, j, d->ln2_lo);
 
   /* Approximate expm1(f) using polynomial.
      Taylor expansion for expm1(x) has the form:

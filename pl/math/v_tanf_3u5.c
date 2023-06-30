@@ -10,7 +10,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static const volatile struct
+static const struct data
 {
   float32x4_t poly[6];
   float32x4_t neg_half_pi_1, neg_half_pi_2, neg_half_pi_3, two_over_pi, shift;
@@ -34,7 +34,7 @@ static const volatile struct
 #define RangeVal v_u32 (0x47000000)  /* asuint32(0x1p15f).  */
 #define TinyBound v_u32 (0x30000000) /* asuint32 (0x1p-31f).  */
 #define Thresh v_u32 (0x16000000)    /* asuint32(RangeVal) - TinyBound.  */
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 /* Special cases (fall back to scalar calls).  */
 static float32x4_t VPCS_ATTR NOINLINE
@@ -45,7 +45,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 
 /* Use a full Estrin scheme to evaluate polynomial.  */
 static inline float32x4_t
-eval_poly (float32x4_t z)
+eval_poly (float32x4_t z, const struct data *d)
 {
   float32x4_t z2 = vmulq_f32 (z, z);
 #if WANT_SIMD_EXCEPT
@@ -66,6 +66,7 @@ eval_poly (float32x4_t z)
 			    want 0x1.ff9850p-1.  */
 float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   float32x4_t special_arg = x;
 
   /* iax >= RangeVal means x, if not inf or NaN, is too large to perform fast
@@ -80,12 +81,12 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
     x = vbslq_f32 (special, v_f32 (1.0f), x);
 #else
   /* Otherwise, special-case large and special values.  */
-  uint32x4_t special = vcageq_f32 (x, data.range_val);
+  uint32x4_t special = vcageq_f32 (x, d->range_val);
 #endif
 
   /* n = rint(x/(pi/2)).  */
-  float32x4_t q = vfmaq_f32 (data.shift, data.two_over_pi, x);
-  float32x4_t n = vsubq_f32 (q, data.shift);
+  float32x4_t q = vfmaq_f32 (d->shift, d->two_over_pi, x);
+  float32x4_t n = vsubq_f32 (q, d->shift);
   /* n is representable as a signed integer, simply convert it.  */
   int32x4_t in = vcvtaq_s32_f32 (n);
   /* Determine if x lives in an interval, where |tan(x)| grows to infinity.  */
@@ -95,9 +96,9 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
 
   /* r = x - n * (pi/2)  (range reduction into -pi./4 .. pi/4).  */
   float32x4_t r;
-  r = vfmaq_f32 (x, data.neg_half_pi_1, n);
-  r = vfmaq_f32 (r, data.neg_half_pi_2, n);
-  r = vfmaq_f32 (r, data.neg_half_pi_3, n);
+  r = vfmaq_f32 (x, d->neg_half_pi_1, n);
+  r = vfmaq_f32 (r, d->neg_half_pi_2, n);
+  r = vfmaq_f32 (r, d->neg_half_pi_3, n);
 
   /* If x lives in an interval, where |tan(x)|
      - is finite, then use a polynomial approximation of the form
@@ -111,7 +112,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
 
   /* Evaluate polynomial approximation of tangent on [-pi/4, pi/4].  */
   float32x4_t z2 = vmulq_f32 (r, r);
-  float32x4_t p = eval_poly (z2);
+  float32x4_t p = eval_poly (z2, d);
   float32x4_t y = vfmaq_f32 (z, vmulq_f32 (z, z2), p);
 
   /* Compute reciprocal and apply if required.  */

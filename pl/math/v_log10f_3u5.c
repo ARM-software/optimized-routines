@@ -10,7 +10,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static const volatile struct
+static const struct data
 {
   float32x4_t poly[8];
   float32x4_t inv_ln10, ln2;
@@ -29,7 +29,7 @@ static const volatile struct
   .mantissa_mask = V4 (0x007fffff),
 };
 
-#define P(i) data.poly[i]
+#define P(i) d->poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
@@ -46,23 +46,24 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 				 want 0x1.ffe2f4p-4.  */
 float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint32x4_t u = vreinterpretq_u32_f32 (x);
   uint32x4_t special
-      = vcgeq_u32 (vsubq_u32 (u, data.min_norm), data.special_bound);
+      = vcgeq_u32 (vsubq_u32 (u, d->min_norm), d->special_bound);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
-  u = vsubq_u32 (u, data.off);
+  u = vsubq_u32 (u, d->off);
   float32x4_t n = vcvtq_f32_s32 (
       vshrq_n_s32 (vreinterpretq_s32_u32 (u), 23)); /* signextend.  */
-  u = vaddq_u32 (vandq_u32 (u, data.mantissa_mask), data.off);
+  u = vaddq_u32 (vandq_u32 (u, d->mantissa_mask), d->off);
   float32x4_t r = vsubq_f32 (vreinterpretq_f32_u32 (u), v_f32 (1.0f));
 
   /* y = log10(1+r) + n * log10(2).  */
   float32x4_t r2 = vmulq_f32 (r, r);
   float32x4_t poly = PAIRWISE_HORNER_7 (r, r2, P);
   /* y = Log10(2) * n + poly * InvLn(10).  */
-  float32x4_t y = vfmaq_f32 (r, data.ln2, n);
-  y = vfmaq_f32 (vmulq_f32 (y, data.inv_ln10), poly, r2);
+  float32x4_t y = vfmaq_f32 (r, d->ln2, n);
+  y = vfmaq_f32 (vmulq_f32 (y, d->inv_ln10), poly, r2);
 
   if (unlikely (v_any_u32 (special)))
     return special_case (x, y, special);

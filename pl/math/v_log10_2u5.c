@@ -11,7 +11,7 @@
 
 #define N (1 << V_LOG10_TABLE_BITS)
 
-static const volatile struct
+static const struct data
 {
   float64x2_t poly[5];
   float64x2_t invln10, log10_2, ln2;
@@ -33,7 +33,7 @@ static const volatile struct
 #define Off v_u64 (0x3fe6900900000000)
 #define IndexMask v_u64 (N - 1)
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 #define T(s, i) __v_log10_data.s[i]
 
 struct entry
@@ -67,9 +67,10 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 				       want 0x1.fff6be3cae4b9p-6.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t special
-      = vcgeq_u64 (vsubq_u64 (ix, data.min_norm), data.special_bound);
+      = vcgeq_u64 (vsubq_u64 (ix, d->min_norm), d->special_bound);
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.
@@ -78,7 +79,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
   uint64x2_t i
       = vandq_u64 (vshrq_n_u64 (tmp, 52 - V_LOG10_TABLE_BITS), IndexMask);
   int64x2_t k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52);
-  uint64x2_t iz = vsubq_u64 (ix, vandq_u64 (tmp, data.sign_exp_mask));
+  uint64x2_t iz = vsubq_u64 (ix, vandq_u64 (tmp, d->sign_exp_mask));
   float64x2_t z = vreinterpretq_f64_u64 (iz);
 
   struct entry e = lookup (i);
@@ -88,12 +89,12 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
   float64x2_t kd = vcvtq_f64_s64 (k);
 
   /* hi = r / log(10) + log10(c) + k*log10(2).
-     Constants in `v_log10_data.c` are computed (in extended precision) as
+     Constants in v_log10_data.c are computed (in extended precision) as
      e.log10c := e.logc * ivln10.  */
-  float64x2_t w = vfmaq_f64 (e.log10c, r, data.invln10);
+  float64x2_t w = vfmaq_f64 (e.log10c, r, d->invln10);
 
   /* y = log10(1+r) + n * log10(2).  */
-  float64x2_t hi = vfmaq_f64 (w, kd, data.log10_2);
+  float64x2_t hi = vfmaq_f64 (w, kd, d->log10_2);
 
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   float64x2_t r2 = vmulq_f64 (r, r);

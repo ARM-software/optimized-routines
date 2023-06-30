@@ -12,7 +12,7 @@
 
 #define ScaleBound 192.0f
 
-static const volatile struct
+static const struct data
 {
   float32x4_t poly[5];
   float32x4_t shift, log10_2, log2_10_hi, log2_10_lo;
@@ -36,7 +36,7 @@ static const volatile struct
 #endif
 };
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 #define ExponentBias v_u32 (0x3f800000)
 
 #if WANT_SIMD_EXCEPT
@@ -62,13 +62,13 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
-	      float32x4_t scale)
+	      float32x4_t scale, const struct data *d)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
   uint32x4_t b = vandq_u32 (vclezq_f32 (n), SpecialOffset);
   float32x4_t s1 = vreinterpretq_f32_u32 (vaddq_u32 (b, SpecialBias));
   float32x4_t s2 = vreinterpretq_f32_u32 (vsubq_u32 (e, b));
-  uint32x4_t cmp2 = vcagtq_f32 (n, data.scale_thresh);
+  uint32x4_t cmp2 = vcagtq_f32 (n, d->scale_thresh);
   float32x4_t r2 = vmulq_f32 (s1, s1);
   float32x4_t r1 = vmulq_f32 (vfmaq_f32 (s2, poly, s2), s1);
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
@@ -85,6 +85,7 @@ special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
 				 want 0x1.7e79cp+11.  */
 float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
 #if WANT_SIMD_EXCEPT
   /* asuint(x) - TinyBound >= BigBound - TinyBound.  */
   uint32x4_t cmp = vcgeq_u32 (
@@ -102,10 +103,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
   /* exp10(x) = 2^n * 10^r = 2^n * (1 + poly (r)),
      with poly(r) in [1/sqrt(2), sqrt(2)] and
      x = r + n * log10 (2), with r in [-log10(2)/2, log10(2)/2].  */
-  float32x4_t z = vfmaq_f32 (data.shift, x, data.log10_2);
-  float32x4_t n = vsubq_f32 (z, data.shift);
-  float32x4_t r = vfmsq_f32 (x, n, data.log2_10_hi);
-  r = vfmsq_f32 (r, n, data.log2_10_lo);
+  float32x4_t z = vfmaq_f32 (d->shift, x, d->log10_2);
+  float32x4_t n = vsubq_f32 (z, d->shift);
+  float32x4_t r = vfmsq_f32 (x, n, d->log2_10_hi);
+  r = vfmsq_f32 (r, n, d->log2_10_lo);
   uint32x4_t e = vshlq_n_u32 (vreinterpretq_u32_f32 (z), 23);
 
   float32x4_t scale = vreinterpretq_f32_u32 (vaddq_u32 (e, ExponentBias));
@@ -125,7 +126,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
 #if WANT_SIMD_EXCEPT
     return special_case (xm, vfmaq_f32 (scale, poly, scale), cmp);
 #else
-    return special_case (poly, n, e, cmp, scale);
+    return special_case (poly, n, e, cmp, scale, d);
 #endif
 
   return vfmaq_f32 (scale, poly, scale);

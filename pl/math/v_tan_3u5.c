@@ -10,7 +10,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static const volatile struct
+static const struct data
 {
   float64x2_t poly[9];
   float64x2_t half_pi_hi, half_pi_lo, two_over_pi, shift;
@@ -36,7 +36,7 @@ static const volatile struct
 #define RangeVal 0x4160000000000000  /* asuint64(0x1p23).  */
 #define TinyBound 0x3e50000000000000 /* asuint64(2^-26).  */
 #define Thresh 0x310000000000000     /* RangeVal - TinyBound.  */
-#define C(i) data.poly[i]
+#define C(i) dat->poly[i]
 
 /* Special cases (fall back to scalar calls).  */
 static float64x2_t VPCS_ATTR NOINLINE
@@ -51,6 +51,7 @@ special_case (float64x2_t x)
 				 want -0x1.f6ccd8ecf7deap+37.   */
 float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 {
+  const struct data *dat = ptr_barrier (&data);
   /* Our argument reduction cannot calculate q with sufficient accuracy for very
      large inputs. Fall back to scalar routine for all lanes if any are too
      large, or Inf/NaN. If fenv exceptions are expected, also fall back for tiny
@@ -66,14 +67,14 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 
   /* q = nearest integer to 2 * x / pi.  */
   float64x2_t q
-    = vsubq_f64 (vfmaq_f64 (data.shift, x, data.two_over_pi), data.shift);
+      = vsubq_f64 (vfmaq_f64 (dat->shift, x, dat->two_over_pi), dat->shift);
   int64x2_t qi = vcvtq_s64_f64 (q);
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
   float64x2_t r = x;
-  r = vfmsq_f64 (r, q, data.half_pi_hi);
-  r = vfmsq_f64 (r, q, data.half_pi_lo);
+  r = vfmsq_f64 (r, q, dat->half_pi_hi);
+  r = vfmsq_f64 (r, q, dat->half_pi_lo);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
      formula.  */
   r = vmulq_n_f64 (r, 0.5);
@@ -104,7 +105,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
     = vceqzq_u64 (vandq_u64 (vreinterpretq_u64_s64 (qi), v_u64 (1)));
 
 #if !WANT_SIMD_EXCEPT
-  uint64x2_t special = vceqzq_u64 (vcaleq_f64 (x, data.range_val));
+  uint64x2_t special = vceqzq_u64 (vcaleq_f64 (x, dat->range_val));
   if (unlikely (v_any_u64 (special)))
     return special_case (x);
 #endif

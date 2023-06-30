@@ -12,7 +12,7 @@
 #define V_LOG2_TABLE_BITS 7
 #define N (1 << V_LOG2_TABLE_BITS)
 
-static const volatile struct
+static const struct data
 {
   float64x2_t poly[5];
   float64x2_t invln2;
@@ -34,7 +34,7 @@ static const volatile struct
 #define IndexMask v_u64 (N - 1)
 
 #define T(s, i) __v_log2_data.s[i]
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 struct entry
 {
@@ -66,9 +66,10 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 				      want 0x1.fffb34198d9ddp-5.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t special
-      = vcgeq_u64 (vsubq_u64 (ix, data.min_norm), data.special_bound);
+      = vcgeq_u64 (vsubq_u64 (ix, d->min_norm), d->special_bound);
 
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
@@ -77,7 +78,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
   uint64x2_t i
       = vandq_u64 (vshrq_n_u64 (tmp, 52 - V_LOG2_TABLE_BITS), IndexMask);
   int64x2_t k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52);
-  uint64x2_t iz = vsubq_u64 (ix, vandq_u64 (tmp, data.sign_exp_mask));
+  uint64x2_t iz = vsubq_u64 (ix, vandq_u64 (tmp, d->sign_exp_mask));
   float64x2_t z = vreinterpretq_f64_u64 (iz);
 
   struct entry e = lookup (i);
@@ -86,7 +87,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
 
   float64x2_t r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   float64x2_t kd = vcvtq_f64_s64 (k);
-  float64x2_t w = vfmaq_f64 (e.log2c, r, data.invln2);
+  float64x2_t w = vfmaq_f64 (e.log2c, r, d->invln2);
 
   float64x2_t r2 = vmulq_f64 (r, r);
   float64x2_t p_23 = vfmaq_f64 (C (2), C (3), r);

@@ -13,40 +13,37 @@
 #include "math_config.h"
 #include "estrinf.h"
 
-#define V_EXPM1F_INLINE_POLY_ORDER 4
-
-struct v_expm1f_inline_data
+static const struct data
 {
-  float32x4_t poly[V_EXPM1F_INLINE_POLY_ORDER + 1];
+  float32x4_t poly[5];
   float32x4_t invln2, ln2_lo, ln2_hi, shift;
+} data = {
+  /* Generated using fpminimax with degree=5 in [-log(2)/2, log(2)/2].  */
+  .poly = { V4 (0x1.fffffep-2), V4 (0x1.5554aep-3), V4 (0x1.555736p-5),
+	    V4 (0x1.12287cp-7), V4 (0x1.6b55a2p-10) },
+  .invln2 = V4 (0x1.715476p+0f),
+  .ln2_hi = V4 (0x1.62e4p-1f),
+  .ln2_lo = V4 (0x1.7f7d1cp-20f),
+  .shift = V4 (0x1.8p23f),
 };
 
-static const volatile struct v_expm1f_inline_data data
-  = {.invln2 = V4 (0x1.715476p+0f),
-     .ln2_hi = V4 (0x1.62e4p-1f),
-     .ln2_lo = V4 (0x1.7f7d1cp-20f),
-     .shift = V4 (0x1.8p23f),
-     /* Generated using fpminimax, see tools/expm1f.sollya for details.  */
-     .poly = {V4 (0x1.fffffep-2), V4 (0x1.5554aep-3), V4 (0x1.555736p-5),
-	      V4 (0x1.12287cp-7), V4 (0x1.6b55a2p-10)}};
-
 #define ExponentBias v_s32 (0x3f800000) /* asuint(1.0f).  */
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 static inline float32x4_t
 expm1f_inline (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   /* Helper routine for calculating exp(x) - 1.
      Copied from v_expm1f_1u6.c, with all special-case handling removed - the
      calling routine should handle special values if required.  */
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
-  float32x4_t j
-    = vsubq_f32 (vfmaq_f32 (data.shift, data.invln2, x), data.shift);
+  float32x4_t j = vsubq_f32 (vfmaq_f32 (d->shift, d->invln2, x), d->shift);
   int32x4_t i = vcvtq_s32_f32 (j);
   float32x4_t f;
-  f = vfmsq_f32 (x, j, data.ln2_hi);
-  f = vfmsq_f32 (f, j, data.ln2_lo);
+  f = vfmsq_f32 (x, j, d->ln2_hi);
+  f = vfmsq_f32 (f, j, d->ln2_lo);
 
   /* Approximate expm1(f) with polynomial P, expm1(f) ~= f + f^2 * P(f).
      Uses Estrin scheme, where the main __v_expm1f routine uses Horner.  */
