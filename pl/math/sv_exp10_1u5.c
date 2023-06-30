@@ -12,7 +12,7 @@
 
 #define SpecialBound 307.0 /* floor (log10 (2^1023)).  */
 
-static struct
+static const struct data
 {
   double poly[5];
   double shift, log10_2, log2_10_hi, log2_10_lo, scale_thres, special_bound;
@@ -32,7 +32,7 @@ static struct
   .special_bound = SpecialBound,
 };
 
-#define C(i) sv_f64 (data.poly[i])
+#define C(i) sv_f64 (d->poly[i])
 #define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 #define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
@@ -41,7 +41,8 @@ static struct
 /* Update of both special and non-special cases, if any special case is
    detected.  */
 static inline svfloat64_t
-special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
+special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
+	      const struct data *d)
 {
   /* s=2^n may overflow, break it up into s=s1*s2,
      such that exp = s + s*y can be computed as s1*(s2+s2*y)
@@ -59,7 +60,7 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
       pg, svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), SpecialBias2), b));
 
   /* |n| > 1280 => 2^(n) overflows.  */
-  svbool_t p_cmp = svacgt_n_f64 (pg, n, data.scale_thres);
+  svbool_t p_cmp = svacgt_n_f64 (pg, n, d->scale_thres);
 
   svfloat64_t r1 = svmul_f64_x (pg, s1, s1);
   svfloat64_t r2 = svmla_f64_x (pg, s2, s2, y);
@@ -74,16 +75,17 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 					    want 0x1.885a89551d781p-16.  */
 svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
 {
-  svbool_t no_big_scale = svacle_n_f64 (pg, x, data.special_bound);
+  const struct data *d = ptr_barrier (&data);
+  svbool_t no_big_scale = svacle_n_f64 (pg, x, d->special_bound);
   svbool_t special = svnot_b_z (pg, no_big_scale);
 
   /* n = round(x/(log10(2)/N)).  */
-  svfloat64_t shift = sv_f64 (data.shift);
-  svfloat64_t z = svmla_n_f64_x (pg, shift, x, data.log10_2);
+  svfloat64_t shift = sv_f64 (d->shift);
+  svfloat64_t z = svmla_n_f64_x (pg, shift, x, d->log10_2);
   svfloat64_t n = svsub_f64_x (pg, z, shift);
 
   /* r = x - n*log10(2)/N.  */
-  svfloat64_t log2_10 = svld1rq_f64 (svptrue_b64 (), &data.log2_10_hi);
+  svfloat64_t log2_10 = svld1rq_f64 (svptrue_b64 (), &d->log2_10_hi);
   svfloat64_t r = x;
   r = svmls_lane_f64 (r, n, log2_10, 0);
   r = svmls_lane_f64 (r, n, log2_10, 1);
@@ -113,7 +115,7 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
       /* Copy sign to scale.  */
       scale = svreinterpret_f64_u64 (
 	  svadd_u64_x (pg, e, svreinterpret_u64_f64 (scale)));
-      return special_case (pg, scale, y, n);
+      return special_case (pg, scale, y, n, d);
     }
 
   /* No special case.  */

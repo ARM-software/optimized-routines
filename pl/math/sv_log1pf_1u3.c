@@ -10,7 +10,7 @@
 #include "pl_test.h"
 #include "sv_estrinf.h"
 
-static struct sv_log1pf_data
+static const struct data
 {
   float poly[8];
   float ln2, exp_bias;
@@ -27,7 +27,7 @@ static struct sv_log1pf_data
 	  .three_quarters = 0x3f400000};
 
 #define SignExponentMask 0xff800000
-#define C(i) sv_f32 (data.poly[i])
+#define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -41,6 +41,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 				 want 0x1.9f323ep-2.  */
 svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
   /* x < -1, Inf/Nan and -0 (need to catch -0 as argument reduction otherwise
      discards sign).  */
   svbool_t special
@@ -59,10 +60,9 @@ svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
   svfloat32_t m = svadd_n_f32_x (pg, x, 1);
 
   /* Choose k to scale x to the range [-1/4, 1/2].  */
-  svint32_t k = svand_s32_x (pg,
-			     svsub_n_s32_x (pg, svreinterpret_s32_f32 (m),
-					    data.three_quarters),
-			     sv_s32 (SignExponentMask));
+  svint32_t k = svand_s32_x (
+      pg, svsub_n_s32_x (pg, svreinterpret_s32_f32 (m), d->three_quarters),
+      sv_s32 (SignExponentMask));
 
   /* Scale x by exponent manipulation.  */
   svfloat32_t m_scale = svreinterpret_f32_u32 (
@@ -70,7 +70,7 @@ svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
 
   /* Scale up to ensure that the scale factor is representable as normalised
      fp32 number, and scale m down accordingly.  */
-  svfloat32_t s = svreinterpret_f32_s32 (svsubr_n_s32_x (pg, k, data.four));
+  svfloat32_t s = svreinterpret_f32_s32 (svsubr_n_s32_x (pg, k, d->four));
   m_scale = svadd_f32_x (pg, m_scale, svmla_n_f32_x (pg, sv_f32 (-1), s, 0.25));
 
   /* Evaluate polynomial on reduced interval.  */
@@ -83,10 +83,10 @@ svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
   /* The scale factor to be applied back at the end - by multiplying float(k)
      by 2^-23 we get the unbiased exponent of k.  */
   svfloat32_t scale_back
-    = svmul_n_f32_x (pg, svcvt_f32_s32_x (pg, k), data.exp_bias);
+      = svmul_n_f32_x (pg, svcvt_f32_s32_x (pg, k), d->exp_bias);
 
   /* Apply the scaling back.  */
-  svfloat32_t y = svmla_n_f32_x (pg, p, scale_back, data.ln2);
+  svfloat32_t y = svmla_n_f32_x (pg, p, scale_back, d->ln2);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, y, special);

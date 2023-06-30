@@ -14,7 +14,7 @@
 #define SpecialBound 0x1.62b7d369a5aa9p+9
 #define ExponentBias 0x3ff0000000000000
 
-static struct sv_expm1_data
+static const struct data
 {
   double poly[SV_EXPM1_POLY_ORDER + 1];
   double shift, inv_ln2, special_bound;
@@ -32,7 +32,7 @@ static struct sv_expm1_data
 		   0x1.71ddf82db5bb4p-19, 0x1.27e517fc0d54bp-22,
 		   0x1.af5eedae67435p-26, 0x1.1f143d060a28ap-29}};
 
-#define C(i) sv_f64 (data.poly[i])
+#define C(i) sv_f64 (d->poly[i])
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x, svfloat64_t y, svbool_t pg)
@@ -46,8 +46,9 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t pg)
 				       want 0x1.a8b9ea8d66e2p-2.  */
 svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
   /* Large, Nan/Inf.  */
-  svbool_t special = svnot_b_z (pg, svaclt_n_f64 (pg, x, data.special_bound));
+  svbool_t special = svnot_b_z (pg, svaclt_n_f64 (pg, x, d->special_bound));
   /* Argument reduction discards sign of zero, but expm1(-0) is expected to be
      -0. Use merging predication on zero lanes to propagate -0 correctly.  */
   svbool_t pnz = svcmpne_n_f64 (pg, x, 0);
@@ -57,11 +58,11 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
      and f = x - i * ln2, then f is in [-ln2/2, ln2/2].
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
-  svfloat64_t shift = sv_f64 (data.shift);
+  svfloat64_t shift = sv_f64 (d->shift);
   svfloat64_t n
-    = svsub_f64_x (pg, svmla_n_f64_x (pg, shift, x, data.inv_ln2), shift);
+      = svsub_f64_x (pg, svmla_n_f64_x (pg, shift, x, d->inv_ln2), shift);
   svint64_t i = svcvt_s64_f64_m (svreinterpret_s64_f64 (x), pnz, n);
-  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &data.ln2_hi);
+  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &d->ln2_hi);
   svfloat64_t f = svmls_lane_f64 (x, n, ln2, 0);
   f = svmls_lane_f64 (f, n, ln2, 1);
 

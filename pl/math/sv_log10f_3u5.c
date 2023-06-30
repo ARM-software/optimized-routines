@@ -9,7 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   float poly_0246[4];
   float poly_1357[4];
@@ -33,7 +33,7 @@ static struct
 #define Offset 0x3f2aaaab /* 0.666667.  */
 #define MantissaMask 0x007fffff
 
-#define P(i) sv_f32 (data.poly[i])
+#define P(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -48,6 +48,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 				    want 0x1.ffe2f4p-4.  */
 svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
   svuint32_t ix = svreinterpret_u32_f32 (x);
   svbool_t special = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, ix, Min), Thres);
 
@@ -66,18 +67,18 @@ svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
      log10(1+x)/x, with x in [-1/3, 1/3] (offset=2/3).  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
   svfloat32_t r4 = svmul_f32_x (pg, r2, r2);
-  svfloat32_t p_1357 = svld1rq_f32 (pg, &data.poly_1357[0]);
-  svfloat32_t q_01 = svmla_lane_f32 (sv_f32 (data.poly_0246[0]), r, p_1357, 0);
-  svfloat32_t q_23 = svmla_lane_f32 (sv_f32 (data.poly_0246[1]), r, p_1357, 1);
-  svfloat32_t q_45 = svmla_lane_f32 (sv_f32 (data.poly_0246[2]), r, p_1357, 2);
-  svfloat32_t q_67 = svmla_lane_f32 (sv_f32 (data.poly_0246[3]), r, p_1357, 3);
+  svfloat32_t p_1357 = svld1rq_f32 (pg, &d->poly_1357[0]);
+  svfloat32_t q_01 = svmla_lane_f32 (sv_f32 (d->poly_0246[0]), r, p_1357, 0);
+  svfloat32_t q_23 = svmla_lane_f32 (sv_f32 (d->poly_0246[1]), r, p_1357, 1);
+  svfloat32_t q_45 = svmla_lane_f32 (sv_f32 (d->poly_0246[2]), r, p_1357, 2);
+  svfloat32_t q_67 = svmla_lane_f32 (sv_f32 (d->poly_0246[3]), r, p_1357, 3);
   svfloat32_t q_47 = svmla_f32_x (pg, q_45, r2, q_67);
   svfloat32_t q_03 = svmla_f32_x (pg, q_01, r2, q_23);
   svfloat32_t y = svmla_f32_x (pg, q_03, r4, q_47);
 
   /* Using hi = Log10(2)*n + r*InvLn(10) is faster but less accurate.  */
-  svfloat32_t hi = svmla_n_f32_x (pg, r, n, data.ln2);
-  hi = svmul_n_f32_x (pg, hi, data.inv_ln10);
+  svfloat32_t hi = svmla_n_f32_x (pg, r, n, d->ln2);
+  hi = svmul_n_f32_x (pg, hi, d->inv_ln10);
   y = svmla_f32_x (pg, hi, r2, y);
 
   if (unlikely (svptest_any (pg, special)))

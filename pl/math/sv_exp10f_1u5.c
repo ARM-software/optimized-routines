@@ -14,7 +14,7 @@
    FEXPA.  */
 #define SpecialBound 37.9
 
-static struct
+static const struct data
 {
   float poly[5];
   float shift, log10_2, log2_10_hi, log2_10_lo, special_bound;
@@ -34,7 +34,7 @@ static struct
   .special_bound = SpecialBound,
 };
 
-#define C(i) data.poly[i]
+#define C(i) d->poly[i]
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -49,16 +49,17 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 				  want 0x1.ba5f9cp-1.  */
 svfloat32_t SV_NAME_F1 (exp10) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
   /* exp10(x) = 2^(n/N) * 10^r = 2^n * (1 + poly (r)),
      with poly(r) in [1/sqrt(2), sqrt(2)] and
      x = r + n * log10(2) / N, with r in [-log10(2)/2N, log10(2)/2N].  */
 
   /* Load some constants in quad-word chunks to minimise memory access (last
      lane is wasted).  */
-  svfloat32_t log10_2_and_inv = svld1rq_f32 (svptrue_b32 (), &data.log10_2);
+  svfloat32_t log10_2_and_inv = svld1rq_f32 (svptrue_b32 (), &d->log10_2);
 
   /* n = round(x/(log10(2)/N)).  */
-  svfloat32_t shift = sv_f32 (data.shift);
+  svfloat32_t shift = sv_f32 (d->shift);
   svfloat32_t z = svmla_lane_f32 (shift, x, log10_2_and_inv, 0);
   svfloat32_t n = svsub_f32_x (pg, z, shift);
 
@@ -66,7 +67,7 @@ svfloat32_t SV_NAME_F1 (exp10) (svfloat32_t x, const svbool_t pg)
   svfloat32_t r = svmls_lane_f32 (x, n, log10_2_and_inv, 1);
   r = svmls_lane_f32 (r, n, log10_2_and_inv, 2);
 
-  svbool_t special = svacgt_n_f32 (pg, x, data.special_bound);
+  svbool_t special = svacgt_n_f32 (pg, x, d->special_bound);
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 
   /* Polynomial evaluation: poly(r) ~ exp10(r)-1.  */

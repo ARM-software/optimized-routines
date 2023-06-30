@@ -12,7 +12,7 @@
 /* Largest value of x for which expm1(x) should round to -1.  */
 #define SpecialBound 0x1.5ebc4p+6f
 
-static struct sv_expm1f_data
+static const struct data
 {
   /* These 4 are grouped together so they can be loaded as one quadword, then
      used with _lane forms of svmla/svmls.  */
@@ -29,7 +29,7 @@ static struct sv_expm1f_data
   .ln2_lo = 0x1.7f7d1cp-20f,
 };
 
-#define C(i) sv_f32 (data.c##i)
+#define C(i) sv_f32 (d->c##i)
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svbool_t pg)
@@ -42,16 +42,17 @@ special_case (svfloat32_t x, svbool_t pg)
 				 want 0x1.e859d4p-2.  */
 svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
   /* Large, NaN/Inf and -0.  */
-  svbool_t special = svnot_b_z (pg, svaclt_n_f32 (pg, x, data.special_bound));
+  svbool_t special = svnot_b_z (pg, svaclt_n_f32 (pg, x, d->special_bound));
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, pg);
 
-  /* This vector is reliant on layout of sv_expm1f_data - it contains constants
+  /* This vector is reliant on layout of sv_expm1f_d->- it contains constants
      that can be used with _lane forms of svmla/svmls. Values are:
      [ coeff_2, coeff_4, ln2_hi, ln2_lo ].  */
-  svfloat32_t lane_constants = svld1rq_f32 (svptrue_b32 (), &data.c2);
+  svfloat32_t lane_constants = svld1rq_f32 (svptrue_b32 (), &d->c2);
 
   /* Algorithm returns incorrect sign of 0 for x = -0. Use merging predication
      to propagate zero through to result.  */
@@ -62,8 +63,8 @@ svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
      and f = x - i * ln2, then f is in [-ln2/2, ln2/2].
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
-  svfloat32_t j = svmla_n_f32_m (pnz, sv_f32 (data.shift), x, data.inv_ln2);
-  j = svsub_n_f32_m (pnz, j, data.shift);
+  svfloat32_t j = svmla_n_f32_m (pnz, sv_f32 (d->shift), x, d->inv_ln2);
+  j = svsub_n_f32_m (pnz, j, d->shift);
   svint32_t i = svcvt_s32_f32_m (svreinterpret_s32_f32 (x), pnz, j);
 
   svfloat32_t f = x;

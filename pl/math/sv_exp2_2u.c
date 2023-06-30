@@ -15,7 +15,7 @@
 #define BigBound 1022
 #define UOFlowBound 1280
 
-static struct
+static const struct data
 {
   double poly[4];
   double shift, big_bound, uoflow_bound;
@@ -29,7 +29,7 @@ static struct
   .big_bound = BigBound,
 };
 
-#define C(i) sv_f64 (data.poly[i])
+#define C(i) sv_f64 (d->poly[i])
 #define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 #define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
@@ -38,7 +38,8 @@ static struct
 /* Update of both special and non-special cases, if any special case is
    detected.  */
 static inline svfloat64_t
-special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
+special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
+	      const struct data *d)
 {
   /* s=2^n may overflow, break it up into s=s1*s2,
      such that exp = s + s*y can be computed as s1*(s2+s2*y)
@@ -55,7 +56,7 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
     pg, svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), SpecialBias2), b));
 
   /* |n| > 1280 => 2^(n) overflows.  */
-  svbool_t p_cmp = svacgt_n_f64 (pg, n, data.uoflow_bound);
+  svbool_t p_cmp = svacgt_n_f64 (pg, n, d->uoflow_bound);
 
   svfloat64_t r1 = svmul_f64_x (pg, s1, s1);
   svfloat64_t r2 = svmla_f64_x (pg, s2, s2, y);
@@ -70,11 +71,12 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 				       want 0x1.f8db0d4df721dp-1.  */
 svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
 {
-  svbool_t no_big_scale = svacle_n_f64 (pg, x, data.big_bound);
+  const struct data *d = ptr_barrier (&data);
+  svbool_t no_big_scale = svacle_n_f64 (pg, x, d->big_bound);
   svbool_t special = svnot_b_z (pg, no_big_scale);
 
   /* Reduce x to k/N + r, where k is integer and r in [-1/2N, 1/2N].  */
-  svfloat64_t shift = sv_f64 (data.shift);
+  svfloat64_t shift = sv_f64 (d->shift);
   svfloat64_t kd = svadd_f64_x (pg, x, shift);
   svuint64_t ki = svreinterpret_u64_f64 (kd);
   /* kd = k/N.  */
@@ -95,7 +97,7 @@ svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
 
   /* Assemble exp2(x) = exp2(r) * scale.  */
   if (unlikely (svptest_any (pg, special)))
-    return special_case (pg, scale, y, kd);
+    return special_case (pg, scale, y, kd, d);
   return svmla_f64_x (pg, scale, scale, y);
 }
 

@@ -11,7 +11,7 @@
 
 #define P(i) __sv_log2f_poly[i]
 
-static struct
+static const struct data
 {
   float poly_02468[5];
   float poly_1357[4];
@@ -45,6 +45,8 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
 				   want 0x1.a9be8p-2.  */
 svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   svuint32_t u = svreinterpret_u32_f32 (x);
   svbool_t special = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, u, Min), Thres);
 
@@ -61,16 +63,12 @@ svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
 
   /* Evaluate polynomial using pairwise Horner scheme.  */
-  svfloat32_t p_1357 = svld1rq_f32 (pg, &data.poly_1357[0]);
-  svfloat32_t q_01
-      = svmla_lane_f32 (sv_f32 (data.poly_02468[0]), r, p_1357, 0);
-  svfloat32_t q_23
-      = svmla_lane_f32 (sv_f32 (data.poly_02468[1]), r, p_1357, 1);
-  svfloat32_t q_45
-      = svmla_lane_f32 (sv_f32 (data.poly_02468[2]), r, p_1357, 2);
-  svfloat32_t q_67
-      = svmla_lane_f32 (sv_f32 (data.poly_02468[3]), r, p_1357, 3);
-  svfloat32_t y = svmla_f32_x (pg, q_67, r2, sv_f32 (data.poly_02468[4]));
+  svfloat32_t p_1357 = svld1rq_f32 (pg, &d->poly_1357[0]);
+  svfloat32_t q_01 = svmla_lane_f32 (sv_f32 (d->poly_02468[0]), r, p_1357, 0);
+  svfloat32_t q_23 = svmla_lane_f32 (sv_f32 (d->poly_02468[1]), r, p_1357, 1);
+  svfloat32_t q_45 = svmla_lane_f32 (sv_f32 (d->poly_02468[2]), r, p_1357, 2);
+  svfloat32_t q_67 = svmla_lane_f32 (sv_f32 (d->poly_02468[3]), r, p_1357, 3);
+  svfloat32_t y = svmla_f32_x (pg, q_67, r2, sv_f32 (d->poly_02468[4]));
   y = svmla_f32_x (pg, q_45, r2, y);
   y = svmla_f32_x (pg, q_23, r2, y);
   y = svmla_f32_x (pg, q_01, r2, y);

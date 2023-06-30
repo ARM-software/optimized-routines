@@ -10,7 +10,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-static struct
+static const struct data
 {
   float poly[5];
   float shift, thres;
@@ -26,7 +26,7 @@ static struct
   .thres = 0x1.5d5e2ap+6f,
 };
 
-#define C(i) sv_f32 (data.poly[i])
+#define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -41,14 +41,15 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 				  want 0x1.ba7ebp+0.  */
 svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
   /* exp2(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
     x = n + r, with r in [-1/2, 1/2].  */
-  svfloat32_t shift = sv_f32 (data.shift);
+  svfloat32_t shift = sv_f32 (d->shift);
   svfloat32_t z = svadd_f32_x (pg, x, shift);
   svfloat32_t n = svsub_f32_x (pg, z, shift);
   svfloat32_t r = svsub_f32_x (pg, x, n);
 
-  svbool_t special = svacgt_n_f32 (pg, x, data.thres);
+  svbool_t special = svacgt_n_f32 (pg, x, d->thres);
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 
   /* Polynomial evaluation: poly(r) ~ exp2(r)-1.
