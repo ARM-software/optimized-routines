@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pairwise_hornerf.h"
+#include "poly_advsimd_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -28,8 +28,6 @@ static const struct data
   .off = V4 (0x3f2aaaab),	    /* 0.666667.  */
   .mantissa_mask = V4 (0x007fffff),
 };
-
-#define P(i) d->poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
@@ -60,7 +58,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
 
   /* y = log10(1+r) + n * log10(2).  */
   float32x4_t r2 = vmulq_f32 (r, r);
-  float32x4_t poly = PAIRWISE_HORNER_7 (r, r2, P);
+  float32x4_t poly = v_pw_horner_7_f32 (r, r2, d->poly);
   /* y = Log10(2) * n + poly * InvLn(10).  */
   float32x4_t y = vfmaq_f32 (r, d->ln2, n);
   y = vfmaq_f32 (vmulq_f32 (y, d->inv_ln10), poly, r2);

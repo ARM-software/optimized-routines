@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrinf.h"
+#include "poly_advsimd_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -34,7 +34,6 @@ static const struct data
 #define RangeVal v_u32 (0x47000000)  /* asuint32(0x1p15f).  */
 #define TinyBound v_u32 (0x30000000) /* asuint32 (0x1p-31f).  */
 #define Thresh v_u32 (0x16000000)    /* asuint32(RangeVal) - TinyBound.  */
-#define C(i) d->poly[i]
 
 /* Special cases (fall back to scalar calls).  */
 static float32x4_t VPCS_ATTR NOINLINE
@@ -57,7 +56,7 @@ eval_poly (float32x4_t z, const struct data *d)
     z2 = vbslq_f32 (will_uflow, v_f32 (0), z2);
 #endif
   float32x4_t z4 = vmulq_f32 (z2, z2);
-  return ESTRIN_5 (z, z2, z4, C);
+  return v_estrin_5_f32 (z, z2, z4, d->poly);
 }
 
 /* Fast implementation of AdvSIMD tanf.

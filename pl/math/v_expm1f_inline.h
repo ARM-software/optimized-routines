@@ -11,7 +11,7 @@
 
 #include "v_math.h"
 #include "math_config.h"
-#include "estrinf.h"
+#include "poly_advsimd_f32.h"
 
 static const struct data
 {
@@ -28,7 +28,6 @@ static const struct data
 };
 
 #define ExponentBias v_s32 (0x3f800000) /* asuint(1.0f).  */
-#define C(i) d->poly[i]
 
 static inline float32x4_t
 expm1f_inline (float32x4_t x)
@@ -49,7 +48,7 @@ expm1f_inline (float32x4_t x)
      Uses Estrin scheme, where the main __v_expm1f routine uses Horner.  */
   float32x4_t f2 = vmulq_f32 (f, f);
   float32x4_t f4 = vmulq_f32 (f2, f2);
-  float32x4_t p = ESTRIN_4 (f, f2, f4, C);
+  float32x4_t p = v_estrin_4_f32 (f, f2, f4, d->poly);
   p = vfmaq_f32 (f, f2, p);
 
   /* t = 2^i.  */

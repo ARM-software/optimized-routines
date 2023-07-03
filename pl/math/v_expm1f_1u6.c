@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "hornerf.h"
+#include "poly_advsimd_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -32,7 +32,6 @@ static const struct data
 #define BigBoundNeg 0x42cddd5e		/* asuint(0x1.9bbabcp+6).  */
 #define TinyBound 0x34000000		/* asuint(0x1p-23).  */
 #define ExponentBias v_s32 (0x3f800000) /* asuint(1.0f).  */
-#define C(i) d->poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
@@ -80,7 +79,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
 	 x + ax^2 + bx^3 + cx^4 ....
      So we calculate the polynomial P(f) = a + bf + cf^2 + ...
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
-  float32x4_t p = HORNER_4 (f, C);
+  float32x4_t p = v_horner_4_f32 (f, d->poly);
   p = vfmaq_f32 (f, vmulq_f32 (f, f), p);
 
   /* Assemble the result.

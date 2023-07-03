@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "hornerf.h"
+#include "poly_advsimd_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -26,8 +26,6 @@ static const struct data
 #define Half 0x3f000000
 #define One 0x3f800000
 #define Small 0x39800000 /* 2^-12.  */
-
-#define P(i) d->poly[i]
 
 #if WANT_SIMD_EXCEPT
 static float32x4_t VPCS_ATTR NOINLINE
@@ -82,7 +80,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (asin) (float32x4_t x)
   float32x4_t z = vbslq_f32 (a_lt_half, ax, vsqrtq_f32 (z2));
 
   /* Use a single polynomial approximation P for both intervals.  */
-  float32x4_t p = HORNER_4 (z2, P);
+  float32x4_t p = v_horner_4_f32 (z2, d->poly);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = vfmaq_f32 (z, vmulq_f32 (z, z2), p);
 

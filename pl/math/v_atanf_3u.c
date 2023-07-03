@@ -8,7 +8,7 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "estrinf.h"
+#include "poly_advsimd_f32.h"
 
 static const struct data
 {
@@ -85,8 +85,9 @@ float32x4_t VPCS_ATTR V_NAME_F1 (atan) (float32x4_t x)
   float32x4_t z2 = vmulq_f32 (z, z);
   float32x4_t z4 = vmulq_f32 (z2, z2);
 
-  float32x4_t y = vfmaq_f32 (ESTRIN_3 (z2, z4, P), z4,
-			     vmulq_f32 (z4, ESTRIN_3_ (z2, z4, P, 4)));
+  float32x4_t y = vfmaq_f32 (
+      v_pairwise_poly_3_f32 (z2, z4, d->poly), z4,
+      vmulq_f32 (z4, v_pairwise_poly_3_f32 (z2, z4, d->poly + 4)));
 
   /* y = shift + z * P(z^2).  */
   y = vaddq_f32 (vfmaq_f32 (az, y, vmulq_f32 (z2, az)), shift);

@@ -8,7 +8,7 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "estrinf.h"
+#include "poly_advsimd_f32.h"
 
 static const struct data
 {
@@ -25,8 +25,6 @@ static const struct data
 };
 
 #define SignMask v_u32 (0x80000000)
-
-#define P(i) data_ptr->poly[i]
 
 /* Special cases i.e. 0, infinity and nan (fall back to scalar calls).  */
 static float32x4_t VPCS_ATTR NOINLINE
@@ -88,8 +86,9 @@ float32x4_t VPCS_ATTR V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
   float32x4_t z2 = vmulq_f32 (z, z);
   float32x4_t z4 = vmulq_f32 (z2, z2);
 
-  float32x4_t ret = vfmaq_f32 (ESTRIN_3 (z2, z4, P), z4,
-			       vmulq_f32 (z4, ESTRIN_3_ (z2, z4, P, 4)));
+  float32x4_t ret = vfmaq_f32 (
+      v_pairwise_poly_3_f32 (z2, z4, data_ptr->poly), z4,
+      vmulq_f32 (z4, v_pairwise_poly_3_f32 (z2, z4, data_ptr->poly + 4)));
 
   /* y = shift + z * P(z^2).  */
   ret = vaddq_f32 (vfmaq_f32 (z, ret, vmulq_f32 (z2, z)), shift);
