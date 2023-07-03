@@ -7,7 +7,6 @@
 
 #include "mathlib.h"
 #include "v_math.h"
-#include "estrin.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -40,7 +39,6 @@ const static struct data
 #endif
 };
 
-#define C(i) d->poly[i]
 #define N (1 << V_EXP_TABLE_BITS)
 #define Tab __v_exp_data
 #define IndexMask v_u64 (N - 1)
@@ -119,7 +117,10 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
 
   /* y = exp10(r) - 1 ~= C0 r + C1 r^2 + C2 r^3 + C3 r^4.  */
   float64x2_t r2 = vmulq_f64 (r, r);
-  float64x2_t y = vmulq_f64 (r, ESTRIN_3 (r, r2, C));
+  float64x2_t p = vfmaq_f64 (d->poly[0], r, d->poly[1]);
+  float64x2_t y = vfmaq_f64 (d->poly[2], r, d->poly[3]);
+  p = vfmaq_f64 (p, y, r2);
+  y = vmulq_f64 (r, p);
 
   /* s = 2^(n/N).  */
   u = v_lookup_u64 (Tab, i);

@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -31,8 +31,6 @@ static const struct data
 #define Halfu (0x3fe0000000000000)
 #define One (0x3ff0000000000000)
 #define Small (0x3e50000000000000) /* 2^-12.  */
-
-#define P(i) d->poly[i]
 
 #if WANT_SIMD_EXCEPT
 static float64x2_t VPCS_ATTR NOINLINE
@@ -92,7 +90,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (asin) (float64x2_t x)
   float64x2_t z4 = vmulq_f64 (z2, z2);
   float64x2_t z8 = vmulq_f64 (z4, z4);
   float64x2_t z16 = vmulq_f64 (z8, z8);
-  float64x2_t p = ESTRIN_11 (z2, z4, z8, z16, P);
+  float64x2_t p = v_estrin_11_f64 (z2, z4, z8, z16, d->poly);
 
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = vfmaq_f64 (z, vmulq_f64 (z, z2), p);

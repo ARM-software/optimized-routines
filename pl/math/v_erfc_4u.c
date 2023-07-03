@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "horner.h"
+#include "poly_advsimd_f64.h"
 #include "math_config.h"
 #include "pl_sig.h"
 #include "pl_test.h"
@@ -19,7 +19,6 @@
 #define Scale v_f64 (0x1.0000002p27)
 
 /* Coeffs for polynomial approximation on [0x1.0p-28., 31.].  */
-#define PX __v_erfc_data.poly
 #define xint __v_erfc_data.interval_bounds
 
 /* Special cases (fall back to scalar calls).  */
@@ -44,8 +43,8 @@ lookup (uint64x2_t i)
   struct entry e;
   for (int j = 0; j <= ERFC_POLY_ORDER; ++j)
     {
-      e.P[j][0] = PX[i[0]][j];
-      e.P[j][1] = PX[i[1]][j];
+      e.P[j][0] = __v_erfc_data.poly[i[0]][j];
+      e.P[j][1] = __v_erfc_data.poly[i[1]][j];
     }
   e.xi[0] = xint[i[0]];
   e.xi[1] = xint[i[1]];
@@ -125,8 +124,7 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
 
   /* Evaluate Polynomial: P(|x|-x_i).  */
   z = a - dat.xi;
-#define C(i) dat.P[i]
-  p = HORNER_12 (z, C);
+  p = v_horner_12_f64 (z, dat.P);
 
   /* Evaluate Gaussian: exp(-x^2).  */
   float64x2_t e = v_eval_gauss (a);

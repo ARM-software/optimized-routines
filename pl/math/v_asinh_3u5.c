@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -14,7 +14,6 @@
 #define HugeBound 0x5fe /* top12(asuint64(0x1p511)).  */
 #define TinyBound 0x3e5 /* top12(asuint64(0x1p-26)).  */
 #define AbsMask v_u64 (0x7fffffffffffffff)
-#define C(i) v_f64 (__asinh_data.poly[i])
 
 /* Constants & data for log.  */
 #define OFF 0x3fe6000000000000
@@ -22,6 +21,20 @@
 #define A(i) v_f64 (__v_log_data.poly[i])
 #define T(i) __log_data.tab[i]
 #define N (1 << LOG_TABLE_BITS)
+
+/* Even terms of polynomial s.t. asinh(x) is approximated by
+   asinh(x) ~= x + x^3 * (C0 + C1 * x + C2 * x^2 + C3 * x^3 + ...).
+   Generated using Remez, f = (asinh(sqrt(x)) - sqrt(x))/x^(3/2).  */
+const static volatile float64x2_t poly[18]
+    = { V2 (-0x1.55555555554a7p-3),  V2 (0x1.3333333326c7p-4),
+	V2 (-0x1.6db6db68332e6p-5),  V2 (0x1.f1c71b26fb40dp-6),
+	V2 (-0x1.6e8b8b654a621p-6),  V2 (0x1.1c4daa9e67871p-6),
+	V2 (-0x1.c9871d10885afp-7),  V2 (0x1.7a16e8d9d2ecfp-7),
+	V2 (-0x1.3ddca533e9f54p-7),  V2 (0x1.0becef748dafcp-7),
+	V2 (-0x1.b90c7099dd397p-8),  V2 (0x1.541f2bb1ffe51p-8),
+	V2 (-0x1.d217026a669ecp-9),  V2 (0x1.0b5c7977aaf7p-9),
+	V2 (-0x1.e0f37daef9127p-11), V2 (0x1.388b5fe542a6p-12),
+	V2 (-0x1.021a48685e287p-14), V2 (0x1.93d4ba83d34dap-18) };
 
 static NOINLINE float64x2_t
 special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
@@ -130,7 +143,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
       float64x2_t z2 = x2 * x2;
       float64x2_t z4 = z2 * z2;
       float64x2_t z8 = z4 * z4;
-      float64x2_t p = ESTRIN_17 (x2, z2, z4, z8, z8 * z8, C);
+      float64x2_t p = v_estrin_17_f64 (x2, z2, z4, z8, z8 * z8,
+				       (const float64x2_t *) poly);
       option_2 = vfmaq_f64 (ax, p, x2 * ax);
 #if WANT_SIMD_EXCEPT
       option_2 = vbslq_f64 (tiny, x, option_2);

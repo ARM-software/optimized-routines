@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -36,7 +36,6 @@ static const struct data
 #define RangeVal 0x4160000000000000  /* asuint64(0x1p23).  */
 #define TinyBound 0x3e50000000000000 /* asuint64(2^-26).  */
 #define Thresh 0x310000000000000     /* RangeVal - TinyBound.  */
-#define C(i) dat->poly[i]
 
 /* Special cases (fall back to scalar calls).  */
 static float64x2_t VPCS_ATTR NOINLINE
@@ -87,9 +86,9 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
      tan(r) ~= r + r^3 * (C0 + r^2 * P(r)).  */
   float64x2_t r2 = vmulq_f64 (r, r), r4 = vmulq_f64 (r2, r2),
 	      r8 = vmulq_f64 (r4, r4);
-  /* Use offset version of Estrin wrapper to evaluate from C1 onwards.  */
-  float64x2_t p = ESTRIN_7_ (r2, r4, r8, C, 1);
-  p = vfmaq_f64 (C (0), p, r2);
+  /* Offset coefficients to evaluate from C1 onwards.  */
+  float64x2_t p = v_estrin_7_f64 (r2, r4, r8, dat->poly + 1);
+  p = vfmaq_f64 (dat->poly[0], p, r2);
   p = vfmaq_f64 (r, r2, vmulq_f64 (p, r));
 
   /* Recombination uses double-angle formula:

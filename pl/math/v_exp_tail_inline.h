@@ -8,7 +8,7 @@
 #define PL_MATH_V_EXP_TAIL_INLINE_H
 
 #include "v_math.h"
-#include "horner.h"
+#include "poly_advsimd_f64.h"
 
 #ifndef WANT_V_EXP_TAIL_SPECIALCASE
 #error                                                                         \
@@ -85,9 +85,8 @@ v_exp_tail_inline (float64x2_t x, float64x2_t xtail)
   uint64x2_t e = vshlq_n_u64 (u, 52 - V_EXP_TAIL_TABLE_BITS);
   uint64x2_t i = vandq_u64 (u, v_u64 (N - 1));
 
-  /* y = tail + exp(r) - 1 ~= r + C1 r^2 + C2 r^3 + C3 r^4.  */
-#define V_EXP_TAIL_C(i) d->poly[i]
-  float64x2_t y = HORNER_3 (r, V_EXP_TAIL_C);
+  /* y = tail + exp(r) - 1 ~= r + C1 r^2 + C2 r^3 + C3 r^4, using Horner.  */
+  float64x2_t y = v_horner_3_f64 (r, d->poly);
   y = vfmaq_f64 (xtail, y, r);
 
   /* s = 2^(n/N).  */

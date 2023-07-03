@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -19,7 +19,19 @@
 #define OneTop12 0x3ff
 #define BottomMask 0xffffffff
 #define AbsMask 0x7fffffffffffffff
-#define C(i) v_f64 (__log1p_data.coeffs[i])
+
+/* Generated using Remez, deg=20, in [sqrt(2)/2-1, sqrt(2)-1].  */
+const static volatile float64x2_t poly[19]
+    = { V2 (-0x1.ffffffffffffbp-2), V2 (0x1.55555555551a9p-2),
+	V2 (-0x1.00000000008e3p-2), V2 (0x1.9999999a32797p-3),
+	V2 (-0x1.555555552fecfp-3), V2 (0x1.249248e071e5ap-3),
+	V2 (-0x1.ffffff8bf8482p-4), V2 (0x1.c71c8f07da57ap-4),
+	V2 (-0x1.9999ca4ccb617p-4), V2 (0x1.7459ad2e1dfa3p-4),
+	V2 (-0x1.554d2680a3ff2p-4), V2 (0x1.3b4c54d487455p-4),
+	V2 (-0x1.2548a9ffe80e6p-4), V2 (0x1.0f389a24b2e07p-4),
+	V2 (-0x1.eee4db15db335p-5), V2 (0x1.e95b494d4a5ddp-5),
+	V2 (-0x1.15fdf07cb7c73p-4), V2 (0x1.0310b70800fcfp-4),
+	V2 (-0x1.cfa7385bdb37ep-6) };
 
 static inline float64x2_t
 eval_poly (float64x2_t f)
@@ -27,7 +39,7 @@ eval_poly (float64x2_t f)
   float64x2_t f2 = f * f;
   float64x2_t f4 = f2 * f2;
   float64x2_t f8 = f4 * f4;
-  return ESTRIN_18 (f, f2, f4, f8, f8 * f8, C);
+  return v_estrin_18_f64 (f, f2, f4, f8, f8 * f8, (const float64x2_t *) poly);
 }
 
 VPCS_ATTR

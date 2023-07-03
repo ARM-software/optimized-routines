@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "erfcf.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -35,17 +35,16 @@ interval_index (uint32_t ia12)
   // clang-format on
 }
 
-/* The C macro wraps the coeffs argument in order to make the
-   poynomial evaluation more readable.  */
-#define C(i) ((float64x2_t){coeff1[i], coeff2[i]})
-
 static inline float64x2_t
 v_approx_erfcf_poly_gauss (float64x2_t x, const double *coeff1,
 			   const double *coeff2)
 {
+  float64x2_t coeffs[16];
+  for (int i = 0; i < 16; i++)
+    coeffs[i] = (float64x2_t){ coeff1[i], coeff2[i] };
   float64x2_t x2 = x * x;
   float64x2_t x4 = x2 * x2;
-  float64x2_t poly = ESTRIN_15 (x, x2, x4, x4 * x4, C);
+  float64x2_t poly = v_estrin_15_f64 (x, x2, x4, x4 * x4, coeffs);
   float64x2_t gauss = v_exp_tail_inline (-(x * x), v_f64 (0.0));
   return poly * gauss;
 }

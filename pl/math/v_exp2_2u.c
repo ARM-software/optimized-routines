@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -28,8 +28,6 @@ static const struct data
   .scale_big_bound = V2 (BigBound),
   .scale_uoflow_bound = V2 (UOFlowBound),
 };
-
-#define C(i) d->poly[i]
 
 static inline uint64x2_t
 lookup_sbits (uint64x2_t i)
@@ -109,7 +107,7 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 
   /* y ~ exp2(r) - 1.  */
   float64x2_t r2 = vmulq_f64 (r, r);
-  float64x2_t y = ESTRIN_3 (r, r2, C);
+  float64x2_t y = v_pairwise_poly_3_f64 (r, r2, d->poly);
   y = vmulq_f64 (r, y);
 
 #if !WANT_SIMD_EXCEPT

@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -36,7 +36,6 @@ static const struct data
 /* Value below which expm1(x) is within 2 ULP of x.  */
 #define TinyBound 0x3cc0000000000000		/* asuint64(0x1p-51).  */
 #define ExponentBias v_s64 (0x3ff0000000000000) /* asuint64(1.0).  */
-#define C(i) d->poly[i]
 
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
@@ -86,7 +85,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
   float64x2_t f2 = vmulq_f64 (f, f);
   float64x2_t f4 = vmulq_f64 (f2, f2);
   float64x2_t f8 = vmulq_f64 (f4, f4);
-  float64x2_t p = vfmaq_f64 (f, f2, ESTRIN_10 (f, f2, f4, f8, C));
+  float64x2_t p = vfmaq_f64 (f, f2, v_estrin_10_f64 (f, f2, f4, f8, d->poly));
 
   /* Assemble the result.
      expm1(x) ~= 2^i * (p + 1) - 1

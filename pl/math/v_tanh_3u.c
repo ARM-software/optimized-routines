@@ -5,7 +5,7 @@
  */
 
 #include "v_math.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 #include "mathlib.h"
 #include "pl_sig.h"
 #include "pl_test.h"
@@ -15,11 +15,24 @@
 #define MLn2hi v_f64 (-0x1.62e42fefa39efp-1)
 #define MLn2lo v_f64 (-0x1.abc9e3b39803fp-56)
 #define Shift v_f64 (0x1.8p52)
-#define C(i) v_f64 (__expm1_poly[i])
 
 #define BoringBound 0x403241bf835f9d5f /* asuint64 (0x1.241bf835f9d5fp+4).  */
 #define TinyBound 0x3e40000000000000   /* asuint64 (0x1p-27).  */
 #define One v_u64 (0x3ff0000000000000)
+
+/* Generated using Remez, deg=12 in [-log(2)/2, log(2)/2].  */
+const static volatile float64x2_t expm1_poly[11]
+    = { V2 (0x1p-1),
+	V2 (0x1.5555555555559p-3),
+	V2 (0x1.555555555554bp-5),
+	V2 (0x1.111111110f663p-7),
+	V2 (0x1.6c16c16c1b5f3p-10),
+	V2 (0x1.a01a01affa35dp-13),
+	V2 (0x1.a01a018b4ecbbp-16),
+	V2 (0x1.71ddf82db5bb4p-19),
+	V2 (0x1.27e517fc0d54bp-22),
+	V2 (0x1.af5eedae67435p-26),
+	V2 (0x1.1f143d060a28ap-29) };
 
 static inline float64x2_t
 expm1_inline (float64x2_t x)
@@ -36,7 +49,9 @@ expm1_inline (float64x2_t x)
   /* Approximate expm1(f) using polynomial.  */
   float64x2_t f2 = f * f;
   float64x2_t f4 = f2 * f2;
-  float64x2_t p = vfmaq_f64 (f, f2, ESTRIN_10 (f, f2, f4, f4 * f4, C));
+  float64x2_t p = vfmaq_f64 (
+      f, f2,
+      v_estrin_10_f64 (f, f2, f4, f4 * f4, (const float64x2_t *) expm1_poly));
 
   /* t = 2 ^ i.  */
   float64x2_t t = vreinterpretq_f64_u64 (vreinterpretq_u64_s64 (i << 52) + One);

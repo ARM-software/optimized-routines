@@ -6,7 +6,6 @@
  */
 
 #include "v_math.h"
-#include "pairwise_horner.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 

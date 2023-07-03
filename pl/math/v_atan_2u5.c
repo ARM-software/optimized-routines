@@ -8,7 +8,7 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "estrin.h"
+#include "poly_advsimd_f64.h"
 
 static const struct data
 {
@@ -33,8 +33,6 @@ static const struct data
 #define SignMask v_u64 (0x8000000000000000)
 #define TinyBound 0x3e10000000000000 /* asuint64(0x1p-30).  */
 #define BigBound 0x4340000000000000  /* asuint64(0x1p53).  */
-
-#define P(i) d->poly[i]
 
 /* Fast implementation of vector atan.
    Based on atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
@@ -82,8 +80,9 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atan) (float64x2_t x)
   float64x2_t x2 = vmulq_f64 (z2, z2);
   float64x2_t x4 = vmulq_f64 (x2, x2);
   float64x2_t x8 = vmulq_f64 (x4, x4);
-  float64x2_t y = vfmaq_f64 (ESTRIN_7 (z2, x2, x4, P),
-			     ESTRIN_11_ (z2, x2, x4, x8, P, 8), x8);
+  float64x2_t y
+      = vfmaq_f64 (v_estrin_7_f64 (z2, x2, x4, d->poly),
+		   v_estrin_11_f64 (z2, x2, x4, x8, d->poly + 8), x8);
 
   /* Finalize. y = shift + z + z^3 * P(z^2).  */
   y = vfmaq_f64 (az, y, vmulq_f64 (z2, az));

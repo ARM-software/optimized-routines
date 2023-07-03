@@ -9,7 +9,7 @@
 #define PL_MATH_V_LOG1P_INLINE_H
 
 #include "v_math.h"
-#include "pairwise_horner.h"
+#include "poly_advsimd_f64.h"
 
 #define Ln2Hi v_f64 (0x1.62e42fefa3800p-1)
 #define Ln2Lo v_f64 (0x1.ef35793c76730p-45)
@@ -21,7 +21,18 @@
 #define BottomMask 0xffffffff
 #define BigBoundTop 0x5fe /* top12 (asuint64 (0x1p511)).  */
 
-#define C(i) v_f64 (__log1p_data.coeffs[i])
+/* Generated using Remez, deg=20, in [sqrt(2)/2-1, sqrt(2)-1].  */
+const static volatile float64x2_t log1p_poly[19]
+    = { V2 (-0x1.ffffffffffffbp-2), V2 (0x1.55555555551a9p-2),
+	V2 (-0x1.00000000008e3p-2), V2 (0x1.9999999a32797p-3),
+	V2 (-0x1.555555552fecfp-3), V2 (0x1.249248e071e5ap-3),
+	V2 (-0x1.ffffff8bf8482p-4), V2 (0x1.c71c8f07da57ap-4),
+	V2 (-0x1.9999ca4ccb617p-4), V2 (0x1.7459ad2e1dfa3p-4),
+	V2 (-0x1.554d2680a3ff2p-4), V2 (0x1.3b4c54d487455p-4),
+	V2 (-0x1.2548a9ffe80e6p-4), V2 (0x1.0f389a24b2e07p-4),
+	V2 (-0x1.eee4db15db335p-5), V2 (0x1.e95b494d4a5ddp-5),
+	V2 (-0x1.15fdf07cb7c73p-4), V2 (0x1.0310b70800fcfp-4),
+	V2 (-0x1.cfa7385bdb37ep-6) };
 
 static inline float64x2_t
 log1p_inline (float64x2_t x)
@@ -66,7 +77,7 @@ log1p_inline (float64x2_t x)
 
   /* Approximate log1p(f) on the reduced input using a polynomial.  */
   float64x2_t f2 = f * f;
-  float64x2_t p = PAIRWISE_HORNER_18 (f, f2, C);
+  float64x2_t p = v_pw_horner_18_f64 (f, f2, (const float64x2_t *) log1p_poly);
 
   /* Assemble log1p(x) = k * log2 + log1p(f) + c/m.  */
   float64x2_t ylo = vfmaq_f64 (cm, k, Ln2Lo);
