@@ -528,25 +528,16 @@ extern const struct v_log10_data
 } __v_log10_data HIDDEN;
 
 /* Some data for SVE powf's internal exp and log.  */
-#define SV_POWF_EXP2_TABLE_BITS 5
-#define SV_POWF_EXP2_POLY_ORDER 3
-#define SV_POWF_EXP2_N (1 << SV_POWF_EXP2_TABLE_BITS)
-#define SV_POWF_EXP2_SCALE ((double) SV_POWF_EXP2_N)
-extern const struct sv_powf_exp2_data
+#define V_POWF_EXP2_TABLE_BITS 5
+#define V_POWF_EXP2_N (1 << V_POWF_EXP2_TABLE_BITS)
+#define V_POWF_LOG2_TABLE_BITS 5
+#define V_POWF_LOG2_N (1 << V_POWF_LOG2_TABLE_BITS)
+extern const struct v_powf_data
 {
-  uint64_t tab[SV_POWF_EXP2_N];
-  double poly[SV_POWF_EXP2_POLY_ORDER];
-} __sv_powf_exp2_data HIDDEN;
-
-#define SV_POWF_LOG2_TABLE_BITS 5
-#define SV_POWF_LOG2_POLY_ORDER 4
-#define SV_POWF_LOG2_N (1 << SV_POWF_LOG2_TABLE_BITS)
-extern const struct sv_powf_log2_data
-{
-  double invc[SV_POWF_LOG2_N];
-  double logc[SV_POWF_LOG2_N];
-  double poly[SV_POWF_LOG2_POLY_ORDER];
-} __sv_powf_log2_data HIDDEN;
+  double invc[V_POWF_LOG2_N];
+  double logc[V_POWF_LOG2_N];
+  uint64_t scale[V_POWF_EXP2_N];
+} __v_powf_data HIDDEN;
 
 #define V_LOG_POLY_ORDER 6
 #define V_LOG_TABLE_BITS 7

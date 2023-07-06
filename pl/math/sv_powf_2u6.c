@@ -11,17 +11,43 @@
 
 /* The following data is used in the SVE pow core computation
    and special case detection.  */
-#define Tinvc __sv_powf_log2_data.invc
-#define Tlogc __sv_powf_log2_data.logc
-#define Texp __sv_powf_exp2_data.tab
-#define A(i) sv_f64 (__sv_powf_log2_data.poly[i])
-#define C(i) sv_f64 (__sv_powf_exp2_data.poly[i])
-/* 2.6 ulp ~ 0.5 + 2^24 (128*Ln2*relerr_log2 + relerr_exp2).  */
-#define SignBias (1 << (SV_POWF_EXP2_TABLE_BITS + 11))
+#define Tinvc __v_powf_data.invc
+#define Tlogc __v_powf_data.logc
+#define Texp __v_powf_data.scale
+#define SignBias (1 << (V_POWF_EXP2_TABLE_BITS + 11))
 #define Shift 0x1.8p52
-#define Off 0x3f35d000
-#define ExpUnderFlowBound (-150.0 * SV_POWF_EXP2_SCALE)
-#define ExpOverFlowBound (128.0 * SV_POWF_EXP2_SCALE)
+#define Norm 0x1p23f /* 0x4b000000.  */
+
+/* Overall ULP error bound for pow is 2.6 ulp
+   ~ 0.5 + 2^24 (128*Ln2*relerr_log2 + relerr_exp2).  */
+static const struct data
+{
+  double log_poly[4];
+  double exp_poly[3];
+  float uflow_bound, oflow_bound, small_bound;
+  uint32_t sign_bias, sign_mask, subnormal_bias, off;
+} data = {
+  /* rel err: 1.5 * 2^-30. Each coefficients is multiplied the value of
+     V_POWF_EXP2_N.  */
+  .log_poly = { -0x1.6ff5daa3b3d7cp+3, 0x1.ec81d03c01aebp+3,
+		-0x1.71547bb43f101p+4, 0x1.7154764a815cbp+5 },
+  /* rel err: 1.69 * 2^-34.  */
+  .exp_poly = {
+    0x1.c6af84b912394p-20, /* A0 / V_POWF_EXP2_N^3.  */
+    0x1.ebfce50fac4f3p-13, /* A1 / V_POWF_EXP2_N^2.  */
+    0x1.62e42ff0c52d6p-6,   /* A3 / V_POWF_EXP2_N.  */
+  },
+  .uflow_bound = -0x1.2cp+12f, /* -150.0 * V_POWF_EXP2_N.  */
+  .oflow_bound = 0x1p+12f, /* 128.0 * V_POWF_EXP2_N.  */
+  .small_bound = 0x1p-126f,
+  .off = 0x3f35d000,
+  .sign_bias = SignBias,
+  .sign_mask = 0x80000000,
+  .subnormal_bias = 0x0b800000, /* 23 << 23.  */
+};
+
+#define A(i) sv_f64 (d->log_poly[i])
+#define C(i) sv_f64 (d->exp_poly[i])
 
 /* Check if x is an integer.  */
 static inline svbool_t
@@ -102,19 +128,10 @@ powf_specialcase (float x, float y, float z)
     }
   if (unlikely (zeroinfnan (ix)))
     {
-      uint32_t sign_bias = 0;
       float_t x2 = x * x;
       if (ix & 0x80000000 && checkint (iy) == 1)
-	{
-	  x2 = -x2;
-	  /* This is only needed if we care about error numbers.  */
-	  sign_bias = 1;
-	}
-      if (2 * ix == 0 && iy & 0x80000000)
-	return sign_bias ? -INFINITY : INFINITY;
-      /* Without the barrier some versions of clang hoist the 1/x2 and
-	 thus division by zero exception can be signaled spuriously.  */
-      return iy & 0x80000000 ? opt_barrier_float (1 / x2) : x2;
+	x2 = -x2;
+      return iy & 0x80000000 ? 1 / x2 : x2;
     }
   /* We need a return here in case x<0 and y is integer, but all other tests
    need to be run.  */
@@ -123,8 +140,7 @@ powf_specialcase (float x, float y, float z)
 
 /* Scalar fallback for special case routines with custom signature.  */
 static inline svfloat32_t
-sv_call_powf_sc (float (*f) (float, float, float), svfloat32_t x1,
-		 svfloat32_t x2, svfloat32_t y, svbool_t cmp)
+sv_call_powf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
 {
   svbool_t p = svpfirst (cmp, svpfalse ());
   while (svptest_any (cmp, p))
@@ -132,7 +148,7 @@ sv_call_powf_sc (float (*f) (float, float, float), svfloat32_t x1,
       float sx1 = svclastb_n_f32 (p, 0, x1);
       float sx2 = svclastb_n_f32 (p, 0, x2);
       float elem = svclastb_n_f32 (p, 0, y);
-      elem = (*f) (sx1, sx2, elem);
+      elem = powf_specialcase (sx1, sx2, elem);
       svfloat32_t y2 = svdup_n_f32 (elem);
       y = svsel_f32 (p, y2, y);
       p = svpnext_b32 (cmp, p);
@@ -143,7 +159,8 @@ sv_call_powf_sc (float (*f) (float, float, float), svfloat32_t x1,
 /* Compute core for half of the lanes in double precision.  */
 static inline svfloat64_t
 sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
-		  svfloat64_t y, svuint64_t sign_bias, svfloat64_t *pylogx)
+		  svfloat64_t y, svuint64_t sign_bias, svfloat64_t *pylogx,
+		  const struct data *d)
 {
   svfloat64_t invc = svld1_gather_u64index_f64 (pg, Tinvc, i);
   svfloat64_t logc = svld1_gather_u64index_f64 (pg, Tlogc, i);
@@ -168,12 +185,11 @@ sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
   r = svsub_f64_x (pg, *pylogx, kd);
 
   /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
-  svuint64_t t
-    = svld1_gather_u64index_u64 (pg, Texp,
-				 svand_n_u64_x (pg, ki, SV_POWF_EXP2_N - 1));
+  svuint64_t t = svld1_gather_u64index_u64 (
+      pg, Texp, svand_n_u64_x (pg, ki, V_POWF_EXP2_N - 1));
   svuint64_t ski = svadd_u64_x (pg, ki, sign_bias);
   t = svadd_u64_x (pg, t,
-		   svlsl_n_u64_x (pg, ski, 52 - SV_POWF_EXP2_TABLE_BITS));
+		   svlsl_n_u64_x (pg, ski, 52 - V_POWF_EXP2_TABLE_BITS));
   svfloat64_t s = svreinterpret_f64_u64 (t);
 
   svfloat64_t p = C (0);
@@ -188,7 +204,8 @@ sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
    vector. Lower cost of promotion by considering all lanes active.  */
 static inline svfloat32_t
 sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
-	      svfloat32_t y, svuint32_t sign_bias, svfloat32_t *pylogx)
+	      svfloat32_t y, svuint32_t sign_bias, svfloat32_t *pylogx,
+	      const struct data *d)
 {
   const svbool_t ptrue = svptrue_b64 ();
 
@@ -218,10 +235,10 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
 
   /* Compute each part in double precision.  */
   svfloat64_t ylogx_lo, ylogx_hi;
-  svfloat64_t lo
-    = sv_powf_core_ext (pg_lo, i_lo, z_lo, k_lo, y_lo, sign_bias_lo, &ylogx_lo);
-  svfloat64_t hi
-    = sv_powf_core_ext (pg_hi, i_hi, z_hi, k_hi, y_hi, sign_bias_hi, &ylogx_hi);
+  svfloat64_t lo = sv_powf_core_ext (pg_lo, i_lo, z_lo, k_lo, y_lo,
+				     sign_bias_lo, &ylogx_lo, d);
+  svfloat64_t hi = sv_powf_core_ext (pg_hi, i_hi, z_hi, k_hi, y_hi,
+				     sign_bias_hi, &ylogx_hi, d);
 
   /* Convert back to single-precision and interleave.  */
   svfloat32_t ylogx_lo_32 = svcvt_f32_f64_x (ptrue, ylogx_lo);
@@ -240,17 +257,18 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
 						   want 0x1.fd4b06p+127.  */
 svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 {
+  const struct data *d = ptr_barrier (&data);
+
   svuint32_t vix0 = svreinterpret_u32_f32 (x);
   svuint32_t viy0 = svreinterpret_u32_f32 (y);
-  svuint32_t vtopx0 = svlsr_n_u32_m (pg, vix0, 20);
 
   /* Negative x cases.  */
-  svuint32_t sign_bit = svand_n_u32_m (pg, vtopx0, 0x800);
-  svbool_t xisneg = svcmpeq_n_u32 (pg, sign_bit, 0x800);
+  svuint32_t sign_bit = svand_n_u32_m (pg, vix0, d->sign_mask);
+  svbool_t xisneg = svcmpeq_n_u32 (pg, sign_bit, d->sign_mask);
 
   /* Set sign_bias and ix depending on sign of x and nature of y.  */
   svbool_t yisnotint_xisneg = svpfalse_b ();
-  svuint32_t sign_bias = svdup_u32 (0);
+  svuint32_t sign_bias = sv_u32 (0);
   svuint32_t vix = vix0;
   if (unlikely (svptest_any (pg, xisneg)))
     {
@@ -258,12 +276,10 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
       yisnotint_xisneg = svisnotint (xisneg, y);
       svbool_t yisint_xisneg = svisint (xisneg, y);
       svbool_t yisodd_xisneg = svisodd (xisneg, y);
-
       /* ix set to abs(ix) if y is integer.  */
       vix = svand_n_u32_m (yisint_xisneg, vix0, 0x7fffffff);
-      /* Set to SIGN_BIAS if x is negative and y is odd.  */
-      sign_bias
-	= svsel_u32 (yisodd_xisneg, svdup_u32 (SignBias), svdup_u32 (0));
+      /* Set to SignBias if x is negative and y is odd.  */
+      sign_bias = svsel_u32 (yisodd_xisneg, sv_u32 (d->sign_bias), sv_u32 (0));
     }
 
   /* Special cases of x or y: zero, inf and nan.  */
@@ -272,47 +288,44 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
   svbool_t cmp = svorr_b_z (pg, xspecial, yspecial);
 
   /* Small cases of x: |x| < 0x1p-126.  */
-  svuint32_t vabstopx0 = svand_n_u32_x (pg, vtopx0, 0x7ff);
-  svbool_t xsmall = svcmplt_n_u32 (pg, vabstopx0, 0x008);
+  svbool_t xsmall = svaclt_n_f32 (pg, x, d->small_bound);
   if (unlikely (svptest_any (pg, xsmall)))
     {
       /* Normalize subnormal x so exponent becomes negative.  */
       svuint32_t vix_norm
-	= svreinterpret_u32_f32 (svmul_n_f32_x (xsmall, x, 0x1p23f));
+	  = svreinterpret_u32_f32 (svmul_n_f32_x (xsmall, x, Norm));
       vix_norm = svand_n_u32_x (xsmall, vix_norm, 0x7fffffff);
-      vix_norm = svsub_n_u32_x (xsmall, vix_norm, 23 << 23);
+      vix_norm = svsub_n_u32_x (xsmall, vix_norm, d->subnormal_bias);
       vix = svsel_u32 (xsmall, vix_norm, vix);
     }
   /* Part of core computation carried in working precision.  */
-  svuint32_t tmp = svsub_n_u32_x (pg, vix, Off);
-  svuint32_t i
-    = svand_n_u32_x (pg,
-		     svlsr_n_u32_x (pg, tmp, (23 - SV_POWF_LOG2_TABLE_BITS)),
-		     SV_POWF_LOG2_N - 1);
+  svuint32_t tmp = svsub_n_u32_x (pg, vix, d->off);
+  svuint32_t i = svand_n_u32_x (
+      pg, svlsr_n_u32_x (pg, tmp, (23 - V_POWF_LOG2_TABLE_BITS)),
+      V_POWF_LOG2_N - 1);
   svuint32_t top = svand_n_u32_x (pg, tmp, 0xff800000);
   svuint32_t iz = svsub_u32_x (pg, vix, top);
   svint32_t k = svasr_n_s32_x (pg, svreinterpret_s32_u32 (top),
-			       (23 - SV_POWF_EXP2_TABLE_BITS));
+			       (23 - V_POWF_EXP2_TABLE_BITS));
 
   /* Compute core in extended precision and return intermediate ylogx results to
       handle cases of underflow and underflow in exp.  */
   svfloat32_t ylogx;
-  svfloat32_t ret = sv_powf_core (pg, i, iz, k, y, sign_bias, &ylogx);
+  svfloat32_t ret = sv_powf_core (pg, i, iz, k, y, sign_bias, &ylogx, d);
 
   /* Handle exp special cases of underflow and overflow.  */
-  svuint32_t sign = svlsl_n_u32_x (pg, sign_bias, 20 - SV_POWF_EXP2_TABLE_BITS);
+  svuint32_t sign = svlsl_n_u32_x (pg, sign_bias, 20 - V_POWF_EXP2_TABLE_BITS);
   svfloat32_t ret_oflow
     = svreinterpret_f32_u32 (svorr_n_u32_x (pg, sign, asuint (INFINITY)));
   svfloat32_t ret_uflow = svreinterpret_f32_u32 (sign);
-  ret
-    = svsel_f32 (svcmple_n_f32 (pg, ylogx, ExpUnderFlowBound), ret_uflow, ret);
-  ret = svsel_f32 (svcmpgt_n_f32 (pg, ylogx, ExpOverFlowBound), ret_oflow, ret);
+  ret = svsel_f32 (svcmple_n_f32 (pg, ylogx, d->uflow_bound), ret_uflow, ret);
+  ret = svsel_f32 (svcmpgt_n_f32 (pg, ylogx, d->oflow_bound), ret_oflow, ret);
 
   /* Cases of finite y and finite negative x.  */
   ret = svsel_f32 (yisnotint_xisneg, sv_f32 (__builtin_nanf ("")), ret);
 
   if (unlikely (svptest_any (pg, cmp)))
-    return sv_call_powf_sc (powf_specialcase, x, y, ret, cmp);
+    return sv_call_powf_sc (x, y, ret, cmp);
 
   return ret;
 }
@@ -320,21 +333,15 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 PL_SIG (SV, F, 2, pow)
 PL_TEST_ULP (SV_NAME_F2 (pow), 2.06)
 /* Wide intervals spanning the whole domain but shared between x and y.  */
-#define SV_POWF_INTERVAL(lo, hi, n)                                            \
-  PL_TEST_INTERVAL (SV_NAME_F2 (pow), lo, hi, n)                               \
-  PL_TEST_INTERVAL (SV_NAME_F2 (pow), -lo, -hi, n)
-SV_POWF_INTERVAL (0, 0x1p-126, 40000)
-SV_POWF_INTERVAL (0x1p-126, 0x1p-65, 50000)
-SV_POWF_INTERVAL (0x1p-65, 1, 50000)
-SV_POWF_INTERVAL (1, 0x1p63, 50000)
-SV_POWF_INTERVAL (0x1p63, inf, 50000)
-SV_POWF_INTERVAL (0, inf, 100000)
-/* x~1 or y~1.  */
 #define SV_POWF_INTERVAL2(xlo, xhi, ylo, yhi, n)                               \
   PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), xlo, xhi, ylo, yhi, n)                  \
   PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), xlo, xhi, -ylo, -yhi, n)                \
   PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -xlo, -xhi, ylo, yhi, n)                \
   PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -xlo, -xhi, -ylo, -yhi, n)
+SV_POWF_INTERVAL2 (0, 0x1p-126, 0, inf, 40000)
+SV_POWF_INTERVAL2 (0x1p-126, 1, 0, inf, 50000)
+SV_POWF_INTERVAL2 (1, inf, 0, inf, 50000)
+/* x~1 or y~1.  */
 SV_POWF_INTERVAL2 (0x1p-1, 0x1p1, 0x1p-10, 0x1p10, 10000)
 SV_POWF_INTERVAL2 (0x1.ep-1, 0x1.1p0, 0x1p8, 0x1p16, 10000)
 SV_POWF_INTERVAL2 (0x1p-500, 0x1p500, 0x1p-1, 0x1p1, 10000)
@@ -358,5 +365,3 @@ PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 0.0, 0x1p-50, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 0x1p-50, 1.0, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 1.0, 0x1p100, 1000)
 PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)
-/* For some NaNs, AOR powf algorithm will get the sign wrong.
-   There are plans to relax the requirements on NaNs.  */
