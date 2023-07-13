@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
-#include "estrin.h"
+#include "poly_scalar_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -14,7 +14,6 @@
 #define Ln2hi 0x1.62e42fefa39efp-1
 #define Ln2lo 0x1.abc9e3b39803fp-56
 #define Shift 0x1.8p52
-#define C(i) __expm1_poly[i]
 
 #define BoringBound 0x403241bf835f9d5f /* asuint64 (0x1.241bf835f9d5fp+4).  */
 #define TinyBound 0x3e40000000000000   /* asuint64 (0x1p-27).  */
@@ -38,7 +37,7 @@ expm1_inline (double x)
   /* Approximate expm1(f) using polynomial.  */
   double f2 = f * f;
   double f4 = f2 * f2;
-  double p = fma (f2, ESTRIN_10 (f, f2, f4, f4 * f4, C), f);
+  double p = fma (f2, estrin_10_f64 (f, f2, f4, f4 * f4, __expm1_poly), f);
 
   /* t = 2 ^ i.  */
   double t = asdouble ((uint64_t) (i + 1023) << 52);

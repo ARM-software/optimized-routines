@@ -9,9 +9,7 @@
 #define PL_MATH_ERFCF_H
 
 #include "math_config.h"
-
-#define FMA fma
-#include "estrin_wrap.h"
+#include "poly_scalar_f64.h"
 
 /* Accurate exponential from optimized-routines.  */
 double
@@ -23,9 +21,7 @@ eval_poly (double z, const double *coeff)
   double z2 = z * z;
   double z4 = z2 * z2;
   double z8 = z4 * z4;
-#define C(i) coeff[i]
-  return ESTRIN_15 (z, z2, z4, z8, C);
-#undef C
+  return estrin_15_f64 (z, z2, z4, z8, coeff);
 }
 
 static inline double
@@ -34,5 +30,4 @@ eval_exp_mx2 (double x)
   return __exp_dd (-(x * x), 0.0);
 }
 
-#undef FMA
 #endif // PL_MATH_ERFCF_H

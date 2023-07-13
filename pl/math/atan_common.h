@@ -7,9 +7,7 @@
  */
 
 #include "math_config.h"
-#include "estrin.h"
-
-#define P(i) __atan_poly_data.poly[i]
+#include "poly_scalar_f64.h"
 
 /* Polynomial used in fast atan(x) and atan2(y,x) implementations
    The order 19 polynomial P approximates (atan(sqrt(x))-sqrt(x))/x^(3/2).  */
@@ -22,8 +20,8 @@ eval_poly (double z, double az, double shift)
   double x2 = z2 * z2;
   double x4 = x2 * x2;
   double x8 = x4 * x4;
-  double y
-      = fma (ESTRIN_11_ (z2, x2, x4, x8, P, 8), x8, ESTRIN_7 (z2, x2, x4, P));
+  double y = fma (estrin_11_f64 (z2, x2, x4, x8, __atan_poly_data.poly + 8),
+		  x8, estrin_7_f64 (z2, x2, x4, __atan_poly_data.poly));
 
   /* Finalize. y = shift + z + z^3 * P(z^2).  */
   y = fma (y, z2 * az, az);

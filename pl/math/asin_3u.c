@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "estrin.h"
+#include "poly_scalar_f64.h"
 #include "math_config.h"
 #include "pl_sig.h"
 #include "pl_test.h"
@@ -17,8 +17,6 @@
 #define Small (0x3e50000000000000) /* 2^-26.  */
 #define Small16 (0x3e50)
 #define QNaN (0x7ff8)
-
-#define P(i) __asin_poly[i]
 
 /* Fast implementation of double-precision asin(x) based on polynomial
    approximation.
@@ -85,7 +83,7 @@ asin (double x)
   double z4 = z2 * z2;
   double z8 = z4 * z4;
   double z16 = z8 * z8;
-  double p = ESTRIN_11 (z2, z4, z8, z16, P);
+  double p = estrin_11_f64 (z2, z4, z8, z16, __asin_poly);
 
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = fma (z * z2, p, z);

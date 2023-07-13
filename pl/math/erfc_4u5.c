@@ -6,14 +6,13 @@
  */
 
 #include "math_config.h"
-#include "pairwise_horner.h"
+#include "poly_scalar_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
 #define AbsMask (0x7fffffffffffffff)
 
 #define xint __erfc_data.interval_bounds
-#define PX __erfc_data.poly
 
 /* Accurate exponential from optimized routines.  */
 double
@@ -23,8 +22,7 @@ static inline double
 eval_poly_horner (double z, int i)
 {
   double z2 = z * z;
-#define C(j) PX[i][j]
-  return PAIRWISE_HORNER_12 (z, z2, C);
+  return pw_horner_12_f64 (z, z2, __erfc_data.poly[i]);
 }
 
 /* Accurate evaluation of exp(x^2)
