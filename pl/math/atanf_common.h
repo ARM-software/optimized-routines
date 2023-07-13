@@ -10,9 +10,7 @@
 #define PL_MATH_ATANF_COMMON_H
 
 #include "math_config.h"
-#include "estrinf.h"
-
-#define P(i) __atanf_poly_data.poly[i]
+#include "poly_scalar_f32.h"
 
 /* Polynomial used in fast atanf(x) and atan2f(y,x) implementations
    The order 7 polynomial P approximates (atan(sqrt(x))-sqrt(x))/x^(3/2).  */
@@ -29,8 +27,9 @@ eval_poly (float z, float az, float shift)
   float z4 = z2 * z2;
 
   /* Then assemble polynomial.  */
-  float y = fmaf (z4, z4 * ESTRIN_3_ (z2, z4, P, 4), ESTRIN_3 (z2, z4, P));
-
+  float y = fmaf (
+      z4, z4 * pairwise_poly_3_f32 (z2, z4, __atanf_poly_data.poly + 4),
+      pairwise_poly_3_f32 (z2, z4, __atanf_poly_data.poly));
   /* Finalize:
      y = shift + z * P(z^2).  */
   return fmaf (y, z2 * az, az) + shift;

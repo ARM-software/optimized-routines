@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "hornerf.h"
+#include "poly_scalar_f32.h"
 #include "math_config.h"
 #include "pl_sig.h"
 #include "pl_test.h"
@@ -17,8 +17,6 @@
 #define Small (0x39800000) /* 2^-12.  */
 #define Small12 (0x398)
 #define QNaN (0x7fc)
-
-#define P(i) __asinf_poly[i]
 
 /* Fast implementation of single-precision asin(x) based on polynomial
    approximation.
@@ -80,7 +78,7 @@ asinf (float x)
   float z = ax < 0.5 ? ax : sqrtf (z2);
 
   /* Use a single polynomial approximation P for both intervals.  */
-  float p = HORNER_4 (z2, P);
+  float p = horner_4_f32 (z2, __asinf_poly);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = fmaf (z * z2, p, z);
 

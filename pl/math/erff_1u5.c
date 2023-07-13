@@ -4,8 +4,7 @@
  * Copyright (c) 2020-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-#include "estrinf.h"
-#include "hornerf.h"
+#include "poly_scalar_f32.h"
 #include "math_config.h"
 #include "pl_sig.h"
 #include "pl_test.h"
@@ -55,18 +54,14 @@ erff (float x)
 
       /* Normalized cases (|x| < 0.921875) - Use Horner scheme for x+x*P(x^2).
        */
-#define C(i) A[i]
-      r = fmaf (HORNER_5 (x2, C), x, x);
-#undef C
+      r = fmaf (horner_5_f32 (x2, A), x, x);
     }
   else if (ia12 < 0x408)
     { /* |x| < 4.0 - Use a custom Estrin scheme.  */
 
       float a = fabsf (x);
       /* Use Estrin scheme on high order (small magnitude) coefficients.  */
-#define C(i) B[i]
-      r = ESTRIN_3_ (a, x * x, C, 3);
-#undef C
+      r = pairwise_poly_3_f32 (a, x * x, &B[3]);
       /* Then switch to pure Horner scheme.  */
       r = fmaf (r, a, B[2]);
       r = fmaf (r, a, B[1]);
