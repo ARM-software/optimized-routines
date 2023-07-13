@@ -585,24 +585,18 @@ extern const double __asin_poly[ASIN_POLY_ORDER + 1] HIDDEN;
 
 /* Some data for AdvSIMD and SVE pow's internal exp and log.  */
 #define V_POW_EXP_TABLE_BITS 8
-#define V_POW_EXP_POLY_ORDER 4
 extern const struct v_pow_exp_data
 {
-  double invln2N;
-  double shift;
-  double negln2hiN;
-  double negln2loN;
-  double poly[4]; /* Last four coefficients.  */
+  double poly[3];
+  double n_over_ln2, ln2_over_n_hi, ln2_over_n_lo, shift;
   uint64_t sbits[1 << V_POW_EXP_TABLE_BITS];
 } __v_pow_exp_data HIDDEN;
 
 #define V_POW_LOG_TABLE_BITS 7
-#define V_POW_LOG_POLY_ORDER 8
 extern const struct v_pow_log_data
 {
-  double ln2hi;
-  double ln2lo;
-  double poly[V_POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
+  double poly[7]; /* First coefficient is 1.  */
+  double ln2_hi, ln2_lo;
   double invc[1 << V_POW_LOG_TABLE_BITS];
   double logc[1 << V_POW_LOG_TABLE_BITS];
   double logctail[1 << V_POW_LOG_TABLE_BITS];

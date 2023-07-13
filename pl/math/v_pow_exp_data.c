@@ -10,23 +10,22 @@
 #define N (1 << V_POW_EXP_TABLE_BITS)
 
 const struct v_pow_exp_data __v_pow_exp_data = {
-// N/ln2
-.invln2N = 0x1.71547652b82fep0 * N,
-// -ln2/N
-.negln2hiN = -0x1.62e42fefc0000p-9,
-.negln2loN = 0x1.c610ca86c3899p-45,
-// Used for rounding to nearest integer without using intrinsics.
-.shift = 0x1.8p52,
 // exp polynomial coefficients.
 .poly = {
 // abs error: 1.43*2^-58
 // ulp error: 0.549 (0.550 without fma)
 // if |x| < ln2/512
-0x1p0, // unused
 0x1.fffffffffffd4p-2,
 0x1.5555571d6ef9p-3,
 0x1.5555576a5adcep-5,
 },
+// N/ln2
+.n_over_ln2 = 0x1.71547652b82fep0 * N,
+// ln2/N
+.ln2_over_n_hi = 0x1.62e42fefc0000p-9,
+.ln2_over_n_lo = -0x1.c610ca86c3899p-45,
+// Used for rounding to nearest integer without using intrinsics.
+.shift = 0x1.8p52,
 // 2^(k/N) ~= H[k]*(1 + T[k]) for int k in [0,N)
 // sbits[k] = asuint64(H[k]) - (k << 52)/N
 .sbits = {

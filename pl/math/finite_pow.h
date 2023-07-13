@@ -7,32 +7,32 @@
 
 #include "math_config.h"
 
-/* Scalar version of pow used for fallbacks for vector implementations.
-   This is almost a copy-paste of the math/pow.c algorithm, where we kept only
-   round to nearest mode and removed: exception/errno handling, tricks for
-   extra accuracy in subnormal range.  */
+/* Scalar version of pow used for fallbacks in vector implementations.  */
 
-/* Data is defined in pl/math/v_pow_log_data.c.  */
-#define INVC __v_pow_log_data.invc
-#define LOGC __v_pow_log_data.logc
-#define LOGCTAIL __v_pow_log_data.logctail
-#define A __v_pow_log_data.poly
-#define Ln2hi __v_pow_log_data.ln2hi
-#define Ln2lo __v_pow_log_data.ln2lo
+/* Data is defined in v_pow_log_data.c.  */
 #define N_LOG (1 << V_POW_LOG_TABLE_BITS)
-#define OFF 0x3fe6955500000000
+#define Off 0x3fe6955500000000
+#define As __v_pow_log_data.poly
 
-/* Data is defined in pl/math/v_pow_exp_data.c.  */
+/* Data is defined in v_pow_exp_data.c.  */
 #define N_EXP (1 << V_POW_EXP_TABLE_BITS)
-#define InvLn2N __v_pow_exp_data.invln2N
-#define NegLn2hiN __v_pow_exp_data.negln2hiN
-#define NegLn2loN __v_pow_exp_data.negln2loN
-#define Shift __v_pow_exp_data.shift
+#define SignBias (0x800 << V_POW_EXP_TABLE_BITS)
+#define SmallExp 0x3c9 /* top12(0x1p-54).  */
+#define BigExp 0x408   /* top12(512.0).  */
+#define ThresExp 0x03f /* BigExp - SmallExp.  */
+#define InvLn2N __v_pow_exp_data.n_over_ln2
+#define Ln2HiN __v_pow_exp_data.ln2_over_n_hi
+#define Ln2LoN __v_pow_exp_data.ln2_over_n_lo
 #define SBits __v_pow_exp_data.sbits
-#define C2 __v_pow_exp_data.poly[5 - V_POW_EXP_POLY_ORDER]
-#define C3 __v_pow_exp_data.poly[6 - V_POW_EXP_POLY_ORDER]
-#define C4 __v_pow_exp_data.poly[7 - V_POW_EXP_POLY_ORDER]
-#define C5 __v_pow_exp_data.poly[8 - V_POW_EXP_POLY_ORDER]
+#define Cs __v_pow_exp_data.poly
+
+/* Constants associated with pow.  */
+#define SmallPowX 0x001 /* top12(0x1p-126).  */
+#define BigPowX 0x7ff	/* top12(INFINITY).  */
+#define ThresPowX 0x7fe /* BigPowX - SmallPowX.  */
+#define SmallPowY 0x3be /* top12(0x1.e7b6p-65).  */
+#define BigPowY 0x43e	/* top12(0x1.749p62).  */
+#define ThresPowY 0x080 /* BigPowY - SmallPowY.  */
 
 /* Top 12 bits of a double (sign and exponent bits).  */
 static inline uint32_t
@@ -47,10 +47,10 @@ top12 (double x)
 static inline double
 log_inline (uint64_t ix, double *tail)
 {
-  /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
+  /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
-  uint64_t tmp = ix - OFF;
+  uint64_t tmp = ix - Off;
   int i = (tmp >> (52 - V_POW_LOG_TABLE_BITS)) & (N_LOG - 1);
   int k = (int64_t) tmp >> 52; /* arithmetic shift.  */
   uint64_t iz = ix - (tmp & 0xfffULL << 52);
@@ -58,22 +58,22 @@ log_inline (uint64_t ix, double *tail)
   double kd = (double) k;
 
   /* log(x) = k*Ln2 + log(c) + log1p(z/c-1).  */
-  double invc = INVC[i];
-  double logc = LOGC[i];
-  double logctail = LOGCTAIL[i];
+  double invc = __v_pow_log_data.invc[i];
+  double logc = __v_pow_log_data.logc[i];
+  double logctail = __v_pow_log_data.logctail[i];
 
   /* Note: 1/c is j/N or j/N/2 where j is an integer in [N,2N) and
      |z/c - 1| < 1/N, so r = z/c - 1 is exactly representible.  */
   double r = fma (z, invc, -1.0);
 
   /* k*Ln2 + log(c) + r.  */
-  double t1 = kd * Ln2hi + logc;
+  double t1 = kd * __v_pow_log_data.ln2_hi + logc;
   double t2 = t1 + r;
-  double lo1 = kd * Ln2lo + logctail;
+  double lo1 = kd * __v_pow_log_data.ln2_lo + logctail;
   double lo2 = t1 - t2 + r;
 
   /* Evaluation is optimized assuming superscalar pipelined execution.  */
-  double ar = A[0] * r; /* A[0] = -0.5.  */
+  double ar = As[0] * r;
   double ar2 = r * ar;
   double ar3 = r * ar2;
   /* k*Ln2 + log(c) + r + A[0]*r*r.  */
@@ -81,9 +81,9 @@ log_inline (uint64_t ix, double *tail)
   double lo3 = fma (ar, r, -ar2);
   double lo4 = t2 - hi + ar2;
   /* p = log1p(r) - r - A[0]*r*r.  */
-  double p
-    = (ar3
-       * (A[1] + r * A[2] + ar2 * (A[3] + r * A[4] + ar2 * (A[5] + r * A[6]))));
+  double p = (ar3
+	      * (As[1] + r * As[2]
+		 + ar2 * (As[3] + r * As[4] + ar2 * (As[5] + r * As[6]))));
   double lo = lo1 + lo2 + lo3 + lo4 + p;
   double y = hi + lo;
   *tail = hi - y + lo;
@@ -98,7 +98,7 @@ log_inline (uint64_t ix, double *tail)
    adjustment of scale, positive k here means the result may overflow and
    negative k means the result may underflow.  */
 static inline double
-specialcase (double tmp, uint64_t sbits, uint64_t ki)
+special_case (double tmp, uint64_t sbits, uint64_t ki)
 {
   double scale, y;
 
@@ -140,17 +140,15 @@ specialcase (double tmp, uint64_t sbits, uint64_t ki)
   return check_uflow (eval_as_double (y));
 }
 
-#define SIGN_BIAS (0x800 << V_POW_EXP_TABLE_BITS)
-
 /* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
-   The sign_bias argument is SIGN_BIAS or 0 and sets the sign to -1 or 1.  */
+   The sign_bias argument is SignBias or 0 and sets the sign to -1 or 1.  */
 static inline double
 exp_inline (double x, double xtail, uint32_t sign_bias)
 {
   uint32_t abstop = top12 (x) & 0x7ff;
-  if (unlikely (abstop - top12 (0x1p-54) >= top12 (512.0) - top12 (0x1p-54)))
+  if (unlikely (abstop - SmallExp >= ThresExp))
     {
-      if (abstop - top12 (0x1p-54) >= 0x80000000)
+      if (abstop - SmallExp >= 0x80000000)
 	{
 	  /* Avoid spurious underflow for tiny x.  */
 	  /* Note: 0 is common input.  */
@@ -177,7 +175,7 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   double z = InvLn2N * x;
   double kd = roundtoint (z);
   uint64_t ki = converttoint (z);
-  double r = x + kd * NegLn2hiN + kd * NegLn2loN;
+  double r = x - kd * Ln2HiN - kd * Ln2LoN;
   /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
   r += xtail;
   /* 2^(k/N) ~= scale.  */
@@ -188,9 +186,56 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   /* exp(x) = 2^(k/N) * exp(r) ~= scale + scale * (exp(r) - 1).  */
   /* Evaluation is optimized assuming superscalar pipelined execution.  */
   double r2 = r * r;
-  double tmp = r + r2 * C2 + r * r2 * (C3 + r * C4);
+  double tmp = r + r2 * Cs[0] + r * r2 * (Cs[1] + r * Cs[2]);
   if (unlikely (abstop == 0))
-    return specialcase (tmp, sbits, ki);
+    return special_case (tmp, sbits, ki);
+  double scale = asdouble (sbits);
+  /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
+     is no spurious underflow here even without fma.  */
+  return eval_as_double (scale + scale * tmp);
+}
+
+/* Computes exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
+   A version of exp_inline that is not inlined and for which sign_bias is
+   equal to 0.  */
+static double NOINLINE
+exp_nosignbias (double x, double xtail)
+{
+  uint32_t abstop = top12 (x) & 0x7ff;
+  if (unlikely (abstop - SmallExp >= ThresExp))
+    {
+      /* Avoid spurious underflow for tiny x.  */
+      if (abstop - SmallExp >= 0x80000000)
+	return 1.0;
+      /* Note: inf and nan are already handled.  */
+      if (abstop >= top12 (1024.0))
+#if WANT_SIMD_EXCEPT
+	return asuint64 (x) >> 63 ? __math_uflow (0) : __math_oflow (0);
+#else
+	return asuint64 (x) >> 63 ? 0.0 : INFINITY;
+#endif
+      /* Large x is special cased below.  */
+      abstop = 0;
+    }
+
+  /* exp(x) = 2^(k/N) * exp(r), with exp(r) in [2^(-1/2N),2^(1/2N)].  */
+  /* x = ln2/N*k + r, with k integer and r in [-ln2/2N, ln2/2N].  */
+  double z = InvLn2N * x;
+  double kd = roundtoint (z);
+  uint64_t ki = converttoint (z);
+  double r = x - kd * Ln2HiN - kd * Ln2LoN;
+  /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
+  r += xtail;
+  /* 2^(k/N) ~= scale.  */
+  uint64_t idx = ki & (N_EXP - 1);
+  uint64_t top = ki << (52 - V_POW_EXP_TABLE_BITS);
+  /* This is only a valid scale when -1023*N < k < 1024*N.  */
+  uint64_t sbits = SBits[idx] + top;
+  /* exp(x) = 2^(k/N) * exp(r) ~= scale + scale * (tail + exp(r) - 1).  */
+  double r2 = r * r;
+  double tmp = r + r2 * Cs[0] + r * r2 * (Cs[1] + r * Cs[2]);
+  if (unlikely (abstop == 0))
+    return special_case (tmp, sbits, ki);
   double scale = asdouble (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
@@ -221,7 +266,7 @@ zeroinfnan (uint64_t i)
   return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
 }
 
-static NOINLINE double
+static double NOINLINE
 __pl_finite_pow (double x, double y)
 {
   uint32_t sign_bias = 0;
@@ -232,8 +277,8 @@ __pl_finite_pow (double x, double y)
   iy = asuint64 (y);
   topx = top12 (x);
   topy = top12 (y);
-  if (unlikely (topx - 0x001 >= 0x7ff - 0x001
-		|| (topy & 0x7ff) - 0x3be >= 0x43e - 0x3be))
+  if (unlikely (topx - SmallPowX >= ThresPowX
+		|| (topy & 0x7ff) - SmallPowY >= ThresPowY))
     {
       /* Note: if |y| > 1075 * ln2 * 2^53 ~= 0x1.749p62 then pow(x,y) = inf/0
 	 and if |y| < 2^-54 / 1075 ~= 0x1.e7b6p-65 then pow(x,y) = +-1.  */
@@ -282,17 +327,17 @@ __pl_finite_pow (double x, double y)
 	    return __builtin_nan ("");
 #endif
 	  if (yint == 1)
-	    sign_bias = SIGN_BIAS;
+	    sign_bias = SignBias;
 	  ix &= 0x7fffffffffffffff;
 	  topx &= 0x7ff;
 	}
-      if ((topy & 0x7ff) - 0x3be >= 0x43e - 0x3be)
+      if ((topy & 0x7ff) - SmallPowY >= ThresPowY)
 	{
 	  /* Note: sign_bias == 0 here because y is not odd.  */
 	  if (ix == asuint64 (1.0))
 	    return 1.0;
 	  /* |y| < 2^-65, x^y ~= 1 + y*log(x).  */
-	  if ((topy & 0x7ff) < 0x3be)
+	  if ((topy & 0x7ff) < SmallPowY)
 	    return 1.0;
 #if WANT_SIMD_EXCEPT
 	  return (ix > asuint64 (1.0)) == (topy < 0x800) ? __math_oflow (0)
