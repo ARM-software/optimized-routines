@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -26,8 +26,6 @@ static const struct data
   .range_val = 0x1p23,
   .shift = 0x1.8p52,
 };
-
-#define C(i) sv_f64 (dat->poly[i])
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x)
@@ -75,9 +73,9 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
   svfloat64_t r4 = svmul_f64_x (pg, r2, r2);
   svfloat64_t r8 = svmul_f64_x (pg, r4, r4);
-  /* Use offset version of Estrin wrapper to evaluate from C1 onwards.  */
-  svfloat64_t p = ESTRIN_7_ (pg, r2, r4, r8, C, 1);
-  p = svmla_f64_x (pg, C (0), p, r2);
+  /* Use offset version coeff array by 1 to evaluate from C1 onwards.  */
+  svfloat64_t p = sv_estrin_7_f64_x (pg, r2, r4, r8, dat->poly + 1);
+  p = svmad_n_f64_x (pg, p, r2, dat->poly[0]);
   p = svmla_f64_x (pg, r, r2, svmul_f64_x (pg, p, r));
 
   /* Recombination uses double-angle formula:

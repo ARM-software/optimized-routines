@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -14,7 +14,6 @@
 #define HugeBound sv_u64 (0x5fe) /* top12(asuint64(0x1p511)).  */
 #define TinyBound (0x3e5)	 /* top12(asuint64(0x1p-26)).  */
 #define SignMask (0x8000000000000000)
-#define C(i) sv_f64 (__asinh_data.poly[i])
 
 /* Constants & data for log.  */
 #define A(i) __v_log_data.poly[i]
@@ -102,7 +101,8 @@ svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg)
       svfloat64_t z4 = svmul_f64_x (pg, z2, z2);
       svfloat64_t z8 = svmul_f64_x (pg, z4, z4);
       svfloat64_t z16 = svmul_f64_x (pg, z8, z8);
-      svfloat64_t p = ESTRIN_17 (pg, x2, z2, z4, z8, z16, C);
+      svfloat64_t p
+	  = sv_estrin_17_f64_x (pg, x2, z2, z4, z8, z16, __asinh_data.poly);
       option_2 = svmla_f64_x (pg, ax, p, svmul_f64_x (pg, x2, ax));
     }
 

@@ -9,7 +9,7 @@
 #define PL_MATH_SV_LOG1P_INLINE_H
 
 #include "sv_math.h"
-#include "sv_pairwise_horner.h"
+#include "poly_sve_f64.h"
 
 #define Ln2Hi 0x1.62e42fefa3800p-1
 #define Ln2Lo 0x1.ef35793c76730p-45
@@ -19,7 +19,6 @@
   0x00095f6200000000 /* (top32(asuint64(1)) - top32(asuint64(sqrt(2)/2)))      \
 			<< 32.  */
 #define OneTop 0x3ff
-#define C(i) (__log1p_data.coeffs[i])
 
 static inline svfloat64_t
 sv_log1p_inline (svfloat64_t x, const svbool_t pg)
@@ -71,7 +70,7 @@ sv_log1p_inline (svfloat64_t x, const svbool_t pg)
 
   /* Approximate log1p(f) on the reduced input using a polynomial.  */
   svfloat64_t f2 = svmul_f64_x (pg, f, f);
-  svfloat64_t p = PAIRWISE_HORNER_18 (pg, f, f2, C);
+  svfloat64_t p = sv_pw_horner_18_f64_x (pg, f, f2, __log1p_data.coeffs);
 
   /* Assemble log1p(x) = k * log2 + log1p(f) + c/m.  */
   svfloat64_t ylo = svmla_n_f64_x (pg, cm, k, Ln2Lo);

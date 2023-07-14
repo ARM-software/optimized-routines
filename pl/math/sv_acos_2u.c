@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -24,8 +24,6 @@ static const struct data
   .pi = 0x1.921fb54442d18p+1,
   .pi_over_2 = 0x1.921fb54442d18p+0,
 };
-
-#define P(i) sv_f64 (d->poly[i])
 
 /* Double-precision SVE implementation of vector acos(x).
 
@@ -67,7 +65,7 @@ svfloat64_t SV_NAME_D1 (acos) (svfloat64_t x, const svbool_t pg)
   svfloat64_t z4 = svmul_f64_x (pg, z2, z2);
   svfloat64_t z8 = svmul_f64_x (pg, z4, z4);
   svfloat64_t z16 = svmul_f64_x (pg, z8, z8);
-  svfloat64_t p = ESTRIN_11 (pg, z2, z4, z8, z16, P);
+  svfloat64_t p = sv_estrin_11_f64_x (pg, z2, z4, z8, z16, d->poly);
 
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = svmla_f64_x (pg, z, svmul_f64_x (pg, z, z2), p);

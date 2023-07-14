@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -31,8 +31,6 @@ static const struct data
 		   0x1.a01a01affa35dp-13, 0x1.a01a018b4ecbbp-16,
 		   0x1.71ddf82db5bb4p-19, 0x1.27e517fc0d54bp-22,
 		   0x1.af5eedae67435p-26, 0x1.1f143d060a28ap-29}};
-
-#define C(i) sv_f64 (d->poly[i])
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x, svfloat64_t y, svbool_t pg)
@@ -73,7 +71,8 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
   svfloat64_t f2 = svmul_f64_x (pg, f, f), f4 = svmul_f64_x (pg, f2, f2),
 	      f8 = svmul_f64_x (pg, f4, f4);
-  svfloat64_t p = svmla_f64_x (pg, f, f2, ESTRIN_10 (pg, f, f2, f4, f8, C));
+  svfloat64_t p = svmla_f64_x (
+      pg, f, f2, sv_estrin_10_f64_x (pg, f, f2, f4, f8, d->poly));
 
   /* Assemble the result.
    expm1(x) ~= 2^i * (p + 1) - 1

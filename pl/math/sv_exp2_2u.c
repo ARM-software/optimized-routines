@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -29,7 +29,6 @@ static const struct data
   .big_bound = BigBound,
 };
 
-#define C(i) sv_f64 (d->poly[i])
 #define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 #define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
@@ -92,7 +91,7 @@ svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
 
   /* Approximate exp2(r) using polynomial.  */
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t p = ESTRIN_3 (pg, r, r2, C);
+  svfloat64_t p = sv_pairwise_poly_3_f64_x (pg, r, r2, d->poly);
   svfloat64_t y = svmul_f64_x (pg, r, p);
 
   /* Assemble exp2(x) = exp2(r) * scale.  */

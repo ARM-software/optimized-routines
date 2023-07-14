@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -37,7 +37,6 @@ static const struct data
 
 #define AbsMask 0x7fffffffffffffff
 #define BottomMask 0xffffffff
-#define C(i) sv_f64 (d->poly[i])
 
 static svfloat64_t NOINLINE
 special_case (svbool_t special, svfloat64_t x, svfloat64_t y)
@@ -99,7 +98,7 @@ svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
      Assembling this all correctly is dealt with at the final step.  */
   svfloat64_t f2 = svmul_f64_x (pg, f, f), f4 = svmul_f64_x (pg, f2, f2),
 	      f8 = svmul_f64_x (pg, f4, f4), f16 = svmul_f64_x (pg, f8, f8);
-  svfloat64_t p = ESTRIN_18 (pg, f, f2, f4, f8, f16, C);
+  svfloat64_t p = sv_estrin_18_f64_x (pg, f, f2, f4, f8, f16, d->poly);
 
   svfloat64_t ylo = svmla_n_f64_x (pg, cm, k, d->ln2_lo);
   svfloat64_t yhi = svmla_n_f64_x (pg, f, k, d->ln2_hi);

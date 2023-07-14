@@ -8,7 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "sv_estrin.h"
+#include "poly_sve_f64.h"
 
 static const struct data
 {
@@ -29,8 +29,6 @@ static const struct data
 
 /* Useful constants.  */
 #define SignMask sv_u64 (0x8000000000000000)
-
-#define P(i) sv_f64 (data_ptr->poly[i])
 
 /* Special cases i.e. 0, infinity, nan (fall back to scalar calls).  */
 static svfloat64_t NOINLINE
@@ -90,8 +88,9 @@ svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x, const svbool_t pg)
   svfloat64_t x4 = svmul_f64_x (pg, x2, x2);
   svfloat64_t x8 = svmul_f64_x (pg, x4, x4);
 
-  svfloat64_t ret = svmla_f64_x (pg, ESTRIN_7 (pg, z2, x2, x4, P),
-				 ESTRIN_11_ (pg, z2, x2, x4, x8, P, 8), x8);
+  svfloat64_t ret = svmla_f64_x (
+      pg, sv_estrin_7_f64_x (pg, z2, x2, x4, data_ptr->poly),
+      sv_estrin_11_f64_x (pg, z2, x2, x4, x8, data_ptr->poly + 8), x8);
 
   /* y = shift + z + z^3 * P(z^2).  */
   svfloat64_t z3 = svmul_f64_x (pg, z2, z);
