@@ -8,7 +8,6 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "sv_estrinf.h"
 
 static const struct data
 {

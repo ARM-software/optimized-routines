@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_estrinf.h"
+#include "poly_sve_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -25,8 +25,6 @@ static const struct data
      correctly by FEXPA.  */
   .thres = 0x1.5d5e2ap+6f,
 };
-
-#define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -53,11 +51,11 @@ svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
   svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
 
   /* Polynomial evaluation: poly(r) ~ exp2(r)-1.
-     Evaluate polynomial use hybrid scheme - offset variant of ESTRIN macro for
+     Evaluate polynomial use hybrid scheme - offset ESTRIN by 1 for
      coefficients 1 to 4, and apply most significant coefficient directly.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
-  svfloat32_t p14 = ESTRIN_3_ (pg, r, r2, C, 1);
-  svfloat32_t p0 = svmul_f32_x (pg, r, C (0));
+  svfloat32_t p14 = sv_pairwise_poly_3_f32_x (pg, r, r2, d->poly + 1);
+  svfloat32_t p0 = svmul_n_f32_x (pg, r, d->poly[0]);
   svfloat32_t poly = svmla_f32_x (pg, p0, r2, p14);
 
   if (unlikely (svptest_any (pg, special)))

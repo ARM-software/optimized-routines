@@ -8,7 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "sv_estrinf.h"
+#include "poly_sve_f32.h"
 
 static const struct data
 {
@@ -27,7 +27,6 @@ static const struct data
 	  .three_quarters = 0x3f400000};
 
 #define SignExponentMask 0xff800000
-#define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -76,7 +75,7 @@ svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
   /* Evaluate polynomial on reduced interval.  */
   svfloat32_t ms2 = svmul_f32_x (pg, m_scale, m_scale),
 	      ms4 = svmul_f32_x (pg, ms2, ms2);
-  svfloat32_t p = ESTRIN_7 (pg, m_scale, ms2, ms4, C);
+  svfloat32_t p = sv_estrin_7_f32_x (pg, m_scale, ms2, ms4, d->poly);
   p = svmad_n_f32_x (pg, m_scale, p, -0.5);
   p = svmla_f32_x (pg, m_scale, m_scale, svmul_f32_x (pg, m_scale, p));
 

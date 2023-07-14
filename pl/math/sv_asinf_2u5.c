@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "sv_hornerf.h"
+#include "poly_sve_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 
@@ -21,8 +21,6 @@ static const struct data
 	    0x1.3af7d8p-5, },
   .pi_over_2f = 0x1.921fb6p+0f,
 };
-
-#define P(i) d->poly[i]
 
 /* Single-precision SVE implementation of vector asin(x).
 
@@ -58,7 +56,7 @@ svfloat32_t SV_NAME_F1 (asin) (svfloat32_t x, const svbool_t pg)
   svfloat32_t z = svsqrt_f32_m (ax, a_ge_half, z2);
 
   /* Use a single polynomial approximation P for both intervals.  */
-  svfloat32_t p = HORNER_4 (pg, z2, P);
+  svfloat32_t p = sv_horner_4_f32_x (pg, z2, d->poly);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
   p = svmla_f32_x (pg, z, svmul_f32_x (pg, z, z2), p);
 

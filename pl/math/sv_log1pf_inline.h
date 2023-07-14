@@ -8,7 +8,7 @@
 
 #include "v_math.h"
 #include "math_config.h"
-#include "sv_estrinf.h"
+#include "poly_sve_f32.h"
 
 #define Four 0x40800000
 #define Ln2 0x1.62e43p-1f
@@ -23,7 +23,8 @@ eval_poly (svfloat32_t m, svbool_t pg)
 
   svfloat32_t m2 = svmul_f32_x (pg, m, m);
   svfloat32_t p_02 = svmla_f32_x (pg, m, m2, p_12);
-  svfloat32_t p_36 = ESTRIN_3_ (pg, m, m2, C, 2);
+  svfloat32_t p_36
+      = sv_pairwise_poly_3_f32_x (pg, m, m2, __log1pf_data.coeffs + 2);
   svfloat32_t p_79 = svmla_f32_x (pg, p_78, m2, C (8));
 
   svfloat32_t m4 = svmul_f32_x (pg, m2, m2);
