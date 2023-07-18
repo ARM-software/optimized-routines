@@ -100,8 +100,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
   float64x2_t n = vfmaq_f64 (v_f64 (-1), p, p);
   float64x2_t d = vaddq_f64 (p, p);
 
-  uint64x2_t use_recip
-    = vceqzq_u64 (vandq_u64 (vreinterpretq_u64_s64 (qi), v_u64 (1)));
+  uint64x2_t no_recip = vtstq_u64 (vreinterpretq_u64_s64 (qi), v_u64 (1));
 
 #if !WANT_SIMD_EXCEPT
   uint64x2_t special = vceqzq_u64 (vcaleq_f64 (x, dat->range_val));
@@ -109,8 +108,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
     return special_case (x);
 #endif
 
-  return vdivq_f64 (vbslq_f64 (use_recip, vnegq_f64 (d), n),
-		    vbslq_f64 (use_recip, n, d));
+  return vdivq_f64 (vbslq_f64 (no_recip, n, vnegq_f64 (d)),
+		    vbslq_f64 (no_recip, d, n));
 }
 
 PL_SIG (V, D, 1, tan, -3.1, 3.1)

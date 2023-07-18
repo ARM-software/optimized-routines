@@ -86,12 +86,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
   /* n = rint(x/(pi/2)).  */
   float32x4_t q = vfmaq_f32 (d->shift, d->two_over_pi, x);
   float32x4_t n = vsubq_f32 (q, d->shift);
-  /* n is representable as a signed integer, simply convert it.  */
-  int32x4_t in = vcvtaq_s32_f32 (n);
   /* Determine if x lives in an interval, where |tan(x)| grows to infinity.  */
-  int32x4_t alt = vandq_s32 (in, v_s32 (1));
-  /* alt != 0.  */
-  uint32x4_t pred_alt = vmvnq_u32 (vceqzq_s32 (alt));
+  uint32x4_t pred_alt = vtstq_u32 (vreinterpretq_u32_f32 (q), v_u32 (1));
 
   /* r = x - n * (pi/2)  (range reduction into -pi./4 .. pi/4).  */
   float32x4_t r;
@@ -130,11 +126,9 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
 PL_SIG (V, F, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (V_NAME_F1 (tan), 2.96)
 PL_TEST_EXPECT_FENV (V_NAME_F1 (tan), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-23, 0.7, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 0.7, 1.5, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 1.5, 100, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 100, 0x1p17, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p17, inf, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0, 0x1p-31, 5000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p-31, 0x1p15, 500000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), 0x1p15, inf, 5000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), -0, -0x1p-31, 5000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), -0x1p-31, -0x1p15, 500000)
+PL_TEST_INTERVAL (V_NAME_F1 (tan), -0x1p15, -inf, 5000)
