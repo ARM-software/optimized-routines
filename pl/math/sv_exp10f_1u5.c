@@ -9,6 +9,7 @@
 #include "include/mathlib.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "poly_sve_f32.h"
 
 /* For x < -SpecialBound, the result is subnormal and not handled correctly by
    FEXPA.  */
@@ -33,8 +34,6 @@ static const struct data
   .log2_10_lo = -0x1.ec10cp-27,
   .special_bound = SpecialBound,
 };
-
-#define C(i) d->poly[i]
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
@@ -72,11 +71,9 @@ svfloat32_t SV_NAME_F1 (exp10) (svfloat32_t x, const svbool_t pg)
 
   /* Polynomial evaluation: poly(r) ~ exp10(r)-1.  */
   svfloat32_t r2 = svmul_f32_x (pg, r, r);
-  svfloat32_t p = svmla_n_f32_x (pg, sv_f32 (C (3)), r, C (4));
-  svfloat32_t q = svmla_n_f32_x (pg, sv_f32 (C (1)), r, C (2));
-  q = svmla_f32_x (pg, q, r2, p);
-  p = svmul_n_f32_x (pg, r, C (0));
-  svfloat32_t poly = svmla_f32_x (pg, p, r2, q);
+  svfloat32_t poly
+      = svmla_f32_x (pg, svmul_n_f32_x (pg, r, d->poly[0]),
+		     sv_pairwise_poly_3_f32_x (pg, r, r2, d->poly + 1), r2);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, svmla_f32_x (pg, scale, scale, poly), special);

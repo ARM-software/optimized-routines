@@ -8,6 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "poly_sve_f64.h"
 
 #define SpecialBound 307.0 /* floor (log10 (2^1023)).  */
 
@@ -31,7 +32,6 @@ static const struct data
   .special_bound = SpecialBound,
 };
 
-#define C(i) sv_f64 (d->poly[i])
 #define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 #define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
@@ -97,10 +97,9 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
 
   /* Approximate exp10(r) using polynomial.  */
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t p12 = svmla_f64_x (pg, C (1), r, C (2));
-  svfloat64_t p34 = svmla_f64_x (pg, C (3), r, C (4));
-  svfloat64_t y = svmla_f64_x (pg, p12, r2, p34);
-  y = svmla_f64_x (pg, svmul_f64_x (pg, r, C (0)), r2, y);
+  svfloat64_t y
+      = svmla_f64_x (pg, svmul_n_f64_x (pg, r, d->poly[0]), r2,
+		     sv_pairwise_poly_3_f64_x (pg, r, r2, d->poly + 1));
 
   /* Assemble result as exp10(x) = 2^n * exp10(r).  If |x| > SpecialBound
      multiplication may overflow, so use special case routine.  */

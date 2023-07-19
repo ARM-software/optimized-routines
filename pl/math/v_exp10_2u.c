@@ -40,7 +40,6 @@ const static struct data
 };
 
 #define N (1 << V_EXP_TABLE_BITS)
-#define Tab __v_exp_data
 #define IndexMask v_u64 (N - 1)
 
 #if WANT_SIMD_EXCEPT
@@ -123,7 +122,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
   y = vmulq_f64 (r, p);
 
   /* s = 2^(n/N).  */
-  u = v_lookup_u64 (Tab, i);
+  u = v_lookup_u64 (__v_exp_data, i);
   float64x2_t s = vreinterpretq_f64_u64 (vaddq_u64 (u, e));
 
   if (unlikely (v_any_u64 (cmp)))

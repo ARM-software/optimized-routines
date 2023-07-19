@@ -9,6 +9,7 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "poly_advsimd_f32.h"
 
 #define ScaleBound 192.0f
 
@@ -36,7 +37,6 @@ static const struct data
 #endif
 };
 
-#define C(i) d->poly[i]
 #define ExponentBias v_u32 (0x3f800000)
 
 #if WANT_SIMD_EXCEPT
@@ -116,11 +116,9 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
 #endif
 
   float32x4_t r2 = vmulq_f32 (r, r);
-  float32x4_t p = vfmaq_f32 (C (3), C (4), r);
-  float32x4_t q = vfmaq_f32 (C (1), C (2), r);
-  q = vfmaq_f32 (q, p, r2);
-  p = vmulq_f32 (C (0), r);
-  float32x4_t poly = vfmaq_f32 (p, q, r2);
+  float32x4_t poly
+      = vfmaq_f32 (vmulq_f32 (r, d->poly[0]),
+		   v_pairwise_poly_3_f32 (r, r2, d->poly + 1), r2);
 
   if (unlikely (v_any_u32 (cmp)))
 #if WANT_SIMD_EXCEPT
