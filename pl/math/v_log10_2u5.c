@@ -8,6 +8,7 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "poly_advsimd_f64.h"
 
 #define N (1 << V_LOG10_TABLE_BITS)
 
@@ -33,7 +34,6 @@ static const struct data
 #define Off v_u64 (0x3fe6900900000000)
 #define IndexMask v_u64 (N - 1)
 
-#define C(i) d->poly[i]
 #define T(s, i) __v_log10_data.s[i]
 
 struct entry
@@ -98,11 +98,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
 
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   float64x2_t r2 = vmulq_f64 (r, r);
-  float64x2_t p_23 = vfmaq_f64 (C (2), C (3), r);
-  float64x2_t p_01 = vfmaq_f64 (C (0), C (1), r);
-  float64x2_t y;
-  y = vfmaq_f64 (p_23, C (4), r2);
-  y = vfmaq_f64 (p_01, r2, y);
+  float64x2_t y = v_pw_horner_4_f64 (r, r2, d->poly);
   y = vfmaq_f64 (hi, r2, y);
 
   if (unlikely (v_any_u64 (special)))

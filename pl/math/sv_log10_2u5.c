@@ -8,6 +8,7 @@
 #include "sv_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "poly_sve_f64.h"
 
 #define Min 0x0010000000000000
 #define Max 0x7ff0000000000000
@@ -15,7 +16,6 @@
 #define Off 0x3fe6900900000000
 #define N (1 << V_LOG10_TABLE_BITS)
 
-#define A(i) __v_log10_data.poly[i]
 #define T(s, i) __v_log10_data.s[i]
 
 static svfloat64_t NOINLINE
@@ -51,7 +51,7 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
   /* We approximate log(z/c) with a polynomial P(x) ~= log(x + 1):
      r = z/c - 1 (we look up precomputed 1/c)
      log(z/c) ~= P(r).  */
-  svfloat64_t r = svmla_f64_x (pg, sv_f64 (-1.0), invc, z);
+  svfloat64_t r = svmad_n_f64_x (pg, invc, z, -1.0);
 
   /* hi = log(c) + k*log(2).  */
   svfloat64_t w = svmla_n_f64_x (pg, logc, r, __v_log10_data.invln10);
@@ -59,10 +59,7 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
 
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t y = svmla_n_f64_x (pg, sv_f64 (A (2)), r, A (3));
-  svfloat64_t p = svmla_n_f64_x (pg, sv_f64 (A (0)), r, A (1));
-  y = svmla_n_f64_x (pg, y, r2, A (4));
-  y = svmla_f64_x (pg, p, r2, y);
+  svfloat64_t y = sv_pw_horner_4_f64_x (pg, r, r2, __v_log10_data.poly);
   y = svmla_f64_x (pg, hi, r2, y);
 
   if (unlikely (svptest_any (pg, special)))

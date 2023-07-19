@@ -33,8 +33,6 @@ static const struct data
 #define Offset 0x3f2aaaab /* 0.666667.  */
 #define MantissaMask 0x007fffff
 
-#define P(i) sv_f32 (d->poly[i])
-
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 {
