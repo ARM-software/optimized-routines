@@ -11,7 +11,7 @@
 #include "pl_test.h"
 
 #define N (1 << V_EXP_TABLE_BITS)
-#define IndexMask v_u64 (N - 1)
+#define IndexMask (N - 1)
 #define BigBound 1022.0
 #define UOFlowBound 1280.0
 
@@ -32,7 +32,8 @@ static const struct data
 static inline uint64x2_t
 lookup_sbits (uint64x2_t i)
 {
-  return (uint64x2_t){__v_exp_data[i[0]], __v_exp_data[i[1]]};
+  return (uint64x2_t){ __v_exp_data[i[0] & IndexMask],
+		       __v_exp_data[i[1] & IndexMask] };
 }
 
 #if WANT_SIMD_EXCEPT
@@ -101,8 +102,7 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 
   /* s = 2^(n/N).  */
   uint64x2_t e = vshlq_n_u64 (u, 52 - V_EXP_TABLE_BITS);
-  uint64x2_t i = vandq_u64 (u, IndexMask);
-  u = lookup_sbits (i);
+  u = lookup_sbits (u);
   float64x2_t s = vreinterpretq_f64_u64 (vaddq_u64 (u, e));
 
   /* y ~ exp2(r) - 1.  */
