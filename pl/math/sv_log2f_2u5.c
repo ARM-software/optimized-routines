@@ -9,8 +9,6 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define P(i) __sv_log2f_poly[i]
-
 static const struct data
 {
   float poly_02468[5];
