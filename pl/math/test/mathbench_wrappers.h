@@ -62,13 +62,13 @@ y_Z_pow (v_double x)
 static sv_float
 _Z_sv_atan2f_wrap (sv_float x, sv_bool pg)
 {
-  return _ZGVsMxvv_atan2f (x, svdup_n_f32 (5.0f), pg);
+  return _ZGVsMxvv_atan2f (x, svdup_f32 (5.0f), pg);
 }
 
 static sv_double
 _Z_sv_atan2_wrap (sv_double x, sv_bool pg)
 {
-  return _ZGVsMxvv_atan2 (x, svdup_n_f64 (5.0), pg);
+  return _ZGVsMxvv_atan2 (x, svdup_f64 (5.0), pg);
 }
 
 static sv_float
@@ -92,13 +92,13 @@ xy_Z_sv_powf (sv_float x, sv_bool pg)
 static sv_float
 x_Z_sv_powf (sv_float x, sv_bool pg)
 {
-  return _ZGVsMxvv_powf (x, svdup_n_f32 (23.4f), pg);
+  return _ZGVsMxvv_powf (x, svdup_f32 (23.4f), pg);
 }
 
 static sv_float
 y_Z_sv_powf (sv_float x, sv_bool pg)
 {
-  return _ZGVsMxvv_powf (svdup_n_f32 (2.34f), x, pg);
+  return _ZGVsMxvv_powf (svdup_f32 (2.34f), x, pg);
 }
 
 static sv_double
@@ -110,13 +110,13 @@ xy_Z_sv_pow (sv_double x, sv_bool pg)
 static sv_double
 x_Z_sv_pow (sv_double x, sv_bool pg)
 {
-  return _ZGVsMxvv_pow (x, svdup_n_f64 (23.4), pg);
+  return _ZGVsMxvv_pow (x, svdup_f64 (23.4), pg);
 }
 
 static sv_double
 y_Z_sv_pow (sv_double x, sv_bool pg)
 {
-  return _ZGVsMxvv_pow (svdup_n_f64 (2.34), x, pg);
+  return _ZGVsMxvv_pow (svdup_f64 (2.34), x, pg);
 }
 
 #endif // WANT_SVE_MATH

@@ -43,8 +43,8 @@ special_case (svfloat64_t y, svfloat64_t x, svfloat64_t ret,
 static inline svbool_t
 zeroinfnan (svuint64_t i, const svbool_t pg)
 {
-  return svcmpge_u64 (pg, svsub_n_u64_x (pg, svlsl_n_u64_x (pg, i, 1), 1),
-		      sv_u64 (2 * asuint64 (INFINITY) - 1));
+  return svcmpge (pg, svsub_x (pg, svlsl_x (pg, i, 1), 1),
+		  sv_u64 (2 * asuint64 (INFINITY) - 1));
 }
 
 /* Fast implementation of SVE atan2. Errors are greatest when y and
@@ -55,52 +55,51 @@ svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x, const svbool_t pg)
 {
   const struct data *data_ptr = ptr_barrier (&data);
 
-  svuint64_t ix = svreinterpret_u64_f64 (x);
-  svuint64_t iy = svreinterpret_u64_f64 (y);
+  svuint64_t ix = svreinterpret_u64 (x);
+  svuint64_t iy = svreinterpret_u64 (y);
 
   svbool_t cmp_x = zeroinfnan (ix, pg);
   svbool_t cmp_y = zeroinfnan (iy, pg);
-  svbool_t cmp_xy = svorr_b_z (pg, cmp_x, cmp_y);
+  svbool_t cmp_xy = svorr_z (pg, cmp_x, cmp_y);
 
-  svuint64_t sign_x = svand_u64_x (pg, ix, SignMask);
-  svuint64_t sign_y = svand_u64_x (pg, iy, SignMask);
-  svuint64_t sign_xy = sveor_u64_x (pg, sign_x, sign_y);
+  svuint64_t sign_x = svand_x (pg, ix, SignMask);
+  svuint64_t sign_y = svand_x (pg, iy, SignMask);
+  svuint64_t sign_xy = sveor_x (pg, sign_x, sign_y);
 
-  svfloat64_t ax = svabs_f64_x (pg, x);
-  svfloat64_t ay = svabs_f64_x (pg, y);
+  svfloat64_t ax = svabs_x (pg, x);
+  svfloat64_t ay = svabs_x (pg, y);
 
-  svbool_t pred_xlt0 = svcmplt_n_f64 (pg, x, 0.0);
-  svbool_t pred_aygtax = svcmpgt_f64 (pg, ay, ax);
+  svbool_t pred_xlt0 = svcmplt (pg, x, 0.0);
+  svbool_t pred_aygtax = svcmpgt (pg, ay, ax);
 
   /* Set up z for call to atan.  */
-  svfloat64_t n = svsel_f64 (pred_aygtax, svneg_f64_x (pg, ax), ay);
-  svfloat64_t d = svsel_f64 (pred_aygtax, ay, ax);
-  svfloat64_t z = svdiv_f64_x (pg, n, d);
+  svfloat64_t n = svsel (pred_aygtax, svneg_x (pg, ax), ay);
+  svfloat64_t d = svsel (pred_aygtax, ay, ax);
+  svfloat64_t z = svdiv_x (pg, n, d);
 
   /* Work out the correct shift.  */
-  svfloat64_t shift = svsel_f64 (pred_xlt0, sv_f64 (-2.0), sv_f64 (0.0));
-  shift = svsel_f64 (pred_aygtax, svadd_n_f64_x (pg, shift, 1.0), shift);
-  shift = svmul_n_f64_x (pg, shift, data_ptr->pi_over_2);
+  svfloat64_t shift = svsel (pred_xlt0, sv_f64 (-2.0), sv_f64 (0.0));
+  shift = svsel (pred_aygtax, svadd_x (pg, shift, 1.0), shift);
+  shift = svmul_x (pg, shift, data_ptr->pi_over_2);
 
   /* Use split Estrin scheme for P(z^2) with deg(P)=19.  */
-  svfloat64_t z2 = svmul_f64_x (pg, z, z);
-  svfloat64_t x2 = svmul_f64_x (pg, z2, z2);
-  svfloat64_t x4 = svmul_f64_x (pg, x2, x2);
-  svfloat64_t x8 = svmul_f64_x (pg, x4, x4);
+  svfloat64_t z2 = svmul_x (pg, z, z);
+  svfloat64_t x2 = svmul_x (pg, z2, z2);
+  svfloat64_t x4 = svmul_x (pg, x2, x2);
+  svfloat64_t x8 = svmul_x (pg, x4, x4);
 
-  svfloat64_t ret = svmla_f64_x (
+  svfloat64_t ret = svmla_x (
       pg, sv_estrin_7_f64_x (pg, z2, x2, x4, data_ptr->poly),
       sv_estrin_11_f64_x (pg, z2, x2, x4, x8, data_ptr->poly + 8), x8);
 
   /* y = shift + z + z^3 * P(z^2).  */
-  svfloat64_t z3 = svmul_f64_x (pg, z2, z);
-  ret = svmla_f64_x (pg, z, z3, ret);
+  svfloat64_t z3 = svmul_x (pg, z2, z);
+  ret = svmla_x (pg, z, z3, ret);
 
-  ret = svadd_f64_m (pg, ret, shift);
+  ret = svadd_m (pg, ret, shift);
 
   /* Account for the sign of x and y.  */
-  ret = svreinterpret_f64_u64 (
-      sveor_u64_x (pg, svreinterpret_u64_f64 (ret), sign_xy));
+  ret = svreinterpret_f64 (sveor_x (pg, svreinterpret_u64 (ret), sign_xy));
 
   if (unlikely (svptest_any (pg, cmp_xy)))
     return special_case (y, x, ret, cmp_xy);

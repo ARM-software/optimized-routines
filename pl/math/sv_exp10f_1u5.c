@@ -55,30 +55,30 @@ svfloat32_t SV_NAME_F1 (exp10) (svfloat32_t x, const svbool_t pg)
 
   /* Load some constants in quad-word chunks to minimise memory access (last
      lane is wasted).  */
-  svfloat32_t log10_2_and_inv = svld1rq_f32 (svptrue_b32 (), &d->log10_2);
+  svfloat32_t log10_2_and_inv = svld1rq (svptrue_b32 (), &d->log10_2);
 
   /* n = round(x/(log10(2)/N)).  */
   svfloat32_t shift = sv_f32 (d->shift);
-  svfloat32_t z = svmla_lane_f32 (shift, x, log10_2_and_inv, 0);
-  svfloat32_t n = svsub_f32_x (pg, z, shift);
+  svfloat32_t z = svmla_lane (shift, x, log10_2_and_inv, 0);
+  svfloat32_t n = svsub_x (pg, z, shift);
 
   /* r = x - n*log10(2)/N.  */
-  svfloat32_t r = svmls_lane_f32 (x, n, log10_2_and_inv, 1);
-  r = svmls_lane_f32 (r, n, log10_2_and_inv, 2);
+  svfloat32_t r = svmls_lane (x, n, log10_2_and_inv, 1);
+  r = svmls_lane (r, n, log10_2_and_inv, 2);
 
-  svbool_t special = svacgt_n_f32 (pg, x, d->special_bound);
-  svfloat32_t scale = svexpa_f32 (svreinterpret_u32_f32 (z));
+  svbool_t special = svacgt (pg, x, d->special_bound);
+  svfloat32_t scale = svexpa (svreinterpret_u32 (z));
 
   /* Polynomial evaluation: poly(r) ~ exp10(r)-1.  */
-  svfloat32_t r2 = svmul_f32_x (pg, r, r);
+  svfloat32_t r2 = svmul_x (pg, r, r);
   svfloat32_t poly
-      = svmla_f32_x (pg, svmul_n_f32_x (pg, r, d->poly[0]),
-		     sv_pairwise_poly_3_f32_x (pg, r, r2, d->poly + 1), r2);
+      = svmla_x (pg, svmul_x (pg, r, d->poly[0]),
+		 sv_pairwise_poly_3_f32_x (pg, r, r2, d->poly + 1), r2);
 
   if (unlikely (svptest_any (pg, special)))
-    return special_case (x, svmla_f32_x (pg, scale, scale, poly), special);
+    return special_case (x, svmla_x (pg, scale, scale, poly), special);
 
-  return svmla_f32_x (pg, scale, scale, poly);
+  return svmla_x (pg, scale, scale, poly);
 }
 
 PL_SIG (SV, F, 1, exp10, -9.9, 9.9)

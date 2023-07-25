@@ -42,31 +42,29 @@ svfloat32_t SV_NAME_F1 (asin) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
 
-  svuint32_t sign = svand_n_u32_x (pg, svreinterpret_u32_f32 (x), 0x80000000);
+  svuint32_t sign = svand_x (pg, svreinterpret_u32 (x), 0x80000000);
 
-  svfloat32_t ax = svabs_f32_x (pg, x);
-  svbool_t a_ge_half = svacge_n_f32 (pg, x, 0.5);
+  svfloat32_t ax = svabs_x (pg, x);
+  svbool_t a_ge_half = svacge (pg, x, 0.5);
 
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
    z = x ^ 2 and y = |x|            , if |x| < 0.5
    z = (1 - |x|) / 2 and y = sqrt(z), if |x| >= 0.5.  */
-  svfloat32_t z2
-      = svsel_f32 (a_ge_half, svmls_n_f32_x (pg, sv_f32 (0.5), ax, 0.5),
-		   svmul_f32_x (pg, x, x));
-  svfloat32_t z = svsqrt_f32_m (ax, a_ge_half, z2);
+  svfloat32_t z2 = svsel (a_ge_half, svmls_x (pg, sv_f32 (0.5), ax, 0.5),
+			  svmul_x (pg, x, x));
+  svfloat32_t z = svsqrt_m (ax, a_ge_half, z2);
 
   /* Use a single polynomial approximation P for both intervals.  */
   svfloat32_t p = sv_horner_4_f32_x (pg, z2, d->poly);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
-  p = svmla_f32_x (pg, z, svmul_f32_x (pg, z, z2), p);
+  p = svmla_x (pg, z, svmul_x (pg, z, z2), p);
 
   /* asin(|x|) = Q(|x|)         , for |x| < 0.5
 		 = pi/2 - 2 Q(|x|), for |x| >= 0.5.  */
-  svfloat32_t y = svmad_n_f32_m (a_ge_half, p, sv_f32 (-2.0), d->pi_over_2f);
+  svfloat32_t y = svmad_m (a_ge_half, p, sv_f32 (-2.0), d->pi_over_2f);
 
   /* Copy sign.  */
-  return svreinterpret_f32_u32 (
-      svorr_u32_x (pg, svreinterpret_u32_f32 (y), sign));
+  return svreinterpret_f32 (svorr_x (pg, svreinterpret_u32 (y), sign));
 }
 
 PL_SIG (SV, F, 1, asin, -1.0, 1.0)

@@ -47,41 +47,39 @@ svfloat64_t SV_NAME_D1 (acos) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
 
-  svuint64_t sign
-      = svand_n_u64_x (pg, svreinterpret_u64_f64 (x), 0x8000000000000000);
-  svfloat64_t ax = svabs_f64_x (pg, x);
+  svuint64_t sign = svand_x (pg, svreinterpret_u64 (x), 0x8000000000000000);
+  svfloat64_t ax = svabs_x (pg, x);
 
-  svbool_t a_gt_half = svacgt_n_f64 (pg, x, 0.5);
+  svbool_t a_gt_half = svacgt (pg, x, 0.5);
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
      z2 = (1 - |x|) / 2 and z = sqrt(z2), if |x| >= 0.5.  */
-  svfloat64_t z2
-      = svsel_f64 (a_gt_half, svmls_n_f64_x (pg, sv_f64 (0.5), ax, 0.5),
-		   svmul_f64_x (pg, x, x));
-  svfloat64_t z = svsqrt_f64_m (ax, a_gt_half, z2);
+  svfloat64_t z2 = svsel (a_gt_half, svmls_x (pg, sv_f64 (0.5), ax, 0.5),
+			  svmul_x (pg, x, x));
+  svfloat64_t z = svsqrt_m (ax, a_gt_half, z2);
 
   /* Use a single polynomial approximation P for both intervals.  */
-  svfloat64_t z4 = svmul_f64_x (pg, z2, z2);
-  svfloat64_t z8 = svmul_f64_x (pg, z4, z4);
-  svfloat64_t z16 = svmul_f64_x (pg, z8, z8);
+  svfloat64_t z4 = svmul_x (pg, z2, z2);
+  svfloat64_t z8 = svmul_x (pg, z4, z4);
+  svfloat64_t z16 = svmul_x (pg, z8, z8);
   svfloat64_t p = sv_estrin_11_f64_x (pg, z2, z4, z8, z16, d->poly);
 
   /* Finalize polynomial: z + z * z2 * P(z2).  */
-  p = svmla_f64_x (pg, z, svmul_f64_x (pg, z, z2), p);
+  p = svmla_x (pg, z, svmul_x (pg, z, z2), p);
 
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  svfloat64_t y = svreinterpret_f64_u64 (
-      svorr_u64_x (pg, svreinterpret_u64_f64 (p), sign));
+  svfloat64_t y
+      = svreinterpret_f64 (svorr_x (pg, svreinterpret_u64 (p), sign));
 
-  svbool_t is_neg = svcmplt_n_f64 (pg, x, 0.0);
-  svfloat64_t off = svdup_n_f64_z (is_neg, d->pi);
-  svfloat64_t mul = svsel_f64 (a_gt_half, sv_f64 (2.0), sv_f64 (-1.0));
-  svfloat64_t add = svsel_f64 (a_gt_half, off, sv_f64 (d->pi_over_2));
+  svbool_t is_neg = svcmplt (pg, x, 0.0);
+  svfloat64_t off = svdup_f64_z (is_neg, d->pi);
+  svfloat64_t mul = svsel (a_gt_half, sv_f64 (2.0), sv_f64 (-1.0));
+  svfloat64_t add = svsel (a_gt_half, off, sv_f64 (d->pi_over_2));
 
-  return svmla_f64_x (pg, add, mul, y);
+  return svmla_x (pg, add, mul, y);
 }
 
 PL_SIG (SV, D, 1, acos, -1.0, 1.0)

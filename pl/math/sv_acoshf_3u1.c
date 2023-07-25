@@ -29,14 +29,13 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 				      want 0x1.fbc7f4p-4.  */
 svfloat32_t SV_NAME_F1 (acosh) (svfloat32_t x, const svbool_t pg)
 {
-  svuint32_t ix = svreinterpret_u32_f32 (x);
-  svbool_t special = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, ix, One), Thres);
+  svuint32_t ix = svreinterpret_u32 (x);
+  svbool_t special = svcmpge (pg, svsub_x (pg, ix, One), Thres);
 
-  svfloat32_t xm1 = svsub_n_f32_x (pg, x, 1);
-  svfloat32_t u = svmul_f32_x (pg, xm1, svadd_n_f32_x (pg, x, 1.0f));
+  svfloat32_t xm1 = svsub_x (pg, x, 1);
+  svfloat32_t u = svmul_x (pg, xm1, svadd_x (pg, x, 1.0f));
 
-  svfloat32_t y
-    = sv_log1pf_inline (svadd_f32_x (pg, xm1, svsqrt_f32_x (pg, u)), pg);
+  svfloat32_t y = sv_log1pf_inline (svadd_x (pg, xm1, svsqrt_x (pg, u)), pg);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, y, special);

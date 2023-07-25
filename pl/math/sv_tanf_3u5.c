@@ -51,26 +51,26 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
   const struct data *d = ptr_barrier (&data);
 
   /* Determine whether input is too large to perform fast regression.  */
-  svbool_t cmp = svacge_n_f32 (pg, x, d->range_val);
-  svbool_t peqz = svcmpeq_n_f32 (pg, x, 0.0);
+  svbool_t cmp = svacge (pg, x, d->range_val);
+  svbool_t peqz = svcmpeq (pg, x, 0.0);
 
-  svfloat32_t odd_coeffs = svld1rq_f32 (svptrue_b32 (), &d->c1);
-  svfloat32_t pi_vals = svld1rq_f32 (svptrue_b32 (), &d->pio2_1);
+  svfloat32_t odd_coeffs = svld1rq (svptrue_b32 (), &d->c1);
+  svfloat32_t pi_vals = svld1rq (svptrue_b32 (), &d->pio2_1);
 
   /* n = rint(x/(pi/2)).  */
-  svfloat32_t q = svmla_lane_f32 (sv_f32 (d->shift), x, pi_vals, 3);
-  svfloat32_t n = svsub_n_f32_x (pg, q, d->shift);
+  svfloat32_t q = svmla_lane (sv_f32 (d->shift), x, pi_vals, 3);
+  svfloat32_t n = svsub_x (pg, q, d->shift);
   /* n is already a signed integer, simply convert it.  */
-  svint32_t in = svcvt_s32_f32_x (pg, n);
+  svint32_t in = svcvt_s32_x (pg, n);
   /* Determine if x lives in an interval, where |tan(x)| grows to infinity.  */
-  svint32_t alt = svand_n_s32_x (pg, in, 1);
-  svbool_t pred_alt = svcmpne_n_s32 (pg, alt, 0);
+  svint32_t alt = svand_x (pg, in, 1);
+  svbool_t pred_alt = svcmpne (pg, alt, 0);
 
   /* r = x - n * (pi/2)  (range reduction into 0 .. pi/4).  */
   svfloat32_t r;
-  r = svmls_lane_f32 (x, n, pi_vals, 0);
-  r = svmls_lane_f32 (r, n, pi_vals, 1);
-  r = svmls_lane_f32 (r, n, pi_vals, 2);
+  r = svmls_lane (x, n, pi_vals, 0);
+  r = svmls_lane (r, n, pi_vals, 1);
+  r = svmls_lane (r, n, pi_vals, 2);
 
   /* If x lives in an interval, where |tan(x)|
      - is finite, then use a polynomial approximation of the form
@@ -80,30 +80,30 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
        the same polynomial approximation of tan as above.  */
 
   /* Perform additional reduction if required.  */
-  svfloat32_t z = svneg_f32_m (r, pred_alt, r);
+  svfloat32_t z = svneg_m (r, pred_alt, r);
 
   /* Evaluate polynomial approximation of tangent on [-pi/4, pi/4],
      using Estrin on z^2.  */
-  svfloat32_t z2 = svmul_f32_x (pg, z, z);
-  svfloat32_t p01 = svmla_lane_f32 (sv_f32 (d->c0), z2, odd_coeffs, 0);
-  svfloat32_t p23 = svmla_lane_f32 (sv_f32 (d->c2), z2, odd_coeffs, 1);
-  svfloat32_t p45 = svmla_lane_f32 (sv_f32 (d->c4), z2, odd_coeffs, 2);
+  svfloat32_t z2 = svmul_x (pg, z, z);
+  svfloat32_t p01 = svmla_lane (sv_f32 (d->c0), z2, odd_coeffs, 0);
+  svfloat32_t p23 = svmla_lane (sv_f32 (d->c2), z2, odd_coeffs, 1);
+  svfloat32_t p45 = svmla_lane (sv_f32 (d->c4), z2, odd_coeffs, 2);
 
-  svfloat32_t z4 = svmul_f32_x (pg, z2, z2);
-  svfloat32_t p = svmla_f32_x (pg, p01, z4, p23);
+  svfloat32_t z4 = svmul_x (pg, z2, z2);
+  svfloat32_t p = svmla_x (pg, p01, z4, p23);
 
-  svfloat32_t z8 = svmul_f32_x (pg, z4, z4);
-  p = svmla_f32_x (pg, p, z8, p45);
+  svfloat32_t z8 = svmul_x (pg, z4, z4);
+  p = svmla_x (pg, p, z8, p45);
 
-  svfloat32_t y = svmla_f32_x (pg, z, p, svmul_f32_x (pg, z, z2));
+  svfloat32_t y = svmla_x (pg, z, p, svmul_x (pg, z, z2));
 
   /* Transform result back, if necessary.  */
-  svfloat32_t inv_y = svdivr_n_f32_x (pg, y, 1.0f);
-  y = svsel_f32 (pred_alt, inv_y, y);
+  svfloat32_t inv_y = svdivr_x (pg, y, 1.0f);
+  y = svsel (pred_alt, inv_y, y);
 
   /* Fast reduction does not handle the x = -0.0 case well,
      therefore it is fixed here.  */
-  y = svsel_f32 (peqz, x, y);
+  y = svsel (peqz, x, y);
 
   /* No need to pass pg to specialcase here since cmp is a strict subset,
      guaranteed by the cmpge above.  */

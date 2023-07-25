@@ -15,13 +15,13 @@ svfloat32_t
 _ZGVsMxvv_powi (svfloat32_t as, svint32_t ns, svbool_t p)
 {
   /* Compute powi by successive squaring, right to left.  */
-  svfloat32_t acc = svdup_n_f32 (1.f);
-  svbool_t want_recip = svcmplt_n_s32 (p, ns, 0);
-  svuint32_t ns_abs = svreinterpret_u32_s32 (svabs_s32_x (p, ns));
+  svfloat32_t acc = sv_f32 (1.f);
+  svbool_t want_recip = svcmplt (p, ns, 0);
+  svuint32_t ns_abs = svreinterpret_u32 (svabs_x (p, ns));
 
   /* We use a max to avoid needing to check whether any lane != 0 on each
      iteration.  */
-  uint32_t max_n = svmaxv_u32 (p, ns_abs);
+  uint32_t max_n = svmaxv (p, ns_abs);
 
   svfloat32_t c = as;
   /* Successively square c, and use merging predication (_m) to determine
@@ -29,20 +29,20 @@ _ZGVsMxvv_powi (svfloat32_t as, svint32_t ns, svbool_t p)
      iteration.  */
   while (true)
     {
-      svbool_t px = svcmpeq_n_u32 (p, svand_n_u32_x (p, ns_abs, 1), 1);
-      acc = svmul_f32_m (px, acc, c);
+      svbool_t px = svcmpeq (p, svand_x (p, ns_abs, 1), 1);
+      acc = svmul_m (px, acc, c);
       max_n >>= 1;
       if (max_n == 0)
 	break;
 
-      ns_abs = svlsr_n_u32_x (p, ns_abs, 1);
-      c = svmul_f32_x (p, c, c);
+      ns_abs = svlsr_x (p, ns_abs, 1);
+      c = svmul_x (p, c, c);
     }
 
   /* Negative powers are handled by computing the abs(n) version and then
      taking the reciprocal.  */
   if (svptest_any (want_recip, want_recip))
-    acc = svdivr_n_f32_m (want_recip, acc, 1.0f);
+    acc = svdivr_m (want_recip, acc, 1.0f);
 
   return acc;
 }

@@ -45,35 +45,34 @@ svfloat32_t SV_NAME_F1 (acos) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
 
-  svuint32_t sign = svand_n_u32_x (pg, svreinterpret_u32_f32 (x), 0x80000000);
-  svfloat32_t ax = svabs_f32_x (pg, x);
-  svbool_t a_gt_half = svacgt_n_f32 (pg, x, 0.5);
+  svuint32_t sign = svand_x (pg, svreinterpret_u32 (x), 0x80000000);
+  svfloat32_t ax = svabs_x (pg, x);
+  svbool_t a_gt_half = svacgt (pg, x, 0.5);
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
      z2 = (1 - |x|) / 2 and z = sqrt(z2), if |x| >= 0.5.  */
-  svfloat32_t z2
-      = svsel_f32 (a_gt_half, svmls_n_f32_x (pg, sv_f32 (0.5), ax, 0.5),
-		   svmul_f32_x (pg, x, x));
-  svfloat32_t z = svsqrt_f32_m (ax, a_gt_half, z2);
+  svfloat32_t z2 = svsel (a_gt_half, svmls_x (pg, sv_f32 (0.5), ax, 0.5),
+			  svmul_x (pg, x, x));
+  svfloat32_t z = svsqrt_m (ax, a_gt_half, z2);
 
   /* Use a single polynomial approximation P for both intervals.  */
   svfloat32_t p = sv_horner_4_f32_x (pg, z2, d->poly);
   /* Finalize polynomial: z + z * z2 * P(z2).  */
-  p = svmla_f32_x (pg, z, svmul_f32_x (pg, z, z2), p);
+  p = svmla_x (pg, z, svmul_x (pg, z, z2), p);
 
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  svfloat32_t y = svreinterpret_f32_u32 (
-      svorr_u32_x (pg, svreinterpret_u32_f32 (p), sign));
+  svfloat32_t y
+      = svreinterpret_f32 (svorr_x (pg, svreinterpret_u32 (p), sign));
 
-  svbool_t is_neg = svcmplt_n_f32 (pg, x, 0.0);
-  svfloat32_t off = svdup_n_f32_z (is_neg, d->pi);
-  svfloat32_t mul = svsel_f32 (a_gt_half, sv_f32 (2.0), sv_f32 (-1.0));
-  svfloat32_t add = svsel_f32 (a_gt_half, off, sv_f32 (d->pi_over_2));
+  svbool_t is_neg = svcmplt (pg, x, 0.0);
+  svfloat32_t off = svdup_f32_z (is_neg, d->pi);
+  svfloat32_t mul = svsel (a_gt_half, sv_f32 (2.0), sv_f32 (-1.0));
+  svfloat32_t add = svsel (a_gt_half, off, sv_f32 (d->pi_over_2));
 
-  return svmla_f32_x (pg, add, mul, y);
+  return svmla_x (pg, add, mul, y);
 }
 
 PL_SIG (SV, F, 1, acos, -1.0, 1.0)

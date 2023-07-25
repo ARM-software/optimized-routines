@@ -46,10 +46,10 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
   /* Large, Nan/Inf.  */
-  svbool_t special = svnot_b_z (pg, svaclt_n_f64 (pg, x, d->special_bound));
+  svbool_t special = svnot_z (pg, svaclt (pg, x, d->special_bound));
   /* Argument reduction discards sign of zero, but expm1(-0) is expected to be
      -0. Use merging predication on zero lanes to propagate -0 correctly.  */
-  svbool_t pnz = svcmpne_n_f64 (pg, x, 0);
+  svbool_t pnz = svcmpne (pg, x, 0);
 
   /* Reduce argument to smaller range:
      Let i = round(x / ln2)
@@ -57,31 +57,30 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
      exp(x) - 1 = 2^i * (expm1(f) + 1) - 1
      where 2^i is exact because i is an integer.  */
   svfloat64_t shift = sv_f64 (d->shift);
-  svfloat64_t n
-      = svsub_f64_x (pg, svmla_n_f64_x (pg, shift, x, d->inv_ln2), shift);
-  svint64_t i = svcvt_s64_f64_m (svreinterpret_s64_f64 (x), pnz, n);
-  svfloat64_t ln2 = svld1rq_f64 (svptrue_b64 (), &d->ln2_hi);
-  svfloat64_t f = svmls_lane_f64 (x, n, ln2, 0);
-  f = svmls_lane_f64 (f, n, ln2, 1);
+  svfloat64_t n = svsub_x (pg, svmla_x (pg, shift, x, d->inv_ln2), shift);
+  svint64_t i = svcvt_s64_m (svreinterpret_s64 (x), pnz, n);
+  svfloat64_t ln2 = svld1rq (svptrue_b64 (), &d->ln2_hi);
+  svfloat64_t f = svmls_lane (x, n, ln2, 0);
+  f = svmls_lane (f, n, ln2, 1);
 
   /* Approximate expm1(f) using polynomial.
      Taylor expansion for expm1(x) has the form:
 	 x + ax^2 + bx^3 + cx^4 ....
      So we calculate the polynomial P(f) = a + bf + cf^2 + ...
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
-  svfloat64_t f2 = svmul_f64_x (pg, f, f), f4 = svmul_f64_x (pg, f2, f2),
-	      f8 = svmul_f64_x (pg, f4, f4);
-  svfloat64_t p = svmla_f64_x (
-      pg, f, f2, sv_estrin_10_f64_x (pg, f, f2, f4, f8, d->poly));
+  svfloat64_t f2 = svmul_x (pg, f, f), f4 = svmul_x (pg, f2, f2),
+	      f8 = svmul_x (pg, f4, f4);
+  svfloat64_t p
+      = svmla_x (pg, f, f2, sv_estrin_10_f64_x (pg, f, f2, f4, f8, d->poly));
 
   /* Assemble the result.
    expm1(x) ~= 2^i * (p + 1) - 1
    Let t = 2^i.  */
-  svint64_t u = svadd_n_s64_m (pnz, svlsl_n_s64_m (pnz, i, 52), ExponentBias);
-  svfloat64_t t = svreinterpret_f64_s64 (u);
+  svint64_t u = svadd_m (pnz, svlsl_m (pnz, i, 52), ExponentBias);
+  svfloat64_t t = svreinterpret_f64 (u);
 
   /* expm1(x) ~= p * t + (t - 1).  */
-  svfloat64_t y = svmla_f64_m (pnz, svsub_n_f64_m (pnz, t, 1), p, t);
+  svfloat64_t y = svmla_m (pnz, svsub_m (pnz, t, 1), p, t);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, y, special);

@@ -24,21 +24,20 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t, svbool_t);
 			   want 0x1.9f9c8ap-1.  */
 svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
 {
-  svuint32_t ix = svreinterpret_u32_f32 (x);
-  svuint32_t atop = svand_n_u32_x (pg, svlsr_n_u32_x (pg, ix, 16), 0x7fff);
+  svuint32_t ix = svreinterpret_u32 (x);
+  svuint32_t atop = svand_x (pg, svlsr_x (pg, ix, 16), 0x7fff);
   /* Handle both inf/nan as well as small values (|x|<2^-28).  */
-  svbool_t cmp
-    = svcmpge_n_u32 (pg, svsub_n_u32_x (pg, atop, 0x3180), 0x7ff0 - 0x3180);
+  svbool_t cmp = svcmpge (pg, svsub_x (pg, atop, 0x3180), 0x7ff0 - 0x3180);
 
-  svuint32_t sign = svand_n_u32_x (pg, ix, ~AbsMask);
+  svuint32_t sign = svand_x (pg, ix, ~AbsMask);
   /* |x| < 0.921875.  */
-  svbool_t red = svaclt_n_f32 (pg, x, 0.921875f);
+  svbool_t red = svaclt (pg, x, 0.921875f);
   /* |x| > 4.0.  */
-  svbool_t bor = svacgt_n_f32 (pg, x, 4.0f);
+  svbool_t bor = svacgt (pg, x, 4.0f);
 
   /* Load polynomial coefficients.  */
   svuint32_t idx_lo = svsel (red, sv_u32 (0), sv_u32 (1));
-  svuint32_t idx_hi = svadd_n_u32_x (pg, idx_lo, 2);
+  svuint32_t idx_hi = svadd_x (pg, idx_lo, 2);
 
   const float *base = (float *) __v_erff_data.coeffs;
   svfloat32_t c_2_5 = svld1rq (svptrue_b32 (), base + 2);
@@ -53,33 +52,33 @@ svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
   svfloat32_t p5 = svtbl (c_10_13, idx_lo);
   svfloat32_t p6 = svtbl (c_10_13, idx_hi);
 
-  svfloat32_t a = svabs_f32_x (pg, x);
+  svfloat32_t a = svabs_x (pg, x);
   /* Square with merging mul - z is x^2 for reduced, |x| otherwise.  */
-  svfloat32_t z = svmul_f32_m (red, a, a);
+  svfloat32_t z = svmul_m (red, a, a);
 
   /* Evaluate polynomial on |x| or x^2.  */
-  svfloat32_t r = svmla_f32_x (pg, p5, p6, z);
-  r = svmla_f32_x (pg, p4, r, z);
-  r = svmla_f32_x (pg, p3, r, z);
-  r = svmla_f32_x (pg, p2, r, z);
-  r = svmla_f32_x (pg, p1, r, z);
+  svfloat32_t r = svmla_x (pg, p5, p6, z);
+  r = svmla_x (pg, p4, r, z);
+  r = svmla_x (pg, p3, r, z);
+  r = svmla_x (pg, p2, r, z);
+  r = svmla_x (pg, p1, r, z);
   /* Use merging svmad for last operation - apply first coefficient if not
      reduced, otherwise r is propagated unchanged. This is because the reduced
      polynomial has lower order than the non-reduced.  */
-  r = svmad_n_f32_m (svnot_b_z (pg, red), r, z, base[1]);
-  r = svmla_f32_x (pg, a, r, a);
+  r = svmad_m (svnot_z (pg, red), r, z, base[1]);
+  r = svmla_x (pg, a, r, a);
 
   /* y = |x| + |x| * P(x^2)               if |x| < 0.921875
      y = 1 - exp (-(|x| + |x| * P(|x|)))  otherwise.  */
-  svfloat32_t y = SV_NAME_F1 (exp) (svneg_f32_x (pg, r), pg);
-  y = svsel_f32 (red, r, svsubr_n_f32_x (pg, y, 1.0));
+  svfloat32_t y = SV_NAME_F1 (exp) (svneg_x (pg, r), pg);
+  y = svsel (red, r, svsub_x (pg, y, 1.0));
 
   /* Boring domain (absolute value is required to get the sign of erf(-nan)
      right).  */
-  y = svsel_f32 (bor, sv_f32 (1.0f), svabs_f32_x (pg, y));
+  y = svsel (bor, sv_f32 (1.0f), svabs_x (pg, y));
 
   /* y = erf(x) if x>0, -erf(-x) otherwise.  */
-  y = svreinterpret_f32_u32 (sveor_u32_x (pg, svreinterpret_u32_f32 (y), sign));
+  y = svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (y), sign));
 
   if (unlikely (svptest_any (pg, cmp)))
     return __sv_erff_specialcase (x, y, cmp);

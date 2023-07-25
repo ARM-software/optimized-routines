@@ -36,37 +36,36 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
 
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  svuint32_t ix = svreinterpret_u32_f32 (x);
-  svuint32_t sign = svand_n_u32_x (pg, ix, SignMask);
+  svuint32_t ix = svreinterpret_u32 (x);
+  svuint32_t sign = svand_x (pg, ix, SignMask);
 
   /* Argument reduction:
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
-  svbool_t red = svacgt_n_f32 (pg, x, 1.0f);
+  svbool_t red = svacgt (pg, x, 1.0f);
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  svfloat32_t z = svsel_f32 (red, svdiv_f32_x (pg, sv_f32 (1.0f), x), x);
+  svfloat32_t z = svsel (red, svdiv_x (pg, sv_f32 (1.0f), x), x);
   /* Use absolute value only when needed (odd powers of z).  */
-  svfloat32_t az = svabs_f32_x (pg, z);
-  az = svneg_f32_m (az, red, az);
+  svfloat32_t az = svabs_x (pg, z);
+  az = svneg_m (az, red, az);
 
   /* Use split Estrin scheme for P(z^2) with deg(P)=7.  */
-  svfloat32_t z2 = svmul_f32_x (pg, z, z);
-  svfloat32_t z4 = svmul_f32_x (pg, z2, z2);
-  svfloat32_t z8 = svmul_f32_x (pg, z4, z4);
+  svfloat32_t z2 = svmul_x (pg, z, z);
+  svfloat32_t z4 = svmul_x (pg, z2, z2);
+  svfloat32_t z8 = svmul_x (pg, z4, z4);
 
   svfloat32_t y = sv_estrin_7_f32_x (pg, z2, z4, z8, d->poly);
 
   /* y = shift + z + z^3 * P(z^2).  */
-  svfloat32_t z3 = svmul_f32_x (pg, z2, az);
-  y = svmla_f32_x (pg, az, z3, y);
+  svfloat32_t z3 = svmul_x (pg, z2, az);
+  y = svmla_x (pg, az, z3, y);
 
   /* Apply shift as indicated by 'red' predicate.  */
-  y = svadd_f32_m (red, y, sv_f32 (d->pi_over_2));
+  y = svadd_m (red, y, sv_f32 (d->pi_over_2));
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
-  return svreinterpret_f32_u32 (
-      sveor_u32_x (pg, svreinterpret_u32_f32 (y), sign));
+  return svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (y), sign));
 }
 
 PL_SIG (SV, F, 1, atan, -3.1, 3.1)

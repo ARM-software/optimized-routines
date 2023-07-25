@@ -16,7 +16,7 @@
 #define VTYPE svfloat32_t
 #define STYPE float
 #define VWRAP(f) sv_##f##_f32_x
-#define DUP svdup_n_f32
+#define DUP svdup_f32
 #include "poly_sve_generic.h"
 #undef DUP
 #undef VWRAP

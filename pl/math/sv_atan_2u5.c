@@ -42,39 +42,39 @@ svfloat64_t SV_NAME_D1 (atan) (svfloat64_t x, const svbool_t pg)
 
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  svuint64_t ix = svreinterpret_u64_f64 (x);
-  svuint64_t sign = svand_n_u64_x (pg, ix, SignMask);
+  svuint64_t ix = svreinterpret_u64 (x);
+  svuint64_t sign = svand_x (pg, ix, SignMask);
 
   /* Argument reduction:
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
      Hence, use z=-1/a if x>=1, otherwise z=a.  */
-  svbool_t red = svacgt_n_f64 (pg, x, 1.0);
+  svbool_t red = svacgt (pg, x, 1.0);
   /* Avoid dependency in abs(x) in division (and comparison).  */
-  svfloat64_t z = svsel_f64 (red, svdivr_n_f64_x (pg, x, 1.0), x);
+  svfloat64_t z = svsel (red, svdivr_x (pg, x, 1.0), x);
   /* Use absolute value only when needed (odd powers of z).  */
-  svfloat64_t az = svabs_f64_x (pg, z);
-  az = svneg_f64_m (az, red, az);
+  svfloat64_t az = svabs_x (pg, z);
+  az = svneg_m (az, red, az);
 
   /* Use split Estrin scheme for P(z^2) with deg(P)=19.  */
-  svfloat64_t z2 = svmul_f64_x (pg, z, z);
-  svfloat64_t x2 = svmul_f64_x (pg, z2, z2);
-  svfloat64_t x4 = svmul_f64_x (pg, x2, x2);
-  svfloat64_t x8 = svmul_f64_x (pg, x4, x4);
+  svfloat64_t z2 = svmul_x (pg, z, z);
+  svfloat64_t x2 = svmul_x (pg, z2, z2);
+  svfloat64_t x4 = svmul_x (pg, x2, x2);
+  svfloat64_t x8 = svmul_x (pg, x4, x4);
 
   svfloat64_t y
-      = svmla_f64_x (pg, sv_estrin_7_f64_x (pg, z2, x2, x4, d->poly),
-		     sv_estrin_11_f64_x (pg, z2, x2, x4, x8, d->poly + 8), x8);
+      = svmla_x (pg, sv_estrin_7_f64_x (pg, z2, x2, x4, d->poly),
+		 sv_estrin_11_f64_x (pg, z2, x2, x4, x8, d->poly + 8), x8);
 
   /* y = shift + z + z^3 * P(z^2).  */
-  svfloat64_t z3 = svmul_f64_x (pg, z2, az);
-  y = svmla_f64_x (pg, az, z3, y);
+  svfloat64_t z3 = svmul_x (pg, z2, az);
+  y = svmla_x (pg, az, z3, y);
 
   /* Apply shift as indicated by `red` predicate.  */
-  y = svadd_n_f64_m (red, y, d->pi_over_2);
+  y = svadd_m (red, y, d->pi_over_2);
 
   /* y = atan(x) if x>0, -atan(-x) otherwise.  */
-  y = svreinterpret_f64_u64 (sveor_u64_x (pg, svreinterpret_u64_f64 (y), sign));
+  y = svreinterpret_f64 (sveor_x (pg, svreinterpret_u64 (y), sign));
 
   return y;
 }

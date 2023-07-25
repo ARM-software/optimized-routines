@@ -30,31 +30,30 @@ special_case (svfloat64_t x, svfloat64_t y, const svbool_t cmp)
 					  want 0x1.fffb34198d9ddp-5.  */
 svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
 {
-  svuint64_t ix = svreinterpret_u64_f64 (x);
-  svbool_t special = svcmpge_n_u64 (pg, svsub_n_u64_x (pg, ix, Min), Thresh);
+  svuint64_t ix = svreinterpret_u64 (x);
+  svbool_t special = svcmpge (pg, svsub_x (pg, ix, Min), Thresh);
 
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
-  svuint64_t tmp = svsub_n_u64_x (pg, ix, Off);
-  svuint64_t i = sv_mod_n_u64_x (
-      pg, svlsr_n_u64_x (pg, tmp, 52 - V_LOG2_TABLE_BITS), N);
-  svfloat64_t k = svcvt_f64_s64_x (
-      pg, svasr_n_s64_x (pg, svreinterpret_s64_u64 (tmp), 52));
-  svfloat64_t z = svreinterpret_f64_u64 (
-    svsub_u64_x (pg, ix, svand_n_u64_x (pg, tmp, 0xfffULL << 52)));
+  svuint64_t tmp = svsub_x (pg, ix, Off);
+  svuint64_t i
+      = sv_mod_n_u64_x (pg, svlsr_x (pg, tmp, 52 - V_LOG2_TABLE_BITS), N);
+  svfloat64_t k = svcvt_f64_x (pg, svasr_x (pg, svreinterpret_s64 (tmp), 52));
+  svfloat64_t z = svreinterpret_f64 (
+      svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52)));
 
-  svfloat64_t invc = svld1_gather_u64index_f64 (pg, __v_log2_data.invc, i);
-  svfloat64_t log2c = svld1_gather_u64index_f64 (pg, __v_log2_data.log2c, i);
+  svfloat64_t invc = svld1_gather_index (pg, __v_log2_data.invc, i);
+  svfloat64_t log2c = svld1_gather_index (pg, __v_log2_data.log2c, i);
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 
-  svfloat64_t r = svmad_n_f64_x (pg, invc, z, -1.0);
-  svfloat64_t w = svmla_n_f64_x (pg, log2c, r, __v_log2_data.invln2);
+  svfloat64_t r = svmad_x (pg, invc, z, -1.0);
+  svfloat64_t w = svmla_x (pg, log2c, r, __v_log2_data.invln2);
 
-  svfloat64_t r2 = svmul_f64_x (pg, r, r);
+  svfloat64_t r2 = svmul_x (pg, r, r);
   svfloat64_t y = sv_pw_horner_4_f64_x (pg, r, r2, __v_log2_data.poly);
-  y = svmla_f64_x (pg, svadd_f64_x (pg, k, w), r2, y);
+  y = svmla_x (pg, svadd_x (pg, k, w), r2, y);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, y, special);

@@ -51,10 +51,10 @@ special_case (svbool_t special, svfloat64_t x, svfloat64_t y)
 svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
-  svuint64_t ix = svreinterpret_u64_f64 (x);
-  svuint64_t ax = svand_n_u64_x (pg, ix, AbsMask);
-  svbool_t special = svorr_b_z (pg, svcmpge_n_u64 (pg, ax, d->inf),
-				svcmpge_n_u64 (pg, ix, d->mone));
+  svuint64_t ix = svreinterpret_u64 (x);
+  svuint64_t ax = svand_x (pg, ix, AbsMask);
+  svbool_t special
+      = svorr_z (pg, svcmpge (pg, ax, d->inf), svcmpge (pg, ix, d->mone));
 
   /* With x + 1 = t * 2^k (where t = f + 1 and k is chosen such that f
 			   is in [sqrt(2)/2, sqrt(2)]):
@@ -71,24 +71,21 @@ svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
      The scalar algorithm casts down to 32-bit at this point to calculate k and
      u_red. We stay in double-width to obtain f and k, using the same constants
      as the scalar algorithm but shifted left by 32.  */
-  svfloat64_t m = svadd_n_f64_x (pg, x, 1);
-  svuint64_t mi = svreinterpret_u64_f64 (m);
-  svuint64_t u = svadd_n_u64_x (pg, mi, d->onemhfrt2_top);
+  svfloat64_t m = svadd_x (pg, x, 1);
+  svuint64_t mi = svreinterpret_u64 (m);
+  svuint64_t u = svadd_x (pg, mi, d->onemhfrt2_top);
 
-  svint64_t ki = svsub_n_s64_x (
-      pg, svreinterpret_s64_u64 (svlsr_n_u64_x (pg, u, 52)), 0x3ff);
-  svfloat64_t k = svcvt_f64_s64_x (pg, ki);
+  svint64_t ki = svsub_x (pg, svreinterpret_s64 (svlsr_x (pg, u, 52)), 0x3ff);
+  svfloat64_t k = svcvt_f64_x (pg, ki);
 
   /* Reduce x to f in [sqrt(2)/2, sqrt(2)].  */
-  svuint64_t utop = svadd_n_u64_x (
-      pg, svand_n_u64_x (pg, u, 0x000fffff00000000), d->hfrt2_top);
-  svuint64_t u_red
-      = svorr_u64_x (pg, utop, svand_n_u64_x (pg, mi, BottomMask));
-  svfloat64_t f = svsub_n_f64_x (pg, svreinterpret_f64_u64 (u_red), 1);
+  svuint64_t utop
+      = svadd_x (pg, svand_x (pg, u, 0x000fffff00000000), d->hfrt2_top);
+  svuint64_t u_red = svorr_x (pg, utop, svand_x (pg, mi, BottomMask));
+  svfloat64_t f = svsub_x (pg, svreinterpret_f64 (u_red), 1);
 
   /* Correction term c/m.  */
-  svfloat64_t cm
-      = svdiv_f64_x (pg, svsub_f64_x (pg, x, svsub_n_f64_x (pg, m, 1)), m);
+  svfloat64_t cm = svdiv_x (pg, svsub_x (pg, x, svsub_x (pg, m, 1)), m);
 
   /* Approximate log1p(x) on the reduced input using a polynomial. Because
      log1p(0)=0 we choose an approximation of the form:
@@ -96,13 +93,13 @@ svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
      Hence approximation has the form f + f^2 * P(f)
      where P(x) = C0 + C1*x + C2x^2 + ...
      Assembling this all correctly is dealt with at the final step.  */
-  svfloat64_t f2 = svmul_f64_x (pg, f, f), f4 = svmul_f64_x (pg, f2, f2),
-	      f8 = svmul_f64_x (pg, f4, f4), f16 = svmul_f64_x (pg, f8, f8);
+  svfloat64_t f2 = svmul_x (pg, f, f), f4 = svmul_x (pg, f2, f2),
+	      f8 = svmul_x (pg, f4, f4), f16 = svmul_x (pg, f8, f8);
   svfloat64_t p = sv_estrin_18_f64_x (pg, f, f2, f4, f8, f16, d->poly);
 
-  svfloat64_t ylo = svmla_n_f64_x (pg, cm, k, d->ln2_lo);
-  svfloat64_t yhi = svmla_n_f64_x (pg, f, k, d->ln2_hi);
-  svfloat64_t y = svmla_f64_x (pg, svadd_f64_x (pg, ylo, yhi), f2, p);
+  svfloat64_t ylo = svmla_x (pg, cm, k, d->ln2_lo);
+  svfloat64_t yhi = svmla_x (pg, f, k, d->ln2_hi);
+  svfloat64_t y = svmla_x (pg, svadd_x (pg, ylo, yhi), f2, p);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (special, x, y);

@@ -45,23 +45,23 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
      and s1*s1 overflows only if n>0.  */
 
   /* If n<=0 then set b to 0x6, 0 otherwise.  */
-  svbool_t p_sign = svcmple_n_f64 (pg, n, 0.0); /* n <= 0.  */
-  svuint64_t b = svdup_n_u64_z (p_sign, SpecialOffset);
+  svbool_t p_sign = svcmple (pg, n, 0.0); /* n <= 0.  */
+  svuint64_t b = svdup_u64_z (p_sign, SpecialOffset);
 
   /* Set s1 to generate overflow depending on sign of exponent n.  */
-  svfloat64_t s1 = svreinterpret_f64_u64 (svsubr_n_u64_x (pg, b, SpecialBias1));
+  svfloat64_t s1 = svreinterpret_f64 (svsubr_x (pg, b, SpecialBias1));
   /* Offset s to avoid overflow in final result if n is below threshold.  */
-  svfloat64_t s2 = svreinterpret_f64_u64 (svadd_u64_x (
-    pg, svsub_n_u64_x (pg, svreinterpret_u64_f64 (s), SpecialBias2), b));
+  svfloat64_t s2 = svreinterpret_f64 (
+      svadd_x (pg, svsub_x (pg, svreinterpret_u64 (s), SpecialBias2), b));
 
   /* |n| > 1280 => 2^(n) overflows.  */
-  svbool_t p_cmp = svacgt_n_f64 (pg, n, d->uoflow_bound);
+  svbool_t p_cmp = svacgt (pg, n, d->uoflow_bound);
 
-  svfloat64_t r1 = svmul_f64_x (pg, s1, s1);
-  svfloat64_t r2 = svmla_f64_x (pg, s2, s2, y);
-  svfloat64_t r0 = svmul_f64_x (pg, r2, s1);
+  svfloat64_t r1 = svmul_x (pg, s1, s1);
+  svfloat64_t r2 = svmla_x (pg, s2, s2, y);
+  svfloat64_t r0 = svmul_x (pg, r2, s1);
 
-  return svsel_f64 (p_cmp, r1, r0);
+  return svsel (p_cmp, r1, r0);
 }
 
 /* Fast vector implementation of exp2.
@@ -71,33 +71,33 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
 svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
-  svbool_t no_big_scale = svacle_n_f64 (pg, x, d->big_bound);
-  svbool_t special = svnot_b_z (pg, no_big_scale);
+  svbool_t no_big_scale = svacle (pg, x, d->big_bound);
+  svbool_t special = svnot_z (pg, no_big_scale);
 
   /* Reduce x to k/N + r, where k is integer and r in [-1/2N, 1/2N].  */
   svfloat64_t shift = sv_f64 (d->shift);
-  svfloat64_t kd = svadd_f64_x (pg, x, shift);
-  svuint64_t ki = svreinterpret_u64_f64 (kd);
+  svfloat64_t kd = svadd_x (pg, x, shift);
+  svuint64_t ki = svreinterpret_u64 (kd);
   /* kd = k/N.  */
-  kd = svsub_f64_x (pg, kd, shift);
-  svfloat64_t r = svsub_f64_x (pg, x, kd);
+  kd = svsub_x (pg, kd, shift);
+  svfloat64_t r = svsub_x (pg, x, kd);
 
   /* scale ~= 2^(k/N).  */
-  svuint64_t idx = svand_n_u64_x (pg, ki, N - 1);
-  svuint64_t sbits = svld1_gather_u64index_u64 (pg, __v_exp_data, idx);
+  svuint64_t idx = svand_x (pg, ki, N - 1);
+  svuint64_t sbits = svld1_gather_index (pg, __v_exp_data, idx);
   /* This is only a valid scale when -1023*N < k < 1024*N.  */
-  svuint64_t top = svlsl_n_u64_x (pg, ki, 52 - V_EXP_TABLE_BITS);
-  svfloat64_t scale = svreinterpret_f64_u64 (svadd_u64_x (pg, sbits, top));
+  svuint64_t top = svlsl_x (pg, ki, 52 - V_EXP_TABLE_BITS);
+  svfloat64_t scale = svreinterpret_f64 (svadd_x (pg, sbits, top));
 
   /* Approximate exp2(r) using polynomial.  */
-  svfloat64_t r2 = svmul_f64_x (pg, r, r);
+  svfloat64_t r2 = svmul_x (pg, r, r);
   svfloat64_t p = sv_pairwise_poly_3_f64_x (pg, r, r2, d->poly);
-  svfloat64_t y = svmul_f64_x (pg, r, p);
+  svfloat64_t y = svmul_x (pg, r, p);
 
   /* Assemble exp2(x) = exp2(r) * scale.  */
   if (unlikely (svptest_any (pg, special)))
     return special_case (pg, scale, y, kd, d);
-  return svmla_f64_x (pg, scale, scale, y);
+  return svmla_x (pg, scale, scale, y);
 }
 
 PL_SIG (SV, D, 1, exp2, -9.9, 9.9)

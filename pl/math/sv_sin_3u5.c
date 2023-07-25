@@ -46,42 +46,42 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   /* Load some values in quad-word chunks to minimise memory access.  */
   const svbool_t ptrue = svptrue_b64 ();
   svfloat64_t shift = sv_f64 (d->shift);
-  svfloat64_t inv_pi_and_pi1 = svld1rq_f64 (ptrue, &d->inv_pi);
-  svfloat64_t pi2_and_pi3 = svld1rq_f64 (ptrue, &d->pi_2);
+  svfloat64_t inv_pi_and_pi1 = svld1rq (ptrue, &d->inv_pi);
+  svfloat64_t pi2_and_pi3 = svld1rq (ptrue, &d->pi_2);
 
   /* n = rint(|x|/pi).  */
-  svfloat64_t n = svmla_lane_f64 (shift, x, inv_pi_and_pi1, 0);
-  svuint64_t odd = svlsl_n_u64_x (pg, svreinterpret_u64_f64 (n), 63);
-  odd = sveor_n_u64_m (svcmpeq_u64 (pg, svreinterpret_u64_f64 (x),
-				    svreinterpret_u64_f64 (sv_f64 (-0.0))),
-		       odd, 0x8000000000000000);
-  n = svsub_f64_x (pg, n, shift);
+  svfloat64_t n = svmla_lane (shift, x, inv_pi_and_pi1, 0);
+  svuint64_t odd = svlsl_x (pg, svreinterpret_u64 (n), 63);
+  odd = sveor_m (
+      svcmpeq (pg, svreinterpret_u64 (x), svreinterpret_u64 (sv_f64 (-0.0))),
+      odd, 0x8000000000000000);
+  n = svsub_x (pg, n, shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/2 .. pi/2).  */
   svfloat64_t r = x;
-  r = svmls_lane_f64 (r, n, inv_pi_and_pi1, 1);
-  r = svmls_lane_f64 (r, n, pi2_and_pi3, 0);
-  r = svmls_lane_f64 (r, n, pi2_and_pi3, 1);
+  r = svmls_lane (r, n, inv_pi_and_pi1, 1);
+  r = svmls_lane (r, n, pi2_and_pi3, 0);
+  r = svmls_lane (r, n, pi2_and_pi3, 1);
 
   /* sin(r) poly approx.  */
-  svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t r3 = svmul_f64_x (pg, r2, r);
-  svfloat64_t r4 = svmul_f64_x (pg, r2, r2);
+  svfloat64_t r2 = svmul_x (pg, r, r);
+  svfloat64_t r3 = svmul_x (pg, r2, r);
+  svfloat64_t r4 = svmul_x (pg, r2, r2);
 
-  svfloat64_t t1 = svmla_f64_x (pg, C (4), C (5), r2);
-  svfloat64_t t2 = svmla_f64_x (pg, C (2), C (3), r2);
-  svfloat64_t t3 = svmla_f64_x (pg, C (0), C (1), r2);
+  svfloat64_t t1 = svmla_x (pg, C (4), C (5), r2);
+  svfloat64_t t2 = svmla_x (pg, C (2), C (3), r2);
+  svfloat64_t t3 = svmla_x (pg, C (0), C (1), r2);
 
-  svfloat64_t y = svmla_f64_x (pg, t1, C (6), r4);
-  y = svmla_f64_x (pg, t2, y, r4);
-  y = svmla_f64_x (pg, t3, y, r4);
-  y = svmla_f64_x (pg, r, y, r3);
+  svfloat64_t y = svmla_x (pg, t1, C (6), r4);
+  y = svmla_x (pg, t2, y, r4);
+  y = svmla_x (pg, t3, y, r4);
+  y = svmla_x (pg, r, y, r3);
 
   /* sign = y^sign.  */
-  y = svreinterpret_f64_u64 (sveor_u64_z (pg, svreinterpret_u64_f64 (y), odd));
+  y = svreinterpret_f64 (sveor_z (pg, svreinterpret_u64 (y), odd));
 
-  svbool_t cmp = svacle_n_f64 (pg, x, d->range_val);
-  cmp = svnot_b_z (pg, cmp);
+  svbool_t cmp = svacle (pg, x, d->range_val);
+  cmp = svnot_z (pg, cmp);
   if (unlikely (svptest_any (pg, cmp)))
     return special_case (x, y, cmp);
   return y;

@@ -27,15 +27,13 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 					   want 0x1.f1902db063433p-5.  */
 svfloat64_t SV_NAME_D1 (acosh) (svfloat64_t x, const svbool_t pg)
 {
-  svuint64_t itop = svlsr_n_u64_x (pg, svreinterpret_u64_f64 (x), 52);
+  svuint64_t itop = svlsr_x (pg, svreinterpret_u64 (x), 52);
   /* (itop - OneTop) >= (BigBoundTop - OneTop).  */
-  svbool_t special
-    = svcmpge (pg, svsub_n_u64_x (pg, itop, OneTop), sv_u64 (0x1ff));
+  svbool_t special = svcmpge (pg, svsub_x (pg, itop, OneTop), sv_u64 (0x1ff));
 
-  svfloat64_t xm1 = svsub_n_f64_x (pg, x, 1);
-  svfloat64_t u = svmul_f64_x (pg, xm1, svadd_n_f64_x (pg, x, 1));
-  svfloat64_t y
-    = sv_log1p_inline (svadd_f64_x (pg, xm1, svsqrt_f64_x (pg, u)), pg);
+  svfloat64_t xm1 = svsub_x (pg, x, 1);
+  svfloat64_t u = svmul_x (pg, xm1, svadd_x (pg, x, 1));
+  svfloat64_t y = sv_log1p_inline (svadd_x (pg, xm1, svsqrt_x (pg, u)), pg);
 
   /* Fall back to scalar routine for special lanes.  */
   if (unlikely (svptest_any (pg, special)))

@@ -111,7 +111,7 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #include "ulp_wrappers_gen.h"
 
 #if WANT_SVE_MATH
-static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_n_s32((int)round(y)), svptrue_b32())); }
-static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_n_s64((long)round(y)), svptrue_b64())); }
+static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), svptrue_b32())); }
+static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), svptrue_b64())); }
 #endif
 // clang-format on

@@ -42,7 +42,7 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
   const struct data *dat = ptr_barrier (&data);
 
   /* Invert condition to catch NaNs and Infs as well as large values.  */
-  svbool_t special = svnot_b_z (pg, svaclt_n_f64 (pg, x, dat->range_val));
+  svbool_t special = svnot_z (pg, svaclt (pg, x, dat->range_val));
 
   /* Fallback for all lanes if any are out of bounds.  */
   if (unlikely (svptest_any (pg, special)))
@@ -50,19 +50,19 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
 
   /* q = nearest integer to 2 * x / pi.  */
   svfloat64_t shift = sv_f64 (dat->shift);
-  svfloat64_t q = svmla_n_f64_x (pg, shift, x, dat->inv_half_pi);
-  q = svsub_f64_x (pg, q, shift);
-  svint64_t qi = svcvt_s64_f64_x (pg, q);
+  svfloat64_t q = svmla_x (pg, shift, x, dat->inv_half_pi);
+  q = svsub_x (pg, q, shift);
+  svint64_t qi = svcvt_s64_x (pg, q);
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
   svfloat64_t r = x;
-  svfloat64_t half_pi = svld1rq_f64 (svptrue_b64 (), &dat->half_pi_hi);
-  r = svmls_lane_f64 (r, q, half_pi, 0);
-  r = svmls_lane_f64 (r, q, half_pi, 1);
+  svfloat64_t half_pi = svld1rq (svptrue_b64 (), &dat->half_pi_hi);
+  r = svmls_lane (r, q, half_pi, 0);
+  r = svmls_lane (r, q, half_pi, 1);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
      formula.  */
-  r = svmul_n_f64_x (pg, r, 0.5);
+  r = svmul_x (pg, r, 0.5);
 
   /* Approximate tan(r) using order 8 polynomial.
      tan(x) is odd, so polynomial has the form:
@@ -70,13 +70,13 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
      Hence we first approximate P(r) = C1 + C2 * r^2 + C3 * r^4 + ...
      Then compute the approximation by:
      tan(r) ~= r + r^3 * (C0 + r^2 * P(r)).  */
-  svfloat64_t r2 = svmul_f64_x (pg, r, r);
-  svfloat64_t r4 = svmul_f64_x (pg, r2, r2);
-  svfloat64_t r8 = svmul_f64_x (pg, r4, r4);
+  svfloat64_t r2 = svmul_x (pg, r, r);
+  svfloat64_t r4 = svmul_x (pg, r2, r2);
+  svfloat64_t r8 = svmul_x (pg, r4, r4);
   /* Use offset version coeff array by 1 to evaluate from C1 onwards.  */
   svfloat64_t p = sv_estrin_7_f64_x (pg, r2, r4, r8, dat->poly + 1);
-  p = svmad_n_f64_x (pg, p, r2, dat->poly[0]);
-  p = svmla_f64_x (pg, r, r2, svmul_f64_x (pg, p, r));
+  p = svmad_x (pg, p, r2, dat->poly[0]);
+  p = svmla_x (pg, r, r2, svmul_x (pg, p, r));
 
   /* Recombination uses double-angle formula:
      tan(2x) = 2 * tan(x) / (1 - (tan(x))^2)
@@ -85,14 +85,14 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
      to assemble result using change-of-sign and conditional selection of
      numerator/denominator dependent on odd/even-ness of q (hence quadrant).  */
   svbool_t use_recip
-    = svcmpeq_n_u64 (pg, svand_n_u64_x (pg, svreinterpret_u64_s64 (qi), 1), 0);
+      = svcmpeq (pg, svand_x (pg, svreinterpret_u64 (qi), 1), 0);
 
-  svfloat64_t n = svmad_n_f64_x (pg, p, p, -1);
-  svfloat64_t d = svmul_n_f64_x (pg, p, 2);
+  svfloat64_t n = svmad_x (pg, p, p, -1);
+  svfloat64_t d = svmul_x (pg, p, 2);
   svfloat64_t swap = n;
-  n = svneg_f64_m (n, use_recip, d);
-  d = svsel_f64 (use_recip, swap, d);
-  return svdiv_f64_x (pg, n, d);
+  n = svneg_m (n, use_recip, d);
+  d = svsel (use_recip, swap, d);
+  return svdiv_x (pg, n, d);
 }
 
 PL_SIG (SV, D, 1, tan, -3.1, 3.1)
