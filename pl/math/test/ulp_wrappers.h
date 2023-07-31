@@ -7,6 +7,7 @@
  */
 
 #include <stdbool.h>
+#include <arm_neon.h>
 
 #if USE_MPFR
 static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
@@ -109,6 +110,11 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZSND2_WRAP(func)
 
 #include "ulp_wrappers_gen.h"
+
+float v_sincosf_sin(float x) { float32x4_t s, c; _ZGVnN4vl4l4_sincosf(vdupq_n_f32(x), &s, &c); return s[0]; }
+float v_sincosf_cos(float x) { float32x4_t s, c; _ZGVnN4vl4l4_sincosf(vdupq_n_f32(x), &s, &c); return c[0]; }
+float v_cexpif_sin(float x) { return _ZGVnN4v_cexpif(vdupq_n_f32(x)).val[0][0]; }
+float v_cexpif_cos(float x) { return _ZGVnN4v_cexpif(vdupq_n_f32(x)).val[1][0]; }
 
 #if WANT_SVE_MATH
 static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), svptrue_b32())); }

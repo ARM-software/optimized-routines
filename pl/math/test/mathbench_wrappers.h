@@ -55,6 +55,21 @@ y_Z_pow (v_double x)
   return _ZGVnN2vv_pow (v_double_dup (2.34), x);
 }
 
+__vpcs static v_float
+_Z_sincosf_wrap (v_float x)
+{
+  v_float s, c;
+  _ZGVnN4vl4l4_sincosf (x, &s, &c);
+  return s + c;
+}
+
+__vpcs static v_float
+_Z_cexpif_wrap (v_float x)
+{
+  __f32x4x2_t sc = _ZGVnN4v_cexpif (x);
+  return sc.val[0] + sc.val[1];
+}
+
 #endif // __arch64__ && __vpcs
 
 #if WANT_SVE_MATH
