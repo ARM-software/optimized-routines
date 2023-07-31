@@ -65,6 +65,11 @@ typedef struct __f32x4x2_t
   __f32x4_t val[2];
 } __f32x4x2_t;
 
+typedef struct __f64x2x2_t
+{
+  __f64x2_t val[2];
+} __f64x2x2_t;
+
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_acoshf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_acosh (__f64x2_t);
@@ -83,6 +88,7 @@ __vpcs __f64x2_t _ZGVnN2v_atanh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_cbrtf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_cbrt (__f64x2_t);
 __vpcs __f32x4x2_t _ZGVnN4v_cexpif (__f32x4_t);
+__vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_coshf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_cosh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_erff (__f32x4_t);
@@ -108,6 +114,7 @@ __vpcs __f64x2_t _ZGVnN2v_tan (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_tanhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_tanh (__f64x2_t);
 __vpcs void _ZGVnN4vl4l4_sincosf (__f32x4_t, __f32x4_t *, __f32x4_t *);
+__vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
 
 # endif
 

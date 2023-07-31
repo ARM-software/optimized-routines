@@ -70,6 +70,21 @@ _Z_cexpif_wrap (v_float x)
   return sc.val[0] + sc.val[1];
 }
 
+__vpcs static v_double
+_Z_sincos_wrap (v_double x)
+{
+  v_double s, c;
+  _ZGVnN2vl8l8_sincos (x, &s, &c);
+  return s + c;
+}
+
+__vpcs static v_double
+_Z_cexpi_wrap (v_double x)
+{
+  __f64x2x2_t sc = _ZGVnN2v_cexpi (x);
+  return sc.val[0] + sc.val[1];
+}
+
 #endif // __arch64__ && __vpcs
 
 #if WANT_SVE_MATH
