@@ -75,5 +75,7 @@
 {"_ZGVsMxvv_pow",    'd', 's', -10.0, 10.0, {.svd = xy_Z_sv_pow}},
 {"x_ZGVsMxvv_pow",   'd', 's', -10.0, 10.0, {.svd = x_Z_sv_pow}},
 {"y_ZGVsMxvv_pow",   'd', 's', -10.0, 10.0, {.svd = y_Z_sv_pow}},
+{"_ZGVsMxvl4l4_sincosf", 'f', 's', -3.1, 3.1, {.svf = _Z_sv_sincosf_wrap}},
+{"_ZGVsMxv_cexpif", 'f', 's', -3.1, 3.1, {.svf = _Z_sv_cexpif_wrap}},
 #endif
     // clang-format on

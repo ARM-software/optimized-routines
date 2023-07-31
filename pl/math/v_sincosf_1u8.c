@@ -28,10 +28,10 @@ special_case (float32x4_t x, uint32x4_t special, float *out_sin,
 /* Single-precision vector function allowing calculation of both sin and cos in
    one function call, using shared argument reduction and separate low-order
    polynomials.
-   Worst-case error for sin is 2.10 ULP:
-   v_sincosf_sin(+/-0x1.1bcc64p+13) got 0x1.6db076p-1 want 0x1.6db07ap-1.
-   Worst-case error for cos is 2.04 ULP:
-   v_sincosf_cos(+/-0x1.5c1436p+12) got -0x1.6bc654p-1 want -0x1.6bc658p-1.  */
+   Worst-case error for sin is 1.67 ULP:
+   v_sincosf_sin(0x1.c704c4p+19) got 0x1.fff698p-5 want 0x1.fff69cp-5
+   Worst-case error for cos is 1.81 ULP:
+   v_sincosf_cos(0x1.e506fp+19) got -0x1.ffec6ep-6 want -0x1.ffec72p-6.  */
 VPCS_ATTR void
 _ZGVnN4vl4l4_sincosf (float32x4_t x, float *out_sin, float *out_cos)
 {
@@ -47,8 +47,8 @@ _ZGVnN4vl4l4_sincosf (float32x4_t x, float *out_sin, float *out_cos)
     special_case (x, special, out_sin, out_cos);
 }
 
-PL_TEST_ULP (v_sincosf_sin, 1.60)
-PL_TEST_ULP (v_sincosf_cos, 1.51)
+PL_TEST_ULP (v_sincosf_sin, 1.17)
+PL_TEST_ULP (v_sincosf_cos, 1.31)
 #define V_SINCOSF_INTERVAL(lo, hi, n)                                         \
   PL_TEST_INTERVAL (v_sincosf_sin, lo, hi, n)                                 \
   PL_TEST_INTERVAL (v_sincosf_cos, lo, hi, n)

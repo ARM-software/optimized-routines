@@ -149,4 +149,19 @@ y_Z_sv_pow (sv_double x, sv_bool pg)
   return _ZGVsMxvv_pow (svdup_f64 (2.34), x, pg);
 }
 
+static sv_float
+_Z_sv_sincosf_wrap (sv_float x, sv_bool pg)
+{
+  float s[svcntw ()], c[svcntw ()];
+  _ZGVsMxvl4l4_sincosf (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
+}
+
+static sv_float
+_Z_sv_cexpif_wrap (sv_float x, sv_bool pg)
+{
+  svfloat32x2_t sc = _ZGVsMxv_cexpif (x, pg);
+  return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
+}
+
 #endif // WANT_SVE_MATH

@@ -124,5 +124,11 @@ double v_cexpi_cos(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[1][0]; 
 #if WANT_SVE_MATH
 static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), svptrue_b32())); }
 static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), svptrue_b64())); }
+
+float sv_sincosf_sin(float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, svptrue_b32()); return s[0]; }
+float sv_sincosf_cos(float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, svptrue_b32()); return c[0]; }
+float sv_cexpif_sin(float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), svptrue_b32()), 0)); }
+float sv_cexpif_cos(float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), svptrue_b32()), 1)); }
+
 #endif
 // clang-format on

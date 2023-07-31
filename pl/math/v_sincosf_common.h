@@ -32,10 +32,10 @@ check_ge_rangeval (float32x4_t x, const struct v_sincosf_data *d)
 /* Single-precision vector function allowing calculation of both sin and cos in
    one function call, using shared argument reduction and separate low-order
    polynomials.
-   Worst-case error for sin is 2.10 ULP:
-   v_sincosf_sin(+/-0x1.1bcc64p+13) got 0x1.6db076p-1 want 0x1.6db07ap-1.
-   Worst-case error for cos is 2.04 ULP:
-   v_sincosf_cos(+/-0x1.5c1436p+12) got -0x1.6bc654p-1 want -0x1.6bc658p-1.  */
+   Worst-case error for sin is 1.67 ULP:
+   v_sincosf_sin(0x1.c704c4p+19) got 0x1.fff698p-5 want 0x1.fff69cp-5
+   Worst-case error for cos is 1.81 ULP:
+   v_sincosf_cos(0x1.e506fp+19) got -0x1.ffec6ep-6 want -0x1.ffec72p-6.  */
 static inline float32x4x2_t
 v_sincosf_inline (float32x4_t x, const struct v_sincosf_data *d)
 {
@@ -58,11 +58,11 @@ v_sincosf_inline (float32x4_t x, const struct v_sincosf_data *d)
   s = vfmaq_f32 (r, r3, s);
 
   /* Approximate cos(r) ~= 1 - (r^2)/2 + r^4 * poly_cos(r^2).  */
-  float32x4_t r4 = vmulq_f32 (r2, r2), r8 = vmulq_f32 (r4, r4);
-  float32x4_t c = vfmaq_f32 (v_f32 (1), v_f32 (-0.5), r2);
-  float32x4_t p = vfmaq_f32 (d->poly_cos[0], d->poly_cos[1], r2);
+  float32x4_t r4 = vmulq_f32 (r2, r2);
+  float32x4_t p = vfmaq_f32 (d->poly_cos[1], r2, d->poly_cos[2]);
+  float32x4_t c = vfmaq_f32 (v_f32 (-0.5), r2, d->poly_cos[0]);
   c = vfmaq_f32 (c, r4, p);
-  c = vfmaq_f32 (c, d->poly_cos[2], r8);
+  c = vfmaq_f32 (v_f32 (1), c, r2);
 
   /* If odd quadrant, swap cos and sin.  */
   uint32x4_t swap = vtstq_u32 (vreinterpretq_u32_s32 (n), v_u32 (1));
