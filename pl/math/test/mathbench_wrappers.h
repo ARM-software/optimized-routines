@@ -164,4 +164,19 @@ _Z_sv_cexpif_wrap (sv_float x, sv_bool pg)
   return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
 
+static sv_double
+_Z_sv_sincos_wrap (sv_double x, sv_bool pg)
+{
+  double s[svcntd ()], c[svcntd ()];
+  _ZGVsMxvl8l8_sincos (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
+}
+
+static sv_double
+_Z_sv_cexpi_wrap (sv_double x, sv_bool pg)
+{
+  svfloat64x2_t sc = _ZGVsMxv_cexpi (x, pg);
+  return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
+}
+
 #endif // WANT_SVE_MATH

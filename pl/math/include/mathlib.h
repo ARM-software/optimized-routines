@@ -133,6 +133,7 @@ svfloat32_t _ZGVsMxv_atanf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_atan (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvv_atan2 (svfloat64_t, svfloat64_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
+svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_cosf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_cos (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_erff (svfloat32_t, svbool_t);
@@ -164,6 +165,7 @@ svfloat64_t _ZGVsMxv_sin (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_tanf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_tan (svfloat64_t, svbool_t);
 void _ZGVsMxvl4l4_sincosf (svfloat32_t, float *, float *, svbool_t);
+void _ZGVsMxvl8l8_sincos (svfloat64_t, double *, double *, svbool_t);
 # endif
 
 #endif

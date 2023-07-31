@@ -130,5 +130,10 @@ float sv_sincosf_cos(float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sin
 float sv_cexpif_sin(float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), svptrue_b32()), 0)); }
 float sv_cexpif_cos(float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), svptrue_b32()), 1)); }
 
+double sv_sincos_sin(double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, svptrue_b64()); return s[0]; }
+double sv_sincos_cos(double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, svptrue_b64()); return c[0]; }
+double sv_cexpi_sin(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), svptrue_b64()), 0)); }
+double sv_cexpi_cos(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), svptrue_b64()), 1)); }
+
 #endif
 // clang-format on

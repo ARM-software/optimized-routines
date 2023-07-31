@@ -62,4 +62,9 @@ F (sv_sincosf_sin, sv_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
 F (sv_sincosf_cos, sv_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
 F (sv_cexpif_sin, sv_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)
 F (sv_cexpif_cos, sv_cexpif_cos, cos, mpfr_cos, 1, 1, f1, 0)
+
+F (sv_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+F (sv_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+F (sv_cexpi_sin, sv_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+F (sv_cexpi_cos, sv_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 #endif
