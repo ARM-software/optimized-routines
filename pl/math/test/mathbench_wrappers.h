@@ -37,6 +37,18 @@ _Z_atan2f_wrap (v_float x)
   return _ZGVnN4vv_atan2f (v_float_dup (5.0f), x);
 }
 
+__vpcs static v_float
+_Z_hypotf_wrap (v_float x)
+{
+  return _ZGVnN4vv_hypotf (v_float_dup (5.0f), x);
+}
+
+__vpcs static v_double
+_Z_hypot_wrap (v_double x)
+{
+  return _ZGVnN2vv_hypot (v_double_dup (5.0), x);
+}
+
 __vpcs static v_double
 xy_Z_pow (v_double x)
 {
