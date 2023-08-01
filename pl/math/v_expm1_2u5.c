@@ -30,9 +30,9 @@ static const struct data
 #define AllMask v_u64 (0xffffffffffffffff)
 #define AbsMask v_u64 (0x7fffffffffffffff)
 #define SignMask v_u64 (0x8000000000000000)
-/* For |x| > BigBound, the final stage of the algorithm overflows so fall back
-   to scalar.  */
-#define BigBound 0x40862b7d369a5aa9    /* asuint64(0x1.62b7d369a5aa9p+9).  */
+/* For |x| > BigBound, the final stage of the algorithm overflows so fall
+   back to scalar.  */
+#define BigBound 0x40862b7d369a5aa9 /* asuint64(0x1.62b7d369a5aa9p+9).  */
 /* Value below which expm1(x) is within 2 ULP of x.  */
 #define TinyBound 0x3cc0000000000000		/* asuint64(0x1p-51).  */
 #define ExponentBias v_s64 (0x3ff0000000000000) /* asuint64(1.0).  */
@@ -45,11 +45,12 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 
 /* Double-precision vector exp(x) - 1 function.
    The maximum error observed error is 2.18 ULP:
-   __v_expm1(0x1.634ba0c237d7bp-2) got 0x1.a8b9ea8d66e22p-2
-				  want 0x1.a8b9ea8d66e2p-2.  */
+   _ZGVnN2v_expm1 (0x1.634ba0c237d7bp-2) got 0x1.a8b9ea8d66e22p-2
+					want 0x1.a8b9ea8d66e2p-2.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
+
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t ax = vandq_u64 (ix, AbsMask);
 
@@ -63,7 +64,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
 #else
   /* Large input, NaNs and Infs, or -0.  */
   uint64x2_t special
-    = vorrq_u64 (vcgeq_u64 (ax, v_u64 (BigBound)), vceqq_u64 (ix, SignMask));
+      = vorrq_u64 (vcgeq_u64 (ax, v_u64 (BigBound)), vceqq_u64 (ix, SignMask));
 #endif
 
   /* Reduce argument to smaller range:
@@ -73,8 +74,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
      where 2^i is exact because i is an integer.  */
   float64x2_t n = vsubq_f64 (vfmaq_f64 (d->shift, d->invln2, x), d->shift);
   int64x2_t i = vcvtq_s64_f64 (n);
-  float64x2_t f;
-  f = vfmsq_f64 (x, n, d->ln2_hi);
+  float64x2_t f = vfmsq_f64 (x, n, d->ln2_hi);
   f = vfmsq_f64 (f, n, d->ln2_lo);
 
   /* Approximate expm1(f) using polynomial.

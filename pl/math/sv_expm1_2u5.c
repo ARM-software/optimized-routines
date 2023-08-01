@@ -10,27 +10,28 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define SV_EXPM1_POLY_ORDER 10
 #define SpecialBound 0x1.62b7d369a5aa9p+9
 #define ExponentBias 0x3ff0000000000000
 
 static const struct data
 {
-  double poly[SV_EXPM1_POLY_ORDER + 1];
+  double poly[11];
   double shift, inv_ln2, special_bound;
   /* To be loaded in one quad-word.  */
   double ln2_hi, ln2_lo;
-} data = {.special_bound = SpecialBound,
-	  .inv_ln2 = 0x1.71547652b82fep0,
-	  .ln2_hi = 0x1.62e42fefa39efp-1,
-	  .ln2_lo = 0x1.abc9e3b39803fp-56,
-	  .shift = 0x1.8p52,
-	  /* Generated using fpminimax, see tools/expm1.sollya for details.  */
-	  .poly = {0x1p-1, 0x1.5555555555559p-3, 0x1.555555555554bp-5,
-		   0x1.111111110f663p-7, 0x1.6c16c16c1b5f3p-10,
-		   0x1.a01a01affa35dp-13, 0x1.a01a018b4ecbbp-16,
-		   0x1.71ddf82db5bb4p-19, 0x1.27e517fc0d54bp-22,
-		   0x1.af5eedae67435p-26, 0x1.1f143d060a28ap-29}};
+} data = {
+  /* Generated using fpminimax.  */
+  .poly = { 0x1p-1, 0x1.5555555555559p-3, 0x1.555555555554bp-5,
+            0x1.111111110f663p-7, 0x1.6c16c16c1b5f3p-10, 0x1.a01a01affa35dp-13,
+            0x1.a01a018b4ecbbp-16, 0x1.71ddf82db5bb4p-19, 0x1.27e517fc0d54bp-22,
+            0x1.af5eedae67435p-26, 0x1.1f143d060a28ap-29, },
+
+  .special_bound = SpecialBound,
+  .inv_ln2 = 0x1.71547652b82fep0,
+  .ln2_hi = 0x1.62e42fefa39efp-1,
+  .ln2_lo = 0x1.abc9e3b39803fp-56,
+  .shift = 0x1.8p52,
+};
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x, svfloat64_t y, svbool_t pg)
@@ -45,6 +46,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t pg)
 svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
+
   /* Large, Nan/Inf.  */
   svbool_t special = svnot_z (pg, svaclt (pg, x, d->special_bound));
   /* Argument reduction discards sign of zero, but expm1(-0) is expected to be
@@ -68,8 +70,9 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 	 x + ax^2 + bx^3 + cx^4 ....
      So we calculate the polynomial P(f) = a + bf + cf^2 + ...
      and assemble the approximation expm1(f) ~= f + f^2 * P(f).  */
-  svfloat64_t f2 = svmul_x (pg, f, f), f4 = svmul_x (pg, f2, f2),
-	      f8 = svmul_x (pg, f4, f4);
+  svfloat64_t f2 = svmul_x (pg, f, f);
+  svfloat64_t f4 = svmul_x (pg, f2, f2);
+  svfloat64_t f8 = svmul_x (pg, f4, f4);
   svfloat64_t p
       = svmla_x (pg, f, f2, sv_estrin_10_f64_x (pg, f, f2, f4, f8, d->poly));
 

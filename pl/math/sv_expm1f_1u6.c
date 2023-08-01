@@ -19,7 +19,7 @@ static const struct data
   float c2, c4, ln2_hi, ln2_lo;
   float c0, c1, c3, inv_ln2, special_bound, shift;
 } data = {
-  /* Generated using fpminimax, see tools/expm1f.sollya for details.  */
+  /* Generated using fpminimax.  */
   .c0 = 0x1.fffffep-2,		 .c1 = 0x1.5554aep-3,
   .c2 = 0x1.555736p-5,		 .c3 = 0x1.12287cp-7,
   .c4 = 0x1.6b55a2p-10,
@@ -43,13 +43,14 @@ special_case (svfloat32_t x, svbool_t pg)
 svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
+
   /* Large, NaN/Inf and -0.  */
   svbool_t special = svnot_z (pg, svaclt (pg, x, d->special_bound));
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, pg);
 
-  /* This vector is reliant on layout of sv_expm1f_d->- it contains constants
+  /* This vector is reliant on layout of data - it contains constants
      that can be used with _lane forms of svmla/svmls. Values are:
      [ coeff_2, coeff_4, ln2_hi, ln2_lo ].  */
   svfloat32_t lane_constants = svld1rq (svptrue_b32 (), &d->c2);
@@ -67,8 +68,7 @@ svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
   j = svsub_m (pnz, j, d->shift);
   svint32_t i = svcvt_s32_m (svreinterpret_s32 (x), pnz, j);
 
-  svfloat32_t f = x;
-  f = svmls_lane (f, j, lane_constants, 2);
+  svfloat32_t f = svmls_lane (x, j, lane_constants, 2);
   f = svmls_lane (f, j, lane_constants, 3);
 
   /* Approximate expm1(f) using polynomial.

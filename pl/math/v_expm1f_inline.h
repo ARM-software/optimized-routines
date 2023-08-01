@@ -33,6 +33,7 @@ static inline float32x4_t
 expm1f_inline (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
+
   /* Helper routine for calculating exp(x) - 1.
      Copied from v_expm1f_1u6.c, with all special-case handling removed - the
      calling routine should handle special values if required.  */
@@ -40,12 +41,12 @@ expm1f_inline (float32x4_t x)
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
   float32x4_t j = vsubq_f32 (vfmaq_f32 (d->shift, d->invln2, x), d->shift);
   int32x4_t i = vcvtq_s32_f32 (j);
-  float32x4_t f;
-  f = vfmsq_f32 (x, j, d->ln2_hi);
+  float32x4_t f = vfmsq_f32 (x, j, d->ln2_hi);
   f = vfmsq_f32 (f, j, d->ln2_lo);
 
   /* Approximate expm1(f) with polynomial P, expm1(f) ~= f + f^2 * P(f).
-     Uses Estrin scheme, where the main __v_expm1f routine uses Horner.  */
+     Uses Estrin scheme, where the main _ZGVnN4v_expm1f routine uses
+     Horner.  */
   float32x4_t f2 = vmulq_f32 (f, f);
   float32x4_t f4 = vmulq_f32 (f2, f2);
   float32x4_t p = v_estrin_4_f32 (f, f2, f4, d->poly);
@@ -53,7 +54,7 @@ expm1f_inline (float32x4_t x)
 
   /* t = 2^i.  */
   int32x4_t u = vaddq_s32 (vshlq_n_s32 (i, 23), ExponentBias);
-  float32x4_t t = vreinterpretq_f32_u32 (vreinterpretq_u32_s32 (u));
+  float32x4_t t = vreinterpretq_f32_s32 (u);
   /* expm1(x) ~= p * t + (t - 1).  */
   return vfmaq_f32 (vsubq_f32 (t, v_f32 (1.0f)), p, t);
 }

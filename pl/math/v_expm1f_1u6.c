@@ -41,11 +41,12 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 
 /* Single-precision vector exp(x) - 1 function.
    The maximum error is 1.51 ULP:
-   expm1f(0x1.8baa96p-2) got 0x1.e2fb9p-2
-			want 0x1.e2fb94p-2.  */
+   _ZGVnN4v_expm1f (0x1.8baa96p-2) got 0x1.e2fb9p-2
+				  want 0x1.e2fb94p-2.  */
 float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
+
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ax = vandq_u32 (ix, AbsMask);
 
@@ -60,7 +61,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
 #else
   /* Handles very large values (+ve and -ve), +/-NaN, +/-Inf and -0.  */
   uint32x4_t special
-    = vorrq_u32 (vcgeq_u32 (ax, v_u32 (BigBound)), vceqq_u32 (ix, SignMask));
+      = vorrq_u32 (vcgeq_u32 (ax, v_u32 (BigBound)), vceqq_u32 (ix, SignMask));
 #endif
 
   /* Reduce argument to smaller range:
@@ -70,8 +71,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
      where 2^i is exact because i is an integer.  */
   float32x4_t j = vsubq_f32 (vfmaq_f32 (d->shift, d->invln2, x), d->shift);
   int32x4_t i = vcvtq_s32_f32 (j);
-  float32x4_t f;
-  f = vfmsq_f32 (x, j, d->ln2_hi);
+  float32x4_t f = vfmsq_f32 (x, j, d->ln2_hi);
   f = vfmsq_f32 (f, j, d->ln2_lo);
 
   /* Approximate expm1(f) using polynomial.
@@ -86,7 +86,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
   int32x4_t u = vaddq_s32 (vshlq_n_s32 (i, 23), ExponentBias);
-  float32x4_t t = vreinterpretq_f32_u32 (vreinterpretq_u32_s32 (u));
+  float32x4_t t = vreinterpretq_f32_s32 (u);
   /* expm1(x) ~= p * t + (t - 1).  */
   float32x4_t y = vfmaq_f32 (vsubq_f32 (t, v_f32 (1.0f)), p, t);
 
