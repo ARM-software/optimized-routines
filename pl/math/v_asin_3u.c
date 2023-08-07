@@ -100,8 +100,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (asin) (float64x2_t x)
   float64x2_t y = vbslq_f64 (a_lt_half, p, vfmsq_n_f64 (d->pi_over_2, p, 2.0));
 
   /* Copy sign.  */
-  return vreinterpretq_f64_u64 (
-      vbslq_u64 (v_u64 (AbsMask), vreinterpretq_u64_f64 (y), ix));
+  return vbslq_f64 (v_u64 (AbsMask), y, x);
 }
 
 PL_SIG (V, D, 1, asin, -1.0, 1.0)

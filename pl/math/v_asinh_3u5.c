@@ -154,8 +154,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   /* Choose the right option for each lane.  */
   float64x2_t y = vbslq_f64 (gt1, option_1, option_2);
   /* Copy sign.  */
-  y = vreinterpretq_f64_u64 (
-    vbslq_u64 (AbsMask, vreinterpretq_u64_f64 (y), ix));
+  y = vbslq_f64 (AbsMask, y, x);
 
   if (unlikely (v_any_u64 (special)))
     return special_case (x, y, special);

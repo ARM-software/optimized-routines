@@ -13,7 +13,6 @@
 #include "v_log1pf_inline.h"
 
 #define AbsMask 0x7fffffff
-#define Half 0x3f000000
 #define One 0x3f800000
 #define TinyBound 0x39800000 /* 0x1p-12, below which atanhf(x) rounds to x. */
 
@@ -24,8 +23,7 @@
 VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 {
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
-  float32x4_t halfsign
-    = vreinterpretq_f32_u32 (vbslq_u32 (v_u32 (AbsMask), v_u32 (Half), ix));
+  float32x4_t halfsign = vbslq_f32 (v_u32 (AbsMask), v_f32 (0.5f), x);
   uint32x4_t iax = ix & AbsMask;
 
   float32x4_t ax = vreinterpretq_f32_u32 (iax);

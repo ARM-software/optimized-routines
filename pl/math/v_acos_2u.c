@@ -101,8 +101,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (acos) (float64x2_t x)
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  float64x2_t y = vreinterpretq_f64_u64 (
-      vbslq_u64 (v_u64 (AbsMask), vreinterpretq_u64_f64 (p), ix));
+  float64x2_t y = vbslq_f64 (v_u64 (AbsMask), p, x);
 
   uint64x2_t is_neg = vcltzq_f64 (x);
   float64x2_t off = vreinterpretq_f64_u64 (

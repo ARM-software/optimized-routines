@@ -91,8 +91,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (acos) (float32x4_t x)
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  float32x4_t y = vreinterpretq_f32_u32 (
-      vbslq_u32 (v_u32 (AbsMask), vreinterpretq_u32_f32 (p), ix));
+  float32x4_t y = vbslq_f32 (v_u32 (AbsMask), p, x);
 
   uint32x4_t is_neg = vcltzq_f32 (x);
   float32x4_t off = vreinterpretq_f32_u32 (

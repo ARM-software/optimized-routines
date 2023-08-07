@@ -90,8 +90,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (asin) (float32x4_t x)
       = vbslq_f32 (a_lt_half, p, vfmsq_n_f32 (d->pi_over_2f, p, 2.0));
 
   /* Copy sign.  */
-  return vreinterpretq_f32_u32 (
-      vbslq_u32 (v_u32 (AbsMask), vreinterpretq_u32_f32 (y), ix));
+  return vbslq_f32 (v_u32 (AbsMask), y, x);
 }
 
 PL_SIG (V, F, 1, asin, -1.0, 1.0)
