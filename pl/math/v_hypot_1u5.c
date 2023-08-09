@@ -13,11 +13,12 @@ static const struct data
 {
   uint64x2_t tiny_bound, thres;
 } data = {
-  .tiny_bound = V2 (0x2000000000000000), /* asuint (0x1p-511).  */
 #if WANT_SIMD_EXCEPT
+  .tiny_bound = V2 (0x2000000000000000), /* asuint (0x1p-511).  */
   .thres = V2 (0x3fe0000000000000), /* asuint (0x1p511) - tiny_bound.  */
 #else
-  .thres = V2 (0x5ff0000000000000), /* asuint (inf) - tiny_bound.  */
+  .tiny_bound = V2 (0x0020000000000000), /* asuint (DBL_MIN * 2).  */
+  .thres = V2 (0x7fd0000000000000),	 /* asuint (inf) - tiny_bound.  */
 #endif
 };
 
@@ -52,8 +53,8 @@ float64x2_t VPCS_ATTR V_NAME_D2 (hypot) (float64x2_t x, float64x2_t y)
   uint64x2_t special
       = vorrq_u64 (vcgeq_u64 (vsubq_u64 (ix, d->tiny_bound), d->thres),
 		   vcgeq_u64 (vsubq_u64 (iy, d->tiny_bound), d->thres));
-  ax = vbslq_f64 (special, v_f64 (1.0), ax);
-  ay = vbslq_f64 (special, v_f64 (1.0), ay);
+  ax = vreinterpretq_f64_u64 (vbicq_u64 (ix, special));
+  ay = vreinterpretq_f64_u64 (vbicq_u64 (iy, special));
 #endif
 
   float64x2_t sqsum = vfmaq_f64 (vmulq_f64 (ax, ax), ay, ay);

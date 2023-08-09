@@ -51,8 +51,8 @@ float32x4_t VPCS_ATTR V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
   uint32x4_t special
       = vorrq_u32 (vcgeq_u32 (vsubq_u32 (ix, d->tiny_bound), d->thres),
 		   vcgeq_u32 (vsubq_u32 (iy, d->tiny_bound), d->thres));
-  ax = vbslq_f32 (special, v_f32 (1.0), ax);
-  ay = vbslq_f32 (special, v_f32 (1.0), ay);
+  ax = vreinterpretq_f32_u32 (vbicq_u32 (ix, special));
+  ay = vreinterpretq_f32_u32 (vbicq_u32 (iy, special));
 #endif
 
   float32x4_t sqsum = vfmaq_f32 (vmulq_f32 (ax, ax), ay, ay);
