@@ -38,6 +38,12 @@
 	x, x, x, x                                                            \
       }
 
+static inline int
+v_any_u16h (uint16x4_t x)
+{
+  return vget_lane_u64 (vreinterpret_u64_u16 (x), 0) != 0;
+}
+
 static inline float32x4_t
 v_f32 (float x)
 {

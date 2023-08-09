@@ -7,17 +7,26 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-
-#define SignMask 0x80000000
-#define One 0x3f800000
-#define SquareLim 0x5f800000 /* asuint(0x1p64).  */
-
 #include "v_log1pf_inline.h"
 
-static NOINLINE VPCS_ATTR float32x4_t
-special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
+const static struct data
 {
-  return v_call_f32 (acoshf, x, y, special);
+  struct v_log1pf_data log1pf_consts;
+  uint32x4_t one;
+  uint16x4_t thresh;
+} data = {
+  .log1pf_consts = V_LOG1PF_CONSTANTS_TABLE,
+  .one = V4 (0x3f800000),
+  .thresh = V4 (0x2000) /* asuint(0x1p64) - asuint(1).  */
+};
+
+#define SignMask 0x80000000
+
+static float32x4_t NOINLINE VPCS_ATTR
+special_case (float32x4_t x, float32x4_t y, uint16x4_t special,
+	      const struct v_log1pf_data d)
+{
+  return v_call_f32 (acoshf, x, log1pf_inline (y, d), vmovl_u16 (special));
 }
 
 /* Vector approximation for single-precision acosh, based on log1p. Maximum
@@ -32,23 +41,29 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 
 VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
-  uint32x4_t special = (ix - One) >= (SquareLim - One);
+  uint16x4_t special = vcge_u16 (vsubhn_u32 (ix, d->one), d->thresh);
 
 #if WANT_SIMD_EXCEPT
   /* Mask special lanes with 1 to side-step spurious invalid or overflow. Use
-     only xm1 to calculate u, as operating on x will trigger invalid for NaN. */
-  float32x4_t xm1 = vbslq_f32 (special, v_f32 (1), x - 1);
-  float32x4_t u = vfmaq_f32 (2 * xm1, xm1, xm1);
+     only xm1 to calculate u, as operating on x will trigger invalid for NaN.
+     Widening sign-extend special predicate in order to mask with it.  */
+  uint32x4_t p
+      = vreinterpretq_u32_s32 (vmovl_s16 (vreinterpret_s16_u16 (special)));
+  float32x4_t xm1 = vreinterpretq_f32_u32 (
+      vbicq_u32 (vreinterpretq_u32_f32 (vsubq_f32 (x, v_f32 (1))), p));
+  float32x4_t u = vfmaq_f32 (vaddq_f32 (xm1, xm1), xm1, xm1);
 #else
-  float32x4_t xm1 = x - 1;
-  float32x4_t u = xm1 * (x + 1.0f);
+  float32x4_t xm1 = vsubq_f32 (x, v_f32 (1));
+  float32x4_t u = vmulq_f32 (xm1, vaddq_f32 (x, v_f32 (1.0f)));
 #endif
-  float32x4_t y = log1pf_inline (xm1 + vsqrtq_f32 (u));
 
-  if (unlikely (v_any_u32 (special)))
-    return special_case (x, y, special);
-  return y;
+  float32x4_t y = vaddq_f32 (xm1, vsqrtq_f32 (u));
+
+  if (unlikely (v_any_u16h (special)))
+    return special_case (x, y, special, d->log1pf_consts);
+  return log1pf_inline (y, d->log1pf_consts);
 }
 
 PL_SIG (V, F, 1, acosh, 1.0, 10.0)
