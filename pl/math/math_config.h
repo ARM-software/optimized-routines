@@ -435,13 +435,19 @@ extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
 #define V_EXP_TABLE_BITS 7
 extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 
-#define V_ERF_NINTS 49
-#define V_ERF_NCOEFFS 10
-extern const struct v_erf_data
+extern const struct erf_data
 {
-  double shifts[V_ERF_NINTS];
-  double coeffs[V_ERF_NCOEFFS][V_ERF_NINTS];
-} __v_erf_data HIDDEN;
+  struct
+  {
+    double erf, scale;
+  } tab[769];
+} __erf_data HIDDEN;
+
+extern const struct sv_erf_data
+{
+  double erf[769];
+  double scale[769];
+} __sv_erf_data HIDDEN;
 
 #define ATAN_POLY_NCOEFFS 20
 extern const struct atan_poly_data
