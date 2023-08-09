@@ -521,8 +521,10 @@ extern const struct v_log2_data
 {
   double poly[5];
   double invln2;
-  double invc[1 << V_LOG2_TABLE_BITS];
-  double log2c[1 << V_LOG2_TABLE_BITS];
+  struct
+  {
+    double invc, log2c;
+  } table[1 << V_LOG2_TABLE_BITS];
 } __v_log2_data HIDDEN;
 
 #define V_LOG10_TABLE_BITS 7
@@ -530,8 +532,10 @@ extern const struct v_log10_data
 {
   double poly[5];
   double invln10, log10_2;
-  double invc[1 << V_LOG10_TABLE_BITS];
-  double log10c[1 << V_LOG10_TABLE_BITS];
+  struct
+  {
+    double invc, log10c;
+  } table[1 << V_LOG10_TABLE_BITS];
 } __v_log10_data HIDDEN;
 
 /* Some data for SVE powf's internal exp and log.  */

@@ -37,14 +37,15 @@ svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   svuint64_t tmp = svsub_x (pg, ix, Off);
-  svuint64_t i
-      = sv_mod_n_u64_x (pg, svlsr_x (pg, tmp, 52 - V_LOG2_TABLE_BITS), N);
+  svuint64_t i = svlsr_x (pg, tmp, 51 - V_LOG2_TABLE_BITS);
+  i = svand_x (pg, i, (N - 1) << 1);
   svfloat64_t k = svcvt_f64_x (pg, svasr_x (pg, svreinterpret_s64 (tmp), 52));
   svfloat64_t z = svreinterpret_f64 (
       svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52)));
 
-  svfloat64_t invc = svld1_gather_index (pg, __v_log2_data.invc, i);
-  svfloat64_t log2c = svld1_gather_index (pg, __v_log2_data.log2c, i);
+  svfloat64_t invc = svld1_gather_index (pg, &__v_log2_data.table[0].invc, i);
+  svfloat64_t log2c
+      = svld1_gather_index (pg, &__v_log2_data.table[0].log2c, i);
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 

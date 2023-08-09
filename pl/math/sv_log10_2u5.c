@@ -16,8 +16,6 @@
 #define Off 0x3fe6900900000000
 #define N (1 << V_LOG10_TABLE_BITS)
 
-#define T(s, i) __v_log10_data.s[i]
-
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 {
@@ -37,15 +35,16 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   svuint64_t tmp = svsub_x (pg, ix, Off);
-  svuint64_t i
-      = sv_mod_n_u64_x (pg, svlsr_x (pg, tmp, 52 - V_LOG10_TABLE_BITS), N);
+  svuint64_t i = svlsr_x (pg, tmp, 51 - V_LOG10_TABLE_BITS);
+  i = svand_x (pg, i, (N - 1) << 1);
   svfloat64_t k = svcvt_f64_x (pg, svasr_x (pg, svreinterpret_s64 (tmp), 52));
   svfloat64_t z = svreinterpret_f64 (
       svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52)));
 
   /* log(x) = k*log(2) + log(c) + log(z/c).  */
-  svfloat64_t invc = svld1_gather_index (pg, &T (invc, 0), i);
-  svfloat64_t logc = svld1_gather_index (pg, &T (log10c, 0), i);
+  svfloat64_t invc = svld1_gather_index (pg, &__v_log10_data.table[0].invc, i);
+  svfloat64_t logc
+      = svld1_gather_index (pg, &__v_log10_data.table[0].log10c, i);
 
   /* We approximate log(z/c) with a polynomial P(x) ~= log(x + 1):
      r = z/c - 1 (we look up precomputed 1/c)

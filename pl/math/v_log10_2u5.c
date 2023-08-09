@@ -32,7 +32,7 @@ static const struct data
 };
 
 #define Off v_u64 (0x3fe6900900000000)
-#define IndexMask v_u64 (N - 1)
+#define IndexMask (N - 1)
 
 #define T(s, i) __v_log10_data.s[i]
 
@@ -46,10 +46,12 @@ static inline struct entry
 lookup (uint64x2_t i)
 {
   struct entry e;
-  e.invc[0] = T (invc, i[0]);
-  e.log10c[0] = T (log10c, i[0]);
-  e.invc[1] = T (invc, i[1]);
-  e.log10c[1] = T (log10c, i[1]);
+  uint64_t i0 = (i[0] >> (52 - V_LOG10_TABLE_BITS)) & IndexMask;
+  uint64_t i1 = (i[1] >> (52 - V_LOG10_TABLE_BITS)) & IndexMask;
+  float64x2_t e0 = vld1q_f64 (&__v_log10_data.table[i0].invc);
+  float64x2_t e1 = vld1q_f64 (&__v_log10_data.table[i1].invc);
+  e.invc = vuzp1q_f64 (e0, e1);
+  e.log10c = vuzp2q_f64 (e0, e1);
   return e;
 }
 
@@ -76,13 +78,11 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   uint64x2_t tmp = vsubq_u64 (ix, Off);
-  uint64x2_t i
-      = vandq_u64 (vshrq_n_u64 (tmp, 52 - V_LOG10_TABLE_BITS), IndexMask);
   int64x2_t k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52);
   uint64x2_t iz = vsubq_u64 (ix, vandq_u64 (tmp, d->sign_exp_mask));
   float64x2_t z = vreinterpretq_f64_u64 (iz);
 
-  struct entry e = lookup (i);
+  struct entry e = lookup (tmp);
 
   /* log10(x) = log1p(z/c-1)/log(10) + log10(c) + k*log10(2).  */
   float64x2_t r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);

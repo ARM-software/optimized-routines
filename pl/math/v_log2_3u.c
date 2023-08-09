@@ -8,8 +8,8 @@
 #include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#include "poly_advsimd_f64.h"
 
-#define V_LOG2_TABLE_BITS 7
 #define N (1 << V_LOG2_TABLE_BITS)
 
 static const struct data
@@ -31,10 +31,7 @@ static const struct data
 };
 
 #define Off v_u64 (0x3fe6900900000000)
-#define IndexMask v_u64 (N - 1)
-
-#define T(s, i) __v_log2_data.s[i]
-#define C(i) d->poly[i]
+#define IndexMask (N - 1)
 
 struct entry
 {
@@ -46,10 +43,12 @@ static inline struct entry
 lookup (uint64x2_t i)
 {
   struct entry e;
-  e.invc[0] = T (invc, i[0]);
-  e.log2c[0] = T (log2c, i[0]);
-  e.invc[1] = T (invc, i[1]);
-  e.log2c[1] = T (log2c, i[1]);
+  uint64_t i0 = (i[0] >> (52 - V_LOG2_TABLE_BITS)) & IndexMask;
+  uint64_t i1 = (i[1] >> (52 - V_LOG2_TABLE_BITS)) & IndexMask;
+  float64x2_t e0 = vld1q_f64 (&__v_log2_data.table[i0].invc);
+  float64x2_t e1 = vld1q_f64 (&__v_log2_data.table[i1].invc);
+  e.invc = vuzp1q_f64 (e0, e1);
+  e.log2c = vuzp2q_f64 (e0, e1);
   return e;
 }
 
@@ -75,13 +74,11 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   uint64x2_t tmp = vsubq_u64 (ix, Off);
-  uint64x2_t i
-      = vandq_u64 (vshrq_n_u64 (tmp, 52 - V_LOG2_TABLE_BITS), IndexMask);
   int64x2_t k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52);
   uint64x2_t iz = vsubq_u64 (ix, vandq_u64 (tmp, d->sign_exp_mask));
   float64x2_t z = vreinterpretq_f64_u64 (iz);
 
-  struct entry e = lookup (i);
+  struct entry e = lookup (tmp);
 
   /* log2(x) = log1p(z/c-1)/log(2) + log2(c) + k.  */
 
@@ -90,11 +87,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
   float64x2_t w = vfmaq_f64 (e.log2c, r, d->invln2);
 
   float64x2_t r2 = vmulq_f64 (r, r);
-  float64x2_t p_23 = vfmaq_f64 (C (2), C (3), r);
-  float64x2_t p_01 = vfmaq_f64 (C (0), C (1), r);
-  float64x2_t y;
-  y = vfmaq_f64 (p_23, C (4), r2);
-  y = vfmaq_f64 (p_01, r2, y);
+  float64x2_t y = v_pw_horner_4_f64 (r, r2, d->poly);
   y = vfmaq_f64 (vaddq_f64 (kd, w), r2, y);
 
   if (unlikely (v_any_u64 (special)))
