@@ -41,10 +41,12 @@ lookup (uint64x2_t i)
 {
   /* Since N is a power of 2, n % N = n & (N - 1).  */
   struct entry e;
-  e.invc[0] = __v_log_data.invc[i[0] & IndexMask];
-  e.logc[0] = __v_log_data.logc[i[0] & IndexMask];
-  e.invc[1] = __v_log_data.invc[i[1] & IndexMask];
-  e.logc[1] = __v_log_data.logc[i[1] & IndexMask];
+  uint64_t i0 = (i[0] >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
+  uint64_t i1 = (i[1] >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
+  float64x2_t e0 = vld1q_f64 (&__v_log_data.table[i0].invc);
+  float64x2_t e1 = vld1q_f64 (&__v_log_data.table[i1].invc);
+  e.invc = vuzp1q_f64 (e0, e1);
+  e.logc = vuzp2q_f64 (e0, e1);
   return e;
 }
 
@@ -72,7 +74,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log) (float64x2_t x)
   k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52); /* arithmetic shift.  */
   iz = vsubq_u64 (ix, vandq_u64 (tmp, d->sign_exp_mask));
   z = vreinterpretq_f64_u64 (iz);
-  e = lookup (vshrq_n_u64 (tmp, 52 - V_LOG_TABLE_BITS));
+  e = lookup (tmp);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
   r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);

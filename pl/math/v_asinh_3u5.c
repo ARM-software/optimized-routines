@@ -10,33 +10,35 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define OneTop 0x3ff	/* top12(asuint64(1.0f)).  */
-#define HugeBound 0x5fe /* top12(asuint64(0x1p511)).  */
-#define TinyBound 0x3e5 /* top12(asuint64(0x1p-26)).  */
-#define AbsMask v_u64 (0x7fffffffffffffff)
-
-/* Constants & data for log.  */
-#define OFF 0x3fe6000000000000
-#define Ln2 v_f64 (0x1.62e42fefa39efp-1)
 #define A(i) v_f64 (__v_log_data.poly[i])
-#define T(i) __log_data.tab[i]
-#define N (1 << LOG_TABLE_BITS)
+#define N (1 << V_LOG_TABLE_BITS)
 
-/* Even terms of polynomial s.t. asinh(x) is approximated by
-   asinh(x) ~= x + x^3 * (C0 + C1 * x + C2 * x^2 + C3 * x^3 + ...).
-   Generated using Remez, f = (asinh(sqrt(x)) - sqrt(x))/x^(3/2).  */
-const static volatile float64x2_t poly[18]
-    = { V2 (-0x1.55555555554a7p-3),  V2 (0x1.3333333326c7p-4),
-	V2 (-0x1.6db6db68332e6p-5),  V2 (0x1.f1c71b26fb40dp-6),
-	V2 (-0x1.6e8b8b654a621p-6),  V2 (0x1.1c4daa9e67871p-6),
-	V2 (-0x1.c9871d10885afp-7),  V2 (0x1.7a16e8d9d2ecfp-7),
-	V2 (-0x1.3ddca533e9f54p-7),  V2 (0x1.0becef748dafcp-7),
-	V2 (-0x1.b90c7099dd397p-8),  V2 (0x1.541f2bb1ffe51p-8),
-	V2 (-0x1.d217026a669ecp-9),  V2 (0x1.0b5c7977aaf7p-9),
-	V2 (-0x1.e0f37daef9127p-11), V2 (0x1.388b5fe542a6p-12),
-	V2 (-0x1.021a48685e287p-14), V2 (0x1.93d4ba83d34dap-18) };
+const static struct data
+{
+  float64x2_t poly[18];
+  uint64x2_t off, huge_bound, abs_mask;
+  float64x2_t ln2, tiny_bound;
+} data = {
+  .off = V2 (0x3fe6900900000000),
+  .ln2 = V2 (0x1.62e42fefa39efp-1),
+  .huge_bound = V2 (0x5fe0000000000000),
+  .tiny_bound = V2 (0x1p-26),
+  .abs_mask = V2 (0x7fffffffffffffff),
+  /* Even terms of polynomial s.t. asinh(x) is approximated by
+     asinh(x) ~= x + x^3 * (C0 + C1 * x + C2 * x^2 + C3 * x^3 + ...).
+     Generated using Remez, f = (asinh(sqrt(x)) - sqrt(x))/x^(3/2).  */
+  .poly = { V2 (-0x1.55555555554a7p-3), V2 (0x1.3333333326c7p-4),
+	    V2 (-0x1.6db6db68332e6p-5), V2 (0x1.f1c71b26fb40dp-6),
+	    V2 (-0x1.6e8b8b654a621p-6), V2 (0x1.1c4daa9e67871p-6),
+	    V2 (-0x1.c9871d10885afp-7), V2 (0x1.7a16e8d9d2ecfp-7),
+	    V2 (-0x1.3ddca533e9f54p-7), V2 (0x1.0becef748dafcp-7),
+	    V2 (-0x1.b90c7099dd397p-8), V2 (0x1.541f2bb1ffe51p-8),
+	    V2 (-0x1.d217026a669ecp-9), V2 (0x1.0b5c7977aaf7p-9),
+	    V2 (-0x1.e0f37daef9127p-11), V2 (0x1.388b5fe542a6p-12),
+	    V2 (-0x1.021a48685e287p-14), V2 (0x1.93d4ba83d34dap-18) },
+};
 
-static NOINLINE float64x2_t
+static float64x2_t NOINLINE VPCS_ATTR
 special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 {
   return v_call_f64 (asinh, x, y, special);
@@ -51,31 +53,29 @@ struct entry
 static inline struct entry
 lookup (uint64x2_t i)
 {
-  struct entry e;
-  e.invc[0] = T (i[0]).invc;
-  e.logc[0] = T (i[0]).logc;
-  e.invc[1] = T (i[1]).invc;
-  e.logc[1] = T (i[1]).logc;
-  return e;
+  float64x2_t e0 = vld1q_f64 (
+      &__v_log_data.table[(i[0] >> (52 - V_LOG_TABLE_BITS)) & (N - 1)].invc);
+  float64x2_t e1 = vld1q_f64 (
+      &__v_log_data.table[(i[1] >> (52 - V_LOG_TABLE_BITS)) & (N - 1)].invc);
+  return (struct entry){ vuzp1q_f64 (e0, e1), vuzp2q_f64 (e0, e1) };
 }
 
 static inline float64x2_t
-log_inline (float64x2_t x)
+log_inline (float64x2_t x, const struct data *d)
 {
-  /* Double-precision vector log, copied from math/v_log.c with some cosmetic
-     modification and special-cases removed. See that file for details of the
-     algorithm used.  */
+  /* Double-precision vector log, copied from ordinary vector log with some
+     cosmetic modification and special-cases removed.  */
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint64x2_t tmp = ix - OFF;
-  uint64x2_t i = (tmp >> (52 - LOG_TABLE_BITS)) % N;
-  int64x2_t k = vreinterpretq_s64_u64 (tmp) >> 52;
-  uint64x2_t iz = ix - (tmp & 0xfffULL << 52);
+  uint64x2_t tmp = vsubq_u64 (ix, d->off);
+  int64x2_t k = vshrq_n_s64 (vreinterpretq_s64_u64 (tmp), 52);
+  uint64x2_t iz
+      = vsubq_u64 (ix, vandq_u64 (tmp, vdupq_n_u64 (0xfffULL << 52)));
   float64x2_t z = vreinterpretq_f64_u64 (iz);
-  struct entry e = lookup (i);
+  struct entry e = lookup (tmp);
   float64x2_t r = vfmaq_f64 (v_f64 (-1.0), z, e.invc);
   float64x2_t kd = vcvtq_f64_s64 (k);
-  float64x2_t hi = vfmaq_f64 (e.logc + r, kd, Ln2);
-  float64x2_t r2 = r * r;
+  float64x2_t hi = vfmaq_f64 (vaddq_f64 (e.logc, r), kd, d->ln2);
+  float64x2_t r2 = vmulq_f64 (r, r);
   float64x2_t y = vfmaq_f64 (A (2), A (3), r);
   float64x2_t p = vfmaq_f64 (A (0), A (1), r);
   y = vfmaq_f64 (y, A (4), r2);
@@ -97,17 +97,17 @@ log_inline (float64x2_t x)
 				  want 0x1.ffffcfd0e2352p-1.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 {
-  uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint64x2_t iax = ix & AbsMask;
-  float64x2_t ax = vreinterpretq_f64_u64 (iax);
-  uint64x2_t top12 = iax >> 52;
+  const struct data *d = ptr_barrier (&data);
 
-  uint64x2_t gt1 = top12 >= OneTop;
-  uint64x2_t special = top12 >= HugeBound;
+  float64x2_t ax = vabsq_f64 (x);
+  uint64x2_t iax = vreinterpretq_u64_f64 (ax);
+
+  uint64x2_t gt1 = vcgeq_f64 (ax, v_f64 (1));
+  uint64x2_t special = vcgeq_u64 (iax, d->huge_bound);
 
 #if WANT_SIMD_EXCEPT
-  uint64x2_t tiny = top12 < TinyBound;
-  special |= tiny;
+  uint64x2_t tiny = vcltq_f64 (ax, d->tiny_bound);
+  special = vorrq_u64 (special, tiny);
 #endif
 
   /* Option 1: |x| >= 1.
@@ -118,11 +118,12 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   if (likely (v_any_u64 (gt1)))
     {
 #if WANT_SIMD_EXCEPT
-      float64x2_t xm = vbslq_f64 (special, v_f64 (1), ax);
+      float64x2_t xm = vreinterpretq_f64_u64 (vbicq_u64 (iax, special));
 #else
       float64x2_t xm = ax;
 #endif
-      option_1 = log_inline (xm + vsqrtq_f64 (xm * xm + 1));
+      option_1 = log_inline (
+	  vaddq_f64 (xm, vsqrtq_f64 (vfmaq_f64 (v_f64 (1), xm, xm))), d);
     }
 
   /* Option 2: |x| < 1.
@@ -134,18 +135,16 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
      __v_asinh(0x1.fdfcd00cc1e6ap-1) got 0x1.c1d6bf874019bp-1
 				    want 0x1.c1d6bf874019cp-1.  */
   float64x2_t option_2 = v_f64 (0);
-  if (likely (v_any_u64 (~gt1)))
+  if (likely (v_any_u64 (vceqzq_u64 (gt1))))
     {
 #if WANT_SIMD_EXCEPT
-      ax = vbslq_f64 (tiny | gt1, v_f64 (0), ax);
+      ax = vreinterpretq_f64_u64 (vbicq_u64 (iax, vorrq_u64 (tiny, gt1)));
 #endif
-      float64x2_t x2 = ax * ax;
-      float64x2_t z2 = x2 * x2;
-      float64x2_t z4 = z2 * z2;
-      float64x2_t z8 = z4 * z4;
-      float64x2_t p = v_estrin_17_f64 (x2, z2, z4, z8, z8 * z8,
-				       (const float64x2_t *) poly);
-      option_2 = vfmaq_f64 (ax, p, x2 * ax);
+      float64x2_t x2 = vmulq_f64 (ax, ax), x3 = vmulq_f64 (ax, x2),
+		  z2 = vmulq_f64 (x2, x2), z4 = vmulq_f64 (z2, z2),
+		  z8 = vmulq_f64 (z4, z4), z16 = vmulq_f64 (z8, z8);
+      float64x2_t p = v_estrin_17_f64 (x2, z2, z4, z8, z16, d->poly);
+      option_2 = vfmaq_f64 (ax, p, x3);
 #if WANT_SIMD_EXCEPT
       option_2 = vbslq_f64 (tiny, x, option_2);
 #endif
@@ -154,7 +153,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   /* Choose the right option for each lane.  */
   float64x2_t y = vbslq_f64 (gt1, option_1, option_2);
   /* Copy sign.  */
-  y = vbslq_f64 (AbsMask, y, x);
+  y = vbslq_f64 (d->abs_mask, y, x);
 
   if (unlikely (v_any_u64 (special)))
     return special_case (x, y, special);

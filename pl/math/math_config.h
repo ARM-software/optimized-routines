@@ -553,8 +553,10 @@ extern const struct v_log_data
   /* Shared data for vector log and log-derived routines (e.g. asinh).  */
   double poly[V_LOG_POLY_ORDER - 1];
   double ln2;
-  double invc[1 << V_LOG_TABLE_BITS];
-  double logc[1 << V_LOG_TABLE_BITS];
+  struct
+  {
+    double invc, logc;
+  } table[1 << V_LOG_TABLE_BITS];
 } __v_log_data HIDDEN;
 
 #define EXPM1F_POLY_ORDER 5

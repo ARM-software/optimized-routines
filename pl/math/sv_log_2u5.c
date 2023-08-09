@@ -36,17 +36,17 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   svuint64_t tmp = svsub_x (pg, ix, Off);
-  /* Equivalent to (tmp >> (52 - V_LOG_TABLE_BITS)) % N, since N is a power
-     of 2.  */
+  /* Calculate table index = (tmp >> (52 - V_LOG_TABLE_BITS)) % N.
+     The actual value of i is double this due to table layout.  */
   svuint64_t i
-      = svand_x (pg, svlsr_x (pg, tmp, (52 - V_LOG_TABLE_BITS)), N - 1);
+      = svand_x (pg, svlsr_x (pg, tmp, (51 - V_LOG_TABLE_BITS)), (N - 1) << 1);
   svint64_t k
       = svasr_x (pg, svreinterpret_s64 (tmp), 52); /* Arithmetic shift.  */
   svuint64_t iz = svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52));
   svfloat64_t z = svreinterpret_f64 (iz);
   /* Lookup in 2 global lists (length N).  */
-  svfloat64_t invc = svld1_gather_index (pg, __v_log_data.invc, i);
-  svfloat64_t logc = svld1_gather_index (pg, __v_log_data.logc, i);
+  svfloat64_t invc = svld1_gather_index (pg, &__v_log_data.table[0].invc, i);
+  svfloat64_t logc = svld1_gather_index (pg, &__v_log_data.table[0].logc, i);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
   svfloat64_t r = svmad_x (pg, invc, z, -1);
