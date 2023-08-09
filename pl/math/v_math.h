@@ -67,6 +67,11 @@ v_any_u32 (uint32x4_t x)
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
 }
+static inline int
+v_any_u32h (uint32x2_t x)
+{
+  return vget_lane_u64 (vreinterpret_u64_u32 (x), 0) != 0;
+}
 static inline float32x4_t
 v_lookup_f32 (const float *tab, uint32x4_t idx)
 {
