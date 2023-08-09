@@ -330,9 +330,17 @@ check_uflowf (float x)
 
 extern const struct erff_data
 {
-  float erff_poly_A[6];
-  float erff_poly_B[7];
+  struct
+  {
+    float erf, scale;
+  } tab[513];
 } __erff_data HIDDEN;
+
+extern const struct sv_erff_data
+{
+  float erf[513];
+  float scale[513];
+} __sv_erff_data HIDDEN;
 
 /* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
@@ -434,12 +442,6 @@ extern const struct v_erf_data
   double shifts[V_ERF_NINTS];
   double coeffs[V_ERF_NCOEFFS][V_ERF_NINTS];
 } __v_erf_data HIDDEN;
-
-#define V_ERFF_NCOEFFS 7
-extern const struct v_erff_data
-{
-  float coeffs[V_ERFF_NCOEFFS][2];
-} __v_erff_data HIDDEN;
 
 #define ATAN_POLY_NCOEFFS 20
 extern const struct atan_poly_data
