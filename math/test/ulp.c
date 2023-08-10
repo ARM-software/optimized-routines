@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#define _GNU_SOURCE
 #include <ctype.h>
 #include <fenv.h>
 #include <float.h>
@@ -259,39 +260,7 @@ static inline double svretd(sv_double vec) {
 #endif
 #endif
 
-#if WANT_SVE_MATH
-long double
-dummyl (long double x)
-{
-  return x;
-}
-
-double
-dummy (double x)
-{
-  return x;
-}
-
-static sv_double
-__sv_dummy (sv_double x)
-{
-  return x;
-}
-
-static sv_float
-__sv_dummyf (sv_float x)
-{
-  return x;
-}
-#endif
-
 #include "test/ulp_wrappers.h"
-
-/* Wrappers for SVE functions.  */
-#if WANT_SVE_MATH
-static double sv_dummy (double x) { return svretd (__sv_dummy (svargd (x))); }
-static float sv_dummyf (float x) { return svretf (__sv_dummyf (svargf (x))); }
-#endif
 
 struct fun
 {
@@ -364,11 +333,6 @@ static const struct fun fun[] = {
 #define ZSVD2(x) F (_ZGVsMxvv_##x, Z_sv_##x, x##l, mpfr_##x, 2, 0, d2, 0)
 
 #include "test/ulp_funcs.h"
-
-#if WANT_SVE_MATH
- SVD1 (dummy)
- SVF1 (dummy)
-#endif
 
 #undef F
 #undef F1
@@ -619,7 +583,7 @@ call_mpfr_d2 (mpfr_t y, const struct fun *f, struct args_d2 a, mpfr_rnd_t r)
 static void
 usage (void)
 {
-  puts ("./ulp [-q] [-m] [-f] [-r nudz] [-l soft-ulplimit] [-e ulplimit] func "
+  puts ("./ulp [-q] [-m] [-f] [-r {n|u|d|z}] [-l soft-ulplimit] [-e ulplimit] func "
 	"lo [hi [x lo2 hi2] [count]]");
   puts ("Compares func against a higher precision implementation in [lo; hi].");
   puts ("-q: quiet.");
@@ -792,7 +756,7 @@ main (int argc, char *argv[])
 	    {
 	      argc--;
 	      argv++;
-	      if (argc < 1)
+	      if (argc < 1 || argv[0][1] != '\0')
 		usage ();
 	      conf.rc = argv[0][0];
 	    }
@@ -826,6 +790,11 @@ main (int argc, char *argv[])
     default:
       usage ();
     }
+  if (conf.fenv == 0 && conf.r != FE_TONEAREST)
+    {
+      printf ("'-f' only supports round to nearest\n");
+      exit (0);
+    }
   for (f = fun; f->name; f++)
     if (strcmp (argv[0], f->name) == 0)
       break;
@@ -836,7 +805,7 @@ main (int argc, char *argv[])
       if (strncmp (argv[0], "_ZGVnN", 6) == 0)
 	exit (0);
 #endif
-#ifndef WANT_SVE_MATH
+#if !WANT_SVE_MATH
       if (strncmp (argv[0], "_ZGVsMxv", 8) == 0)
 	exit (0);
 #endif
