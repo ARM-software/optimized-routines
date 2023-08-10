@@ -30,7 +30,8 @@ static long measurecount = MEASURE;
 static long itercount = ITER;
 
 #ifdef __vpcs
-typedef __f64x2_t v_double;
+#include <arm_neon.h>
+typedef float64x2_t v_double;
 
 #define v_double_len() 2
 
@@ -46,7 +47,7 @@ v_double_dup (double x)
   return (v_double){x, x};
 }
 
-typedef __f32x4_t v_float;
+typedef float32x4_t v_float;
 
 #define v_float_len() 4
 
@@ -61,6 +62,19 @@ v_float_dup (float x)
 {
   return (v_float){x, x, x, x};
 }
+#else
+/* dummy definitions to make things compile.  */
+typedef double v_double;
+typedef float v_float;
+#define v_double_len(x) 1
+#define v_double_load(x) (x)[0]
+#define v_double_dup(x) (x)
+#define v_float_len(x) 1
+#define v_float_load(x) (x)[0]
+#define v_float_dup(x) (x)
+
+#endif
+
 #if WANT_SVE_MATH
 #include <arm_sve.h>
 typedef svbool_t sv_bool;
@@ -97,17 +111,10 @@ sv_float_dup (float x)
 {
   return svdup_n_f32(x);
 }
-#endif
 #else
 /* dummy definitions to make things compile.  */
-typedef double v_double;
-typedef float v_float;
-#define v_double_len(x) 1
-#define v_double_load(x) (x)[0]
-#define v_double_dup(x) (x)
-#define v_float_len(x) 1
-#define v_float_load(x) (x)[0]
-#define v_float_dup(x) (x)
+#define sv_double_len(x) 1
+#define sv_float_len(x) 1
 #endif
 
 static double
@@ -312,19 +319,21 @@ runf_vn_thruput (__vpcs v_float f (v_float))
 static void
 run_vn_latency (__vpcs v_double f (v_double))
 {
-  v_double z = v_double_dup (zero);
-  v_double prev = z;
+  volatile uint64x2_t vsel = (uint64x2_t) { 0, 0 };
+  uint64x2_t sel = vsel;
+  v_double prev = v_double_dup (0);
   for (int i = 0; i < N; i += v_double_len ())
-    prev = f (v_double_load (A+i) + prev * z);
+    prev = f (vbslq_f64 (sel, prev, v_double_load (A+i)));
 }
 
 static void
 runf_vn_latency (__vpcs v_float f (v_float))
 {
-  v_float z = v_float_dup (zero);
-  v_float prev = z;
+  volatile uint32x4_t vsel = (uint32x4_t) { 0, 0, 0, 0 };
+  uint32x4_t sel = vsel;
+  v_float prev = v_float_dup (0);
   for (int i = 0; i < N; i += v_float_len ())
-    prev = f (v_float_load (Af+i) + prev * z);
+    prev = f (vbslq_f32 (sel, prev, v_float_load (Af+i)));
 }
 #endif
 
@@ -346,19 +355,21 @@ runf_sv_thruput (sv_float f (sv_float, sv_bool))
 static void
 run_sv_latency (sv_double f (sv_double, sv_bool))
 {
-  sv_double z = sv_double_dup (zero);
-  sv_double prev = z;
+  volatile sv_bool vsel = svptrue_b64 ();
+  sv_bool sel = vsel;
+  sv_double prev = sv_double_dup (0);
   for (int i = 0; i < N; i += sv_double_len ())
-    prev = f (svmad_f64_x (svptrue_b64 (), prev, z, sv_double_load (A+i)), svptrue_b64 ());
+    prev = f (svsel_f64 (sel, sv_double_load (A+i), prev), svptrue_b64 ());
 }
 
 static void
 runf_sv_latency (sv_float f (sv_float, sv_bool))
 {
-  sv_float z = sv_float_dup (zero);
-  sv_float prev = z;
+  volatile sv_bool vsel = svptrue_b32 ();
+  sv_bool sel = vsel;
+  sv_float prev = sv_float_dup (0);
   for (int i = 0; i < N; i += sv_float_len ())
-    prev = f (svmad_f32_x (svptrue_b32 (), prev, z, sv_float_load (Af+i)), svptrue_b32 ());
+    prev = f (svsel_f32 (sel, sv_float_load (Af+i), prev), svptrue_b32 ());
 }
 #endif
 
@@ -393,10 +404,10 @@ bench1 (const struct fun *f, int type, double lo, double hi)
   const char *s = type == 't' ? "rthruput" : "latency";
   int vlen = 1;
 
-  if (f->vec && f->prec == 'd')
-    vlen = v_double_len();
-  else if (f->vec && f->prec == 'f')
-    vlen = v_float_len();
+  if (f->vec == 'n')
+    vlen = f->prec == 'd' ? v_double_len() : v_float_len();
+  else if (f->vec == 's')
+    vlen = f->prec == 'd' ? sv_double_len() : sv_float_len();
 
   if (f->prec == 'd' && type == 't' && f->vec == 0)
     TIMEIT (run_thruput, f->fun.d);
@@ -430,16 +441,18 @@ bench1 (const struct fun *f, int type, double lo, double hi)
   if (type == 't')
     {
       ns100 = (100 * dt + itercount * N / 2) / (itercount * N);
-      printf ("%9s %8s: %4u.%02u ns/elem %10llu ns in [%g %g]\n", f->name, s,
+      printf ("%9s %8s: %4u.%02u ns/elem %10llu ns in [%g %g] vlen %d\n",
+	      f->name, s,
 	      (unsigned) (ns100 / 100), (unsigned) (ns100 % 100),
-	      (unsigned long long) dt, lo, hi);
+	      (unsigned long long) dt, lo, hi, vlen);
     }
   else if (type == 'l')
     {
       ns100 = (100 * dt + itercount * N / vlen / 2) / (itercount * N / vlen);
-      printf ("%9s %8s: %4u.%02u ns/call %10llu ns in [%g %g]\n", f->name, s,
+      printf ("%9s %8s: %4u.%02u ns/call %10llu ns in [%g %g] vlen %d\n",
+	      f->name, s,
 	      (unsigned) (ns100 / 100), (unsigned) (ns100 % 100),
-	      (unsigned long long) dt, lo, hi);
+	      (unsigned long long) dt, lo, hi, vlen);
     }
   fflush (stdout);
 }
