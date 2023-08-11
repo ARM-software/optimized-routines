@@ -27,9 +27,9 @@ static const struct data
 #define RangeVal 0x4160000000000000 /* asuint64 (0x1p23).  */
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t out_of_bounds)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t oob)
 {
-  return sv_call_f64 (cos, x, y, out_of_bounds);
+  return sv_call_f64 (cos, x, y, oob);
 }
 
 /* A fast SVE implementation of cos based on trigonometric
@@ -42,7 +42,7 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
   const struct data *d = ptr_barrier (&data);
 
   svfloat64_t r = svabs_x (pg, x);
-  svbool_t out_of_bounds = svcmpge (pg, svreinterpret_u64 (r), RangeVal);
+  svbool_t oob = svcmpge (pg, svreinterpret_u64 (r), RangeVal);
 
   /* Load some constants in quad-word chunks to minimise memory access.  */
   svbool_t ptrue = svptrue_b64 ();
@@ -72,12 +72,12 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
 
   /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
   svfloat64_t f = svtssel (r, svreinterpret_u64 (q));
-  /* Apply factor.  */
-  y = svmul_x (pg, f, y);
 
-  if (unlikely (svptest_any (pg, out_of_bounds)))
-    return special_case (x, y, out_of_bounds);
-  return y;
+  if (unlikely (svptest_any (pg, oob)))
+    return special_case (x, svmul_x (svnot_z (pg, oob), y, f), oob);
+
+  /* Apply factor.  */
+  return svmul_x (pg, f, y);
 }
 
 PL_SIG (SV, D, 1, cos, -3.1, 3.1)

@@ -28,9 +28,9 @@ static const struct data
 };
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 {
-  return sv_call_f64 (tan, x, x, svptrue_b64 ());
+  return sv_call_f64 (tan, x, y, special);
 }
 
 /* Vector approximation for double-precision tan.
@@ -43,10 +43,6 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
 
   /* Invert condition to catch NaNs and Infs as well as large values.  */
   svbool_t special = svnot_z (pg, svaclt (pg, x, dat->range_val));
-
-  /* Fallback for all lanes if any are out of bounds.  */
-  if (unlikely (svptest_any (pg, special)))
-    return special_case (x);
 
   /* q = nearest integer to 2 * x / pi.  */
   svfloat64_t shift = sv_f64 (dat->shift);
@@ -92,6 +88,8 @@ svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
   svfloat64_t swap = n;
   n = svneg_m (n, use_recip, d);
   d = svsel (use_recip, swap, d);
+  if (unlikely (svptest_any (pg, special)))
+    return special_case (x, svdiv_x (svnot_z (pg, special), n, d), special);
   return svdiv_x (pg, n, d);
 }
 

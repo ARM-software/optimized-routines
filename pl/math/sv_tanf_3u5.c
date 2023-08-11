@@ -101,15 +101,14 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
   svfloat32_t inv_y = svdivr_x (pg, y, 1.0f);
   y = svsel (pred_alt, inv_y, y);
 
-  /* Fast reduction does not handle the x = -0.0 case well,
-     therefore it is fixed here.  */
-  y = svsel (peqz, x, y);
-
   /* No need to pass pg to specialcase here since cmp is a strict subset,
      guaranteed by the cmpge above.  */
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x, svsel (peqz, x, y), cmp);
+
+  /* Fast reduction does not handle the x = -0.0 case well,
+     therefore it is fixed here.  */
+  return svsel (peqz, x, y);
 }
 
 PL_SIG (SV, F, 1, tan, -3.1, 3.1)

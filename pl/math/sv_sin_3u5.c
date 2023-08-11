@@ -77,14 +77,16 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   y = svmla_x (pg, t3, y, r4);
   y = svmla_x (pg, r, y, r3);
 
-  /* sign = y^sign.  */
-  y = svreinterpret_f64 (sveor_z (pg, svreinterpret_u64 (y), odd));
-
   svbool_t cmp = svacle (pg, x, d->range_val);
   cmp = svnot_z (pg, cmp);
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x,
+			 svreinterpret_f64 (sveor_z (
+			     svnot_z (pg, cmp), svreinterpret_u64 (y), odd)),
+			 cmp);
+
+  /* Copy sign.  */
+  return svreinterpret_f64 (sveor_z (pg, svreinterpret_u64 (y), odd));
 }
 
 PL_SIG (SV, D, 1, sin, -3.1, 3.1)

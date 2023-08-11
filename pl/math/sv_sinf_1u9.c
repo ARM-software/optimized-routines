@@ -77,12 +77,14 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
   y = svmla_x (pg, r, r, svmul_x (pg, y, r2));
 
   /* sign = y^sign^odd.  */
-  y = svreinterpret_f32 (
-      sveor_x (pg, svreinterpret_u32 (y), sveor_x (pg, sign, odd)));
+  sign = sveor_x (pg, sign, odd);
 
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x,
+			 svreinterpret_f32 (sveor_x (
+			     svnot_z (pg, cmp), svreinterpret_u32 (y), sign)),
+			 cmp);
+  return svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (y), sign));
 }
 
 PL_SIG (SV, F, 1, sin, -3.1, 3.1)
