@@ -85,7 +85,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erf) (float64x2_t x)
   uint64x2_t cmp1 = vcgtq_f64 (a, dat->huge_bound);
   uint64x2_t cmp2 = vcltq_f64 (a, dat->tiny_bound);
   uint64x2_t cmp = vorrq_u64 (cmp1, cmp2);
-  float64x2_t am = a;
   /* If any lanes are special, mask them with 1 for small x or 8 for large
      values and retain a copy of a to allow special case handler to fix special
      lanes later. This is only necessary if fenv exceptions are to be triggered
