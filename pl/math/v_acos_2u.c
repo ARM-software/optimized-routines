@@ -14,6 +14,7 @@ static const struct data
 {
   float64x2_t poly[12];
   float64x2_t pi, pi_over_2;
+  uint64x2_t abs_mask;
 } data = {
   /* Polynomial approximation of  (asin(sqrt(x)) - sqrt(x)) / (x * sqrt(x))
      on [ 0x1p-106, 0x1p-2 ], relative error: 0x1.c3d8e169p-57.  */
@@ -25,11 +26,10 @@ static const struct data
 	    V2 (-0x1.6602748120927p-7), V2 (0x1.cfa0dd1f9478p-6), },
   .pi = V2 (0x1.921fb54442d18p+1),
   .pi_over_2 = V2 (0x1.921fb54442d18p+0),
+  .abs_mask = V2 (0x7fffffffffffffff),
 };
 
 #define AllMask v_u64 (0xffffffffffffffff)
-#define AbsMask (0x7fffffffffffffff)
-#define Halfu (0x3fe0000000000000)
 #define Oneu (0x3ff0000000000000)
 #define Small (0x3e50000000000000) /* 2^-53.  */
 
@@ -68,19 +68,18 @@ float64x2_t VPCS_ATTR V_NAME_D1 (acos) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
-  uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint64x2_t ia = vandq_u64 (ix, v_u64 (AbsMask));
+  float64x2_t ax = vabsq_f64 (x);
 
 #if WANT_SIMD_EXCEPT
   /* A single comparison for One, Small and QNaN.  */
   uint64x2_t special
-      = vcgtq_u64 (vsubq_u64 (ia, v_u64 (Small)), v_u64 (Oneu - Small));
+      = vcgtq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (ax), v_u64 (Small)),
+		   v_u64 (Oneu - Small));
   if (unlikely (v_any_u64 (special)))
     return special_case (x, x, AllMask);
 #endif
 
-  float64x2_t ax = vreinterpretq_f64_u64 (ia);
-  uint64x2_t a_le_half = vcleq_u64 (ia, v_u64 (Halfu));
+  uint64x2_t a_le_half = vcleq_f64 (ax, v_f64 (0.5));
 
   /* Evaluate polynomial Q(x) = z + z * z2 * P(z2) with
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
@@ -101,7 +100,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (acos) (float64x2_t x)
   /* acos(|x|) = pi/2 - sign(x) * Q(|x|), for  |x| < 0.5
 	       = 2 Q(|x|)               , for  0.5 < x < 1.0
 	       = pi - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-  float64x2_t y = vbslq_f64 (v_u64 (AbsMask), p, x);
+  float64x2_t y = vbslq_f64 (d->abs_mask, p, x);
 
   uint64x2_t is_neg = vcltzq_f64 (x);
   float64x2_t off = vreinterpretq_f64_u64 (

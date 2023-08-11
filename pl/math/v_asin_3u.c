@@ -14,6 +14,7 @@ static const struct data
 {
   float64x2_t poly[12];
   float64x2_t pi_over_2;
+  uint64x2_t abs_mask;
 } data = {
   /* Polynomial approximation of  (asin(sqrt(x)) - sqrt(x)) / (x * sqrt(x))
      on [ 0x1p-106, 0x1p-2 ], relative error: 0x1.c3d8e169p-57.  */
@@ -24,11 +25,10 @@ static const struct data
 	    V2 (0x1.fd1151acb6bedp-8), V2 (0x1.087182f799c1dp-6),
 	    V2 (-0x1.6602748120927p-7), V2 (0x1.cfa0dd1f9478p-6), },
   .pi_over_2 = V2 (0x1.921fb54442d18p+0),
+  .abs_mask = V2 (0x7fffffffffffffff),
 };
 
 #define AllMask v_u64 (0xffffffffffffffff)
-#define AbsMask (0x7fffffffffffffff)
-#define Halfu (0x3fe0000000000000)
 #define One (0x3ff0000000000000)
 #define Small (0x3e50000000000000) /* 2^-12.  */
 
@@ -64,20 +64,19 @@ float64x2_t VPCS_ATTR V_NAME_D1 (asin) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
-  uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint64x2_t ia = vandq_u64 (ix, v_u64 (AbsMask));
+  float64x2_t ax = vabsq_f64 (x);
 
 #if WANT_SIMD_EXCEPT
   /* Special values need to be computed with scalar fallbacks so
      that appropriate exceptions are raised.  */
   uint64x2_t special
-      = vcgtq_u64 (vsubq_u64 (ia, v_u64 (Small)), v_u64 (One - Small));
+      = vcgtq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (ax), v_u64 (Small)),
+		   v_u64 (One - Small));
   if (unlikely (v_any_u64 (special)))
     return special_case (x, x, AllMask);
 #endif
 
-  float64x2_t ax = vreinterpretq_f64_u64 (ia);
-  uint64x2_t a_lt_half = vcltq_u64 (ia, v_u64 (Halfu));
+  uint64x2_t a_lt_half = vcltq_f64 (ax, v_f64 (0.5));
 
   /* Evaluate polynomial Q(x) = y + y * z * P(z) with
      z = x ^ 2 and y = |x|            , if |x| < 0.5
@@ -100,7 +99,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (asin) (float64x2_t x)
   float64x2_t y = vbslq_f64 (a_lt_half, p, vfmsq_n_f64 (d->pi_over_2, p, 2.0));
 
   /* Copy sign.  */
-  return vbslq_f64 (v_u64 (AbsMask), y, x);
+  return vbslq_f64 (d->abs_mask, y, x);
 }
 
 PL_SIG (V, D, 1, asin, -1.0, 1.0)
