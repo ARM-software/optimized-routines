@@ -58,11 +58,11 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   svfloat64_t r2 = svmul_x (pg, r, r);
   svfloat64_t y = sv_pw_horner_4_f64_x (pg, r, r2, __v_log10_data.poly);
-  y = svmla_x (pg, hi, r2, y);
 
   if (unlikely (svptest_any (pg, special)))
-    return special_case (x, y, special);
-  return y;
+    return special_case (x, svmla_x (svnot_z (pg, special), hi, r2, y),
+			 special);
+  return svmla_x (pg, hi, r2, y);
 }
 
 PL_SIG (SV, D, 1, log10, 0.01, 11.1)

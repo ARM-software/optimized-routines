@@ -59,11 +59,10 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
   svfloat64_t p = svmla_x (pg, P (0), r, P (1));
   y = svmla_x (pg, y, r2, P (4));
   y = svmla_x (pg, p, r2, y);
-  y = svmla_x (pg, hi, r2, y);
 
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x, y, cmp);
-  return y;
+    return special_case (x, svmla_x (svnot_z (pg, cmp), hi, r2, y), cmp);
+  return svmla_x (pg, hi, r2, y);
 }
 
 PL_SIG (SV, D, 1, log, 0.01, 11.1)

@@ -16,7 +16,8 @@ static const struct data
 {
   float64x2_t poly[5];
   float64x2_t invln10, log10_2, ln2;
-  uint64x2_t min_norm, special_bound, sign_exp_mask;
+  uint64x2_t min_norm, sign_exp_mask;
+  uint32x2_t special_bound;
 } data = {
   /* Computed from log coefficients divided by log(10) then rounded to double
      precision.  */
@@ -26,8 +27,8 @@ static const struct data
   .ln2 = V2 (0x1.62e42fefa39efp-1),
   .invln10 = V2 (0x1.bcb7b1526e50ep-2),
   .log10_2 = V2 (0x1.34413509f79ffp-2),
-  .min_norm = V2 (0x0010000000000000),	    /* asuint64(0x1p-1022).  */
-  .special_bound = V2 (0x7fe0000000000000), /* asuint64(inf) - min_norm.  */
+  .min_norm = V2 (0x0010000000000000), /* asuint64(0x1p-1022).  */
+  .special_bound = V2 (0x7fe00000),    /* asuint64(inf) - min_norm.  */
   .sign_exp_mask = V2 (0xfff0000000000000),
 };
 
@@ -56,9 +57,10 @@ lookup (uint64x2_t i)
 }
 
 static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
+special_case (float64x2_t x, float64x2_t y, float64x2_t hi, float64x2_t r2,
+	      uint32x2_t special)
 {
-  return v_call_f64 (log10, x, y, special);
+  return v_call_f64 (log10, x, vfmaq_f64 (hi, r2, y), vmovl_u32 (special));
 }
 
 /* Fast implementation of double-precision vector log10
@@ -71,8 +73,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint64x2_t special
-      = vcgeq_u64 (vsubq_u64 (ix, d->min_norm), d->special_bound);
+  uint32x2_t special
+      = vcge_u32 (vsubhn_u64 (ix, d->min_norm), d->special_bound);
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.
@@ -99,16 +101,19 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
   /* y = r2*(A0 + r*A1 + r2*(A2 + r*A3 + r2*A4)) + hi.  */
   float64x2_t r2 = vmulq_f64 (r, r);
   float64x2_t y = v_pw_horner_4_f64 (r, r2, d->poly);
-  y = vfmaq_f64 (hi, r2, y);
 
-  if (unlikely (v_any_u64 (special)))
-    return special_case (x, y, special);
-  return y;
+  if (unlikely (v_any_u32h (special)))
+    return special_case (x, y, hi, r2, special);
+  return vfmaq_f64 (hi, r2, y);
 }
 
 PL_SIG (V, D, 1, log10, 0.01, 11.1)
 PL_TEST_ULP (V_NAME_D1 (log10), 1.97)
 PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (log10))
-PL_TEST_INTERVAL (V_NAME_D1 (log10), 0, 0xffff000000000000, 10000)
-PL_TEST_INTERVAL (V_NAME_D1 (log10), 0x1p-4, 0x1p4, 400000)
-PL_TEST_INTERVAL (V_NAME_D1 (log10), 0, inf, 400000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), -0.0, -inf, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0, 0x1p-149, 1000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0x1p-149, 0x1p-126, 4000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 1.0, 100, 50000)
+PL_TEST_INTERVAL (V_NAME_D1 (log10), 100, inf, 50000)

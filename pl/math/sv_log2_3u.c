@@ -17,7 +17,7 @@
 #define Thresh (0x7fe0000000000000) /* Max - Min.  */
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, const svbool_t cmp)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
   return sv_call_f64 (log2, x, y, cmp);
 }
@@ -54,11 +54,12 @@ svfloat64_t SV_NAME_D1 (log2) (svfloat64_t x, const svbool_t pg)
 
   svfloat64_t r2 = svmul_x (pg, r, r);
   svfloat64_t y = sv_pw_horner_4_f64_x (pg, r, r2, __v_log2_data.poly);
-  y = svmla_x (pg, svadd_x (pg, k, w), r2, y);
+  w = svadd_x (pg, k, w);
 
   if (unlikely (svptest_any (pg, special)))
-    return special_case (x, y, special);
-  return y;
+    return special_case (x, svmla_x (svnot_z (pg, special), w, r2, y),
+			 special);
+  return svmla_x (pg, w, r2, y);
 }
 
 PL_SIG (SV, D, 1, log2, 0.01, 11.1)

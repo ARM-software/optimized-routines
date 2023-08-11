@@ -76,11 +76,11 @@ svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
   /* Using hi = Log10(2)*n + r*InvLn(10) is faster but less accurate.  */
   svfloat32_t hi = svmla_x (pg, r, n, d->ln2);
   hi = svmul_x (pg, hi, d->inv_ln10);
-  y = svmla_x (pg, hi, r2, y);
 
   if (unlikely (svptest_any (pg, special)))
-    return special_case (x, y, special);
-  return y;
+    return special_case (x, svmla_x (svnot_z (pg, special), hi, r2, y),
+			 special);
+  return svmla_x (pg, hi, r2, y);
 }
 
 PL_SIG (SV, F, 1, log10, 0.01, 11.1)

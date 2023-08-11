@@ -14,7 +14,8 @@ static const struct data
 {
   float32x4_t poly[8];
   float32x4_t inv_ln10, ln2;
-  uint32x4_t min_norm, special_bound, off, mantissa_mask;
+  uint32x4_t min_norm, off, mantissa_mask;
+  uint16x4_t special_bound;
 } data = {
   /* Use order 9 for log10(1+x), i.e. order 8 for log10(1+x)/x, with x in
       [-1/3, 1/3] (offset=2/3). Max. relative error: 0x1.068ee468p-25.  */
@@ -24,16 +25,17 @@ static const struct data
   .ln2 = V4 (0x1.62e43p-1f),
   .inv_ln10 = V4 (0x1.bcb7b2p-2f),
   .min_norm = V4 (0x00800000),
-  .special_bound = V4 (0x7f000000), /* asuint32(inf) - min_norm.  */
-  .off = V4 (0x3f2aaaab),	    /* 0.666667.  */
+  .special_bound = V4 (0x7f00), /* asuint32(inf) - min_norm.  */
+  .off = V4 (0x3f2aaaab),	/* 0.666667.  */
   .mantissa_mask = V4 (0x007fffff),
 };
 
 static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
+special_case (float32x4_t x, float32x4_t y, float32x4_t p, float32x4_t r2,
+	      uint16x4_t cmp)
 {
   /* Fall back to scalar code.  */
-  return v_call_f32 (log10f, x, y, cmp);
+  return v_call_f32 (log10f, x, vfmaq_f32 (y, p, r2), vmovl_u16 (cmp));
 }
 
 /* Fast implementation of AdvSIMD log10f,
@@ -46,8 +48,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t u = vreinterpretq_u32_f32 (x);
-  uint32x4_t special
-      = vcgeq_u32 (vsubq_u32 (u, d->min_norm), d->special_bound);
+  uint16x4_t special
+      = vcge_u16 (vsubhn_u32 (u, d->min_norm), d->special_bound);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = vsubq_u32 (u, d->off);
@@ -61,15 +63,19 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
   float32x4_t poly = v_pw_horner_7_f32 (r, r2, d->poly);
   /* y = Log10(2) * n + poly * InvLn(10).  */
   float32x4_t y = vfmaq_f32 (r, d->ln2, n);
-  y = vfmaq_f32 (vmulq_f32 (y, d->inv_ln10), poly, r2);
+  y = vmulq_f32 (y, d->inv_ln10);
 
-  if (unlikely (v_any_u32 (special)))
-    return special_case (x, y, special);
-  return y;
+  if (unlikely (v_any_u16h (special)))
+    return special_case (x, y, poly, r2, special);
+  return vfmaq_f32 (y, poly, r2);
 }
 
 PL_SIG (V, F, 1, log10, 0.01, 11.1)
 PL_TEST_ULP (V_NAME_F1 (log10), 2.81)
 PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_F1 (log10))
-PL_TEST_INTERVAL (V_NAME_F1 (log10), 0, 0xffff0000, 10000)
-PL_TEST_INTERVAL (V_NAME_F1 (log10), 0x1p-4, 0x1p4, 500000)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), -0.0, -inf, 100)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 0, 0x1p-126, 100)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 0x1p-126, 0x1p-23, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 0x1p-23, 1.0, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 1.0, 100, 50000)
+PL_TEST_INTERVAL (V_NAME_F1 (log10), 100, inf, 50000)

@@ -14,7 +14,8 @@ static const struct data
 {
   float32x4_t poly[9];
   float32x4_t ln2;
-  uint32x4_t min_norm, special_bound, off, mantissa_mask;
+  uint32x4_t min_norm, off, mantissa_mask;
+  uint16x4_t special_bound;
 } data = {
   /* Coefficients generated using Remez algorithm approximate
      log2(1+r)/r for r in [ -1/3, 1/3 ].
@@ -25,16 +26,17 @@ static const struct data
 	    V4 (-0x1.c675bp-3f), V4 (0x1.9e495p-3f) },
   .ln2 = V4 (0x1.62e43p-1f),
   .min_norm = V4 (0x00800000),
-  .special_bound = V4 (0x7f000000), /* asuint32(inf) - min_norm.  */
-  .off = V4 (0x3f2aaaab),	    /* 0.666667.  */
+  .special_bound = V4 (0x7f00), /* asuint32(inf) - min_norm.  */
+  .off = V4 (0x3f2aaaab),	/* 0.666667.  */
   .mantissa_mask = V4 (0x007fffff),
 };
 
 static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
+special_case (float32x4_t x, float32x4_t n, float32x4_t p, float32x4_t r,
+	      uint16x4_t cmp)
 {
   /* Fall back to scalar code.  */
-  return v_call_f32 (log2f, x, y, cmp);
+  return v_call_f32 (log2f, x, vfmaq_f32 (n, p, r), vmovl_u16 (cmp));
 }
 
 /* Fast implementation for single precision AdvSIMD log2,
@@ -46,8 +48,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log2) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t u = vreinterpretq_u32_f32 (x);
-  uint32x4_t special
-      = vcgeq_u32 (vsubq_u32 (u, d->min_norm), d->special_bound);
+  uint16x4_t special
+      = vcge_u16 (vsubhn_u32 (u, d->min_norm), d->special_bound);
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = vsubq_u32 (u, d->off);
@@ -59,11 +61,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log2) (float32x4_t x)
   /* y = log2(1+r) + n.  */
   float32x4_t r2 = vmulq_f32 (r, r);
   float32x4_t p = v_pw_horner_8_f32 (r, r2, d->poly);
-  float32x4_t y = vfmaq_f32 (n, p, r);
 
-  if (unlikely (v_any_u32 (special)))
-    return special_case (x, y, special);
-  return y;
+  if (unlikely (v_any_u16h (special)))
+    return special_case (x, n, p, r, special);
+  return vfmaq_f32 (n, p, r);
 }
 
 PL_SIG (V, F, 1, log2, 0.01, 11.1)
