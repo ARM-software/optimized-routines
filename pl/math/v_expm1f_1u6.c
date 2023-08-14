@@ -14,6 +14,12 @@ static const struct data
 {
   float32x4_t poly[5];
   float32x4_t invln2, ln2_lo, ln2_hi, shift;
+  int32x4_t exponent_bias;
+#if WANT_SIMD_EXCEPT
+  uint32x4_t thresh;
+#else
+  float32x4_t oflow_bound;
+#endif
 } data = {
   /* Generated using fpminimax with degree=5 in [-log(2)/2, log(2)/2].  */
   .poly = { V4 (0x1.fffffep-2), V4 (0x1.5554aep-3), V4 (0x1.555736p-5),
@@ -22,16 +28,21 @@ static const struct data
   .ln2_hi = V4 (0x1.62e4p-1f),
   .ln2_lo = V4 (0x1.7f7d1cp-20f),
   .shift = V4 (0x1.8p23f),
+  .exponent_bias = V4 (0x3f800000),
+#if !WANT_SIMD_EXCEPT
+  /* Value above which expm1f(x) should overflow. Absolute value of the
+     underflow bound is greater than this, so it catches both cases - there is
+     a small window where fallbacks are triggered unnecessarily.  */
+  .oflow_bound = V4 (0x1.5ebc4p+6),
+#else
+  /* asuint(oflow_bound) - asuint(0x1p-23), shifted left by 1 for absolute
+     compare.  */
+  .thresh = V4 (0x1d5ebc40),
+#endif
 };
 
-#define AllMask v_u32 (0xffffffff)
-#define AbsMask v_u32 (0x7fffffff)
-#define SignMask v_u32 (0x80000000)
-/* Largest value of x for which expm1(x) should round to -1.  */
-#define BigBound 0x42af5e20		/* asuint(0x1.5ebc4p+6).  */
-#define BigBoundNeg 0x42cddd5e		/* asuint(0x1.9bbabcp+6).  */
-#define TinyBound 0x34000000		/* asuint(0x1p-23).  */
-#define ExponentBias v_s32 (0x3f800000) /* asuint(1.0f).  */
+/* asuint(0x1p-23), shifted by 1 for abs compare.  */
+#define TinyBound v_u32 (0x34000000 << 1)
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
@@ -46,22 +57,21 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
-
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
-  uint32x4_t ax = vandq_u32 (ix, AbsMask);
 
 #if WANT_SIMD_EXCEPT
-  /* If fp exceptions are to be triggered correctly, fall back to the scalar
-     variant for all lanes if any of them should trigger an exception.  */
-  uint32x4_t special = vorrq_u32 (vcgeq_u32 (ax, v_u32 (BigBound)),
-				  vcleq_u32 (ax, v_u32 (TinyBound)));
-  special = vorrq_u32 (special, vceqq_u32 (ix, SignMask));
+  /* If fp exceptions are to be triggered correctly, fall back to scalar for
+     |x| < 2^-23, |x| > oflow_bound, Inf & NaN. Add ix to itself for
+     shift-left by 1, and compare with thresh which was left-shifted offline -
+     this is effectively an absolute compare.  */
+  uint32x4_t special
+      = vcgeq_u32 (vsubq_u32 (vaddq_u32 (ix, ix), TinyBound), d->thresh);
   if (unlikely (v_any_u32 (special)))
-    return special_case (x, x, AllMask);
+    x = vreinterpretq_f32_u32 (vbicq_u32 (ix, special));
 #else
   /* Handles very large values (+ve and -ve), +/-NaN, +/-Inf and -0.  */
   uint32x4_t special
-      = vorrq_u32 (vcgeq_u32 (ax, v_u32 (BigBound)), vceqq_u32 (ix, SignMask));
+      = vornq_u32 (vceqzq_f32 (x), vcaltq_f32 (x, d->oflow_bound));
 #endif
 
   /* Reduce argument to smaller range:
@@ -85,23 +95,24 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
   /* Assemble the result.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^i.  */
-  int32x4_t u = vaddq_s32 (vshlq_n_s32 (i, 23), ExponentBias);
+  int32x4_t u = vaddq_s32 (vshlq_n_s32 (i, 23), d->exponent_bias);
   float32x4_t t = vreinterpretq_f32_s32 (u);
-  /* expm1(x) ~= p * t + (t - 1).  */
-  float32x4_t y = vfmaq_f32 (vsubq_f32 (t, v_f32 (1.0f)), p, t);
 
-#if !WANT_SIMD_EXCEPT
   if (unlikely (v_any_u32 (special)))
-    return special_case (x, y, special);
-#endif
+    return special_case (vreinterpretq_f32_u32 (ix),
+			 vfmaq_f32 (vsubq_f32 (t, v_f32 (1.0f)), p, t),
+			 special);
 
-  return y;
+  /* expm1(x) ~= p * t + (t - 1).  */
+  return vfmaq_f32 (vsubq_f32 (t, v_f32 (1.0f)), p, t);
 }
 
 PL_SIG (V, F, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (V_NAME_F1 (expm1), 1.02)
 PL_TEST_EXPECT_FENV (V_NAME_F1 (expm1), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_F1 (expm1), 0, TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0, -TinyBound, 1000)
-PL_TEST_INTERVAL (V_NAME_F1 (expm1), TinyBound, BigBound, 1000000)
-PL_TEST_INTERVAL (V_NAME_F1 (expm1), -TinyBound, -BigBoundNeg, 1000000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), 0, 0x1p-23, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0, -0x1p-23, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0x1p-23, 0x1.5ebc4p+6, 1000000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0x1p-23, -0x1.9bbabcp+6, 1000000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), 0x1.5ebc4p+6, inf, 1000)
+PL_TEST_INTERVAL (V_NAME_F1 (expm1), -0x1.9bbabcp+6, -inf, 1000)
