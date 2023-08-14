@@ -12,10 +12,11 @@
 
 static const struct data
 {
+  uint32x4_t min_norm;
+  uint16x8_t special_bound;
   float32x4_t poly[8];
   float32x4_t inv_ln10, ln2;
-  uint32x4_t min_norm, off, mantissa_mask;
-  uint16x4_t special_bound;
+  uint32x4_t off, mantissa_mask;
 } data = {
   /* Use order 9 for log10(1+x), i.e. order 8 for log10(1+x)/x, with x in
       [-1/3, 1/3] (offset=2/3). Max. relative error: 0x1.068ee468p-25.  */
@@ -25,7 +26,7 @@ static const struct data
   .ln2 = V4 (0x1.62e43p-1f),
   .inv_ln10 = V4 (0x1.bcb7b2p-2f),
   .min_norm = V4 (0x00800000),
-  .special_bound = V4 (0x7f00), /* asuint32(inf) - min_norm.  */
+  .special_bound = V8 (0x7f00), /* asuint32(inf) - min_norm.  */
   .off = V4 (0x3f2aaaab),	/* 0.666667.  */
   .mantissa_mask = V4 (0x007fffff),
 };
@@ -48,8 +49,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t u = vreinterpretq_u32_f32 (x);
-  uint16x4_t special
-      = vcge_u16 (vsubhn_u32 (u, d->min_norm), d->special_bound);
+  uint16x4_t special = vcge_u16 (vsubhn_u32 (u, d->min_norm),
+				 vget_low_u16 (d->special_bound));
 
   /* x = 2^n * (1+r), where 2/3 < 1+r < 4/3.  */
   u = vsubq_u32 (u, d->off);

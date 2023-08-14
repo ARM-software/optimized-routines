@@ -28,14 +28,17 @@
 #  include <arm_neon.h>
 
 /* Shorthand helpers for declaring constants.  */
-#  define V2(x)                                                               \
+#    define V2(X)                                                             \
       {                                                                       \
-	x, x                                                                  \
+	X, X                                                                  \
       }
-
-#  define V4(x)                                                               \
+#    define V4(X)                                                             \
       {                                                                       \
-	x, x, x, x                                                            \
+	X, X, X, X                                                            \
+      }
+#    define V8(X)                                                             \
+      {                                                                       \
+	X, X, X, X, X, X, X, X                                                \
       }
 
 static inline int

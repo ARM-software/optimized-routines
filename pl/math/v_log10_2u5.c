@@ -14,10 +14,11 @@
 
 static const struct data
 {
+  uint64x2_t min_norm;
+  uint32x4_t special_bound;
   float64x2_t poly[5];
   float64x2_t invln10, log10_2, ln2;
-  uint64x2_t min_norm, sign_exp_mask;
-  uint32x2_t special_bound;
+  uint64x2_t sign_exp_mask;
 } data = {
   /* Computed from log coefficients divided by log(10) then rounded to double
      precision.  */
@@ -28,7 +29,7 @@ static const struct data
   .invln10 = V2 (0x1.bcb7b1526e50ep-2),
   .log10_2 = V2 (0x1.34413509f79ffp-2),
   .min_norm = V2 (0x0010000000000000), /* asuint64(0x1p-1022).  */
-  .special_bound = V2 (0x7fe00000),    /* asuint64(inf) - min_norm.  */
+  .special_bound = V4 (0x7fe00000),    /* asuint64(inf) - min_norm.  */
   .sign_exp_mask = V2 (0xfff0000000000000),
 };
 
@@ -73,8 +74,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log10) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint32x2_t special
-      = vcge_u32 (vsubhn_u64 (ix, d->min_norm), d->special_bound);
+  uint32x2_t special = vcge_u32 (vsubhn_u64 (ix, d->min_norm),
+				 vget_low_u32 (d->special_bound));
 
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
      The range is split into N subintervals.

@@ -14,10 +14,11 @@
 
 static const struct data
 {
+  uint64x2_t min_norm;
+  uint32x4_t special_bound;
   float64x2_t poly[5];
   float64x2_t invln2;
-  uint64x2_t min_norm, sign_exp_mask;
-  uint32x2_t special_bound;
+  uint64x2_t sign_exp_mask;
 } data = {
   /* Each coefficient was generated to approximate log(r) for |r| < 0x1.fp-9
      and N = 128, then scaled by log2(e) in extended precision and rounded back
@@ -27,7 +28,7 @@ static const struct data
 	    V2 (-0x1.ec738d616fe26p-3) },
   .invln2 = V2 (0x1.71547652b82fep0),
   .min_norm = V2 (0x0010000000000000), /* asuint64(0x1p-1022).  */
-  .special_bound = V2 (0x7fe00000),    /* asuint64(inf) - min_norm.  */
+  .special_bound = V4 (0x7fe00000),    /* asuint64(inf) - min_norm.  */
   .sign_exp_mask = V2 (0xfff0000000000000),
 };
 
@@ -69,8 +70,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint32x2_t special
-      = vcge_u32 (vsubhn_u64 (ix, d->min_norm), d->special_bound);
+  uint32x2_t special = vcge_u32 (vsubhn_u64 (ix, d->min_norm),
+				 vget_low_u32 (d->special_bound));
 
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
