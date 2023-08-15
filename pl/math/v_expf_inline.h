@@ -11,27 +11,28 @@
 
 #include "v_math.h"
 
-static const struct data
+struct v_expf_data
 {
   float32x4_t poly[5];
   float32x4_t shift, invln2, ln2_hi, ln2_lo;
-} data = {
-  /* maxerr: 1.45358 +0.5 ulp.  */
-  .poly = { V4 (0x1.0e4020p-7f), V4 (0x1.573e2ep-5f), V4 (0x1.555e66p-3f),
-	    V4 (0x1.fffdb6p-2f), V4 (0x1.ffffecp-1f) },
-  .shift = V4 (0x1.8p23f),
-  .invln2 = V4 (0x1.715476p+0f),
-  .ln2_hi = V4 (0x1.62e4p-1f),
-  .ln2_lo = V4 (0x1.7f7d1cp-20f),
 };
+
+/* maxerr: 1.45358 +0.5 ulp.  */
+#define V_EXPF_DATA                                                           \
+  {                                                                           \
+    .poly = { V4 (0x1.0e4020p-7f), V4 (0x1.573e2ep-5f), V4 (0x1.555e66p-3f),  \
+	      V4 (0x1.fffdb6p-2f), V4 (0x1.ffffecp-1f) },                     \
+                                                                              \
+    .shift = V4 (0x1.8p23f), .invln2 = V4 (0x1.715476p+0f),                   \
+    .ln2_hi = V4 (0x1.62e4p-1f), .ln2_lo = V4 (0x1.7f7d1cp-20f),              \
+  }
 
 #define ExponentBias v_u32 (0x3f800000) /* asuint(1.0f).  */
 #define C(i) d->poly[i]
 
 static inline float32x4_t
-v_expf_inline (float32x4_t x)
+v_expf_inline (float32x4_t x, const struct v_expf_data *d)
 {
-  const struct data *d = ptr_barrier (&data);
   /* Helper routine for calculating exp(x).
      Copied from v_expf.c, with all special-case handling removed - the
      calling routine should handle special values if required.  */

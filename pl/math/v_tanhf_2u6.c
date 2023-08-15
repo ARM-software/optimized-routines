@@ -11,48 +11,59 @@
 
 #include "v_expm1f_inline.h"
 
-#define BoringBound                                                            \
-  0x41102cb3 /* 0x1.205966p+3, above which tanhf rounds to 1 (or -1 for        \
-		negative).  */
-#define AbsMask 0x7fffffff
-#define One 0x3f800000
+static const struct data
+{
+  struct v_expm1f_data expm1f_consts;
+  uint32x4_t boring_bound, large_bound, onef;
+} data = {
+  .expm1f_consts = V_EXPM1F_DATA,
+  /* 0x1.205966p+3, above which tanhf rounds to 1 (or -1 for  negative).  */
+  .boring_bound = V4 (0x41102cb3),
+  .large_bound = V4 (0x7f800000),
+  .onef = V4 (0x3f800000),
+};
 
-static NOINLINE float32x4_t
+static float32x4_t NOINLINE VPCS_ATTR
 special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 {
   return v_call_f32 (tanhf, x, y, special);
 }
 
-/* Approximation for single-precision vector tanh(x), using a simplified version
-   of expm1f. The maximum error is 2.58 ULP:
-   __v_tanhf(0x1.fa5eep-5) got 0x1.f9ba02p-5
-			  want 0x1.f9ba08p-5.  */
-VPCS_ATTR float32x4_t V_NAME_F1 (tanh) (float32x4_t x)
+/* Approximation for single-precision vector tanh(x), using a simplified
+   version of expm1f. The maximum error is 2.58 ULP:
+   _ZGVnN4v_tanhf (0x1.fa5eep-5) got 0x1.f9ba02p-5
+				want 0x1.f9ba08p-5.  */
+float32x4_t VPCS_ATTR V_NAME_F1 (tanh) (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
+
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
-  uint32x4_t iax = ix & AbsMask;
-  uint32x4_t sign = ix & ~AbsMask;
-  uint32x4_t is_boring = iax > BoringBound;
-  float32x4_t boring = vreinterpretq_f32_u32 (sign | One);
+  float32x4_t ax = vabsq_f32 (x);
+  uint32x4_t iax = vreinterpretq_u32_f32 (ax);
+  uint32x4_t sign = veorq_u32 (ix, iax);
+  uint32x4_t is_boring = vcgtq_u32 (iax, d->boring_bound);
+  float32x4_t boring = vreinterpretq_f32_u32 (vorrq_u32 (sign, d->onef));
 
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered properly, set all special and boring
-     lanes to 1, which will trigger no exceptions, and fix them up later.  */
-  uint32x4_t special = (iax > 0x7f800000) | (iax < 0x34000000);
-  ix = vbslq_u32 (is_boring, v_u32 (One), ix);
+     lanes to 0, which will trigger no exceptions, and fix them up later.  */
+  uint32x4_t special = vorrq_u32 (vcgtq_u32 (iax, d->large_bound),
+				  vcltq_u32 (iax, v_u32 (0x34000000)));
+  ix = vbicq_u32 (ix, is_boring);
   if (unlikely (v_any_u32 (special)))
-    ix = vbslq_u32 (special, v_u32 (One), ix);
+    ix = vbicq_u32 (ix, special);
 #else
-  uint32x4_t special = (iax > 0x7f800000) | (iax == 0);
+  uint32x4_t special
+      = vorrq_u32 (vcgtq_u32 (iax, d->large_bound), vceqzq_u32 (iax));
 #endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
-  float32x4_t q = expm1f_inline (2 * vreinterpretq_f32_u32 (ix));
-  float32x4_t y = q / (q + 2);
-  y = vbslq_f32 (is_boring, boring, y);
+  float32x4_t q = expm1f_inline (vmulq_n_f32 (vreinterpretq_f32_u32 (ix), 2),
+				 &d->expm1f_consts);
+  float32x4_t y = vdivq_f32 (q, vaddq_f32 (q, v_f32 (2.0)));
   if (unlikely (v_any_u32 (special)))
-    return special_case (x, y, special);
-  return y;
+    return special_case (x, vbslq_f32 (is_boring, boring, y), special);
+  return vbslq_f32 (is_boring, boring, y);
 }
 
 PL_SIG (V, F, 1, tanh, -10.0, 10.0)
