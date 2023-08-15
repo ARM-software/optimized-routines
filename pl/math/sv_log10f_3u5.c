@@ -64,7 +64,7 @@ svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
      log10(1+x)/x, with x in [-1/3, 1/3] (offset=2/3).  */
   svfloat32_t r2 = svmul_x (pg, r, r);
   svfloat32_t r4 = svmul_x (pg, r2, r2);
-  svfloat32_t p_1357 = svld1rq (pg, &d->poly_1357[0]);
+  svfloat32_t p_1357 = svld1rq (svptrue_b32 (), &d->poly_1357[0]);
   svfloat32_t q_01 = svmla_lane (sv_f32 (d->poly_0246[0]), r, p_1357, 0);
   svfloat32_t q_23 = svmla_lane (sv_f32 (d->poly_0246[1]), r, p_1357, 1);
   svfloat32_t q_45 = svmla_lane (sv_f32 (d->poly_0246[2]), r, p_1357, 2);
