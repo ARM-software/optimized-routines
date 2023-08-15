@@ -24,15 +24,15 @@
 #include <arm_neon.h>
 
 /* Shorthand helpers for declaring constants.  */
-#define V2(x)                                                                  \
-  {                                                                            \
-    x, x                                                                       \
-  }
+#  define V2(X) { X, X }
+#  define V4(X) { X, X, X, X }
+#  define V8(X) { X, X, X, X, X, X, X, X }
 
-#define V4(x)                                                                  \
-  {                                                                            \
-    x, x, x, x                                                                 \
-  }
+static inline int
+v_any_u16h (uint16x4_t x)
+{
+  return vget_lane_u64 (vreinterpret_u64_u16 (x), 0) != 0;
+}
 
 static inline int
 v_lanes32 (void)
@@ -56,6 +56,11 @@ v_any_u32 (uint32x4_t x)
 {
   /* assume elements in x are either 0 or -1u.  */
   return vpaddd_u64 (vreinterpretq_u64_u32 (x)) != 0;
+}
+static inline int
+v_any_u32h (uint32x2_t x)
+{
+  return vget_lane_u64 (vreinterpret_u64_u32 (x), 0) != 0;
 }
 static inline float32x4_t
 v_lookup_f32 (const float *tab, uint32x4_t idx)
