@@ -9,6 +9,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
+#define TwoOverSqrtPiMinusOne 0x1.06eba8214db69p-3
 #define Shift 0x1p45
 
 /* Polynomial coefficients.  */
@@ -43,23 +44,27 @@
 double
 erf (double x)
 {
-  /* Get top words and sign.  */
+  /* Get absolute value and sign.  */
   uint64_t ix = asuint64 (x);
   uint64_t ia = ix & 0x7fffffffffffffff;
-  double a = asdouble (ia);
   uint64_t sign = ix & ~0x7fffffffffffffff;
 
-  /* Set r to multiple of 1/128 nearest to |x|.  */
-  double z = a + Shift;
-  uint64_t i = asuint64 (z) - asuint64 (Shift);
-  double r = z - Shift;
-  /* Lookup erf(r) and scale(r) in table.
-     Set erf(r) to 0 and scale to 2/sqrt(pi) for |x| <= 0x1.cp-9.  */
-  double erfr = __erf_data.tab[i].erf;
-  double scale = __erf_data.tab[i].scale;
+  /* |x| < 0x1p-508. Triggers exceptions.  */
+  if (unlikely (ia < 0x2030000000000000))
+    return fma (TwoOverSqrtPiMinusOne, x, x);
 
   if (ia < 0x4017f80000000000) /* |x| <  6 - 1 / 128 = 5.9921875.  */
     {
+      /* Set r to multiple of 1/128 nearest to |x|.  */
+      double a = asdouble (ia);
+      double z = a + Shift;
+      uint64_t i = asuint64 (z) - asuint64 (Shift);
+      double r = z - Shift;
+      /* Lookup erf(r) and scale(r) in table.
+	 Set erf(r) to 0 and scale to 2/sqrt(pi) for |x| <= 0x1.cp-9.  */
+      double erfr = __erf_data.tab[i].erf;
+      double scale = __erf_data.tab[i].scale;
+
       /* erf(x) ~ erf(r) + scale * d * poly (d, r).  */
       double d = a - r;
       double r2 = r * r;
@@ -81,19 +86,13 @@ erf (double x)
       y = fma (fma (y, d2, d), scale, erfr);
       return asdouble (asuint64 (y) | sign);
     }
-  else
-    { /* |x| >= 6.0.  */
 
-      /* Special cases : erf(nan)=nan, erf(+inf)=+1 and erf(-inf)=-1.  */
-      if (unlikely (ia >= 0x7ff0000000000000))
-	return (1.0 - (double) (sign >> 62)) + 1.0 / x;
+  /* Special cases : erf(nan)=nan, erf(+inf)=+1 and erf(-inf)=-1.  */
+  if (unlikely (ia >= 0x7ff0000000000000))
+    return (1.0 - (double) (sign >> 62)) + 1.0 / x;
 
-      /* Boring domain.  */
-      if (sign)
-	return -1.0;
-      else
-	return 1.0;
-    }
+  /* Boring domain (|x| >= 6.0).  */
+  return asdouble (sign | asuint64 (1.0));
 }
 
 PL_SIG (S, D, 1, erf, -6.0, 6.0)
