@@ -115,8 +115,12 @@ static inline void T(call_fenv) (const struct fun *f, struct T(args) a, int r,
 static inline void T(call_nofenv) (const struct fun *f, struct T(args) a,
 				    int r, RT(float) * y, int *ex)
 {
+  if (r != FE_TONEAREST)
+    fesetround (r);
   *y = T(call) (f, a);
   *ex = 0;
+  if (r != FE_TONEAREST)
+    fesetround (FE_TONEAREST);
 }
 
 static inline int T(call_long_fenv) (const struct fun *f, struct T(args) a,
@@ -156,8 +160,12 @@ static inline int T(call_long_nofenv) (const struct fun *f, struct T(args) a,
 					int r, struct RT(ret) * p,
 					RT(float) ygot, int exgot)
 {
+  if (r != FE_TONEAREST)
+    fesetround (r);
   RT(double) yl = T(call_long) (f, a);
   p->y = (RT(float)) yl;
+  if (r != FE_TONEAREST)
+    fesetround (FE_TONEAREST);
   if (RT(isok_nofenv) (ygot, p->y))
     return 1;
   p->ulpexp = RT(ulpscale) (p->y);

@@ -588,7 +588,7 @@ usage (void)
   puts ("Compares func against a higher precision implementation in [lo; hi].");
   puts ("-q: quiet.");
   puts ("-m: use mpfr even if faster method is available.");
-  puts ("-f: disable fenv testing (rounding modes and exceptions).");
+  puts ("-f: disable fenv exceptions testing.");
 #ifdef ___vpcs
   puts ("-c: neutral 'control value' to test behaviour when one lane can affect another. \n"
 	"    This should be different from tested input in other lanes, and non-special \n"
@@ -789,11 +789,6 @@ main (int argc, char *argv[])
       break;
     default:
       usage ();
-    }
-  if (conf.fenv == 0 && conf.r != FE_TONEAREST)
-    {
-      printf ("'-f' only supports round to nearest\n");
-      exit (0);
     }
   for (f = fun; f->name; f++)
     if (strcmp (argv[0], f->name) == 0)
