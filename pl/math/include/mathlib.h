@@ -169,6 +169,7 @@ svfloat64_t _ZGVsMxv_sinh (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_sinf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_sin (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_tanhf (svfloat32_t, svbool_t);
+svfloat64_t _ZGVsMxv_tanh (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_tanf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_tan (svfloat64_t, svbool_t);
 void _ZGVsMxvl4l4_sincosf (svfloat32_t, float *, float *, svbool_t);
