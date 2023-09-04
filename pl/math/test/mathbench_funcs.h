@@ -69,6 +69,8 @@
 #if WANT_SVE_MATH
 {"_ZGVsMxvv_atan2f", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
 {"_ZGVsMxvv_atan2",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
+{"_ZGVsMxvv_hypotf", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_hypotf_wrap}},
+{"_ZGVsMxvv_hypot",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_hypot_wrap}},
 {"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
 {"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
 {"_ZGVsMxvv_powf",   'f', 's', -10.0, 10.0, {.svf = xy_Z_sv_powf}},

@@ -114,6 +114,18 @@ _Z_sv_atan2_wrap (sv_double x, sv_bool pg)
 }
 
 static sv_float
+_Z_sv_hypotf_wrap (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_hypotf (x, svdup_f32 (5.0), pg);
+}
+
+static sv_double
+_Z_sv_hypot_wrap (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_hypot (x, svdup_f64 (5.0), pg);
+}
+
+static sv_float
 _Z_sv_powi_wrap (sv_float x, sv_bool pg)
 {
   return _ZGVsMxvv_powi (x, svcvt_s32_f32_x (pg, x), pg);
