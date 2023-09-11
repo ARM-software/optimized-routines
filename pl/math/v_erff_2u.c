@@ -18,7 +18,7 @@ static const struct data
 } data = {
   .max = V4 (3.9375), /* 4 - 8/128.  */
   .shift = V4 (0x1p16f),
-  .third = V4 (0x1.555554p-2f), /* 1/3.  */
+  .third = V4 (0x1.555556p-2f), /* 1/3.  */
 #if WANT_SIMD_EXCEPT
   .tiny_bound = V4 (0x1p-62f),
   .scale_minus_one = V4 (0x1.06eba8p-3f), /* scale - 1.0.  */

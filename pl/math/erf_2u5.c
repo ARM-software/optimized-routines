@@ -13,8 +13,8 @@
 #define Shift 0x1p45
 
 /* Polynomial coefficients.  */
-#define OneThird 0x1.5555555555556p-2
-#define TwoThird 0x1.5555555555556p-1
+#define OneThird 0x1.5555555555555p-2
+#define TwoThird 0x1.5555555555555p-1
 
 #define TwoOverFifteen 0x1.1111111111111p-3
 #define TwoOverFive 0x1.999999999999ap-2
@@ -22,7 +22,7 @@
 
 #define TwoOverNine 0x1.c71c71c71c71cp-3
 #define TwoOverFortyFive 0x1.6c16c16c16c17p-5
-#define Sixth 0x1.5555555555556p-3
+#define Sixth 0x1.555555555555p-3
 
 /* Fast erf approximation based on series expansion near x rounded to
    nearest multiple of 1/128.

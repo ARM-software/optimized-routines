@@ -11,6 +11,7 @@
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
 #define Shift 0x1p16f
+#define OneThird 0x1.555556p-2f
 
 /* Fast erff approximation based on series expansion near x rounded to
    nearest multiple of 1/128.
@@ -61,7 +62,7 @@ erff (float x)
       /* erf(x) ~ erf(r) + scale * d * (1 - r * d - 1/3 * d^2).  */
       float d = a - r;
       float d2 = d * d;
-      float y = -fmaf (0x1.555554p-2f, d, r);
+      float y = -fmaf (OneThird, d, r);
       y = fmaf (fmaf (y, d2, d), scale, erfr);
       return asfloat (asuint (y) | sign);
     }

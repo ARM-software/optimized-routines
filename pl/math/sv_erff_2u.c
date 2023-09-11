@@ -17,7 +17,7 @@ static const struct data
   .max = 3.9375,	   /* 4 - 8/128.  */
   .scale = 0x1.20dd76p+0f, /* 2/sqrt(pi).  */
   .shift = 0x1p16f,
-  .third = 0x1.555554p-2f, /* 1/3.  */
+  .third = 0x1.555556p-2f, /* 1/3.  */
 };
 
 #define SignMask (0x80000000)
