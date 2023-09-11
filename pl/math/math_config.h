@@ -358,6 +358,14 @@ extern const struct sv_erff_data
   float scale[513];
 } __sv_erff_data HIDDEN;
 
+extern const struct erfcf_data
+{
+  struct
+  {
+    float erfc, scale;
+  } tab[645];
+} __erfcf_data HIDDEN;
+
 /* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
 #define LOGF_POLY_ORDER 4
