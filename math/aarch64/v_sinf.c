@@ -45,7 +45,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   float32x4_t n, r, r2, y;
-  uint32x4_t odd, cmp, eqz;
+  uint32x4_t odd, cmp;
 
 #if WANT_SIMD_EXCEPT
   uint32x4_t ir = vreinterpretq_u32_f32 (vabsq_f32 (x));
@@ -59,7 +59,6 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
   cmp = vcageq_f32 (d->range_val, x);
   cmp = vceqzq_u32 (cmp); /* cmp = ~cmp.  */
 #endif
-  eqz = vceqzq_f32 (x);
 
   /* n = rint(|x|/pi) */
   n = vfmaq_f32 (d->shift, d->inv_pi, r);
@@ -77,10 +76,6 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
   y = vfmaq_f32 (C (1), y, r2);
   y = vfmaq_f32 (C (0), y, r2);
   y = vfmaq_f32 (r, vmulq_f32 (y, r2), r);
-
-  /* Sign of 0 is discarded by polynomial, so copy it back here.  */
-  if (unlikely (v_any_u32 (eqz)))
-    y = vbslq_f32 (eqz, x, y);
 
   if (unlikely (v_any_u32 (cmp)))
     return special_case (x, y, odd, cmp);
