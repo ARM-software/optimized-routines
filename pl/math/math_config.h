@@ -433,20 +433,6 @@ extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
 #define V_EXP_TABLE_BITS 7
 extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 
-#define ERFC_NUM_INTERVALS 20
-#define ERFC_POLY_ORDER 12
-extern const struct v_erfc_data
-{
-  double interval_bounds[ERFC_NUM_INTERVALS + 1];
-  double poly[ERFC_NUM_INTERVALS + 1][ERFC_POLY_ORDER + 1];
-} __v_erfc_data HIDDEN;
-
-#define V_EXP_TAIL_TABLE_BITS 8
-extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
-
-#define V_EXP_TABLE_BITS 7
-extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
-
 extern const struct erf_data
 {
   struct
