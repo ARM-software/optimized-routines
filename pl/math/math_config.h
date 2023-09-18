@@ -435,11 +435,6 @@ extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 
 #define ERFC_NUM_INTERVALS 20
 #define ERFC_POLY_ORDER 12
-extern const struct erfc_data
-{
-  double interval_bounds[ERFC_NUM_INTERVALS + 1];
-  double poly[ERFC_NUM_INTERVALS][ERFC_POLY_ORDER + 1];
-} __erfc_data HIDDEN;
 extern const struct v_erfc_data
 {
   double interval_bounds[ERFC_NUM_INTERVALS + 1];
@@ -465,6 +460,14 @@ extern const struct sv_erf_data
   double erf[769];
   double scale[769];
 } __sv_erf_data HIDDEN;
+
+extern const struct erfc_data
+{
+  struct
+  {
+    double erfc, scale;
+  } tab[3488];
+} __erfc_data HIDDEN;
 
 #define ATAN_POLY_NCOEFFS 20
 extern const struct atan_poly_data
