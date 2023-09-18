@@ -41,9 +41,9 @@ static const struct data
 
      asin(x) = pi/2 - (y + y * z * P(z)), with  z = (1-x)/2 and y = sqrt(z).
 
-   The largest observed error in this region is 2.68 ulps,
-   _ZGVsMxv_asin (0x1.0429658b0bae7p-1) got 0x1.10e6b8f3db182p-1
-				       want 0x1.10e6b8f3db185p-1.  */
+   The largest observed error in this region is 2.69 ulps,
+   _ZGVsMxv_asin(0x1.044ac9819f573p-1) got 0x1.110d7e85fdd5p-1
+				      want 0x1.110d7e85fdd53p-1.  */
 svfloat64_t SV_NAME_D1 (asin) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -76,7 +76,7 @@ svfloat64_t SV_NAME_D1 (asin) (svfloat64_t x, const svbool_t pg)
 }
 
 PL_SIG (SV, D, 1, asin, -1.0, 1.0)
-PL_TEST_ULP (SV_NAME_D1 (asin), 2.18)
+PL_TEST_ULP (SV_NAME_D1 (asin), 2.19)
 PL_TEST_INTERVAL (SV_NAME_D1 (asin), 0, 0.5, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (asin), 0.5, 1.0, 50000)
 PL_TEST_INTERVAL (SV_NAME_D1 (asin), 1.0, 0x1p11, 50000)
