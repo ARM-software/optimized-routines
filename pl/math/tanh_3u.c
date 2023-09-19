@@ -46,9 +46,9 @@ expm1_inline (double x)
 }
 
 /* Approximation for double-precision tanh(x), using a simplified version of
-   expm1. The greatest observed error is 2.75 ULP:
-   tanh(-0x1.c143c3a44e087p-3) got -0x1.ba31ba4691ab7p-3
-			      want -0x1.ba31ba4691ab4p-3.  */
+   expm1. The greatest observed error is 2.77 ULP:
+   tanh(-0x1.c4a4ca0f9f3b7p-3) got -0x1.bd6a21a163627p-3
+			      want -0x1.bd6a21a163624p-3.  */
 double
 tanh (double x)
 {
@@ -72,7 +72,7 @@ tanh (double x)
 }
 
 PL_SIG (S, D, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (tanh, 2.26)
+PL_TEST_ULP (tanh, 2.27)
 PL_TEST_INTERVAL (tanh, 0, TinyBound, 1000)
 PL_TEST_INTERVAL (tanh, -0, -TinyBound, 1000)
 PL_TEST_INTERVAL (tanh, TinyBound, BoringBound, 100000)

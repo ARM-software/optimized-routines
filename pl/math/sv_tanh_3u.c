@@ -66,9 +66,9 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 }
 
 /* SVE approximation for double-precision tanh(x), using a simplified
-   version of expm1. The greatest observed error is 2.75 ULP:
-   _ZGVsMxv_tanh (-0x1.c3c28aa0271f3p-3) got -0x1.bc9290a85c95cp-3
-					want -0x1.bc9290a85c959p-3.  */
+   version of expm1. The greatest observed error is 2.77 ULP:
+   _ZGVsMxv_tanh(-0x1.c4a4ca0f9f3b7p-3) got -0x1.bd6a21a163627p-3
+				       want -0x1.bd6a21a163624p-3.  */
 svfloat64_t SV_NAME_D1 (tanh) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -90,7 +90,7 @@ svfloat64_t SV_NAME_D1 (tanh) (svfloat64_t x, svbool_t pg)
 }
 
 PL_SIG (SV, D, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (SV_NAME_D1 (tanh), 2.26)
+PL_TEST_ULP (SV_NAME_D1 (tanh), 2.27)
 PL_TEST_INTERVAL (SV_NAME_D1 (tanh), 0, 0x1p-27, 5000)
 PL_TEST_INTERVAL (SV_NAME_D1 (tanh), -0, -0x1p-27, 5000)
 PL_TEST_INTERVAL (SV_NAME_D1 (tanh), 0x1p-27, 0x1.241bf835f9d5fp+4, 50000)

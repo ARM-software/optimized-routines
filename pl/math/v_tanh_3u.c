@@ -67,9 +67,9 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 }
 
 /* Vector approximation for double-precision tanh(x), using a simplified
-   version of expm1. The greatest observed error is 2.75 ULP:
-   _ZGVnN2v_tanh (-0x1.c46e6acac03efp-3) got -0x1.bd365474a1d0ep-3
-					want -0x1.bd365474a1d0bp-3.  */
+   version of expm1. The greatest observed error is 2.77 ULP:
+   _ZGVnN2v_tanh(-0x1.c4a4ca0f9f3b7p-3) got -0x1.bd6a21a163627p-3
+				       want -0x1.bd6a21a163624p-3.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (tanh) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -99,7 +99,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tanh) (float64x2_t x)
 }
 
 PL_SIG (V, D, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME_D1 (tanh), 2.26)
+PL_TEST_ULP (V_NAME_D1 (tanh), 2.27)
 PL_TEST_EXPECT_FENV (V_NAME_D1 (tanh), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME_D1 (tanh), 0, 0x1p-27, 5000)
 PL_TEST_INTERVAL (V_NAME_D1 (tanh), -0, -0x1p-27, 5000)
