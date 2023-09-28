@@ -37,7 +37,8 @@ static int RT(ulpscale_mpfr) (mpfr_t x, int t)
 /* Difference between exact result and closest real number that
    gets rounded to got, i.e. error before rounding, for a correctly
    rounded result the difference is 0.  */
-static double RT(ulperr) (RT(float) got, const struct RT(ret) * p, int r)
+static double RT (ulperr) (RT (float) got, const struct RT (ret) * p, int r,
+			   int ignore_zero_sign)
 {
   RT(float) want = p->y;
   RT(float) d;
@@ -49,7 +50,14 @@ static double RT(ulperr) (RT(float) got, const struct RT(ret) * p, int r)
     /* Ignore sign of NaN.  */
     return RT (issignaling) (got) == RT (issignaling) (want) ? 0 : INFINITY;
   if (signbit (got) != signbit (want))
-    return INFINITY;
+    {
+      /* Fall through to ULP calculation if ignoring sign of zero and at
+	 exactly one of want and got is non-zero.  */
+      if (ignore_zero_sign && want == got)
+	return 0.0;
+      if (!ignore_zero_sign || (want != 0 && got != 0))
+	return INFINITY;
+    }
   if (!isfinite (want) || !isfinite (got))
     {
       if (isnan (got) != isnan (want))
@@ -297,7 +305,7 @@ static int T(cmp) (const struct fun *f, struct gen *gen,
       if (!ok)
 	{
 	  int print = 0;
-	  double err = RT(ulperr) (ygot, &want, r);
+	  double err = RT (ulperr) (ygot, &want, r, conf->ignore_zero_sign);
 	  double abserr = fabs (err);
 	  // TODO: count errors below accuracy limit.
 	  if (abserr > 0)

@@ -1,7 +1,7 @@
 /*
  * ULP error checking tool for math functions.
  *
- * Copyright (c) 2019-2022, Arm Limited.
+ * Copyright (c) 2019-2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -208,6 +208,7 @@ struct conf
   unsigned long long n;
   double softlim;
   double errlim;
+  int ignore_zero_sign;
 };
 
 /* A bit of a hack: call vector functions twice with the same
@@ -594,6 +595,7 @@ usage (void)
 	"    This should be different from tested input in other lanes, and non-special \n"
 	"    (i.e. should not trigger fenv exceptions). Default is 1.");
 #endif
+  puts ("-z: ignore sign of 0.");
   puts ("Supported func:");
   for (const struct fun *f = fun; f->name; f++)
     printf ("\t%s\n", f->name);
@@ -717,6 +719,7 @@ main (int argc, char *argv[])
   conf.fenv = 1;
   conf.softlim = 0;
   conf.errlim = INFINITY;
+  conf.ignore_zero_sign = 0;
   for (;;)
     {
       argc--;
@@ -760,6 +763,9 @@ main (int argc, char *argv[])
 		usage ();
 	      conf.rc = argv[0][0];
 	    }
+	  break;
+	case 'z':
+	  conf.ignore_zero_sign = 1;
 	  break;
 #ifdef __vpcs
 	case 'c':

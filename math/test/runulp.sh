@@ -172,8 +172,8 @@ range_pow='
 '
 
 range_sin='
-  0x1p-8  0x1p23     500000
- -0x1p-8 -0x1p23     500000
+  0       0x1p23     500000
+ -0      -0x1p23     500000
   0x1p23  inf        10000
  -0x1p23 -inf        10000
 '
@@ -195,8 +195,8 @@ range_logf='
 '
 
 range_sinf='
-  0x1p-8   0x1p20   500000
- -0x1p-8  -0x1p20   500000
+  0        0x1p20   500000
+ -0       -0x1p20   500000
   0x1p20   inf      10000
  -0x1p20  -inf      10000
 '
@@ -254,14 +254,14 @@ done << EOF
 exp       _ZGVnN2v_exp
 log       _ZGVnN2v_log
 pow       _ZGVnN2vv_pow      -f
-sin       _ZGVnN2v_sin
+sin       _ZGVnN2v_sin       -z
 cos       _ZGVnN2v_cos
 expf      _ZGVnN4v_expf
 expf_1u   _ZGVnN4v_expf_1u   -f
 exp2f     _ZGVnN4v_exp2f
 exp2f_1u  _ZGVnN4v_exp2f_1u  -f
 logf      _ZGVnN4v_logf
-sinf      _ZGVnN4v_sinf
+sinf      _ZGVnN4v_sinf      -z
 cosf      _ZGVnN4v_cosf
 powf      _ZGVnN4vv_powf     -f
 EOF
