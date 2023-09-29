@@ -47,11 +47,11 @@ _ZGVnN4vl4l4_sincosf (float32x4_t x, float *out_sin, float *out_cos)
     special_case (x, special, out_sin, out_cos);
 }
 
-PL_TEST_ULP (v_sincosf_sin, 1.17)
-PL_TEST_ULP (v_sincosf_cos, 1.31)
+PL_TEST_ULP (_ZGVnN4v_sincosf_sin, 1.17)
+PL_TEST_ULP (_ZGVnN4v_sincosf_cos, 1.31)
 #define V_SINCOSF_INTERVAL(lo, hi, n)                                         \
-  PL_TEST_INTERVAL (v_sincosf_sin, lo, hi, n)                                 \
-  PL_TEST_INTERVAL (v_sincosf_cos, lo, hi, n)
+  PL_TEST_INTERVAL (_ZGVnN4v_sincosf_sin, lo, hi, n)                          \
+  PL_TEST_INTERVAL (_ZGVnN4v_sincosf_cos, lo, hi, n)
 V_SINCOSF_INTERVAL (0, 0x1p20, 500000)
 V_SINCOSF_INTERVAL (-0, -0x1p20, 500000)
 V_SINCOSF_INTERVAL (0x1p20, inf, 10000)

@@ -34,11 +34,11 @@ _ZGVsMxv_cexpi (svfloat64_t x, svbool_t pg)
   return sc;
 }
 
-PL_TEST_ULP (sv_cexpi_sin, 2.73)
-PL_TEST_ULP (sv_cexpi_cos, 2.73)
+PL_TEST_ULP (_ZGVsMxv_cexpi_sin, 2.73)
+PL_TEST_ULP (_ZGVsMxv_cexpi_cos, 2.73)
 #define SV_CEXPI_INTERVAL(lo, hi, n)                                          \
-  PL_TEST_INTERVAL (sv_cexpi_sin, lo, hi, n)                                  \
-  PL_TEST_INTERVAL (sv_cexpi_cos, lo, hi, n)
+  PL_TEST_INTERVAL (_ZGVsMxv_cexpi_sin, lo, hi, n)                            \
+  PL_TEST_INTERVAL (_ZGVsMxv_cexpi_cos, lo, hi, n)
 SV_CEXPI_INTERVAL (0, 0x1p23, 500000)
 SV_CEXPI_INTERVAL (-0, -0x1p23, 500000)
 SV_CEXPI_INTERVAL (0x1p23, inf, 10000)

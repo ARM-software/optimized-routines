@@ -36,11 +36,11 @@ _ZGVnN4v_cexpif (float32x4_t x)
   return sc;
 }
 
-PL_TEST_ULP (v_cexpif_sin, 1.17)
-PL_TEST_ULP (v_cexpif_cos, 1.31)
+PL_TEST_ULP (_ZGVnN4v_cexpif_sin, 1.17)
+PL_TEST_ULP (_ZGVnN4v_cexpif_cos, 1.31)
 #define V_CEXPIF_INTERVAL(lo, hi, n)                                          \
-  PL_TEST_INTERVAL (v_cexpif_sin, lo, hi, n)                                  \
-  PL_TEST_INTERVAL (v_cexpif_cos, lo, hi, n)
+  PL_TEST_INTERVAL (_ZGVnN4v_cexpif_sin, lo, hi, n)                           \
+  PL_TEST_INTERVAL (_ZGVnN4v_cexpif_cos, lo, hi, n)
 V_CEXPIF_INTERVAL (0, 0x1p20, 500000)
 V_CEXPIF_INTERVAL (-0, -0x1p20, 500000)
 V_CEXPIF_INTERVAL (0x1p20, inf, 10000)

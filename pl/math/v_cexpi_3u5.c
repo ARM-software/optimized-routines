@@ -34,11 +34,11 @@ _ZGVnN2v_cexpi (float64x2_t x)
   return sc;
 }
 
-PL_TEST_ULP (v_cexpi_sin, 2.73)
-PL_TEST_ULP (v_cexpi_cos, 2.73)
+PL_TEST_ULP (_ZGVnN2v_cexpi_sin, 2.73)
+PL_TEST_ULP (_ZGVnN2v_cexpi_cos, 2.73)
 #define V_CEXPI_INTERVAL(lo, hi, n)                                           \
-  PL_TEST_INTERVAL (v_cexpi_sin, lo, hi, n)                                   \
-  PL_TEST_INTERVAL (v_cexpi_cos, lo, hi, n)
+  PL_TEST_INTERVAL (_ZGVnN2v_cexpi_sin, lo, hi, n)                            \
+  PL_TEST_INTERVAL (_ZGVnN2v_cexpi_cos, lo, hi, n)
 V_CEXPI_INTERVAL (0, 0x1p23, 500000)
 V_CEXPI_INTERVAL (-0, -0x1p23, 500000)
 V_CEXPI_INTERVAL (0x1p23, inf, 10000)
