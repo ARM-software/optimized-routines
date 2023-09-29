@@ -13,9 +13,10 @@
 #define Thres 0x73000000     /* 0x70000000 - TinyBound.  */
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svfloat32_t ret, svbool_t special)
+special_case (svfloat32_t sqsum, svfloat32_t x, svfloat32_t y, svbool_t pg,
+	      svbool_t special)
 {
-  return sv_call2_f32 (hypotf, x, y, ret, special);
+  return sv_call2_f32 (hypotf, x, y, svsqrt_x (pg, sqsum), special);
 }
 
 /* SVE implementation of single-precision hypot.
@@ -31,7 +32,7 @@ svfloat32_t SV_NAME_F2 (hypot) (svfloat32_t x, svfloat32_t y,
       pg, svsub_x (pg, svreinterpret_u32 (sqsum), TinyBound), Thres);
 
   if (unlikely (svptest_any (pg, special)))
-    return special_case (x, y, x, pg);
+    return special_case (sqsum, x, y, pg, special);
 
   return svsqrt_x (pg, sqsum);
 }
