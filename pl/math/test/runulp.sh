@@ -33,6 +33,8 @@ t() {
 	for i in "${!LO[@]}"; do
 	[[ "$i" -eq "0" ]] || ITV="$ITV x ${LO[$i]} ${HI[$i]}"
 	done
+	# Add -z flag to ignore zero sign for vector routines
+	{ echo $routine | grep -q "ZGV"; } && extra_flags="$extra_flags -z"
 	$emu ./ulp -e $L $flags ${extra_flags} $routine $ITV $4 && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
 }
 

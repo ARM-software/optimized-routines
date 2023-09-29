@@ -48,21 +48,18 @@ sv_sincos_inline (svbool_t pg, svfloat64_t x, const struct sv_sincos_data *d)
 			   d->shift);
   svint64_t n = svcvt_s64_x (pg, q);
 
-  /* Reduce x such that r is in [ -pi/4, pi/4 ]. This operation discards sign
-     of 0, so use merging predication with non-zero values.  */
-  svbool_t pnz = svcmpne (pg, x, 0);
+  /* Reduce x such that r is in [ -pi/4, pi/4 ].  */
   svfloat64_t r = x;
-  r = svmls_m (pnz, r, q, d->pio2[0]);
-  r = svmls_m (pnz, r, q, d->pio2[1]);
-  r = svmls_m (pnz, r, q, d->pio2[2]);
+  r = svmls_x (pg, r, q, d->pio2[0]);
+  r = svmls_x (pg, r, q, d->pio2[1]);
+  r = svmls_x (pg, r, q, d->pio2[2]);
 
   svfloat64_t r2 = svmul_x (pg, r, r), r3 = svmul_x (pg, r2, r),
 	      r4 = svmul_x (pg, r2, r2);
 
-  /* Approximate sin(r) ~= r + r^3 * poly_sin(r^2). Use merging predication
-     with pnz in last fma to preserve sign of zero.  */
+  /* Approximate sin(r) ~= r + r^3 * poly_sin(r^2).  */
   svfloat64_t s = sv_pw_horner_6_f64_x (pg, r2, r4, d->sin_poly);
-  s = svmla_m (pnz, r, r3, s);
+  s = svmla_x (pg, r, r3, s);
 
   /* Approximate cos(r) ~= 1 - (r^2)/2 + r^4 * poly_cos(r^2).  */
   svfloat64_t c = sv_pw_horner_5_f64_x (pg, r2, r4, d->cos_poly);

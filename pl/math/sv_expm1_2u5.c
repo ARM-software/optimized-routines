@@ -49,9 +49,6 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 
   /* Large, Nan/Inf.  */
   svbool_t special = svnot_z (pg, svaclt (pg, x, d->special_bound));
-  /* Argument reduction discards sign of zero, but expm1(-0) is expected to be
-     -0. Use merging predication on zero lanes to propagate -0 correctly.  */
-  svbool_t pnz = svcmpne (pg, x, 0);
 
   /* Reduce argument to smaller range:
      Let i = round(x / ln2)
@@ -60,7 +57,7 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
      where 2^i is exact because i is an integer.  */
   svfloat64_t shift = sv_f64 (d->shift);
   svfloat64_t n = svsub_x (pg, svmla_x (pg, shift, x, d->inv_ln2), shift);
-  svint64_t i = svcvt_s64_m (svreinterpret_s64 (x), pnz, n);
+  svint64_t i = svcvt_s64_x (pg, n);
   svfloat64_t ln2 = svld1rq (svptrue_b64 (), &d->ln2_hi);
   svfloat64_t f = svmls_lane (x, n, ln2, 0);
   f = svmls_lane (f, n, ln2, 1);
@@ -79,11 +76,11 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
   /* Assemble the result.
    expm1(x) ~= 2^i * (p + 1) - 1
    Let t = 2^i.  */
-  svint64_t u = svadd_m (pnz, svlsl_m (pnz, i, 52), ExponentBias);
+  svint64_t u = svadd_x (pg, svlsl_x (pg, i, 52), ExponentBias);
   svfloat64_t t = svreinterpret_f64 (u);
 
   /* expm1(x) ~= p * t + (t - 1).  */
-  svfloat64_t y = svmla_m (pnz, svsub_m (pnz, t, 1), p, t);
+  svfloat64_t y = svmla_x (pg, svsub_x (pg, t, 1), p, t);
 
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, y, special);

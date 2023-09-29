@@ -53,8 +53,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tanh) (float32x4_t x)
   if (unlikely (v_any_u32 (special)))
     ix = vbicq_u32 (ix, special);
 #else
-  uint32x4_t special
-      = vorrq_u32 (vcgtq_u32 (iax, d->large_bound), vceqzq_u32 (iax));
+  uint32x4_t special = vcgtq_u32 (iax, d->large_bound);
 #endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */

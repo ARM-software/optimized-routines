@@ -72,9 +72,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
   if (unlikely (v_any_u64 (special)))
     x = vreinterpretq_f64_u64 (vbicq_u64 (ix, special));
 #else
-  /* Large input, NaNs and Infs, or -0.  */
-  uint64x2_t special
-      = vornq_u64 (vceqzq_f64 (x), vcaltq_f64 (x, d->oflow_bound));
+  /* Large input, NaNs and Infs.  */
+  uint64x2_t special = vceqzq_u64 (vcaltq_f64 (x, d->oflow_bound));
 #endif
 
   /* Reduce argument to smaller range:

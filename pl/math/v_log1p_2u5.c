@@ -56,7 +56,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
   const struct data *d = ptr_barrier (&data);
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t ia = vreinterpretq_u64_f64 (vabsq_f64 (x));
-  uint64x2_t special = vorrq_u64 (vcgeq_u64 (ia, d->inf), vceqzq_f64 (x));
+  uint64x2_t special = vcgeq_u64 (ia, d->inf);
 
 #if WANT_SIMD_EXCEPT
   special = vorrq_u64 (special,

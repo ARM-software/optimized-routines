@@ -112,15 +112,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tan) (float32x4_t x)
 
   /* Compute reciprocal and apply if required.  */
   float32x4_t inv_y = vdivq_f32 (v_f32 (1.0f), y);
-  y = vbslq_f32 (pred_alt, inv_y, y);
-
-  /* Fast reduction does not handle the x = -0.0 case well,
-     therefore it is fixed here.  */
-  y = vbslq_f32 (vceqzq_f32 (x), x, y);
 
   if (unlikely (v_any_u32 (special)))
-    return special_case (special_arg, y, special);
-  return y;
+    return special_case (special_arg, vbslq_f32 (pred_alt, inv_y, y), special);
+  return vbslq_f32 (pred_alt, inv_y, y);
 }
 
 PL_SIG (V, F, 1, tan, -3.1, 3.1)

@@ -77,8 +77,6 @@ v_sincosf_inline (float32x4_t x, const struct v_sincosf_data *d)
   uint32x4_t cos_sign = vshlq_n_u32 (
       vandq_u32 (vreinterpretq_u32_s32 (vaddq_s32 (n, v_s32 (1))), v_u32 (2)),
       30);
-  /* Sign of 0 is discarded by algorithm - copy it back here.  */
-  sin_sign = vbslq_u32 (vceqzq_f32 (x), vreinterpretq_u32_f32 (x), sin_sign);
   ss = vreinterpretq_f32_u32 (
       veorq_u32 (vreinterpretq_u32_f32 (ss), sin_sign));
   cc = vreinterpretq_f32_u32 (

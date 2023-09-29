@@ -79,8 +79,6 @@ v_sincos_inline (float64x2_t x, const struct v_sincos_data *d)
   uint64x2_t cos_sign = vshlq_n_u64 (
       vandq_u64 (vreinterpretq_u64_s64 (vaddq_s64 (n, v_s64 (1))), v_u64 (2)),
       62);
-  /* Sign of 0 is discarded by algorithm - copy it back here.  */
-  sin_sign = vbslq_u64 (vceqzq_f64 (x), vreinterpretq_u64_f64 (x), sin_sign);
   ss = vreinterpretq_f64_u64 (
       veorq_u64 (vreinterpretq_u64_f64 (ss), sin_sign));
   cc = vreinterpretq_f64_u64 (

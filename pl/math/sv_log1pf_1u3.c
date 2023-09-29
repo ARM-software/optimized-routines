@@ -41,10 +41,8 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
-  /* x < -1, Inf/Nan and -0 (need to catch -0 as argument reduction otherwise
-     discards sign).  */
-  svbool_t special = svorr_z (pg, svcmpeq (pg, x, 0),
-			      svcmpeq (pg, svreinterpret_u32 (x), 0x7f800000));
+  /* x < -1, Inf/Nan.  */
+  svbool_t special = svcmpeq (pg, svreinterpret_u32 (x), 0x7f800000);
   special = svorn_z (pg, special, svcmpge (pg, x, -1));
 
   /* With x + 1 = t * 2^k (where t = m + 1 and k is chosen such that m

@@ -42,8 +42,7 @@ svfloat32_t SV_NAME_F1 (tanh) (svfloat32_t x, const svbool_t pg)
   svbool_t is_boring = svcmpgt (pg, iax, d->boring_bound);
   svfloat32_t boring = svreinterpret_f32 (svorr_x (pg, sign, d->onef));
 
-  svbool_t special
-      = svorr_b_z (pg, svcmpgt (pg, iax, 0x7f800000), svcmpeq (pg, iax, 0));
+  svbool_t special = svcmpgt (pg, iax, 0x7f800000);
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
   svfloat32_t q = expm1f_inline (svmul_x (pg, x, 2.0), pg, &d->expm1f_consts);

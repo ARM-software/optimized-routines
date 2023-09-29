@@ -52,7 +52,6 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
 
   /* Determine whether input is too large to perform fast regression.  */
   svbool_t cmp = svacge (pg, x, d->range_val);
-  svbool_t peqz = svcmpeq (pg, x, 0.0);
 
   svfloat32_t odd_coeffs = svld1rq (svptrue_b32 (), &d->c1);
   svfloat32_t pi_vals = svld1rq (svptrue_b32 (), &d->pio2_1);
@@ -99,16 +98,13 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
 
   /* Transform result back, if necessary.  */
   svfloat32_t inv_y = svdivr_x (pg, y, 1.0f);
-  y = svsel (pred_alt, inv_y, y);
 
   /* No need to pass pg to specialcase here since cmp is a strict subset,
      guaranteed by the cmpge above.  */
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x, svsel (peqz, x, y), cmp);
+    return special_case (x, svsel (pred_alt, inv_y, y), cmp);
 
-  /* Fast reduction does not handle the x = -0.0 case well,
-     therefore it is fixed here.  */
-  return svsel (peqz, x, y);
+  return svsel (pred_alt, inv_y, y);
 }
 
 PL_SIG (SV, F, 1, tan, -3.1, 3.1)

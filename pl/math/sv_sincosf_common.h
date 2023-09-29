@@ -43,20 +43,17 @@ sv_sincosf_inline (svbool_t pg, svfloat32_t x, const struct sv_sincosf_data *d)
   q = svsub_x (pg, q, d->shift);
   svint32_t n = svcvt_s32_x (pg, q);
 
-  /* Reduce x such that r is in [ -pi/4, pi/4 ]. This operation discards sign
-     of 0, so use merging predication with non-zero values.  */
-  svbool_t pnz = svcmpne (pg, x, 0);
+  /* Reduce x such that r is in [ -pi/4, pi/4 ].  */
   svfloat32_t r = x;
-  r = svmls_m (pnz, r, q, d->pio2[0]);
-  r = svmls_m (pnz, r, q, d->pio2[1]);
-  r = svmls_m (pnz, r, q, d->pio2[2]);
+  r = svmls_x (pg, r, q, d->pio2[0]);
+  r = svmls_x (pg, r, q, d->pio2[1]);
+  r = svmls_x (pg, r, q, d->pio2[2]);
 
-  /* Approximate sin(r) ~= r + r^3 * poly_sin(r^2). Use merging predication
-     with pnz in last fma to preserve sign of zero.  */
+  /* Approximate sin(r) ~= r + r^3 * poly_sin(r^2).  */
   svfloat32_t r2 = svmul_x (pg, r, r), r3 = svmul_x (pg, r, r2);
   svfloat32_t s = svmla_x (pg, sv_f32 (d->poly_sin[1]), r2, d->poly_sin[2]);
   s = svmad_x (pg, r2, s, d->poly_sin[0]);
-  s = svmla_m (pnz, r, r3, s);
+  s = svmla_x (pg, r, r3, s);
 
   /* Approximate cos(r) ~= 1 - (r^2)/2 + r^4 * poly_cos(r^2).  */
   svfloat32_t r4 = svmul_x (pg, r2, r2);
