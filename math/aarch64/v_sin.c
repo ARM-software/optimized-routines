@@ -13,7 +13,7 @@ static const struct data
   float64x2_t poly[7];
   float64x2_t range_val, inv_pi, shift, pi_1, pi_2, pi_3;
 } data = {
-  /* Worst-case error is 2.8 ulp in [-pi/2, pi/2].  */
+  /* Worst-case error is 2.87 ulp in [-pi/2, pi/2].  */
   .poly = { V2 (-0x1.555555555547bp-3), V2 (0x1.1111111108a4dp-7),
 	    V2 (-0x1.a01a019936f27p-13), V2 (0x1.71de37a97d93ep-19),
 	    V2 (-0x1.ae633919987c6p-26), V2 (0x1.60e277ae07cecp-33),
