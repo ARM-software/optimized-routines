@@ -14,7 +14,7 @@ static const struct data
   double inv_pi, pi_1, pi_2, pi_3, shift, range_val;
   double poly[7];
 } data = {
-  /* Worst-case error is 2.8+0.5 ulp in [-pi/2, pi/2].  */
+  /* Worst-case error is 2.87 ulp in [-pi/2, pi/2].  */
   .poly = { -0x1.555555555547bp-3, 0x1.1111111108a4dp-7, -0x1.a01a019936f27p-13,
             0x1.71de37a97d93ep-19, -0x1.ae633919987c6p-26,
             0x1.60e277ae07cecp-33, -0x1.9e9540300a1p-41, },
@@ -52,9 +52,6 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   /* n = rint(|x|/pi).  */
   svfloat64_t n = svmla_lane (shift, x, inv_pi_and_pi1, 0);
   svuint64_t odd = svlsl_x (pg, svreinterpret_u64 (n), 63);
-  odd = sveor_m (
-      svcmpeq (pg, svreinterpret_u64 (x), svreinterpret_u64 (sv_f64 (-0.0))),
-      odd, 0x8000000000000000);
   n = svsub_x (pg, n, shift);
 
   /* r = |x| - n*(pi/2)  (range reduction into -pi/2 .. pi/2).  */
