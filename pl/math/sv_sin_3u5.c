@@ -14,7 +14,6 @@ static const struct data
   double inv_pi, pi_1, pi_2, pi_3, shift, range_val;
   double poly[7];
 } data = {
-  /* Worst-case error is 2.87 ulp in [-pi/2, pi/2].  */
   .poly = { -0x1.555555555547bp-3, 0x1.1111111108a4dp-7, -0x1.a01a019936f27p-13,
             0x1.71de37a97d93ep-19, -0x1.ae633919987c6p-26,
             0x1.60e277ae07cecp-33, -0x1.9e9540300a1p-41, },
@@ -36,9 +35,14 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
 }
 
 /* A fast SVE implementation of sin.
-   Maximum observed error in 3.22 ULP:
-   _ZGVsMxv_sin (0x1.d70eef40f39b1p+12) got -0x1.ffe9537d5dbb7p-3
-				       want -0x1.ffe9537d5dbb4p-3.  */
+   Maximum observed error in [-pi/2, pi/2], where argument is not reduced,
+   is 2.87 ULP:
+   _ZGVsMxv_sin (0x1.921d5c6a07142p+0) got 0x1.fffffffa7dc02p-1
+				      want 0x1.fffffffa7dc05p-1
+   Maximum observed error in the entire non-special domain ([-2^23, 2^23])
+   is 3.22 ULP:
+   _ZGVsMxv_sin (0x1.5702447b6f17bp+22) got 0x1.ffdcd125c84fbp-3
+				       want 0x1.ffdcd125c84f8p-3.  */
 svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
