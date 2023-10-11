@@ -127,10 +127,15 @@ erfc (double x)
       double fac = asdouble (asuint64 (0x1p-128) | sign);
       y = fma (y, fac, off);
 
-      /* The underflow exception needs to be signaled explicitly when
-	 result gets into the subnormal range.  */
-      if (x >= 0x1.a8b12fc6e4892p+4)
-	force_eval_double (opt_barrier_double (0x1p-1022) * 0x1p-1022);
+      if (unlikely (x > 26.0))
+	{
+	  /* The underflow exception needs to be signaled explicitly when
+	     result gets into the subnormal range.  */
+	  if (unlikely (y < 0x1p-1022))
+	    force_eval_double (opt_barrier_double (0x1p-1022) * 0x1p-1022);
+	  /* Set errno to ERANGE if result rounds to 0.  */
+	  return __math_check_uflow (y);
+	}
 
       return y;
     }
