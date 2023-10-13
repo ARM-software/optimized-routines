@@ -37,14 +37,15 @@ static inline svfloat32_t
 sv_log1pf_inline (svfloat32_t x, svbool_t pg)
 {
   svfloat32_t m = svadd_x (pg, x, 1.0f);
-  svuint32_t k = svsub_x (pg, svreinterpret_u32 (m), 0x3f400000);
-  k = svand_x (pg, k, 0xff800000);
+  svint32_t ks = svsub_x (pg, svreinterpret_s32 (m), 0x3f400000);
+  ks = svand_x (pg, ks, 0xff800000);
+  svuint32_t k = svreinterpret_u32 (ks);
   svfloat32_t s = svreinterpret_f32 (svsub_x (pg, sv_u32 (Four), k));
   svfloat32_t m_scale
       = svreinterpret_f32 (svsub_x (pg, svreinterpret_u32 (x), k));
   m_scale
       = svadd_x (pg, m_scale, svmla_x (pg, sv_f32 (-1.0f), sv_f32 (0.25f), s));
   svfloat32_t p = eval_poly (m_scale, pg);
-  svfloat32_t scale_back = svmul_x (pg, svcvt_f32_x (pg, k), 0x1.0p-23f);
+  svfloat32_t scale_back = svmul_x (pg, svcvt_f32_x (pg, ks), 0x1.0p-23f);
   return svmla_x (pg, p, scale_back, Ln2);
 }
