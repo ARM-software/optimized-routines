@@ -39,6 +39,9 @@ static const struct fun
 # if __ARM_FEATURE_SVE
   F(__memcpy_aarch64_sve)
 # endif
+# if WANT_MOPS
+  F(__memcpy_aarch64_mops)
+# endif
 #elif __arm__
   F(__memcpy_arm)
 #endif

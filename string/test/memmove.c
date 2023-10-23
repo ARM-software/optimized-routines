@@ -31,6 +31,9 @@ static const struct fun
 # if __ARM_FEATURE_SVE
   F(__memmove_aarch64_sve, 1)
 # endif
+# if WANT_MOPS
+  F(__memmove_aarch64_mops, 1)
+# endif
 #endif
   {0, 0, 0}
   // clang-format on
