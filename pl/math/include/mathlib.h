@@ -19,6 +19,7 @@ float cbrtf (float);
 float coshf (float);
 float erfcf (float);
 float erff (float);
+float erfinvf (float);
 float exp10f (float);
 float expm1f (float);
 float log10f (float);
@@ -37,6 +38,7 @@ double atanh (double);
 double cbrt (double);
 double cosh (double);
 double erfc (double);
+double erfinv (double);
 double exp10 (double);
 double expm1 (double);
 double log10 (double);
@@ -44,6 +46,7 @@ double log1p (double);
 double sinh (double);
 double tanh (double);
 
+long double erfinvl (long double);
 long double exp10l (long double);
 
 #if __aarch64__

@@ -125,6 +125,11 @@ static inline VTYPE VWRAP (estrin_19) (VTYPE x, VTYPE x2, VTYPE x4, VTYPE x8,
   return FMA (p16_19, x16, VWRAP (estrin_15) (x, x2, x4, x8, poly));
 }
 
+static inline VTYPE VWRAP (horner_2) (VTYPE x, const VTYPE *poly)
+{
+  VTYPE p = FMA (poly[2], x, poly[1]);
+  return FMA (x, p, poly[0]);
+}
 static inline VTYPE VWRAP (horner_3) (VTYPE x, const VTYPE *poly)
 {
   VTYPE p = FMA (poly[3], x, poly[2]);
