@@ -10,8 +10,8 @@
 #include "pl_sig.h"
 #include "poly_advsimd_f64.h"
 #include "v_math.h"
-#define WANT_V_LOG1P_K0_SHORTCUT 0
-#include "v_log1p_inline.h"
+#define V_LOG_INLINE_POLY_ORDER 4
+#include "v_log_inline.h"
 
 const static struct data
 {
@@ -23,7 +23,7 @@ const static struct data
   double P[8][2], Q[7][2];
   float64x2_t tailshift;
   uint8x16_t idx;
-  struct v_log1p_data log1p_tbl;
+  struct v_log_inline_data log_tbl;
   float64x2_t P_57[9], Q_57[10], P_17[7], Q_17[6];
 } data = { .P = { { 0x1.007ce8f01b2e8p+4, -0x1.f3596123109edp-7 },
 		  { -0x1.6b23cc5c6c6d7p+6, 0x1.60b8fe375999ep-2 },
@@ -59,13 +59,19 @@ const static struct data
 		     V2 (0x1.ae6b0c504ee02p+6), V2 (-0x1.499dfec1a7f5fp+4) },
 	   .tailshift = V2 (-0.87890625),
 	   .idx = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-	   .log1p_tbl = V_LOG1P_CONSTANTS_TABLE };
+	   .log_tbl = V_LOG_CONSTANTS };
 
 static inline float64x2_t
 special (float64x2_t x, const struct data *d)
 {
-  float64x2_t t
-      = vnegq_f64 (log1p_inline (vnegq_f64 (vabsq_f64 (x)), &d->log1p_tbl));
+  /* Note erfinv(inf) should return NaN, and erfinv(1) should return Inf.
+     By using log here, instead of log1p, we return finite values for both
+     these inputs, and values outside [-1, 1]. This is non-compliant, but is an
+     acceptable optimisation at Ofast. To get correct behaviour for all finite
+     values use the log1p_inline helper on -abs(x) - note that erfinv(inf)
+     will still be finite.  */
+  float64x2_t t = vnegq_f64 (
+      v_log_inline (vsubq_f64 (v_f64 (1), vabsq_f64 (x)), &d->log_tbl));
   t = vdivq_f64 (v_f64 (1), vsqrtq_f64 (t));
   float64x2_t ts = vbslq_f64 (v_u64 (0x7fffffffffffffff), t, x);
   return vdivq_f64 (v_horner_8_f64 (t, d->P_57),
@@ -93,9 +99,9 @@ notails (float64x2_t x, const struct data *d)
 }
 
 /* Vector implementation of Blair et al's rational approximation to inverse
-   error function in single-precision. Largest observed error is 24.31 ULP:
-   _ZGVnN2v_erfinv(-0x1.fd8ff76e7b2cbp-1) got -0x1.fefa12e985586p+0
-					 want -0x1.fefa12e98556ep+0.  */
+   error function in single-precision. Largest observed error is 24.75 ULP:
+   _ZGVnN2v_erfinv(0x1.fc861d81c2ba8p-1) got 0x1.ea05472686625p+0
+					want 0x1.ea0547268660cp+0.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -114,7 +120,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
      loads to obtain correct coefficients depending on interval.  */
   uint64x2_t is_tail = vcagtq_f64 (x, v_f64 (0.75));
 
-  if (likely (!v_any_u64 (is_tail)))
+  if (unlikely (!v_any_u64 (is_tail)))
     /* If input is normally distributed in [-1, 1] then likelihood of this is
        0.75^2 ~= 0.56.  */
     return notails (x, d);
@@ -145,11 +151,11 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
 }
 
 PL_SIG (V, D, 1, erfinv, -0.99, 0.99)
-PL_TEST_ULP (V_NAME_D1 (erfinv), 24.5)
+PL_TEST_ULP (V_NAME_D1 (erfinv), 24.8)
 /* Test with control lane in each interval.  */
 #define TEST_INTERVAL(lo, hi, n)                                              \
   PL_TEST_INTERVAL_C (V_NAME_D1 (erfinv), lo, hi, n, 0.5)                     \
   PL_TEST_INTERVAL_C (V_NAME_D1 (erfinv), lo, hi, n, 0.8)                     \
   PL_TEST_INTERVAL_C (V_NAME_D1 (erfinv), lo, hi, n, 0.95)
-TEST_INTERVAL (0, 1, 100000)
-TEST_INTERVAL (-0, -1, 100000)
+TEST_INTERVAL (0, 0x1.fffffffffffffp-1, 100000)
+TEST_INTERVAL (-0, -0x1.fffffffffffffp-1, 100000)

@@ -7,7 +7,7 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 #include "poly_advsimd_f32.h"
-#include "v_log1pf_inline.h"
+#include "v_logf_inline.h"
 #include "v_math.h"
 
 const static struct data
@@ -28,7 +28,7 @@ const static struct data
   float32x4_t P_50[6], Q_50[2];
   float32x4_t P_10[3], Q_10[3];
   uint8x16_t idxhi, idxlo;
-  struct v_log1pf_data log1p_tbl;
+  struct v_logf_data logf_tbl;
 } data = {
   .idxlo = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
   .idxhi = { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 },
@@ -42,19 +42,23 @@ const static struct data
   .Q_50 = { V4 (0x1.3d7dacp-3), V4 (0x1.629e5p+0) },
   .P_10 = { V4 (-0x1.a31268p+3), V4 (0x1.ac9048p+4), V4 (-0x1.293ff6p+3) },
   .Q_10 = { V4 (-0x1.8265eep+3), V4 (0x1.ef5eaep+4), V4 (-0x1.12665p+4) },
-  .log1p_tbl = V_LOG1PF_CONSTANTS_TABLE
+  .logf_tbl = V_LOGF_CONSTANTS
 };
 
 static inline float32x4_t
 special (float32x4_t x, const struct data *d)
 {
+  /* Note erfinvf(inf) should return NaN, and erfinvf(1) should return Inf.
+     By using log here, instead of log1p, we return finite values for both
+     these inputs, and values outside [-1, 1]. This is non-compliant, but is an
+     acceptable optimisation at Ofast. To get correct behaviour for all finite
+     values use the log1pf_inline helper on -abs(x) - note that erfinvf(inf)
+     will still be finite.  */
   float32x4_t t = vdivq_f32 (
-      v_f32 (1),
-      vsqrtq_f32 (vnegq_f32 (log1pf_inline (-vabsq_f32 (x), d->log1p_tbl))));
+      v_f32 (1), vsqrtq_f32 (vnegq_f32 (v_logf_inline (
+		     vsubq_f32 (v_f32 (1), vabsq_f32 (x)), &d->logf_tbl))));
   float32x4_t ts = vbslq_f32 (v_u32 (0x7fffffff), t, x);
   float32x4_t q = vfmaq_f32 (d->Q_50[0], vaddq_f32 (t, d->Q_50[1]), t);
-  /* Note erfinvf(inf) should return NaN, however by taking this branch it
-     returns a finite value. This is non-compliant but fine at Ofast.  */
   return vdivq_f32 (v_horner_5_f32 (t, d->P_50), vmulq_f32 (ts, q));
 }
 
@@ -78,10 +82,10 @@ lookup (float32x4_t tbl, uint8x16_t idx)
 }
 
 /* Vector implementation of Blair et al's rational approximation to inverse
-   error function in single-precision. Worst-case error is 4.71 ULP, in the
+   error function in single-precision. Worst-case error is 4.98 ULP, in the
    tail region:
-   _ZGVnN4v_erfinvf(0x1.f84e9ap-1) got 0x1.b8326ap+0
-				  want 0x1.b83274p+0.  */
+   _ZGVnN4v_erfinvf(0x1.f7dbeep-1) got 0x1.b4793p+0
+				  want 0x1.b4793ap+0 .  */
 float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -152,11 +156,11 @@ float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
 }
 
 PL_SIG (V, F, 1, erfinv, -0.99, 0.99)
-PL_TEST_ULP (V_NAME_F1 (erfinv), 4.09)
+PL_TEST_ULP (V_NAME_F1 (erfinv), 4.49)
 /* Test with control lane in each interval.  */
 #define TEST_INTERVAL(lo, hi, n)                                              \
   PL_TEST_INTERVAL_C (V_NAME_F1 (erfinv), lo, hi, n, 0.5)                     \
   PL_TEST_INTERVAL_C (V_NAME_F1 (erfinv), lo, hi, n, 0.8)                     \
   PL_TEST_INTERVAL_C (V_NAME_F1 (erfinv), lo, hi, n, 0.95)
-TEST_INTERVAL (0, 1, 40000)
-TEST_INTERVAL (-0, -1, 40000)
+TEST_INTERVAL (0, 0x1.fffffep-1, 40000)
+TEST_INTERVAL (-0, -0x1.fffffep-1, 40000)
