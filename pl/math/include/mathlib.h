@@ -39,6 +39,7 @@ double atan2 (double, double);
 double atanh (double);
 double cbrt (double);
 double cosh (double);
+double cospi (double);
 double erfc (double);
 double erfinv (double);
 double exp10 (double);
@@ -46,10 +47,13 @@ double expm1 (double);
 double log10 (double);
 double log1p (double);
 double sinh (double);
+double sinpi (double);
 double tanh (double);
 
+long double cospil (long double);
 long double erfinvl (long double);
 long double exp10l (long double);
+long double sinpil (long double);
 
 #if __aarch64__
 # if __GNUC__ >= 5
@@ -97,6 +101,7 @@ __vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_coshf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_cosh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_cospif (__f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_cospi (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_erff (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_erf (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_erfcf (__f32x4_t);
@@ -120,6 +125,7 @@ __vpcs __f64x2_t _ZGVnN2vv_pow (__f64x2_t, __f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_sinhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_sinh (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_sinpif (__f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_sinpi (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_tanf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_tan (__f64x2_t);
 __vpcs __f32x4_t _ZGVnN4v_tanhf (__f32x4_t);

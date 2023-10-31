@@ -122,51 +122,6 @@ double v_sincos_cos(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincos(vdupq_n_f6
 double v_cexpi_sin(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[0][0]; }
 double v_cexpi_cos(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[1][0]; }
 
-double sinpi(double x) {
-
-  /* sin(inf) should return nan, as defined by C23.  */
-  if (isinf(x))
-    return SNAN;
-
-  double ax = fabs(x);
-
-  /* All integer cases should return 0.  */
-  if (ax >= 0x1p23)
-    return 0;
-
-  if ((int32_t)x == x)
-    return 0;
-
-  return sin(x * M_PI);
-}
-
-double cospi(double x) {
-
-  /* cos(inf) should return nan, as defined by C23.  */
-  if (isinf(x))
-    return SNAN;
-
-  double ax = fabs(x);
-
-  /* Any value higher than 2^53 in double precision is even
-     Therefore cospi(x) = 1, this prevents overflow later.  */
-  if (ax >= 0x1p53)
-    return 1;
-
-  uint64_t m = (uint64_t)ax;
-
-  /* Integer values of cospi(x) should return +/-1.
-    The sign depends on if x is odd or even.  */
-  if (m == ax || ax >= 0x1p51)
-    return (m & 1) ? -1 : 1;
-
-  /* Values of Integer + 0.5 should always return 0.  */
-  if (ax - 0.5 == m || ax + 0.5 == m)
-    return 0;
-
-  return cos(x * M_PI);
-}
-
 #if WANT_SVE_MATH
 static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), svptrue_b32())); }
 static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), svptrue_b64())); }
