@@ -61,7 +61,7 @@ __sv_log_inline (svfloat64_t x, const svbool_t pg)
    asinh(x) = sign(x) * log(|x| + sqrt(x^2 + 1)      if |x| >= 1
 	    = sign(x) * (|x| + |x|^3 * P(x^2))       otherwise
    where log(x) is an optimized log approximation, and P(x) is a polynomial
-   shared with the scalar routine. The greatest observed error 3.01 ULP, in
+   shared with the scalar routine. The greatest observed error 2.51 ULP, in
    |x| >= 1:
    _ZGVsMxv_asinh(0x1.170469d024505p+0) got 0x1.e3181c43b0f36p-1
 				       want 0x1.e3181c43b0f39p-1.  */
@@ -119,9 +119,9 @@ PL_SIG (SV, D, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (SV_NAME_D1 (asinh), 2.52)
 /* Test vector asinh 3 times, with control lane < 1, > 1 and special.
    Ensures the svsel is choosing the right option in all cases.  */
-#define SV_ASINH_INTERVAL(lo, hi, n)                                           \
-  PL_TEST_INTERVAL_C (SV_NAME_D1 (asinh), lo, hi, n, 0.5)                      \
-  PL_TEST_INTERVAL_C (SV_NAME_D1 (asinh), lo, hi, n, 2)                        \
+#define SV_ASINH_INTERVAL(lo, hi, n)                                          \
+  PL_TEST_INTERVAL_C (SV_NAME_D1 (asinh), lo, hi, n, 0.5)                     \
+  PL_TEST_INTERVAL_C (SV_NAME_D1 (asinh), lo, hi, n, 2)                       \
   PL_TEST_INTERVAL_C (SV_NAME_D1 (asinh), lo, hi, n, 0x1p600)
 SV_ASINH_INTERVAL (0, 0x1p-26, 50000)
 SV_ASINH_INTERVAL (0x1p-26, 1, 50000)
