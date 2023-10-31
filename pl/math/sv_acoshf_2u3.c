@@ -24,9 +24,9 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 /* Single-precision SVE acosh(x) routine. Implements the same algorithm as
    vector acoshf and log1p.
 
-   Maximum error is 3.07 ULPs:
-   SV_NAME_F1 (acosh) (0x1.01f83ep+0) got 0x1.fbc7fap-4
-				      want 0x1.fbc7f4p-4.  */
+   Maximum error is 2.27 ULPs:
+   SV_NAME_F1 (acosh) (0x1.01e996p+0) got 0x1.f45b42p-4
+				     want 0x1.f45b3cp-4.  */
 svfloat32_t SV_NAME_F1 (acosh) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t ix = svreinterpret_u32 (x);

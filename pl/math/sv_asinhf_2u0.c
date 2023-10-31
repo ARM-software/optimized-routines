@@ -26,9 +26,9 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special, svbool_t pg)
 /* Single-precision SVE asinh(x) routine. Implements the same algorithm as
    vector asinhf and log1p.
 
-   Maximum error is 2.76 ULPs:
-   SV_NAME_F1 (asinh) (0x1.0251b4p-2) got 0x1.ff4f52p-3
-	  want 0x1.ff4f58p-3  */
+   Maximum error is 1.97 ULPs:
+   SV_NAME_F1 (asinh) (0x1.008864p-3) got 0x1.ffbbbcp-4
+				     want 0x1.ffbbb8p-4.  */
 svfloat32_t SV_NAME_F1 (asinh) (svfloat32_t x, const svbool_t pg)
 {
   svuint32_t ix = svreinterpret_u32 (x);
