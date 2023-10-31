@@ -14,7 +14,7 @@
 struct v_expf_data
 {
   float32x4_t poly[5];
-  float32x4_t shift, invln2, ln2_hi, ln2_lo;
+  float32x4_t shift, invln2_and_ln2;
 };
 
 /* maxerr: 1.45358 +0.5 ulp.  */
@@ -22,9 +22,8 @@ struct v_expf_data
   {                                                                           \
     .poly = { V4 (0x1.0e4020p-7f), V4 (0x1.573e2ep-5f), V4 (0x1.555e66p-3f),  \
 	      V4 (0x1.fffdb6p-2f), V4 (0x1.ffffecp-1f) },                     \
-                                                                              \
-    .shift = V4 (0x1.8p23f), .invln2 = V4 (0x1.715476p+0f),                   \
-    .ln2_hi = V4 (0x1.62e4p-1f), .ln2_lo = V4 (0x1.7f7d1cp-20f),              \
+    .shift = V4 (0x1.8p23f),                                                  \
+    .invln2_and_ln2 = { 0x1.715476p+0f, 0x1.62e4p-1f, 0x1.7f7d1cp-20f, 0 },   \
   }
 
 #define ExponentBias v_u32 (0x3f800000) /* asuint(1.0f).  */
@@ -40,10 +39,10 @@ v_expf_inline (float32x4_t x, const struct v_expf_data *d)
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
   float32x4_t n, r, z;
-  z = vfmaq_f32 (d->shift, x, d->invln2);
+  z = vfmaq_laneq_f32 (d->shift, x, d->invln2_and_ln2, 0);
   n = vsubq_f32 (z, d->shift);
-  r = vfmsq_f32 (x, n, d->ln2_hi);
-  r = vfmsq_f32 (r, n, d->ln2_lo);
+  r = vfmsq_laneq_f32 (x, n, d->invln2_and_ln2, 1);
+  r = vfmsq_laneq_f32 (r, n, d->invln2_and_ln2, 2);
   uint32x4_t e = vshlq_n_u32 (vreinterpretq_u32_f32 (z), 23);
   float32x4_t scale = vreinterpretq_f32_u32 (vaddq_u32 (e, ExponentBias));
 

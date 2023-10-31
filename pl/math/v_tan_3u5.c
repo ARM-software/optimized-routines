@@ -13,7 +13,7 @@
 static const struct data
 {
   float64x2_t poly[9];
-  float64x2_t half_pi_hi, half_pi_lo, two_over_pi, shift;
+  float64x2_t half_pi, two_over_pi, shift;
 #if !WANT_SIMD_EXCEPT
   float64x2_t range_val;
 #endif
@@ -24,8 +24,7 @@ static const struct data
 	    V2 (0x1.226e5e5ecdfa3p-7), V2 (0x1.d6c7ddbf87047p-9),
 	    V2 (0x1.7ea75d05b583ep-10), V2 (0x1.289f22964a03cp-11),
 	    V2 (0x1.4e4fd14147622p-12) },
-  .half_pi_hi = V2 (0x1.921fb54442d18p0),
-  .half_pi_lo = V2 (0x1.1a62633145c07p-54),
+  .half_pi = { 0x1.921fb54442d18p0, 0x1.1a62633145c07p-54 },
   .two_over_pi = V2 (0x1.45f306dc9c883p-1),
   .shift = V2 (0x1.8p52),
 #if !WANT_SIMD_EXCEPT
@@ -51,10 +50,10 @@ special_case (float64x2_t x)
 float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 {
   const struct data *dat = ptr_barrier (&data);
-  /* Our argument reduction cannot calculate q with sufficient accuracy for very
-     large inputs. Fall back to scalar routine for all lanes if any are too
-     large, or Inf/NaN. If fenv exceptions are expected, also fall back for tiny
-     input to avoid underflow.  */
+  /* Our argument reduction cannot calculate q with sufficient accuracy for
+     very large inputs. Fall back to scalar routine for all lanes if any are
+     too large, or Inf/NaN. If fenv exceptions are expected, also fall back for
+     tiny input to avoid underflow.  */
 #if WANT_SIMD_EXCEPT
   uint64x2_t iax = vreinterpretq_u64_f64 (vabsq_f64 (x));
   /* iax - tiny_bound > range_val - tiny_bound.  */
@@ -72,8 +71,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
   float64x2_t r = x;
-  r = vfmsq_f64 (r, q, dat->half_pi_hi);
-  r = vfmsq_f64 (r, q, dat->half_pi_lo);
+  r = vfmsq_laneq_f64 (r, q, dat->half_pi, 0);
+  r = vfmsq_laneq_f64 (r, q, dat->half_pi, 1);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
      formula.  */
   r = vmulq_n_f64 (r, 0.5);
@@ -96,7 +95,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
      and reciprocity around pi/2:
      tan(x) = 1 / (tan(pi/2 - x))
      to assemble result using change-of-sign and conditional selection of
-     numerator/denominator, dependent on odd/even-ness of q (hence quadrant). */
+     numerator/denominator, dependent on odd/even-ness of q (hence quadrant).
+   */
   float64x2_t n = vfmaq_f64 (v_f64 (-1), p, p);
   float64x2_t d = vaddq_f64 (p, p);
 

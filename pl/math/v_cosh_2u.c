@@ -12,7 +12,7 @@
 static const struct data
 {
   float64x2_t poly[3];
-  float64x2_t inv_ln2, ln2_hi, ln2_lo, shift, thres;
+  float64x2_t inv_ln2, ln2, shift, thres;
   uint64x2_t index_mask, special_bound;
 } data = {
   .poly = { V2 (0x1.fffffffffffd4p-2), V2 (0x1.5555571d6b68cp-3),
@@ -20,8 +20,7 @@ static const struct data
 
   .inv_ln2 = V2 (0x1.71547652b82fep8), /* N/ln2.  */
   /* -ln2/N.  */
-  .ln2_hi = V2 (-0x1.62e42fefa39efp-9),
-  .ln2_lo = V2 (-0x1.abc9e3b39803f3p-64),
+  .ln2 = {-0x1.62e42fefa39efp-9, -0x1.abc9e3b39803f3p-64},
   .shift = V2 (0x1.8p+52),
   .thres = V2 (704.0),
 
@@ -49,8 +48,8 @@ exp_inline (float64x2_t x)
   float64x2_t n = vsubq_f64 (z, d->shift);
 
   /* r = x - n*ln2/N.  */
-  float64x2_t r = vfmaq_f64 (x, d->ln2_hi, n);
-  r = vfmaq_f64 (r, d->ln2_lo, n);
+  float64x2_t r = vfmaq_laneq_f64 (x, n, d->ln2, 0);
+  r = vfmaq_laneq_f64 (r, n, d->ln2, 1);
 
   uint64x2_t e = vshlq_n_u64 (u, 52 - V_EXP_TAIL_TABLE_BITS);
   uint64x2_t i = vandq_u64 (u, d->index_mask);

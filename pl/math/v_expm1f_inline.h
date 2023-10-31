@@ -16,20 +16,19 @@
 struct v_expm1f_data
 {
   float32x4_t poly[5];
-  float32x4_t invln2, ln2_lo, ln2_hi, shift;
+  float32x4_t invln2_and_ln2, shift;
   int32x4_t exponent_bias;
 };
 
 /* Coefficients generated using fpminimax with degree=5 in [-log(2)/2,
- * log(2)/2]. Exponent bias is asuint(1.0f).  */
+   log(2)/2]. Exponent bias is asuint(1.0f).
+   invln2_and_ln2 Stores constants: invln2, ln2_lo, ln2_hi, 0.  */
 #define V_EXPM1F_DATA                                                         \
   {                                                                           \
     .poly = { V4 (0x1.fffffep-2), V4 (0x1.5554aep-3), V4 (0x1.555736p-5),     \
 	      V4 (0x1.12287cp-7), V4 (0x1.6b55a2p-10) },                      \
-                                                                              \
-    .invln2 = V4 (0x1.715476p+0f), .ln2_hi = V4 (0x1.62e4p-1f),               \
-    .ln2_lo = V4 (0x1.7f7d1cp-20f), .shift = V4 (0x1.8p23f),                  \
-    .exponent_bias = V4 (0x3f800000),                                         \
+    .shift = V4 (0x1.8p23f), .exponent_bias = V4 (0x3f800000),                \
+    .invln2_and_ln2 = { 0x1.715476p+0f, 0x1.62e4p-1f, 0x1.7f7d1cp-20f, 0 },   \
   }
 
 static inline float32x4_t
@@ -40,10 +39,11 @@ expm1f_inline (float32x4_t x, const struct v_expm1f_data *d)
      calling routine should handle special values if required.  */
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
-  float32x4_t j = vsubq_f32 (vfmaq_f32 (d->shift, d->invln2, x), d->shift);
+  float32x4_t j = vsubq_f32 (
+      vfmaq_laneq_f32 (d->shift, x, d->invln2_and_ln2, 0), d->shift);
   int32x4_t i = vcvtq_s32_f32 (j);
-  float32x4_t f = vfmsq_f32 (x, j, d->ln2_hi);
-  f = vfmsq_f32 (f, j, d->ln2_lo);
+  float32x4_t f = vfmsq_laneq_f32 (x, j, d->invln2_and_ln2, 1);
+  f = vfmsq_laneq_f32 (f, j, d->invln2_and_ln2, 2);
 
   /* Approximate expm1(f) with polynomial P, expm1(f) ~= f + f^2 * P(f).
      Uses Estrin scheme, where the main _ZGVnN4v_expm1f routine uses
