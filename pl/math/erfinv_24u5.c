@@ -7,6 +7,7 @@
 #include "math_config.h"
 #include "poly_scalar_f64.h"
 #include "pl_sig.h"
+#define IGNORE_SCALAR_FENV
 #include "pl_test.h"
 
 const static struct

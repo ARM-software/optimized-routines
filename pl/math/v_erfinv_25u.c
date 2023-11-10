@@ -4,12 +4,12 @@
  * Copyright (c) 2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+#include "v_math.h"
 #include "pl_test.h"
 #include "mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
 #include "poly_advsimd_f64.h"
-#include "v_math.h"
 #define V_LOG_INLINE_POLY_ORDER 4
 #include "v_log_inline.h"
 

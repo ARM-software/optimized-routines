@@ -5,10 +5,10 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "sv_math.h"
 #include "mathlib.h"
 #include "pl_sig.h"
 #include "pl_test.h"
-#include "sv_math.h"
 
 #include "sv_log1pf_inline.h"
 

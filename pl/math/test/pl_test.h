@@ -8,12 +8,12 @@
 
 /* Emit the max ULP threshold, l, for routine f. Piggy-back PL_TEST_EXPECT_FENV
    on PL_TEST_ULP to add EXPECT_FENV to all scalar routines.  */
-#if !(WANT_VMATH || WANT_SVE_MATH)
-#define PL_TEST_ULP(f, l)                                                      \
-  PL_TEST_EXPECT_FENV_ALWAYS (f)                                               \
-  PL_TEST_ULP f l
+#if WANT_VMATH || defined(IGNORE_SCALAR_FENV)
+# define PL_TEST_ULP(f, l) PL_TEST_ULP f l
 #else
-#define PL_TEST_ULP(f, l) PL_TEST_ULP f l
+# define PL_TEST_ULP(f, l)                                                   \
+    PL_TEST_EXPECT_FENV_ALWAYS (f)                                            \
+    PL_TEST_ULP f l
 #endif
 
 /* Emit routine name if e == 1 and f is expected to correctly trigger fenv

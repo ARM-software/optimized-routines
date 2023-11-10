@@ -4,11 +4,11 @@
  * Copyright (c) 2023, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+#include "v_math.h"
 #include "pl_sig.h"
 #include "pl_test.h"
 #include "poly_advsimd_f32.h"
 #include "v_logf_inline.h"
-#include "v_math.h"
 
 const static struct data
 {
