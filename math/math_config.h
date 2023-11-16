@@ -117,6 +117,21 @@
 #define __math_check_oflowf arm_math_check_oflowf
 #define __math_check_uflowf arm_math_check_uflowf
 
+#define __sincosf_table arm_math_sincosf_table
+#define __inv_pio4 arm_math_inv_pio4
+#define __exp2f_data arm_math_exp2f_data
+#define __logf_data arm_math_logf_data
+#define __log2f_data arm_math_log2f_data
+#define __powf_log2_data arm_math_powf_log2_data
+#define __exp_data arm_math_exp_data
+#define __log_data arm_math_log_data
+#define __log2_data arm_math_log2_data
+#define __pow_log_data arm_math_pow_log_data
+#define __erff_data arm_math_erff_data
+#define __erf_data arm_math_erf_data
+#define __v_exp_data arm_math_v_exp_data
+#define __v_log_data arm_math_v_log_data
+
 #if HAVE_FAST_ROUND
 /* When set, the roundtoint and converttoint functions are provided with
    the semantics documented below.  */
