@@ -406,15 +406,22 @@ extern const struct powf_log2_data
 #define EXP_USE_TOINT_NARROW 0
 #define EXP2_POLY_ORDER 5
 #define EXP2_POLY_WIDE 0
+/* Wider exp10 polynomial necessary for good precision in non-nearest rounding
+   and !TOINT_INTRINSICS.  */
+#define EXP10_POLY_WIDE 0
 extern const struct exp_data
 {
   double invln2N;
+  double invlog10_2N;
   double shift;
   double negln2hiN;
   double negln2loN;
+  double neglog10_2hiN;
+  double neglog10_2loN;
   double poly[4]; /* Last four coefficients.  */
   double exp2_shift;
   double exp2_poly[EXP2_POLY_ORDER];
+  double exp10_poly[5];
   uint64_t tab[2*(1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
 

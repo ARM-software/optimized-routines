@@ -11,7 +11,7 @@ a = -b;
 wp = single;
 
 // exp10 parameters
-//deg = 4; // poly degree
+//deg = 4; // poly degree - bump to 5 for ~1 ULP
 //N = 128; // table size
 //b = log(2)/(2 * N * log(10)); // interval
 //a = -b;

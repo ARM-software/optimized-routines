@@ -16,6 +16,7 @@
  F2 (pow)
  F1 (erf)
  D1 (exp)
+ D1 (exp10)
  D1 (exp2)
  D1 (log)
  D1 (log2)

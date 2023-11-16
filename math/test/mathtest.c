@@ -254,6 +254,7 @@ test_func tfuncs[] = {
     TFUNCARM(at_s,rt_s, expf, 3*ULPUNIT/4),
     TFUNCARM(at_s,rt_s, exp2f, 3*ULPUNIT/4),
     TFUNC(at_s,rt_s, expm1f, ULPUNIT),
+    TFUNC(at_d,rt_d, exp10, ULPUNIT),
 
     /* power */
     TFUNC(at_d2,rt_d, pow, 3*ULPUNIT/4),
