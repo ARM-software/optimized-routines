@@ -127,8 +127,8 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
 		      : cmp[lane];
 
       /* N*x = k + r with r in [-1/2, 1/2].  */
-      double kd = roundtoint (ylogx);
-      uint64_t ki = converttoint (ylogx);
+      double kd = round (ylogx);
+      uint64_t ki = lround (ylogx);
       r = ylogx - kd;
 
       /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
