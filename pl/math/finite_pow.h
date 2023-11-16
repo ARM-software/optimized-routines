@@ -173,8 +173,8 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   /* exp(x) = 2^(k/N) * exp(r), with exp(r) in [2^(-1/2N),2^(1/2N)].  */
   /* x = ln2/N*k + r, with int k and r in [-ln2/2N, ln2/2N].  */
   double z = InvLn2N * x;
-  double kd = roundtoint (z);
-  uint64_t ki = converttoint (z);
+  double kd = round (z);
+  uint64_t ki = lround (z);
   double r = x - kd * Ln2HiN - kd * Ln2LoN;
   /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
   r += xtail;
@@ -221,8 +221,8 @@ exp_nosignbias (double x, double xtail)
   /* exp(x) = 2^(k/N) * exp(r), with exp(r) in [2^(-1/2N),2^(1/2N)].  */
   /* x = ln2/N*k + r, with k integer and r in [-ln2/2N, ln2/2N].  */
   double z = InvLn2N * x;
-  double kd = roundtoint (z);
-  uint64_t ki = converttoint (z);
+  double kd = round (z);
+  uint64_t ki = lround (z);
   double r = x - kd * Ln2HiN - kd * Ln2LoN;
   /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
   r += xtail;
