@@ -31,9 +31,7 @@ static const struct v_sincos_data
 static inline uint64x2_t
 check_ge_rangeval (float64x2_t x, const struct v_sincos_data *d)
 {
-  uint64x2_t in_bounds = vcaltq_f64 (x, d->range_val);
-  uint64x2_t special = vceqzq_u64 (in_bounds);
-  return special;
+  return vcagtq_f64 (x, d->range_val);
 }
 
 /* Double-precision vector function allowing calculation of both sin and cos in

@@ -103,7 +103,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
   uint64x2_t no_recip = vtstq_u64 (vreinterpretq_u64_s64 (qi), v_u64 (1));
 
 #if !WANT_SIMD_EXCEPT
-  uint64x2_t special = vceqzq_u64 (vcaleq_f64 (x, dat->range_val));
+  uint64x2_t special = vcageq_f64 (x, dat->range_val);
   if (unlikely (v_any_u64 (special)))
     return special_case (x);
 #endif

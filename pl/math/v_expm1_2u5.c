@@ -72,7 +72,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
     x = vreinterpretq_f64_u64 (vbicq_u64 (ix, special));
 #else
   /* Large input, NaNs and Infs.  */
-  uint64x2_t special = vceqzq_u64 (vcaltq_f64 (x, d->oflow_bound));
+  uint64x2_t special = vcageq_f64 (x, d->oflow_bound);
 #endif
 
   /* Reduce argument to smaller range:

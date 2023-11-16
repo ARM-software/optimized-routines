@@ -70,7 +70,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
     x = vreinterpretq_f32_u32 (vbicq_u32 (ix, special));
 #else
   /* Handles very large values (+ve and -ve), +/-NaN, +/-Inf.  */
-  uint32x4_t special = vceqzq_u32 (vcaltq_f32 (x, d->oflow_bound));
+  uint32x4_t special = vcagtq_f32 (x, d->oflow_bound);
 #endif
 
   /* Reduce argument to smaller range:

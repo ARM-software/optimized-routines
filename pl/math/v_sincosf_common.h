@@ -24,9 +24,7 @@ const static struct v_sincosf_data
 static inline uint32x4_t
 check_ge_rangeval (float32x4_t x, const struct v_sincosf_data *d)
 {
-  uint32x4_t in_bounds = vcaltq_f32 (x, d->range_val);
-  uint32x4_t special = vceqzq_u32 (in_bounds);
-  return special;
+  return vcagtq_f32 (x, d->range_val);
 }
 
 /* Single-precision vector function allowing calculation of both sin and cos in
