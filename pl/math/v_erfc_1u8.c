@@ -117,7 +117,7 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
      special case handler to fix special lanes later. This is only necessary if
      fenv exceptions are to be triggered correctly.  */
   if (unlikely (v_any_u64 (cmp)))
-    x = vreinterpretq_f64_u64 (vbicq_u64 (ix, cmp));
+    x = v_zerofy_f64 (x, cmp);
 #endif
 
   float64x2_t a = vabsq_f64 (x);

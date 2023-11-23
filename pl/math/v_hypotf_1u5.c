@@ -55,8 +55,8 @@ float32x4_t VPCS_ATTR V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
      fallback for correct flag handling.  */
   uint32x4_t specialx = vcgeq_u32 (vsubq_u32 (ix, d->tiny_bound), d->thres);
   uint32x4_t specialy = vcgeq_u32 (vsubq_u32 (iy, d->tiny_bound), d->thres);
-  ax = vreinterpretq_f32_u32 (vbicq_u32 (ix, specialx));
-  ay = vreinterpretq_f32_u32 (vbicq_u32 (iy, specialy));
+  ax = v_zerofy_f32 (ax, specialx);
+  ay = v_zerofy_f32 (ay, specialy);
   uint16x4_t special = vaddhn_u32 (specialx, specialy);
 
   float32x4_t sqsum = vfmaq_f32 (vmulq_f32 (ax, ax), ay, ay);

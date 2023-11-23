@@ -47,7 +47,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sinpi) (float32x4_t x)
 
   /* When WANT_SIMD_EXCEPT = 1, special lanes should be set to 0
      to avoid them under/overflowing and throwing exceptions.  */
-  float32x4_t r = vbslq_f32 (cmp, v_f32 (0), x);
+  float32x4_t r = v_zerofy_f32 (x, cmp);
 #else
   float32x4_t r = x;
 #endif

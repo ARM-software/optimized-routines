@@ -62,7 +62,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
   special = vorrq_u64 (special,
 		       vcgeq_u64 (ix, vreinterpretq_u64_f64 (v_f64 (-1))));
   if (unlikely (v_any_u64 (special)))
-    x = vreinterpretq_f64_u64 (vbicq_u64 (ix, special));
+    x = v_zerofy_f64 (x, special);
 #else
   special = vorrq_u64 (special, vcleq_f64 (x, v_f64 (-1)));
 #endif

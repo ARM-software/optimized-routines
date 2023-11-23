@@ -56,8 +56,8 @@ float64x2_t VPCS_ATTR V_NAME_D2 (hypot) (float64x2_t x, float64x2_t y)
      fallback for correct flag handling.  */
   uint64x2_t specialx = vcgeq_u64 (vsubq_u64 (ix, d->tiny_bound), d->thres);
   uint64x2_t specialy = vcgeq_u64 (vsubq_u64 (iy, d->tiny_bound), d->thres);
-  ax = vreinterpretq_f64_u64 (vbicq_u64 (ix, specialx));
-  ay = vreinterpretq_f64_u64 (vbicq_u64 (iy, specialy));
+  ax = v_zerofy_f64 (ax, specialx);
+  ay = v_zerofy_f64 (ay, specialy);
   uint32x2_t special = vaddhn_u64 (specialx, specialy);
 
   float64x2_t sqsum = vfmaq_f64 (vmulq_f64 (ax, ax), ay, ay);

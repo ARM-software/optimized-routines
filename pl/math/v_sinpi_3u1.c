@@ -52,8 +52,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinpi) (float64x2_t x)
 
   /* When WANT_SIMD_EXCEPT = 1, special lanes should be set to 0
      to avoid them under/overflowing and throwing exceptions.  */
-  float64x2_t r
-      = vreinterpretq_f64_u64 (vbicq_u64 (vreinterpretq_u64_f64 (x), cmp));
+  float64x2_t r = v_zerofy_f64 (x, cmp);
 #else
   float64x2_t r = x;
 #endif

@@ -69,7 +69,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
   uint64x2_t special
       = vcgeq_u64 (vsubq_u64 (vaddq_u64 (ix, ix), d->tiny_bound), d->thresh);
   if (unlikely (v_any_u64 (special)))
-    x = vreinterpretq_f64_u64 (vbicq_u64 (ix, special));
+    x = v_zerofy_f64 (x, special);
 #else
   /* Large input, NaNs and Infs.  */
   uint64x2_t special = vcageq_f64 (x, d->oflow_bound);

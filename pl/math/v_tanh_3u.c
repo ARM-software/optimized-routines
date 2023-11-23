@@ -84,7 +84,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tanh) (float64x2_t x)
   /* To trigger fp exceptions correctly, set special lanes to a neutral value.
      They will be fixed up later by the special-case handler.  */
   if (unlikely (v_any_u64 (special)))
-    u = vreinterpretq_f64_u64 (vbicq_u64 (vreinterpretq_u64_f64 (u), special));
+    u = v_zerofy_f64 (u, special);
 #endif
 
   u = vaddq_f64 (u, u);

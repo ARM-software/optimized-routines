@@ -50,9 +50,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
   special = vorrq_u32 (special, vcltq_u32 (iax, dat->tiny_bound));
   if (unlikely (v_any_u32 (special)))
     {
-      ax = vreinterpretq_f32_u32 (vbicq_u32 (iax, special));
-      x = vreinterpretq_f32_u32 (
-	  vbicq_u32 (vreinterpretq_u32_f32 (x), special));
+      ax = v_zerofy_f32 (ax, special);
+      x = v_zerofy_f32 (x, special);
     }
 #endif
 

@@ -51,8 +51,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
      Widening sign-extend special predicate in order to mask with it.  */
   uint32x4_t p
       = vreinterpretq_u32_s32 (vmovl_s16 (vreinterpret_s16_u16 (special)));
-  float32x4_t xm1 = vreinterpretq_f32_u32 (
-      vbicq_u32 (vreinterpretq_u32_f32 (vsubq_f32 (x, v_f32 (1))), p));
+  float32x4_t xm1 = v_zerofy_f32 (vsubq_f32 (x, v_f32 (1)), p);
   float32x4_t u = vfmaq_f32 (vaddq_f32 (xm1, xm1), xm1, xm1);
 #else
   float32x4_t xm1 = vsubq_f32 (x, v_f32 (1));

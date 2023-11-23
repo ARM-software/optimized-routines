@@ -118,7 +118,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   if (likely (v_any_u64 (gt1)))
     {
 #if WANT_SIMD_EXCEPT
-      float64x2_t xm = vreinterpretq_f64_u64 (vbicq_u64 (iax, special));
+      float64x2_t xm = v_zerofy_f64 (ax, special);
 #else
       float64x2_t xm = ax;
 #endif
@@ -138,7 +138,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   if (likely (v_any_u64 (vceqzq_u64 (gt1))))
     {
 #if WANT_SIMD_EXCEPT
-      ax = vreinterpretq_f64_u64 (vbicq_u64 (iax, vorrq_u64 (tiny, gt1)));
+      ax = v_zerofy_f64 (ax, vorrq_u64 (tiny, gt1));
 #endif
       float64x2_t x2 = vmulq_f64 (ax, ax), x3 = vmulq_f64 (ax, x2),
 		  z2 = vmulq_f64 (x2, x2), z4 = vmulq_f64 (z2, z2),

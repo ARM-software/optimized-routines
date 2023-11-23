@@ -42,7 +42,7 @@ float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
   float64x2_t halfsign = vreinterpretq_f64_u64 (vorrq_u64 (sign, d->half));
 
 #if WANT_SIMD_EXCEPT
-  ax = vreinterpretq_f64_u64 (vbicq_u64 (vreinterpretq_u64_f64 (ax), special));
+  ax = v_zerofy_f64 (ax, special);
 #endif
 
   float64x2_t y;

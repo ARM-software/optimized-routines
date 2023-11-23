@@ -72,9 +72,9 @@ log1p_inline (float64x2_t x, const struct v_log1p_data *d)
   "Cannot use v_log1p_inline.h without specifying whether you need the k0 shortcut for greater accuracy close to 0"
 #elif WANT_V_LOG1P_K0_SHORTCUT
   /* Shortcut if k is 0 - set correction term to 0 and f to x. The result is
-     that the approximation is solely the polynomial. */
+     that the approximation is solely the polynomial.  */
   uint64x2_t k0 = vceqzq_f64 (k);
-  cm = vreinterpretq_f64_u64 (vbicq_u64 (vreinterpretq_u64_f64 (cm), k0));
+  cm = v_zerofy_f64 (cm, k0);
   f = vbslq_f64 (k0, x, f);
 #endif
 

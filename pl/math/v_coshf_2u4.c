@@ -22,11 +22,13 @@ static const struct data
   .special_bound = V4 (0x42ad496c),
 };
 
+#if !WANT_SIMD_EXCEPT
 static float32x4_t NOINLINE VPCS_ATTR
 special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
 {
   return v_call_f32 (coshf, x, y, special);
 }
+#endif
 
 /* Single-precision vector cosh, using vector expf.
    Maximum error is 2.38 ULP:
@@ -51,7 +53,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cosh) (float32x4_t x)
   /* If any input is tiny, avoid underflow exception by fixing tiny lanes of
      input to 0, which will generate no exceptions.  */
   if (unlikely (v_any_u32 (tiny)))
-    ax = vreinterpretq_f32_u32 (vbicq_u32 (iax, tiny));
+    ax = v_zerofy_f32 (ax, tiny);
 #endif
 
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */

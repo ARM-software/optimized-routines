@@ -67,7 +67,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
   uint32x4_t special
       = vcgeq_u32 (vsubq_u32 (vaddq_u32 (ix, ix), TinyBound), d->thresh);
   if (unlikely (v_any_u32 (special)))
-    x = vreinterpretq_f32_u32 (vbicq_u32 (ix, special));
+    x = v_zerofy_f32 (x, special);
 #else
   /* Handles very large values (+ve and -ve), +/-NaN, +/-Inf.  */
   uint32x4_t special = vcagtq_f32 (x, d->oflow_bound);

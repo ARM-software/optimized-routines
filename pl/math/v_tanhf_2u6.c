@@ -49,19 +49,19 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tanh) (float32x4_t x)
      lanes to 0, which will trigger no exceptions, and fix them up later.  */
   uint32x4_t special = vorrq_u32 (vcgtq_u32 (iax, d->large_bound),
 				  vcltq_u32 (iax, v_u32 (0x34000000)));
-  ix = vbicq_u32 (ix, is_boring);
+  x = v_zerofy_f32 (x, is_boring);
   if (unlikely (v_any_u32 (special)))
-    ix = vbicq_u32 (ix, special);
+    x = v_zerofy_f32 (x, special);
 #else
   uint32x4_t special = vcgtq_u32 (iax, d->large_bound);
 #endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
-  float32x4_t q = expm1f_inline (vmulq_n_f32 (vreinterpretq_f32_u32 (ix), 2),
-				 &d->expm1f_consts);
+  float32x4_t q = expm1f_inline (vmulq_n_f32 (x, 2), &d->expm1f_consts);
   float32x4_t y = vdivq_f32 (q, vaddq_f32 (q, v_f32 (2.0)));
   if (unlikely (v_any_u32 (special)))
-    return special_case (x, vbslq_f32 (is_boring, boring, y), special);
+    return special_case (vreinterpretq_f32_u32 (ix),
+			 vbslq_f32 (is_boring, boring, y), special);
   return vbslq_f32 (is_boring, boring, y);
 }
 

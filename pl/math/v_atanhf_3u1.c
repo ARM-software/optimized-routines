@@ -53,7 +53,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
   /* Side-step special cases by setting those lanes to 0, which will trigger no
      exceptions. These will be fixed up later.  */
   if (unlikely (v_any_u32 (special)))
-    ax = vreinterpretq_f32_u32 (vbicq_u32 (iax, special));
+    ax = v_zerofy_f32 (ax, special);
 #else
   uint32x4_t special = vcgeq_u32 (iax, d->one);
 #endif

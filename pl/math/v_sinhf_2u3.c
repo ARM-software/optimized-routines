@@ -57,7 +57,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sinh) (float32x4_t x)
 
 #if WANT_SIMD_EXCEPT
   uint32x4_t special = vcgeq_u32 (vsubq_u32 (iax, d->tiny_bound), d->thresh);
-  ax = vreinterpretq_f32_u32 (vbicq_u32 (iax, special));
+  ax = v_zerofy_f32 (ax, special);
 #else
   uint32x4_t special = vcgeq_u32 (iax, d->oflow_bound);
 #endif
