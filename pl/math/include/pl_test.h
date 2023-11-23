@@ -18,5 +18,7 @@
 #define PL_TEST_EXPECT_FENV_ALWAYS(f)
 
 #define PL_TEST_INTERVAL(f, lo, hi, n)
+#define PL_TEST_SYM_INTERVAL(f, lo, hi, n)
 #define PL_TEST_INTERVAL_C(f, lo, hi, n, c)
+#define PL_TEST_SYM_INTERVAL_C(f, lo, hi, n, c)
 #define PL_TEST_INTERVAL2(f, xlo, xhi, ylo, yhi, n)

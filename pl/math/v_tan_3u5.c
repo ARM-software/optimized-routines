@@ -45,8 +45,8 @@ special_case (float64x2_t x)
 
 /* Vector approximation for double-precision tan.
    Maximum measured error is 3.48 ULP:
-   __v_tan(0x1.4457047ef78d8p+20) got -0x1.f6ccd8ecf7dedp+37
-				 want -0x1.f6ccd8ecf7deap+37.   */
+   _ZGVnN2v_tan(0x1.4457047ef78d8p+20) got -0x1.f6ccd8ecf7dedp+37
+				      want -0x1.f6ccd8ecf7deap+37.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 {
   const struct data *dat = ptr_barrier (&data);
@@ -115,9 +115,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 PL_SIG (V, D, 1, tan, -3.1, 3.1)
 PL_TEST_ULP (V_NAME_D1 (tan), 2.99)
 PL_TEST_EXPECT_FENV (V_NAME_D1 (tan), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_D1 (tan), 0, TinyBound, 5000)
-PL_TEST_INTERVAL (V_NAME_D1 (tan), TinyBound, RangeVal, 100000)
-PL_TEST_INTERVAL (V_NAME_D1 (tan), RangeVal, inf, 5000)
-PL_TEST_INTERVAL (V_NAME_D1 (tan), -0, -TinyBound, 5000)
-PL_TEST_INTERVAL (V_NAME_D1 (tan), -TinyBound, -RangeVal, 100000)
-PL_TEST_INTERVAL (V_NAME_D1 (tan), -RangeVal, -inf, 5000)
+PL_TEST_SYM_INTERVAL (V_NAME_D1 (tan), 0, TinyBound, 5000)
+PL_TEST_SYM_INTERVAL (V_NAME_D1 (tan), TinyBound, RangeVal, 100000)
+PL_TEST_SYM_INTERVAL (V_NAME_D1 (tan), RangeVal, inf, 5000)

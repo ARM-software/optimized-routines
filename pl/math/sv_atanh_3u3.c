@@ -52,9 +52,9 @@ svfloat64_t SV_NAME_D1 (atanh) (svfloat64_t x, const svbool_t pg)
 
 PL_SIG (SV, D, 1, atanh, -1.0, 1.0)
 PL_TEST_ULP (SV_NAME_D1 (atanh), 3.32)
-PL_TEST_INTERVAL_C (SV_NAME_D1 (atanh), 0, 0x1p-23, 10000, 0)
-PL_TEST_INTERVAL_C (SV_NAME_D1 (atanh), -0, -0x1p-23, 10000, 0)
-PL_TEST_INTERVAL_C (SV_NAME_D1 (atanh), 0x1p-23, 1, 90000, 0)
-PL_TEST_INTERVAL_C (SV_NAME_D1 (atanh), -0x1p-23, -1, 90000, 0)
-PL_TEST_INTERVAL_C (SV_NAME_D1 (atanh), 1, inf, 100, 0)
-PL_TEST_INTERVAL_C (SV_NAME_D1 (atanh), -1, -inf, 100, 0)
+/* atanh is asymptotic at 1, which is the default control value - have to set
+ -c 0 specially to ensure fp exceptions are triggered correctly (choice of
+ control lane is irrelevant if fp exceptions are disabled).  */
+PL_TEST_SYM_INTERVAL_C (SV_NAME_D1 (atanh), 0, 0x1p-23, 10000, 0)
+PL_TEST_SYM_INTERVAL_C (SV_NAME_D1 (atanh), 0x1p-23, 1, 90000, 0)
+PL_TEST_SYM_INTERVAL_C (SV_NAME_D1 (atanh), 1, inf, 100, 0)

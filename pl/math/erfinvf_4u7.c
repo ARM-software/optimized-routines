@@ -57,7 +57,7 @@ erfinvf (float x)
     {
       /* Greatest error in this region is 3.79 ULP:
 	 erfinvf(0x1.ac82d6p-1) got 0x1.f8fc54p-1
-	 want 0x1.f8fc5cp-1.  */
+			       want 0x1.f8fc5cp-1.  */
       float t = x * x - 0.87890625f;
       return x * horner_3_f32 (t, data.P_29) / horner_3_f32 (t, data.Q_29);
     }
@@ -71,5 +71,4 @@ erfinvf (float x)
 
 PL_SIG (S, F, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (erfinvf, 4.09)
-PL_TEST_INTERVAL (erfinvf, 0, 1, 40000)
-PL_TEST_INTERVAL (erfinvf, -0, -1, 40000)
+PL_TEST_SYM_INTERVAL (erfinvf, 0, 1, 40000)

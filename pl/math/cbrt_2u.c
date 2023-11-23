@@ -66,5 +66,4 @@ cbrt (double x)
 }
 
 PL_TEST_ULP (cbrt, 1.30)
-PL_TEST_INTERVAL (cbrt, 0, inf, 1000000)
-PL_TEST_INTERVAL (cbrt, -0, -inf, 1000000)
+PL_TEST_SYM_INTERVAL (cbrt, 0, inf, 1000000)

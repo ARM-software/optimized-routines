@@ -14,10 +14,12 @@
 #define Ln2hi 0x1.62e42fefa39efp-1
 #define Ln2lo 0x1.abc9e3b39803fp-56
 #define Shift 0x1.8p52
-#define TinyBound                                                              \
-  0x3cc0000000000000 /* 0x1p-51, below which expm1(x) is within 2 ULP of x. */
-#define BigBound 0x1.63108c75a1937p+9  /* Above which expm1(x) overflows.  */
-#define NegBound -0x1.740bf7c0d927dp+9 /* Below which expm1(x) rounds to 1. */
+/* 0x1p-51, below which expm1(x) is within 2 ULP of x.  */
+#define TinyBound 0x3cc0000000000000
+/* Above which expm1(x) overflows.  */
+#define BigBound 0x1.63108c75a1937p+9
+/* Below which expm1(x) rounds to 1.  */
+#define NegBound -0x1.740bf7c0d927dp+9
 #define AbsMask 0x7fffffffffffffff
 
 /* Approximation for exp(x) - 1 using polynomial on a reduced interval.
@@ -76,8 +78,7 @@ expm1 (double x)
 
 PL_SIG (S, D, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (expm1, 1.68)
-PL_TEST_INTERVAL (expm1, 0, 0x1p-51, 1000)
-PL_TEST_INTERVAL (expm1, -0, -0x1p-51, 1000)
+PL_TEST_SYM_INTERVAL (expm1, 0, 0x1p-51, 1000)
 PL_TEST_INTERVAL (expm1, 0x1p-51, 0x1.63108c75a1937p+9, 100000)
 PL_TEST_INTERVAL (expm1, -0x1p-51, -0x1.740bf7c0d927dp+9, 100000)
 PL_TEST_INTERVAL (expm1, 0x1.63108c75a1937p+9, inf, 100)

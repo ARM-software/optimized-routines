@@ -113,5 +113,4 @@ svfloat32_t SV_NAME_F1 (cbrt) (svfloat32_t x, const svbool_t pg)
 
 PL_SIG (SV, F, 1, cbrt, -10.0, 10.0)
 PL_TEST_ULP (SV_NAME_F1 (cbrt), 1.15)
-PL_TEST_INTERVAL (SV_NAME_F1 (cbrt), 0, inf, 1000000)
-PL_TEST_INTERVAL (SV_NAME_F1 (cbrt), -0, -inf, 1000000)
+PL_TEST_SYM_INTERVAL (SV_NAME_F1 (cbrt), 0, inf, 1000000)

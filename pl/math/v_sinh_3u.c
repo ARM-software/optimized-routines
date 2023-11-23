@@ -81,7 +81,7 @@ special_case (float64x2_t x)
    sinh(x) = (exp(x) - exp(-x)) / 2.
    The greatest observed error is 2.57 ULP:
    _ZGVnN2v_sinh (0x1.9fb1d49d1d58bp-2) got 0x1.ab34e59d678dcp-2
-			     want 0x1.ab34e59d678d9p-2.  */
+				       want 0x1.ab34e59d678d9p-2.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -113,9 +113,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 PL_SIG (V, D, 1, sinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME_D1 (sinh), 2.08)
 PL_TEST_EXPECT_FENV (V_NAME_D1 (sinh), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_D1 (sinh), 0, 0x1p-26, 1000)
-PL_TEST_INTERVAL (V_NAME_D1 (sinh), -0, -0x1p-26, 1000)
-PL_TEST_INTERVAL (V_NAME_D1 (sinh), 0x1p-26, 0x1p9, 500000)
-PL_TEST_INTERVAL (V_NAME_D1 (sinh), -0x1p-26, -0x1p9, 500000)
-PL_TEST_INTERVAL (V_NAME_D1 (sinh), 0x1p9, inf, 1000)
-PL_TEST_INTERVAL (V_NAME_D1 (sinh), -0x1p9, -inf, 1000)
+PL_TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0, 0x1p-26, 1000)
+PL_TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0x1p-26, 0x1p9, 500000)
+PL_TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0x1p9, inf, 1000)

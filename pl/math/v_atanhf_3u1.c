@@ -69,9 +69,9 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 PL_SIG (V, F, 1, atanh, -1.0, 1.0)
 PL_TEST_ULP (V_NAME_F1 (atanh), 2.59)
 PL_TEST_EXPECT_FENV (V_NAME_F1 (atanh), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), 0, 0x1p-12, 500, 0)
-PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), 0x1p-12, 1, 200000, 0)
-PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), 1, inf, 1000, 0)
-PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), -0, -0x1p-12, 500, 0)
-PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), -0x1p-12, -1, 200000, 0)
-PL_TEST_INTERVAL_C (V_NAME_F1 (atanh), -1, -inf, 1000, 0)
+/* atanh is asymptotic at 1, which is the default control value - have to set
+ -c 0 specially to ensure fp exceptions are triggered correctly (choice of
+ control lane is irrelevant if fp exceptions are disabled).  */
+PL_TEST_SYM_INTERVAL_C (V_NAME_F1 (atanh), 0, 0x1p-12, 500, 0)
+PL_TEST_SYM_INTERVAL_C (V_NAME_F1 (atanh), 0x1p-12, 1, 200000, 0)
+PL_TEST_SYM_INTERVAL_C (V_NAME_F1 (atanh), 1, inf, 1000, 0)

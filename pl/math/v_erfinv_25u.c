@@ -153,9 +153,9 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
 PL_SIG (V, D, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (V_NAME_D1 (erfinv), 24.8)
 /* Test with control lane in each interval.  */
-#define TEST_INTERVAL(lo, hi, n)                                              \
-  PL_TEST_INTERVAL_C (V_NAME_D1 (erfinv), lo, hi, n, 0.5)                     \
-  PL_TEST_INTERVAL_C (V_NAME_D1 (erfinv), lo, hi, n, 0.8)                     \
-  PL_TEST_INTERVAL_C (V_NAME_D1 (erfinv), lo, hi, n, 0.95)
-TEST_INTERVAL (0, 0x1.fffffffffffffp-1, 100000)
-TEST_INTERVAL (-0, -0x1.fffffffffffffp-1, 100000)
+PL_TEST_SYM_INTERVAL_C (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000,
+			0.5)
+PL_TEST_SYM_INTERVAL_C (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000,
+			0.8)
+PL_TEST_SYM_INTERVAL_C (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000,
+			0.95)

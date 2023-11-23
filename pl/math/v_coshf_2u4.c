@@ -43,7 +43,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cosh) (float32x4_t x)
 #if WANT_SIMD_EXCEPT
   /* If fp exceptions are to be triggered correctly, fall back to the scalar
      variant for all inputs if any input is a special value or above the bound
-     at which expf overflows. */
+     at which expf overflows.  */
   if (unlikely (v_any_u32 (special)))
     return v_call_f32 (coshf, x, x, v_u32 (-1));
 
@@ -73,9 +73,6 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cosh) (float32x4_t x)
 PL_SIG (V, F, 1, cosh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME_F1 (cosh), 1.89)
 PL_TEST_EXPECT_FENV (V_NAME_F1 (cosh), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_F1 (cosh), 0, 0x1p-63, 100)
-PL_TEST_INTERVAL (V_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
-PL_TEST_INTERVAL (V_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)
-PL_TEST_INTERVAL (V_NAME_F1 (cosh), -0, -0x1p-63, 100)
-PL_TEST_INTERVAL (V_NAME_F1 (cosh), -0, -0x1.5a92d8p+6, 80000)
-PL_TEST_INTERVAL (V_NAME_F1 (cosh), -0x1.5a92d8p+6, -inf, 2000)
+PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0x1p-63, 100)
+PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
+PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)
