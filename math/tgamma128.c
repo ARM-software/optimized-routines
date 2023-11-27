@@ -21,6 +21,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+/* Only binary128 format is supported.  */
+#if LDBL_MANT_DIG == 113
+
 #include "tgamma128.h"
 
 #define lenof(x) (sizeof(x)/sizeof(*(x)))
@@ -349,3 +352,5 @@ long double tgamma128(long double x)
         return 1.0L / (g * x * negadjust);
     }
 }
+
+#endif
