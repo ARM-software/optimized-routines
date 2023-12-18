@@ -38,7 +38,7 @@ static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t
    double. This is fine since a round-trip to higher precision and
    back down is correctly rounded.  */
 #define DECL_POW_INT_REF(NAME, DBL_T, FLT_T, INT_T)                            \
-  static DBL_T NAME (DBL_T in_val, DBL_T y)                                    \
+  static DBL_T __attribute__((unused)) NAME (DBL_T in_val, DBL_T y)            \
   {                                                                            \
     INT_T n = (INT_T) round (y);                                               \
     FLT_T acc = 1.0;                                                           \
