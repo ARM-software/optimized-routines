@@ -59,6 +59,8 @@ $(B)/test/mathtest.o: CFLAGS_PL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
+$(B)/sv_%: CFLAGS_PL += $(math-sve-cflags)
+
 build/pl/include/test/ulp_funcs_gen.h: $(math-lib-srcs)
 	# Replace PL_SIG
 	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=_Z##v##t##a(f)" -P > $@
@@ -87,6 +89,8 @@ build/pl/lib/libmathlib.a: $(math-lib-objs)
 
 $(math-host-tools): HOST_LDLIBS += -lm -lmpfr -lmpc
 $(math-tools): LDLIBS += $(math-ldlibs) -lm
+# math-sve-cflags should be empty if WANT_SVE_MATH is not enabled
+$(math-tools): CFLAGS_PL += $(math-sve-cflags)
 
 # Some targets to build pl/math/test from math/test sources
 build/pl/math/test/%.o: $(srcdir)/math/test/%.S
