@@ -1,16 +1,16 @@
 # Makefile fragment - requires GNU make
 #
-# Copyright (c) 2019-2023, Arm Limited.
+# Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 PLM := $(srcdir)/pl/math
 AOR := $(srcdir)/math
 B := build/pl/math
 
-math-lib-srcs := $(wildcard $(PLM)/*.[cS])
+pl-lib-srcs := $(wildcard $(PLM)/*.[cS])
 
 ifeq ($(WANT_SVE_MATH), 0)
-math-lib-srcs := $(filter-out $(PLM)/sv_%, $(math-lib-srcs))
+pl-lib-srcs := $(filter-out $(PLM)/sv_%, $(pl-lib-srcs))
 endif
 
 math-test-srcs := \
@@ -20,10 +20,10 @@ math-test-srcs := \
 
 math-test-host-srcs := $(wildcard $(AOR)/test/rtest/*.[cS])
 
-math-includes := $(patsubst $(PLM)/%,build/pl/%,$(wildcard $(PLM)/include/*.h))
-math-test-includes := $(patsubst $(PLM)/%,build/pl/include/%,$(wildcard $(PLM)/test/*.h))
+pl-includes := $(patsubst $(PLM)/%,build/pl/%,$(wildcard $(PLM)/include/*.h))
+pl-test-includes := $(patsubst $(PLM)/%,build/pl/include/%,$(wildcard $(PLM)/test/*.h))
 
-math-libs := \
+pl-libs := \
 	build/pl/lib/libmathlib.so \
 	build/pl/lib/libmathlib.a \
 
@@ -37,39 +37,39 @@ math-tools := \
 math-host-tools := \
 	build/pl/bin/rtest \
 
-math-lib-objs := $(patsubst $(PLM)/%,$(B)/%.o,$(basename $(math-lib-srcs)))
+pl-lib-objs := $(patsubst $(PLM)/%,$(B)/%.o,$(basename $(pl-lib-srcs)))
 math-test-objs := $(patsubst $(AOR)/%,$(B)/%.o,$(basename $(math-test-srcs)))
 math-host-objs := $(patsubst $(AOR)/%,$(B)/%.o,$(basename $(math-test-host-srcs)))
-math-target-objs := $(math-lib-objs) $(math-test-objs)
-math-objs := $(math-target-objs) $(math-target-objs:%.o=%.os) $(math-host-objs)
+pl-target-objs := $(pl-lib-objs) $(math-test-objs)
+pl-objs := $(pl-target-objs) $(pl-target-objs:%.o=%.os) $(math-host-objs)
 
 pl/math-files := \
-	$(math-objs) \
-	$(math-libs) \
+	$(pl-objs) \
+	$(pl-libs) \
 	$(math-tools) \
 	$(math-host-tools) \
-	$(math-includes) \
-	$(math-test-includes) \
+	$(pl-includes) \
+	$(pl-test-includes) \
 
-all-pl/math: $(math-libs) $(math-tools) $(math-includes) $(math-test-includes)
+all-pl/math: $(pl-libs) $(math-tools) $(pl-includes) $(pl-test-includes)
 
-$(math-objs): $(math-includes) $(math-test-includes)
-$(math-objs): CFLAGS_PL += $(math-cflags)
+$(pl-objs): $(pl-includes) $(pl-test-includes)
+$(pl-objs): CFLAGS_PL += $(math-cflags)
 $(B)/test/mathtest.o: CFLAGS_PL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
 $(B)/sv_%: CFLAGS_PL += $(math-sve-cflags)
 
-build/pl/include/test/ulp_funcs_gen.h: $(math-lib-srcs)
+build/pl/include/test/ulp_funcs_gen.h: $(pl-lib-srcs)
 	# Replace PL_SIG
 	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=_Z##v##t##a(f)" -P > $@
 
-build/pl/include/test/mathbench_funcs_gen.h: $(math-lib-srcs)
+build/pl/include/test/mathbench_funcs_gen.h: $(pl-lib-srcs)
 	# Replace PL_SIG macros with mathbench func entries
 	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=_Z##v##t##a(f, ##__VA_ARGS__)" -P > $@
 
-build/pl/include/test/ulp_wrappers_gen.h: $(math-lib-srcs)
+build/pl/include/test/ulp_wrappers_gen.h: $(pl-lib-srcs)
 	# Replace PL_SIG macros with ULP wrapper declarations
 	cat $^ | grep PL_SIG | $(CC) -xc - -o - -E "-DPL_SIG(v, t, a, f, ...)=Z##v##N##t##a##_WRAP(f)" -P > $@
 
@@ -79,10 +79,10 @@ $(B)/test/ulp.o: CFLAGS_PL += -I build/pl/include/test
 $(B)/test/mathbench.o: build/pl/include/test/mathbench_funcs_gen.h
 $(B)/test/mathbench.o: CFLAGS_PL += -I build/pl/include/test
 
-build/pl/lib/libmathlib.so: $(math-lib-objs:%.o=%.os)
+build/pl/lib/libmathlib.so: $(pl-lib-objs:%.o=%.os)
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -shared -o $@ $^
 
-build/pl/lib/libmathlib.a: $(math-lib-objs)
+build/pl/lib/libmathlib.a: $(pl-lib-objs)
 	rm -f $@
 	$(AR) rc $@ $^
 	$(RANLIB) $@
@@ -154,9 +154,9 @@ check-pl/math-rtest: $(math-host-tools) $(math-tools)
 
 ulp-input-dir=$(B)/test/inputs
 
-math-lib-lims = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.ulp,$(basename $(math-lib-srcs)))
-math-lib-fenvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.fenv,$(basename $(math-lib-srcs)))
-math-lib-itvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.itv,$(basename $(math-lib-srcs)))
+math-lib-lims = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.ulp,$(basename $(pl-lib-srcs)))
+math-lib-fenvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.fenv,$(basename $(pl-lib-srcs)))
+math-lib-itvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.itv,$(basename $(pl-lib-srcs)))
 
 ulp-inputs = $(math-lib-lims) $(math-lib-fenvs) $(math-lib-itvs)
 
@@ -207,8 +207,8 @@ $(DESTDIR)$(includedir)/pl/%: build/pl/include/%
 	$(INSTALL) -m 644 -D $< $@
 
 install-pl/math: \
- $(math-libs:build/pl/lib/%=$(DESTDIR)$(libdir)/pl/%) \
- $(math-includes:build/pl/include/%=$(DESTDIR)$(includedir)/pl/%)
+ $(pl-libs:build/pl/lib/%=$(DESTDIR)$(libdir)/pl/%) \
+ $(pl-includes:build/pl/include/%=$(DESTDIR)$(includedir)/pl/%)
 
 clean-pl/math:
 	rm -f $(pl/math-files)
