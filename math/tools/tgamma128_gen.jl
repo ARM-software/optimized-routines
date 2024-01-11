@@ -3,7 +3,7 @@
 # Generate tgamma128.h, containing polynomials and constants used by
 # tgamma128.c.
 #
-# Copyright (c) 2006,2009,2023 Arm Limited.
+# Copyright (c) 2006-2023, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 # This Julia program depends on the 'Remez' and 'SpecialFunctions'
