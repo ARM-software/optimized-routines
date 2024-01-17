@@ -1,7 +1,7 @@
 /*
  * Single-precision inverse error function (AdvSIMD variant).
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
@@ -30,8 +30,8 @@ const static struct data
   uint8x16_t idxhi, idxlo;
   struct v_logf_data logf_tbl;
 } data = {
-  .idxlo = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
-  .idxhi = { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23 },
+  .idxlo = { 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3 },
+  .idxhi = { 8, 9, 10, 11, 8, 9, 10, 11, 8, 9, 10, 11, 8, 9, 10, 11 },
   .P29_3 = V4 (0x1.b13626p-2),
   .tailshift = V4 (-0.87890625),
   .Plo = { -0x1.a31268p+3, -0x1.fc0252p-4, 0x1.ac9048p+4, 0x1.119d44p+0 },

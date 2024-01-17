@@ -1,7 +1,7 @@
 /*
  * Double-precision inverse error function (AdvSIMD variant).
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
@@ -58,7 +58,7 @@ const static struct data
 		     V2 (0x1.a450d8e7f4cbbp+7), V2 (-0x1.bc3480485857p+7),
 		     V2 (0x1.ae6b0c504ee02p+6), V2 (-0x1.499dfec1a7f5fp+4) },
 	   .tailshift = V2 (-0.87890625),
-	   .idx = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
+	   .idx = { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7 },
 	   .log_tbl = V_LOG_CONSTANTS };
 
 static inline float64x2_t
