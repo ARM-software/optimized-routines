@@ -1,7 +1,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2015-2023, Arm Limited.
+ * Copyright (c) 2015-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -165,6 +165,8 @@ svfloat32_t _ZGVsMxv_erff (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_erf (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_erfc (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_erfcf (svfloat32_t, svbool_t);
+svfloat32_t _ZGVsMxv_erfinvf (svfloat32_t, svbool_t);
+svfloat64_t _ZGVsMxv_erfinv (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_expf (svfloat32_t, svbool_t);
 svfloat64_t _ZGVsMxv_exp (svfloat64_t, svbool_t);
 svfloat32_t _ZGVsMxv_exp10f (svfloat32_t, svbool_t);
