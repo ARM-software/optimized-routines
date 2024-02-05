@@ -1,9 +1,11 @@
 /*
  * Double-precision vector log(x) function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#include <endian.h>
 
 #include "mathlib.h"
 #include "v_math.h"
@@ -47,8 +49,13 @@ lookup (uint64x2_t i)
   uint64_t i1 = (i[1] >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
   float64x2_t e0 = vld1q_f64 (&__v_log_data.table[i0].invc);
   float64x2_t e1 = vld1q_f64 (&__v_log_data.table[i1].invc);
+#if __BYTE_ORDER == __LITTLE_ENDIAN
   e.invc = vuzp1q_f64 (e0, e1);
   e.logc = vuzp2q_f64 (e0, e1);
+#else
+  e.invc = vuzp1q_f64 (e1, e0);
+  e.logc = vuzp2q_f64 (e1, e0);
+#endif
   return e;
 }
 
