@@ -1,7 +1,7 @@
 /*
  * Function entries for mathbench.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 /* clang-format off */
@@ -55,8 +55,10 @@ VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
 VNF (_ZGVnN4v_exp2f, -9.9, 9.9)
 VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
 VNF (_ZGVnN4v_logf, 0.01, 11.1)
-{"_ZGVnN4vv_powf", 'f', 'n', 0.01, 11.1, {.vnf = xy_Z_powf}},
+{"_ZGVnN4vv_powf",  'f', 'n',   0.01, 11.1, {.vnf = xy_Z_powf}},
+{"x_ZGVnN4vv_powf", 'f', 'n',   0.01, 11.1, {.vnf = x_Z_powf}},
+{"y_ZGVnN4vv_powf", 'f', 'n', -10.0,  10.0, {.vnf = y_Z_powf}},
 VNF (_ZGVnN4v_sinf, -3.1, 3.1)
 VNF (_ZGVnN4v_cosf, -3.1, 3.1)
 #endif
-  /* clang-format on */
+    /* clang-format on */

@@ -1,9 +1,11 @@
 /*
  * Single-precision vector powf function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#include <endian.h>
 
 #include "v_math.h"
 
@@ -12,26 +14,26 @@
 #define Thresh v_u32 (0x7f000000) /* Max - Min.  */
 #define MantissaMask v_u32 (0x007fffff)
 
-#define A data.log2_poly
-#define C data.exp2f_poly
+#define A d->log2_poly
+#define C d->exp2f_poly
 
 /* 2.6 ulp ~ 0.5 + 2^24 (128*Ln2*relerr_log2 + relerr_exp2).  */
 #define Off v_u32 (0x3f35d000)
 
 #define V_POWF_LOG2_TABLE_BITS 5
 #define V_EXP2F_TABLE_BITS 5
-#define Log2IdxMask v_u32 ((1 << V_POWF_LOG2_TABLE_BITS) - 1)
+#define Log2IdxMask ((1 << V_POWF_LOG2_TABLE_BITS) - 1)
 #define Scale ((double) (1 << V_EXP2F_TABLE_BITS))
 
-static const struct
+static const struct data
 {
   struct
   {
     double invc, logc;
   } log2_tab[1 << V_POWF_LOG2_TABLE_BITS];
-  double log2_poly[4];
+  float64x2_t log2_poly[4];
   uint64_t exp2f_tab[1 << V_EXP2F_TABLE_BITS];
-  double exp2f_poly[3];
+  float64x2_t exp2f_poly[3];
 } data = {
   .log2_tab = {{0x1.6489890582816p+0, -0x1.e960f97b22702p-2 * Scale},
 	       {0x1.5cf19b35e3472p+0, -0x1.c993406cd4db6p-2 * Scale},
@@ -66,8 +68,10 @@ static const struct
 	       {0x1.74c2c1cf97b65p-1, 0x1.d4e21b0daa86ap-2 * Scale},
 	       {0x1.6c77f37cff2a1p-1, 0x1.f61e2a2f67f3fp-2 * Scale},},
   .log2_poly = { /* rel err: 1.5 * 2^-30.  */
-		-0x1.6ff5daa3b3d7cp-2 * Scale, 0x1.ec81d03c01aebp-2 * Scale,
-		-0x1.71547bb43f101p-1 * Scale, 0x1.7154764a815cbp0 * Scale,},
+		 V2 (-0x1.6ff5daa3b3d7cp-2 * Scale),
+		 V2 (0x1.ec81d03c01aebp-2 * Scale),
+		 V2 (-0x1.71547bb43f101p-1 * Scale),
+		 V2 (0x1.7154764a815cbp0 * Scale)},
   .exp2f_tab = {0x3ff0000000000000, 0x3fefd9b0d3158574, 0x3fefb5586cf9890f,
 		0x3fef9301d0125b51, 0x3fef72b83c7d517b, 0x3fef54873168b9aa,
 		0x3fef387a6e756238, 0x3fef1e9df51fdee1, 0x3fef06fe0a31b715,
@@ -80,9 +84,9 @@ static const struct
 		0x3fef3720dcef9069, 0x3fef5818dcfba487, 0x3fef7c97337b9b5f,
 		0x3fefa4afa2a490da, 0x3fefd0765b6e4540,},
   .exp2f_poly = { /* rel err: 1.69 * 2^-34.  */
-		 0x1.c6af84b912394p-5 / Scale / Scale / Scale,
-		 0x1.ebfce50fac4f3p-3 / Scale / Scale,
-		 0x1.62e42ff0c52d6p-1 / Scale}};
+		  V2 (0x1.c6af84b912394p-5 / Scale / Scale / Scale),
+		  V2 (0x1.ebfce50fac4f3p-3 / Scale / Scale),
+		  V2 (0x1.62e42ff0c52d6p-1 / Scale)}};
 
 static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t x, float32x4_t y, float32x4_t ret, uint32x4_t cmp)
@@ -90,59 +94,109 @@ special_case (float32x4_t x, float32x4_t y, float32x4_t ret, uint32x4_t cmp)
   return v_call2_f32 (powf, x, y, ret, cmp);
 }
 
+static inline float64x2_t
+ylogx_core (const struct data *d, float64x2_t iz, float64x2_t k,
+	    float64x2_t invc, float64x2_t logc, float64x2_t y)
+{
+
+  /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k.  */
+  float64x2_t r = vfmaq_f64 (v_f64 (-1.0), iz, invc);
+  float64x2_t y0 = vaddq_f64 (logc, k);
+
+  /* Polynomial to approximate log1p(r)/ln2.  */
+  float64x2_t logx = vfmaq_f64 (A[1], r, A[0]);
+  logx = vfmaq_f64 (A[2], logx, r);
+  logx = vfmaq_f64 (A[3], logx, r);
+  logx = vfmaq_f64 (y0, logx, r);
+
+  return vmulq_f64 (logx, y);
+}
+
+static inline float64x2_t
+log2_lookup (const struct data *d, uint32_t i)
+{
+  return vld1q_f64 (
+      &d->log2_tab[(i >> (23 - V_POWF_LOG2_TABLE_BITS)) & Log2IdxMask].invc);
+}
+
+static inline uint64_t
+exp2f_lookup (const struct data *d, uint64_t i)
+{
+  return d->exp2f_tab[i % (1 << V_EXP2F_TABLE_BITS)];
+}
+
+static inline float32x2_t
+powf_core (const struct data *d, float64x2_t ylogx)
+{
+  /* N*x = k + r with r in [-1/2, 1/2].  */
+  float64x2_t kd = vrndnq_f64 (ylogx);
+  int64x2_t ki = vcvtaq_s64_f64 (ylogx);
+  float64x2_t r = vsubq_f64 (ylogx, kd);
+
+  /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
+  uint64x2_t t
+      = (uint64x2_t){ exp2f_lookup (d, ki[0]), exp2f_lookup (d, ki[1]) };
+  t = vaddq_u64 (
+      t, vreinterpretq_u64_s64 (vshlq_n_s64 (ki, 52 - V_EXP2F_TABLE_BITS)));
+  float64x2_t s = vreinterpretq_f64_u64 (t);
+  float64x2_t p = vfmaq_f64 (C[1], r, C[0]);
+  p = vfmaq_f64 (C[2], r, p);
+  p = vfmaq_f64 (s, p, vmulq_f64 (s, r));
+  return vcvt_f32_f64 (p);
+}
+
 float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
 {
+  const struct data *d = ptr_barrier (&data);
   uint32x4_t u = vreinterpretq_u32_f32 (x);
   uint32x4_t cmp = vcgeq_u32 (vsubq_u32 (u, Min), Thresh);
   uint32x4_t tmp = vsubq_u32 (u, Off);
-  uint32x4_t i = vandq_u32 (vshrq_n_u32 (tmp, (23 - V_POWF_LOG2_TABLE_BITS)),
-			    Log2IdxMask);
   uint32x4_t top = vbicq_u32 (tmp, MantissaMask);
-  uint32x4_t iz = vsubq_u32 (u, top);
+  float32x4_t iz = vreinterpretq_f32_u32 (vsubq_u32 (u, top));
   int32x4_t k = vshrq_n_s32 (vreinterpretq_s32_u32 (top),
 			     23 - V_EXP2F_TABLE_BITS); /* arithmetic shift.  */
 
-  float32x4_t ret;
-  for (int lane = 0; lane < 4; lane++)
-    {
-      /* Use double precision for each lane.  */
-      double invc = data.log2_tab[i[lane]].invc;
-      double logc = data.log2_tab[i[lane]].logc;
-      double z = (double) asfloat (iz[lane]);
+  /* Use double precision for each lane: split input vectors into lo and hi
+     halves and promote.  */
+  float64x2_t tab0 = log2_lookup (d, tmp[0]), tab1 = log2_lookup (d, tmp[1]),
+	      tab2 = log2_lookup (d, tmp[2]), tab3 = log2_lookup (d, tmp[3]);
 
-      /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k.  */
-      double r = __builtin_fma (z, invc, -1.0);
-      double y0 = logc + (double) k[lane];
+  float64x2_t iz_lo = vcvt_f64_f32 (vget_low_f32 (iz)),
+	      iz_hi = vcvt_high_f64_f32 (iz);
 
-      /* Polynomial to approximate log1p(r)/ln2.  */
-      double logx = A[0];
-      logx = r * logx + A[1];
-      logx = r * logx + A[2];
-      logx = r * logx + A[3];
-      logx = r * logx + y0;
-      double ylogx = y[lane] * logx;
-      cmp[lane] = (asuint64 (ylogx) >> 47 & 0xffff)
-			  >= asuint64 (126.0 * (1 << V_EXP2F_TABLE_BITS)) >> 47
-		      ? 1
-		      : cmp[lane];
+  float64x2_t k_lo = vcvtq_f64_s64 (vmovl_s32 (vget_low_s32 (k))),
+	      k_hi = vcvtq_f64_s64 (vmovl_high_s32 (k));
 
-      /* N*x = k + r with r in [-1/2, 1/2].  */
-      double kd = round (ylogx);
-      uint64_t ki = lround (ylogx);
-      r = ylogx - kd;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+  float64x2_t invc_lo = vzip1q_f64 (tab0, tab1),
+	      invc_hi = vzip1q_f64 (tab2, tab3),
+	      logc_lo = vzip2q_f64 (tab0, tab1),
+	      logc_hi = vzip2q_f64 (tab2, tab3);
+#else
+  float64x2_t invc_lo = vzip1q_f64 (tab1, tab0),
+	      invc_hi = vzip1q_f64 (tab3, tab2),
+	      logc_lo = vzip2q_f64 (tab1, tab0),
+	      logc_hi = vzip2q_f64 (tab3, tab2);
+#endif
 
-      /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
-      uint64_t t = data.exp2f_tab[ki % (1 << V_EXP2F_TABLE_BITS)];
-      t += ki << (52 - V_EXP2F_TABLE_BITS);
-      double s = asdouble (t);
-      double p = C[0];
-      p = __builtin_fma (p, r, C[1]);
-      p = __builtin_fma (p, r, C[2]);
-      p = __builtin_fma (p, s * r, s);
+  float64x2_t y_lo = vcvt_f64_f32 (vget_low_f32 (y)),
+	      y_hi = vcvt_high_f64_f32 (y);
 
-      ret[lane] = p;
-    }
+  float64x2_t ylogx_lo = ylogx_core (d, iz_lo, k_lo, invc_lo, logc_lo, y_lo);
+  float64x2_t ylogx_hi = ylogx_core (d, iz_hi, k_hi, invc_hi, logc_hi, y_hi);
+
+  uint32x4_t ylogx_top = vuzp2q_u32 (vreinterpretq_u32_f64 (ylogx_lo),
+				     vreinterpretq_u32_f64 (ylogx_hi));
+
+  cmp = vorrq_u32 (
+      cmp, vcgeq_u32 (vandq_u32 (vshrq_n_u32 (ylogx_top, 15), v_u32 (0xffff)),
+		      vdupq_n_u32 (asuint64 (126.0 * (1 << V_EXP2F_TABLE_BITS))
+				   >> 47)));
+
+  float32x2_t p_lo = powf_core (d, ylogx_lo);
+  float32x2_t p_hi = powf_core (d, ylogx_hi);
+
   if (unlikely (v_any_u32 (cmp)))
-    return special_case (x, y, ret, cmp);
-  return ret;
+    return special_case (x, y, vcombine_f32 (p_lo, p_hi), cmp);
+  return vcombine_f32 (p_lo, p_hi);
 }

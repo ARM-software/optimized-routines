@@ -1,7 +1,7 @@
 /*
  * Function wrappers for mathbench.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,6 +11,18 @@ __vpcs static v_float
 xy_Z_powf (v_float x)
 {
   return _ZGVnN4vv_powf (x, x);
+}
+
+__vpcs static v_float
+x_Z_powf (v_float x)
+{
+  return _ZGVnN4vv_powf (x, v_float_dup (23.4));
+}
+
+__vpcs static v_float
+y_Z_powf (v_float x)
+{
+  return _ZGVnN4vv_powf (v_float_dup (2.34), x);
 }
 
 __vpcs static v_double
