@@ -1,7 +1,7 @@
 /*
  * Double-precision vector 2^x function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -14,6 +14,7 @@
 #define IndexMask (N - 1)
 #define BigBound 1022.0
 #define UOFlowBound 1280.0
+#define TinyBound 0x2000000000000000 /* asuint64(0x1p-511).  */
 
 static const struct data
 {
@@ -38,7 +39,6 @@ lookup_sbits (uint64x2_t i)
 
 #if WANT_SIMD_EXCEPT
 
-# define TinyBound 0x2000000000000000 /* asuint64(0x1p-511).  */
 # define Thres 0x2080000000000000     /* asuint64(512.0) - TinyBound.  */
 
 /* Call scalar exp2 as a fallback.  */

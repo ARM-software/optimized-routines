@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE 2^x function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,6 +9,8 @@
 #include "poly_sve_f32.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+
+#define Thres 0x1.5d5e2ap+6f
 
 static const struct data
 {
@@ -23,7 +25,7 @@ static const struct data
   .shift = 0x1.903f8p17f,
   /* Roughly 87.3. For x < -Thres, the result is subnormal and not handled
      correctly by FEXPA.  */
-  .thres = 0x1.5d5e2ap+6f,
+  .thres = Thres,
 };
 
 static svfloat32_t NOINLINE
@@ -67,14 +69,9 @@ svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
 PL_SIG (SV, F, 1, exp2, -9.9, 9.9)
 PL_TEST_ULP (SV_NAME_F1 (exp2), 0.55)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), 0, Thres, 40000)
-PL_TEST_INTERVAL (SV_NAME_F1 (exp2), Thres, 1, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), 1, Thres, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), Thres, inf, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0, -0x1p-23, 40000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0x1p-23, -1, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -1, -0x1p23, 50000)
 PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0x1p23, -inf, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -0, ScaleThres, 40000)
-PL_TEST_INTERVAL (SV_NAME_F1 (exp2), ScaleThres, -1, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (exp2), -1, ScaleThres, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (exp2), ScaleThres, -inf, 50000)

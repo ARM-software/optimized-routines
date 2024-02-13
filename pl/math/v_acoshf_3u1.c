@@ -1,6 +1,6 @@
 /*
  * Single-precision vector acosh(x) function.
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -8,6 +8,8 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 #include "v_log1pf_inline.h"
+
+#define SquareLim 0x1p64
 
 const static struct data
 {
@@ -17,10 +19,8 @@ const static struct data
 } data = {
   .log1pf_consts = V_LOG1PF_CONSTANTS_TABLE,
   .one = V4 (0x3f800000),
-  .thresh = V4 (0x2000) /* asuint(0x1p64) - asuint(1).  */
+  .thresh = V4 (0x2000) /* top(asuint(SquareLim) - asuint(1)).  */
 };
-
-#define SignMask 0x80000000
 
 static float32x4_t NOINLINE VPCS_ATTR
 special_case (float32x4_t x, float32x4_t y, uint16x4_t special,

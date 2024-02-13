@@ -1,7 +1,7 @@
 /*
  * Single-precision acos(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,14 +10,14 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define AbsMask (0x7fffffff)
-#define Half (0x3f000000)
-#define One (0x3f800000)
-#define PiOver2f (0x1.921fb6p+0f)
-#define Pif (0x1.921fb6p+1f)
-#define Small (0x32800000) /* 2^-26.  */
-#define Small12 (0x328)
-#define QNaN (0x7fc)
+#define AbsMask 0x7fffffff
+#define Half 0x3f000000
+#define One 0x3f800000
+#define PiOver2f 0x1.921fb6p+0f
+#define Pif 0x1.921fb6p+1f
+#define Small 0x32800000 /* 2^-26.  */
+#define Small12 0x328
+#define QNaN 0x7fc
 
 /* Fast implementation of single-precision acos(x) based on polynomial
    approximation of single-precision asin(x).

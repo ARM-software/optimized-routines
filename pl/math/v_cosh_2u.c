@@ -1,7 +1,7 @@
 /*
  * Double-precision vector cosh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -99,6 +99,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cosh) (float64x2_t x)
 
 PL_SIG (V, D, 1, cosh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME_D1 (cosh), 1.43)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (cosh))
+PL_TEST_EXPECT_FENV (V_NAME_D1 (cosh), WANT_SIMD_EXCEPT)
 PL_TEST_SYM_INTERVAL (V_NAME_D1 (cosh), 0, 0x1.6p9, 100000)
 PL_TEST_SYM_INTERVAL (V_NAME_D1 (cosh), 0x1.6p9, inf, 1000)

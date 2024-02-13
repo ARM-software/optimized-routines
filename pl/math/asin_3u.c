@@ -1,7 +1,7 @@
 /*
  * Double-precision asin(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,13 +10,13 @@
 #include "pl_sig.h"
 #include "pl_test.h"
 
-#define AbsMask (0x7fffffffffffffff)
-#define Half (0x3fe0000000000000)
-#define One (0x3ff0000000000000)
-#define PiOver2 (0x1.921fb54442d18p+0)
-#define Small (0x3e50000000000000) /* 2^-26.  */
-#define Small16 (0x3e50)
-#define QNaN (0x7ff8)
+#define AbsMask 0x7fffffffffffffff
+#define Half 0x3fe0000000000000
+#define One 0x3ff0000000000000
+#define PiOver2 0x1.921fb54442d18p+0
+#define Small 0x3e50000000000000 /* 2^-26.  */
+#define Small16 0x3e50
+#define QNaN 0x7ff8
 
 /* Fast implementation of double-precision asin(x) based on polynomial
    approximation.
