@@ -1,7 +1,7 @@
 /*
  * ULP error checking tool for math functions.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -633,9 +633,21 @@ getnum (const char *s, int singleprec)
       sign = singleprec ? 1ULL << 31 : 1ULL << 63;
       s++;
     }
+
+  /* Sentinel value for failed parse.  */
+  char *should_not_be_s = NULL;
+
   /* 0xXXXX is treated as bit representation, '-' flips the sign bit.  */
   if (s[0] == '0' && tolower (s[1]) == 'x' && strchr (s, 'p') == 0)
-    return sign ^ strtoull (s, 0, 0);
+    {
+      uint64_t out = sign ^ strtoull (s, &should_not_be_s, 0);
+      if (should_not_be_s == s)
+	{
+	  printf ("ERROR: Could not parse '%s'\n", s);
+	  exit (1);
+	}
+      return out;
+    }
   //	/* SNaN, QNaN, NaN, Inf.  */
   //	for (i=0; s[i] && i < sizeof buf; i++)
   //		buf[i] = tolower(s[i]);
@@ -647,8 +659,16 @@ getnum (const char *s, int singleprec)
   //	if (strcmp(buf, "inf") == 0 || strcmp(buf, "infinity") == 0)
   //		return sign | (singleprec ? 0x7f800000 : 0x7ff0000000000000);
   /* Otherwise assume it's a floating-point literal.  */
-  return sign
-	 | (singleprec ? asuint (strtof (s, 0)) : asuint64 (strtod (s, 0)));
+  uint64_t out = sign
+		 | (singleprec ? asuint (strtof (s, &should_not_be_s))
+			       : asuint64 (strtod (s, &should_not_be_s)));
+  if (should_not_be_s == s)
+    {
+      printf ("ERROR: Could not parse '%s'\n", s);
+      exit (1);
+    }
+
+  return out;
 }
 
 static void
