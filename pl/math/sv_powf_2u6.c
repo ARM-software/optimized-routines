@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE powf function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -51,21 +51,21 @@ static const struct data
 
 /* Check if x is an integer.  */
 static inline svbool_t
-svisint (svbool_t pg, svfloat32_t x)
+svisint (svbool_t pg, svfloat32_t x) SC_ATTR
 {
   return svcmpeq (pg, svrintz_z (pg, x), x);
 }
 
 /* Check if x is real not integer valued.  */
 static inline svbool_t
-svisnotint (svbool_t pg, svfloat32_t x)
+svisnotint (svbool_t pg, svfloat32_t x) SC_ATTR
 {
   return svcmpne (pg, svrintz_z (pg, x), x);
 }
 
 /* Check if x is an odd integer.  */
 static inline svbool_t
-svisodd (svbool_t pg, svfloat32_t x)
+svisodd (svbool_t pg, svfloat32_t x) SC_ATTR
 {
   svfloat32_t y = svmul_x (pg, x, 0.5f);
   return svisnotint (pg, y);
@@ -73,7 +73,7 @@ svisodd (svbool_t pg, svfloat32_t x)
 
 /* Check if zero, inf or nan.  */
 static inline svbool_t
-sv_zeroinfnan (svbool_t pg, svuint32_t i)
+sv_zeroinfnan (svbool_t pg, svuint32_t i) SC_ATTR
 {
   return svcmpge (pg, svsub_x (pg, svmul_x (pg, i, 2u), 1),
 		  2u * 0x7f800000 - 1);
@@ -82,7 +82,7 @@ sv_zeroinfnan (svbool_t pg, svuint32_t i)
 /* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
    the bit representation of a non-zero finite floating-point value.  */
 static inline int
-checkint (uint32_t iy)
+checkint (uint32_t iy) SC_ATTR
 {
   int e = iy >> 23 & 0xff;
   if (e < 0x7f)
@@ -98,7 +98,7 @@ checkint (uint32_t iy)
 
 /* Check if zero, inf or nan.  */
 static inline int
-zeroinfnan (uint32_t ix)
+zeroinfnan (uint32_t ix) SC_ATTR
 {
   return 2 * ix - 1 >= 2u * 0x7f800000 - 1;
 }
@@ -107,7 +107,7 @@ zeroinfnan (uint32_t ix)
    preamble of finite_powf except that we do not update ix and sign_bias. This
    is done in the preamble of the SVE powf.  */
 static inline float
-powf_specialcase (float x, float y, float z)
+powf_specialcase (float x, float y, float z) SC_ATTR
 {
   uint32_t ix = asuint (x);
   uint32_t iy = asuint (y);
@@ -140,7 +140,8 @@ powf_specialcase (float x, float y, float z)
 
 /* Scalar fallback for special case routines with custom signature.  */
 static inline svfloat32_t
-sv_call_powf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
+sv_call_powf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y,
+		 svbool_t cmp) SC_ATTR
 {
   svbool_t p = svpfirst (cmp, svpfalse ());
   while (svptest_any (cmp, p))
@@ -160,10 +161,15 @@ sv_call_powf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
 static inline svfloat64_t
 sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
 		  svfloat64_t y, svuint64_t sign_bias, svfloat64_t *pylogx,
-		  const struct data *d)
+		  const struct data *d) SC_ATTR
 {
+#if ENABLE_SC_COMPAT
+  svfloat64_t invc = sc_lookup_f64 (i, Tinvc);
+  svfloat64_t logc = sc_lookup_f64 (i, Tlogc);
+#else
   svfloat64_t invc = svld1_gather_index (pg, Tinvc, i);
   svfloat64_t logc = svld1_gather_index (pg, Tlogc, i);
+#endif
 
   /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k.  */
   svfloat64_t r = svmla_x (pg, sv_f64 (-1.0), z, invc);
@@ -185,8 +191,12 @@ sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
   r = svsub_x (pg, *pylogx, kd);
 
   /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
+#if ENABLE_SC_COMPAT
+  svuint64_t t = sc_lookup_u64 (svand_z (pg, ki, V_POWF_EXP2_N - 1), Texp);
+#else
   svuint64_t t
       = svld1_gather_index (pg, Texp, svand_x (pg, ki, V_POWF_EXP2_N - 1));
+#endif
   svuint64_t ski = svadd_x (pg, ki, sign_bias);
   t = svadd_x (pg, t, svlsl_x (pg, ski, 52 - V_POWF_EXP2_TABLE_BITS));
   svfloat64_t s = svreinterpret_f64 (t);
@@ -204,7 +214,7 @@ sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
 static inline svfloat32_t
 sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
 	      svfloat32_t y, svuint32_t sign_bias, svfloat32_t *pylogx,
-	      const struct data *d)
+	      const struct data *d) SC_ATTR
 {
   const svbool_t ptrue = svptrue_b64 ();
 
@@ -250,7 +260,8 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
    Maximum measured error is 2.56 ULPs:
    SV_NAME_F2 (pow) (0x1.004118p+0, 0x1.5d14a4p+16) got 0x1.fd4bp+127
 						   want 0x1.fd4b06p+127.  */
-svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
+svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y,
+			      const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -294,7 +305,7 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
     }
   /* Part of core computation carried in working precision.  */
   svuint32_t tmp = svsub_x (pg, vix, d->off);
-  svuint32_t i = svand_x (pg, svlsr_x (pg, tmp, (23 - V_POWF_LOG2_TABLE_BITS)),
+  svuint32_t i = svand_z (pg, svlsr_x (pg, tmp, (23 - V_POWF_LOG2_TABLE_BITS)),
 			  V_POWF_LOG2_N - 1);
   svuint32_t top = svand_x (pg, tmp, 0xff800000);
   svuint32_t iz = svsub_x (pg, vix, top);

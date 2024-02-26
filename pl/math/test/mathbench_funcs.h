@@ -99,6 +99,12 @@
 {"_ZGVsMxvl8l8_sc_sincos", 'd', 'c', -3.1, 3.1, {.scd = _Z_sc_sincos_wrap}},
 {"_ZGVsMxv_sc_cexpif", 'f', 'c', -3.1, 3.1, {.scf = _Z_sc_cexpif_wrap}},
 {"_ZGVsMxv_sc_cexpi", 'd', 'c', -3.1, 3.1, {.scd = _Z_sc_cexpi_wrap}},
+{"_ZGVsMxvv_sc_powf",   'f', 'c', -10.0, 10.0, {.scf = xy_Z_sc_powf}},
+{"x_ZGVsMxvv_sc_powf",  'f', 'c', -10.0, 10.0, {.scf = x_Z_sc_powf}},
+{"y_ZGVsMxvv_sc_powf",  'f', 'c', -10.0, 10.0, {.scf = y_Z_sc_powf}},
+{"_ZGVsMxvv_sc_pow",    'd', 'c', -10.0, 10.0, {.scd = xy_Z_sc_pow}},
+{"x_ZGVsMxvv_sc_pow",   'd', 'c', -10.0, 10.0, {.scd = x_Z_sc_pow}},
+{"y_ZGVsMxvv_sc_pow",   'd', 'c', -10.0, 10.0, {.scd = y_Z_sc_pow}},
 #endif
 #endif
     // clang-format on

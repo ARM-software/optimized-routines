@@ -259,6 +259,42 @@ _Z_sc_cexpif_wrap (sv_float x, sv_bool pg) __arm_streaming_compatible
   return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
 
+static sv_float
+xy_Z_sc_powf (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_powf (x, x, pg);
+}
+
+static sv_float
+x_Z_sc_powf (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_powf (x, svdup_f32 (23.4f), pg);
+}
+
+static sv_float
+y_Z_sc_powf (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_powf (svdup_f32 (2.34f), x, pg);
+}
+
+static sv_double
+xy_Z_sc_pow (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_pow (x, x, pg);
+}
+
+static sv_double
+x_Z_sc_pow (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_pow (x, svdup_f64 (23.4), pg);
+}
+
+static sv_double
+y_Z_sc_pow (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_pow (svdup_f64 (2.34), x, pg);
+}
+
 #endif // WANT_SME_MATH
 
 #endif // WANT_SVE_MATH

@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE pow(x, y) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -55,21 +55,21 @@
 
 /* Check if x is an integer.  */
 static inline svbool_t
-sv_isint (svbool_t pg, svfloat64_t x)
+sv_isint (svbool_t pg, svfloat64_t x) SC_ATTR
 {
   return svcmpeq (pg, svrintz_z (pg, x), x);
 }
 
 /* Check if x is real not integer valued.  */
 static inline svbool_t
-sv_isnotint (svbool_t pg, svfloat64_t x)
+sv_isnotint (svbool_t pg, svfloat64_t x) SC_ATTR
 {
   return svcmpne (pg, svrintz_z (pg, x), x);
 }
 
 /* Check if x is an odd integer.  */
 static inline svbool_t
-sv_isodd (svbool_t pg, svfloat64_t x)
+sv_isodd (svbool_t pg, svfloat64_t x) SC_ATTR
 {
   svfloat64_t y = svmul_x (pg, x, 0.5);
   return sv_isnotint (pg, y);
@@ -78,7 +78,7 @@ sv_isodd (svbool_t pg, svfloat64_t x)
 /* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
    the bit representation of a non-zero finite floating-point value.  */
 static inline int
-checkint (uint64_t iy)
+checkint (uint64_t iy) SC_ATTR
 {
   int e = iy >> 52 & 0x7ff;
   if (e < 0x3ff)
@@ -94,21 +94,21 @@ checkint (uint64_t iy)
 
 /* Top 12 bits (sign and exponent of each double float lane).  */
 static inline svuint64_t
-sv_top12 (svfloat64_t x)
+sv_top12 (svfloat64_t x) SC_ATTR
 {
   return svlsr_x (svptrue_b64 (), svreinterpret_u64 (x), 52);
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */
 static inline int
-zeroinfnan (uint64_t i)
+zeroinfnan (uint64_t i) SC_ATTR
 {
   return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */
 static inline svbool_t
-sv_zeroinfnan (svbool_t pg, svuint64_t i)
+sv_zeroinfnan (svbool_t pg, svuint64_t i) SC_ATTR
 {
   return svcmpge (pg, svsub_x (pg, svmul_x (pg, i, 2), 1),
 		  2 * asuint64 (INFINITY) - 1);
@@ -122,7 +122,7 @@ sv_zeroinfnan (svbool_t pg, svuint64_t i)
    adjustment of scale, positive k here means the result may overflow and
    negative k means the result may underflow.  */
 static inline double
-specialcase (double tmp, uint64_t sbits, uint64_t ki)
+specialcase (double tmp, uint64_t sbits, uint64_t ki) SC_ATTR
 {
   double scale;
   if ((ki & 0x80000000) == 0)
@@ -143,7 +143,7 @@ specialcase (double tmp, uint64_t sbits, uint64_t ki)
 /* Scalar fallback for special cases of SVE pow's exp.  */
 static inline svfloat64_t
 sv_call_specialcase (svfloat64_t x1, svuint64_t u1, svuint64_t u2,
-		     svfloat64_t y, svbool_t cmp)
+		     svfloat64_t y, svbool_t cmp) SC_ATTR
 {
   svbool_t p = svpfirst (cmp, svpfalse ());
   while (svptest_any (cmp, p))
@@ -163,13 +163,13 @@ sv_call_specialcase (svfloat64_t x1, svuint64_t u1, svuint64_t u2,
    additional 15 bits precision.  IX is the bit representation of x, but
    normalized in the subnormal range using the sign bit for the exponent.  */
 static inline svfloat64_t
-sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail)
+sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail) SC_ATTR
 {
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
   svuint64_t tmp = svsub_x (pg, ix, Off);
-  svuint64_t i = svand_x (pg, svlsr_x (pg, tmp, 52 - V_POW_LOG_TABLE_BITS),
+  svuint64_t i = svand_z (pg, svlsr_x (pg, tmp, 52 - V_POW_LOG_TABLE_BITS),
 			  sv_u64 (N_LOG - 1));
   svint64_t k = svasr_x (pg, svreinterpret_s64 (tmp), 52);
   svuint64_t iz = svsub_x (pg, ix, svand_x (pg, tmp, sv_u64 (0xfffULL << 52)));
@@ -180,9 +180,15 @@ sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail)
   /* SVE lookup requires 3 separate lookup tables, as opposed to scalar version
      that uses array of structures. We also do the lookup earlier in the code to
      make sure it finishes as early as possible.  */
+#if ENABLE_SC_COMPAT
+  svfloat64_t invc = sc_lookup_f64 (i, __v_pow_log_data.invc);
+  svfloat64_t logc = sc_lookup_f64 (i, __v_pow_log_data.logc);
+  svfloat64_t logctail = sc_lookup_f64 (i, __v_pow_log_data.logctail);
+#else
   svfloat64_t invc = svld1_gather_index (pg, __v_pow_log_data.invc, i);
   svfloat64_t logc = svld1_gather_index (pg, __v_pow_log_data.logc, i);
   svfloat64_t logctail = svld1_gather_index (pg, __v_pow_log_data.logctail, i);
+#endif
 
   /* Note: 1/c is j/N or j/N/2 where j is an integer in [N,2N) and
      |z/c - 1| < 1/N, so r = z/c - 1 is exactly representible.  */
@@ -221,7 +227,7 @@ sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail)
    The sign_bias argument is SignBias or 0 and sets the sign to -1 or 1.  */
 static inline svfloat64_t
 sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
-	       svuint64_t sign_bias)
+	       svuint64_t sign_bias) SC_ATTR
 {
   /* 3 types of special cases: tiny (uflow and spurious uflow), huge (oflow)
      and other cases of large values of x (scale * (1 + TMP) oflow).  */
@@ -262,11 +268,15 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
   /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
   r = svadd_x (pg, r, xtail);
   /* 2^(k/N) ~= scale.  */
-  svuint64_t idx = svand_x (pg, ki, N_EXP - 1);
+  svuint64_t idx = svand_z (pg, ki, N_EXP - 1);
   svuint64_t top
       = svlsl_x (pg, svadd_x (pg, ki, sign_bias), 52 - V_POW_EXP_TABLE_BITS);
   /* This is only a valid scale when -1023*N < k < 1024*N.  */
+#if ENABLE_SC_COMPAT
+  svuint64_t sbits = sc_lookup_u64 (idx, __v_pow_exp_data.sbits);
+#else
   svuint64_t sbits = svld1_gather_index (pg, __v_pow_exp_data.sbits, idx);
+#endif
   sbits = svadd_x (pg, sbits, top);
   /* exp(x) = 2^(k/N) * exp(r) ~= scale + scale * (exp(r) - 1).  */
   svfloat64_t r2 = svmul_x (pg, r, r);
@@ -299,7 +309,7 @@ sv_exp_inline (svbool_t pg, svfloat64_t x, svfloat64_t xtail,
 }
 
 static inline double
-pow_sc (double x, double y)
+pow_sc (double x, double y) SC_ATTR
 {
   uint64_t ix = asuint64 (x);
   uint64_t iy = asuint64 (y);
@@ -330,7 +340,8 @@ pow_sc (double x, double y)
   return x;
 }
 
-svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
+svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y,
+			      const svbool_t pg) SC_ATTR
 {
   /* This preamble handles special case conditions used in the final scalar
      fallbacks. It also updates ix and sign_bias, that are used in the core
@@ -396,7 +407,11 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 
   /* Cases of zero/inf/nan x or y.  */
   if (unlikely (svptest_any (pg, special)))
+#if ENABLE_SC_COMPAT
+    vz = sc_call2_f64 (pow_sc, x, y, vz, special);
+#else
     vz = sv_call2_f64 (pow_sc, x, y, vz, special);
+#endif
 
   return vz;
 }

@@ -251,6 +251,10 @@ svfloat32_t _ZGVsMxv_sc_log1pf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_log1p (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_log2f (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_log2 (svfloat64_t, svbool_t) __streaming_compatible;
+svfloat32_t _ZGVsMxvv_sc_powf (svfloat32_t, svfloat32_t,
+			       svbool_t) __streaming_compatible;
+svfloat64_t _ZGVsMxvv_sc_pow (svfloat64_t, svfloat64_t,
+			      svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_sinh (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_sinhf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_sinf (svfloat32_t, svbool_t) __streaming_compatible;

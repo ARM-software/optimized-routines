@@ -199,5 +199,22 @@ sc_lookup2_f32 (svuint32_t index, svfloat32_t *x0, svfloat32_t *x1,
     }
 }
 
+UNUSED static svfloat64_t NOINLINE
+sc_call2_f64 (double (*f) (double, double) SC_ATTR, svfloat64_t x1,
+	      svfloat64_t x2, svfloat64_t y, svbool_t cmp) SC_ATTR
+{
+  svbool_t p = svpfirst (cmp, svpfalse ());
+  while (svptest_any (cmp, p))
+    {
+      double elem1 = svclastb (p, 0, x1);
+      double elem2 = svclastb (p, 0, x2);
+      double ret = (*f) (elem1, elem2);
+      svfloat64_t y2 = sv_f64 (ret);
+      y = svsel (p, y2, y);
+      p = svpnext_b64 (cmp, p);
+    }
+  return y;
+}
+
 #endif
 #endif
