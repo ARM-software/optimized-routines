@@ -1,7 +1,7 @@
 /*
  * Double-precision vector erf(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -44,7 +44,7 @@ static const struct data
    Maximum measure error: 2.29 ULP
    _ZGVsMxv_erf(-0x1.00003c924e5d1p-8) got -0x1.20dd59132ebadp-8
 				      want -0x1.20dd59132ebafp-8.  */
-svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *dat = ptr_barrier (&data);
 
@@ -57,15 +57,20 @@ svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
   svfloat64_t a = svabs_x (pg, x);
   svfloat64_t shift = sv_f64 (dat->shift);
   svfloat64_t z = svadd_x (pg, a, shift);
-  svuint64_t i
-      = svsub_x (pg, svreinterpret_u64 (z), svreinterpret_u64 (shift));
 
   /* Lookup without shortcut for small values but with predicate to avoid
      segfault for large values and NaNs.  */
   svfloat64_t r = svsub_x (pg, z, shift);
-  svfloat64_t erfr = svld1_gather_index (a_lt_max, __sv_erf_data.erf, i);
-  svfloat64_t scale = svld1_gather_index (a_lt_max, __sv_erf_data.scale, i);
-
+  svuint64_t i
+      = svsub_x (pg, svreinterpret_u64 (z), svreinterpret_u64 (shift));
+  svfloat64_t erfr, scale;
+#if ENABLE_SC_COMPAT
+  i = svadd_z (a_lt_max, i, i);
+  sc_lookup2_f64 (i, &erfr, &scale, &__erf_data.tab[0].erf);
+#else
+  erfr = svld1_gather_index (a_lt_max, __sv_erf_data.erf, i);
+  scale = svld1_gather_index (a_lt_max, __sv_erf_data.scale, i);
+#endif
   /* erf(x) ~ erf(r) + scale * d * poly (r, d).  */
   svfloat64_t d = svsub_x (pg, a, r);
   svfloat64_t d2 = svmul_x (pg, d, d);

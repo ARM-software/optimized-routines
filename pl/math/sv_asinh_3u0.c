@@ -41,13 +41,14 @@ static const struct data
 };
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (asinh, x, y, special);
 }
 
 static inline svfloat64_t
-__sv_log_inline (svfloat64_t x, const struct data *d, const svbool_t pg)
+__sv_log_inline (svfloat64_t x, const struct data *d,
+		 const svbool_t pg) SC_ATTR
 {
   /* Double-precision SVE log, copied from SVE log implementation with some
      cosmetic modification and special-cases removed. See that file for details
@@ -55,14 +56,22 @@ __sv_log_inline (svfloat64_t x, const struct data *d, const svbool_t pg)
 
   svuint64_t ix = svreinterpret_u64 (x);
   svuint64_t tmp = svsub_x (pg, ix, d->off);
-  svuint64_t i = svand_x (pg, svlsr_x (pg, tmp, (51 - V_LOG_TABLE_BITS)),
+  svuint64_t i = svand_z (pg, svlsr_x (pg, tmp, (51 - V_LOG_TABLE_BITS)),
 			  (d->n - 1) << 1);
+
+#if ENABLE_SC_COMPAT
+  /* Normal lookups break streaming compatibility,
+     so if we want SME math, an SME-legal lookup is required.  */
+  svfloat64_t invc, logc;
+  sc_lookup2_f64 (i, &invc, &logc, &__v_log_data.table[0].invc);
+#else
+  svfloat64_t invc = svld1_gather_index (pg, &__v_log_data.table[0].invc, i);
+  svfloat64_t logc = svld1_gather_index (pg, &__v_log_data.table[0].logc, i);
+#endif
+
   svint64_t k = svasr_x (pg, svreinterpret_s64 (tmp), 52);
   svuint64_t iz = svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52));
   svfloat64_t z = svreinterpret_f64 (iz);
-
-  svfloat64_t invc = svld1_gather_index (pg, &__v_log_data.table[0].invc, i);
-  svfloat64_t logc = svld1_gather_index (pg, &__v_log_data.table[0].logc, i);
 
   svfloat64_t ln2_p3 = svld1rq (svptrue_b64 (), &d->ln2);
   svfloat64_t p1_p4 = svld1rq (svptrue_b64 (), &d->p1);
@@ -93,7 +102,7 @@ __sv_log_inline (svfloat64_t x, const struct data *d, const svbool_t pg)
    |x| >= 1:
    _ZGVsMxv_asinh(0x1.170469d024505p+0) got 0x1.e3181c43b0f36p-1
 				       want 0x1.e3181c43b0f39p-1.  */
-svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 
