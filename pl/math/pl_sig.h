@@ -5,15 +5,16 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception.
  */
 
+#define SC_NAME_F1(fun) _ZGVsMxv_sc_##fun##f
+#define SC_NAME_D1(fun) _ZGVsMxv_sc_##fun
+#define SC_NAME_F2(fun) _ZGVsMxvv_sc_##fun##f
+#define SC_NAME_D2(fun) _ZGVsMxvv_sc_##fun
+
 /* If streaming-compatibility is enabled, paste over instances of SV with SC to
    ensure that the source including this file emits names and signatures
    corresponding to the _sc_ variant. This requires one level of deferral in
    expansion of PL_SIG.  */
 #if ENABLE_SC_COMPAT
-# define SC_NAME_F1(fun) _ZGVsMxv_sc_##fun##f
-# define SC_NAME_D1(fun) _ZGVsMxv_sc_##fun
-# define SC_NAME_F2(fun) _ZGVsMxvv_sc_##fun##f
-# define SC_NAME_D2(fun) _ZGVsMxvv_sc_##fun
 # define SV SC
 # define SV_NAME_F1 SC_NAME_F1
 # define SV_NAME_D1 SC_NAME_D1

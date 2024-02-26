@@ -64,7 +64,7 @@ $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
 $(B)/sv_%: CFLAGS_PL += $(math-sve-cflags)
-$(B)/sc_%: CFLAGS_PL += $(math-sme-cflags)
+$(B)/sc_%: CFLAGS_PL += $(math-sme-cflags) -DENABLE_SC_COMPAT=1
 
 ulp-funcs-dir = build/pl/test/ulp-funcs/
 ulp-wrappers-dir = build/pl/test/ulp-wrappers/
