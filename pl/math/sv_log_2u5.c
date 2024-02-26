@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE log(x) function.
  *
- * Copyright (c) 2020-2023, Arm Limited.
+ * Copyright (c) 2020-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -17,7 +17,7 @@
 #define ThreshTop (0x7fe) /* MaxTop - MinTop.  */
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp) SC_ATTR
 {
   return sv_call_f64 (log, x, y, cmp);
 }
@@ -26,7 +26,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
    Maximum measured error is 2.17 ulp:
    SV_NAME_D1 (log)(0x1.a6129884398a3p+0) got 0x1.ffffff1cca043p-2
 					 want 0x1.ffffff1cca045p-2.  */
-svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   svuint64_t ix = svreinterpret_u64 (x);
   svuint64_t top = svlsr_x (pg, ix, 52);
@@ -35,18 +35,26 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
-  svuint64_t tmp = svsub_x (pg, ix, Off);
+  svuint64_t tmp = svsub_z (pg, ix, Off);
   /* Calculate table index = (tmp >> (52 - V_LOG_TABLE_BITS)) % N.
      The actual value of i is double this due to table layout.  */
   svuint64_t i
       = svand_x (pg, svlsr_x (pg, tmp, (51 - V_LOG_TABLE_BITS)), (N - 1) << 1);
+  /* Lookup in 2 global lists (length N).  */
+#if ENABLE_SC_COMPAT
+  /* Normal lookups break streaming compatibility,
+     so if we want SME math, an SME-legal lookup is required.  */
+  svfloat64_t invc, logc;
+  sc_lookup2_f64 (i, &invc, &logc, &__v_log_data.table[0].invc);
+#else
+  svfloat64_t invc = svld1_gather_index (pg, &__v_log_data.table[0].invc, i);
+  svfloat64_t logc = svld1_gather_index (pg, &__v_log_data.table[0].logc, i);
+#endif
+
   svint64_t k
       = svasr_x (pg, svreinterpret_s64 (tmp), 52); /* Arithmetic shift.  */
   svuint64_t iz = svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52));
   svfloat64_t z = svreinterpret_f64 (iz);
-  /* Lookup in 2 global lists (length N).  */
-  svfloat64_t invc = svld1_gather_index (pg, &__v_log_data.table[0].invc, i);
-  svfloat64_t logc = svld1_gather_index (pg, &__v_log_data.table[0].logc, i);
 
   /* log(x) = log1p(z/c-1) + log(c) + k*Ln2.  */
   svfloat64_t r = svmad_x (pg, invc, z, -1);

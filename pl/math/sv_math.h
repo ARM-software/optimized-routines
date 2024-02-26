@@ -165,5 +165,22 @@ sc_lookup_f32 (svuint32_t index, const float *data)
   return ret;
 }
 
+static inline void
+sc_lookup2_f64 (svuint64_t index, svfloat64_t *x0, svfloat64_t *x1,
+		const double *data)
+{
+  uint64_t idx_arr[svcntd ()];
+  svst1 (svptrue_b64 (), idx_arr, index);
+  uint64_t idx = idx_arr[svcntd () - 1];
+  *x0 = svdup_f64 (data[idx]);
+  *x1 = svdup_f64 (data[idx + 1]);
+  for (int i = svcntd () - 2; i >= 0; i--)
+    {
+      idx = idx_arr[i];
+      *x0 = svinsr_n_f64 (*x0, data[idx]);
+      *x1 = svinsr_n_f64 (*x1, data[idx + 1]);
+    }
+}
+
 #endif
 #endif
