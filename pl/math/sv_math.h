@@ -182,5 +182,22 @@ sc_lookup2_f64 (svuint64_t index, svfloat64_t *x0, svfloat64_t *x1,
     }
 }
 
+static inline void
+sc_lookup2_f32 (svuint32_t index, svfloat32_t *x0, svfloat32_t *x1,
+		const float *data)
+{
+  uint32_t idx_arr[svcntw ()];
+  svst1 (svptrue_b32 (), idx_arr, index);
+  uint32_t idx = idx_arr[svcntw () - 1];
+  *x0 = svdup_f32 (data[idx]);
+  *x1 = svdup_f32 (data[idx + 1]);
+  for (int i = svcntw () - 2; i >= 0; i--)
+    {
+      idx = idx_arr[i];
+      *x0 = svinsr_n_f32 (*x0, data[idx]);
+      *x1 = svinsr_n_f32 (*x1, data[idx + 1]);
+    }
+}
+
 #endif
 #endif

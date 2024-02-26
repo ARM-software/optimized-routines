@@ -1,7 +1,7 @@
 /*
  * Single-precision vector erfc(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -49,7 +49,7 @@ static const struct data
    Maximum error: 1.63 ULP (~1.0 ULP for x < 0.0).
    _ZGVsMxv_erfcf(0x1.1dbf7ap+3) got 0x1.f51212p-120
 				want 0x1.f51216p-120.  */
-svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *dat = ptr_barrier (&data);
 
@@ -62,14 +62,20 @@ svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg)
   svfloat32_t shift = sv_f32 (dat->shift);
   svfloat32_t z = svadd_x (pg, a, shift);
 
+  /* Lookup erfc(r) and 2/sqrt(pi)*exp(-r^2) in tables.  */
+  const float32_t *p = &__erfcf_data.tab[0].erfc - 2 * dat->off_arr;
+#if ENABLE_SC_COMPAT
+  svuint32_t i = svqadd_z (pg, svreinterpret_u32 (z), dat->off_idx);
+  i = svmul_x (pg, i, 2);
+  svfloat32_t erfcr, scale;
+  sc_lookup2_f32 (i, &erfcr, &scale, p);
+#else
   /* Saturate index for the NaN case.  */
   svuint32_t i = svqadd (svreinterpret_u32 (z), dat->off_idx);
-
-  /* Lookup erfc(r) and 2/sqrt(pi)*exp(-r^2) in tables.  */
   i = svmul_x (pg, i, 2);
-  const float32_t *p = &__erfcf_data.tab[0].erfc - 2 * dat->off_arr;
   svfloat32_t erfcr = svld1_gather_index (pg, p, i);
   svfloat32_t scale = svld1_gather_index (pg, p + 1, i);
+#endif
 
   /* erfc(x) ~ erfc(r) - scale * d * poly(r, d).  */
   svfloat32_t r = svsub_x (pg, z, shift);
