@@ -1,7 +1,7 @@
 /*
  * Wrapper functions for SVE ACLE.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -128,6 +128,21 @@ sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
     }
   return y;
 }
+
+/* Streaming Compatible Gather.
+   Iterates backwards over LUT indexes to load scalar values, then uses svinsr
+   to prepend scalar to the front of a blank return vector.  */
+static inline svuint64_t
+sc_lookup_u64 (svuint64_t index, const uint64_t *data) SC_ATTR
+{
+  uint64_t ret_arr[svcntd ()];
+  svst1 (svptrue_b64 (), ret_arr, index);
+  svuint64_t ret = svdup_n_u64 (ret_arr[svcntd () - 1]);
+  for (int i = svcntd () - 2; i >= 0; i--)
+    ret = svinsr (ret, data[ret_arr[i]]);
+  return ret;
+}
+
 #endif
 
 #endif

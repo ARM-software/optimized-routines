@@ -220,6 +220,7 @@ svfloat32_t _ZGVsMxv_sc_cosf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_cos (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_expm1f (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_expm1 (svfloat64_t, svbool_t) __streaming_compatible;
+svfloat64_t _ZGVsMxv_sc_exp2 (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxvv_sc_hypotf (svfloat32_t, svfloat32_t,
 				 svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxvv_sc_hypot (svfloat64_t, svfloat64_t,

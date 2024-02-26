@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE 2^x function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -38,7 +38,7 @@ static const struct data
    detected.  */
 static inline svfloat64_t
 special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
-	      const struct data *d)
+	      const struct data *d) SC_ATTR
 {
   /* s=2^n may overflow, break it up into s=s1*s2,
      such that exp = s + s*y can be computed as s1*(s2+s2*y)
@@ -68,7 +68,7 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
    Maximum measured error is 1.65 ulp.
    _ZGVsMxv_exp2(-0x1.4c264ab5b559bp-6) got 0x1.f8db0d4df721fp-1
 				       want 0x1.f8db0d4df721dp-1.  */
-svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
+svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
   svbool_t no_big_scale = svacle (pg, x, d->big_bound);
@@ -83,8 +83,12 @@ svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
   svfloat64_t r = svsub_x (pg, x, kd);
 
   /* scale ~= 2^(k/N).  */
-  svuint64_t idx = svand_x (pg, ki, N - 1);
+  svuint64_t idx = svand_z (pg, ki, N - 1);
+#if ENABLE_SC_COMPAT
+  svuint64_t sbits = sc_lookup_u64 (idx, __v_exp_data);
+#else
   svuint64_t sbits = svld1_gather_index (pg, __v_exp_data, idx);
+#endif
   /* This is only a valid scale when -1023*N < k < 1024*N.  */
   svuint64_t top = svlsl_x (pg, ki, 52 - V_EXP_TABLE_BITS);
   svfloat64_t scale = svreinterpret_f64 (svadd_x (pg, sbits, top));
