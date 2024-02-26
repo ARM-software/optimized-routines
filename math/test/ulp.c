@@ -225,40 +225,42 @@ static float fv[2] = {1.0f, -INFINITY};
 static double dv[2] = {1.0, -INFINITY};
 static inline v_float argf(float x) { return (v_float){x,x,x,fv[secondcall]}; }
 static inline v_double argd(double x) { return (v_double){x,dv[secondcall]}; }
-#if WANT_SVE_MATH
-#include <arm_sve.h>
+# if WANT_SVE_MATH
+#  include <arm_sve.h>
 typedef __SVFloat32_t sv_float;
 typedef __SVFloat64_t sv_double;
 
-static inline sv_float svargf(float x)  {
-	int n = svcntw();
-	float base[n];
-	for (int i=0; i<n; i++)
-		base[i] = (float)x;
-	base[n-1] = (float) fv[secondcall];
-	return svld1(svptrue_b32(), base);
+static inline sv_float
+svargf (float x) __streaming_compatible
+{
+  int n = svcntw ();
+  float base[n];
+  for (int i = 0; i < n; i++)
+    base[i] = (float) x;
+  base[n - 1] = (float) fv[secondcall];
+  return svld1 (svptrue_b32 (), base);
 }
-static inline sv_double svargd(double x) {
-	int n = svcntd();
-	double base[n];
-	for (int i=0; i<n; i++)
-		base[i] = x;
-	base[n-1] = dv[secondcall];
-	return svld1(svptrue_b64(), base);
+static inline sv_double
+svargd (double x) __streaming_compatible
+{
+  int n = svcntd ();
+  double base[n];
+  for (int i = 0; i < n; i++)
+    base[i] = x;
+  base[n - 1] = dv[secondcall];
+  return svld1 (svptrue_b64 (), base);
 }
-static inline float svretf(sv_float vec)  {
-	int n = svcntw();
-	float res[n];
-	svst1(svptrue_b32(), res, vec);
-	return res[0];
+static inline float
+svretf (sv_float vec) __streaming_compatible
+{
+  return svlasta (svpfalse (), vec);
 }
-static inline double svretd(sv_double vec) {
-	int n = svcntd();
-	double res[n];
-	svst1(svptrue_b64(), res, vec);
-	return res[0];
+static inline double
+svretd (sv_double vec) __streaming_compatible
+{
+  return svlasta (svpfalse (), vec);
 }
-#endif
+# endif
 #endif
 
 #include "test/ulp_wrappers.h"
@@ -324,14 +326,15 @@ static const struct fun fun[] = {
 #define ZVND1(x) VND1 (x) ZVD1 (x)
 #define ZVND2(x) VND2 (x) ZVD2 (x)
 /* SVE routines.  */
-#define SVF1(x) F (__sv_##x##f, sv_##x##f, x, mpfr_##x, 1, 1, f1, 0)
-#define SVF2(x) F (__sv_##x##f, sv_##x##f, x, mpfr_##x, 2, 1, f2, 0)
-#define SVD1(x) F (__sv_##x, sv_##x, x##l, mpfr_##x, 1, 0, d1, 0)
-#define SVD2(x) F (__sv_##x, sv_##x, x##l, mpfr_##x, 2, 0, d2, 0)
 #define ZSVF1(x) F (_ZGVsMxv_##x##f, Z_sv_##x##f, x, mpfr_##x, 1, 1, f1, 0)
 #define ZSVF2(x) F (_ZGVsMxvv_##x##f, Z_sv_##x##f, x, mpfr_##x, 2, 1, f2, 0)
 #define ZSVD1(x) F (_ZGVsMxv_##x, Z_sv_##x, x##l, mpfr_##x, 1, 0, d1, 0)
 #define ZSVD2(x) F (_ZGVsMxvv_##x, Z_sv_##x, x##l, mpfr_##x, 2, 0, d2, 0)
+/* SVE Streaming Compatible routines.  */
+#define ZSCF1(x) F (_ZGVsMxv_sc_##x##f, Z_sc_##x##f, x, mpfr_##x, 1, 1, f1, 0)
+#define ZSCF2(x) F (_ZGVsMxvv_sc_##x##f, Z_sc_##x##f, x, mpfr_##x, 2, 1, f2, 0)
+#define ZSCD1(x) F (_ZGVsMxv_sc_##x, Z_sc_##x, x##l, mpfr_##x, 1, 0, d1, 0)
+#define ZSCD2(x) F (_ZGVsMxvv_sc_##x, Z_sc_##x, x##l, mpfr_##x, 2, 0, d2, 0)
 
 #include "test/ulp_funcs.h"
 
@@ -340,12 +343,16 @@ static const struct fun fun[] = {
 #undef F2
 #undef D1
 #undef D2
-#undef SVF1
-#undef SVF2
-#undef SVD1
-#undef SVD2
- {0}};
-
+#undef ZSVF1
+#undef ZSVF2
+#undef ZSVD1
+#undef ZSVD2
+#undef ZSCF1
+#undef ZSCF2
+#undef ZSCD1
+#undef ZSCD2
+  { 0 }
+};
 /* Boilerplate for generic calls.  */
 
 static inline int

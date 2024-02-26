@@ -1,7 +1,7 @@
 /*
  * Single-precision vector tan(x) function.
  *
- * Copyright (c) 2020-2023, Arm Limited.
+ * Copyright (c) 2020-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,7 +37,7 @@ static const struct data
 };
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp) SC_ATTR
 {
   return sv_call_f32 (tanf, x, y, cmp);
 }
@@ -46,7 +46,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
    Maximum error is 3.45 ULP:
    SV_NAME_F1 (tan)(-0x1.e5f0cap+13) got 0x1.ff9856p-1
 				    want 0x1.ff9850p-1.  */
-svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

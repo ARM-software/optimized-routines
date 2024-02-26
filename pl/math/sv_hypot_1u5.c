@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE hypot(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -19,7 +19,7 @@ static const struct data
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t sqsum, svfloat64_t x, svfloat64_t y, svbool_t pg,
-	      svbool_t special)
+	      svbool_t special) SC_ATTR
 {
   return sv_call2_f64 (hypot, x, y, svsqrt_x (pg, sqsum), special);
 }
@@ -29,7 +29,8 @@ special_case (svfloat64_t sqsum, svfloat64_t x, svfloat64_t y, svbool_t pg,
    _ZGVsMxvv_hypot (-0x1.6a22d0412cdd3p+352, 0x1.d3d89bd66fb1ap+330)
     got 0x1.6a22d0412cfp+352
    want 0x1.6a22d0412cf01p+352.  */
-svfloat64_t SV_NAME_D2 (hypot) (svfloat64_t x, svfloat64_t y, svbool_t pg)
+svfloat64_t SV_NAME_D2 (hypot) (svfloat64_t x, svfloat64_t y,
+				svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

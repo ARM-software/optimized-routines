@@ -1,7 +1,7 @@
 /*
  * Single-precision vector atan(x) function.
  *
- * Copyright (c) 2021-2023, Arm Limited.
+ * Copyright (c) 2021-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -30,7 +30,7 @@ static const struct data
    Largest observed error is 2.9 ULP, close to +/-1.0:
    _ZGVsMxv_atanf (0x1.0468f6p+0) got -0x1.967f06p-1
 				 want -0x1.967fp-1.  */
-svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

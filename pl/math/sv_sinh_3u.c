@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE sinh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,7 +37,7 @@ static const struct data
 };
 
 static inline svfloat64_t
-expm1_inline (svfloat64_t x, svbool_t pg)
+expm1_inline (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -63,7 +63,7 @@ expm1_inline (svfloat64_t x, svbool_t pg)
 }
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svbool_t pg)
+special_case (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   return sv_call_f64 (sinh, x, x, pg);
 }
@@ -73,7 +73,7 @@ special_case (svfloat64_t x, svbool_t pg)
    The greatest observed error is 2.57 ULP:
    _ZGVsMxv_sinh (0x1.a008538399931p-2) got 0x1.ab929fc64bd66p-2
 				       want 0x1.ab929fc64bd63p-2.  */
-svfloat64_t SV_NAME_D1 (sinh) (svfloat64_t x, svbool_t pg)
+svfloat64_t SV_NAME_D1 (sinh) (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

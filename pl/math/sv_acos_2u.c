@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE acos(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -43,7 +43,7 @@ static const struct data
    The largest observed error in this region is 1.52 ulps,
    _ZGVsMxv_acos (0x1.24024271a500ap-1) got 0x1.ed82df4243f0dp-1
 				       want 0x1.ed82df4243f0bp-1.  */
-svfloat64_t SV_NAME_D1 (acos) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (acos) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

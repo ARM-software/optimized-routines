@@ -1,0 +1,8 @@
+/*
+ * Streaming-compatible version of SVE asin
+ *
+ * Copyright (c) 2024, Arm Limited.
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+ */
+#define ENABLE_SC_COMPAT 1
+#include "sv_asin_3u.c"

@@ -1,7 +1,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2015-2023, Arm Limited.
+ * Copyright (c) 2015-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -54,6 +54,12 @@ __vpcs __f64x2_t _ZGVnN2v_exp (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_log (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2vv_pow (__f64x2_t, __f64x2_t);
 # endif
+#endif
+
+#if WANT_SME_MATH
+# define __streaming_compatible __arm_streaming_compatible
+#else
+# define __streaming_compatible
 #endif
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE cospi(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -26,7 +26,7 @@ static const struct data
    Maximum error: 2.60 ULP:
    _ZGVsMxv_cospif(+/-0x1.cae664p-4) got 0x1.e09c9ep-1
 				    want 0x1.e09c98p-1.  */
-svfloat32_t SV_NAME_F1 (cospi) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (cospi) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

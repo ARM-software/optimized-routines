@@ -1,7 +1,7 @@
 /*
  * Single-precision vector exp(x) - 1 function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -32,7 +32,7 @@ static const struct data
 #define C(i) sv_f32 (d->c##i)
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svbool_t pg)
+special_case (svfloat32_t x, svbool_t pg) SC_ATTR
 {
   return sv_call_f32 (expm1f, x, x, pg);
 }
@@ -40,7 +40,7 @@ special_case (svfloat32_t x, svbool_t pg)
 /* Single-precision SVE exp(x) - 1. Maximum error is 1.52 ULP:
    _ZGVsMxv_expm1f(0x1.8f4ebcp-2) got 0x1.e859dp-2
 				 want 0x1.e859d4p-2.  */
-svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
+svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

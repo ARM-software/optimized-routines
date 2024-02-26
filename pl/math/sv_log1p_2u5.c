@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE log(1+x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -39,7 +39,7 @@ static const struct data
 #define BottomMask 0xffffffff
 
 static svfloat64_t NOINLINE
-special_case (svbool_t special, svfloat64_t x, svfloat64_t y)
+special_case (svbool_t special, svfloat64_t x, svfloat64_t y) SC_ATTR
 {
   return sv_call_f64 (log1p, x, y, special);
 }
@@ -48,7 +48,7 @@ special_case (svbool_t special, svfloat64_t x, svfloat64_t y)
    observed error is 2.46 ULP:
    _ZGVsMxv_log1p(0x1.654a1307242a4p+11) got 0x1.fd5565fb590f4p+2
 					want 0x1.fd5565fb590f6p+2.  */
-svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
+svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
   svuint64_t ix = svreinterpret_u64 (x);

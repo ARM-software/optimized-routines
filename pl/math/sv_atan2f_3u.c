@@ -25,7 +25,7 @@ static const struct data
 /* Special cases i.e. 0, infinity, nan (fall back to scalar calls).  */
 static svfloat32_t NOINLINE
 special_case (svfloat32_t y, svfloat32_t x, svfloat32_t ret,
-	      const svbool_t cmp)
+	      const svbool_t cmp) SC_ATTR
 {
   return sv_call2_f32 (atan2f, y, x, ret, cmp);
 }
@@ -33,7 +33,7 @@ special_case (svfloat32_t y, svfloat32_t x, svfloat32_t ret,
 /* Returns a predicate indicating true if the input is the bit representation
    of 0, infinity or nan.  */
 static inline svbool_t
-zeroinfnan (svuint32_t i, const svbool_t pg)
+zeroinfnan (svuint32_t i, const svbool_t pg) SC_ATTR
 {
   return svcmpge (pg, svsub_x (pg, svlsl_x (pg, i, 1), 1),
 		  sv_u32 (2 * 0x7f800000lu - 1));
@@ -44,7 +44,8 @@ zeroinfnan (svuint32_t i, const svbool_t pg)
    observed error is 2.95 ULP:
    _ZGVsMxvv_atan2f (0x1.93836cp+6, 0x1.8cae1p+6) got 0x1.967f06p-1
 						 want 0x1.967f00p-1.  */
-svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x,
+				const svbool_t pg) SC_ATTR
 {
   const struct data *data_ptr = ptr_barrier (&data);
 

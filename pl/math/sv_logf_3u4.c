@@ -1,7 +1,7 @@
 /*
  * Single-precision vector log function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -34,7 +34,7 @@ static const struct data
 float optr_aor_log_f32 (float);
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp) SC_ATTR
 {
   return sv_call_f32 (optr_aor_log_f32, x, y, cmp);
 }
@@ -43,7 +43,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
    polynomial as the AdvSIMD routine. Maximum error is 3.34 ULPs:
    SV_NAME_F1 (log)(0x1.557298p+0) got 0x1.26edecp-2
 				  want 0x1.26ede6p-2.  */
-svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (log) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

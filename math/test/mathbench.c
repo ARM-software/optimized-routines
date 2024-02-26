@@ -1,7 +1,7 @@
 /*
  * Microbenchmark for math functions.
  *
- * Copyright (c) 2018-2023, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -176,15 +176,22 @@ static const struct fun
 #if WANT_SVE_MATH
     sv_double (*svd) (sv_double, sv_bool);
     sv_float (*svf) (sv_float, sv_bool);
+# if WANT_SME_MATH
+    sv_double (*scd) (sv_double, sv_bool) __arm_streaming_compatible;
+    sv_float (*scf) (sv_float, sv_bool) __arm_streaming_compatible;
+# endif
 #endif
   } fun;
 } funtab[] = {
+// clang-format off
 #define D(func, lo, hi) {#func, 'd', 0, lo, hi, {.d = func}},
 #define F(func, lo, hi) {#func, 'f', 0, lo, hi, {.f = func}},
 #define VND(func, lo, hi) {#func, 'd', 'n', lo, hi, {.vnd = func}},
 #define VNF(func, lo, hi) {#func, 'f', 'n', lo, hi, {.vnf = func}},
 #define SVD(func, lo, hi) {#func, 'd', 's', lo, hi, {.svd = func}},
 #define SVF(func, lo, hi) {#func, 'f', 's', lo, hi, {.svf = func}},
+#define SCD(func, lo, hi) {#func, 'd', 'c', lo, hi, {.scd = func}},
+#define SCF(func, lo, hi) {#func, 'f', 'c', lo, hi, {.scf = func}},
 D (dummy, 1.0, 2.0)
 F (dummyf, 1.0, 2.0)
 #ifdef __vpcs
@@ -203,6 +210,9 @@ SVF (__sv_dummyf, 1.0, 2.0)
 #undef VND
 #undef SVF
 #undef SVD
+#undef SCF
+#undef SCD
+  // clang-format on
 };
 
 static void
@@ -371,6 +381,51 @@ runf_sv_latency (sv_float f (sv_float, sv_bool))
   for (int i = 0; i < N; i += sv_float_len ())
     prev = f (svsel_f32 (sel, sv_float_load (Af+i), prev), svptrue_b32 ());
 }
+# if WANT_SME_MATH
+/* The __arm_streaming attribute is enough to ensure that
+   streaming-compatible functions are run in streaming mode, however
+   repeated calls to these functions will switch in and out of
+   streaming mode on every call. Ideally we want to choose either
+   streaming or non-streaming as an option, and then if streaming is
+   chosen set it for the duration of TIMEIT.  */
+static __attribute__ ((noinline)) void
+run_sc_thruput (sv_double f (sv_double, sv_bool)
+		    __arm_streaming_compatible) __arm_streaming
+{
+  for (int i = 0; i < N; i += sv_double_len ())
+    f (sv_double_load (A + i), svptrue_b64 ());
+}
+
+static __attribute__ ((noinline)) void
+runf_sc_thruput (sv_float f (sv_float, sv_bool)
+		     __arm_streaming_compatible) __arm_streaming
+{
+  for (int i = 0; i < N; i += sv_float_len ())
+    f (sv_float_load (Af + i), svptrue_b32 ());
+}
+
+static __attribute__ ((noinline)) void
+run_sc_latency (sv_double f (sv_double, sv_bool)
+		    __arm_streaming_compatible) __arm_streaming
+{
+  volatile sv_bool vsel = svptrue_b64 ();
+  sv_bool sel = vsel;
+  sv_double prev = sv_double_dup (0);
+  for (int i = 0; i < N; i += sv_double_len ())
+    prev = f (svsel_f64 (sel, sv_double_load (A + i), prev), svptrue_b64 ());
+}
+
+static __attribute__ ((noinline)) void
+runf_sc_latency (sv_float f (sv_float, sv_bool)
+		     __arm_streaming_compatible) __arm_streaming
+{
+  volatile sv_bool vsel = svptrue_b32 ();
+  sv_bool sel = vsel;
+  sv_float prev = sv_float_dup (0);
+  for (int i = 0; i < N; i += sv_float_len ())
+    prev = f (svsel_f32 (sel, sv_float_load (Af + i), prev), svptrue_b32 ());
+}
+# endif
 #endif
 
 static uint64_t
@@ -436,6 +491,16 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_sv_thruput, f->fun.svf);
   else if (f->prec == 'f' && type == 'l' && f->vec == 's')
     TIMEIT (runf_sv_latency, f->fun.svf);
+# if WANT_SME_MATH
+  else if (f->prec == 'd' && type == 't' && f->vec == 'c')
+    TIMEIT (run_sc_thruput, f->fun.scd);
+  else if (f->prec == 'd' && type == 'l' && f->vec == 'c')
+    TIMEIT (run_sc_latency, f->fun.scd);
+  else if (f->prec == 'f' && type == 't' && f->vec == 'c')
+    TIMEIT (runf_sc_thruput, f->fun.scf);
+  else if (f->prec == 'f' && type == 'l' && f->vec == 'c')
+    TIMEIT (runf_sc_latency, f->fun.scf);
+# endif
 #endif
 
   if (type == 't')

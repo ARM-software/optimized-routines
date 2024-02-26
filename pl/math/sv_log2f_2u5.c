@@ -1,7 +1,7 @@
 /*
  * Single-precision vector/SVE log2 function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -31,7 +31,7 @@ static const struct data
 #define Off (0x3f2aaaab) /* 0.666667.  */
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp) SC_ATTR
 {
   return sv_call_f32 (log2f, x, y, cmp);
 }
@@ -41,7 +41,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
    Maximum error is 2.48 ULPs:
    SV_NAME_F1 (log2)(0x1.558174p+0) got 0x1.a9be84p-2
 				   want 0x1.a9be8p-2.  */
-svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

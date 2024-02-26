@@ -2,7 +2,7 @@
 /*
  * Function entries for mathbench.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -23,6 +23,11 @@
 
 #if WANT_SVE_MATH
 
+# if WANT_SME_MATH
+#  define _ZSCF1(fun, a, b) SCF(_ZGVsMxv_sc_##fun##f, a, b)
+#  define _ZSCD1(f, a, b) SCD(_ZGVsMxv_sc_##f, a, b)
+# endif
+
 #define _ZSVF1(fun, a, b) SVF(_ZGVsMxv_##fun##f, a, b)
 #define _ZSVD1(f, a, b) SVD(_ZGVsMxv_##f, a, b)
 
@@ -42,6 +47,8 @@
 #define _ZVD2(...)
 #define _ZSVF2(...)
 #define _ZSVD2(...)
+#define _ZSCF2(...)
+#define _ZSCD2(...)
 
 #include "mathbench_funcs_gen.h"
 
@@ -83,5 +90,11 @@
 {"_ZGVsMxvl8l8_sincos", 'd', 's', -3.1, 3.1, {.svd = _Z_sv_sincos_wrap}},
 {"_ZGVsMxv_cexpif", 'f', 's', -3.1, 3.1, {.svf = _Z_sv_cexpif_wrap}},
 {"_ZGVsMxv_cexpi", 'd', 's', -3.1, 3.1, {.svd = _Z_sv_cexpi_wrap}},
+#if WANT_SME_MATH
+{"_ZGVsMxvv_sc_atan2f", 'f', 'c', -10.0, 10.0, {.scf = _Z_sc_atan2f_wrap}},
+{"_ZGVsMxvv_sc_atan2",  'd', 'c', -10.0, 10.0, {.scd = _Z_sc_atan2_wrap}},
+{"_ZGVsMxvv_sc_hypotf", 'f', 'c', -10.0, 10.0, {.scf = _Z_sc_hypotf_wrap}},
+{"_ZGVsMxvv_sc_hypot",  'd', 'c', -10.0, 10.0, {.scd = _Z_sc_hypot_wrap}},
+#endif
 #endif
     // clang-format on

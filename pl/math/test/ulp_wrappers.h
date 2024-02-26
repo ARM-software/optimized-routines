@@ -2,7 +2,7 @@
 /*
  * Function wrappers for ulp.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -110,8 +110,6 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZSND1_WRAP(func)
 #define ZSND2_WRAP(func)
 
-#include "ulp_wrappers_gen.h"
-
 float v_sincosf_sin(float x) { float32x4_t s, c; _ZGVnN4vl4l4_sincosf(vdupq_n_f32(x), &s, &c); return s[0]; }
 float v_sincosf_cos(float x) { float32x4_t s, c; _ZGVnN4vl4l4_sincosf(vdupq_n_f32(x), &s, &c); return c[0]; }
 float v_cexpif_sin(float x) { return _ZGVnN4v_cexpif(vdupq_n_f32(x)).val[0][0]; }
@@ -136,5 +134,36 @@ double sv_sincos_cos(double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_s
 double sv_cexpi_sin(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), svptrue_b64()), 0)); }
 double sv_cexpi_cos(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), svptrue_b64()), 1)); }
 
+#if WANT_SME_MATH
+/* Streaming-compatible routines have a nested wrapper so that streaming mode can be forced on.  */
+
+#define ZSCNF1_WRAP(func)                                                                     \
+  static __attribute__((noinline)) float _Z_sc_##func##f(float x) __arm_streaming {           \
+    return svretf(_ZGVsMxv_sc_##func##f(svargf(x), svptrue_b32()));                           \
+  }                                                                                           \
+  static float Z_sc_##func##f(float x) { return _Z_sc_##func##f(x); }
+
+#define ZSCNF2_WRAP(func)                                                                     \
+  static __attribute__((noinline)) float _Z_sc_##func##f(float x, float y) __arm_streaming {  \
+    return svretf(_ZGVsMxvv_sc_##func##f(svargf(x), svargf(y), svptrue_b32()));               \
+  }                                                                                           \
+  static float Z_sc_##func##f(float x, float y) { return _Z_sc_##func##f(x, y); }
+
+#define ZSCND1_WRAP(func)                                                                     \
+  static __attribute__((noinline)) double _Z_sc_##func(double x) __arm_streaming {            \
+   return svretd(_ZGVsMxv_sc_##func(svargd(x), svptrue_b64()));                               \
+  }                                                                                           \
+  static double Z_sc_##func(double x) { return _Z_sc_##func(x); }
+
+#define ZSCND2_WRAP(func)                                                                     \
+  static __attribute__((noinline)) double _Z_sc_##func(double x, double y) __arm_streaming {  \
+    return svretd(_ZGVsMxvv_sc_##func(svargd(x), svargd(y), svptrue_b64()));                  \
+  }                                                                                           \
+  static double Z_sc_##func(double x, double y) { return _Z_sc_##func(x, y); }
+
 #endif
+#endif
+
+#include "ulp_wrappers_gen.h"
+
 // clang-format on

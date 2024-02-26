@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE asin(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -38,7 +38,7 @@ static const struct data
    The largest observed error in this region is 2.41 ulps,
      _ZGVsMxv_asinf (-0x1.00203ep-1) got -0x1.0c3a64p-1
 				    want -0x1.0c3a6p-1.  */
-svfloat32_t SV_NAME_F1 (asin) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (asin) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

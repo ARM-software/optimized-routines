@@ -1,7 +1,7 @@
 /*
  * Function wrappers for mathbench.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -202,5 +202,33 @@ _Z_sv_cexpi_wrap (sv_double x, sv_bool pg)
   svfloat64x2_t sc = _ZGVsMxv_cexpi (x, pg);
   return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
+
+#if WANT_SME_MATH
+
+static sv_float
+_Z_sc_atan2f_wrap (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_atan2f (x, svdup_f32 (5.0f), pg);
+}
+
+static sv_double
+_Z_sc_atan2_wrap (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_atan2 (x, svdup_f64 (5.0), pg);
+}
+
+static sv_float
+_Z_sc_hypotf_wrap (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_hypotf (x, svdup_f32 (5.0), pg);
+}
+
+static sv_double
+_Z_sc_hypot_wrap (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_hypot (x, svdup_f64 (5.0), pg);
+}
+
+#endif // WANT_SME_MATH
 
 #endif // WANT_SVE_MATH

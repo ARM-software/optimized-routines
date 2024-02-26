@@ -1,7 +1,7 @@
 /*
  * Configuration for math routines.
  *
- * Copyright (c) 2017-2023, Arm Limited.
+ * Copyright (c) 2017-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -92,6 +92,16 @@
 # define UNUSED
 # define likely(x) (x)
 # define unlikely(x) (x)
+#endif
+
+#ifndef ENABLE_SC_COMPAT
+# define ENABLE_SC_COMPAT 0
+#endif
+
+#if ENABLE_SC_COMPAT
+# define SC_ATTR __arm_streaming_compatible
+#else
+# define SC_ATTR
 #endif
 
 /* Return ptr but hide its value from the compiler so accesses through it

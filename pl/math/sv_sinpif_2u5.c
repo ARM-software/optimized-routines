@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE sinpi(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -24,7 +24,7 @@ static const struct data
    Maximum error 2.48 ULP:
    _ZGVsMxv_sinpif(0x1.d062b6p-2) got 0x1.fa8c06p-1
 				 want 0x1.fa8c02p-1.  */
-svfloat32_t SV_NAME_F1 (sinpi) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (sinpi) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

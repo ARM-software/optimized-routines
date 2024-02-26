@@ -1,6 +1,6 @@
 /*
  * Double-precision SVE tanh(x) function.
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -34,7 +34,7 @@ static const struct data
 };
 
 static inline svfloat64_t
-expm1_inline (svfloat64_t x, const svbool_t pg, const struct data *d)
+expm1_inline (svfloat64_t x, const svbool_t pg, const struct data *d) SC_ATTR
 {
   /* Helper routine for calculating exp(x) - 1. Vector port of the helper from
      the scalar variant of tanh.  */
@@ -60,7 +60,7 @@ expm1_inline (svfloat64_t x, const svbool_t pg, const struct data *d)
 }
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (tanh, x, y, special);
 }
@@ -69,7 +69,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
    version of expm1. The greatest observed error is 2.77 ULP:
    _ZGVsMxv_tanh(-0x1.c4a4ca0f9f3b7p-3) got -0x1.bd6a21a163627p-3
 				       want -0x1.bd6a21a163624p-3.  */
-svfloat64_t SV_NAME_D1 (tanh) (svfloat64_t x, svbool_t pg)
+svfloat64_t SV_NAME_D1 (tanh) (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

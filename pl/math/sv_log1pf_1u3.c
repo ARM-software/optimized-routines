@@ -1,7 +1,7 @@
 /*
  * Single-precision vector log(x + 1) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,7 +29,7 @@ static const struct data
 #define SignExponentMask 0xff800000
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f32 (log1pf, x, y, special);
 }
@@ -38,7 +38,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
    error is 1.27 ULP very close to 0.5.
    _ZGVsMxv_log1pf(0x1.fffffep-2) got 0x1.9f324p-2
 				 want 0x1.9f323ep-2.  */
-svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
+svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
   /* x < -1, Inf/Nan.  */

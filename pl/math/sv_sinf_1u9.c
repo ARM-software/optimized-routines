@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE sin(x) function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -33,7 +33,7 @@ static const struct data
 #define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp) SC_ATTR
 {
   return sv_call_f32 (sinf, x, y, cmp);
 }
@@ -43,7 +43,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
    This maximum error is achieved at multiple values in [-2^18, 2^18]
    but one example is:
    SV_NAME_F1 (sin)(0x1.9247a4p+0) got 0x1.fffff6p-1 want 0x1.fffffap-1.  */
-svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE sin(x) function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,7 +29,7 @@ static const struct data
 #define C(i) sv_f64 (d->poly[i])
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp) SC_ATTR
 {
   return sv_call_f64 (sin, x, y, cmp);
 }
@@ -43,7 +43,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
    is 3.22 ULP:
    _ZGVsMxv_sin (0x1.5702447b6f17bp+22) got 0x1.ffdcd125c84fbp-3
 				       want 0x1.ffdcd125c84f8p-3.  */
-svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

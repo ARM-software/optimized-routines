@@ -1,7 +1,7 @@
 /*
  * Function entries for ulp.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -23,17 +23,23 @@
 
 #if WANT_SVE_MATH
 
-#define _ZSVF1(f) ZSVF1 (f)
-#define _ZSVF2(f) ZSVF2 (f)
-#define _ZSVD1(f) ZSVD1 (f)
-#define _ZSVD2(f) ZSVD2 (f)
+# if WANT_SME_MATH
+#  define _ZSCF1(f) ZSCF1 (f)
+#  define _ZSCF2(f) ZSCF2 (f)
+#  define _ZSCD1(f) ZSCD1 (f)
+#  define _ZSCD2(f) ZSCD2 (f)
+# endif
+# define _ZSVF1(f) ZSVF1 (f)
+# define _ZSVF2(f) ZSVF2 (f)
+# define _ZSVD1(f) ZSVD1 (f)
+# define _ZSVD2(f) ZSVD2 (f)
 
 #else
 
-#define _ZSVF1(f)
-#define _ZSVF2(f)
-#define _ZSVD1(f)
-#define _ZSVD2(f)
+# define _ZSVF1(f)
+# define _ZSVF2(f)
+# define _ZSVD1(f)
+# define _ZSVD2(f)
 
 #endif
 

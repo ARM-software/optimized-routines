@@ -1,6 +1,6 @@
 # Example config.mk
 #
-# Copyright (c) 2018-2023, Arm Limited.
+# Copyright (c) 2018-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 # Subprojects to build
@@ -64,11 +64,19 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 # routines only so that SVE code does not leak into scalar
 # routines. It is also necessary to add it for tools (e.g. ulp,
 # mathbench)
+# Disable/enable SVE and/or SME vector math code and tests
+# SME math requires SVE math to be enabled.
 WANT_SVE_MATH = 0
+
+# Disable/enable SME/SSVE code. Requires WANT_SVE_MATH = 1.
+WANT_SME_MATH = 0
 ifeq ($(WANT_SVE_MATH), 1)
   math-sve-cflags = -march=armv8-a+sve
+  ifeq ($(WANT_SME_MATH), 1)
+    math-sme-cflags = -march=armv9-a+sme+sve
+  endif
 endif
-math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH)
+math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH) -DWANT_SME_MATH=$(WANT_SME_MATH)
 
 # If defined to 1, set errno in math functions according to ISO C.  Many math
 # libraries do not set errno, so this is 0 by default.  It may need to be

@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE hypot(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -14,7 +14,7 @@
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t sqsum, svfloat32_t x, svfloat32_t y, svbool_t pg,
-	      svbool_t special)
+	      svbool_t special) SC_ATTR
 {
   return sv_call2_f32 (hypotf, x, y, svsqrt_x (pg, sqsum), special);
 }
@@ -24,7 +24,7 @@ special_case (svfloat32_t sqsum, svfloat32_t x, svfloat32_t y, svbool_t pg,
    _ZGVsMxvv_hypotf (0x1.6a213cp-19, -0x1.32b982p-26) got 0x1.6a2346p-19
 						     want 0x1.6a2344p-19.  */
 svfloat32_t SV_NAME_F2 (hypot) (svfloat32_t x, svfloat32_t y,
-				const svbool_t pg)
+				const svbool_t pg) SC_ATTR
 {
   svfloat32_t sqsum = svmla_x (pg, svmul_x (pg, x, x), y, y);
 

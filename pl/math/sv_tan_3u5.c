@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE tan(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -28,7 +28,7 @@ static const struct data
 };
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (tan, x, y, special);
 }
@@ -37,7 +37,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
    Maximum measured error is 3.48 ULP:
    _ZGVsMxv_tan(0x1.4457047ef78d8p+20) got -0x1.f6ccd8ecf7dedp+37
 				      want -0x1.f6ccd8ecf7deap+37.  */
-svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg)
+svfloat64_t SV_NAME_D1 (tan) (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *dat = ptr_barrier (&data);
 

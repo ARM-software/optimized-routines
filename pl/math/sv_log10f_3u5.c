@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE log10 function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -34,7 +34,7 @@ static const struct data
 #define MantissaMask 0x007fffff
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f32 (log10f, x, y, special);
 }
@@ -44,7 +44,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
    Maximum error is 3.31ulps:
    SV_NAME_F1 (log10)(0x1.555c16p+0) got 0x1.ffe2fap-4
 				    want 0x1.ffe2f4p-4.  */
-svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (log10) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
   svuint32_t ix = svreinterpret_u32 (x);
