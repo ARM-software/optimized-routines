@@ -143,6 +143,27 @@ sc_lookup_u64 (svuint64_t index, const uint64_t *data) SC_ATTR
   return ret;
 }
 
-#endif
+static inline svfloat64_t
+sc_lookup_f64 (svuint64_t index, const double *data)
+{
+  uint64_t idx_arr[svcntd ()];
+  svst1 (svptrue_b64 (), idx_arr, index);
+  svfloat64_t ret = svdup_n_f64 (idx_arr[svcntd () - 1]);
+  for (int i = svcntd () - 2; i >= 0; i--)
+    ret = svinsr (ret, data[idx_arr[i]]);
+  return ret;
+}
 
+static inline svfloat32_t
+sc_lookup_f32 (svuint32_t index, const float *data)
+{
+  uint32_t idx_arr[svcntw ()];
+  svst1 (svptrue_b32 (), idx_arr, index);
+  svfloat32_t ret = svdup_n_f32 (idx_arr[svcntw () - 1]);
+  for (int i = svcntw () - 2; i >= 0; i--)
+    ret = svinsr (ret, data[idx_arr[i]]);
+  return ret;
+}
+
+#endif
 #endif

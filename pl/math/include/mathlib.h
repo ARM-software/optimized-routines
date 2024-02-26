@@ -214,9 +214,12 @@ svfloat32_t _ZGVsMxv_sc_atanf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_atan (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxvv_sc_atan2 (svfloat64_t, svfloat64_t,
 				svbool_t) __streaming_compatible;
+svfloat32_t _ZGVsMxv_sc_cbrtf (svfloat32_t, svbool_t) __streaming_compatible;
+svfloat64_t _ZGVsMxv_sc_cbrt (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_cospif (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_cospi (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_cosf (svfloat32_t, svbool_t) __streaming_compatible;
+svfloat64_t _ZGVsMxv_sc_cosh (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_cos (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_expm1f (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_expm1 (svfloat64_t, svbool_t) __streaming_compatible;

@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE cbrt(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -36,15 +36,19 @@ const static struct data
 #define HalfExp 0x3fe0000000000000
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (cbrt, x, y, special);
 }
 
 static inline svfloat64_t
-shifted_lookup (const svbool_t pg, const float64_t *table, svint64_t i)
+shifted_lookup (const svbool_t pg, const float64_t *table, svint64_t i) SC_ATTR
 {
+#if ENABLE_SC_COMPAT
+  return sc_lookup_f64 (svreinterpret_u64 (svadd_z (pg, i, 2)), table);
+#else
   return svld1_gather_index (pg, table, svadd_x (pg, i, 2));
+#endif
 }
 
 /* Approximation for double-precision vector cbrt(x), using low-order
@@ -54,7 +58,7 @@ shifted_lookup (const svbool_t pg, const float64_t *table, svint64_t i)
    is an integer.
    _ZGVsMxv_cbrt (0x0.3fffb8d4413f3p-1022) got 0x1.965f53b0e5d97p-342
 					  want 0x1.965f53b0e5d95p-342.  */
-svfloat64_t SV_NAME_D1 (cbrt) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (cbrt) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE cbrt(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -32,15 +32,19 @@ const static struct data
 #define HalfExp 0x3f000000
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f32 (cbrtf, x, y, special);
 }
 
 static inline svfloat32_t
-shifted_lookup (const svbool_t pg, const float32_t *table, svint32_t i)
+shifted_lookup (const svbool_t pg, const float32_t *table, svint32_t i) SC_ATTR
 {
+#if ENABLE_SC_COMPAT
+  return sc_lookup_f32 (svreinterpret_u32 (svadd_z (pg, i, 2)), table);
+#else
   return svld1_gather_index (pg, table, svadd_x (pg, i, 2));
+#endif
 }
 
 /* Approximation for vector single-precision cbrt(x) using Newton iteration
@@ -49,7 +53,7 @@ shifted_lookup (const svbool_t pg, const float32_t *table, svint32_t i)
    0x1.85a2aa and the exponent is a multiple of 3, for example:
    _ZGVsMxv_cbrtf (0x1.85a2aap+3) got 0x1.267936p+1
 				 want 0x1.267932p+1.  */
-svfloat32_t SV_NAME_F1 (cbrt) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (cbrt) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

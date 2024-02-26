@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE cosh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -31,7 +31,7 @@ static const struct data
 };
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (cosh, x, y, special);
 }
@@ -39,7 +39,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 /* Helper for approximating exp(x). Copied from sv_exp_tail, with no
    special-case handling or tail.  */
 static inline svfloat64_t
-exp_inline (svfloat64_t x, const svbool_t pg, const struct data *d)
+exp_inline (svfloat64_t x, const svbool_t pg, const struct data *d) SC_ATTR
 {
   /* Calculate exp(x).  */
   svfloat64_t z = svmla_x (pg, sv_f64 (d->shift), x, d->inv_ln2);
@@ -50,7 +50,6 @@ exp_inline (svfloat64_t x, const svbool_t pg, const struct data *d)
 
   svuint64_t u = svreinterpret_u64 (z);
   svuint64_t e = svlsl_x (pg, u, 52 - V_EXP_TAIL_TABLE_BITS);
-  svuint64_t i = svand_x (pg, u, d->index_mask);
 
   svfloat64_t y = svmla_x (pg, sv_f64 (d->poly[1]), r, d->poly[2]);
   y = svmla_x (pg, sv_f64 (d->poly[0]), r, y);
@@ -58,7 +57,13 @@ exp_inline (svfloat64_t x, const svbool_t pg, const struct data *d)
   y = svmul_x (pg, r, y);
 
   /* s = 2^(n/N).  */
+#if ENABLE_SC_COMPAT
+  svuint64_t i = svand_z (pg, u, d->index_mask);
+  u = sc_lookup_u64 (i, __v_exp_tail_data);
+#else
+  svuint64_t i = svand_x (pg, u, d->index_mask);
   u = svld1_gather_index (pg, __v_exp_tail_data, i);
+#endif
   svfloat64_t s = svreinterpret_f64 (svadd_x (pg, u, e));
 
   return svmla_x (pg, s, s, y);
@@ -74,7 +79,7 @@ exp_inline (svfloat64_t x, const svbool_t pg, const struct data *d)
    The greatest observed error in the non-special region is 1.54 ULP:
    _ZGVsMxv_cosh (0x1.ba5651dd4486bp+2) got 0x1.f5e2bb8d5c98fp+8
 				       want 0x1.f5e2bb8d5c991p+8.  */
-svfloat64_t SV_NAME_D1 (cosh) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (cosh) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 
