@@ -216,6 +216,7 @@ $(ulp-itvs): $(math-lib-itvs)
 
 check-pl/math-ulp: $(math-tools) $(ulp-lims) $(fenv-exps) $(ulp-itvs)
 	WANT_SVE_MATH=$(WANT_SVE_MATH) \
+	WANT_SME_MATH=$(WANT_SME_MATH) \
 	ULPFLAGS="$(math-ulpflags)" \
 	LIMITS=../../../$(ulp-lims) \
 	INTERVALS=../../../$(ulp-itvs) \

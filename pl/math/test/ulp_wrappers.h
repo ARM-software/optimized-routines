@@ -161,6 +161,14 @@ double sv_cexpi_cos(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x)
   }                                                                                           \
   static double Z_sc_##func(double x, double y) { return _Z_sc_##func(x, y); }
 
+static __attribute__((noinline)) float _Z_sc_powi(float x, float y) __arm_streaming {
+  return svretf(_ZGVsMxvv_sc_powi(svargf(x), svdup_s32((int)round(y)), svptrue_b32()));
+}
+static float Z_sc_powi(float x, float y) { return _Z_sc_powi(x, y); }
+static __attribute__((noinline)) double _Z_sc_powk(double x, double y) __arm_streaming {
+  return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), svptrue_b64()));
+}
+static double Z_sc_powk(double x, double y) { return _Z_sc_powk(x, y); }
 
 static __attribute__((noinline)) float _sc_sincosf_sin(float x) __arm_streaming { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sc_sincosf(svdup_f32(x), s, c, svptrue_b32()); return s[0]; }
 static __attribute__((noinline)) float _sc_sincosf_cos(float x) __arm_streaming { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sc_sincosf(svdup_f32(x), s, c, svptrue_b32()); return c[0]; }

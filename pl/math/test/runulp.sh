@@ -2,7 +2,7 @@
 
 # ULP error check script.
 #
-# Copyright (c) 2019-2023, Arm Limited.
+# Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 #set -x
@@ -53,16 +53,35 @@ fi
 flags="${ULPFLAGS:--q}"
 runsv=
 if [ $WANT_SVE_MATH -eq 1 ]; then
-# No guarantees about powi accuracy, so regression-test for exactness
-# w.r.t. the custom reference impl in ulp_wrappers.h
-check -q -f -e 0 _ZGVsMxvv_powi  0  inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powi  0  inf x -0 -1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x -0 -1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powk  0  inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x  0  1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powk  0  inf x -0 -1000 100000 && runsv=1
-check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x -0 -1000 100000 && runsv=1
+    # No guarantees about powi accuracy, so regression-test for exactness
+    # w.r.t. the custom reference impl in ulp_wrappers.h
+    if [ "$FUNC" == "_ZGVsMxvv_powi" ] ||  [ -z "$FUNC" ]; then
+	check -q -f -e 0 _ZGVsMxvv_powi  0  inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_powi  0  inf x -0 -1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x -0 -1000 100000 && runsv=1
+    elif [ "$FUNC" == "_ZGVsMxvv_powk" ] ||  [ -z "$FUNC" ]; then
+	check -q -f -e 0 _ZGVsMxvv_powk  0  inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_powk  0  inf x -0 -1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x -0 -1000 100000 && runsv=1
+    fi
+fi
+
+if [ $WANT_SME_MATH -eq 1 ]; then
+    # No guarantees about powi accuracy, so regression-test for exactness
+    # w.r.t. the custom reference impl in ulp_wrappers.h
+    if [ "$FUNC" == "_ZGVsMxvv_sc_powi" ] ||  [ -z "$FUNC" ]; then
+	check -q -f -e 0 _ZGVsMxvv_sc_powi  0  inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_sc_powi -0 -inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_sc_powi  0  inf x -0 -1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_sc_powi -0 -inf x -0 -1000 100000 && runsv=1
+    elif [ "$FUNC" == "_ZGVsMxvv_sc_powk" ] ||  [ -z "$FUNC" ]; then
+	check -q -f -e 0 _ZGVsMxvv_sc_powk  0  inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_sc_powk -0 -inf x  0  1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_sc_powk  0  inf x -0 -1000 100000 && runsv=1
+	check -q -f -e 0 _ZGVsMxvv_sc_powk -0 -inf x -0 -1000 100000 && runsv=1
+    fi
 fi
 
 while read F LO HI N C

@@ -75,6 +75,8 @@ F (_ZGVsMxv_cexpi_sin, sv_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 F (_ZGVsMxv_cexpi_cos, sv_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 
 #if WANT_SME_MATH
+F (_ZGVsMxvv_sc_powk, Z_sc_powk, ref_powi, mpfr_powi, 2, 0, d2, 0)
+F (_ZGVsMxvv_sc_powi, Z_sc_powi, ref_powif, mpfr_powi, 2, 1, f2, 0)
 
 F (_ZGVsMxvl4l4_sc_sincos_sinf, sc_sincos_sinf, sin, mpfr_sin, 1, 1, f1, 0)
 F (_ZGVsMxvl4l4_sc_sincos_cosf, sc_sincos_cosf, cos, mpfr_cos, 1, 1, f1, 0)

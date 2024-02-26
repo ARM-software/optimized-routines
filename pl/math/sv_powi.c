@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE powi(x, n) function.
  *
- * Copyright (c) 2020-2023, Arm Limited.
+ * Copyright (c) 2020-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -12,7 +12,12 @@
    importance than performance, hence we provide no estimate for worst-case
    error.  */
 svfloat64_t
-_ZGVsMxvv_powk (svfloat64_t as, svint64_t ns, svbool_t p)
+#if ENABLE_SC_COMPAT
+_ZGVsMxvv_sc_powk
+#else
+_ZGVsMxvv_powk
+#endif
+    (svfloat64_t as, svint64_t ns, svbool_t p) SC_ATTR
 {
   /* Compute powi by successive squaring, right to left.  */
   svfloat64_t acc = sv_f64 (1.0);

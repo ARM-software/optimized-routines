@@ -295,6 +295,18 @@ y_Z_sc_pow (sv_double x, sv_bool pg) __arm_streaming_compatible
   return _ZGVsMxvv_sc_pow (svdup_f64 (2.34), x, pg);
 }
 
+static sv_float
+_Z_sc_powi_wrap (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_powi (x, svcvt_s32_f32_x (pg, x), pg);
+}
+
+static sv_double
+_Z_sc_powk_wrap (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  return _ZGVsMxvv_sc_powk (x, svcvt_s64_f64_x (pg, x), pg);
+}
+
 #endif // WANT_SME_MATH
 
 #endif // WANT_SVE_MATH
