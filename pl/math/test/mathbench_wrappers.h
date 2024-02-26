@@ -178,7 +178,7 @@ _Z_sv_sincosf_wrap (sv_float x, sv_bool pg)
 {
   float s[svcntw ()], c[svcntw ()];
   _ZGVsMxvl4l4_sincosf (x, s, c, pg);
-  return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
 }
 
 static sv_float
@@ -193,7 +193,7 @@ _Z_sv_sincos_wrap (sv_double x, sv_bool pg)
 {
   double s[svcntd ()], c[svcntd ()];
   _ZGVsMxvl8l8_sincos (x, s, c, pg);
-  return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
 }
 
 static sv_double
@@ -227,6 +227,36 @@ static sv_double
 _Z_sc_hypot_wrap (sv_double x, sv_bool pg) __arm_streaming_compatible
 {
   return _ZGVsMxvv_sc_hypot (x, svdup_f64 (5.0), pg);
+}
+
+static sv_double
+_Z_sc_sincos_wrap (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  double s[svcntd ()], c[svcntd ()];
+  _ZGVsMxvl8l8_sc_sincos (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
+}
+
+static sv_double
+_Z_sc_cexpi_wrap (sv_double x, sv_bool pg) __arm_streaming_compatible
+{
+  svfloat64x2_t sc = _ZGVsMxv_sc_cexpi (x, pg);
+  return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
+}
+
+static sv_float
+_Z_sc_sincosf_wrap (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  float s[svcntw ()], c[svcntw ()];
+  _ZGVsMxvl4l4_sc_sincosf (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
+}
+
+static sv_float
+_Z_sc_cexpif_wrap (sv_float x, sv_bool pg) __arm_streaming_compatible
+{
+  svfloat32x2_t sc = _ZGVsMxv_sc_cexpif (x, pg);
+  return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
 
 #endif // WANT_SME_MATH

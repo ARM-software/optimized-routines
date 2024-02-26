@@ -1,7 +1,7 @@
 /*
  * Single-precision vector sincos function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -15,9 +15,11 @@
 #include "sv_sincosf_common.h"
 #include "sv_math.h"
 #include "pl_test.h"
+#include "pl_sig.h"
 
 static void NOINLINE
-special_case (svfloat32_t x, svbool_t special, float *out_sin, float *out_cos)
+special_case (svfloat32_t x, svbool_t special, float *out_sin,
+	      float *out_cos) SC_ATTR
 {
   svbool_t p = svptrue_pat_b32 (SV_VL1);
   for (int i = 0; i < svcntw (); i++)
@@ -35,9 +37,8 @@ special_case (svfloat32_t x, svbool_t special, float *out_sin, float *out_cos)
    sv_sincosf_sin(0x1.c704c4p+19) got 0x1.fff698p-5 want 0x1.fff69cp-5
    Worst-case error for cos is 1.81 ULP:
    sv_sincosf_cos(0x1.e506fp+19) got -0x1.ffec6ep-6 want -0x1.ffec72p-6.  */
-void
-_ZGVsMxvl4l4_sincosf (svfloat32_t x, float *out_sin, float *out_cos,
-		      svbool_t pg)
+void SV_NAME_FLL (sincos) (svfloat32_t x, float *out_sin, float *out_cos,
+			   svbool_t pg) SC_ATTR
 {
   const struct sv_sincosf_data *d = ptr_barrier (&sv_sincosf_data);
   svbool_t special = check_ge_rangeval (pg, x, d);
@@ -51,11 +52,11 @@ _ZGVsMxvl4l4_sincosf (svfloat32_t x, float *out_sin, float *out_cos,
     special_case (x, special, out_sin, out_cos);
 }
 
-PL_TEST_ULP (_ZGVsMxv_sincosf_sin, 1.17)
-PL_TEST_ULP (_ZGVsMxv_sincosf_cos, 1.31)
+PL_TEST_ULP (SV_NAME_FLL (sincos_sin), 1.17)
+PL_TEST_ULP (SV_NAME_FLL (sincos_cos), 1.31)
 #define SV_SINCOSF_INTERVAL(lo, hi, n)                                        \
-  PL_TEST_INTERVAL (_ZGVsMxv_sincosf_sin, lo, hi, n)                          \
-  PL_TEST_INTERVAL (_ZGVsMxv_sincosf_cos, lo, hi, n)
+  PL_TEST_INTERVAL (SV_NAME_FLL (sincos_sin), lo, hi, n)                      \
+  PL_TEST_INTERVAL (SV_NAME_FLL (sincos_cos), lo, hi, n)
 SV_SINCOSF_INTERVAL (0, 0x1p20, 500000)
 SV_SINCOSF_INTERVAL (-0, -0x1p20, 500000)
 SV_SINCOSF_INTERVAL (0x1p20, inf, 10000)

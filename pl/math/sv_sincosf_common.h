@@ -1,7 +1,7 @@
 /*
  * Core approximation for single-precision vector sincos
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -22,7 +22,8 @@ const static struct sv_sincosf_data
 };
 
 static inline svbool_t
-check_ge_rangeval (svbool_t pg, svfloat32_t x, const struct sv_sincosf_data *d)
+check_ge_rangeval (svbool_t pg, svfloat32_t x,
+		   const struct sv_sincosf_data *d) SC_ATTR
 {
   svbool_t in_bounds = svaclt (pg, x, d->range_val);
   return svnot_z (pg, in_bounds);
@@ -36,7 +37,8 @@ check_ge_rangeval (svbool_t pg, svfloat32_t x, const struct sv_sincosf_data *d)
    Worst-case error for cos is 1.81 ULP:
    sv_sincosf_cos(0x1.e506fp+19) got -0x1.ffec6ep-6 want -0x1.ffec72p-6.  */
 static inline svfloat32x2_t
-sv_sincosf_inline (svbool_t pg, svfloat32_t x, const struct sv_sincosf_data *d)
+sv_sincosf_inline (svbool_t pg, svfloat32_t x,
+		   const struct sv_sincosf_data *d) SC_ATTR
 {
   /* n = rint ( x / (pi/2) ).  */
   svfloat32_t q = svmla_x (pg, sv_f32 (d->shift), x, d->inv_pio2);

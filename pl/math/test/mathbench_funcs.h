@@ -95,6 +95,10 @@
 {"_ZGVsMxvv_sc_atan2",  'd', 'c', -10.0, 10.0, {.scd = _Z_sc_atan2_wrap}},
 {"_ZGVsMxvv_sc_hypotf", 'f', 'c', -10.0, 10.0, {.scf = _Z_sc_hypotf_wrap}},
 {"_ZGVsMxvv_sc_hypot",  'd', 'c', -10.0, 10.0, {.scd = _Z_sc_hypot_wrap}},
+{"_ZGVsMxvl4l4_sc_sincosf", 'f', 'c', -3.1, 3.1, {.scf = _Z_sc_sincosf_wrap}},
+{"_ZGVsMxvl8l8_sc_sincos", 'd', 'c', -3.1, 3.1, {.scd = _Z_sc_sincos_wrap}},
+{"_ZGVsMxv_sc_cexpif", 'f', 'c', -3.1, 3.1, {.scf = _Z_sc_cexpif_wrap}},
+{"_ZGVsMxv_sc_cexpi", 'd', 'c', -3.1, 3.1, {.scd = _Z_sc_cexpi_wrap}},
 #endif
 #endif
     // clang-format on

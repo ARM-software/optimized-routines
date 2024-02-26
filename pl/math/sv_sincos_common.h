@@ -1,7 +1,7 @@
 /*
  * Core approximation for double-precision vector sincos
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,7 +29,8 @@ static const struct sv_sincos_data
   .range_val = 0x1p23, };
 
 static inline svbool_t
-check_ge_rangeval (svbool_t pg, svfloat64_t x, const struct sv_sincos_data *d)
+check_ge_rangeval (svbool_t pg, svfloat64_t x,
+		   const struct sv_sincos_data *d) SC_ATTR
 {
   svbool_t in_bounds = svaclt (pg, x, d->range_val);
   return svnot_z (pg, in_bounds);
@@ -41,7 +42,8 @@ check_ge_rangeval (svbool_t pg, svfloat64_t x, const struct sv_sincos_data *d)
    v_sincos_sin (0x1.d70eef40f39b1p+12) got -0x1.ffe9537d5dbb7p-3
 				       want -0x1.ffe9537d5dbb4p-3.  */
 static inline svfloat64x2_t
-sv_sincos_inline (svbool_t pg, svfloat64_t x, const struct sv_sincos_data *d)
+sv_sincos_inline (svbool_t pg, svfloat64_t x,
+		  const struct sv_sincos_data *d) SC_ATTR
 {
   /* q = nearest integer to 2 * x / pi.  */
   svfloat64_t q = svsub_x (pg, svmla_x (pg, sv_f64 (d->shift), x, d->inv_pio2),

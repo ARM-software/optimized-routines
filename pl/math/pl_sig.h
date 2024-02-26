@@ -9,6 +9,8 @@
 #define SC_NAME_D1(fun) _ZGVsMxv_sc_##fun
 #define SC_NAME_F2(fun) _ZGVsMxvv_sc_##fun##f
 #define SC_NAME_D2(fun) _ZGVsMxvv_sc_##fun
+#define SC_NAME_FLL(fun) _ZGVsMxvl4l4_sc_##fun##f
+#define SC_NAME_DLL(fun) _ZGVsMxvl8l8_sc_##fun
 
 /* If streaming-compatibility is enabled, paste over instances of SV with SC to
    ensure that the source including this file emits names and signatures
@@ -20,11 +22,15 @@
 # define SV_NAME_D1 SC_NAME_D1
 # define SV_NAME_F2 SC_NAME_F2
 # define SV_NAME_D2 SC_NAME_D2
+# define SV_NAME_FLL SC_NAME_FLL
+# define SV_NAME_DLL SC_NAME_DLL
 #else
 # define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
 # define SV_NAME_D1(fun) _ZGVsMxv_##fun
 # define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
 # define SV_NAME_D2(fun) _ZGVsMxvv_##fun
+# define SV_NAME_FLL(fun) _ZGVsMxvl4l4_##fun##f
+# define SV_NAME_DLL(fun) _ZGVsMxvl8l8_##fun
 #endif
 
 #define PL_DECL_SF1(fun) float fun##f (float);

@@ -64,13 +64,27 @@ F (_ZGVnN2v_cexpi_cos, v_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 F (_ZGVsMxvv_powk, Z_sv_powk, ref_powi, mpfr_powi, 2, 0, d2, 0)
 F (_ZGVsMxvv_powi, Z_sv_powi, ref_powif, mpfr_powi, 2, 1, f2, 0)
 
-F (_ZGVsMxv_sincosf_sin, sv_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
-F (_ZGVsMxv_sincosf_cos, sv_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
-F (_ZGVsMxv_cexpif_sin, sv_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)
-F (_ZGVsMxv_cexpif_cos, sv_cexpif_cos, cos, mpfr_cos, 1, 1, f1, 0)
+F (_ZGVsMxvl4l4_sincos_sinf, sv_sincos_sinf, sin, mpfr_sin, 1, 1, f1, 0)
+F (_ZGVsMxvl4l4_sincos_cosf, sv_sincos_cosf, cos, mpfr_cos, 1, 1, f1, 0)
+F (_ZGVsMxv_cexpi_sinf, sv_cexpi_sinf, sin, mpfr_sin, 1, 1, f1, 0)
+F (_ZGVsMxv_cexpi_cosf, sv_cexpi_cosf, cos, mpfr_cos, 1, 1, f1, 0)
 
-F (_ZGVsMxv_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
-F (_ZGVsMxv_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+F (_ZGVsMxvl8l8_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+F (_ZGVsMxvl8l8_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 F (_ZGVsMxv_cexpi_sin, sv_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 F (_ZGVsMxv_cexpi_cos, sv_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+
+#if WANT_SME_MATH
+
+F (_ZGVsMxvl4l4_sc_sincos_sinf, sc_sincos_sinf, sin, mpfr_sin, 1, 1, f1, 0)
+F (_ZGVsMxvl4l4_sc_sincos_cosf, sc_sincos_cosf, cos, mpfr_cos, 1, 1, f1, 0)
+F (_ZGVsMxv_sc_cexpi_sinf, sc_cexpi_sinf, sin, mpfr_sin, 1, 1, f1, 0)
+F (_ZGVsMxv_sc_cexpi_cosf, sc_cexpi_cosf, cos, mpfr_cos, 1, 1, f1, 0)
+
+F (_ZGVsMxvl8l8_sc_sincos_sin, sc_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+F (_ZGVsMxvl8l8_sc_sincos_cos, sc_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+F (_ZGVsMxv_sc_cexpi_sin, sc_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+F (_ZGVsMxv_sc_cexpi_cos, sc_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+
+#endif
 #endif

@@ -222,6 +222,9 @@ svfloat64_t _ZGVsMxvv_sc_atan2 (svfloat64_t, svfloat64_t,
 				svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_cbrtf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_cbrt (svfloat64_t, svbool_t) __streaming_compatible;
+svfloat32x2_t _ZGVsMxv_sc_cexpif (svfloat32_t,
+				  svbool_t) __streaming_compatible;
+svfloat64x2_t _ZGVsMxv_sc_cexpi (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_cospif (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_cospi (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_cosf (svfloat32_t, svbool_t) __streaming_compatible;
@@ -256,6 +259,10 @@ svfloat32_t _ZGVsMxv_sc_tanhf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_tanh (svfloat64_t, svbool_t) __streaming_compatible;
 svfloat32_t _ZGVsMxv_sc_tanf (svfloat32_t, svbool_t) __streaming_compatible;
 svfloat64_t _ZGVsMxv_sc_tan (svfloat64_t, svbool_t) __streaming_compatible;
+void _ZGVsMxvl4l4_sc_sincosf (svfloat32_t, float *, float *,
+			      svbool_t) __streaming_compatible;
+void _ZGVsMxvl8l8_sc_sincos (svfloat64_t, double *, double *,
+			     svbool_t) __streaming_compatible;
 #  else
 #   define __streaming_compatible
 #  endif
