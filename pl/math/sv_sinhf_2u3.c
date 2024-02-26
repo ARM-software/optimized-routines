@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE sinh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -23,7 +23,7 @@ static const struct data
 };
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t pg)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t pg) SC_ATTR
 {
   return sv_call_f32 (sinhf, x, y, pg);
 }
@@ -33,7 +33,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t pg)
    The maximum error is 2.26 ULP:
    _ZGVsMxv_sinhf (0x1.e34a9ep-4) got 0x1.e469ep-4
 				 want 0x1.e469e4p-4.  */
-svfloat32_t SV_NAME_F1 (sinh) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (sinh) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
   svfloat32_t ax = svabs_x (pg, x);

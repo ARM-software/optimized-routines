@@ -2,7 +2,7 @@
  * SVE helper for single-precision routines which calculate exp(x) - 1 and do
  * not need special-case handling
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -32,7 +32,8 @@ struct sv_expm1f_data
 #define C(i) sv_f32 (d->c##i)
 
 static inline svfloat32_t
-expm1f_inline (svfloat32_t x, svbool_t pg, const struct sv_expm1f_data *d)
+expm1f_inline (svfloat32_t x, svbool_t pg,
+	       const struct sv_expm1f_data *d) SC_ATTR
 {
   /* This vector is reliant on layout of data - it contains constants
    that can be used with _lane forms of svmla/svmls. Values are:

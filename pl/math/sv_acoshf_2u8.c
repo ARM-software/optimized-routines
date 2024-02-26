@@ -1,6 +1,6 @@
 /*
  * Single-precision SVE acosh(x) function.
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -14,7 +14,7 @@
 #include "sv_log1pf_inline.h"
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f32 (acoshf, x, y, special);
 }
@@ -25,7 +25,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
    Maximum error is 2.78 ULPs:
    SV_NAME_F1 (acosh) (0x1.01e996p+0) got 0x1.f45b42p-4
 				     want 0x1.f45b3cp-4.  */
-svfloat32_t SV_NAME_F1 (acosh) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (acosh) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   svuint32_t ix = svreinterpret_u32 (x);
   svbool_t special = svcmpge (pg, svsub_x (pg, ix, One), Thres);

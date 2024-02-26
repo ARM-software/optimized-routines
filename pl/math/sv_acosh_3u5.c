@@ -15,7 +15,7 @@
 #define Thres (0x1ff0000000000000) /* asuint64 (0x1p511) - One.  */
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (acosh, x, y, special);
 }
@@ -25,7 +25,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
    argument to log1p falls in the k=0 interval, i.e. x close to 1:
    SV_NAME_D1 (acosh)(0x1.1e4388d4ca821p+0) got 0x1.ed23399f5137p-2
 					   want 0x1.ed23399f51373p-2.  */
-svfloat64_t SV_NAME_D1 (acosh) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (acosh) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   /* (ix - One) >= (BigBound - One).  */
   svuint64_t ix = svreinterpret_u64 (x);

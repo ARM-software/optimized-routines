@@ -9,6 +9,8 @@
 #include "poly_sve_f64.h"
 #include "pl_sig.h"
 #include "pl_test.h"
+#define SV_LOG_INLINE_POLY_ORDER 5
+#include "sv_log_inline.h"
 
 #define SignMask (0x8000000000000000)
 #define One (0x3ff0000000000000)
@@ -17,9 +19,7 @@
 static const struct data
 {
   double poly[18];
-  double ln2, p3, p1, p4, p0, p2;
-  uint64_t n;
-  uint64_t off;
+  struct sv_log_inline_data log_tbl;
 
 } data = {
   /* Polynomial generated using Remez on [2^-26, 1].  */
@@ -30,65 +30,13 @@ static const struct data
       0x1.0becef748dafcp-7, -0x1.b90c7099dd397p-8, 0x1.541f2bb1ffe51p-8,
       -0x1.d217026a669ecp-9, 0x1.0b5c7977aaf7p-9, -0x1.e0f37daef9127p-11,
       0x1.388b5fe542a6p-12, -0x1.021a48685e287p-14, 0x1.93d4ba83d34dap-18 },
-  .ln2 = 0x1.62e42fefa39efp-1,
-  .p0 = -0x1.ffffffffffff7p-2,
-  .p1 = 0x1.55555555170d4p-2,
-  .p2 = -0x1.0000000399c27p-2,
-  .p3 = 0x1.999b2e90e94cap-3,
-  .p4 = -0x1.554e550bd501ep-3,
-  .n = 1 << V_LOG_TABLE_BITS,
-  .off = 0x3fe6900900000000
+  .log_tbl = SV_LOG_CONSTANTS
 };
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (asinh, x, y, special);
-}
-
-static inline svfloat64_t
-__sv_log_inline (svfloat64_t x, const struct data *d,
-		 const svbool_t pg) SC_ATTR
-{
-  /* Double-precision SVE log, copied from SVE log implementation with some
-     cosmetic modification and special-cases removed. See that file for details
-     of the algorithm used.  */
-
-  svuint64_t ix = svreinterpret_u64 (x);
-  svuint64_t tmp = svsub_x (pg, ix, d->off);
-  svuint64_t i = svand_z (pg, svlsr_x (pg, tmp, (51 - V_LOG_TABLE_BITS)),
-			  (d->n - 1) << 1);
-
-#if ENABLE_SC_COMPAT
-  /* Normal lookups break streaming compatibility,
-     so if we want SME math, an SME-legal lookup is required.  */
-  svfloat64_t invc, logc;
-  sc_lookup2_f64 (i, &invc, &logc, &__v_log_data.table[0].invc);
-#else
-  svfloat64_t invc = svld1_gather_index (pg, &__v_log_data.table[0].invc, i);
-  svfloat64_t logc = svld1_gather_index (pg, &__v_log_data.table[0].logc, i);
-#endif
-
-  svint64_t k = svasr_x (pg, svreinterpret_s64 (tmp), 52);
-  svuint64_t iz = svsub_x (pg, ix, svand_x (pg, tmp, 0xfffULL << 52));
-  svfloat64_t z = svreinterpret_f64 (iz);
-
-  svfloat64_t ln2_p3 = svld1rq (svptrue_b64 (), &d->ln2);
-  svfloat64_t p1_p4 = svld1rq (svptrue_b64 (), &d->p1);
-
-  svfloat64_t r = svmla_x (pg, sv_f64 (-1.0), invc, z);
-  svfloat64_t kd = svcvt_f64_x (pg, k);
-
-  svfloat64_t hi = svmla_lane (svadd_x (pg, logc, r), kd, ln2_p3, 0);
-  svfloat64_t r2 = svmul_x (pg, r, r);
-
-  svfloat64_t y = svmla_lane (sv_f64 (d->p2), r, ln2_p3, 1);
-
-  svfloat64_t p = svmla_lane (sv_f64 (d->p0), r, p1_p4, 0);
-  y = svmla_lane (y, r2, p1_p4, 1);
-  y = svmla_x (pg, p, r2, y);
-  y = svmla_x (pg, hi, r2, y);
-  return y;
 }
 
 /* Double-precision implementation of SVE asinh(x).
@@ -120,8 +68,9 @@ svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg) SC_ATTR
   if (likely (svptest_any (pg, ge1)))
     {
       svfloat64_t x2 = svmul_x (pg, ax, ax);
-      option_1 = __sv_log_inline (
-	  svadd_x (pg, ax, svsqrt_x (pg, svadd_x (pg, x2, 1))), d, pg);
+      option_1 = sv_log_inline (
+	  pg, svadd_x (pg, ax, svsqrt_x (pg, svadd_x (pg, x2, 1))),
+	  &d->log_tbl);
     }
 
   /* Option 2: |x| < 1.

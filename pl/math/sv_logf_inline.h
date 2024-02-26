@@ -23,7 +23,8 @@ struct sv_logf_data
   }
 
 static inline svfloat32_t
-sv_logf_inline (svbool_t pg, svfloat32_t x, const struct sv_logf_data *d)
+sv_logf_inline (svbool_t pg, svfloat32_t x,
+		const struct sv_logf_data *d) SC_ATTR
 {
   svuint32_t u = svreinterpret_u32 (x);
 

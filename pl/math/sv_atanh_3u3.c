@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE atanh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -16,7 +16,7 @@
 #define Half (0x3fe0000000000000)
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f64 (atanh, x, y, special);
 }
@@ -25,7 +25,7 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
    The greatest observed error is 2.81 ULP:
    _ZGVsMxv_atanh(0x1.ffae6288b601p-6) got 0x1.ffd8ff31b5019p-6
 				      want 0x1.ffd8ff31b501cp-6.  */
-svfloat64_t SV_NAME_D1 (atanh) (svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D1 (atanh) (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
 
   svfloat64_t ax = svabs_x (pg, x);

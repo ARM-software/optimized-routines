@@ -2,7 +2,7 @@
  * Helper for SVE routines which calculate log(1 + x) and do not
  * need special-case handling
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -28,7 +28,7 @@ static const struct sv_log1pf_data
 };
 
 static inline svfloat32_t
-eval_poly (svfloat32_t m, const float32_t *c, svbool_t pg)
+eval_poly (svfloat32_t m, const float32_t *c, svbool_t pg) SC_ATTR
 {
   svfloat32_t p_12 = svmla_x (pg, sv_f32 (c[0]), m, sv_f32 (c[1]));
   svfloat32_t m2 = svmul_x (pg, m, m);
@@ -40,7 +40,7 @@ eval_poly (svfloat32_t m, const float32_t *c, svbool_t pg)
 }
 
 static inline svfloat32_t
-sv_log1pf_inline (svfloat32_t x, svbool_t pg)
+sv_log1pf_inline (svfloat32_t x, svbool_t pg) SC_ATTR
 {
   const struct sv_log1pf_data *d = ptr_barrier (&sv_log1pf_data);
 

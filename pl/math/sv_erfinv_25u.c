@@ -47,7 +47,7 @@ const static struct data
 };
 
 static inline svfloat64_t
-special (svbool_t pg, svfloat64_t x, const struct data *d)
+special (svbool_t pg, svfloat64_t x, const struct data *d) SC_ATTR
 {
   /* Note erfinv(inf) should return NaN, and erfinv(1) should return Inf.
      By using log here, instead of log1p, we return finite values for both
@@ -72,14 +72,14 @@ special (svbool_t pg, svfloat64_t x, const struct data *d)
 }
 
 static inline svfloat64_t
-lookup (const double *c, svuint64_t idx)
+lookup (const double *c, svuint64_t idx) SC_ATTR
 {
   svfloat64_t x = svld1rq_f64 (svptrue_b64 (), c);
   return svtbl (x, idx);
 }
 
 static inline svfloat64_t
-notails (svbool_t pg, svfloat64_t x, const struct data *d)
+notails (svbool_t pg, svfloat64_t x, const struct data *d) SC_ATTR
 {
   svfloat64_t t = svmad_x (pg, x, x, -0.5625);
   svfloat64_t p = svmla_x (pg, sv_f64 (d->P[5][0]), t, d->P[6][0]);
@@ -97,7 +97,7 @@ notails (svbool_t pg, svfloat64_t x, const struct data *d)
    error function in double precision. Largest observed error is 24.75 ULP:
    _ZGVsMxv_erfinv(0x1.fc861d81c2ba8p-1) got 0x1.ea05472686625p+0
 					want 0x1.ea0547268660cp+0.  */
-svfloat64_t SV_NAME_D1 (erfinv) (svfloat64_t x, svbool_t pg)
+svfloat64_t SV_NAME_D1 (erfinv) (svfloat64_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
   /* Calculate inverse error using algorithm described in

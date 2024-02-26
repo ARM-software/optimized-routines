@@ -2,7 +2,7 @@
  * Helper for SVE double-precision routines which calculate log(1 + x) and do
  * not need special-case handling
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #ifndef PL_MATH_SV_LOG1P_INLINE_H
@@ -36,7 +36,7 @@ static const struct sv_log1p_data
 };
 
 static inline svfloat64_t
-sv_log1p_inline (svfloat64_t x, const svbool_t pg)
+sv_log1p_inline (svfloat64_t x, const svbool_t pg) SC_ATTR
 {
   /* Helper for calculating log(x + 1). Adapted from v_log1p_inline.h, which
      differs from v_log1p_2u5.c by:

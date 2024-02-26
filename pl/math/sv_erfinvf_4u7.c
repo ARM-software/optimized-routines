@@ -41,7 +41,7 @@ const static struct data
 	   .logf_tbl = SV_LOGF_CONSTANTS };
 
 static inline svfloat32_t
-special (svbool_t pg, svfloat32_t x, const struct data *d)
+special (svbool_t pg, svfloat32_t x, const struct data *d) SC_ATTR
 {
   svfloat32_t ax = svabs_x (pg, x);
   svfloat32_t t = svdivr_x (
@@ -59,7 +59,7 @@ special (svbool_t pg, svfloat32_t x, const struct data *d)
 }
 
 static inline svfloat32_t
-notails (svbool_t pg, svfloat32_t x, const struct data *d)
+notails (svbool_t pg, svfloat32_t x, const struct data *d) SC_ATTR
 {
   /* Shortcut when no input is in a tail region - no need to gather shift or
      coefficients.  */
@@ -79,7 +79,7 @@ notails (svbool_t pg, svfloat32_t x, const struct data *d)
    tail region:
    _ZGVsMxv_erfinvf(0x1.f84e9ap-1) got 0x1.b8326ap+0
 				  want 0x1.b83274p+0.  */
-svfloat32_t SV_NAME_F1 (erfinv) (svfloat32_t x, svbool_t pg)
+svfloat32_t SV_NAME_F1 (erfinv) (svfloat32_t x, svbool_t pg) SC_ATTR
 {
   const struct data *d = ptr_barrier (&data);
 

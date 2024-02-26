@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE asinh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -15,7 +15,7 @@
 #define BigBound (0x5f800000)  /* asuint(0x1p64).  */
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special) SC_ATTR
 {
   return sv_call_f32 (asinhf, x, y, special);
 }
@@ -26,7 +26,7 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
    Maximum error is 2.48 ULPs:
    SV_NAME_F1 (asinh) (0x1.008864p-3) got 0x1.ffbbbcp-4
 				     want 0x1.ffbbb8p-4.  */
-svfloat32_t SV_NAME_F1 (asinh) (svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F1 (asinh) (svfloat32_t x, const svbool_t pg) SC_ATTR
 {
   svfloat32_t ax = svabs_x (pg, x);
   svuint32_t iax = svreinterpret_u32 (ax);
