@@ -2,7 +2,7 @@
 
 # ULP error check script.
 #
-# Copyright (c) 2019-2023, Arm Limited.
+# Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 #set -x
@@ -67,7 +67,7 @@ fi
 
 while read F LO HI N C
 do
-	t $F $LO $HI $N $C
+	[[ -z $F ]] || t $F $LO $HI $N $C
 done << EOF
 $(cat $INTERVALS | grep "\b$FUNC\b")
 EOF
