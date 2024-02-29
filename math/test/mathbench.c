@@ -7,6 +7,8 @@
 
 #undef _GNU_SOURCE
 #define _GNU_SOURCE 1
+#include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -111,6 +113,19 @@ sv_float_dup (float x)
 {
   return svdup_n_f32(x);
 }
+
+# if WANT_SME_MATH
+static __attribute__ ((noinline)) uint64_t
+streaming_double_vlen () __arm_streaming
+{
+  return svcntd ();
+}
+static __attribute__ ((noinline)) uint64_t
+streaming_float_vlen () __arm_streaming
+{
+  return svcntw ();
+}
+# endif
 #else
 /* dummy definitions to make things compile.  */
 #define sv_double_len(x) 1
@@ -311,6 +326,31 @@ runf_latency (float f (float))
     prev = f (Af[i] + prev * z);
 }
 
+static uint64_t
+tic (void)
+{
+  struct timespec ts;
+  if (clock_gettime (CLOCK_REALTIME, &ts))
+    abort ();
+  return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+}
+
+#define TIMEIT(run, f)                                                        \
+  ({                                                                          \
+    uint64_t dt = -1;                                                         \
+    run (f); /* Warm up.  */                                                  \
+    for (int j = 0; j < measurecount; j++)                                    \
+      {                                                                       \
+	uint64_t t0 = tic ();                                                 \
+	for (int i = 0; i < itercount; i++)                                   \
+	  run (f);                                                            \
+	uint64_t t1 = tic ();                                                 \
+	if (t1 - t0 < dt)                                                     \
+	  dt = t1 - t0;                                                       \
+      }                                                                       \
+    dt;                                                                       \
+  })
+
 #ifdef __vpcs
 static void
 run_vn_thruput (__vpcs v_double f (v_double))
@@ -344,6 +384,21 @@ runf_vn_latency (__vpcs v_float f (v_float))
   v_float prev = v_float_dup (0);
   for (int i = 0; i < N; i += v_float_len ())
     prev = f (vbslq_f32 (sel, prev, v_float_load (Af+i)));
+}
+
+uint64_t
+dispatch_n (const struct fun *f, int type)
+{
+  if (f->prec == 'd' && type == 't')
+    return TIMEIT (run_vn_thruput, f->fun.vnd);
+  else if (f->prec == 'd' && type == 'l')
+    return TIMEIT (run_vn_latency, f->fun.vnd);
+  else if (f->prec == 'f' && type == 't')
+    return TIMEIT (runf_vn_thruput, f->fun.vnf);
+  else if (f->prec == 'f' && type == 'l')
+    return TIMEIT (runf_vn_latency, f->fun.vnf);
+  else
+    assert (false);
 }
 #endif
 
@@ -381,6 +436,22 @@ runf_sv_latency (sv_float f (sv_float, sv_bool))
   for (int i = 0; i < N; i += sv_float_len ())
     prev = f (svsel_f32 (sel, sv_float_load (Af+i), prev), svptrue_b32 ());
 }
+
+uint64_t
+dispatch_s (const struct fun *f, int type)
+{
+  if (f->prec == 'd' && type == 't')
+    return TIMEIT (run_sv_thruput, f->fun.svd);
+  else if (f->prec == 'd' && type == 'l')
+    return TIMEIT (run_sv_latency, f->fun.svd);
+  else if (f->prec == 'f' && type == 't')
+    return TIMEIT (runf_sv_thruput, f->fun.svf);
+  else if (f->prec == 'f' && type == 'l')
+    return TIMEIT (runf_sv_latency, f->fun.svf);
+  else
+    assert (false);
+}
+
 # if WANT_SME_MATH
 /* The __arm_streaming attribute is enough to ensure that
    streaming-compatible functions are run in streaming mode, however
@@ -388,7 +459,7 @@ runf_sv_latency (sv_float f (sv_float, sv_bool))
    streaming mode on every call. Ideally we want to choose either
    streaming or non-streaming as an option, and then if streaming is
    chosen set it for the duration of TIMEIT.  */
-static __attribute__ ((noinline)) void
+static void
 run_sc_thruput (sv_double f (sv_double, sv_bool)
 		    __arm_streaming_compatible) __arm_streaming
 {
@@ -396,7 +467,7 @@ run_sc_thruput (sv_double f (sv_double, sv_bool)
     f (sv_double_load (A + i), svptrue_b64 ());
 }
 
-static __attribute__ ((noinline)) void
+static void
 runf_sc_thruput (sv_float f (sv_float, sv_bool)
 		     __arm_streaming_compatible) __arm_streaming
 {
@@ -404,7 +475,7 @@ runf_sc_thruput (sv_float f (sv_float, sv_bool)
     f (sv_float_load (Af + i), svptrue_b32 ());
 }
 
-static __attribute__ ((noinline)) void
+static void
 run_sc_latency (sv_double f (sv_double, sv_bool)
 		    __arm_streaming_compatible) __arm_streaming
 {
@@ -415,7 +486,7 @@ run_sc_latency (sv_double f (sv_double, sv_bool)
     prev = f (svsel_f64 (sel, sv_double_load (A + i), prev), svptrue_b64 ());
 }
 
-static __attribute__ ((noinline)) void
+static void
 runf_sc_latency (sv_float f (sv_float, sv_bool)
 		     __arm_streaming_compatible) __arm_streaming
 {
@@ -425,37 +496,43 @@ runf_sc_latency (sv_float f (sv_float, sv_bool)
   for (int i = 0; i < N; i += sv_float_len ())
     prev = f (svsel_f32 (sel, sv_float_load (Af + i), prev), svptrue_b32 ());
 }
+
+uint64_t __attribute__ ((noinline))
+dispatch_c (const struct fun *f, int type) __arm_streaming
+{
+  if (f->prec == 'd' && type == 't')
+    return TIMEIT (run_sc_thruput, f->fun.scd);
+  else if (f->prec == 'd' && type == 'l')
+    return TIMEIT (run_sc_latency, f->fun.scd);
+  else if (f->prec == 'f' && type == 't')
+    return TIMEIT (runf_sc_thruput, f->fun.scf);
+  else if (f->prec == 'f' && type == 'l')
+    return TIMEIT (runf_sc_latency, f->fun.scf);
+  else
+    assert (false);
+}
 # endif
 #endif
 
-static uint64_t
-tic (void)
+uint64_t
+dispatch_scalar (const struct fun *f, int type)
 {
-  struct timespec ts;
-  if (clock_gettime (CLOCK_REALTIME, &ts))
-    abort ();
-  return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+  if (f->prec == 'd' && type == 't')
+    return TIMEIT (run_thruput, f->fun.d);
+  else if (f->prec == 'd' && type == 'l')
+    return TIMEIT (run_latency, f->fun.d);
+  else if (f->prec == 'f' && type == 't')
+    return TIMEIT (runf_thruput, f->fun.f);
+  else if (f->prec == 'f' && type == 'l')
+    return TIMEIT (runf_latency, f->fun.f);
+  else
+    assert (false);
 }
-
-#define TIMEIT(run, f) do { \
-  dt = -1; \
-  run (f); /* Warm up.  */ \
-  for (int j = 0; j < measurecount; j++) \
-    { \
-      uint64_t t0 = tic (); \
-      for (int i = 0; i < itercount; i++) \
-	run (f); \
-      uint64_t t1 = tic (); \
-      if (t1 - t0 < dt) \
-	dt = t1 - t0; \
-    } \
-} while (0)
 
 static void
 bench1 (const struct fun *f, int type, double lo, double hi)
 {
   uint64_t dt = 0;
-  uint64_t ns100;
   const char *s = type == 't' ? "rthruput" : "latency";
   int vlen = 1;
 
@@ -463,46 +540,36 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     vlen = f->prec == 'd' ? v_double_len() : v_float_len();
   else if (f->vec == 's')
     vlen = f->prec == 'd' ? sv_double_len() : sv_float_len();
+#if WANT_SME_MATH
+  else if (f->vec == 'c')
+    vlen = f->prec == 'd' ? streaming_double_vlen () : streaming_float_vlen ();
+#endif
 
-  if (f->prec == 'd' && type == 't' && f->vec == 0)
-    TIMEIT (run_thruput, f->fun.d);
-  else if (f->prec == 'd' && type == 'l' && f->vec == 0)
-    TIMEIT (run_latency, f->fun.d);
-  else if (f->prec == 'f' && type == 't' && f->vec == 0)
-    TIMEIT (runf_thruput, f->fun.f);
-  else if (f->prec == 'f' && type == 'l' && f->vec == 0)
-    TIMEIT (runf_latency, f->fun.f);
+  switch (f->vec)
+    {
+    case 0:
+      dt = dispatch_scalar (f, type);
+      break;
 #ifdef __vpcs
-  else if (f->prec == 'd' && type == 't' && f->vec == 'n')
-    TIMEIT (run_vn_thruput, f->fun.vnd);
-  else if (f->prec == 'd' && type == 'l' && f->vec == 'n')
-    TIMEIT (run_vn_latency, f->fun.vnd);
-  else if (f->prec == 'f' && type == 't' && f->vec == 'n')
-    TIMEIT (runf_vn_thruput, f->fun.vnf);
-  else if (f->prec == 'f' && type == 'l' && f->vec == 'n')
-    TIMEIT (runf_vn_latency, f->fun.vnf);
+    case 'n':
+      dt = dispatch_n (f, type);
+      break;
 #endif
 #if WANT_SVE_MATH
-  else if (f->prec == 'd' && type == 't' && f->vec == 's')
-    TIMEIT (run_sv_thruput, f->fun.svd);
-  else if (f->prec == 'd' && type == 'l' && f->vec == 's')
-    TIMEIT (run_sv_latency, f->fun.svd);
-  else if (f->prec == 'f' && type == 't' && f->vec == 's')
-    TIMEIT (runf_sv_thruput, f->fun.svf);
-  else if (f->prec == 'f' && type == 'l' && f->vec == 's')
-    TIMEIT (runf_sv_latency, f->fun.svf);
+    case 's':
+      dt = dispatch_s (f, type);
+      break;
 # if WANT_SME_MATH
-  else if (f->prec == 'd' && type == 't' && f->vec == 'c')
-    TIMEIT (run_sc_thruput, f->fun.scd);
-  else if (f->prec == 'd' && type == 'l' && f->vec == 'c')
-    TIMEIT (run_sc_latency, f->fun.scd);
-  else if (f->prec == 'f' && type == 't' && f->vec == 'c')
-    TIMEIT (runf_sc_thruput, f->fun.scf);
-  else if (f->prec == 'f' && type == 'l' && f->vec == 'c')
-    TIMEIT (runf_sc_latency, f->fun.scf);
+    case 'c':
+      dt = dispatch_c (f, type);
+      break;
 # endif
 #endif
+    default:
+      assert (false);
+    }
 
+  uint64_t ns100;
   if (type == 't')
     {
       ns100 = (100 * dt + itercount * N / 2) / (itercount * N);
