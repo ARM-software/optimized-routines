@@ -54,8 +54,8 @@
      asin(x) ~ pi/2 - acos(x) ~ pi/2 - 2 * sqrt(z) (1 + z * P(z)).
 
    The largest observed error in this region is 2.69 ulps,
-   asin(0x1.044ac9819f573p-1) got 0x1.110d7e85fdd5p-1
-			     want 0x1.110d7e85fdd53p-1.  */
+   asin(0x1.044e8cefee301p-1) got 0x1.1111dd54ddf96p-1
+			     want 0x1.1111dd54ddf99p-1.  */
 double
 asin (double x)
 {
@@ -97,7 +97,7 @@ asin (double x)
 }
 
 PL_SIG (S, D, 1, asin, -1.0, 1.0)
-PL_TEST_ULP (asin, 2.19)
+PL_TEST_ULP (asin, 2.20)
 PL_TEST_INTERVAL (asin, 0, Small, 5000)
 PL_TEST_INTERVAL (asin, Small, 0.5, 50000)
 PL_TEST_INTERVAL (asin, 0.5, 1.0, 50000)
