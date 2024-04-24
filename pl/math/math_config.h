@@ -1,7 +1,7 @@
 /*
  * Configuration for math routines.
  *
- * Copyright (c) 2017-2023, Arm Limited.
+ * Copyright (c) 2017-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -68,6 +68,9 @@
 #  define USE_GLIBC_ABI 0
 # endif
 #endif
+
+/* Symbol renames to avoid libc conflicts.  */
+#define __exp_data pl_math_exp_data
 
 /* Optionally used extensions.  */
 #ifdef __GNUC__

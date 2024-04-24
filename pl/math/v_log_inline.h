@@ -1,7 +1,7 @@
 /*
  * Double-precision vector log(x) function - inline version
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -57,8 +57,8 @@ log_lookup (uint64x2_t i)
 {
   /* Since N is a power of 2, n % N = n & (N - 1).  */
   struct entry e;
-  uint64_t i0 = (i[0] >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
-  uint64_t i1 = (i[1] >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
+  uint64_t i0 = (vgetq_lane_u64 (i, 0) >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
+  uint64_t i1 = (vgetq_lane_u64 (i, 1) >> (52 - V_LOG_TABLE_BITS)) & IndexMask;
   float64x2_t e0 = vld1q_f64 (&__v_log_data.table[i0].invc);
   float64x2_t e1 = vld1q_f64 (&__v_log_data.table[i1].invc);
   e.invc = vuzp1q_f64 (e0, e1);

@@ -24,10 +24,11 @@ const static struct data
 
       P_10 and Q_10 are also stored in homogenous vectors to allow better
       memory access when no lanes are in a tail region.  */
-  float32x4_t Plo, PQ, Qhi, P29_3, tailshift;
+  float Plo[4], PQ[4], Qhi[4];
+  float32x4_t P29_3, tailshift;
   float32x4_t P_50[6], Q_50[2];
   float32x4_t P_10[3], Q_10[3];
-  uint8x16_t idxhi, idxlo;
+  uint8_t idxhi[16], idxlo[16];
   struct v_logf_data logf_tbl;
 } data = {
   .idxlo = { 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3 },
@@ -124,18 +125,18 @@ float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
      Add 4 * i to a group of 4 lanes to copy 32-bit lane i. Each vector stores
      two pairs of coeffs, so we need two idx vectors - one for each pair.  */
   uint8x16_t off = vandq_u8 (vreinterpretq_u8_u32 (is_tail), vdupq_n_u8 (4));
-  uint8x16_t idx_lo = vaddq_u8 (d->idxlo, off);
-  uint8x16_t idx_hi = vaddq_u8 (d->idxhi, off);
+  uint8x16_t idx_lo = vaddq_u8 (vld1q_u8 (d->idxlo), off);
+  uint8x16_t idx_hi = vaddq_u8 (vld1q_u8 (d->idxhi), off);
 
   /* Load the tables.  */
-  float32x4_t p_lo = d->Plo;
-  float32x4_t pq = d->PQ;
-  float32x4_t qhi = d->Qhi;
+  float32x4_t plo = vld1q_f32 (d->Plo);
+  float32x4_t pq = vld1q_f32 (d->PQ);
+  float32x4_t qhi = vld1q_f32 (d->Qhi);
 
   /* Do the lookup (and calculate p3 by masking non-tail lanes).  */
   float32x4_t p3 = vreinterpretq_f32_u32 (
       vandq_u32 (is_tail, vreinterpretq_u32_f32 (d->P29_3)));
-  float32x4_t p0 = lookup (p_lo, idx_lo), p1 = lookup (p_lo, idx_hi),
+  float32x4_t p0 = lookup (plo, idx_lo), p1 = lookup (plo, idx_hi),
 	      p2 = lookup (pq, idx_lo), q0 = lookup (pq, idx_hi),
 	      q1 = lookup (qhi, idx_lo), q2 = lookup (qhi, idx_hi);
 

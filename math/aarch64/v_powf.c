@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include <endian.h>
-
 #include "v_math.h"
 
 #define Min v_u32 (0x00800000)
@@ -119,10 +117,10 @@ log2_lookup (const struct data *d, uint32_t i)
       &d->log2_tab[(i >> (23 - V_POWF_LOG2_TABLE_BITS)) & Log2IdxMask].invc);
 }
 
-static inline uint64_t
+static inline uint64x1_t
 exp2f_lookup (const struct data *d, uint64_t i)
 {
-  return d->exp2f_tab[i % (1 << V_EXP2F_TABLE_BITS)];
+  return vld1_u64 (&d->exp2f_tab[i % (1 << V_EXP2F_TABLE_BITS)]);
 }
 
 static inline float32x2_t
@@ -134,8 +132,8 @@ powf_core (const struct data *d, float64x2_t ylogx)
   float64x2_t r = vsubq_f64 (ylogx, kd);
 
   /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
-  uint64x2_t t
-      = (uint64x2_t){ exp2f_lookup (d, ki[0]), exp2f_lookup (d, ki[1]) };
+  uint64x2_t t = vcombine_u64 (exp2f_lookup (d, vgetq_lane_s64 (ki, 0)),
+			       exp2f_lookup (d, vgetq_lane_s64 (ki, 1)));
   t = vaddq_u64 (
       t, vreinterpretq_u64_s64 (vshlq_n_s64 (ki, 52 - V_EXP2F_TABLE_BITS)));
   float64x2_t s = vreinterpretq_f64_u64 (t);
@@ -158,8 +156,10 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
 
   /* Use double precision for each lane: split input vectors into lo and hi
      halves and promote.  */
-  float64x2_t tab0 = log2_lookup (d, tmp[0]), tab1 = log2_lookup (d, tmp[1]),
-	      tab2 = log2_lookup (d, tmp[2]), tab3 = log2_lookup (d, tmp[3]);
+  float64x2_t tab0 = log2_lookup (d, vgetq_lane_u32 (tmp, 0)),
+	      tab1 = log2_lookup (d, vgetq_lane_u32 (tmp, 1)),
+	      tab2 = log2_lookup (d, vgetq_lane_u32 (tmp, 2)),
+	      tab3 = log2_lookup (d, vgetq_lane_u32 (tmp, 3));
 
   float64x2_t iz_lo = vcvt_f64_f32 (vget_low_f32 (iz)),
 	      iz_hi = vcvt_high_f64_f32 (iz);
@@ -167,17 +167,10 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
   float64x2_t k_lo = vcvtq_f64_s64 (vmovl_s32 (vget_low_s32 (k))),
 	      k_hi = vcvtq_f64_s64 (vmovl_high_s32 (k));
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
   float64x2_t invc_lo = vzip1q_f64 (tab0, tab1),
 	      invc_hi = vzip1q_f64 (tab2, tab3),
 	      logc_lo = vzip2q_f64 (tab0, tab1),
 	      logc_hi = vzip2q_f64 (tab2, tab3);
-#else
-  float64x2_t invc_lo = vzip1q_f64 (tab1, tab0),
-	      invc_hi = vzip1q_f64 (tab3, tab2),
-	      logc_lo = vzip2q_f64 (tab1, tab0),
-	      logc_hi = vzip2q_f64 (tab3, tab2);
-#endif
 
   float64x2_t y_lo = vcvt_f64_f32 (vget_low_f32 (y)),
 	      y_hi = vcvt_high_f64_f32 (y);

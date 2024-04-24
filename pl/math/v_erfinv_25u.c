@@ -22,7 +22,7 @@ const static struct data
       can be taken.  */
   double P[8][2], Q[7][2];
   float64x2_t tailshift;
-  uint8x16_t idx;
+  uint8_t idx[16];
   struct v_log_inline_data log_tbl;
   float64x2_t P_57[9], Q_57[10], P_17[7], Q_17[6];
 } data = { .P = { { 0x1.007ce8f01b2e8p+4, -0x1.f3596123109edp-7 },
@@ -128,7 +128,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
   uint64x2_t extreme_tail = vcagtq_f64 (x, v_f64 (0.9375));
 
   uint8x16_t off = vandq_u8 (vreinterpretq_u8_u64 (is_tail), vdupq_n_u8 (8));
-  uint8x16_t idx = vaddq_u8 (d->idx, off);
+  uint8x16_t idx = vaddq_u8 (vld1q_u8 (d->idx), off);
 
   float64x2_t t = vbslq_f64 (is_tail, d->tailshift, v_f64 (-0.5625));
   t = vfmaq_f64 (t, x, x);
