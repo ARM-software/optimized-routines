@@ -2,7 +2,7 @@
 /*
  * Function wrappers for ulp.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -83,10 +83,10 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #endif
 
-#define ZSVF1_WRAP(func) static float Z_sv_##func##f(float x) { return svretf(_ZGVsMxv_##func##f(svargf(x), svptrue_b32())); }
-#define ZSVF2_WRAP(func) static float Z_sv_##func##f(float x, float y) { return svretf(_ZGVsMxvv_##func##f(svargf(x), svargf(y), svptrue_b32())); }
-#define ZSVD1_WRAP(func) static double Z_sv_##func(double x) { return svretd(_ZGVsMxv_##func(svargd(x), svptrue_b64())); }
-#define ZSVD2_WRAP(func) static double Z_sv_##func(double x, double y) { return svretd(_ZGVsMxvv_##func(svargd(x), svargd(y), svptrue_b64())); }
+#define ZSVF1_WRAP(func) static float Z_sv_##func##f(svbool_t pg, float x) { return svretf(_ZGVsMxv_##func##f(svargf(x), pg), pg); }
+#define ZSVF2_WRAP(func) static float Z_sv_##func##f(svbool_t pg, float x, float y) { return svretf(_ZGVsMxvv_##func##f(svargf(x), svargf(y), pg), pg); }
+#define ZSVD1_WRAP(func) static double Z_sv_##func(svbool_t pg, double x) { return svretd(_ZGVsMxv_##func(svargd(x), pg), pg); }
+#define ZSVD2_WRAP(func) static double Z_sv_##func(svbool_t pg, double x, double y) { return svretd(_ZGVsMxvv_##func(svargd(x), svargd(y), pg), pg); }
 
 #if WANT_SVE_MATH
 
@@ -123,18 +123,18 @@ double v_cexpi_sin(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[0][0]; 
 double v_cexpi_cos(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[1][0]; }
 
 #if WANT_SVE_MATH
-static float Z_sv_powi(float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), svptrue_b32())); }
-static double Z_sv_powk(double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), svptrue_b64())); }
+static float Z_sv_powi(svbool_t pg, float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), pg), pg); }
+static double Z_sv_powk(svbool_t pg, double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), pg), pg); }
 
-float sv_sincosf_sin(float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, svptrue_b32()); return s[0]; }
-float sv_sincosf_cos(float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, svptrue_b32()); return c[0]; }
-float sv_cexpif_sin(float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), svptrue_b32()), 0)); }
-float sv_cexpif_cos(float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), svptrue_b32()), 1)); }
+float sv_sincosf_sin(svbool_t pg, float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, pg); return svretf(svld1(pg, s), pg); }
+float sv_sincosf_cos(svbool_t pg, float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, pg); return svretf(svld1(pg, c), pg); }
+float sv_cexpif_sin(svbool_t pg, float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), pg), 0), pg); }
+float sv_cexpif_cos(svbool_t pg, float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), pg), 1), pg); }
 
-double sv_sincos_sin(double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, svptrue_b64()); return s[0]; }
-double sv_sincos_cos(double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, svptrue_b64()); return c[0]; }
-double sv_cexpi_sin(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), svptrue_b64()), 0)); }
-double sv_cexpi_cos(double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), svptrue_b64()), 1)); }
+double sv_sincos_sin(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, s), pg); }
+double sv_sincos_cos(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, c), pg); }
+double sv_cexpi_sin(svbool_t pg, double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), pg), 0), pg); }
+double sv_cexpi_cos(svbool_t pg, double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), pg), 1), pg); }
 
 #endif
 // clang-format on

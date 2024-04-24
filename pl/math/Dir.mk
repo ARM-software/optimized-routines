@@ -193,6 +193,7 @@ check-pl/math-ulp: $(math-tools) $(ulp-lims) $(fenv-exps) $(ulp-itvs)
 	INTERVALS=../../../$(ulp-itvs) \
 	FENV=../../../$(fenv-exps) \
 	FUNC=$(func) \
+	PRED=$(pred) \
 	build/pl/bin/runulp.sh $(EMULATOR)
 
 check-pl/math: check-pl/math-test check-pl/math-rtest check-pl/math-ulp
