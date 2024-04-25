@@ -1,7 +1,7 @@
 /*
  * Double-precision vector pow function.
  *
- * Copyright (c) 2020-2023, Arm Limited.
+ * Copyright (c) 2020-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -22,18 +22,19 @@
 
 static const struct data
 {
-  float64x2_t log_poly[7];
+  float64x2_t log_poly[6];
   float64x2_t exp_poly[3];
   float64x2_t ln2_hi, ln2_lo;
-  float64x2_t shift, inv_ln2_n, ln2_hi_n, ln2_lo_n;
+  float64x2_t shift, inv_ln2_n, ln2_hi_n, ln2_lo_n, small_powx;
+  uint64x2_t inf;
 } data = {
   /* Coefficients copied from v_pow_log_data.c
      relative error: 0x1.11922ap-70 in [-0x1.6bp-8, 0x1.6bp-8]
      Coefficients are scaled to match the scaling during evaluation.  */
-  .log_poly = { V2 (-0x1p-1), V2 (0x1.555555555556p-2 * -2),
-		V2 (-0x1.0000000000006p-2 * -2), V2 (0x1.999999959554ep-3 * 4),
-		V2 (-0x1.555555529a47ap-3 * 4), V2 (0x1.2495b9b4845e9p-3 * -8),
-		V2 (-0x1.0002b8b263fc3p-3 * -8) },
+  .log_poly
+  = { V2 (0x1.555555555556p-2 * -2), V2 (-0x1.0000000000006p-2 * -2),
+      V2 (0x1.999999959554ep-3 * 4), V2 (-0x1.555555529a47ap-3 * 4),
+      V2 (0x1.2495b9b4845e9p-3 * -8), V2 (-0x1.0002b8b263fc3p-3 * -8) },
   .ln2_hi = V2 (0x1.62e42fefa3800p-1),
   .ln2_lo = V2 (0x1.ef35793c76730p-45),
   /* Polynomial coefficients: abs error: 1.43*2^-58, ulp error: 0.549
@@ -44,12 +45,14 @@ static const struct data
   .inv_ln2_n = V2 (0x1.71547652b82fep8), /* N/ln2.  */
   .ln2_hi_n = V2 (0x1.62e42fefc0000p-9), /* ln2/N.  */
   .ln2_lo_n = V2 (-0x1.c610ca86c3899p-45),
+  .small_powx = V2 (0x1p-126),
+  .inf = V2 (0x7ff0000000000000)
 };
 
 #define A(i) data.log_poly[i]
 #define C(i) data.exp_poly[i]
 
-/* This version implements an algorithm close to AOR scalar pow but
+/* This version implements an algorithm close to scalar pow but
    - does not implement the trick in the exp's specialcase subroutine to avoid
      double-rounding,
    - does not use a tail in the exponential core computation,
@@ -97,7 +100,7 @@ v_log_inline (uint64x2_t ix, float64x2_t *tail, const struct data *d)
   float64x2_t lo1 = vfmaq_f64 (logctail, kd, d->ln2_lo);
   float64x2_t lo2 = vaddq_f64 (vsubq_f64 (t1, t2), r);
   /* Evaluation is optimized assuming superscalar pipelined execution.  */
-  float64x2_t ar = vmulq_f64 (A (0), r);
+  float64x2_t ar = vmulq_f64 (v_f64 (-0.5), r);
   float64x2_t ar2 = vmulq_f64 (r, ar);
   float64x2_t ar3 = vmulq_f64 (r, ar2);
   /* k*Ln2 + log(c) + r + A[0]*r*r.  */
@@ -105,9 +108,9 @@ v_log_inline (uint64x2_t ix, float64x2_t *tail, const struct data *d)
   float64x2_t lo3 = vfmaq_f64 (vnegq_f64 (ar2), ar, r);
   float64x2_t lo4 = vaddq_f64 (vsubq_f64 (t2, hi), ar2);
   /* p = log1p(r) - r - A[0]*r*r.  */
-  float64x2_t a56 = vfmaq_f64 (A (5), r, A (6));
-  float64x2_t a34 = vfmaq_f64 (A (3), r, A (4));
-  float64x2_t a12 = vfmaq_f64 (A (1), r, A (2));
+  float64x2_t a56 = vfmaq_f64 (A (4), r, A (5));
+  float64x2_t a34 = vfmaq_f64 (A (2), r, A (3));
+  float64x2_t a12 = vfmaq_f64 (A (0), r, A (1));
   float64x2_t p = vfmaq_f64 (a34, ar2, a56);
   p = vfmaq_f64 (a12, ar2, p);
   p = vmulq_f64 (ar3, p);
@@ -118,6 +121,13 @@ v_log_inline (uint64x2_t ix, float64x2_t *tail, const struct data *d)
   return y;
 }
 
+static float64x2_t VPCS_ATTR NOINLINE
+exp_special_case (float64x2_t x, float64x2_t xtail)
+{
+  return (float64x2_t){ exp_nosignbias (x[0], xtail[0]),
+			exp_nosignbias (x[1], xtail[1]) };
+}
+
 /* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.  */
 static inline float64x2_t
 v_exp_inline (float64x2_t x, float64x2_t xtail, const struct data *d)
@@ -125,11 +135,12 @@ v_exp_inline (float64x2_t x, float64x2_t xtail, const struct data *d)
   /* Fallback to scalar exp_inline for all lanes if any lane
      contains value of x s.t. |x| <= 2^-54 or >= 512.  */
   uint64x2_t abstop
-      = vandq_u64 (vshrq_n_u64 (vreinterpretq_u64_f64 (x), 52), v_u64 (0x7ff));
+      = vshrq_n_u64 (vandq_u64 (vreinterpretq_u64_f64 (x), d->inf), 52);
   uint64x2_t uoflowx
       = vcgeq_u64 (vsubq_u64 (abstop, VecSmallExp), VecThresExp);
   if (unlikely (v_any_u64 (uoflowx)))
-    return v_call2_f64 (exp_nosignbias, x, xtail, x, v_u64 (-1));
+    return exp_special_case (x, xtail);
+
   /* exp(x) = 2^(k/N) * exp(r), with exp(r) in [2^(-1/2N),2^(1/2N)].  */
   /* x = ln2/N*k + r, with k integer and r in [-ln2/2N, ln2/2N].  */
   float64x2_t z = vmulq_f64 (d->inv_ln2_n, x);
@@ -158,53 +169,58 @@ v_exp_inline (float64x2_t x, float64x2_t xtail, const struct data *d)
   return vfmaq_f64 (scale, scale, tmp);
 }
 
+static float64x2_t NOINLINE VPCS_ATTR
+scalar_fallback (float64x2_t x, float64x2_t y)
+{
+  return (float64x2_t){ __pl_finite_pow (x[0], y[0]),
+			__pl_finite_pow (x[1], y[1]) };
+}
+
 float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
 {
   const struct data *d = ptr_barrier (&data);
   /* Case of x <= 0 is too complicated to be vectorised efficiently here,
      fallback to scalar pow for all lanes if any x < 0 detected.  */
   if (v_any_u64 (vclezq_s64 (vreinterpretq_s64_f64 (x))))
-    return v_call2_f64 (__pl_finite_pow, x, y, x, v_u64 (-1));
+    return scalar_fallback (x, y);
 
   uint64x2_t vix = vreinterpretq_u64_f64 (x);
   uint64x2_t viy = vreinterpretq_u64_f64 (y);
-  uint64x2_t vtopx = vshrq_n_u64 (vix, 52);
-  uint64x2_t vtopy = vshrq_n_u64 (viy, 52);
-  uint64x2_t vabstopx = vandq_u64 (vtopx, v_u64 (0x7ff));
-  uint64x2_t vabstopy = vandq_u64 (vtopy, v_u64 (0x7ff));
+  uint64x2_t iay = vandq_u64 (viy, d->inf);
 
   /* Special cases of x or y.  */
 #if WANT_SIMD_EXCEPT
   /* Small or large.  */
+  uint64x2_t vtopx = vshrq_n_u64 (vix, 52);
+  uint64x2_t vabstopy = vshrq_n_u64 (iay, 52);
   uint64x2_t specialx
       = vcgeq_u64 (vsubq_u64 (vtopx, VecSmallPowX), VecThresPowX);
   uint64x2_t specialy
       = vcgeq_u64 (vsubq_u64 (vabstopy, VecSmallPowY), VecThresPowY);
 #else
-  /* Inf or nan.  */
-  uint64x2_t specialx = vcgeq_u64 (vabstopx, v_u64 (0x7ff));
-  uint64x2_t specialy = vcgeq_u64 (vabstopy, v_u64 (0x7ff));
   /* The case y==0 does not trigger a special case, since in this case it is
      necessary to fix the result only if x is a signalling nan, which already
      triggers a special case. We test y==0 directly in the scalar fallback.  */
+  uint64x2_t iax = vandq_u64 (vix, d->inf);
+  uint64x2_t specialx = vcgeq_u64 (iax, d->inf);
+  uint64x2_t specialy = vcgeq_u64 (iay, d->inf);
 #endif
   uint64x2_t special = vorrq_u64 (specialx, specialy);
   /* Fallback to scalar on all lanes if any lane is inf or nan.  */
   if (unlikely (v_any_u64 (special)))
-    return v_call2_f64 (__pl_finite_pow, x, y, x, v_u64 (-1));
+    return scalar_fallback (x, y);
 
   /* Small cases of x: |x| < 0x1p-126.  */
-  uint64x2_t smallx = vcltq_u64 (vabstopx, VecSmallPowX);
+  uint64x2_t smallx = vcaltq_f64 (x, d->small_powx);
   if (unlikely (v_any_u64 (smallx)))
     {
       /* Update ix if top 12 bits of x are 0.  */
-      uint64x2_t sub_x = vceqzq_u64 (vtopx);
+      uint64x2_t sub_x = vceqzq_u64 (vshrq_n_u64 (vix, 52));
       if (unlikely (v_any_u64 (sub_x)))
 	{
 	  /* Normalize subnormal x so exponent becomes negative.  */
-	  uint64x2_t vix_norm
-	      = vreinterpretq_u64_f64 (vmulq_f64 (x, v_f64 (0x1p52)));
-	  vix_norm = vandq_u64 (vix_norm, v_u64 (0x7fffffffffffffff));
+	  uint64x2_t vix_norm = vreinterpretq_u64_f64 (
+	      vabsq_f64 (vmulq_f64 (x, vcvtq_f64_u64 (v_u64 (1ULL << 52)))));
 	  vix_norm = vsubq_u64 (vix_norm, v_u64 (52ULL << 52));
 	  vix = vbslq_u64 (sub_x, vix_norm, vix);
 	}
