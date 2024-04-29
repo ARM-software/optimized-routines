@@ -1,7 +1,7 @@
 /*
  * Single-precision vector cosh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -76,5 +76,6 @@ PL_SIG (V, F, 1, cosh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME_F1 (cosh), 1.89)
 PL_TEST_EXPECT_FENV (V_NAME_F1 (cosh), WANT_SIMD_EXCEPT)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0x1p-63, 100)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
+PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1p-63, 1, 1000)
+PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 1, 0x1.5a92d8p+6, 80000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)
