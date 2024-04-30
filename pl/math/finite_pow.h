@@ -1,7 +1,7 @@
 /*
  * Double-precision x^y function.
  *
- * Copyright (c) 2018-2023, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -108,7 +108,7 @@ special_case (double tmp, uint64_t sbits, uint64_t ki)
       sbits -= 1009ull << 52;
       scale = asdouble (sbits);
       y = 0x1p1009 * (scale + scale * tmp);
-      return check_oflow (eval_as_double (y));
+      return y;
     }
   /* k < 0, need special care in the subnormal range.  */
   sbits += 1022ull << 52;
@@ -128,7 +128,7 @@ special_case (double tmp, uint64_t sbits, uint64_t ki)
       lo = scale - y + scale * tmp;
       hi = one + y;
       lo = one - hi + y + lo;
-      y = eval_as_double (hi + lo) - one;
+      y = (hi + lo) - one;
       /* Fix the sign of 0.  */
       if (y == 0.0)
 	y = asdouble (sbits & 0x8000000000000000);
@@ -137,7 +137,7 @@ special_case (double tmp, uint64_t sbits, uint64_t ki)
     }
 #endif
   y = 0x1p-1022 * y;
-  return check_uflow (eval_as_double (y));
+  return y;
 }
 
 /* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
@@ -192,7 +192,7 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   double scale = asdouble (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
-  return eval_as_double (scale + scale * tmp);
+  return scale + scale * tmp;
 }
 
 /* Computes exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
@@ -239,7 +239,7 @@ exp_nosignbias (double x, double xtail)
   double scale = asdouble (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
-  return eval_as_double (scale + scale * tmp);
+  return scale + scale * tmp;
 }
 
 /* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
@@ -311,9 +311,7 @@ __pl_finite_pow (double x, double y)
 	  if (2 * ix == 0 && iy >> 63)
 	    return __math_divzero (sign_bias);
 #endif
-	  /* Without the barrier some versions of clang hoist the 1/x2 and
-	     thus division by zero exception can be signaled spuriously.  */
-	  return iy >> 63 ? opt_barrier_double (1 / x2) : x2;
+	  return iy >> 63 ? 1 / x2 : x2;
 	}
       /* Here x and y are non-zero finite.  */
       if (ix >> 63)
@@ -349,9 +347,7 @@ __pl_finite_pow (double x, double y)
       if (topx == 0)
 	{
 	  /* Normalize subnormal x so exponent becomes negative.  */
-	  /* Without the barrier some versions of clang evalutate the mul
-	     unconditionally causing spurious overflow exceptions.  */
-	  ix = asuint64 (opt_barrier_double (x) * 0x1p52);
+	  ix = asuint64 (x * 0x1p52);
 	  ix &= 0x7fffffffffffffff;
 	  ix -= 52ULL << 52;
 	}

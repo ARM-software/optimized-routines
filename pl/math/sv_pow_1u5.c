@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE pow(x, y) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -323,9 +323,7 @@ pow_sc (double x, double y)
       double_t x2 = x * x;
       if (ix >> 63 && checkint (iy) == 1)
 	x2 = -x2;
-      /* Without the barrier some versions of clang hoist the 1/x2 and
-	 thus division by zero exception can be signaled spuriously.  */
-      return (iy >> 63) ? opt_barrier_double (1 / x2) : x2;
+      return (iy >> 63) ? 1 / x2 : x2;
     }
   return x;
 }
