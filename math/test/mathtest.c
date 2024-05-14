@@ -1,9 +1,10 @@
 /*
  * mathtest.c - test rig for mathlib
  *
- * Copyright (c) 1998-2023, Arm Limited.
+ * Copyright (c) 1998-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+/* clang-format off */
 
 #include <assert.h>
 #include <stdio.h>
@@ -254,7 +255,9 @@ test_func tfuncs[] = {
     TFUNCARM(at_s,rt_s, expf, 3*ULPUNIT/4),
     TFUNCARM(at_s,rt_s, exp2f, 3*ULPUNIT/4),
     TFUNC(at_s,rt_s, expm1f, ULPUNIT),
+#if WANT_EXP10_TESTS
     TFUNC(at_d,rt_d, exp10, ULPUNIT),
+#endif
 
     /* power */
     TFUNC(at_d2,rt_d, pow, 3*ULPUNIT/4),
@@ -1707,3 +1710,4 @@ void undef_func() {
     failed++;
     puts("ERROR: undefined function called");
 }
+/* clang-format on */

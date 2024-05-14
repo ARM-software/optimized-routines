@@ -1,6 +1,6 @@
 # Makefile fragment - requires GNU make
 #
-# Copyright (c) 2019-2023, Arm Limited.
+# Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 S := $(srcdir)/math
@@ -96,6 +96,9 @@ build/bin/%.sh: $(S)/test/%.sh
 	cp $< $@
 
 math-tests := $(wildcard $(S)/test/testcases/directed/*.tst)
+ifeq ($(WANT_EXP10_TESTS),0)
+math-tests := $(filter-out %exp10.tst, $(math-tests))
+endif
 math-rtests := $(wildcard $(S)/test/testcases/random/*.tst)
 
 check-math-test: $(math-tools)
@@ -105,7 +108,7 @@ check-math-rtest: $(math-host-tools) $(math-tools)
 	cat $(math-rtests) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(math-testflags)
 
 check-math-ulp: $(math-tools)
-	ULPFLAGS="$(math-ulpflags)" WANT_SIMD_EXCEPT="$(WANT_SIMD_EXCEPT)" build/bin/runulp.sh $(EMULATOR)
+	ULPFLAGS="$(math-ulpflags)" WANT_SIMD_TESTS="$(WANT_SIMD_TESTS)" WANT_SIMD_EXCEPT="$(WANT_SIMD_EXCEPT)" WANT_EXP10_TESTS="$(WANT_EXP10_TESTS)" build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp
 

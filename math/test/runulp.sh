@@ -2,7 +2,7 @@
 
 # ULP error check script.
 #
-# Copyright (c) 2019-2023, Arm Limited.
+# Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 #set -x
@@ -72,6 +72,7 @@ t pow  0x1.ffffffffffff0p-1  0x1.0000000000008p0 x 0x1p60 0x1p68 50000
 t pow  0x1.ffffffffff000p-1  0x1p0 x 0x1p50 0x1p52 50000
 t pow -0x1.ffffffffff000p-1 -0x1p0 x 0x1p50 0x1p52 50000
 
+if [ $WANT_EXP10_TESTS -eq 1 ]; then
 L=0.02
 t exp10   0                   0x1p-47             5000
 t exp10  -0                  -0x1p-47             5000
@@ -81,6 +82,7 @@ t exp10   1                   0x1.34413509f79ffp8 50000
 t exp10  -1                  -0x1.434e6420f4374p8 50000
 t exp10  0x1.34413509f79ffp8  inf                 5000
 t exp10 -0x1.434e6420f4374p8 -inf                 5000
+fi # WANT_EXP10_TESTS
 
 L=1.0
 Ldir=0.9
@@ -153,6 +155,8 @@ Ldir=0.5
 done
 
 # vector functions
+
+if [ $WANT_SIMD_TESTS -eq 1 ]; then
 
 Ldir=0.5
 r='n'
@@ -275,6 +279,8 @@ sinf      _ZGVnN4v_sinf      -z
 cosf      _ZGVnN4v_cosf
 powf      _ZGVnN4vv_powf     -f
 EOF
+
+fi # WANT_SIMD_TESTS
 
 [ 0 -eq $FAIL ] || {
 	echo "FAILED $FAIL PASSED $PASS"

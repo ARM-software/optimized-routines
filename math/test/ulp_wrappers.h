@@ -1,7 +1,7 @@
 /*
  * Function wrappers for ulp.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -18,7 +18,7 @@ static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,
 #endif
 
 /* Wrappers for vector functions.  */
-#ifdef __vpcs
+#if WANT_SIMD_TESTS && defined (__vpcs)
 static float Z_sinf(float x) { return _ZGVnN4v_sinf(argf(x))[0]; }
 static float Z_cosf(float x) { return _ZGVnN4v_cosf(argf(x))[0]; }
 static float Z_expf_1u(float x) { return _ZGVnN4v_expf_1u(argf(x))[0]; }

@@ -7,7 +7,9 @@
 /* clang-format off */
 D (exp, -9.9, 9.9)
 D (exp, 0.5, 1.0)
+#if WANT_EXP10_TESTS
 D (exp10, -9.9, 9.9)
+#endif
 D (exp2, -9.9, 9.9)
 D (log, 0.01, 11.1)
 D (log, 0.999, 1.001)
@@ -44,7 +46,7 @@ F (cosf, 3.3, 33.3)
 F (cosf, 100, 1000)
 F (cosf, 1e6, 1e32)
 F (erff, -4.0, 4.0)
-#ifdef __vpcs
+#if WANT_SIMD_TESTS && defined (__vpcs)
 VND (_ZGVnN2v_exp, -9.9, 9.9)
 VND (_ZGVnN2v_log, 0.01, 11.1)
 {"_ZGVnN2vv_pow", 'd', 'n', 0.01, 11.1, {.vnd = xy_Z_pow}},

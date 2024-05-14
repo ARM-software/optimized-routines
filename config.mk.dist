@@ -1,6 +1,6 @@
 # Example config.mk
 #
-# Copyright (c) 2018-2023, Arm Limited.
+# Copyright (c) 2018-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 # Subprojects to build
@@ -76,9 +76,17 @@ math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH)
 WANT_ERRNO = 0
 math-cflags += -DWANT_ERRNO=$(WANT_ERRNO)
 
+# Enable SIMD in tests
+WANT_SIMD_TESTS = 1
+math-cflags += -DWANT_SIMD_TESTS=$(WANT_SIMD_TESTS)
+
 # If set to 1, set fenv in vector math routines.
 WANT_SIMD_EXCEPT = 0
 math-cflags += -DWANT_SIMD_EXCEPT=$(WANT_SIMD_EXCEPT)
+
+# If set to 1, enable tests for exp10.
+WANT_EXP10_TESTS = 1
+math-cflags += -DWANT_EXP10_TESTS=$(WANT_EXP10_TESTS)
 
 # Disable fenv checks
 #math-ulpflags = -q -f

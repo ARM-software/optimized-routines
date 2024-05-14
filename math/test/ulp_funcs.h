@@ -1,7 +1,7 @@
 /*
  * Function entries for ulp.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 /* clang-format off */
@@ -16,13 +16,15 @@
  F2 (pow)
  F1 (erf)
  D1 (exp)
+#if WANT_EXP10_TESTS
  D1 (exp10)
+#endif
  D1 (exp2)
  D1 (log)
  D1 (log2)
  D2 (pow)
  D1 (erf)
-#ifdef __vpcs
+#if WANT_SIMD_TESTS && defined (__vpcs)
  F (_ZGVnN4v_sinf, Z_sinf, sin, mpfr_sin, 1, 1, f1, 1)
  F (_ZGVnN4v_cosf, Z_cosf, cos, mpfr_cos, 1, 1, f1, 1)
  F (_ZGVnN4v_expf_1u, Z_expf_1u, exp, mpfr_exp, 1, 1, f1, 1)
