@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE powf function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -104,7 +104,7 @@ zeroinfnan (uint32_t ix)
 }
 
 /* A scalar subroutine used to fix main power special cases. Similar to the
-   preamble of finite_powf except that we do not update ix and sign_bias. This
+   preamble of scalar powf except that we do not update ix and sign_bias. This
    is done in the preamble of the SVE powf.  */
 static inline float
 powf_specialcase (float x, float y, float z)

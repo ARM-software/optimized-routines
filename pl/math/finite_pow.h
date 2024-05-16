@@ -267,7 +267,7 @@ zeroinfnan (uint64_t i)
 }
 
 static double NOINLINE
-__pl_finite_pow (double x, double y)
+pow_scalar_special_case (double x, double y)
 {
   uint32_t sign_bias = 0;
   uint64_t ix, iy;

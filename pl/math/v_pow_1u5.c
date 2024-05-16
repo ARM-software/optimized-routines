@@ -172,8 +172,8 @@ v_exp_inline (float64x2_t x, float64x2_t xtail, const struct data *d)
 static float64x2_t NOINLINE VPCS_ATTR
 scalar_fallback (float64x2_t x, float64x2_t y)
 {
-  return (float64x2_t){ __pl_finite_pow (x[0], y[0]),
-			__pl_finite_pow (x[1], y[1]) };
+  return (float64x2_t){ pow_scalar_special_case (x[0], y[0]),
+			pow_scalar_special_case (x[1], y[1]) };
 }
 
 float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
