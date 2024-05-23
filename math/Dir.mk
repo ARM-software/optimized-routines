@@ -96,7 +96,7 @@ build/bin/%.sh: $(S)/test/%.sh
 	cp $< $@
 
 math-tests := $(wildcard $(S)/test/testcases/directed/*.tst)
-ifeq ($(WANT_EXP10_TESTS),0)
+ifneq ($(WANT_EXP10_TESTS),1)
 math-tests := $(filter-out %exp10.tst, $(math-tests))
 endif
 math-rtests := $(wildcard $(S)/test/testcases/random/*.tst)

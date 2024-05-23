@@ -72,7 +72,7 @@ t pow  0x1.ffffffffffff0p-1  0x1.0000000000008p0 x 0x1p60 0x1p68 50000
 t pow  0x1.ffffffffff000p-1  0x1p0 x 0x1p50 0x1p52 50000
 t pow -0x1.ffffffffff000p-1 -0x1p0 x 0x1p50 0x1p52 50000
 
-if [ $WANT_EXP10_TESTS -eq 1 ]; then
+if [ "$WANT_EXP10_TESTS" = 1 ]; then
 L=0.02
 t exp10   0                   0x1p-47             5000
 t exp10  -0                  -0x1p-47             5000
@@ -156,7 +156,7 @@ done
 
 # vector functions
 
-if [ $WANT_SIMD_TESTS -eq 1 ]; then
+if [ "$WANT_SIMD_TESTS" = 1 ]; then
 
 Ldir=0.5
 r='n'
