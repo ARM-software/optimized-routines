@@ -20,6 +20,7 @@ ENTRY (__strncmp_aarch64_sve)
 	SIZE_ARG (2)
 	setffr				/* initialize FFR */
 	mov	x3, 0			/* initialize off */
+	cntb	x4
 
 0:	whilelo	p0.b, x3, x2		/* while off < max */
 	b.none	9f
@@ -32,9 +33,9 @@ ENTRY (__strncmp_aarch64_sve)
 	/* First fault did not fail: the vector up to max is valid.
 	   Avoid depending on the contents of FFR beyond the branch.
 	   Increment for a whole vector, even if we've only read a partial.
-	   This is significantly cheaper than INCP, and since OFF is not
-	   used after the loop it is ok to increment OFF past MAX.  */
-	incb	x3
+	   Using ADD is significantly cheaper than INCB or INCP, and since OFF
+	   is not used after the loop it is ok to increment OFF past MAX.  */
+	add	x3, x3, x4
 	cmpeq	p1.b, p0/z, z0.b, z1.b	/* compare strings */
 	cmpne	p2.b, p0/z, z0.b, 0	/* search for ~zero */
 	nands	p2.b, p0/z, p1.b, p2.b	/* ~(eq & ~zero) -> ne | zero */
