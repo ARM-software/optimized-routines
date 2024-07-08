@@ -32,6 +32,9 @@ static const struct fun
 {
 #if __aarch64__
   F(__memset_aarch64)
+# if __ARM_FEATURE_SVE
+  F(__memset_aarch64_sve)
+# endif
 #elif __arm__
   F(__memset_arm)
 #endif
