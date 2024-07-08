@@ -45,7 +45,7 @@ math-cflags =
 math-ldlibs =
 math-ulpflags =
 math-testflags =
-string-cflags =
+string-cflags = -falign-functions=64
 networking-cflags =
 
 # Use if mpfr is available on the target for ulp error checking.

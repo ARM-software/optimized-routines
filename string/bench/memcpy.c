@@ -20,8 +20,8 @@
 #define MIN_SIZE 32768
 #define MAX_SIZE (1024 * 1024)
 
-static uint8_t a[MAX_SIZE + 4096 + 64] __attribute__((__aligned__(64)));
-static uint8_t b[MAX_SIZE + 4096 + 64] __attribute__((__aligned__(64)));
+static uint8_t a[MAX_SIZE + 4096 + 64] __attribute__((__aligned__(4096)));
+static uint8_t b[MAX_SIZE + 4096 + 64] __attribute__((__aligned__(4096)));
 
 #define F(x) {#x, x},
 
@@ -191,9 +191,9 @@ int main (void)
 	  t = clock_get_ns () - t;
 	  total += copy_size;
 	  tsum += t;
-	  printf ("%dK: %.2f ", size / 1024, (double)copy_size / t);
+	  printf ("%dK: %5.2f ", size / 1024, (double)copy_size / t);
 	}
-      printf( "avg %.2f\n", (double)total / tsum);
+      printf( "avg %5.2f\n", (double)total / tsum);
     }
 
   size_t total = 0;
@@ -215,9 +215,9 @@ int main (void)
       t = clock_get_ns () - t;
       total += copy_size;
       tsum += t;
-      printf ("%dK: %.2f ", size / 1024, (double)copy_size / t);
+      printf ("%dK: %5.2f ", size / 1024, (double)copy_size / t);
     }
-  printf( "avg %.2f\n", (double)total / tsum);
+  printf( "avg %5.2f\n", (double)total / tsum);
 
 
   printf ("\nAligned medium memcpy (bytes/ns):\n");
@@ -231,7 +231,7 @@ int main (void)
 	  for (int i = 0; i < ITERS2; i++)
 	    funtab[f].fun (b, a, size);
 	  t = clock_get_ns () - t;
-	  printf ("%dB: %.2f ", size, (double)size * ITERS2 / t);
+	  printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
 	}
       printf ("\n");
     }
@@ -243,7 +243,7 @@ int main (void)
       for (int i = 0; i < ITERS2; i++)
 	memcpy (b, a, size);
       t = clock_get_ns () - t;
-      printf ("%dB: %.2f ", size, (double)size * ITERS2 / t);
+      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
     }
   printf ("\n");
 
@@ -259,7 +259,7 @@ int main (void)
 	  for (int i = 0; i < ITERS2; i++)
 	    funtab[f].fun (b + 3, a + 1, size);
 	  t = clock_get_ns () - t;
-	  printf ("%dB: %.2f ", size, (double)size * ITERS2 / t);
+	  printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
 	}
       printf ("\n");
     }
@@ -271,7 +271,7 @@ int main (void)
       for (int i = 0; i < ITERS2; i++)
 	memcpy (b + 3, a + 1, size);
       t = clock_get_ns () - t;
-      printf ("%dB: %.2f ", size, (double)size * ITERS2 / t);
+      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
     }
   printf ("\n");
 
@@ -287,7 +287,7 @@ int main (void)
 	  for (int i = 0; i < ITERS3; i++)
 	    funtab[f].fun (b, a, size);
 	  t = clock_get_ns () - t;
-	  printf ("%dK: %.2f ", size / 1024, (double)size * ITERS3 / t);
+	  printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
 	}
       printf ("\n");
     }
@@ -299,7 +299,7 @@ int main (void)
       for (int i = 0; i < ITERS3; i++)
 	memcpy (b, a, size);
       t = clock_get_ns () - t;
-      printf ("%dK: %.2f ", size / 1024, (double)size * ITERS3 / t);
+      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
     }
   printf ("\n");
 
@@ -315,7 +315,7 @@ int main (void)
 	  for (int i = 0; i < ITERS3; i++)
 	    funtab[f].fun (a, a + 256 + (i & 31), size);
 	  t = clock_get_ns () - t;
-	  printf ("%dK: %.2f ", size / 1024, (double)size * ITERS3 / t);
+	  printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
 	}
       printf ("\n");
     }
@@ -332,7 +332,7 @@ int main (void)
 	  for (int i = 0; i < ITERS3; i++)
 	    funtab[f].fun (a + 256 + (i & 31), a, size);
 	  t = clock_get_ns () - t;
-	  printf ("%dK: %.2f ", size / 1024, (double)size * ITERS3 / t);
+	  printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
 	}
       printf ("\n");
     }

@@ -14,12 +14,12 @@
 #include "benchlib.h"
 
 #define ITERS 5000
-#define ITERS2 20000000
-#define ITERS3 2000000
-#define NUM_TESTS 16384
+#define ITERS2 40000000
+#define ITERS3 4000000
+#define NUM_TESTS 65536
 
 #define MAX_ALIGN 32
-#define MAX_STRLEN 256
+#define MAX_STRLEN 128
 
 static char a[(MAX_STRLEN + 1) * MAX_ALIGN] __attribute__((__aligned__(4096)));
 
@@ -124,6 +124,8 @@ init_strlen_tests (void)
 
       strlen_tests[n] =
 	index[(align + exp_len) & (MAX_ALIGN - 1)] + MAX_STRLEN - exp_len;
+      assert ((strlen_tests[n] & (align - 1)) == 0);
+      assert (strlen (a + strlen_tests[n]) == exp_len);
     }
 }
 
@@ -142,16 +144,24 @@ int main (void)
       printf ("%22s ", funtab[f].name);
 
       for (int c = 0; c < NUM_TESTS; c++)
-	strlen_size += funtab[f].fun (a + strlen_tests[c]);
+	strlen_size += funtab[f].fun (a + strlen_tests[c]) + 1;
       strlen_size *= ITERS;
 
-      /* Measure latency of strlen result with (res & mask).  */
+      /* Measure throughput of strlen.  */
       uint64_t t = clock_get_ns ();
+      for (int i = 0; i < ITERS; i++)
+	for (int c = 0; c < NUM_TESTS; c++)
+	  res = funtab[f].fun (a + strlen_tests[c]);
+      t = clock_get_ns () - t;
+      printf ("tp: %.3f ", (double)strlen_size / t);
+
+      /* Measure latency of strlen result with (res & mask).  */
+      t = clock_get_ns ();
       for (int i = 0; i < ITERS; i++)
 	for (int c = 0; c < NUM_TESTS; c++)
 	  res = funtab[f].fun (a + strlen_tests[c] + (res & mask));
       t = clock_get_ns () - t;
-      printf ("%.2f\n", (double)strlen_size / t);
+      printf ("lat: %.3f\n", (double)strlen_size / t);
     }
 
   printf ("\nSmall aligned strlen (bytes/ns):\n");
@@ -168,7 +178,7 @@ int main (void)
 	  for (int i = 0; i < ITERS2; i++)
 	    funtab[f].fun (a);
 	  t = clock_get_ns () - t;
-	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+	  printf ("%d%c: %5.2f ", size < 1024 ? size : size / 1024,
 		  size < 1024 ? 'B' : 'K', (double)size * ITERS2 / t);
 	}
       printf ("\n");
@@ -189,7 +199,7 @@ int main (void)
 	  for (int i = 0; i < ITERS2; i++)
 	    funtab[f].fun (a + align);
 	  t = clock_get_ns () - t;
-	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+	  printf ("%d%c: %5.2f ", size < 1024 ? size : size / 1024,
 		  size < 1024 ? 'B' : 'K', (double)size * ITERS2 / t);
 	}
       printf ("\n");
@@ -209,7 +219,7 @@ int main (void)
 	  for (int i = 0; i < ITERS3; i++)
 	    funtab[f].fun (a);
 	  t = clock_get_ns () - t;
-	  printf ("%d%c: %.2f ", size < 1024 ? size : size / 1024,
+	  printf ("%d%c: %5.2f ", size < 1024 ? size : size / 1024,
 		  size < 1024 ? 'B' : 'K', (double)size * ITERS3 / t);
 	}
       printf ("\n");
