@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE sinpi(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -49,9 +49,11 @@ svfloat64_t SV_NAME_D1 (sinpi) (svfloat64_t x, const svbool_t pg)
   return svreinterpret_f64 (sveor_x (pg, svreinterpret_u64 (y), sign));
 }
 
+#if WANT_TRIGPI_TESTS
 PL_SIG (SV, D, 1, sinpi, -0.9, 0.9)
 PL_TEST_ULP (SV_NAME_D1 (sinpi), 2.61)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0, 0x1p-63, 5000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0x1p-63, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0.5, 0x1p51, 10000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0x1p51, inf, 10000)
+#endif

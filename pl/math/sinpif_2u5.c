@@ -75,9 +75,11 @@ sinpif (float x)
   return asfloat (asuint (y * r) ^ sign);
 }
 
+#if WANT_TRIGPI_TESTS
 PL_SIG (S, F, 1, sinpi, -0.9, 0.9)
 PL_TEST_ULP (sinpif, 1.99)
 PL_TEST_SYM_INTERVAL (sinpif, 0, 0x1p-31, 5000)
 PL_TEST_SYM_INTERVAL (sinpif, 0x1p-31, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (sinpif, 0.5, 0x1p22f, 10000)
 PL_TEST_SYM_INTERVAL (sinpif, 0x1p22f, inf, 10000)
+#endif

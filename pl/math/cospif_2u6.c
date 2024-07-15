@@ -1,7 +1,7 @@
 /*
  * Single-precision scalar cospi function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -76,9 +76,11 @@ cospif (float x)
   return asfloat (asuint (y * r) ^ sign);
 }
 
+#if WANT_TRIGPI_TESTS
 PL_SIG (S, F, 1, cospi, -0.9, 0.9)
 PL_TEST_ULP (cospif, 2.15)
 PL_TEST_SYM_INTERVAL (cospif, 0, 0x1p-31, 5000)
 PL_TEST_SYM_INTERVAL (cospif, 0x1p-31, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (cospif, 0.5, 0x1p22f, 10000)
 PL_TEST_SYM_INTERVAL (cospif, 0x1p22f, inf, 10000)
+#endif

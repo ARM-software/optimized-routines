@@ -47,8 +47,12 @@ static double RT (ulperr) (RT (float) got, const struct RT (ret) * p, int r,
   if (RT(asuint) (got) == RT(asuint) (want))
     return 0.0;
   if (isnan (got) && isnan (want))
-    /* Ignore sign of NaN.  */
+  /* Ignore sign of NaN, and signalling-ness for MPFR.  */
+# if USE_MPFR
+    return 0;
+# else
     return RT (issignaling) (got) == RT (issignaling) (want) ? 0 : INFINITY;
+# endif
   if (signbit (got) != signbit (want))
     {
       /* Fall through to ULP calculation if ignoring sign of zero and at

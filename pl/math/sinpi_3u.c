@@ -82,9 +82,11 @@ sinpi (double x)
   return asdouble (asuint64 (y) ^ sign);
 }
 
+#if WANT_TRIGPI_TESTS
 PL_SIG (S, D, 1, sinpi, -0.9, 0.9)
 PL_TEST_ULP (sinpi, 2.53)
 PL_TEST_SYM_INTERVAL (sinpi, 0, 0x1p-63, 5000)
 PL_TEST_SYM_INTERVAL (sinpi, 0x1p-63, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (sinpi, 0.5, 0x1p51, 10000)
 PL_TEST_SYM_INTERVAL (sinpi, 0x1p51, inf, 10000)
+#endif

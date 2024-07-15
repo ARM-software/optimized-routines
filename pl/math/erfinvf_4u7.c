@@ -1,7 +1,7 @@
 /*
  * Single-precision inverse error function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "poly_scalar_f32.h"
@@ -69,6 +69,10 @@ erfinvf (float x)
 	 / (copysignf (t, x) * horner_2_f32 (t, data.Q_50));
 }
 
+#if USE_MPFR
+# warning Not generating tests for erfinvf, as MPFR has no suitable reference
+#else
 PL_SIG (S, F, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (erfinvf, 4.09)
 PL_TEST_SYM_INTERVAL (erfinvf, 0, 1, 40000)
+#endif

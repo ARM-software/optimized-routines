@@ -49,8 +49,11 @@ string-cflags = -falign-functions=64
 networking-cflags =
 
 # Use if mpfr is available on the target for ulp error checking.
-#math-ldlibs += -lmpfr -lgmp
-#math-cflags += -DUSE_MPFR
+USE_MPFR=0
+math-cflags += -DUSE_MPFR=$(USE_MPFR)
+ifeq ($(USE_MPFR), 1)
+  math-ldlibs += -lmpfr -lgmp
+endif
 
 # Use with gcc.
 math-cflags += -frounding-math -fexcess-precision=standard -fno-stack-protector
@@ -87,6 +90,10 @@ math-cflags += -DWANT_SIMD_EXCEPT=$(WANT_SIMD_EXCEPT)
 # If set to 1, enable tests for exp10.
 WANT_EXP10_TESTS = 1
 math-cflags += -DWANT_EXP10_TESTS=$(WANT_EXP10_TESTS)
+
+# If set to 1, enable tests for sinpi and cospi.
+WANT_TRIGPI_TESTS = 1
+math-cflags += -DWANT_TRIGPI_TESTS=$(WANT_TRIGPI_TESTS)
 
 # Disable fenv checks
 #math-ulpflags = -q -f

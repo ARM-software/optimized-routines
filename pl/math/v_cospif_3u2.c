@@ -1,7 +1,7 @@
 /*
  * Single-precision vector cospi function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -74,6 +74,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cospi) (float32x4_t x)
   return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
 
+#if WANT_TRIGPI_TESTS
 PL_SIG (V, F, 1, cospi, -0.9, 0.9)
 PL_TEST_ULP (V_NAME_F1 (cospi), 2.67)
 PL_TEST_EXPECT_FENV (V_NAME_F1 (cospi), WANT_SIMD_EXCEPT)
@@ -81,3 +82,4 @@ PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0, 0x1p-31, 5000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p-31, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0.5, 0x1p32f, 10000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p32f, inf, 10000)
+#endif

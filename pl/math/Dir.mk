@@ -211,6 +211,7 @@ check-pl/math-ulp: $(math-tools) $(ulp-lims) $(fenv-exps) $(ulp-itvs)
 	FENV=../../../$(fenv-exps) \
 	FUNC=$(func) \
 	PRED=$(pred) \
+	USE_MPFR=$(USE_MPFR) \
 	build/pl/bin/runulp.sh $(EMULATOR)
 
 check-pl/math: check-pl/math-test check-pl/math-rtest check-pl/math-ulp

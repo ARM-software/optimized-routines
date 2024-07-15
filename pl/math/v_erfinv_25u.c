@@ -150,6 +150,9 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
   return vdivq_f64 (p, q);
 }
 
+#if USE_MPFR
+# warning Not generating tests for _ZGVnN2v_erfinv, as MPFR has no suitable reference
+#else
 PL_SIG (V, D, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (V_NAME_D1 (erfinv), 24.8)
 /* Test with control lane in each interval.  */
@@ -159,3 +162,4 @@ PL_TEST_SYM_INTERVAL_C (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000,
 			0.8)
 PL_TEST_SYM_INTERVAL_C (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000,
 			0.95)
+#endif

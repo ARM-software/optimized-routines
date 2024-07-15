@@ -1,7 +1,7 @@
 /*
  * Double-precision scalar cospi function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -81,9 +81,11 @@ cospi (double x)
   return asdouble (asuint64 (y) ^ sign);
 }
 
+#if WANT_TRIGPI_TESTS
 PL_SIG (S, D, 1, cospi, -0.9, 0.9)
 PL_TEST_ULP (cospi, 2.63)
 PL_TEST_SYM_INTERVAL (cospi, 0, 0x1p-63, 5000)
 PL_TEST_SYM_INTERVAL (cospi, 0x1p-63, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (cospi, 0.5, 0x1p51f, 10000)
 PL_TEST_SYM_INTERVAL (cospi, 0x1p51f, inf, 10000)
+#endif

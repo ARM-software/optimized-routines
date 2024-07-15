@@ -142,11 +142,15 @@ svfloat32_t SV_NAME_F1 (erfinv) (svfloat32_t x, svbool_t pg)
   return svdiv_x (pg, y, q);
 }
 
+#if USE_MPFR
+# warning Not generating tests for _ZGVsMxv_erfinvf, as MPFR has no suitable reference
+#else
 PL_SIG (SV, F, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (SV_NAME_F1 (erfinv), 4.09)
-#define TEST_INTERVAL(lo, hi, n)                                              \
-  PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.5)                    \
-  PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.8)                    \
-  PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.95)
+# define TEST_INTERVAL(lo, hi, n)                                            \
+    PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.5)                  \
+    PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.8)                  \
+    PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.95)
 TEST_INTERVAL (0, 1, 40000)
 TEST_INTERVAL (-0, -1, 40000)
+#endif

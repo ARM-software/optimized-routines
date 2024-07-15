@@ -141,13 +141,16 @@ svfloat64_t SV_NAME_D1 (erfinv) (svfloat64_t x, svbool_t pg)
   return svdiv_x (pg, p, q);
 }
 
+#if USE_MPFR
+# warning Not generating tests for _ZGVsMxv_erfinv, as MPFR has no suitable reference
+#else
 PL_SIG (SV, D, 1, erfinv, -0.99, 0.99)
-
 PL_TEST_ULP (SV_NAME_D1 (erfinv), 24.5)
 /* Test with control lane in each interval.  */
-#define TEST_INTERVAL(lo, hi, n)                                              \
-  PL_TEST_INTERVAL_C (SV_NAME_D1 (erfinv), lo, hi, n, 0.5)                    \
-  PL_TEST_INTERVAL_C (SV_NAME_D1 (erfinv), lo, hi, n, 0.8)                    \
-  PL_TEST_INTERVAL_C (SV_NAME_D1 (erfinv), lo, hi, n, 0.95)
+# define TEST_INTERVAL(lo, hi, n)                                            \
+    PL_TEST_INTERVAL_C (SV_NAME_D1 (erfinv), lo, hi, n, 0.5)                  \
+    PL_TEST_INTERVAL_C (SV_NAME_D1 (erfinv), lo, hi, n, 0.8)                  \
+    PL_TEST_INTERVAL_C (SV_NAME_D1 (erfinv), lo, hi, n, 0.95)
 TEST_INTERVAL (0, 1, 100000)
 TEST_INTERVAL (-0, -1, 100000)
+#endif

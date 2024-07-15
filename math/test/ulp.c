@@ -325,7 +325,7 @@ struct fun
 static const struct fun fun[] = {
 #if USE_MPFR
 #  define F(x, x_wrap, x_long, x_mpfr, a, s, t, twice)                        \
-    { #x, a, s, twice, 0 { .t = x_wrap }, { .t = x_long }, { .t = x_mpfr } },
+    { #x, a, s, twice, 0, { .t = x_wrap }, { .t = x_long }, { .t = x_mpfr } },
 #  define SVF(x, x_wrap, x_long, x_mpfr, a, s, t, twice)                      \
     { #x, a, s, twice, 1, { .t##_pred = x_wrap }, { .t = x_long }, { .t = x_mpfr } },
 #else
