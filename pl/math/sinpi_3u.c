@@ -1,7 +1,7 @@
 /*
  * Double-precision scalar sinpi function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -42,12 +42,12 @@ sinpi (double x)
   /* Edge cases for when sinpif should be exactly 0. (Integers)
      0x1p53 is the limit for single precision to store any decimal places.  */
   if (r >= 0x1p53)
-    return 0;
+    return asdouble (sign);
 
   /* If x is an integer, return 0.  */
   uint64_t m = (uint64_t) r;
   if (r == m)
-    return 0;
+    return asdouble (sign);
 
   /* For very small inputs, squaring r causes underflow.
      Values below this threshold can be approximated via sinpi(x) ≈ pi*x.  */
