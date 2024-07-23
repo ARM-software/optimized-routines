@@ -365,9 +365,9 @@ extern const struct exp2f_data
   uint64_t tab[1 << EXP2F_TABLE_BITS];
   double shift_scaled;
   double poly[EXP2F_POLY_ORDER];
-  double shift;
   double invln2_scaled;
   double poly_scaled[EXP2F_POLY_ORDER];
+  double shift;
 } __exp2f_data HIDDEN;
 
 #define LOGF_TABLE_BITS 4
@@ -427,15 +427,17 @@ extern const struct powf_log2_data
 extern const struct exp_data
 {
   double invln2N;
-  double invlog10_2N;
-  double shift;
   double negln2hiN;
   double negln2loN;
-  double neglog10_2hiN;
-  double neglog10_2loN;
   double poly[4]; /* Last four coefficients.  */
+  double shift;
+
   double exp2_shift;
   double exp2_poly[EXP2_POLY_ORDER];
+
+  double invlog10_2N;
+  double neglog10_2hiN;
+  double neglog10_2loN;
   double exp10_poly[5];
   uint64_t tab[2*(1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
