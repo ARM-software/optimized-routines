@@ -22,6 +22,7 @@
 # define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
 # define PL_DECL_VD2(fun)                                                    \
     VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
+# define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
 #endif
 
 #if WANT_SVE_MATH
