@@ -6,6 +6,7 @@
  */
 /* clang-format off */
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

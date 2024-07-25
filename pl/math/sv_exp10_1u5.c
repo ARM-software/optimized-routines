@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE 10^x function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -116,7 +116,9 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
   return svmla_x (pg, scale, scale, y);
 }
 
+#if WANT_EXP10_TESTS
 PL_SIG (SV, D, 1, exp10, -9.9, 9.9)
 PL_TEST_ULP (SV_NAME_D1 (exp10), 0.52)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 0, 307, 10000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 307, inf, 1000)
+#endif

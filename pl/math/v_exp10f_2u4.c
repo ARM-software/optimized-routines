@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#define _GNU_SOURCE
 #include "mathlib.h"
 #include "v_math.h"
 #include "pl_sig.h"
@@ -131,6 +132,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
   return vfmaq_f32 (scale, poly, scale);
 }
 
+#if WANT_EXP10_TESTS
 PL_SIG (S, F, 1, exp10, -9.9, 9.9)
 PL_SIG (V, F, 1, exp10, -9.9, 9.9)
 PL_TEST_ULP (V_NAME_F1 (exp10), 1.86)
@@ -138,3 +140,4 @@ PL_TEST_EXPECT_FENV (V_NAME_F1 (exp10), WANT_SIMD_EXCEPT)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (exp10), 0, SpecialBound, 5000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (exp10), SpecialBound, ScaleBound, 5000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (exp10), ScaleBound, inf, 10000)
+#endif
