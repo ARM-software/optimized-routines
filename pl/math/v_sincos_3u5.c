@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sincos function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,11 +10,20 @@
    be linked against the scalar sincosf from math/.  */
 #define _GNU_SOURCE
 #include <math.h>
-#undef _GNU_SOURCE
 
 #include "v_math.h"
 #include "pl_test.h"
 #include "v_sincos_common.h"
+
+/* sincos not available for all scalar libm implementations.  */
+#ifndef __GLIBC__
+static void
+sincos (double x, double *out_sin, double *out_cos)
+{
+  *out_sin = sin (x);
+  *out_cos = cos (x);
+}
+#endif
 
 static void VPCS_ATTR NOINLINE
 special_case (float64x2_t x, uint64x2_t special, double *out_sin,

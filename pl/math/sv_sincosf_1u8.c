@@ -1,7 +1,7 @@
 /*
  * Single-precision vector sincos function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,11 +10,20 @@
    be linked against the scalar sincosf from math/.  */
 #define _GNU_SOURCE
 #include <math.h>
-#undef _GNU_SOURCE
 
 #include "sv_sincosf_common.h"
 #include "sv_math.h"
 #include "pl_test.h"
+
+/* sincos not available for all scalar libm implementations.  */
+#ifndef __GLIBC__
+static void
+sincosf (float x, float *out_sin, float *out_cos)
+{
+  *out_sin = sinf (x);
+  *out_cos = cosf (x);
+}
+#endif
 
 static void NOINLINE
 special_case (svfloat32_t x, svbool_t special, float *out_sin, float *out_cos)
