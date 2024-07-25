@@ -3,6 +3,21 @@
 # Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
+ifeq ($(OS),Darwin)
+  ifeq ($(WANT_SIMD_EXCEPT),1)
+    $(error WANT_SIMD_EXCEPT is not supported on Darwin)
+  endif
+  ifeq ($(WANT_SVE_MATH),1)
+    $(error WANT_SVE_MATH is not supported on Darwin)
+  endif
+  ifneq ($(USE_MPFR),1)
+    $(warning WARNING: Double-precision ULP tests will not be usable without MPFR)
+  endif
+  ifeq ($(USE_GLIBC_ABI),1)
+    $(error Can only generate special GLIBC symbols on Linux - please disable USE_GLIBC_ABI)
+  endif
+endif
+
 PLM := $(srcdir)/pl/math
 AOR := $(srcdir)/math
 B := build/pl/math
@@ -109,6 +124,9 @@ $(math-host-tools): HOST_LDLIBS += -lm -lmpfr -lmpc
 $(math-tools): LDLIBS += $(math-ldlibs) -lm
 # math-sve-cflags should be empty if WANT_SVE_MATH is not enabled
 $(math-tools): CFLAGS_PL += $(math-sve-cflags)
+ifneq ($(OS),Darwin)
+  $(math-tools): LDFLAGS += -static
+endif
 
 # Some targets to build pl/math/test from math/test sources
 build/pl/math/test/%.o: $(srcdir)/math/test/%.S
@@ -140,17 +158,17 @@ build/pl/bin/rtest: $(math-host-objs)
 	$(HOST_CC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LDLIBS)
 
 build/pl/bin/mathtest: $(B)/test/mathtest.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 build/pl/bin/mathbench: $(B)/test/mathbench.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # This is not ideal, but allows custom symbols in mathbench to get resolved.
 build/pl/bin/mathbench_libc: $(B)/test/mathbench.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -static -o $@ $< $(LDLIBS) -lc build/pl/lib/libmathlib.a -lm
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $< $(LDLIBS) -lc build/pl/lib/libmathlib.a -lm
 
 build/pl/bin/ulp: $(B)/test/ulp.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -static -o $@ $^ $(LDLIBS)
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 build/pl/include/%.h: $(PLM)/include/%.h
 	cp $< $@

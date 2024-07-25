@@ -1,6 +1,6 @@
 # Makefile - requires GNU make
 #
-# Copyright (c) 2018-2022, Arm Limited.
+# Copyright (c) 2018-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 srcdir = .
@@ -27,6 +27,7 @@ LDLIBS =
 AR = $(CROSS_COMPILE)ar
 RANLIB = $(CROSS_COMPILE)ranlib
 INSTALL = install
+OS = $(shell uname)
 
 all:
 
