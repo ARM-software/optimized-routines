@@ -9,6 +9,10 @@
 #include "math_config.h"
 #include "mathlib.h"
 
+#ifndef M_PIl
+# define M_PIl 3.141592653589793238462643383279502884l
+#endif
+
 long double
 sinpil (long double x)
 {
