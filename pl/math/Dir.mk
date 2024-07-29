@@ -89,6 +89,8 @@ ulp-wrappers = $(patsubst $(PLM)/%,$(ulp-wrappers-dir)%,$(basename $(pl-lib-srcs
 mathbench-funcs = $(patsubst $(PLM)/%,$(mathbench-funcs-dir)%,$(basename $(pl-lib-srcs)))
 plsig-autogen-files = $(ulp-funcs) $(ulp-wrappers) $(mathbench-funcs)
 
+$(plsig-autogen-files): CFLAGS_PL += -DWANT_TRIGPI_TESTS=$(WANT_TRIGPI_TESTS)
+
 $(ulp-funcs): PLSIG_DIRECTIVE = EMIT_ULP_FUNCS
 $(ulp-wrappers): PLSIG_DIRECTIVE = EMIT_ULP_WRAPPERS
 $(mathbench-funcs): PLSIG_DIRECTIVE = EMIT_MATHBENCH_FUNCS
