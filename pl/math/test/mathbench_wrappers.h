@@ -23,6 +23,14 @@ powi_wrap (double x)
   return __builtin_powi (x, (int) round (x));
 }
 
+static float
+sincospif_wrap (float x)
+{
+  float s, c;
+  sincospif (x, &s, &c);
+  return s + c;
+}
+
 #if __aarch64__ && defined(__vpcs)
 
 __vpcs static v_double

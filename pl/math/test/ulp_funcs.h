@@ -47,6 +47,9 @@
 F (_ZGVnN4vl4_modff_frac, v_modff_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
 F (_ZGVnN4vl4_modff_int, v_modff_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
 
+F (sincospif_sin, sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
+F (sincospif_cos, sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
+
 F (_ZGVnN4v_sincosf_sin, v_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
 F (_ZGVnN4v_sincosf_cos, v_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
 F (_ZGVnN4v_cexpif_sin, v_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)

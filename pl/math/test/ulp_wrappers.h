@@ -135,6 +135,8 @@ double v_sincos_cos(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincos(vdupq_n_f6
 double v_cexpi_sin(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[0][0]; }
 double v_cexpi_cos(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[1][0]; }
 
+float sincospif_sin(float x) { float s, c; sincospif(x, &s, &c); return s; }
+float sincospif_cos(float x) { float s, c; sincospif(x, &s, &c); return c; }
 #if WANT_SVE_MATH
 static float Z_sv_powi(svbool_t pg, float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), pg), pg); }
 static double Z_sv_powk(svbool_t pg, double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), pg), pg); }
