@@ -106,6 +106,14 @@ _Z_sincos_wrap (v_double x)
   return s + c;
 }
 
+__vpcs static v_float
+_Z_sincospif_wrap (v_float x)
+{
+  v_float s, c;
+  _ZGVnN4vl4l4_sincospif (x, &s, &c);
+  return s + c;
+}
+
 __vpcs static v_double
 _Z_cexpi_wrap (v_double x)
 {

@@ -132,6 +132,7 @@ __vpcs __f32x4_t _ZGVnN4v_tanhf (__f32x4_t);
 __vpcs __f64x2_t _ZGVnN2v_tanh (__f64x2_t);
 __vpcs void _ZGVnN4vl4l4_sincosf (__f32x4_t, __f32x4_t *, __f32x4_t *);
 __vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
+__vpcs void _ZGVnN4vl4l4_sincospif (__f32x4_t, __f32x4_t *, __f32x4_t *);
 
 # endif
 
