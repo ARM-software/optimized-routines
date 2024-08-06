@@ -1,9 +1,12 @@
 /*
  * Double-precision e^x function.
  *
- * Copyright (c) 2018-2023, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#ifndef PL_MATH_EXP_INLINE_H
+#define PL_MATH_EXP_INLINE_H
 
 #include <float.h>
 #include <math.h>
@@ -30,7 +33,7 @@
    adjustment of scale, positive k here means the result may overflow and
    negative k means the result may underflow.  */
 static inline double
-specialcase (double_t tmp, uint64_t sbits, uint64_t ki)
+exp_inline_special_case (double_t tmp, uint64_t sbits, uint64_t ki)
 {
   double_t scale, y;
 
@@ -77,7 +80,7 @@ top12 (double x)
 /* Computes exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
    If hastail is 0 then xtail is assumed to be 0 too.  */
 static inline double
-exp_inline (double x, double xtail, int hastail)
+exp_inline (double x, double xtail)
 {
   uint32_t abstop;
   uint64_t ki, idx, top, sbits;
@@ -125,7 +128,7 @@ exp_inline (double x, double xtail, int hastail)
 #endif
   r = x + kd * NegLn2hiN + kd * NegLn2loN;
   /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
-  if (hastail)
+  if (!__builtin_constant_p (xtail) || xtail != 0.0)
     r += xtail;
   /* 2^(k/N) ~= scale * (1 + tail).  */
   idx = 2 * (ki % N);
@@ -146,18 +149,11 @@ exp_inline (double x, double xtail, int hastail)
   tmp = tail + r + r2 * (0.5 + r * C3) + r2 * r2 * (C4 + r * C5 + r2 * C6);
 #endif
   if (unlikely (abstop == 0))
-    return specialcase (tmp, sbits, ki);
+    return exp_inline_special_case (tmp, sbits, ki);
   scale = asdouble (sbits);
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
   return eval_as_double (scale + scale * tmp);
 }
 
-/* May be useful for implementing pow where more than double
-   precision input is needed.  */
-double
-__exp_dd (double x, double xtail)
-{
-  return exp_inline (x, xtail, 1);
-}
-
+#endif
