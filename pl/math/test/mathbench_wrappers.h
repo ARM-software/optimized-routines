@@ -66,6 +66,14 @@ _Z_modff_wrap (v_float x)
 }
 
 __vpcs static v_double
+_Z_modf_wrap (v_double x)
+{
+  v_double y;
+  v_double ret = _ZGVnN2vl8_modf (x, &y);
+  return ret + y;
+}
+
+__vpcs static v_double
 xy_Z_pow (v_double x)
 {
   return _ZGVnN2vv_pow (x, x);

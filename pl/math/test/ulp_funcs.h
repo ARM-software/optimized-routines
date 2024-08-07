@@ -44,9 +44,6 @@
 
 #include "ulp_funcs_gen.h"
 
-F (_ZGVnN4vl4_modff_frac, v_modff_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
-F (_ZGVnN4vl4_modff_int, v_modff_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
-
 F (sincospif_sin, sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
 F (sincospif_cos, sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
 
@@ -54,6 +51,8 @@ F (_ZGVnN4v_sincosf_sin, v_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
 F (_ZGVnN4v_sincosf_cos, v_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
 F (_ZGVnN4v_cexpif_sin, v_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)
 F (_ZGVnN4v_cexpif_cos, v_cexpif_cos, cos, mpfr_cos, 1, 1, f1, 0)
+F (_ZGVnN4vl4_modff_frac, v_modff_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
+F (_ZGVnN4vl4_modff_int, v_modff_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
 
 F (_ZGVnN4v_sincospif_sin, v_sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
 F (_ZGVnN4v_sincospif_cos, v_sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
@@ -62,6 +61,8 @@ F (_ZGVnN2v_sincos_sin, v_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 F (_ZGVnN2v_sincos_cos, v_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 F (_ZGVnN2v_cexpi_sin, v_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 F (_ZGVnN2v_cexpi_cos, v_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+F (_ZGVnN2vl8_modf_frac, v_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1, 0)
+F (_ZGVnN2vl8_modf_int, v_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
 
 #if WANT_SVE_MATH
 # if !USE_MPFR
