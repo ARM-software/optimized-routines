@@ -70,7 +70,7 @@
 #endif
 
 /* Symbol renames to avoid libc conflicts.  */
-#define __exp_data pl_math_exp_data
+#define __exp_data __pl_math_exp_data
 
 /* Optionally used extensions.  */
 #ifdef __GNUC__
