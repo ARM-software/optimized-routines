@@ -19,6 +19,7 @@ ENTRY (__strnlen_aarch64_sve)
 	SIZE_ARG (1)
 	setffr				/* initialize FFR */
 	mov	x2, 0			/* initialize len */
+	cntb	x3
 	b	1f
 
 	.p2align 4
@@ -31,7 +32,7 @@ ENTRY (__strnlen_aarch64_sve)
 	   Avoid depending on the contents of FFR beyond the branch.  */
 	cmpeq	p2.b, p0/z, z0.b, 0
 	b.any	8f
-	incb	x2
+	add	x2, x2, x3
 
 1:	whilelo	p0.b, x2, x1
 	b.last	0b
