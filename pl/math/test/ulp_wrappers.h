@@ -159,6 +159,8 @@ double sv_sincos_sin(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _
 double sv_sincos_cos(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, c), pg); }
 double sv_cexpi_sin(svbool_t pg, double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), pg), 0), pg); }
 double sv_cexpi_cos(svbool_t pg, double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), pg), 1), pg); }
+double sv_modf_frac(svbool_t pg, double x) { double i[svcntd()]; return svretd(_ZGVsMxvl8_modf(svdup_f64(x), i, pg), pg); }
+double sv_modf_int(svbool_t pg, double x) { double i[svcntd()]; _ZGVsMxvl8_modf(svdup_f64(x), i, pg); return svretd(svld1(pg, i), pg); }
 
 #endif
 // clang-format on

@@ -165,6 +165,14 @@ _Z_sv_modff_wrap (sv_float x, sv_bool pg)
   return svadd_x (pg, r, svld1 (pg, i));
 }
 
+static sv_double
+_Z_sv_modf_wrap (sv_double x, sv_bool pg)
+{
+  double i[svcntd ()];
+  svfloat64_t r = _ZGVsMxvl8_modf (x, i, pg);
+  return svadd_x (pg, r, svld1 (pg, i));
+}
+
 static sv_float
 _Z_sv_powi_wrap (sv_float x, sv_bool pg)
 {

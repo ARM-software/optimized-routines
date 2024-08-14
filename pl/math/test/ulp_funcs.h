@@ -82,4 +82,7 @@ SVF (_ZGVsMxv_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 SVF (_ZGVsMxv_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 SVF (_ZGVsMxv_cexpi_sin, sv_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 SVF (_ZGVsMxv_cexpi_cos, sv_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+SVF (_ZGVsMxvl8_modf_frac, sv_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1,
+     0)
+SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
 #endif
