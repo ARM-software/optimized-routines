@@ -18,14 +18,9 @@ float32x4_t VPCS_ATTR V_NAME_F1_L1 (modf) (float32x4_t x, float32x4_t *out_int)
   /* Subtract integer component from input.  */
   uint32x4_t remaining = vreinterpretq_u32_f32 (vsubq_f32 (x, *out_int));
 
-  /* Return +/-0 for integer x.  */
+  /* Return +0 for integer x.  */
   uint32x4_t is_integer = vceqq_f32 (x, *out_int);
-
-  /* Get sign of x.  */
-  uint32x4_t ix_sign
-      = vandq_u32 (vreinterpretq_u32_f32 (x), v_u32 (0x80000000));
-
-  return vreinterpretq_f32_u32 (vbslq_u32 (is_integer, ix_sign, remaining));
+  return vreinterpretq_f32_u32 (vbicq_u32 (remaining, is_integer));
 }
 
 PL_TEST_ULP (_ZGVnN4vl4_modff_frac, 0.0)

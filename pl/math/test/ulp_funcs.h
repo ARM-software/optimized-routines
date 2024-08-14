@@ -74,6 +74,9 @@ SVF (_ZGVsMxv_sincosf_sin, sv_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
 SVF (_ZGVsMxv_sincosf_cos, sv_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
 SVF (_ZGVsMxv_cexpif_sin, sv_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)
 SVF (_ZGVsMxv_cexpif_cos, sv_cexpif_cos, cos, mpfr_cos, 1, 1, f1, 0)
+SVF (_ZGVsMxvl4_modff_frac, sv_modff_frac, modf_frac, modf_mpfr_frac, 1, 1, f1,
+     0)
+SVF (_ZGVsMxvl4_modff_int, sv_modff_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
 
 SVF (_ZGVsMxv_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 SVF (_ZGVsMxv_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)

@@ -152,6 +152,8 @@ float sv_sincosf_sin(svbool_t pg, float x) { float s[svcntw()], c[svcntw()]; _ZG
 float sv_sincosf_cos(svbool_t pg, float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, pg); return svretf(svld1(pg, c), pg); }
 float sv_cexpif_sin(svbool_t pg, float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), pg), 0), pg); }
 float sv_cexpif_cos(svbool_t pg, float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), pg), 1), pg); }
+float sv_modff_frac(svbool_t pg, float x) { float i[svcntw()]; return svretf(_ZGVsMxvl4_modff(svdup_f32(x), i, pg), pg); }
+float sv_modff_int(svbool_t pg, float x) { float i[svcntw()]; _ZGVsMxvl4_modff(svdup_f32(x), i, pg); return svretf(svld1(pg, i), pg); }
 
 double sv_sincos_sin(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, s), pg); }
 double sv_sincos_cos(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, c), pg); }

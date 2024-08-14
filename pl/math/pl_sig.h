@@ -31,6 +31,7 @@
 # define SV_NAME_D1(fun) _ZGVsMxv_##fun
 # define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
 # define SV_NAME_D2(fun) _ZGVsMxvv_##fun
+# define SV_NAME_F1_L1(fun) _ZGVsMxvl4_##fun##f
 # define PL_DECL_SVF1(fun)                                                   \
     svfloat32_t SV_NAME_F1 (fun) (svfloat32_t, svbool_t);
 # define PL_DECL_SVF2(fun)                                                   \

@@ -158,6 +158,14 @@ _Z_sv_hypot_wrap (sv_double x, sv_bool pg)
 }
 
 static sv_float
+_Z_sv_modff_wrap (sv_float x, sv_bool pg)
+{
+  float i[svcntw ()];
+  svfloat32_t r = _ZGVsMxvl4_modff (x, i, pg);
+  return svadd_x (pg, r, svld1 (pg, i));
+}
+
+static sv_float
 _Z_sv_powi_wrap (sv_float x, sv_bool pg)
 {
   return _ZGVsMxvv_powi (x, svcvt_s32_f32_x (pg, x), pg);
