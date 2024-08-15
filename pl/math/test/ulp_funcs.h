@@ -46,6 +46,8 @@
 
 F (sincospif_sin, sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
 F (sincospif_cos, sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
+F (sincospi_sin, sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1, 0)
+F (sincospi_cos, sincospi_cos, cospil, mpfr_cospi, 1, 0, d1, 0)
 
 F (_ZGVnN4v_sincosf_sin, v_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
 F (_ZGVnN4v_sincosf_cos, v_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)

@@ -31,6 +31,14 @@ sincospif_wrap (float x)
   return s + c;
 }
 
+static double
+sincospi_wrap (double x)
+{
+  double s, c;
+  sincospi (x, &s, &c);
+  return s + c;
+}
+
 #if __aarch64__ && defined(__vpcs)
 
 __vpcs static v_double

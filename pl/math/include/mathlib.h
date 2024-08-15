@@ -29,6 +29,7 @@ float sinpif (float);
 float tanf (float);
 float tanhf (float);
 void sincospif (float, float *, float *);
+void sincospi (double, double *, double *);
 
 double acos (double);
 double acosh (double);
