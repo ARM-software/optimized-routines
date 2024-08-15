@@ -133,6 +133,8 @@ float v_modff_int(float x) { float32x4_t y; _ZGVnN4vl4_modff(vdupq_n_f32(x), &y)
 
 double v_sincos_sin(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincos(vdupq_n_f64(x), &s, &c); return s[0]; }
 double v_sincos_cos(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincos(vdupq_n_f64(x), &s, &c); return c[0]; }
+double v_sincospi_sin(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincospi(vdupq_n_f64(x), &s, &c); return s[0]; }
+double v_sincospi_cos(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincospi(vdupq_n_f64(x), &s, &c); return c[0]; }
 double v_cexpi_sin(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[0][0]; }
 double v_cexpi_cos(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[1][0]; }
 double v_modf_frac(double x) { float64x2_t y; return _ZGVnN2vl8_modf(vdupq_n_f64(x), &y)[0]; }

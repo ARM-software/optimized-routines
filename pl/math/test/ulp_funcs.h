@@ -61,6 +61,8 @@ F (_ZGVnN4v_sincospif_cos, v_sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
 
 F (_ZGVnN2v_sincos_sin, v_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 F (_ZGVnN2v_sincos_cos, v_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+F (_ZGVnN2v_sincospi_sin, v_sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1, 0)
+F (_ZGVnN2v_sincospi_cos, v_sincospi_cos, cospil, mpfr_cospi, 1, 0, d1, 0)
 F (_ZGVnN2v_cexpi_sin, v_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 F (_ZGVnN2v_cexpi_cos, v_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 F (_ZGVnN2vl8_modf_frac, v_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1, 0)

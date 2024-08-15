@@ -131,6 +131,14 @@ _Z_sincospif_wrap (v_float x)
 }
 
 __vpcs static v_double
+_Z_sincospi_wrap (v_double x)
+{
+  v_double s, c;
+  _ZGVnN2vl8l8_sincospi (x, &s, &c);
+  return s + c;
+}
+
+__vpcs static v_double
 _Z_cexpi_wrap (v_double x)
 {
   __f64x2x2_t sc = _ZGVnN2v_cexpi (x);

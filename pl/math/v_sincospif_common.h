@@ -1,10 +1,9 @@
 /*
- * Core approximation for single-precision vector sincospif
+ * Helper for Single-precision vector sincospi function.
  *
  * Copyright (c) 2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-
 #include "mathlib.h"
 #include "v_math.h"
 #include "poly_advsimd_f32.h"

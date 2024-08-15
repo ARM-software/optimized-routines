@@ -68,6 +68,7 @@
 {"_ZGVnN4vl4l4_sincosf", 'f', 'n', -3.1, 3.1, {.vnf = _Z_sincosf_wrap}},
 {"_ZGVnN2vl8l8_sincos", 'd', 'n', -3.1, 3.1, {.vnd = _Z_sincos_wrap}},
 {"_ZGVnN4vl4l4_sincospif", 'f', 'n', -3.1, 3.1, {.vnf = _Z_sincospif_wrap}},
+{"_ZGVnN2vl8l8_sincospi", 'd', 'n', -3.1, 3.1, {.vnd = _Z_sincospi_wrap}},
 {"_ZGVnN4v_cexpif", 'f', 'n', -3.1, 3.1, {.vnf = _Z_cexpif_wrap}},
 {"_ZGVnN2v_cexpi", 'd', 'n', -3.1, 3.1, {.vnd = _Z_cexpi_wrap}},
 
