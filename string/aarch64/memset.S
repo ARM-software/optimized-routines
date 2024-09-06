@@ -26,7 +26,6 @@
 ENTRY (__memset_aarch64)
 	PTR_ARG (0)
 	SIZE_ARG (2)
-
 	dup	v0.16B, valw
 	cmp	count, 16
 	b.lo	L(set_small)
@@ -58,6 +57,7 @@ L(set_small):
 	str	s0, [dstend2, -4]
 	str	s0, [dstend, -4]
 	ret
+
 	/* Set 0..3 bytes.  */
 2:	cbz	count, 3f
 	lsr	off, count, 1
@@ -80,17 +80,15 @@ L(set_128):
 	.p2align 4
 L(set_long):
 	str	q0, [dstin]
-	and	valw, valw, 255
 	str	q0, [dst, 16]
-	cbnz	valw, L(no_zva)
-
+	tst	valw, 255
+	b.ne	L(no_zva)
 #ifndef SKIP_ZVA_CHECK
 	mrs	zva_val, dczid_el0
 	and	zva_val, zva_val, 31
 	cmp	zva_val, 4		/* ZVA size is 64 bytes.  */
 	b.ne	L(no_zva)
 #endif
-
 	stp	q0, q0, [dst, 32]
 	bic	dst, dstin, 63
 	sub	count, dstend, dst	/* Count is now 64 too large.  */
@@ -101,11 +99,11 @@ L(set_long):
 	stp	q0, q0, [dstend, -32]
 
 	.p2align 4
-L(zva_loop):
+L(zva64_loop):
 	add	dst, dst, 64
 	dc	zva, dst
 	subs	count, count, 64
-	b.hi	L(zva_loop)
+	b.hi	L(zva64_loop)
 	ret
 
 	.p2align 3
@@ -114,7 +112,8 @@ L(no_zva):
 	sub	count, count, 64 + 32	/* Adjust count and bias for loop.  */
 L(no_zva_loop):
 	stp	q0, q0, [dst, 32]
-	stp	q0, q0, [dst, 64]!
+	stp	q0, q0, [dst, 64]
+	add	dst, dst, 64
 	subs	count, count, 64
 	b.hi	L(no_zva_loop)
 	stp	q0, q0, [dstend, -64]
