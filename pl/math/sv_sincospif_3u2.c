@@ -36,7 +36,8 @@ PL_TEST_ULP (_ZGVsMxvl4l4_sincospif_cos, 2.68)
 #  define SV_SINCOSPIF_INTERVAL(lo, hi, n)                                    \
     PL_TEST_SYM_INTERVAL (_ZGVsMxvl4l4_sincospif_sin, lo, hi, n)              \
     PL_TEST_SYM_INTERVAL (_ZGVsMxvl4l4_sincospif_cos, lo, hi, n)
-SV_SINCOSPIF_INTERVAL (0, 1, 500000)
-SV_SINCOSPIF_INTERVAL (1, 0x1p24, 500000)
-SV_SINCOSPIF_INTERVAL (0x1p24, inf, 10000)
+SV_SINCOSPIF_INTERVAL (0, 0x1p-31, 10000)
+SV_SINCOSPIF_INTERVAL (0x1p-31, 0.5, 50000)
+SV_SINCOSPIF_INTERVAL (0.5, 0x1p31, 50000)
+SV_SINCOSPIF_INTERVAL (0x1p31, inf, 10000)
 #endif

@@ -32,11 +32,11 @@ _ZGVnN4vl4l4_sincospif (float32x4_t x, float32x4_t *out_sin,
 #if WANT_TRIGPI_TESTS
 PL_TEST_ULP (_ZGVnN4v_sincospif_sin, 2.54)
 PL_TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
-#  define V_SINCOSF_INTERVAL(lo, hi, n)                                       \
-    PL_TEST_INTERVAL (_ZGVnN4v_sincospif_sin, lo, hi, n)                      \
-    PL_TEST_INTERVAL (_ZGVnN4v_sincospif_cos, lo, hi, n)
-V_SINCOSF_INTERVAL (0, 0x1p31, 500000)
-V_SINCOSF_INTERVAL (-0, -0x1p31, 500000)
-V_SINCOSF_INTERVAL (0x1p31, inf, 10000)
-V_SINCOSF_INTERVAL (-0x1p31, -inf, 10000)
+#  define V_SINCOSPIF_INTERVAL(lo, hi, n)                                     \
+    PL_TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_sin, lo, hi, n)                  \
+    PL_TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_cos, lo, hi, n)
+V_SINCOSPIF_INTERVAL (0, 0x1p-63, 10000)
+V_SINCOSPIF_INTERVAL (0x1p-63, 0.5, 50000)
+V_SINCOSPIF_INTERVAL (0.5, 0x1p31, 50000)
+V_SINCOSPIF_INTERVAL (0x1p31, inf, 10000)
 #endif

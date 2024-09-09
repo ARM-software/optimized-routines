@@ -33,10 +33,11 @@ _ZGVnN2vl8l8_sincospi (float64x2_t x, float64x2_t *out_sin,
 #if WANT_TRIGPI_TESTS
 PL_TEST_ULP (_ZGVnN2v_sincospi_sin, 2.59)
 PL_TEST_ULP (_ZGVnN2v_sincospi_cos, 2.66)
-#  define V_SINCOS_INTERVAL(lo, hi, n)                                        \
+#  define V_SINCOSPI_INTERVAL(lo, hi, n)                                      \
     PL_TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_sin, lo, hi, n)                   \
     PL_TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_cos, lo, hi, n)
-V_SINCOS_INTERVAL (0, 0.5, 10000)
-V_SINCOS_INTERVAL (0.5, 0x1p63, 10000)
-V_SINCOS_INTERVAL (0x1p63, inf, 10000)
+V_SINCOSPI_INTERVAL (0, 0x1p-63, 10000)
+V_SINCOSPI_INTERVAL (0x1p-63, 0.5, 50000)
+V_SINCOSPI_INTERVAL (0.5, 0x1p63, 50000)
+V_SINCOSPI_INTERVAL (0x1p63, inf, 10000)
 #endif

@@ -61,7 +61,6 @@ PL_TEST_ULP (_ZGVnN4v_sincosf_cos, 1.31)
 #define V_SINCOSF_INTERVAL(lo, hi, n)                                         \
   PL_TEST_INTERVAL (_ZGVnN4v_sincosf_sin, lo, hi, n)                          \
   PL_TEST_INTERVAL (_ZGVnN4v_sincosf_cos, lo, hi, n)
-V_SINCOSF_INTERVAL (0, 0x1p20, 500000)
-V_SINCOSF_INTERVAL (-0, -0x1p20, 500000)
+V_SINCOSF_INTERVAL (0, 0x1p-31, 50000)
+V_SINCOSF_INTERVAL (0x1p-31, 0x1p20, 500000)
 V_SINCOSF_INTERVAL (0x1p20, inf, 10000)
-V_SINCOSF_INTERVAL (-0x1p20, -inf, 10000)

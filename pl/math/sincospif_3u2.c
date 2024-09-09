@@ -134,11 +134,11 @@ sincospif (float x, float *out_sin, float *out_cos)
 #if WANT_TRIGPI_TESTS
 PL_TEST_ULP (sincospif_sin, 2.54)
 PL_TEST_ULP (sincospif_cos, 2.68)
-#  define SINCOSF_INTERVAL(lo, hi, n)                                         \
+#  define SINCOSPIF_INTERVAL(lo, hi, n)                                       \
     PL_TEST_SYM_INTERVAL (sincospif_sin, lo, hi, n)                           \
     PL_TEST_SYM_INTERVAL (sincospif_cos, lo, hi, n)
-SINCOSF_INTERVAL (0, 0x1p-30, 5000)
-SINCOSF_INTERVAL (0x1p-30, 0.5, 10000)
-SINCOSF_INTERVAL (0.5, 0x1p22f, 10000)
-SINCOSF_INTERVAL (0x1p22f, inf, 10000)
+SINCOSPIF_INTERVAL (0, 0x1p-31, 10000)
+SINCOSPIF_INTERVAL (0x1p-31, 1, 50000)
+SINCOSPIF_INTERVAL (1, 0x1p22f, 50000)
+SINCOSPIF_INTERVAL (0x1p22f, inf, 10000)
 #endif

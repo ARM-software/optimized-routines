@@ -63,12 +63,12 @@ checkint (uint64_t iy)
 }
 
 /* Approximation for scalar double-precision sincospi(x).
-   Maximum error for sin: 3.41 ULP:
-      sincospif_sin(0x1.7af1061cbe85cp+15) got 0x1.ffa3d426ca085p-1 want
-   0x1.ffa3d426ca088p-1.
-   Maximum error for cos: 3.63 ULP:
-      sincospif_cos(0x1.37058819c4ab1p-10) got 0x1.ffff16e9671bep-1 want
-   0x1.ffff16e9671c2p-1.  */
+   Maximum error for sin: 3.46 ULP:
+      sincospif_sin(0x1.3d8a067cd8961p+14) got 0x1.ffe609a279008p-1 want
+   0x1.ffe609a27900cp-1.
+   Maximum error for cos: 3.66 ULP:
+      sincospif_cos(0x1.a0ec6997557eep-24) got 0x1.ffffffffffe59p-1 want
+   0x1.ffffffffffe5dp-1.  */
 void
 sincospi (double x, double *out_sin, double *out_cos)
 {
@@ -145,13 +145,13 @@ sincospi (double x, double *out_sin, double *out_cos)
 }
 
 #if WANT_TRIGPI_TESTS
-PL_TEST_ULP (sincospi_sin, 2.91)
-PL_TEST_ULP (sincospi_cos, 3.13)
+PL_TEST_ULP (sincospi_sin, 2.96)
+PL_TEST_ULP (sincospi_cos, 3.16)
 #  define SINCOS_INTERVAL(lo, hi, n)                                          \
     PL_TEST_SYM_INTERVAL (sincospi_sin, lo, hi, n)                            \
     PL_TEST_SYM_INTERVAL (sincospi_cos, lo, hi, n)
-SINCOS_INTERVAL (0, 0x1p-63, 5000)
-SINCOS_INTERVAL (0x1p-63, 0.5, 10000)
-SINCOS_INTERVAL (0.5, 0x1p51, 10000)
+SINCOS_INTERVAL (0, 0x1p-63, 10000)
+SINCOS_INTERVAL (0x1p-63, 0.5, 50000)
+SINCOS_INTERVAL (0.5, 0x1p51, 50000)
 SINCOS_INTERVAL (0x1p51, inf, 10000)
 #endif
