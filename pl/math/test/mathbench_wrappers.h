@@ -260,6 +260,14 @@ _Z_sv_sincos_wrap (sv_double x, sv_bool pg)
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
 }
 
+static sv_float
+_Z_sv_sincospif_wrap (sv_float x, sv_bool pg)
+{
+  float s[svcntw ()], c[svcntw ()];
+  _ZGVsMxvl4l4_sincospif (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
+}
+
 static sv_double
 _Z_sv_cexpi_wrap (sv_double x, sv_bool pg)
 {

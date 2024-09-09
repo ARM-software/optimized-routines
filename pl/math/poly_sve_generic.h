@@ -2,7 +2,7 @@
  * Helpers for evaluating polynomials with various schemes - specific to SVE
  * but precision-agnostic.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -298,4 +298,34 @@ static inline VTYPE VWRAP (pw_horner_18) (svbool_t pg, VTYPE x, VTYPE x2,
   VTYPE p2_18 = VWRAP (pw_horner_16) (pg, x, x2, poly + 2);
   VTYPE p01 = svmla_x (pg, DUP (poly[0]), x, poly[1]);
   return svmla_x (pg, p01, x2, p2_18);
+}
+
+static inline VTYPE VWRAP (lw_pw_horner_5) (svbool_t pg, VTYPE x, VTYPE x2,
+					    const STYPE *poly_even,
+					    const STYPE *poly_odd)
+{
+  VTYPE c13 = svld1rq (pg, poly_odd);
+
+  VTYPE p01 = svmla_lane (DUP (poly_even[0]), x, c13, 0);
+  VTYPE p23 = svmla_lane (DUP (poly_even[1]), x, c13, 1);
+  VTYPE p45 = svmla_x (pg, DUP (poly_even[2]), x, poly_odd[2]);
+
+  VTYPE p;
+  p = svmla_x (pg, p23, x2, p45);
+  p = svmla_x (pg, p01, x2, p);
+  return p;
+}
+static inline VTYPE VWRAP (lw_pw_horner_9) (svbool_t pg, VTYPE x, VTYPE x2,
+					    const STYPE *poly_even,
+					    const STYPE *poly_odd)
+{
+  VTYPE c13 = svld1rq (pg, poly_odd);
+
+  VTYPE p49 = VWRAP (lw_pw_horner_5) (pg, x, x2, poly_even + 2, poly_odd + 2);
+  VTYPE p23 = svmla_lane (DUP (poly_even[1]), x, c13, 1);
+
+  VTYPE p29 = svmla_x (pg, p23, x2, p49);
+  VTYPE p01 = svmla_lane (DUP (poly_even[0]), x, c13, 0);
+
+  return svmla_x (pg, p01, x2, p29);
 }

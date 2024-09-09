@@ -23,21 +23,10 @@ _ZGVnN4vl4l4_sincospif (float32x4_t x, float32x4_t *out_sin,
 {
   const struct v_sincospif_data *d = ptr_barrier (&v_sincospif_data);
 
-  /* If r is odd, the sign of the result should be inverted for sinpi and
-     reintroduced for cospi.  */
-  uint32x4_t cmp = vcgeq_f32 (x, d->range_val);
-  uint32x4_t odd = vshlq_n_u32 (
-      vbicq_u32 (vreinterpretq_u32_s32 (vcvtaq_s32_f32 (x)), cmp), 31);
-
   float32x4x2_t sc = v_sincospif_inline (x, d);
 
-  float32x4_t sinpix = vreinterpretq_f32_u32 (
-      veorq_u32 (vreinterpretq_u32_f32 (sc.val[0]), odd));
-  vst1q_f32 ((float *) out_sin, sinpix);
-
-  float32x4_t cospix = vreinterpretq_f32_u32 (
-      veorq_u32 (vreinterpretq_u32_f32 (sc.val[1]), odd));
-  vst1q_f32 ((float *) out_cos, cospix);
+  vst1q_f32 ((float *) out_sin, sc.val[0]);
+  vst1q_f32 ((float *) out_cos, sc.val[1]);
 }
 
 #if WANT_TRIGPI_TESTS
@@ -46,8 +35,8 @@ PL_TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
 #  define V_SINCOSF_INTERVAL(lo, hi, n)                                       \
     PL_TEST_INTERVAL (_ZGVnN4v_sincospif_sin, lo, hi, n)                      \
     PL_TEST_INTERVAL (_ZGVnN4v_sincospif_cos, lo, hi, n)
-V_SINCOSF_INTERVAL (0, 0x1p29, 500000)
-V_SINCOSF_INTERVAL (-0, -0x1p20, 500000)
-V_SINCOSF_INTERVAL (0x1p29, inf, 10000)
-V_SINCOSF_INTERVAL (-0x1p20, -inf, 10000)
+V_SINCOSF_INTERVAL (0, 0x1p31, 500000)
+V_SINCOSF_INTERVAL (-0, -0x1p31, 500000)
+V_SINCOSF_INTERVAL (0x1p31, inf, 10000)
+V_SINCOSF_INTERVAL (-0x1p31, -inf, 10000)
 #endif

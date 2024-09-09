@@ -28,6 +28,12 @@ const static struct v_sincospif_data
 static inline float32x4x2_t
 v_sincospif_inline (float32x4_t x, const struct v_sincospif_data *d)
 {
+  /* If r is odd, the sign of the result should be inverted for sinpi and
+     reintroduced for cospi.  */
+  uint32x4_t cmp = vcgeq_f32 (x, d->range_val);
+  uint32x4_t odd = vshlq_n_u32 (
+      vbicq_u32 (vreinterpretq_u32_s32 (vcvtaq_s32_f32 (x)), cmp), 31);
+
   /* r = x - rint(x).  */
   float32x4_t sr = vsubq_f32 (x, vrndaq_f32 (x));
   /* cospi(x) = sinpi(0.5 - abs(x)) for values -1/2 .. 1/2.  */
@@ -42,5 +48,10 @@ v_sincospif_inline (float32x4_t x, const struct v_sincospif_data *d)
   float32x4_t ss = vmulq_f32 (v_pw_horner_5_f32 (sr2, sr4, d->poly), sr);
   float32x4_t cc = vmulq_f32 (v_pw_horner_5_f32 (cr2, cr4, d->poly), cr);
 
-  return (float32x4x2_t){ ss, cc };
+  float32x4_t sinpix
+      = vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (ss), odd));
+  float32x4_t cospix
+      = vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (cc), odd));
+
+  return (float32x4x2_t){ sinpix, cospix };
 }
