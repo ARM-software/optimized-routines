@@ -24,31 +24,19 @@ _ZGVnN2vl8l8_sincospi (float64x2_t x, float64x2_t *out_sin,
 {
   const struct v_sincospi_data *d = ptr_barrier (&v_sincospi_data);
 
-  /* If r is odd, the sign of the result should be inverted for sinpi
-     and reintroduced for cospi.  */
-  uint64x2_t cmp = vcgeq_f64 (x, d->range_val);
-  uint64x2_t odd = vshlq_n_u64 (
-      vbicq_u64 (vreinterpretq_u64_s64 (vcvtaq_s64_f64 (x)), cmp), 63);
-
   float64x2x2_t sc = v_sincospi_inline (x, d);
 
-  float64x2_t sinpix = vreinterpretq_f64_u64 (
-      veorq_u64 (vreinterpretq_u64_f64 (sc.val[0]), odd));
-  vst1q_f64 ((double *) out_sin, sinpix);
-
-  float64x2_t cospix = vreinterpretq_f64_u64 (
-      veorq_u64 (vreinterpretq_u64_f64 (sc.val[1]), odd));
-  vst1q_f64 ((double *) out_cos, cospix);
+  vst1q_f64 ((double *) out_sin, sc.val[0]);
+  vst1q_f64 ((double *) out_cos, sc.val[1]);
 }
 
 #if WANT_TRIGPI_TESTS
 PL_TEST_ULP (_ZGVnN2v_sincospi_sin, 2.59)
 PL_TEST_ULP (_ZGVnN2v_sincospi_cos, 2.66)
 #  define V_SINCOS_INTERVAL(lo, hi, n)                                        \
-    PL_TEST_INTERVAL (_ZGVnN2v_sincospi_sin, lo, hi, n)                       \
-    PL_TEST_INTERVAL (_ZGVnN2v_sincospi_cos, lo, hi, n)
-V_SINCOS_INTERVAL (0, 0x1p-63, 5000)
-V_SINCOS_INTERVAL (0x1p-63, 0.5, 10000)
-V_SINCOS_INTERVAL (0.5, 0x1p51, 10000)
-V_SINCOS_INTERVAL (0x1p51, inf, 10000)
+    PL_TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_sin, lo, hi, n)                   \
+    PL_TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_cos, lo, hi, n)
+V_SINCOS_INTERVAL (0, 0.5, 10000)
+V_SINCOS_INTERVAL (0.5, 0x1p63, 10000)
+V_SINCOS_INTERVAL (0x1p63, inf, 10000)
 #endif

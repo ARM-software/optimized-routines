@@ -208,6 +208,7 @@ svfloat64_t _ZGVsMxv_tan (svfloat64_t, svbool_t);
 void _ZGVsMxvl4l4_sincosf (svfloat32_t, float *, float *, svbool_t);
 void _ZGVsMxvl8l8_sincos (svfloat64_t, double *, double *, svbool_t);
 void _ZGVsMxvl4l4_sincospif (svfloat32_t, float *, float *, svbool_t);
+void _ZGVsMxvl8l8_sincospi (svfloat64_t, double *, double *, svbool_t);
 #  endif
 
 # endif

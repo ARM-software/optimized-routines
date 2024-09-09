@@ -99,5 +99,9 @@ SVF (_ZGVsMxvl4l4_sincospif_sin, sv_sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1,
      0)
 SVF (_ZGVsMxvl4l4_sincospif_cos, sv_sincospif_cos, cospi, mpfr_cospi, 1, 1, f1,
      0)
+SVF (_ZGVsMxvl8l8_sincospi_sin, sv_sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1,
+     0)
+SVF (_ZGVsMxvl8l8_sincospi_cos, sv_sincospi_cos, cospil, mpfr_cospi, 1, 0, d1,
+     0)
 # endif
 #endif
