@@ -28,6 +28,12 @@ ifeq ($(WANT_SVE_MATH), 0)
 pl-lib-srcs := $(filter-out $(PLM)/sv_%, $(pl-lib-srcs))
 endif
 
+ifneq ($(OS),Linux)
+# Disable all vector symbols if not on Linux
+pl-lib-srcs := $(filter-out $(PLM)/sv_%, $(pl-lib-srcs))
+pl-lib-srcs := $(filter-out $(PLM)/v_%, $(pl-lib-srcs))
+endif
+
 math-test-srcs := \
 	$(AOR)/test/mathtest.c \
 	$(AOR)/test/mathbench.c \

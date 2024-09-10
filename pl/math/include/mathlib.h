@@ -55,7 +55,7 @@ long double erfinvl (long double);
 long double exp10l (long double);
 long double sinpil (long double);
 
-#if __aarch64__
+#if __aarch64__ && __linux__
 # if __GNUC__ >= 5
 typedef __Float32x4_t __f32x4_t;
 typedef __Float64x2_t __f64x2_t;

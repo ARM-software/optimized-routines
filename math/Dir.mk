@@ -19,7 +19,10 @@ S := $(srcdir)/math
 B := build/math
 
 math-lib-srcs := $(wildcard $(S)/*.[cS])
+ifeq ($(OS),Linux)
+# Vector symbols only supported on Linux
 math-lib-srcs += $(wildcard $(S)/$(ARCH)/*.[cS])
+endif
 
 math-test-srcs := \
 	$(S)/test/mathtest.c \
