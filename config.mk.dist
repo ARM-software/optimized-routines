@@ -55,6 +55,7 @@ USE_MPFR=0
 math-cflags += -DUSE_MPFR=$(USE_MPFR)
 ifeq ($(USE_MPFR), 1)
   math-ldlibs += -lmpfr -lgmp
+  math-ulpflags += -m
 endif
 # Disable fenv checks
 #math-ulpflags = -q -f
