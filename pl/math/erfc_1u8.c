@@ -1,7 +1,7 @@
 /*
  * Double-precision erfc(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -86,7 +86,7 @@ erfc (double x)
       /* Lookup erfc(r) and scale(r) in tables, e.g. set erfc(r) to 1 and scale
 	 to 2/sqrt(pi), when x reduced to r = 0.  */
       double z = a + Shift;
-      uint64_t i = asuint64 (z);
+      uint64_t i = asuint64 (z) - asuint64 (Shift);
       double r = z - Shift;
       /* These values are scaled by 2^128.  */
       double erfcr = __erfc_data.tab[i].erfc;
