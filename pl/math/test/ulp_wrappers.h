@@ -11,14 +11,6 @@
 #include <arm_neon.h>
 
 #if USE_MPFR
-static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
-  mpfr_cos(y, x, r);
-  return mpfr_sin(y, x, r);
-}
-static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) {
-  mpfr_sin(y, x, r);
-  return mpfr_cos(y, x, r);
-}
 static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
   mpfr_t y2;
   mpfr_init(y2);

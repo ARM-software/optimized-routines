@@ -91,7 +91,7 @@ sincospi (double x, double *out_sin, double *out_cos)
       double ar4_s = ar2_s * ar2_s;
       double ar4_c = ar2_c * ar2_c;
 
-      uint64_t cc_sign = lrint (x) << 63;
+      uint64_t cc_sign = ((uint64_t) llrint (x)) << 63;
       uint64_t ss_sign = cc_sign;
       if (ar_s == 0)
 	ss_sign = sign;
