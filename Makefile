@@ -27,7 +27,10 @@ LDLIBS =
 AR = $(CROSS_COMPILE)ar
 RANLIB = $(CROSS_COMPILE)ranlib
 INSTALL = install
-OS = $(shell uname)
+# Detect OS.
+# Assume Unix environment: Linux, Darwin, or Msys.
+OS := $(shell uname -s)
+OS := $(patsubst MSYS%,Msys,$(OS))
 
 all:
 

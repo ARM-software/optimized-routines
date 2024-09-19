@@ -30,6 +30,14 @@ HOST_CFLAGS += -Wall -Wno-unused-function
 HOST_CFLAGS += -g
 CFLAGS += -g
 
+ifeq ($(OS),Msys)
+  # Clear the default flag -fPIC, as not supported on Windows
+  CFLAGS_SHARED =
+  # For clang on Windows
+  CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -Wno-deprecated-declarations
+  CFLAGS += -Wno-unused-variable
+endif
+
 # Optimize the shared libraries on aarch64 assuming they fit in 1M.
 #CFLAGS_SHARED = -fPIC -mcmodel=tiny
 

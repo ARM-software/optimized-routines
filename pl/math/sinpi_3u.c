@@ -25,6 +25,8 @@ static const double poly[]
 	-0x1.012a9870eeb7dp-25 };
 
 #define Shift 0x1.8p+52
+/* TODO Store constant in structure for more efficient load.  */
+#define Pi 0x1.921fb54442d18p+1
 
 /* Approximation for scalar double-precision sinpi(x).
    Maximum error: 3.03 ULP:
@@ -52,7 +54,7 @@ sinpi (double x)
   /* For very small inputs, squaring r causes underflow.
      Values below this threshold can be approximated via sinpi(x) ≈ pi*x.  */
   if (r < 0x1p-63)
-    return M_PI * x;
+    return Pi * x;
 
   /* Any non-integer values >= 0x1x51 will be int + 0.5.
      These values should return exactly 1 or -1.  */

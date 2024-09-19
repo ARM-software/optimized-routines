@@ -16,7 +16,7 @@
 #include "pl_test.h"
 
 /* sincos not available for all scalar libm implementations.  */
-#ifndef __GLIBC__
+#if defined(_MSC_VER) || ! defined(__GLIBC__)
 static void
 sincosf (float x, float *out_sin, float *out_cos)
 {

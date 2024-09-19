@@ -3,12 +3,12 @@
 # Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
-ifeq ($(OS),Darwin)
+ifneq ($(OS),Linux)
   ifeq ($(WANT_SIMD_EXCEPT),1)
-    $(error WANT_SIMD_EXCEPT is not supported on Darwin)
+    $(error WANT_SIMD_EXCEPT is not supported outside Linux)
   endif
   ifeq ($(WANT_SVE_MATH),1)
-    $(error WANT_SVE_MATH is not supported on Darwin)
+    $(error WANT_SVE_MATH is not supported outside Linux)
   endif
   ifneq ($(USE_MPFR),1)
     $(warning WARNING: Double-precision ULP tests will not be usable without MPFR)

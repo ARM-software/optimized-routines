@@ -16,7 +16,7 @@
 #include "v_sincos_common.h"
 
 /* sincos not available for all scalar libm implementations.  */
-#ifndef __GLIBC__
+#if defined(_MSC_VER) || ! defined(__GLIBC__)
 static void
 sincos (double x, double *out_sin, double *out_cos)
 {
