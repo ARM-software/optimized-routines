@@ -1,7 +1,7 @@
 /*
  * Single-precision vector e^x function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,7 +11,7 @@
 static const struct data
 {
   float32x4_t poly[5];
-  float32x4_t shift, inv_ln2, ln2_hi, ln2_lo;
+  float32x4_t inv_ln2, ln2_hi, ln2_lo;
   uint32x4_t exponent_bias;
 #if !WANT_SIMD_EXCEPT
   float32x4_t special_bound, scale_thresh;
@@ -20,7 +20,6 @@ static const struct data
   /* maxerr: 1.45358 +0.5 ulp.  */
   .poly = { V4 (0x1.0e4020p-7f), V4 (0x1.573e2ep-5f), V4 (0x1.555e66p-3f),
 	    V4 (0x1.fffdb6p-2f), V4 (0x1.ffffecp-1f) },
-  .shift = V4 (0x1.8p23f),
   .inv_ln2 = V4 (0x1.715476p+0f),
   .ln2_hi = V4 (0x1.62e4p-1f),
   .ln2_lo = V4 (0x1.7f7d1cp-20f),
@@ -74,7 +73,7 @@ special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
 float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
-  float32x4_t n, r, r2, scale, p, q, poly, z;
+  float32x4_t n, r, r2, scale, p, q, poly;
   uint32x4_t cmp, e;
 
 #if WANT_SIMD_EXCEPT
@@ -93,11 +92,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
 
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
-  z = vfmaq_f32 (d->shift, x, d->inv_ln2);
-  n = vsubq_f32 (z, d->shift);
+  n = vrndaq_f32 (vmulq_f32 (x, d->inv_ln2));
   r = vfmsq_f32 (x, n, d->ln2_hi);
   r = vfmsq_f32 (r, n, d->ln2_lo);
-  e = vshlq_n_u32 (vreinterpretq_u32_f32 (z), 23);
+  e = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtq_s32_f32 (n)), 23);
   scale = vreinterpretq_f32_u32 (vaddq_u32 (e, d->exponent_bias));
 
 #if !WANT_SIMD_EXCEPT
