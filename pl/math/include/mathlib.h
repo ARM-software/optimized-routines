@@ -28,6 +28,7 @@ float sinhf (float);
 float sinpif (float);
 float tanf (float);
 float tanhf (float);
+float tanpif (float);
 void sincospif (float, float *, float *);
 void sincospi (double, double *, double *);
 
@@ -49,11 +50,13 @@ double log1p (double);
 double sinh (double);
 double sinpi (double);
 double tanh (double);
+double tanpi (double);
 
 long double cospil (long double);
 long double erfinvl (long double);
 long double exp10l (long double);
 long double sinpil (long double);
+long double tanpil (long double);
 
 #if __aarch64__ && __linux__
 # if __GNUC__ >= 5
