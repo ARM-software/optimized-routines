@@ -53,7 +53,7 @@ math-tools := \
 	build/pl/bin/mathbench \
 	build/pl/bin/mathbench_libc \
 	build/pl/bin/runulp.sh \
-	build/pl/bin/ulp \
+	build/pl/bin/ulp
 
 math-host-tools := \
 	build/pl/bin/rtest \
@@ -128,8 +128,9 @@ build/pl/lib/libmathlib.a: $(pl-lib-objs)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
-$(math-host-tools): HOST_LDLIBS += -lm -lmpfr -lmpc
-$(math-tools): LDLIBS += $(math-ldlibs) -lm
+$(math-host-tools): HOST_LDLIBS += $(libm-libs) $(mpfr-libs) $(mpc-libs)
+$(math-tools): LDLIBS += $(math-ldlibs) $(libm-libs)
+
 # math-sve-cflags should be empty if WANT_SVE_MATH is not enabled
 $(math-tools): CFLAGS_PL += $(math-sve-cflags)
 ifneq ($(OS),Darwin)
@@ -166,14 +167,14 @@ build/pl/bin/rtest: $(math-host-objs)
 	$(HOST_CC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LDLIBS)
 
 build/pl/bin/mathtest: $(B)/test/mathtest.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(libm-libs)
 
 build/pl/bin/mathbench: $(B)/test/mathbench.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(libm-libs)
 
 # This is not ideal, but allows custom symbols in mathbench to get resolved.
 build/pl/bin/mathbench_libc: $(B)/test/mathbench.o build/pl/lib/libmathlib.a
-	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $< $(LDLIBS) -lc build/pl/lib/libmathlib.a -lm
+	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $< $(libm-libs) $(libc-libs) build/pl/lib/libmathlib.a $(libm-libs)
 
 build/pl/bin/ulp: $(B)/test/ulp.o build/pl/lib/libmathlib.a
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)

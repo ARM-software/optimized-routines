@@ -1,7 +1,7 @@
 /*
  * Microbenchmark for math functions.
  *
- * Copyright (c) 2018-2023, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -377,7 +377,11 @@ static uint64_t
 tic (void)
 {
   struct timespec ts;
+#if defined(_MSC_VER)
+  if (timespec_get (&ts, TIME_UTC))
+#else
   if (clock_gettime (CLOCK_REALTIME, &ts))
+#endif
     abort ();
   return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }

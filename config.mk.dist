@@ -31,11 +31,24 @@ HOST_CFLAGS += -g
 CFLAGS += -g
 
 ifeq ($(OS),Msys)
+  # llvm is the only available/valid native compiler
+  CC = clang
+  AR = llvm-ar
+  RANLIB = llvm-ranlib
+  HOST_CC = clang
+  SYSROOT = /c/wenv/msys2/msys64/clangarm64
+  # Common windows flags
+  COMMON_WIN_CFLAGS = -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE
+  COMMON_WIN_CFLAGS += -Wno-deprecated-declarations -Wno-unused-variable
+  # For mathtest
+  HOST_CFLAGS += -I$(SYSROOT)/include
+  HOST_CFLAGS += $(COMMON_WIN_CFLAGS) -Wno-ignored-attributes
   # Clear the default flag -fPIC, as not supported on Windows
   CFLAGS_SHARED =
+  # For ulp.h with MPFR
+  CFLAGS += -I$(SYSROOT)/include
   # For clang on Windows
-  CFLAGS += -D_CRT_SECURE_NO_WARNINGS -D_CRT_NONSTDC_NO_DEPRECATE -Wno-deprecated-declarations
-  CFLAGS += -Wno-unused-variable
+  CFLAGS += $(COMMON_WIN_CFLAGS)
 endif
 
 # Optimize the shared libraries on aarch64 assuming they fit in 1M.
@@ -56,13 +69,25 @@ math-testflags =
 string-cflags = -falign-functions=64
 networking-cflags =
 
+ifeq ($(OS),Msys)
+  # Libraries can be installed with pacman
+  libm-libs = -lmsvcrt -lvcruntime -lucrt
+  libc-libs =
+  # Linker will look for .lib but some systems only have .dll.a,
+  # therefore we have to give absolute path to libraries.
+  # This is system dependent and might need adjusting.
+  mpfr-libs = $(SYSROOT)/lib/libmpfr.dll.a
+  gmp-libs = $(SYSROOT)/lib/libgmp.dll.a
+  mpc-libs = $(SYSROOT)/lib/libmpc.dll.a
+endif
+
 # Use if mpfr is available on the target for ulp error checking. If
 # enabling this, it is advised to disable fenv checks by uncommenting
 # the two lines at the bottom of this block.
 USE_MPFR=0
 math-cflags += -DUSE_MPFR=$(USE_MPFR)
 ifeq ($(USE_MPFR), 1)
-  math-ldlibs += -lmpfr -lgmp
+  math-ldlibs += $(mpfr-libs) $(gmp-libs)
   math-ulpflags += -m
 endif
 # Disable fenv checks
