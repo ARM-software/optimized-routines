@@ -35,7 +35,7 @@ static const double poly[]
 double
 sinpi (double x)
 {
-  if (isinf (x))
+  if (isinf (x) || isnan (x))
     return __math_invalid (x);
 
   double r = asdouble (asuint64 (x) & ~0x8000000000000000);

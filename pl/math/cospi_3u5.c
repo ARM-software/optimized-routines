@@ -31,7 +31,7 @@ static const double poly[]
 double
 cospi (double x)
 {
-  if (isinf (x))
+  if (isinf (x) || isnan (x))
     return __math_invalid (x);
 
   double ax = asdouble (asuint64 (x) & ~0x8000000000000000);

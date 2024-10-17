@@ -27,7 +27,7 @@
 float
 cospif (float x)
 {
-  if (isinf (x))
+  if (isinf (x) || isnan (x))
     return __math_invalidf (x);
 
   float ax = asfloat (asuint (x) & ~0x80000000);

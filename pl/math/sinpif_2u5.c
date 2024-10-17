@@ -27,7 +27,7 @@
 float
 sinpif (float x)
 {
-  if (isinf (x))
+  if (isinf (x) || isnan (x))
     return __math_invalidf (x);
 
   float r = asfloat (asuint (x) & ~0x80000000);

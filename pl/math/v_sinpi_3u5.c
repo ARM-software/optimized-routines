@@ -79,7 +79,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinpi) (float64x2_t x)
 
 #if WANT_TRIGPI_TESTS
 PL_SIG (V, D, 1, sinpi, -0.9, 0.9)
-PL_TEST_ULP (V_NAME_D1 (sinpi), 3.06)
+PL_TEST_ULP (V_NAME_D1 (sinpi), 2.56)
 PL_TEST_EXPECT_FENV (V_NAME_D1 (sinpi), WANT_SIMD_EXCEPT)
 PL_TEST_SYM_INTERVAL (V_NAME_D1 (sinpi), 0, 0x1p-63, 5000)
 PL_TEST_SYM_INTERVAL (V_NAME_D1 (sinpi), 0x1p-63, 0.5, 10000)
