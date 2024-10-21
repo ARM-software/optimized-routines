@@ -19,6 +19,7 @@ ENTRY (__memcmp_aarch64_sve)
 	PTR_ARG (1)
 	SIZE_ARG (2)
 	mov	x3, 0			/* initialize off */
+	cntb    x4
 
 0:	whilelo	p0.b, x3, x2		/* while off < max */
 	b.none	9f
@@ -26,10 +27,10 @@ ENTRY (__memcmp_aarch64_sve)
 	ld1b	z0.b, p0/z, [x0, x3]	/* read vectors bounded by max.  */
 	ld1b	z1.b, p0/z, [x1, x3]
 
-	/* Increment for a whole vector, even if we've only read a partial.
-	   This is significantly cheaper than INCP, and since OFF is not
+	/* Add for a whole vector, even if we've only read a partial.
+	   This is significantly cheaper than INCP or INCB, and since OFF is not
 	   used after the loop it is ok to increment OFF past MAX.  */
-	incb	x3
+	add     x3, x3, x4
 
 	cmpne	p1.b, p0/z, z0.b, z1.b	/* while no inequalities */
 	b.none	0b
