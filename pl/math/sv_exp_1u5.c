@@ -1,7 +1,7 @@
 /*
  * Double-precision vector e^x function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -131,6 +131,7 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 
 PL_SIG (SV, D, 1, exp, -9.9, 9.9)
 PL_TEST_ULP (SV_NAME_D1 (exp), 1.46)
+PL_TEST_DISABLE_FENV (SV_NAME_D1 (exp))
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 0, 0x1p-23, 40000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 0x1p-23, 1, 50000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 1, 0x1p23, 50000)

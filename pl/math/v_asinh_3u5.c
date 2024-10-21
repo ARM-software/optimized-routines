@@ -167,7 +167,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 
 PL_SIG (V, D, 1, asinh, -10.0, 10.0)
 PL_TEST_ULP (V_NAME_D1 (asinh), 2.80)
-PL_TEST_EXPECT_FENV (V_NAME_D1 (asinh), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (asinh), WANT_SIMD_EXCEPT)
 /* Test vector asinh 3 times, with control lane < 1, > 1 and special.
    Ensures the v_sel is choosing the right option in all cases.  */
 #define V_ASINH_INTERVAL(lo, hi, n)                                           \

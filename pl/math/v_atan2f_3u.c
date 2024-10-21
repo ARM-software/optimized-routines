@@ -1,7 +1,7 @@
 /*
  * Single-precision vector atan2(x) function.
  *
- * Copyright (c) 2021-2023, Arm Limited.
+ * Copyright (c) 2021-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -107,6 +107,7 @@ float32x4_t VPCS_ATTR V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (V, F, 2, atan2)
+PL_TEST_DISABLE_FENV (V_NAME_F2 (atan2))
 PL_TEST_ULP (V_NAME_F2 (atan2), 2.46)
 PL_TEST_INTERVAL (V_NAME_F2 (atan2), -10.0, 10.0, 50000)
 PL_TEST_INTERVAL (V_NAME_F2 (atan2), -1.0, 1.0, 40000)

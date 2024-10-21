@@ -1,7 +1,7 @@
 /*
  * Double-precision vector cbrt(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -112,5 +112,4 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
 
 PL_TEST_ULP (V_NAME_D1 (cbrt), 1.30)
 PL_SIG (V, D, 1, cbrt, -10.0, 10.0)
-PL_TEST_EXPECT_FENV_ALWAYS (V_NAME_D1 (cbrt))
 PL_TEST_SYM_INTERVAL (V_NAME_D1 (cbrt), 0, inf, 1000000)

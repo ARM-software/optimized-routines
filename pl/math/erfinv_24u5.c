@@ -7,7 +7,6 @@
 #include "math_config.h"
 #include "poly_scalar_f64.h"
 #include "pl_sig.h"
-#define IGNORE_SCALAR_FENV
 #include "pl_test.h"
 
 const static struct
@@ -78,6 +77,7 @@ erfinv (double x)
 #if USE_MPFR
 # warning Not generating tests for erfinv, as MPFR has no suitable reference
 #else
+PL_TEST_DISABLE_FENV (erfinv)
 PL_SIG (S, D, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (erfinv, 24.0)
 PL_TEST_INTERVAL (erfinv, 0, 1, 40000)

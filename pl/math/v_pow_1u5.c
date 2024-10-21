@@ -240,7 +240,7 @@ float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
 
 PL_SIG (V, D, 2, pow)
 PL_TEST_ULP (V_NAME_D2 (pow), 0.55)
-PL_TEST_EXPECT_FENV (V_NAME_D2 (pow), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D2 (pow), WANT_SIMD_EXCEPT)
 /* Wide intervals spanning the whole domain but shared between x and y.  */
 #define V_POW_INTERVAL2(xlo, xhi, ylo, yhi, n)                                 \
   PL_TEST_INTERVAL2 (V_NAME_D2 (pow), xlo, xhi, ylo, yhi, n)                   \

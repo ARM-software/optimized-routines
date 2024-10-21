@@ -1,6 +1,6 @@
 /*
  * Double-precision SVE tanh(x) function.
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -91,6 +91,7 @@ svfloat64_t SV_NAME_D1 (tanh) (svfloat64_t x, svbool_t pg)
 
 PL_SIG (SV, D, 1, tanh, -10.0, 10.0)
 PL_TEST_ULP (SV_NAME_D1 (tanh), 2.27)
+PL_TEST_DISABLE_FENV (SV_NAME_D1 (tanh))
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (tanh), 0, 0x1p-27, 5000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (tanh), 0x1p-27, 0x1.241bf835f9d5fp+4, 50000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (tanh), 0x1.241bf835f9d5fp+4, inf, 1000)

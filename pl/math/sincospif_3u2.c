@@ -7,7 +7,6 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
-#define IGNORE_SCALAR_FENV
 #include "pl_test.h"
 #include "poly_scalar_f32.h"
 
@@ -132,6 +131,8 @@ sincospif (float x, float *out_sin, float *out_cos)
 }
 
 #if WANT_TRIGPI_TESTS
+PL_TEST_DISABLE_FENV (sincospif_sin)
+PL_TEST_DISABLE_FENV (sincospif_cos)
 PL_TEST_ULP (sincospif_sin, 2.54)
 PL_TEST_ULP (sincospif_cos, 2.68)
 #  define SINCOSPIF_INTERVAL(lo, hi, n)                                       \

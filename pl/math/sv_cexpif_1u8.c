@@ -1,7 +1,7 @@
 /*
  * Single-precision vector cexpi function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -36,6 +36,8 @@ _ZGVsMxv_cexpif (svfloat32_t x, svbool_t pg)
   return sc;
 }
 
+PL_TEST_DISABLE_FENV (_ZGVsMxv_cexpif_sin)
+PL_TEST_DISABLE_FENV (_ZGVsMxv_cexpif_cos)
 PL_TEST_ULP (_ZGVsMxv_cexpif_sin, 1.17)
 PL_TEST_ULP (_ZGVsMxv_cexpif_cos, 1.31)
 #define SV_CEXPIF_INTERVAL(lo, hi, n)                                         \

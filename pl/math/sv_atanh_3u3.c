@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE atanh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -52,6 +52,7 @@ svfloat64_t SV_NAME_D1 (atanh) (svfloat64_t x, const svbool_t pg)
 
 PL_SIG (SV, D, 1, atanh, -1.0, 1.0)
 PL_TEST_ULP (SV_NAME_D1 (atanh), 3.32)
+PL_TEST_DISABLE_FENV (SV_NAME_D1 (atanh))
 /* atanh is asymptotic at 1, which is the default control value - have to set
  -c 0 specially to ensure fp exceptions are triggered correctly (choice of
  control lane is irrelevant if fp exceptions are disabled).  */

@@ -164,6 +164,7 @@ float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
 }
 
 PL_SIG (V, F, 1, erfc, -4.0, 10.0)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (erfc), WANT_SIMD_EXCEPT)
 PL_TEST_ULP (V_NAME_F1 (erfc), 1.14)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (erfc), 0, 0x1p-26, 40000)
 PL_TEST_INTERVAL (V_NAME_F1 (erfc), 0x1p-26, 10.0625, 40000)

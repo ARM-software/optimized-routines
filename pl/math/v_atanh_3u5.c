@@ -1,7 +1,7 @@
 /*
  * Double-precision vector atanh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -56,7 +56,7 @@ float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
 }
 
 PL_SIG (V, D, 1, atanh, -1.0, 1.0)
-PL_TEST_EXPECT_FENV (V_NAME_D1 (atanh), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atanh), WANT_SIMD_EXCEPT)
 PL_TEST_ULP (V_NAME_D1 (atanh), 3.32)
 /* atanh is asymptotic at 1, which is the default control value - have to set
    -c 0 specially to ensure fp exceptions are triggered correctly (choice of

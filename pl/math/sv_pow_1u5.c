@@ -401,6 +401,7 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 
 PL_SIG (SV, D, 2, pow)
 PL_TEST_ULP (SV_NAME_D2 (pow), 0.55)
+PL_TEST_DISABLE_FENV (SV_NAME_D2 (pow))
 /* Wide intervals spanning the whole domain but shared between x and y.  */
 #define SV_POW_INTERVAL2(xlo, xhi, ylo, yhi, n)                                \
   PL_TEST_INTERVAL2 (SV_NAME_D2 (pow), xlo, xhi, ylo, yhi, n)                  \

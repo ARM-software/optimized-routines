@@ -44,5 +44,6 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 
 PL_SIG (SV, F, 1, exp, -9.9, 9.9)
 PL_TEST_ULP (SV_NAME_F1 (exp), 0.55)
+PL_TEST_DISABLE_FENV (SV_NAME_F1 (exp))
 PL_TEST_SYM_INTERVAL (SV_NAME_F1 (exp), 0, Thres, 50000)
 PL_TEST_SYM_INTERVAL (SV_NAME_F1 (exp), Thres, inf, 50000)

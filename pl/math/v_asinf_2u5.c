@@ -1,7 +1,7 @@
 /*
  * Single-precision vector asin(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -95,7 +95,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (asin) (float32x4_t x)
 
 PL_SIG (V, F, 1, asin, -1.0, 1.0)
 PL_TEST_ULP (V_NAME_F1 (asin), 1.91)
-PL_TEST_EXPECT_FENV (V_NAME_F1 (asin), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (asin), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME_F1 (asin), 0, 0x1p-12, 5000)
 PL_TEST_INTERVAL (V_NAME_F1 (asin), 0x1p-12, 0.5, 50000)
 PL_TEST_INTERVAL (V_NAME_F1 (asin), 0.5, 1.0, 50000)

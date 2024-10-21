@@ -27,7 +27,7 @@ t() {
 	extra_flags=
 	[[ -z "${PRED:-}" ]] || extra_flags="$extra_flags -p $PRED"
 	[[ -z "${5:-}" ]] || extra_flags="$extra_flags -c $5"
-	grep -q "^$routine$" $FENV || extra_flags="$extra_flags -f"
+	if grep -q "^$routine$" $FENV; then extra_flags="$extra_flags -f"; fi
 	IFS=',' read -ra LO <<< "$2"
 	IFS=',' read -ra HI <<< "$3"
 	ITV="${LO[0]} ${HI[0]}"

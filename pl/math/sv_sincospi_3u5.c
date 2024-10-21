@@ -32,6 +32,8 @@ _ZGVsMxvl8l8_sincospi (svfloat64_t x, double *out_sin, double *out_cos,
 }
 
 #if WANT_TRIGPI_TESTS
+PL_TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_sin)
+PL_TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_cos)
 PL_TEST_ULP (_ZGVsMxvl8l8_sincospi_sin, 2.59)
 PL_TEST_ULP (_ZGVsMxvl8l8_sincospi_cos, 2.66)
 #  define SV_SINCOSPI_INTERVAL(lo, hi, n)                                     \

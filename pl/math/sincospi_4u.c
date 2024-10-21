@@ -8,7 +8,6 @@
 #include "mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#define IGNORE_SCALAR_FENV
 #include "pl_test.h"
 #include "poly_scalar_f64.h"
 
@@ -145,6 +144,8 @@ sincospi (double x, double *out_sin, double *out_cos)
 }
 
 #if WANT_TRIGPI_TESTS
+PL_TEST_DISABLE_FENV (sincospi_sin)
+PL_TEST_DISABLE_FENV (sincospi_cos)
 PL_TEST_ULP (sincospi_sin, 2.96)
 PL_TEST_ULP (sincospi_cos, 3.16)
 #  define SINCOS_INTERVAL(lo, hi, n)                                          \

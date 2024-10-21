@@ -213,7 +213,7 @@ $(ulp-input-dir)/%.ulp: $(PLM)/%.c | $(ulp-input-dir)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_ULP [^ ]* [^ ]*" || true; } > $@
 
 $(ulp-input-dir)/%.fenv: $(PLM)/%.c | $(ulp-input-dir)
-	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_EXPECT_FENV_ENABLED [^ ]*" || true; } > $@
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_DISABLE_FENV [^ ]*" || true; } > $@
 
 $(ulp-input-dir)/%.itv: $(PLM)/%.c | $(ulp-input-dir)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_INTERVAL " || true; } | sed "s/ PL_TEST_INTERVAL/\nPL_TEST_INTERVAL/g" > $@
@@ -224,7 +224,7 @@ $(ulp-lims): $(math-lib-lims)
 
 fenv-exps := $(ulp-input-dir)/fenv
 $(fenv-exps): $(math-lib-fenvs)
-	cat $^ | sed "s/PL_TEST_EXPECT_FENV_ENABLED //g;s/^ *//g" > $@
+	cat $^ | sed "s/PL_TEST_DISABLE_FENV //g;s/^ *//g" > $@
 
 ulp-itvs := $(ulp-input-dir)/intervals
 $(ulp-itvs): $(math-lib-itvs)

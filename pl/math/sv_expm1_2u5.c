@@ -1,7 +1,7 @@
 /*
  * Double-precision vector exp(x) - 1 function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -90,6 +90,7 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 
 PL_SIG (SV, D, 1, expm1, -9.9, 9.9)
 PL_TEST_ULP (SV_NAME_D1 (expm1), 1.68)
+PL_TEST_DISABLE_FENV (SV_NAME_D1 (expm1))
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0, 0x1p-23, 1000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0x1p-23, SpecialBound, 200000)
 PL_TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), SpecialBound, inf, 1000)

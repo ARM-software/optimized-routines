@@ -1,7 +1,7 @@
 /*
  * Single-precision vector atan(x) function.
  *
- * Copyright (c) 2021-2023, Arm Limited.
+ * Copyright (c) 2021-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -100,7 +100,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (atan) (float32x4_t x)
 
 PL_SIG (V, F, 1, atan, -10.0, 10.0)
 PL_TEST_ULP (V_NAME_F1 (atan), 2.5)
-PL_TEST_EXPECT_FENV (V_NAME_F1 (atan), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (atan), WANT_SIMD_EXCEPT)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (atan), 0, 0x1p-30, 5000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (atan), 0x1p-30, 1, 40000)
 PL_TEST_SYM_INTERVAL (V_NAME_F1 (atan), 1, 0x1p30, 40000)

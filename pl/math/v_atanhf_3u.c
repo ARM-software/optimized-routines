@@ -78,7 +78,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 
 PL_SIG (V, F, 1, atanh, -1.0, 1.0)
 PL_TEST_ULP (V_NAME_F1 (atanh), 2.44)
-PL_TEST_EXPECT_FENV (V_NAME_F1 (atanh), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (atanh), WANT_SIMD_EXCEPT)
 /* atanh is asymptotic at 1, which is the default control value - have to set
  -c 0 specially to ensure fp exceptions are triggered correctly (choice of
  control lane is irrelevant if fp exceptions are disabled).  */

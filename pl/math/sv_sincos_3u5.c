@@ -59,6 +59,8 @@ _ZGVsMxvl8l8_sincos (svfloat64_t x, double *out_sin, double *out_cos,
     special_case (x, special, out_sin, out_cos);
 }
 
+PL_TEST_DISABLE_FENV (_ZGVsMxv_sincos_sin)
+PL_TEST_DISABLE_FENV (_ZGVsMxv_sincos_cos)
 PL_TEST_ULP (_ZGVsMxv_sincos_sin, 2.73)
 PL_TEST_ULP (_ZGVsMxv_sincos_cos, 2.73)
 #define SV_SINCOS_INTERVAL(lo, hi, n)                                         \

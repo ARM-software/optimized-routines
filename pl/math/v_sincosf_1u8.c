@@ -56,6 +56,8 @@ _ZGVnN4vl4l4_sincosf (float32x4_t x, float *out_sin, float *out_cos)
     special_case (x, special, out_sin, out_cos);
 }
 
+PL_TEST_DISABLE_FENV (_ZGVnN4v_sincosf_sin)
+PL_TEST_DISABLE_FENV (_ZGVnN4v_sincosf_cos)
 PL_TEST_ULP (_ZGVnN4v_sincosf_sin, 1.17)
 PL_TEST_ULP (_ZGVnN4v_sincosf_cos, 1.31)
 #define V_SINCOSF_INTERVAL(lo, hi, n)                                         \

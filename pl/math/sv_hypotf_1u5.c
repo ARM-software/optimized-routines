@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE hypot(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -39,6 +39,7 @@ svfloat32_t SV_NAME_F2 (hypot) (svfloat32_t x, svfloat32_t y,
 
 PL_SIG (SV, F, 2, hypot, -10.0, 10.0)
 PL_TEST_ULP (SV_NAME_F2 (hypot), 0.71)
+PL_TEST_DISABLE_FENV (SV_NAME_F2 (hypot))
 PL_TEST_INTERVAL2 (SV_NAME_F2 (hypot), 0, inf, 0, inf, 10000)
 PL_TEST_INTERVAL2 (SV_NAME_F2 (hypot), 0, inf, -0, -inf, 10000)
 PL_TEST_INTERVAL2 (SV_NAME_F2 (hypot), -0, -inf, 0, inf, 10000)

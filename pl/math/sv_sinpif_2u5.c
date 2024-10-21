@@ -50,6 +50,7 @@ svfloat32_t SV_NAME_F1 (sinpi) (svfloat32_t x, const svbool_t pg)
 #if WANT_TRIGPI_TESTS
 PL_SIG (SV, F, 1, sinpi, -0.9, 0.9)
 PL_TEST_ULP (SV_NAME_F1 (sinpi), 1.99)
+PL_TEST_DISABLE_FENV (SV_NAME_F1 (sinpi))
 PL_TEST_SYM_INTERVAL (SV_NAME_F1 (sinpi), 0, 0x1p-31, 5000)
 PL_TEST_SYM_INTERVAL (SV_NAME_F1 (sinpi), 0x1p-31, 0.5, 10000)
 PL_TEST_SYM_INTERVAL (SV_NAME_F1 (sinpi), 0.5, 0x1p22f, 10000)

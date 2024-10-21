@@ -1,7 +1,7 @@
 /*
  * Single-precision vector atanh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -48,6 +48,7 @@ svfloat32_t SV_NAME_F1 (atanh) (svfloat32_t x, const svbool_t pg)
 
 PL_SIG (SV, F, 1, atanh, -1.0, 1.0)
 PL_TEST_ULP (SV_NAME_F1 (atanh), 2.59)
+PL_TEST_DISABLE_FENV (SV_NAME_F1 (atanh))
 /* atanh is asymptotic at 1, which is the default control value - have to set
  -c 0 specially to ensure fp exceptions are triggered correctly (choice of
  control lane is irrelevant if fp exceptions are disabled).  */

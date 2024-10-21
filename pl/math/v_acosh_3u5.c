@@ -1,6 +1,6 @@
 /*
  * Single-precision vector acosh(x) function.
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -59,7 +59,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
 
 PL_SIG (V, D, 1, acosh, 1.0, 10.0)
 PL_TEST_ULP (V_NAME_D1 (acosh), 2.53)
-PL_TEST_EXPECT_FENV (V_NAME_D1 (acosh), WANT_SIMD_EXCEPT)
+PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (acosh), WANT_SIMD_EXCEPT)
 PL_TEST_INTERVAL (V_NAME_D1 (acosh), 1, 0x1p511, 90000)
 PL_TEST_INTERVAL (V_NAME_D1 (acosh), 0x1p511, inf, 10000)
 PL_TEST_INTERVAL (V_NAME_D1 (acosh), 0, 1, 1000)

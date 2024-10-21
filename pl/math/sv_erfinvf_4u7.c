@@ -147,6 +147,7 @@ svfloat32_t SV_NAME_F1 (erfinv) (svfloat32_t x, svbool_t pg)
 #else
 PL_SIG (SV, F, 1, erfinv, -0.99, 0.99)
 PL_TEST_ULP (SV_NAME_F1 (erfinv), 4.09)
+PL_TEST_DISABLE_FENV (SV_NAME_F1 (erfinv))
 # define TEST_INTERVAL(lo, hi, n)                                            \
     PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.5)                  \
     PL_TEST_INTERVAL_C (SV_NAME_F1 (erfinv), lo, hi, n, 0.8)                  \

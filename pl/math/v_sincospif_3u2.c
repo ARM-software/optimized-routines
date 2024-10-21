@@ -30,6 +30,8 @@ _ZGVnN4vl4l4_sincospif (float32x4_t x, float32x4_t *out_sin,
 }
 
 #if WANT_TRIGPI_TESTS
+PL_TEST_DISABLE_FENV (_ZGVnN4v_sincospif_sin)
+PL_TEST_DISABLE_FENV (_ZGVnN4v_sincospif_cos)
 PL_TEST_ULP (_ZGVnN4v_sincospif_sin, 2.54)
 PL_TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
 #  define V_SINCOSPIF_INTERVAL(lo, hi, n)                                     \

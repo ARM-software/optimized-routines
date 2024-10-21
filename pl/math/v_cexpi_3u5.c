@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sincos function - return-by-value interface.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -34,6 +34,8 @@ _ZGVnN2v_cexpi (float64x2_t x)
   return sc;
 }
 
+PL_TEST_DISABLE_FENV (_ZGVnN2v_cexpi_cos)
+PL_TEST_DISABLE_FENV (_ZGVnN2v_cexpi_sin)
 PL_TEST_ULP (_ZGVnN2v_cexpi_sin, 2.73)
 PL_TEST_ULP (_ZGVnN2v_cexpi_cos, 2.73)
 #define V_CEXPI_INTERVAL(lo, hi, n)                                           \
