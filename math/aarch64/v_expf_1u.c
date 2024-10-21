@@ -28,13 +28,13 @@ static const float Poly[] = {
 #define Ln2lo v_f32 (0x1.7f7d1cp-20f)
 
 static float32x4_t VPCS_ATTR NOINLINE
-specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn)
+specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e)
 {
   /* 2^n may overflow, break it up into s1*s2.  */
   uint32x4_t b = (n <= v_f32 (0.0f)) & v_u32 (0x83000000);
   float32x4_t s1 = vreinterpretq_f32_u32 (v_u32 (0x7f000000) + b);
   float32x4_t s2 = vreinterpretq_f32_u32 (e - b);
-  uint32x4_t cmp = absn > v_f32 (192.0f);
+  uint32x4_t cmp = vcagtq_f32(n, v_f32 (192.0f));
   float32x4_t r1 = s1 * s1;
   float32x4_t r0 = poly * s1 * s2;
   return vreinterpretq_f32_u32 ((cmp & vreinterpretq_u32_f32 (r1))
@@ -44,7 +44,7 @@ specialcase (float32x4_t poly, float32x4_t n, uint32x4_t e, float32x4_t absn)
 float32x4_t VPCS_ATTR
 _ZGVnN4v_expf_1u (float32x4_t x)
 {
-  float32x4_t n, r, scale, poly, absn, z;
+  float32x4_t n, r, scale, poly, z;
   uint32x4_t cmp, e;
 
   /* exp(x) = 2^n * poly(r), with poly(r) in [1/sqrt(2),sqrt(2)]
@@ -63,8 +63,7 @@ _ZGVnN4v_expf_1u (float32x4_t x)
   e = vreinterpretq_u32_s32 (vcvtaq_s32_f32 (z)) << 23;
 #endif
   scale = vreinterpretq_f32_u32 (e + v_u32 (0x3f800000));
-  absn = vabsq_f32 (n);
-  cmp = absn > v_f32 (126.0f);
+  cmp = vcagtq_f32(n, v_f32 (126.0f));
   poly = vfmaq_f32 (C1, C0, r);
   poly = vfmaq_f32 (C2, poly, r);
   poly = vfmaq_f32 (C3, poly, r);
@@ -72,6 +71,6 @@ _ZGVnN4v_expf_1u (float32x4_t x)
   poly = vfmaq_f32 (v_f32 (1.0f), poly, r);
   poly = vfmaq_f32 (v_f32 (1.0f), poly, r);
   if (unlikely (v_any_u32 (cmp)))
-    return specialcase (poly, n, e, absn);
+    return specialcase (poly, n, e);
   return scale * poly;
 }
