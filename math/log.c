@@ -1,7 +1,7 @@
 /*
  * Double-precision log(x) function.
  *
- * Copyright (c) 2018-2019, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "test_defs.h"
 
 #define T __log_data.tab
 #define T2 __log_data.tab2
@@ -160,3 +161,6 @@ hidden_alias (log, __ieee754_log)
 long double logl (long double x) { return log (x); }
 # endif
 #endif
+
+TEST_ULP (log, 0.02)
+TEST_ULP_NONNEAREST (log, 0.5)

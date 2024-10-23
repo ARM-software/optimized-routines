@@ -1,7 +1,7 @@
 /*
  * Double-precision x^y function.
  *
- * Copyright (c) 2018-2020, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "test_defs.h"
 
 /*
 Worst-case error: 0.54 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
@@ -378,3 +379,6 @@ hidden_alias (pow, __ieee754_pow)
 long double powl (long double x, long double y) { return pow (x, y); }
 # endif
 #endif
+
+TEST_ULP (pow, 0.05)
+TEST_ULP_NONNEAREST (pow, 0.5)

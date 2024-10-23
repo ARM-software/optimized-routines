@@ -1,12 +1,13 @@
 /*
  * Double-precision vector e^x function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "mathlib.h"
 #include "v_math.h"
+#include "test_defs.h"
 
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask (N - 1)
@@ -123,3 +124,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp) (float64x2_t x)
 
   return vfmaq_f64 (s, y, s);
 }
+
+TEST_ULP (V_NAME_D1 (exp), 1.9)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp), WANT_SIMD_EXCEPT)

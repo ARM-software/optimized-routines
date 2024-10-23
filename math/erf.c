@@ -1,13 +1,14 @@
 /*
  * Double-precision erf(x) function.
  *
- * Copyright (c) 2020, Arm Limited.
+ * Copyright (c) 2020-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include <math.h>
 #include <stdint.h>
+#include "test_defs.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8214db69p-3
 #define C 0x1.b0ac16p-1
@@ -242,3 +243,6 @@ erf (double x)
 	return 1.0;
     }
 }
+
+TEST_ULP (erf, 0.51)
+TEST_ULP_NONNEAREST (erf, 0.9)

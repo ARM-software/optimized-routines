@@ -6,6 +6,7 @@
  */
 
 #include "math_config.h"
+#include "test_defs.h"
 
 #define N (1 << EXP_TABLE_BITS)
 #define IndexMask (N - 1)
@@ -127,3 +128,6 @@ exp10 (double x)
   double_t s = asdouble (sbits);
   return eval_as_double (s * y + s);
 }
+
+TEST_ULP (exp10, 0.02)
+TEST_ULP_NONNEAREST (exp10, 0.5)

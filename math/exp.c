@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "test_defs.h"
 
 #define N (1 << EXP_TABLE_BITS)
 #define InvLn2N __exp_data.invln2N
@@ -166,3 +167,6 @@ hidden_alias (exp, __ieee754_exp)
 long double expl (long double x) { return exp (x); }
 # endif
 #endif
+
+TEST_ULP (exp, 0.01)
+TEST_ULP_NONNEAREST (exp, 0.5)

@@ -1,13 +1,14 @@
 /*
  * Single-precision sin function.
  *
- * Copyright (c) 2018-2021, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include <math.h>
 #include "math_config.h"
 #include "sincosf.h"
+#include "test_defs.h"
 
 /* Fast sinf implementation.  Worst-case ULP is 0.5607, maximum relative
    error is 0.5303 * 2^-23.  A single-step range reduction is used for
@@ -65,3 +66,6 @@ sinf (float y)
   else
     return __math_invalidf (y);
 }
+
+TEST_ULP (sinf, 0.06)
+TEST_ULP_NONNEAREST (sinf, 0.5)

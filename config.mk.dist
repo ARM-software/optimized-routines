@@ -119,7 +119,15 @@ WANT_ERRNO = 0
 math-cflags += -DWANT_ERRNO=$(WANT_ERRNO)
 
 # Enable SIMD in tests
-WANT_SIMD_TESTS = 1
+ifeq ($(ARCH),aarch64)
+ifeq ($(OS),Linux)
+  WANT_SIMD_TESTS = 1
+else
+  WANT_SIMD_TESTS = 0
+endif
+else
+  WANT_SIMD_TESTS = 0
+endif
 math-cflags += -DWANT_SIMD_TESTS=$(WANT_SIMD_TESTS)
 
 # If set to 1, set fenv in vector math routines.

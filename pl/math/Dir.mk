@@ -20,7 +20,7 @@ endif
 
 PLM := $(srcdir)/pl/math
 AOR := $(srcdir)/math
-B := build/pl/math
+PLB := build/pl/math
 
 pl-lib-srcs := $(wildcard $(PLM)/*.[cS])
 
@@ -58,9 +58,9 @@ math-tools := \
 math-host-tools := \
 	build/pl/bin/rtest \
 
-pl-lib-objs := $(patsubst $(PLM)/%,$(B)/%.o,$(basename $(pl-lib-srcs)))
-math-test-objs := $(patsubst $(AOR)/%,$(B)/%.o,$(basename $(math-test-srcs)))
-math-host-objs := $(patsubst $(AOR)/%,$(B)/%.o,$(basename $(math-test-host-srcs)))
+pl-lib-objs := $(patsubst $(PLM)/%,$(PLB)/%.o,$(basename $(pl-lib-srcs)))
+math-test-objs := $(patsubst $(AOR)/%,$(PLB)/%.o,$(basename $(math-test-srcs)))
+math-host-objs := $(patsubst $(AOR)/%,$(PLB)/%.o,$(basename $(math-test-host-srcs)))
 pl-target-objs := $(pl-lib-objs) $(math-test-objs)
 pl-objs := $(pl-target-objs) $(pl-target-objs:%.o=%.os) $(math-host-objs)
 
@@ -76,11 +76,11 @@ all-pl/math: $(pl-libs) $(math-tools) $(pl-includes) $(pl-test-includes)
 
 $(pl-objs): $(pl-includes) $(pl-test-includes)
 $(pl-objs): CFLAGS_PL += $(math-cflags)
-$(B)/test/mathtest.o: CFLAGS_PL += -fmath-errno
+$(PLB)/test/mathtest.o: CFLAGS_PL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
-$(B)/sv_%: CFLAGS_PL += $(math-sve-cflags)
+$(PLB)/sv_%: CFLAGS_PL += $(math-sve-cflags)
 
 ulp-funcs-dir = build/pl/test/ulp-funcs/
 ulp-wrappers-dir = build/pl/test/ulp-wrappers/
@@ -114,11 +114,11 @@ build/pl/include/test/ulp_wrappers_gen.h: $(ulp-wrappers)
 build/pl/include/test/mathbench_funcs_gen.h: $(mathbench-funcs)
 	cat $^ | sort -u > $@
 
-$(B)/test/ulp.o: $(AOR)/test/ulp.h build/pl/include/test/ulp_funcs_gen.h build/pl/include/test/ulp_wrappers_gen.h
-$(B)/test/ulp.o: CFLAGS_PL += -I build/pl/include/test
+$(PLB)/test/ulp.o: $(AOR)/test/ulp.h build/pl/include/test/ulp_funcs_gen.h build/pl/include/test/ulp_wrappers_gen.h
+$(PLB)/test/ulp.o: CFLAGS_PL += -I build/pl/include/test
 
-$(B)/test/mathbench.o: build/pl/include/test/mathbench_funcs_gen.h
-$(B)/test/mathbench.o: CFLAGS_PL += -I build/pl/include/test
+$(PLB)/test/mathbench.o: build/pl/include/test/mathbench_funcs_gen.h
+$(PLB)/test/mathbench.o: CFLAGS_PL += -I build/pl/include/test
 
 build/pl/lib/libmathlib.so: $(pl-lib-objs:%.o=%.os)
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -shared -o $@ $^
@@ -166,17 +166,17 @@ build/pl/%.os: $(srcdir)/pl/%.c
 build/pl/bin/rtest: $(math-host-objs)
 	$(HOST_CC) $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $^ $(HOST_LDLIBS)
 
-build/pl/bin/mathtest: $(B)/test/mathtest.o build/pl/lib/libmathlib.a
+build/pl/bin/mathtest: $(PLB)/test/mathtest.o build/pl/lib/libmathlib.a
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(libm-libs)
 
-build/pl/bin/mathbench: $(B)/test/mathbench.o build/pl/lib/libmathlib.a
+build/pl/bin/mathbench: $(PLB)/test/mathbench.o build/pl/lib/libmathlib.a
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(libm-libs)
 
 # This is not ideal, but allows custom symbols in mathbench to get resolved.
-build/pl/bin/mathbench_libc: $(B)/test/mathbench.o build/pl/lib/libmathlib.a
+build/pl/bin/mathbench_libc: $(PLB)/test/mathbench.o build/pl/lib/libmathlib.a
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $< $(libm-libs) $(libc-libs) build/pl/lib/libmathlib.a $(libm-libs)
 
-build/pl/bin/ulp: $(B)/test/ulp.o build/pl/lib/libmathlib.a
+build/pl/bin/ulp: $(PLB)/test/ulp.o build/pl/lib/libmathlib.a
 	$(CC) $(CFLAGS_PL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 build/pl/include/%.h: $(PLM)/include/%.h
@@ -197,45 +197,44 @@ check-pl/math-test: $(math-tools)
 check-pl/math-rtest: $(math-host-tools) $(math-tools)
 	cat $(pl-math-rtests) | build/pl/bin/rtest | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
 
-ulp-input-dir=$(B)/test/inputs
-$(ulp-input-dir):
+pl-ulp-input-dir=$(PLB)/test/inputs
+$(pl-ulp-input-dir):
 	mkdir -p $@
 
-math-lib-lims = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.ulp,$(basename $(pl-lib-srcs)))
-math-lib-fenvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.fenv,$(basename $(pl-lib-srcs)))
-math-lib-itvs = $(patsubst $(PLM)/%,$(ulp-input-dir)/%.itv,$(basename $(pl-lib-srcs)))
+pl-math-lib-lims = $(patsubst $(PLM)/%,$(pl-ulp-input-dir)/%.ulp,$(basename $(pl-lib-srcs)))
+pl-math-lib-fenvs = $(patsubst $(PLM)/%,$(pl-ulp-input-dir)/%.fenv,$(basename $(pl-lib-srcs)))
+pl-math-lib-itvs = $(patsubst $(PLM)/%,$(pl-ulp-input-dir)/%.itv,$(basename $(pl-lib-srcs)))
 
-ulp-inputs = $(math-lib-lims) $(math-lib-fenvs) $(math-lib-itvs)
+pl-ulp-inputs = $(pl-math-lib-lims) $(pl-math-lib-fenvs) $(pl-math-lib-itvs)
+$(pl-ulp-inputs): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
 
-$(ulp-inputs): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
-
-$(ulp-input-dir)/%.ulp: $(PLM)/%.c | $(ulp-input-dir)
+$(pl-ulp-input-dir)/%.ulp: $(PLM)/%.c | $(pl-ulp-input-dir)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_ULP [^ ]* [^ ]*" || true; } > $@
 
-$(ulp-input-dir)/%.fenv: $(PLM)/%.c | $(ulp-input-dir)
+$(pl-ulp-input-dir)/%.fenv: $(PLM)/%.c | $(pl-ulp-input-dir)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep -o "PL_TEST_DISABLE_FENV [^ ]*" || true; } > $@
 
-$(ulp-input-dir)/%.itv: $(PLM)/%.c | $(ulp-input-dir)
+$(pl-ulp-input-dir)/%.itv: $(PLM)/%.c | $(pl-ulp-input-dir)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_INTERVAL " || true; } | sed "s/ PL_TEST_INTERVAL/\nPL_TEST_INTERVAL/g" > $@
 
-ulp-lims := $(ulp-input-dir)/limits
-$(ulp-lims): $(math-lib-lims)
+pl-ulp-lims := $(pl-ulp-input-dir)/limits
+$(pl-ulp-lims): $(pl-math-lib-lims)
 	cat $^ | sed "s/PL_TEST_ULP //g;s/^ *//g" > $@
 
-fenv-exps := $(ulp-input-dir)/fenv
-$(fenv-exps): $(math-lib-fenvs)
+pl-fenv-exps := $(pl-ulp-input-dir)/fenv
+$(pl-fenv-exps): $(pl-math-lib-fenvs)
 	cat $^ | sed "s/PL_TEST_DISABLE_FENV //g;s/^ *//g" > $@
 
-ulp-itvs := $(ulp-input-dir)/intervals
-$(ulp-itvs): $(math-lib-itvs)
+pl-ulp-itvs := $(pl-ulp-input-dir)/intervals
+$(pl-ulp-itvs): $(pl-math-lib-itvs)
 	cat $^ | sort -u | sed "s/PL_TEST_INTERVAL //g" > $@
 
-check-pl/math-ulp: $(math-tools) $(ulp-lims) $(fenv-exps) $(ulp-itvs)
+check-pl/math-ulp: $(math-tools) $(pl-ulp-lims) $(pl-fenv-exps) $(pl-ulp-itvs)
 	WANT_SVE_MATH=$(WANT_SVE_MATH) \
 	ULPFLAGS="$(math-ulpflags)" \
-	LIMITS=../../../$(ulp-lims) \
-	INTERVALS=../../../$(ulp-itvs) \
-	FENV=../../../$(fenv-exps) \
+	LIMITS=../../../$(pl-ulp-lims) \
+	INTERVALS=../../../$(pl-ulp-itvs) \
+	FENV=../../../$(pl-fenv-exps) \
 	FUNC=$(func) \
 	PRED=$(pred) \
 	USE_MPFR=$(USE_MPFR) \

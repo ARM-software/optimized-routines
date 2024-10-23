@@ -1,12 +1,13 @@
 /*
  * Single-precision vector 2^x function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "mathlib.h"
 #include "v_math.h"
+#include "test_defs.h"
 
 static const struct data
 {
@@ -111,3 +112,6 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp2) (float32x4_t x)
 
   return vfmaq_f32 (scale, poly, scale);
 }
+
+TEST_ULP (V_NAME_F1 (exp2), 1.49)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (exp2), WANT_SIMD_EXCEPT)

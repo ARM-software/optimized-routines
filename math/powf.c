@@ -1,13 +1,14 @@
 /*
  * Single-precision pow function.
  *
- * Copyright (c) 2017-2019, Arm Limited.
+ * Copyright (c) 2017-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "test_defs.h"
 
 /*
 POWF_LOG2_POLY_ORDER = 5
@@ -219,3 +220,6 @@ powf (float x, float y)
 strong_alias (powf, __powf_finite)
 hidden_alias (powf, __ieee754_powf)
 #endif
+
+TEST_ULP (powf, 0.4)
+TEST_ULP_NONNEAREST (powf, 0.5)

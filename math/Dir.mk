@@ -3,6 +3,8 @@
 # Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
+.SECONDEXPANSION:
+
 ifneq ($(OS),Linux)
   ifeq ($(WANT_SIMD_EXCEPT),1)
     $(error WANT_SIMD_EXCEPT is not supported outside Linux)
@@ -126,8 +128,59 @@ check-math-test: $(math-tools)
 check-math-rtest: $(math-host-tools) $(math-tools)
 	cat $(math-rtests) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(math-testflags)
 
+ulp-input-dir = $(B)/test/inputs
+$(ulp-input-dir) $(ulp-input-dir)/$(ARCH):
+	mkdir -p $@
+
+math-lib-lims = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.ulp,$(math-lib-srcs))
+math-lib-lims-nn = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.ulp_nn,$(math-lib-srcs))
+math-lib-fenvs = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.fenv,$(math-lib-srcs))
+
+ulp-inputs = $(math-lib-lims) $(math-lib-lims-nn) $(math-lib-fenvs)
+$(ulp-inputs): CFLAGS = -I$(S)/test -I$(S)/include $(math-cflags)
+
+$(ulp-input-dir)/%.ulp: $(S)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_ULP [^ ]* [^ ]*" || true; } > $@
+
+$(ulp-input-dir)/%.ulp_nn: $(S)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_ULP_NONNEAREST [^ ]* [^ ]*" || true; } > $@
+
+generic-lims = $(ulp-input-dir)/limits
+$(generic-lims): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims))
+
+generic-lims-nn = $(ulp-input-dir)/limits_nn
+$(generic-lims-nn): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims-nn))
+
+arch-lims = $(ulp-input-dir)/$(ARCH)/limits
+$(arch-lims): $(filter $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims))
+
+arch-lims-nn = $(ulp-input-dir)/$(ARCH)/limits_nn
+$(arch-lims-nn): $(filter $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims-nn))
+
+$(arch-lims) $(generic-lims): | $$(@D)
+	cat $^ | sed "s/TEST_ULP //g;s/^ *//g" > $@
+
+$(arch-lims-nn) $(generic-lims-nn): | $$(@D)
+	cat $^ | sed "s/TEST_ULP_NONNEAREST //g;s/^ *//g" > $@
+
+$(ulp-input-dir)/%.fenv: $(S)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_DISABLE_FENV [^ ]*" || true; } > $@
+
+fenv-exps := $(ulp-input-dir)/fenv
+$(fenv-exps): $(math-lib-fenvs)
+	cat $^ | sed "s/TEST_DISABLE_FENV //g;s/^ *//g" > $@
+
+check-math-ulp: $(generic-lims) $(arch-lims)
+check-math-ulp: $(generic-lims-nn) $(arch-lims-nn)
+check-math-ulp: $(fenv-exps)
 check-math-ulp: $(math-tools)
-	ULPFLAGS="$(math-ulpflags)" WANT_SIMD_TESTS="$(WANT_SIMD_TESTS)" WANT_SIMD_EXCEPT="$(WANT_SIMD_EXCEPT)" WANT_EXP10_TESTS="$(WANT_EXP10_TESTS)" build/bin/runulp.sh $(EMULATOR)
+	ULPFLAGS="$(math-ulpflags)" \
+	WANT_SIMD_TESTS="$(WANT_SIMD_TESTS)" \
+	WANT_EXP10_TESTS="$(WANT_EXP10_TESTS)" \
+	ARCH_LIMITS=../../$(arch-lims) \
+	GEN_LIMITS=../../$(generic-lims) \
+	DISABLE_FENV=../../$(fenv-exps) \
+	build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp
 

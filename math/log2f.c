@@ -1,13 +1,14 @@
 /*
  * Single-precision log2 function.
  *
- * Copyright (c) 2017-2018, Arm Limited.
+ * Copyright (c) 2017-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "test_defs.h"
 
 /*
 LOG2F_TABLE_BITS = 4
@@ -78,3 +79,6 @@ log2f (float x)
 strong_alias (log2f, __log2f_finite)
 hidden_alias (log2f, __ieee754_log2f)
 #endif
+
+TEST_ULP (log2f, 0.26)
+TEST_ULP_NONNEAREST (log2f, 0.5)

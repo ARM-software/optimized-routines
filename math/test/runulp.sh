@@ -19,43 +19,57 @@ emu="$@"
 FAIL=0
 PASS=0
 
+run_ulp() {
+    routine=$1
+    shift
+    limits_file=$1
+    shift
+    [ $r == "n" ] || limits_file=${limits_file}_nn
+    L=$(grep "^$routine " $limits_file | awk '{print $2}')
+    [ -n "$L" ] || { echo ERROR: Could not determine ULP limit for $routine in $limits_file && false; }
+    extra_flags="-e $L"
+    if grep -q "^$routine$" $DISABLE_FENV; then extra_flags="$extra_flags -f"; fi
+    $emu ./ulp $flags $extra_flags "$@" && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
+}
+
 t() {
-	[ $r = "n" ] && Lt=$L || Lt=$Ldir
-	$emu ./ulp -r $r -e $Lt $flags "$@" && PASS=$((PASS+1)) || FAIL=$((FAIL+1))
+	run_ulp $1 ${GEN_LIMITS} -r $r "$@"
+}
+
+t_arch() {
+	# Hard-coded flags for arch-specific routines:
+	# -r n : arch routines only have to support round-to-nearest
+	# -z   : arch routines are permitted to discard sign of zero
+	extra_flags="-r n -z"
+	run_ulp $1 ${ARCH_LIMITS} ${extra_flags} "$@"
 }
 
 check() {
 	$emu ./ulp -f -q "$@" >/dev/null
 }
 
-Ldir=0.5
 for r in $rmodes
 do
-L=0.01
 t exp  0 0xffff000000000000 10000
 t exp  0x1p-6     0x1p6     40000
 t exp -0x1p-6    -0x1p6     40000
 t exp  633.3      733.3     10000
 t exp -633.3     -777.3     10000
 
-L=0.01
 t exp2  0 0xffff000000000000 10000
 t exp2  0x1p-6     0x1p6     40000
 t exp2 -0x1p-6    -0x1p6     40000
 t exp2  633.3      733.3     10000
 t exp2 -633.3     -777.3     10000
 
-L=0.02
 t log  0 0xffff000000000000 10000
 t log  0x1p-4    0x1p4      40000
 t log  0         inf        40000
 
-L=0.05
 t log2  0 0xffff000000000000 10000
 t log2  0x1p-4    0x1p4      40000
 t log2  0         inf        40000
 
-L=0.05
 t pow  0.5  2.0  x  0  inf 20000
 t pow -0.5 -2.0  x  0  inf 20000
 t pow  0.5  2.0  x -0 -inf 20000
@@ -73,7 +87,6 @@ t pow  0x1.ffffffffff000p-1  0x1p0 x 0x1p50 0x1p52 50000
 t pow -0x1.ffffffffff000p-1 -0x1p0 x 0x1p50 0x1p52 50000
 
 if [ "$WANT_EXP10_TESTS" = 1 ]; then
-L=0.02
 t exp10   0                   0x1p-47             5000
 t exp10  -0                  -0x1p-47             5000
 t exp10   0x1p-47             1                   50000
@@ -84,57 +97,45 @@ t exp10  0x1.34413509f79ffp8  inf                 5000
 t exp10 -0x1.434e6420f4374p8 -inf                 5000
 fi # WANT_EXP10_TESTS
 
-L=1.0
-Ldir=0.9
 t erf  0 0xffff000000000000 10000
 t erf  0x1p-1022  0x1p-26   40000
 t erf  -0x1p-1022 -0x1p-26  40000
 t erf  0x1p-26    0x1p3     40000
 t erf  -0x1p-26  -0x1p3     40000
 t erf  0         inf        40000
-Ldir=0.5
 
-L=0.01
 t expf  0    0xffff0000    10000
 t expf  0x1p-14   0x1p8    50000
 t expf -0x1p-14  -0x1p8    50000
 
-L=0.01
 t exp2f  0    0xffff0000   10000
 t exp2f  0x1p-14   0x1p8   50000
 t exp2f -0x1p-14  -0x1p8   50000
 
-L=0.32
 t logf  0    0xffff0000    10000
 t logf  0x1p-4    0x1p4    50000
 t logf  0         inf      50000
 
-L=0.26
 t log2f  0    0xffff0000   10000
 t log2f  0x1p-4    0x1p4   50000
 t log2f  0         inf     50000
 
-L=0.06
 t sinf  0    0xffff0000    10000
 t sinf  0x1p-14  0x1p54    50000
 t sinf -0x1p-14 -0x1p54    50000
 
-L=0.06
 t cosf  0    0xffff0000    10000
 t cosf  0x1p-14  0x1p54    50000
 t cosf -0x1p-14 -0x1p54    50000
 
-L=0.06
 t sincosf_sinf  0    0xffff0000    10000
 t sincosf_sinf  0x1p-14  0x1p54    50000
 t sincosf_sinf -0x1p-14 -0x1p54    50000
 
-L=0.06
 t sincosf_cosf  0    0xffff0000    10000
 t sincosf_cosf  0x1p-14  0x1p54    50000
 t sincosf_cosf -0x1p-14 -0x1p54    50000
 
-L=0.4
 t powf  0x1p-1   0x1p1  x  0x1p-7 0x1p7   50000
 t powf  0x1p-1   0x1p1  x -0x1p-7 -0x1p7  50000
 t powf  0x1p-70 0x1p70  x  0x1p-1 0x1p1   50000
@@ -142,15 +143,12 @@ t powf  0x1p-70 0x1p70  x  -0x1p-1 -0x1p1 50000
 t powf  0x1.ep-1 0x1.1p0 x  0x1p8 0x1p14  50000
 t powf  0x1.ep-1 0x1.1p0 x -0x1p8 -0x1p14 50000
 
-L=0.6
-Ldir=0.9
 t erff  0      0xffff0000 10000
 t erff  0x1p-127  0x1p-26 40000
 t erff -0x1p-127 -0x1p-26 40000
 t erff  0x1p-26   0x1p3   40000
 t erff -0x1p-26  -0x1p3   40000
 t erff  0         inf     40000
-Ldir=0.5
 
 done
 
@@ -158,7 +156,6 @@ done
 
 if [ "$WANT_SIMD_TESTS" = 1 ]; then
 
-Ldir=0.5
 r='n'
 flags="${ULPFLAGS:--q}"
 
@@ -225,40 +222,15 @@ range_powf='
  0x1.ep-1 0x1.1p0 x -0x1p8 -0x1p14 50000
 '
 
-# error limits
-L_exp=1.9
-L_log=1.2
-L_pow=0.05
-L_sin=3.0
-L_cos=3.0
-L_expf=1.49
-L_expf_1u=0.4
-L_exp2f=1.49
-L_exp2f_1u=0.4
-L_logf=2.9
-L_sinf=1.4
-L_cosf=1.4
-L_powf=2.1
-
-while read G F D
+while read G F
 do
 	case "$G" in \#*) continue ;; esac
 	eval range="\${range_$G}"
-	eval L="\${L_$G}"
 	while read X
 	do
 		[ -n "$X" ] || continue
 		case "$X" in \#*) continue ;; esac
-		disable_fenv=""
-		if [ -z "$WANT_SIMD_EXCEPT" ] || [ $WANT_SIMD_EXCEPT -eq 0 ]; then
-			# If library was built with SIMD exceptions
-			# disabled, disable fenv checking in ulp
-			# tool. Otherwise, fenv checking may still be
-			# disabled by adding -f to the end of the run
-			# line.
-			disable_fenv="-f"
-		fi
-		t $D $disable_fenv $F $X
+		t_arch $F $X
 	done << EOF
 $range
 
@@ -267,17 +239,17 @@ done << EOF
 # group symbol run
 exp       _ZGVnN2v_exp
 log       _ZGVnN2v_log
-pow       _ZGVnN2vv_pow      -f
-sin       _ZGVnN2v_sin       -z
+pow       _ZGVnN2vv_pow
+sin       _ZGVnN2v_sin
 cos       _ZGVnN2v_cos
 expf      _ZGVnN4v_expf
-expf_1u   _ZGVnN4v_expf_1u   -f
+expf_1u   _ZGVnN4v_expf_1u
 exp2f     _ZGVnN4v_exp2f
-exp2f_1u  _ZGVnN4v_exp2f_1u  -f
+exp2f_1u  _ZGVnN4v_exp2f_1u
 logf      _ZGVnN4v_logf
-sinf      _ZGVnN4v_sinf      -z
+sinf      _ZGVnN4v_sinf
 cosf      _ZGVnN4v_cosf
-powf      _ZGVnN4vv_powf     -f
+powf      _ZGVnN4vv_powf
 EOF
 
 fi # WANT_SIMD_TESTS

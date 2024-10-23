@@ -6,6 +6,7 @@
  */
 
 #include "v_math.h"
+#include "test_defs.h"
 
 #define Min v_u32 (0x00800000)
 #define Max v_u32 (0x7f800000)
@@ -193,3 +194,6 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
     return special_case (x, y, vcombine_f32 (p_lo, p_hi), cmp);
   return vcombine_f32 (p_lo, p_hi);
 }
+
+TEST_ULP (V_NAME_F2 (pow), 2.1)
+TEST_DISABLE_FENV (V_NAME_F2 (pow))

@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "test_defs.h"
 #include "mathlib.h"
 #include "v_math.h"
 
@@ -95,3 +96,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
     return special_case (x, y, odd, cmp);
   return vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
 }
+
+TEST_ULP (V_NAME_D1 (sin), 3.0)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (sin), WANT_SIMD_EXCEPT)
