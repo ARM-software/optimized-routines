@@ -162,8 +162,9 @@ float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
 PL_SIG (V, F, 1, erfinv, -0.99, 0.99)
 PL_TEST_DISABLE_FENV (V_NAME_F1 (erfinv))
 PL_TEST_ULP (V_NAME_F1 (erfinv), 4.49)
+PL_TEST_SYM_INTERVAL (V_NAME_F1 (erfinv), 0, 0x1.fffffep-1, 40000)
 /* Test with control lane in each interval.  */
-PL_TEST_SYM_INTERVAL_C (V_NAME_F1 (erfinv), 0, 0x1.fffffep-1, 40000, 0.5)
-PL_TEST_SYM_INTERVAL_C (V_NAME_F1 (erfinv), 0, 0x1.fffffep-1, 40000, 0.8)
-PL_TEST_SYM_INTERVAL_C (V_NAME_F1 (erfinv), 0, 0x1.fffffep-1, 40000, 0.95)
+PL_TEST_CONTROL_VALUE (V_NAME_F1 (erfinv), 0.5)
+PL_TEST_CONTROL_VALUE (V_NAME_F1 (erfinv), 0.8)
+PL_TEST_CONTROL_VALUE (V_NAME_F1 (erfinv), 0.95)
 #endif
