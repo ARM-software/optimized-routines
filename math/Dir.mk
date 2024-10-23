@@ -141,28 +141,25 @@ ulp-inputs = $(math-lib-lims) $(math-lib-lims-nn) $(math-lib-fenvs) $(math-lib-i
 $(ulp-inputs): CFLAGS = -I$(S)/test -I$(S)/include $(math-cflags)
 
 $(ulp-input-dir)/%.ulp: $(S)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_ULP [^ ]* [^ ]*" || true; } > $@
+	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_ULP " || true; } > $@
 
 $(ulp-input-dir)/%.ulp_nn: $(S)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_ULP_NONNEAREST [^ ]* [^ ]*" || true; } > $@
+	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_ULP_NONNEAREST " || true; } > $@
 
 $(ulp-input-dir)/%.fenv: $(S)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_DISABLE_FENV [^ ]*" || true; } > $@
+	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_DISABLE_FENV " || true; } > $@
 
 $(ulp-input-dir)/%.itv: $(S)/%.c | $$(@D)
 	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_INTERVAL " || true; } | sed "s/ TEST_INTERVAL/\nTEST_INTERVAL/g" > $@
 
 ulp-lims = $(ulp-input-dir)/limits
-$(ulp-lims): $(math-lib-lims) | $$(@D)
-	cat $^ | sed "s/TEST_ULP //g;s/^ *//g" > $@
+$(ulp-lims): $(math-lib-lims)
 
 ulp-lims-nn = $(ulp-input-dir)/limits_nn
-$(ulp-lims-nn): $(math-lib-lims-nn) | $$(@D)
-	cat $^ | sed "s/TEST_ULP_NONNEAREST //g;s/^ *//g" > $@
+$(ulp-lims-nn): $(math-lib-lims-nn)
 
 fenv-exps := $(ulp-input-dir)/fenv
 $(fenv-exps): $(math-lib-fenvs)
-	cat $^ | sed "s/TEST_DISABLE_FENV //g;s/^ *//g" > $@
 
 generic-itvs = $(ulp-input-dir)/itvs
 $(generic-itvs): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-itvs))
@@ -170,8 +167,9 @@ $(generic-itvs): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-itvs))
 arch-itvs = $(ulp-input-dir)/$(ARCH)/itvs
 $(arch-itvs): $(filter $(ulp-input-dir)/$(ARCH)/%,$(math-lib-itvs))
 
-$(generic-itvs) $(arch-itvs): | $$(@D)
-	cat $^ | sort -u | sed "s/TEST_INTERVAL //g" > $@
+# Remove first word, which will be TEST directive
+$(ulp-lims) $(ulp-lims-nn) $(fenv-exps) $(arch-itvs) $(generic-itvs): | $$(@D)
+	sed "s/TEST_[^ ]* //g" $^ | sort -u > $@
 
 check-math-ulp: $(ulp-lims) $(ulp-lims-nn)
 check-math-ulp: $(fenv-exps)
