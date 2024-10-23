@@ -69,3 +69,5 @@ sinf (float y)
 
 TEST_ULP (sinf, 0.06)
 TEST_ULP_NONNEAREST (sinf, 0.5)
+TEST_INTERVAL (sinf, 0, 0xffff0000, 10000)
+TEST_SYM_INTERVAL (sinf, 0x1p-14, 0x1p54, 50000)

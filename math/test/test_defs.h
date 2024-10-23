@@ -18,3 +18,12 @@
 #define TEST_DISABLE_FENV_IF_NOT_(f, e) TEST_DISABLE_FENV_IF_NOT_##e (f)
 #define TEST_DISABLE_FENV_IF_NOT_0(f) TEST_DISABLE_FENV (f)
 #define TEST_DISABLE_FENV_IF_NOT_1(f)
+
+#define TEST_INTERVAL(f, lo, hi, n) TEST_INTERVAL f lo hi n
+#define TEST_SYM_INTERVAL(f, lo, hi, n)                                       \
+  TEST_INTERVAL (f, lo, hi, n)                                                \
+  TEST_INTERVAL (f, -lo, -hi, n)
+// clang-format off
+#define TEST_INTERVAL2(f, xlo, xhi, ylo, yhi, n)                            \
+  TEST_INTERVAL f xlo,ylo xhi,yhi n
+// clang-format on

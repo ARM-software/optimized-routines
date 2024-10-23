@@ -106,3 +106,7 @@ erff (float x)
 
 TEST_ULP (erff, 0.6)
 TEST_ULP_NONNEAREST (erff, 0.9)
+TEST_INTERVAL (erff, 0, 0xffff0000, 10000)
+TEST_SYM_INTERVAL (erff, 0x1p-127, 0x1p-26, 40000)
+TEST_SYM_INTERVAL (erff, 0x1p-26, 0x1p3, 40000)
+TEST_INTERVAL (erff, 0, inf, 40000)

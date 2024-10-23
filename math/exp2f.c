@@ -82,3 +82,5 @@ hidden_alias (exp2f, __ieee754_exp2f)
 
 TEST_ULP (exp2f, 0.01)
 TEST_ULP_NONNEAREST (exp2f, 0.5)
+TEST_INTERVAL (exp2f, 0, 0xffff0000, 10000)
+TEST_SYM_INTERVAL (exp2f, 0x1p-14, 0x1p8, 50000)

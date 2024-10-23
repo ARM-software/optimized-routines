@@ -129,5 +129,13 @@ exp10 (double x)
   return eval_as_double (s * y + s);
 }
 
+#if WANT_EXP10_TESTS
 TEST_ULP (exp10, 0.02)
 TEST_ULP_NONNEAREST (exp10, 0.5)
+TEST_SYM_INTERVAL (exp10, 0, 0x1p-47, 5000)
+TEST_SYM_INTERVAL (exp10, 0x1p47, 1, 50000)
+TEST_INTERVAL (exp10, 1, OFlowBound, 50000)
+TEST_INTERVAL (exp10, -1, UFlowBound, 50000)
+TEST_INTERVAL (exp10, OFlowBound, inf, 5000)
+TEST_INTERVAL (exp10, UFlowBound, -inf, 5000)
+#endif

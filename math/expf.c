@@ -93,3 +93,5 @@ hidden_alias (expf, __ieee754_expf)
 
 TEST_ULP (expf, 0.01)
 TEST_ULP_NONNEAREST (expf, 0.5)
+TEST_INTERVAL (expf, 0, 0xffff0000, 10000)
+TEST_SYM_INTERVAL (expf, 0x1p-14, 0x1p8, 500000)

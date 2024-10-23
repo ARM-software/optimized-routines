@@ -143,3 +143,6 @@ long double log2l (long double x) { return log2 (x); }
 
 TEST_ULP (log2, 0.05)
 TEST_ULP_NONNEAREST (log2, 0.5)
+TEST_INTERVAL (log2, 0, 0xffff000000000000, 10000)
+TEST_INTERVAL (log2, 0x1p-4, 0x1p4, 40000)
+TEST_INTERVAL (log2, 0, inf, 40000)

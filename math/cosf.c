@@ -65,3 +65,5 @@ cosf (float y)
 
 TEST_ULP (cosf, 0.06)
 TEST_ULP_NONNEAREST (cosf, 0.5)
+TEST_INTERVAL (cosf, 0, 0xffff0000, 10000)
+TEST_SYM_INTERVAL (cosf, 0x1p-14, 0x1p54, 50000)

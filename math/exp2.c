@@ -145,3 +145,6 @@ long double exp2l (long double x) { return exp2 (x); }
 
 TEST_ULP (exp2, 0.01)
 TEST_ULP_NONNEAREST (exp2, 0.5)
+TEST_INTERVAL (exp2, 0, 0xffff000000000000, 10000)
+TEST_SYM_INTERVAL (exp2, 0x1p-6, 0x1p6, 40000)
+TEST_SYM_INTERVAL (exp2, 633.3, 733.3, 10000)

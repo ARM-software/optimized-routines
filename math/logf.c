@@ -81,3 +81,6 @@ hidden_alias (logf, __ieee754_logf)
 
 TEST_ULP (logf, 0.32)
 TEST_ULP_NONNEAREST (logf, 0.5)
+TEST_INTERVAL (logf, 0, 0xffff0000, 10000)
+TEST_INTERVAL (logf, 0x1p-4, 0x1p4, 500000)
+TEST_INTERVAL (logf, 0, inf, 50000)

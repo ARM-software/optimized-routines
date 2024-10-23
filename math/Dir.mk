@@ -135,8 +135,9 @@ $(ulp-input-dir) $(ulp-input-dir)/$(ARCH):
 math-lib-lims = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.ulp,$(math-lib-srcs))
 math-lib-lims-nn = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.ulp_nn,$(math-lib-srcs))
 math-lib-fenvs = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.fenv,$(math-lib-srcs))
+math-lib-itvs = $(patsubst $(S)/%.c,$(ulp-input-dir)/%.itv,$(math-lib-srcs))
 
-ulp-inputs = $(math-lib-lims) $(math-lib-lims-nn) $(math-lib-fenvs)
+ulp-inputs = $(math-lib-lims) $(math-lib-lims-nn) $(math-lib-fenvs) $(math-lib-itvs)
 $(ulp-inputs): CFLAGS = -I$(S)/test -I$(S)/include $(math-cflags)
 
 $(ulp-input-dir)/%.ulp: $(S)/%.c | $$(@D)
@@ -145,40 +146,41 @@ $(ulp-input-dir)/%.ulp: $(S)/%.c | $$(@D)
 $(ulp-input-dir)/%.ulp_nn: $(S)/%.c | $$(@D)
 	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_ULP_NONNEAREST [^ ]* [^ ]*" || true; } > $@
 
-generic-lims = $(ulp-input-dir)/limits
-$(generic-lims): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims))
-
-generic-lims-nn = $(ulp-input-dir)/limits_nn
-$(generic-lims-nn): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims-nn))
-
-arch-lims = $(ulp-input-dir)/$(ARCH)/limits
-$(arch-lims): $(filter $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims))
-
-arch-lims-nn = $(ulp-input-dir)/$(ARCH)/limits_nn
-$(arch-lims-nn): $(filter $(ulp-input-dir)/$(ARCH)/%,$(math-lib-lims-nn))
-
-$(arch-lims) $(generic-lims): | $$(@D)
-	cat $^ | sed "s/TEST_ULP //g;s/^ *//g" > $@
-
-$(arch-lims-nn) $(generic-lims-nn): | $$(@D)
-	cat $^ | sed "s/TEST_ULP_NONNEAREST //g;s/^ *//g" > $@
-
 $(ulp-input-dir)/%.fenv: $(S)/%.c | $$(@D)
 	$(CC) $(CFLAGS) $< -o - -E | { grep -o "TEST_DISABLE_FENV [^ ]*" || true; } > $@
+
+$(ulp-input-dir)/%.itv: $(S)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_INTERVAL " || true; } | sed "s/ TEST_INTERVAL/\nTEST_INTERVAL/g" > $@
+
+ulp-lims = $(ulp-input-dir)/limits
+$(ulp-lims): $(math-lib-lims) | $$(@D)
+	cat $^ | sed "s/TEST_ULP //g;s/^ *//g" > $@
+
+ulp-lims-nn = $(ulp-input-dir)/limits_nn
+$(ulp-lims-nn): $(math-lib-lims-nn) | $$(@D)
+	cat $^ | sed "s/TEST_ULP_NONNEAREST //g;s/^ *//g" > $@
 
 fenv-exps := $(ulp-input-dir)/fenv
 $(fenv-exps): $(math-lib-fenvs)
 	cat $^ | sed "s/TEST_DISABLE_FENV //g;s/^ *//g" > $@
 
-check-math-ulp: $(generic-lims) $(arch-lims)
-check-math-ulp: $(generic-lims-nn) $(arch-lims-nn)
+generic-itvs = $(ulp-input-dir)/itvs
+$(generic-itvs): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-itvs))
+
+arch-itvs = $(ulp-input-dir)/$(ARCH)/itvs
+$(arch-itvs): $(filter $(ulp-input-dir)/$(ARCH)/%,$(math-lib-itvs))
+
+$(generic-itvs) $(arch-itvs): | $$(@D)
+	cat $^ | sort -u | sed "s/TEST_INTERVAL //g" > $@
+
+check-math-ulp: $(ulp-lims) $(ulp-lims-nn)
 check-math-ulp: $(fenv-exps)
+check-math-ulp: $(generic-itvs) $(arch-itvs)
 check-math-ulp: $(math-tools)
 	ULPFLAGS="$(math-ulpflags)" \
-	WANT_SIMD_TESTS="$(WANT_SIMD_TESTS)" \
-	WANT_EXP10_TESTS="$(WANT_EXP10_TESTS)" \
-	ARCH_LIMITS=../../$(arch-lims) \
-	GEN_LIMITS=../../$(generic-lims) \
+	LIMITS=../../$(ulp-lims) \
+	ARCH_ITVS=../../$(arch-itvs) \
+	GEN_ITVS=../../$(generic-itvs) \
 	DISABLE_FENV=../../$(fenv-exps) \
 	build/bin/runulp.sh $(EMULATOR)
 
