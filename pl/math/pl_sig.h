@@ -17,10 +17,9 @@
 # define V_NAME_D2(fun) _ZGVnN2vv_##fun
 # define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
 # define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
-# define PL_DECL_VF1(fun)                                                    \
-    VPCS_ATTR float32x4_t V_NAME_F1 (fun##f) (float32x4_t);
+# define PL_DECL_VF1(fun) VPCS_ATTR float32x4_t V_NAME_F1 (fun) (float32x4_t);
 # define PL_DECL_VF2(fun)                                                    \
-    VPCS_ATTR float32x4_t V_NAME_F2 (fun##f) (float32x4_t, float32x4_t);
+    VPCS_ATTR float32x4_t V_NAME_F2 (fun) (float32x4_t, float32x4_t);
 # define PL_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
 # define PL_DECL_VD2(fun)                                                    \
     VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
