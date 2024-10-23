@@ -57,7 +57,7 @@ do
   do
 	[[ -z $F ]] || t $F $LO $HI $N
   done << EOF
-$(cat $GEN_ITVS)
+$(grep "\b$FUNC\b" $GEN_ITVS)
 EOF
 done
 
@@ -67,7 +67,7 @@ while read F LO HI N
 do
 	[[ -z $F ]] || t $F $LO $HI $N -z
 done << EOF
-$(cat $ARCH_ITVS)
+$(grep "\b$FUNC\b" $ARCH_ITVS)
 EOF
 
 [ 0 -eq $FAIL ] || {

@@ -96,7 +96,7 @@ while read F LO HI N
 do
 	[[ -z $F ]] || t $F $LO $HI $N
 done << EOF
-$(cat $INTERVALS | grep "\b$FUNC\b")
+$(grep "\b$FUNC\b" $INTERVALS)
 EOF
 
 [ 0 -eq $FAIL ] || {

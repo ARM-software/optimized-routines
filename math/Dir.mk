@@ -180,6 +180,7 @@ check-math-ulp: $(math-tools)
 	ARCH_ITVS=../../$(arch-itvs) \
 	GEN_ITVS=../../$(generic-itvs) \
 	DISABLE_FENV=../../$(fenv-exps) \
+	FUNC=$(func) \
 	build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp
