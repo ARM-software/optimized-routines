@@ -2,12 +2,12 @@
  * SVE helper for single-precision routines which calculate exp(x) - 1 and do
  * not need special-case handling
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#ifndef PL_MATH_SV_EXPM1F_INLINE_H
-#define PL_MATH_SV_EXPM1F_INLINE_H
+#ifndef MATH_SV_EXPM1F_INLINE_H
+#define MATH_SV_EXPM1F_INLINE_H
 
 #include "sv_math.h"
 
@@ -70,4 +70,4 @@ expm1f_inline (svfloat32_t x, svbool_t pg, const struct sv_expm1f_data *d)
   return svmla_x (pg, svsub_x (pg, t, 1), p, t);
 }
 
-#endif // PL_MATH_SV_EXPM1F_INLINE_H
+#endif // MATH_SV_EXPM1F_INLINE_H

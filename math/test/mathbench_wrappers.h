@@ -7,6 +7,30 @@
 
 #if WANT_SIMD_TESTS
 
+__vpcs static v_double
+_Z_atan2_wrap (v_double x)
+{
+  return _ZGVnN2vv_atan2 (v_double_dup (5.0), x);
+}
+
+__vpcs static v_float
+_Z_atan2f_wrap (v_float x)
+{
+  return _ZGVnN4vv_atan2f (v_float_dup (5.0f), x);
+}
+
+__vpcs static v_float
+_Z_hypotf_wrap (v_float x)
+{
+  return _ZGVnN4vv_hypotf (v_float_dup (5.0f), x);
+}
+
+__vpcs static v_double
+_Z_hypot_wrap (v_double x)
+{
+  return _ZGVnN2vv_hypot (v_double_dup (5.0), x);
+}
+
 __vpcs static v_float
 xy_Z_powf (v_float x)
 {
@@ -29,6 +53,34 @@ __vpcs static v_double
 xy_Z_pow (v_double x)
 {
   return _ZGVnN2vv_pow (x, x);
+}
+
+#endif
+
+#if WANT_SVE_MATH
+
+static sv_float
+_Z_sv_atan2f_wrap (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_atan2f (x, svdup_f32 (5.0f), pg);
+}
+
+static sv_double
+_Z_sv_atan2_wrap (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_atan2 (x, svdup_f64 (5.0), pg);
+}
+
+static sv_float
+_Z_sv_hypotf_wrap (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_hypotf (x, svdup_f32 (5.0), pg);
+}
+
+static sv_double
+_Z_sv_hypot_wrap (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_hypot (x, svdup_f64 (5.0), pg);
 }
 
 #endif

@@ -27,3 +27,5 @@
 #define TEST_INTERVAL2(f, xlo, xhi, ylo, yhi, n)                            \
   TEST_INTERVAL f xlo,ylo xhi,yhi n
 // clang-format on
+
+#define TEST_CONTROL_VALUE(f, c) TEST_CONTROL_VALUE f c

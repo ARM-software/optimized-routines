@@ -17,3 +17,5 @@
 #define TEST_INTERVAL(f, lo, hi, n)
 #define TEST_SYM_INTERVAL(f, lo, hi, n)
 #define TEST_INTERVAL2(f, xlo, xhi, ylo, yhi, n)
+
+#define TEST_CONTROL_VALUE(f, c)

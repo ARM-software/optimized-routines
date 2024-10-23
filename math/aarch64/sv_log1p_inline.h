@@ -2,11 +2,11 @@
  * Helper for SVE double-precision routines which calculate log(1 + x) and do
  * not need special-case handling
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-#ifndef PL_MATH_SV_LOG1P_INLINE_H
-#define PL_MATH_SV_LOG1P_INLINE_H
+#ifndef MATH_SV_LOG1P_INLINE_H
+#define MATH_SV_LOG1P_INLINE_H
 
 #include "sv_math.h"
 #include "poly_sve_f64.h"
@@ -67,8 +67,8 @@ sv_log1p_inline (svfloat64_t x, const svbool_t pg)
   svfloat64_t cm;
 
 #ifndef WANT_SV_LOG1P_K0_SHORTCUT
-#error                                                                         \
-  "Cannot use sv_log1p_inline.h without specifying whether you need the k0 shortcut for greater accuracy close to 0"
+# error                                                                       \
+      "Cannot use sv_log1p_inline.h without specifying whether you need the k0 shortcut for greater accuracy close to 0"
 #elif WANT_SV_LOG1P_K0_SHORTCUT
   /* Shortcut if k is 0 - set correction term to 0 and f to x. The result is
      that the approximation is solely the polynomial.  */
@@ -93,4 +93,4 @@ sv_log1p_inline (svfloat64_t x, const svbool_t pg)
 
   return svmla_x (pg, svadd_x (pg, ylo, yhi), f2, p);
 }
-#endif // PL_MATH_SV_LOG1P_INLINE_H
+#endif // MATH_SV_LOG1P_INLINE_H

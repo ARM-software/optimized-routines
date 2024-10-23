@@ -48,7 +48,8 @@ zeroinfnan (svuint64_t i, const svbool_t pg)
    x are reasonably close together. The greatest observed error is 2.28 ULP:
    _ZGVsMxvv_atan2 (-0x1.5915b1498e82fp+732, 0x1.54d11ef838826p+732)
    got -0x1.954f42f1fa841p-1 want -0x1.954f42f1fa843p-1.  */
-svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x, const svbool_t pg)
+svfloat64_t SV_NAME_D2 (atan2) (svfloat64_t y, svfloat64_t x,
+				const svbool_t pg)
 {
   const struct data *data_ptr = ptr_barrier (&data);
 

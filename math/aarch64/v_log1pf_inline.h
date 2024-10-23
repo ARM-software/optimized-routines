@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#ifndef PL_MATH_V_LOG1PF_INLINE_H
-#define PL_MATH_V_LOG1PF_INLINE_H
+#ifndef MATH_V_LOG1PF_INLINE_H
+#define MATH_V_LOG1PF_INLINE_H
 
 #include "v_math.h"
 #include "poly_advsimd_f32.h"
@@ -91,4 +91,4 @@ log1pf_inline (float32x4_t x, const struct v_log1pf_data *d)
   return vfmaq_f32 (p, scale_back, d->ln2);
 }
 
-#endif //  PL_MATH_V_LOG1PF_INLINE_H
+#endif //  MATH_V_LOG1PF_INLINE_H

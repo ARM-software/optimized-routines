@@ -6,13 +6,12 @@
  */
 
 #include "sv_math.h"
-#include "include/mathlib.h"
 #include "test_sig.h"
 #include "test_defs.h"
 
 #include "sv_log1pf_inline.h"
 
-#define BigBound (0x5f800000)  /* asuint(0x1p64).  */
+#define BigBound (0x5f800000) /* asuint(0x1p64).  */
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t special)

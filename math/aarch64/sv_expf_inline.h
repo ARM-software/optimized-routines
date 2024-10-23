@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#ifndef PL_MATH_SV_EXPF_INLINE_H
-#define PL_MATH_SV_EXPF_INLINE_H
+#ifndef MATH_SV_EXPF_INLINE_H
+#define MATH_SV_EXPF_INLINE_H
 
 #include "sv_math.h"
 #include "test_sig.h"
@@ -63,4 +63,4 @@ expf_inline (svfloat32_t x, const svbool_t pg, const struct sv_expf_data *d)
   return svmla_x (pg, scale, scale, poly);
 }
 
-#endif // PL_MATH_SV_EXPF_INLINE_H
+#endif // MATH_SV_EXPF_INLINE_H

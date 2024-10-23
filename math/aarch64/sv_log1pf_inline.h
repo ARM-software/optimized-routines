@@ -2,15 +2,14 @@
  * Helper for SVE routines which calculate log(1 + x) and do not
  * need special-case handling
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#ifndef PL_MATH_SV_LOG1PF_INLINE_H
-#define PL_MATH_SV_LOG1PF_INLINE_H
+#ifndef MATH_SV_LOG1PF_INLINE_H
+#define MATH_SV_LOG1PF_INLINE_H
 
 #include "v_math.h"
-#include "math_config.h"
 #include "poly_sve_f32.h"
 
 static const struct sv_log1pf_data
@@ -62,4 +61,4 @@ sv_log1pf_inline (svfloat32_t x, svbool_t pg)
   return svmla_x (pg, p, scale_back, d->ln2);
 }
 
-#endif //  PL_MATH_SV_LOG1PF_INLINE_H
+#endif //  SV_LOG1PF_INLINE_H

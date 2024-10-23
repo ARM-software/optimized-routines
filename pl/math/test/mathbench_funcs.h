@@ -57,10 +57,6 @@
 {"sincospi", 'd', 0, -3.1, 3.1, {.d = sincospi_wrap}},
 
 #if __linux__
-{"_ZGVnN4vv_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = _Z_atan2f_wrap}},
-{"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
-{"_ZGVnN4vv_hypotf", 'f', 'n', -10.0, 10.0, {.vnf = _Z_hypotf_wrap}},
-{"_ZGVnN2vv_hypot",  'd', 'n', -10.0, 10.0, {.vnd = _Z_hypot_wrap}},
 {"_ZGVnN4vl4_modff", 'f', 'n', -10.0, 10.0, {.vnf = _Z_modff_wrap}},
 {"_ZGVnN2vl8_modf",  'd', 'n', -10.0, 10.0, {.vnd = _Z_modf_wrap}},
 {"_ZGVnN2vv_pow",    'd', 'n', -10.0, 10.0, {.vnd = xy_Z_pow}},
@@ -74,10 +70,6 @@
 {"_ZGVnN2v_cexpi", 'd', 'n', -3.1, 3.1, {.vnd = _Z_cexpi_wrap}},
 
 # if WANT_SVE_MATH
-{"_ZGVsMxvv_atan2f", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_atan2f_wrap}},
-{"_ZGVsMxvv_atan2",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_atan2_wrap}},
-{"_ZGVsMxvv_hypotf", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_hypotf_wrap}},
-{"_ZGVsMxvv_hypot",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_hypot_wrap}},
 {"_ZGVsMxvl4_modff", 'f', 's', -10.0, 10.0, {.svf = _Z_sv_modff_wrap}},
 {"_ZGVsMxvl8_modf",  'd', 's', -10.0, 10.0, {.svd = _Z_sv_modf_wrap}},
 {"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},

@@ -18,6 +18,17 @@
 #define TEST_DECL_VD2(fun)                                                    \
   VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
 
+#if WANT_SVE_MATH
+# define TEST_DECL_SVF1(fun)                                                 \
+    svfloat32_t SV_NAME_F1 (fun) (svfloat32_t, svbool_t);
+# define TEST_DECL_SVF2(fun)                                                 \
+    svfloat32_t SV_NAME_F2 (fun) (svfloat32_t, svfloat32_t, svbool_t);
+# define TEST_DECL_SVD1(fun)                                                 \
+    svfloat64_t SV_NAME_D1 (fun) (svfloat64_t, svbool_t);
+# define TEST_DECL_SVD2(fun)                                                 \
+    svfloat64_t SV_NAME_D2 (fun) (svfloat64_t, svfloat64_t, svbool_t);
+#endif
+
 /* For building the routines, emit function prototype from TEST_SIG. This
    ensures that the correct signature has been chosen (wrong one will be a
    compile error). TEST_SIG is defined differently by various components of the

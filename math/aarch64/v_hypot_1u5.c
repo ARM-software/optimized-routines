@@ -15,7 +15,7 @@ static const struct data
   uint64x2_t tiny_bound, thres;
 } data = {
   .tiny_bound = V2 (0x2000000000000000), /* asuint (0x1p-511).  */
-  .thres = V2 (0x3fe0000000000000), /* asuint (0x1p511) - tiny_bound.  */
+  .thres = V2 (0x3fe0000000000000),	 /* asuint (0x1p511) - tiny_bound.  */
 };
 #else
 static const struct data
@@ -24,7 +24,7 @@ static const struct data
   uint32x4_t thres;
 } data = {
   .tiny_bound = V2 (0x0360000000000000), /* asuint (0x1p-969).  */
-  .thres = V4 (0x7c900000),	 /* asuint (inf) - tiny_bound.  */
+  .thres = V4 (0x7c900000),		 /* asuint (inf) - tiny_bound.  */
 };
 #endif
 
@@ -75,9 +75,9 @@ float64x2_t VPCS_ATTR V_NAME_D2 (hypot) (float64x2_t x, float64x2_t y)
 
   float64x2_t sqsum = vfmaq_f64 (vmulq_f64 (x, x), y, y);
 
-  uint32x2_t special = vcge_u32 (
-      vsubhn_u64 (vreinterpretq_u64_f64 (sqsum), d->tiny_bound),
-      vget_low_u32 (d->thres));
+  uint32x2_t special
+      = vcge_u32 (vsubhn_u64 (vreinterpretq_u64_f64 (sqsum), d->tiny_bound),
+		  vget_low_u32 (d->thres));
 
   if (unlikely (v_any_u32h (special)))
     return special_case (x, y, sqsum, special);

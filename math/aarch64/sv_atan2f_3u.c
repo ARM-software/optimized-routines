@@ -44,7 +44,8 @@ zeroinfnan (svuint32_t i, const svbool_t pg)
    observed error is 2.95 ULP:
    _ZGVsMxvv_atan2f (0x1.93836cp+6, 0x1.8cae1p+6) got 0x1.967f06p-1
 						 want 0x1.967f00p-1.  */
-svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x, const svbool_t pg)
+svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x,
+				const svbool_t pg)
 {
   const struct data *data_ptr = ptr_barrier (&data);
 

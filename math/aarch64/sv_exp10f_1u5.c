@@ -7,7 +7,6 @@
 
 #define _GNU_SOURCE
 #include "sv_math.h"
-#include "include/mathlib.h"
 #include "test_sig.h"
 #include "test_defs.h"
 #include "poly_sve_f32.h"

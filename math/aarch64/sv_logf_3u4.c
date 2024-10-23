@@ -34,15 +34,12 @@ static const struct data
 #define Thresh (0x7f000000) /* asuint32(inf) - 0x00800000.  */
 #define Mask (0x007fffff)
 
-float optr_aor_log_f32 (float);
-
 static svfloat32_t NOINLINE
 special_case (svuint32_t u_off, svfloat32_t p, svfloat32_t r2, svfloat32_t y,
 	      svbool_t cmp)
 {
   return sv_call_f32 (
-      optr_aor_log_f32,
-      svreinterpret_f32 (svadd_x (svptrue_b32 (), u_off, data.off)),
+      logf, svreinterpret_f32 (svadd_x (svptrue_b32 (), u_off, data.off)),
       svmla_x (svptrue_b32 (), p, r2, y), cmp);
 }
 

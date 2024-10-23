@@ -27,4 +27,9 @@
 #define _ZVF2(f) ZVNF2 (f)
 #define _ZVD2(f) ZVND2 (f)
 
+#define _ZSVF1(f) ZSVF1 (f)
+#define _ZSVF2(f) ZSVF2 (f)
+#define _ZSVD1(f) ZSVD1 (f)
+#define _ZSVD2(f) ZSVD2 (f)
+
 #include "ulp_funcs_gen.h"

@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#ifndef PL_MATH_V_EXPM1F_INLINE_H
-#define PL_MATH_V_EXPM1F_INLINE_H
+#ifndef MATH_V_EXPM1F_INLINE_H
+#define MATH_V_EXPM1F_INLINE_H
 
 #include "v_math.h"
 
@@ -59,4 +59,4 @@ expm1f_inline (float32x4_t x, const struct v_expm1f_data *d)
   return vfmaq_f32 (vsubq_f32 (t, v_f32 (1.0f)), p, t);
 }
 
-#endif // PL_MATH_V_EXPM1F_INLINE_H
+#endif // MATH_V_EXPM1F_INLINE_H
