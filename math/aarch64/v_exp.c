@@ -8,6 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask (N - 1)
@@ -125,6 +126,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp) (float64x2_t x)
   return vfmaq_f64 (s, y, s);
 }
 
+TEST_SIG (V, D, 1, exp, -9.9, 9.9)
 TEST_ULP (V_NAME_D1 (exp), 1.9)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (exp), 0, 0xffff000000000000, 10000)

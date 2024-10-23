@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8214db69p-3
 #define C 0x1.b0ac16p-1
@@ -244,6 +245,7 @@ erf (double x)
     }
 }
 
+TEST_SIG (S, D, 1, erf, -6.0, 6.0)
 TEST_ULP (erf, 0.51)
 TEST_ULP_NONNEAREST (erf, 0.9)
 TEST_INTERVAL (erf, 0, 0xffff000000000000, 10000)

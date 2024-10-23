@@ -8,6 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 static const struct data
 {
@@ -79,6 +80,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cos) (float32x4_t x)
   return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
 
+TEST_SIG (V, F, 1, cos, -3.1, 3.1)
 TEST_ULP (V_NAME_F1 (cos), 1.4)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (cos), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (cos), 0, 0x1p20, 500000)

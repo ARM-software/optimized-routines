@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "math_config.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define N (1 << EXP_TABLE_BITS)
 #define InvLn2N __exp_data.invln2N
@@ -168,6 +169,7 @@ long double expl (long double x) { return exp (x); }
 # endif
 #endif
 
+TEST_SIG (S, D, 1, exp, -9.9, 9.9)
 TEST_ULP (exp, 0.01)
 TEST_ULP_NONNEAREST (exp, 0.5)
 TEST_INTERVAL (exp, 0, 0xffff000000000000, 10000)

@@ -72,7 +72,40 @@ $(B)/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_ALL = $(HOST_CFLAGS)
 
-$(B)/test/ulp.o: $(S)/test/ulp.h
+ulp-funcs-dir = build/test/ulp-funcs/
+ulp-wrappers-dir = build/test/ulp-wrappers/
+mathbench-funcs-dir = build/test/mathbench-funcs/
+test-sig-dirs = $(ulp-funcs-dir) $(ulp-wrappers-dir) $(mathbench-funcs-dir)
+$(test-sig-dirs) $(addsuffix /$(ARCH),$(test-sig-dirs)):
+	mkdir -p $@
+
+ulp-funcs = $(patsubst $(S)/%,$(ulp-funcs-dir)/%,$(basename $(math-lib-srcs)))
+ulp-wrappers = $(patsubst $(S)/%,$(ulp-wrappers-dir)/%,$(basename $(math-lib-srcs)))
+mathbench-funcs = $(patsubst $(S)/%,$(mathbench-funcs-dir)/%,$(basename $(math-lib-srcs)))
+
+define emit_sig
+$1/%: $(S)/%.c | $$$$(@D)
+	$(CC) $$< $(math-cflags) -I$(S)/include -D$2 -E -o - | { grep TEST_SIG || true; } | cut -f 2- -d ' ' > $$@
+endef
+
+$(eval $(call emit_sig,$(ulp-funcs-dir),EMIT_ULP_FUNCS))
+$(eval $(call emit_sig,$(ulp-wrappers-dir),EMIT_ULP_WRAPPERS))
+$(eval $(call emit_sig,$(mathbench-funcs-dir),EMIT_MATHBENCH_FUNCS))
+
+ulp-funcs-gen = build/include/test/ulp_funcs_gen.h
+ulp-wrappers-gen = build/include/test/ulp_wrappers_gen.h
+mathbench-funcs-gen = build/include/test/mathbench_funcs_gen.h
+math-tools-autogen-headers = $(ulp-funcs-gen) $(ulp-wrappers-gen) $(mathbench-funcs-gen)
+
+$(ulp-funcs-gen): $(ulp-funcs)
+$(ulp-wrappers-gen): $(ulp-wrappers)
+$(mathbench-funcs-gen): $(mathbench-funcs)
+
+$(math-tools-autogen-headers): | $$(@D)
+	cat $^ | sort -u > $@
+
+$(B)/test/mathbench.o: $(mathbench-funcs-gen)
+$(B)/test/ulp.o: $(S)/test/ulp.h $(ulp-funcs-gen) $(ulp-wrappers-gen)
 
 build/lib/libmathlib.so: $(math-lib-objs:%.o=%.os)
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -shared -o $@ $^

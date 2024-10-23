@@ -7,6 +7,7 @@
 
 #include "math_config.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define N (1 << EXP_TABLE_BITS)
 #define IndexMask (N - 1)
@@ -130,6 +131,7 @@ exp10 (double x)
 }
 
 #if WANT_EXP10_TESTS
+TEST_SIG (S, D, 1, exp10, -9.9, 9.9)
 TEST_ULP (exp10, 0.02)
 TEST_ULP_NONNEAREST (exp10, 0.5)
 TEST_SYM_INTERVAL (exp10, 0, 0x1p-47, 5000)

@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "math_config.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define T __log2_data.tab
 #define T2 __log2_data.tab2
@@ -141,6 +142,7 @@ long double log2l (long double x) { return log2 (x); }
 # endif
 #endif
 
+TEST_SIG (S, D, 1, log2, 0.01, 11.1)
 TEST_ULP (log2, 0.05)
 TEST_ULP_NONNEAREST (log2, 0.5)
 TEST_INTERVAL (log2, 0, 0xffff000000000000, 10000)

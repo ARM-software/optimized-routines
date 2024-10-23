@@ -10,6 +10,7 @@
 #include "math_config.h"
 #include "sincosf.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 /* Fast cosf implementation.  Worst-case ULP is 0.5607, maximum relative
    error is 0.5303 * 2^-23.  A single-step range reduction is used for
@@ -63,6 +64,7 @@ cosf (float y)
     return __math_invalidf (y);
 }
 
+TEST_SIG (S, F, 1, cos, -3.1, 3.1)
 TEST_ULP (cosf, 0.06)
 TEST_ULP_NONNEAREST (cosf, 0.5)
 TEST_INTERVAL (cosf, 0, 0xffff0000, 10000)

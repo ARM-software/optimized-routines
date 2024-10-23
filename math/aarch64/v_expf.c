@@ -8,6 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 static const struct data
 {
@@ -120,6 +121,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp) (float32x4_t x)
   return vfmaq_f32 (scale, poly, scale);
 }
 
+TEST_SIG (V, F, 1, exp, -9.9, 9.9)
 TEST_ULP (V_NAME_F1 (exp), 1.49)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (exp), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_F1 (exp), 0, 0xffff0000, 10000)

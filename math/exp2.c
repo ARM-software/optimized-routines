@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include "math_config.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define N (1 << EXP_TABLE_BITS)
 #define Shift __exp_data.exp2_shift
@@ -143,6 +144,7 @@ long double exp2l (long double x) { return exp2 (x); }
 # endif
 #endif
 
+TEST_SIG (S, D, 1, exp2, -9.9, 9.9)
 TEST_ULP (exp2, 0.01)
 TEST_ULP_NONNEAREST (exp2, 0.5)
 TEST_INTERVAL (exp2, 0, 0xffff000000000000, 10000)

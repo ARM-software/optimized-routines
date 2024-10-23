@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include "math_config.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 /*
 LOGF_TABLE_BITS = 4
@@ -79,6 +80,7 @@ strong_alias (logf, __logf_finite)
 hidden_alias (logf, __ieee754_logf)
 #endif
 
+TEST_SIG (S, F, 1, log, 0.01, 11.1)
 TEST_ULP (logf, 0.32)
 TEST_ULP_NONNEAREST (logf, 0.5)
 TEST_INTERVAL (logf, 0, 0xffff0000, 10000)

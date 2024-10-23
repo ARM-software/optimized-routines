@@ -9,6 +9,7 @@
 #include <math.h>
 #include "math_config.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
 #define A __erff_data.erff_poly_A
@@ -104,6 +105,7 @@ erff (float x)
   return r;
 }
 
+TEST_SIG (S, F, 1, erf, -6.0, 6.0)
 TEST_ULP (erff, 0.6)
 TEST_ULP_NONNEAREST (erff, 0.9)
 TEST_INTERVAL (erff, 0, 0xffff0000, 10000)
