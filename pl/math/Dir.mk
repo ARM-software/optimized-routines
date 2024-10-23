@@ -82,42 +82,45 @@ $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
 $(PLB)/sv_%: CFLAGS_PL += $(math-sve-cflags)
 
-ulp-funcs-dir = build/pl/test/ulp-funcs/
-ulp-wrappers-dir = build/pl/test/ulp-wrappers/
-mathbench-funcs-dir = build/pl/test/mathbench-funcs/
-plsig-dirs = $(ulp-funcs-dir) $(ulp-wrappers-dir) $(mathbench-funcs-dir)
+pl-ulp-funcs-dir = build/pl/test/ulp-funcs/
+pl-ulp-wrappers-dir = build/pl/test/ulp-wrappers/
+pl-mathbench-funcs-dir = build/pl/test/mathbench-funcs/
+pl-sig-dirs = $(pl-ulp-funcs-dir) $(pl-ulp-wrappers-dir) $(pl-mathbench-funcs-dir)
 
-$(plsig-dirs):
+$(pl-sig-dirs):
 	mkdir -p $@
 
-ulp-funcs = $(patsubst $(PLM)/%,$(ulp-funcs-dir)%,$(basename $(pl-lib-srcs)))
-ulp-wrappers = $(patsubst $(PLM)/%,$(ulp-wrappers-dir)%,$(basename $(pl-lib-srcs)))
-mathbench-funcs = $(patsubst $(PLM)/%,$(mathbench-funcs-dir)%,$(basename $(pl-lib-srcs)))
-plsig-autogen-files = $(ulp-funcs) $(ulp-wrappers) $(mathbench-funcs)
+pl-ulp-funcs = $(patsubst $(PLM)/%,$(pl-ulp-funcs-dir)%,$(basename $(pl-lib-srcs)))
+pl-ulp-wrappers = $(patsubst $(PLM)/%,$(pl-ulp-wrappers-dir)%,$(basename $(pl-lib-srcs)))
+pl-mathbench-funcs = $(patsubst $(PLM)/%,$(pl-mathbench-funcs-dir)%,$(basename $(pl-lib-srcs)))
+pl-sig-autogen-files = $(pl-ulp-funcs) $(pl-ulp-wrappers) $(pl-mathbench-funcs)
 
-$(plsig-autogen-files): CFLAGS_PL += -DWANT_TRIGPI_TESTS=$(WANT_TRIGPI_TESTS)
+$(pl-sig-autogen-files): CFLAGS_PL += -DWANT_TRIGPI_TESTS=$(WANT_TRIGPI_TESTS)
 
-$(ulp-funcs): PLSIG_DIRECTIVE = EMIT_ULP_FUNCS
-$(ulp-wrappers): PLSIG_DIRECTIVE = EMIT_ULP_WRAPPERS
-$(mathbench-funcs): PLSIG_DIRECTIVE = EMIT_MATHBENCH_FUNCS
+$(pl-ulp-funcs): PLSIG_DIRECTIVE = EMIT_ULP_FUNCS
+$(pl-ulp-wrappers): PLSIG_DIRECTIVE = EMIT_ULP_WRAPPERS
+$(pl-mathbench-funcs): PLSIG_DIRECTIVE = EMIT_MATHBENCH_FUNCS
 
 .SECONDEXPANSION:
-$(plsig-autogen-files): %: $(PLM)/$$(notdir $$@).c | $$(dir $$@)
+$(pl-sig-autogen-files): %: $(PLM)/$$(notdir $$@).c | $$(dir $$@)
 	$(CC) $< $(CFLAGS_PL) -D$(PLSIG_DIRECTIVE) -E -o - | { grep PL_SIG || true; } | cut -f 2- -d ' ' > $@
 
-build/pl/include/test/ulp_funcs_gen.h: $(ulp-funcs)
+pl-ulp-funcs-gen = build/pl/include/test/ulp_funcs_gen.h
+pl-ulp-wrappers-gen = build/pl/include/test/ulp_wrappers_gen.h
+pl-mathbench-funcs-gen = build/pl/include/test/mathbench_funcs_gen.h
+pl-autogen-headers = $(pl-ulp-funcs-gen) $(pl-ulp-wrappers-gen) $(pl-mathbench-funcs-gen)
+
+$(pl-ulp-funcs-gen): $(pl-ulp-funcs)
+$(pl-ulp-wrappers-gen): $(pl-ulp-wrappers)
+$(pl-mathbench-funcs-gen): $(pl-mathbench-funcs)
+
+$(pl-autogen-headers):
 	cat $^ | sort -u > $@
 
-build/pl/include/test/ulp_wrappers_gen.h: $(ulp-wrappers)
-	cat $^ > $@
-
-build/pl/include/test/mathbench_funcs_gen.h: $(mathbench-funcs)
-	cat $^ | sort -u > $@
-
-$(PLB)/test/ulp.o: $(AOR)/test/ulp.h build/pl/include/test/ulp_funcs_gen.h build/pl/include/test/ulp_wrappers_gen.h
+$(PLB)/test/ulp.o: $(AOR)/test/ulp.h $(pl-ulp-funcs-gen) $(pl-ulp-wrappers-gen)
 $(PLB)/test/ulp.o: CFLAGS_PL += -I build/pl/include/test
 
-$(PLB)/test/mathbench.o: build/pl/include/test/mathbench_funcs_gen.h
+$(PLB)/test/mathbench.o: $(pl-mathbench-funcs-gen)
 $(PLB)/test/mathbench.o: CFLAGS_PL += -I build/pl/include/test
 
 build/pl/lib/libmathlib.so: $(pl-lib-objs:%.o=%.os)
