@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define Ln2 (0x1.62e4p-1f)
@@ -54,7 +54,7 @@ acoshf (float x)
   return log1pf (xm1 + sqrtf (2 * xm1 + xm1 * xm1));
 }
 
-PL_SIG (S, F, 1, acosh, 1.0, 10.0)
+TEST_SIG (S, F, 1, acosh, 1.0, 10.0)
 TEST_ULP (acoshf, 2.30)
 TEST_INTERVAL (acoshf, 0, 1, 100)
 TEST_INTERVAL (acoshf, 1, 2, 10000)

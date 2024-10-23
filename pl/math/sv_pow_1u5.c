@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 /* This version share a similar algorithm as AOR scalar pow.
@@ -399,7 +399,7 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
   return vz;
 }
 
-PL_SIG (SV, D, 2, pow)
+TEST_SIG (SV, D, 2, pow)
 TEST_ULP (SV_NAME_D2 (pow), 0.55)
 TEST_DISABLE_FENV (SV_NAME_D2 (pow))
 /* Wide intervals spanning the whole domain but shared between x and y.  */

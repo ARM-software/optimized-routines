@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_sve_f32.h"
 
@@ -102,7 +102,7 @@ svfloat32_t SV_NAME_F2 (atan2) (svfloat32_t y, svfloat32_t x, const svbool_t pg)
 }
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
-PL_SIG (SV, F, 2, atan2)
+TEST_SIG (SV, F, 2, atan2)
 TEST_ULP (SV_NAME_F2 (atan2), 2.45)
 TEST_DISABLE_FENV (SV_NAME_F2 (atan2))
 TEST_INTERVAL (SV_NAME_F2 (atan2), 0.0, 1.0, 40000)

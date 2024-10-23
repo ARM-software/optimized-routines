@@ -6,7 +6,7 @@
  */
 #include "mathlib.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_scalar_f64.h"
 
@@ -142,7 +142,7 @@ tanpi (double x)
 }
 
 #if WANT_TRIGPI_TESTS
-PL_SIG (S, D, 1, tanpi, -3.1, 3.1)
+TEST_SIG (S, D, 1, tanpi, -3.1, 3.1)
 TEST_ULP (tanpi, 2.03)
 TEST_SYM_INTERVAL (tanpi, 0, 0x1p-63, 50000)
 TEST_SYM_INTERVAL (tanpi, 0x1p-63, 0.5, 100000)

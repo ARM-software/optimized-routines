@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -90,7 +90,7 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   return svreinterpret_f64 (sveor_z (pg, svreinterpret_u64 (y), odd));
 }
 
-PL_SIG (SV, D, 1, sin, -3.1, 3.1)
+TEST_SIG (SV, D, 1, sin, -3.1, 3.1)
 TEST_ULP (SV_NAME_D1 (sin), 2.73)
 TEST_DISABLE_FENV (SV_NAME_D1 (sin))
 TEST_SYM_INTERVAL (SV_NAME_D1 (sin), 0, 0x1p23, 1000000)

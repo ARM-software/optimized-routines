@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 /* Polynomial coefficients and lookup tables.  */
@@ -143,7 +143,7 @@ log10l (long double x)
 #endif
 // clang-format on
 
-PL_SIG (S, D, 1, log10, 0.01, 11.1)
+TEST_SIG (S, D, 1, log10, 0.01, 11.1)
 TEST_ULP (log10, 1.11)
 TEST_INTERVAL (log10, 0, 0xffff000000000000, 10000)
 TEST_INTERVAL (log10, 0x1p-4, 0x1p4, 40000)

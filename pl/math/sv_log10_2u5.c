@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_sve_f64.h"
 
@@ -65,7 +65,7 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
   return svmla_x (pg, hi, r2, y);
 }
 
-PL_SIG (SV, D, 1, log10, 0.01, 11.1)
+TEST_SIG (SV, D, 1, log10, 0.01, 11.1)
 TEST_ULP (SV_NAME_D1 (log10), 1.97)
 TEST_DISABLE_FENV (SV_NAME_D1 (log10))
 TEST_INTERVAL (SV_NAME_D1 (log10), -0.0, -0x1p126, 100)

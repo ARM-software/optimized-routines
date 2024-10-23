@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_advsimd_f32.h"
 
@@ -106,7 +106,7 @@ float32x4_t VPCS_ATTR V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
 }
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
-PL_SIG (V, F, 2, atan2)
+TEST_SIG (V, F, 2, atan2)
 TEST_DISABLE_FENV (V_NAME_F2 (atan2))
 TEST_ULP (V_NAME_F2 (atan2), 2.46)
 TEST_INTERVAL (V_NAME_F2 (atan2), -10.0, 10.0, 50000)

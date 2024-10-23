@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #if WANT_SIMD_EXCEPT
@@ -86,7 +86,7 @@ float64x2_t VPCS_ATTR V_NAME_D2 (hypot) (float64x2_t x, float64x2_t y)
 }
 #endif
 
-PL_SIG (V, D, 2, hypot, -10.0, 10.0)
+TEST_SIG (V, D, 2, hypot, -10.0, 10.0)
 TEST_ULP (V_NAME_D2 (hypot), 1.21)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D2 (hypot), WANT_SIMD_EXCEPT)
 TEST_INTERVAL2 (V_NAME_D2 (hypot), 0, inf, 0, inf, 10000)

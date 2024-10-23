@@ -5,7 +5,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define One 0x3f800000
@@ -39,7 +39,7 @@ svfloat32_t SV_NAME_F1 (acosh) (svfloat32_t x, const svbool_t pg)
   return y;
 }
 
-PL_SIG (SV, F, 1, acosh, 1.0, 10.0)
+TEST_SIG (SV, F, 1, acosh, 1.0, 10.0)
 TEST_ULP (SV_NAME_F1 (acosh), 2.29)
 TEST_DISABLE_FENV (SV_NAME_F1 (acosh))
 TEST_INTERVAL (SV_NAME_F1 (acosh), 0, 1, 500)

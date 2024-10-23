@@ -7,7 +7,7 @@
 
 #include "math_config.h"
 #include "poly_scalar_f64.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
@@ -76,7 +76,7 @@ atanh (double x)
   return halfsign * log1p_inline ((2 * ax) / (1 - ax));
 }
 
-PL_SIG (S, D, 1, atanh, -1.0, 1.0)
+TEST_SIG (S, D, 1, atanh, -1.0, 1.0)
 TEST_ULP (atanh, 3.00)
 TEST_SYM_INTERVAL (atanh, 0, 0x1p-23, 10000)
 TEST_SYM_INTERVAL (atanh, 0x1p-23, 1, 90000)

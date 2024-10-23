@@ -35,7 +35,7 @@
 
 /* No auto-generated wrappers for binary functions - they have be
    manually defined in mathbench_wrappers.h. We have to define silent
-   macros for them anyway as they will be emitted by PL_SIG.  */
+   macros for them anyway as they will be emitted by TEST_SIG.  */
 #define _ZSF2(...)
 #define _ZSD2(...)
 #define _ZVF2(...)
@@ -45,7 +45,7 @@
 
 #include "mathbench_funcs_gen.h"
 
-/* PL_SIG only emits entries for unary functions, since if a function
+/* TEST_SIG only emits entries for unary functions, since if a function
    needs to be wrapped in mathbench there is no way for it to know the
    same of the wrapper. Add entries for binary functions, or any other
    exotic signatures that need wrapping, below.  */

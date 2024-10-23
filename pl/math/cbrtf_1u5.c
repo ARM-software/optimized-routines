@@ -7,7 +7,7 @@
 
 #include "poly_scalar_f32.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffff
@@ -61,6 +61,6 @@ cbrtf (float x)
   return asfloat (asuint (ldexpf (a * T (2 + e % 3), e / 3)) | sign);
 }
 
-PL_SIG (S, F, 1, cbrt, -10.0, 10.0)
+TEST_SIG (S, F, 1, cbrt, -10.0, 10.0)
 TEST_ULP (cbrtf, 1.03)
 TEST_SYM_INTERVAL (cbrtf, 0, inf, 1000000)

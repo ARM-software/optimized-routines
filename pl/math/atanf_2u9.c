@@ -6,7 +6,7 @@
  */
 
 #include "atanf_common.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define PiOver2 0x1.921fb6p+0f
@@ -64,7 +64,7 @@ atanf (float x)
   return asfloat (asuint (y) ^ sign);
 }
 
-PL_SIG (S, F, 1, atan, -10.0, 10.0)
+TEST_SIG (S, F, 1, atan, -10.0, 10.0)
 TEST_ULP (atanf, 2.38)
 TEST_SYM_INTERVAL (atanf, 0, 0x1p-30, 5000)
 TEST_SYM_INTERVAL (atanf, 0x1p-30, 1, 40000)

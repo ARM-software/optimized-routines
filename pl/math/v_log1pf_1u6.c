@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "v_log1pf_inline.h"
 
@@ -81,7 +81,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
 
 #endif
 
-PL_SIG (V, F, 1, log1p, -0.9, 10.0)
+TEST_SIG (V, F, 1, log1p, -0.9, 10.0)
 TEST_ULP (V_NAME_F1 (log1p), 1.20)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (log1p), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (log1p), 0.0, 0x1p-23, 30000)

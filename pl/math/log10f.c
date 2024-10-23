@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 /* Data associated to logf:
@@ -88,7 +88,7 @@ log10f (float x)
   return eval_as_float (y);
 }
 
-PL_SIG (S, F, 1, log10, 0.01, 11.1)
+TEST_SIG (S, F, 1, log10, 0.01, 11.1)
 TEST_ULP (log10f, 0.30)
 TEST_INTERVAL (log10f, 0, 0xffff0000, 10000)
 TEST_INTERVAL (log10f, 0x1p-127, 0x1p-26, 50000)

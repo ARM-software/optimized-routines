@@ -6,7 +6,7 @@
  */
 #include "poly_scalar_f64.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
@@ -74,7 +74,7 @@ asinh (double x)
 		   | sign);
 }
 
-PL_SIG (S, D, 1, asinh, -10.0, 10.0)
+TEST_SIG (S, D, 1, asinh, -10.0, 10.0)
 TEST_ULP (asinh, 1.54)
 TEST_INTERVAL (asinh, -0x1p-26, 0x1p-26, 50000)
 TEST_INTERVAL (asinh, 0x1p-26, 1.0, 40000)

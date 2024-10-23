@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define WANT_V_LOG1P_K0_SHORTCUT 0
@@ -55,7 +55,7 @@ float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
   return vmulq_f64 (y, halfsign);
 }
 
-PL_SIG (V, D, 1, atanh, -1.0, 1.0)
+TEST_SIG (V, D, 1, atanh, -1.0, 1.0)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atanh), WANT_SIMD_EXCEPT)
 TEST_ULP (V_NAME_D1 (atanh), 3.32)
 TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 0, 0x1p-23, 10000)

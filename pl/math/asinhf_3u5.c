@@ -7,7 +7,7 @@
 
 #include "poly_scalar_f32.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask (0x7fffffff)
@@ -68,7 +68,7 @@ asinhf (float x)
   return asfloat (asuint (optr_aor_log_f32 (ax + sqrtf (ax * ax + 1))) | sign);
 }
 
-PL_SIG (S, F, 1, asinh, -10.0, 10.0)
+TEST_SIG (S, F, 1, asinh, -10.0, 10.0)
 TEST_ULP (asinhf, 2.9)
 TEST_INTERVAL (asinhf, 0, 0x1p-12, 5000)
 TEST_INTERVAL (asinhf, 0x1p-12, 1.0, 50000)

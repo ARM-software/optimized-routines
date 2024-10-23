@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffff
@@ -61,7 +61,7 @@ coshf (float x)
   return 0.5f * t + 0.5f / t;
 }
 
-PL_SIG (S, F, 1, cosh, -10.0, 10.0)
+TEST_SIG (S, F, 1, cosh, -10.0, 10.0)
 TEST_ULP (coshf, 1.89)
 TEST_SYM_INTERVAL (coshf, 0, 0x1p-63, 100)
 TEST_SYM_INTERVAL (coshf, 0, 0x1.5a92d8p+6, 80000)

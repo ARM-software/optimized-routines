@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
@@ -75,7 +75,7 @@ erff (float x)
   return asfloat (sign | asuint (1.0f));
 }
 
-PL_SIG (S, F, 1, erf, -4.0, 4.0)
+TEST_SIG (S, F, 1, erf, -4.0, 4.0)
 TEST_ULP (erff, 1.43)
 TEST_SYM_INTERVAL (erff, 0, 3.9375, 40000)
 TEST_SYM_INTERVAL (erff, 3.9375, inf, 40000)

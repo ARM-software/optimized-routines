@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "atan_common.h"
 
@@ -63,7 +63,7 @@ atan (double x)
   return asdouble (asuint64 (y) ^ sign);
 }
 
-PL_SIG (S, D, 1, atan, -10.0, 10.0)
+TEST_SIG (S, D, 1, atan, -10.0, 10.0)
 TEST_ULP (atan, 1.78)
 TEST_INTERVAL (atan, 0, 0x1p-30, 10000)
 TEST_INTERVAL (atan, -0, -0x1p-30, 1000)

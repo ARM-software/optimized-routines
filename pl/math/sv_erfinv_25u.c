@@ -7,7 +7,7 @@
 #include "sv_math.h"
 #include "test_defs.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "poly_sve_f64.h"
 #define SV_LOG_INLINE_POLY_ORDER 4
 #include "sv_log_inline.h"
@@ -144,7 +144,7 @@ svfloat64_t SV_NAME_D1 (erfinv) (svfloat64_t x, svbool_t pg)
 #if USE_MPFR
 # warning Not generating tests for _ZGVsMxv_erfinv, as MPFR has no suitable reference
 #else
-PL_SIG (SV, D, 1, erfinv, -0.99, 0.99)
+TEST_SIG (SV, D, 1, erfinv, -0.99, 0.99)
 TEST_ULP (SV_NAME_D1 (erfinv), 24.5)
 TEST_DISABLE_FENV (SV_NAME_D1 (erfinv))
 /* Test with control lane in each interval.  */

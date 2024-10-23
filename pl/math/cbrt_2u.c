@@ -6,10 +6,10 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
-PL_SIG (S, D, 1, cbrt, -10.0, 10.0)
+TEST_SIG (S, D, 1, cbrt, -10.0, 10.0)
 
 #define AbsMask 0x7fffffffffffffff
 #define TwoThirds 0x1.5555555555555p-1

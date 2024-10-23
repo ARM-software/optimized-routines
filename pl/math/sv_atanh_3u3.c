@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define WANT_SV_LOG1P_K0_SHORTCUT 0
@@ -50,7 +50,7 @@ svfloat64_t SV_NAME_D1 (atanh) (svfloat64_t x, const svbool_t pg)
   return svmul_x (pg, halfsign, y);
 }
 
-PL_SIG (SV, D, 1, atanh, -1.0, 1.0)
+TEST_SIG (SV, D, 1, atanh, -1.0, 1.0)
 TEST_ULP (SV_NAME_D1 (atanh), 3.32)
 TEST_DISABLE_FENV (SV_NAME_D1 (atanh))
 TEST_SYM_INTERVAL (SV_NAME_D1 (atanh), 0, 0x1p-23, 10000)

@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "v_expm1f_inline.h"
 
@@ -70,7 +70,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (expm1) (float32x4_t x)
   return expm1f_inline (x, &d->d);
 }
 
-PL_SIG (V, F, 1, expm1, -9.9, 9.9)
+TEST_SIG (V, F, 1, expm1, -9.9, 9.9)
 TEST_ULP (V_NAME_F1 (expm1), 1.13)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (expm1), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (expm1), 0, 0x1p-23, 1000)

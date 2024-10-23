@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -107,7 +107,7 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
   return svsel (pred_alt, inv_y, y);
 }
 
-PL_SIG (SV, F, 1, tan, -3.1, 3.1)
+TEST_SIG (SV, F, 1, tan, -3.1, 3.1)
 TEST_ULP (SV_NAME_F1 (tan), 2.96)
 TEST_DISABLE_FENV (SV_NAME_F1 (tan))
 TEST_INTERVAL (SV_NAME_F1 (tan), -0.0, -0x1p126, 100)

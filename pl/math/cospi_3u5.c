@@ -7,7 +7,7 @@
 
 #include "mathlib.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_scalar_f64.h"
 
@@ -82,7 +82,7 @@ cospi (double x)
 }
 
 #if WANT_TRIGPI_TESTS
-PL_SIG (S, D, 1, cospi, -0.9, 0.9)
+TEST_SIG (S, D, 1, cospi, -0.9, 0.9)
 TEST_ULP (cospi, 2.63)
 TEST_SYM_INTERVAL (cospi, 0, 0x1p-63, 5000)
 TEST_SYM_INTERVAL (cospi, 0x1p-63, 0.5, 10000)

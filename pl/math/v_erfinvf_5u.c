@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_advsimd_f32.h"
 #include "v_logf_inline.h"
@@ -159,7 +159,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
 #if USE_MPFR
 # warning Not generating tests for _ZGVnN4v_erfinvf, as MPFR has no suitable reference
 #else
-PL_SIG (V, F, 1, erfinv, -0.99, 0.99)
+TEST_SIG (V, F, 1, erfinv, -0.99, 0.99)
 TEST_DISABLE_FENV (V_NAME_F1 (erfinv))
 TEST_ULP (V_NAME_F1 (erfinv), 4.49)
 TEST_SYM_INTERVAL (V_NAME_F1 (erfinv), 0, 0x1.fffffep-1, 40000)

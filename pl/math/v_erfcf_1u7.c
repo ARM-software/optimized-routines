@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -163,7 +163,7 @@ float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
   return vfmaq_f32 (off, fac, y);
 }
 
-PL_SIG (V, F, 1, erfc, -4.0, 10.0)
+TEST_SIG (V, F, 1, erfc, -4.0, 10.0)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (erfc), WANT_SIMD_EXCEPT)
 TEST_ULP (V_NAME_F1 (erfc), 1.14)
 TEST_SYM_INTERVAL (V_NAME_F1 (erfc), 0, 0x1p-26, 40000)

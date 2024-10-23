@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -150,7 +150,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erf) (float64x2_t x)
   return y;
 }
 
-PL_SIG (V, D, 1, erf, -6.0, 6.0)
+TEST_SIG (V, D, 1, erf, -6.0, 6.0)
 TEST_ULP (V_NAME_D1 (erf), 1.79)
 /* WANT_SIMD_EXCEPT blocks miss some cases.  */
 TEST_DISABLE_FENV (V_NAME_D1 (erf))

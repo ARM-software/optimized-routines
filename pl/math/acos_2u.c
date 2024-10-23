@@ -7,7 +7,7 @@
 
 #include "math_config.h"
 #include "poly_scalar_f64.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
@@ -90,7 +90,7 @@ acos (double x)
   return (x <= -0.5) ? fma (-2.0, p, Pi) : 2.0 * p;
 }
 
-PL_SIG (S, D, 1, acos, -1.0, 1.0)
+TEST_SIG (S, D, 1, acos, -1.0, 1.0)
 TEST_ULP (acos, 1.02)
 TEST_INTERVAL (acos, 0, Small, 5000)
 TEST_INTERVAL (acos, Small, 0.5, 50000)

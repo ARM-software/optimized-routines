@@ -7,7 +7,7 @@
 
 #include "poly_scalar_f64.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
@@ -96,7 +96,7 @@ asin (double x)
   return asdouble (asuint64 (y) | sign);
 }
 
-PL_SIG (S, D, 1, asin, -1.0, 1.0)
+TEST_SIG (S, D, 1, asin, -1.0, 1.0)
 TEST_ULP (asin, 2.20)
 TEST_INTERVAL (asin, 0, Small, 5000)
 TEST_INTERVAL (asin, Small, 0.5, 50000)

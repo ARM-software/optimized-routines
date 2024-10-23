@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "poly_advsimd_f64.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -114,7 +114,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 		    vbslq_f64 (no_recip, d, n));
 }
 
-PL_SIG (V, D, 1, tan, -3.1, 3.1)
+TEST_SIG (V, D, 1, tan, -3.1, 3.1)
 TEST_ULP (V_NAME_D1 (tan), 2.99)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (tan), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (tan), 0, TinyBound, 5000)

@@ -7,7 +7,7 @@
 
 #include "poly_scalar_f32.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define Ln2 (0x1.62e43p-1f)
@@ -153,7 +153,7 @@ log1pf (float x)
   return fmaf (scale_back, Ln2, p);
 }
 
-PL_SIG (S, F, 1, log1p, -0.9, 10.0)
+TEST_SIG (S, F, 1, log1p, -0.9, 10.0)
 TEST_ULP (log1pf, 1.52)
 TEST_SYM_INTERVAL (log1pf, 0.0, 0x1p-23, 50000)
 TEST_SYM_INTERVAL (log1pf, 0x1p-23, 0.001, 50000)

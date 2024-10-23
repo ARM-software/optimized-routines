@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "poly_advsimd_f32.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -81,7 +81,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log10) (float32x4_t x)
   return vfmaq_f32 (y, poly, r2);
 }
 
-PL_SIG (V, F, 1, log10, 0.01, 11.1)
+TEST_SIG (V, F, 1, log10, 0.01, 11.1)
 TEST_ULP (V_NAME_F1 (log10), 2.81)
 TEST_INTERVAL (V_NAME_F1 (log10), -0.0, -inf, 100)
 TEST_INTERVAL (V_NAME_F1 (log10), 0, 0x1p-126, 100)

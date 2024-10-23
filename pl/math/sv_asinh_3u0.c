@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "poly_sve_f64.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define SignMask (0x8000000000000000)
@@ -139,7 +139,7 @@ svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg)
   return svreinterpret_f64 (sveor_x (pg, svreinterpret_u64 (y), sign));
 }
 
-PL_SIG (SV, D, 1, asinh, -10.0, 10.0)
+TEST_SIG (SV, D, 1, asinh, -10.0, 10.0)
 TEST_ULP (SV_NAME_D1 (asinh), 2.52)
 TEST_DISABLE_FENV (SV_NAME_D1 (asinh))
 TEST_SYM_INTERVAL (SV_NAME_D1 (asinh), 0, 0x1p-26, 50000)

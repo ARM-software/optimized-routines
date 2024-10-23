@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_scalar_f32.h"
 
@@ -182,7 +182,7 @@ tanf (float x)
   return fmaf (scale, p, offset);
 }
 
-PL_SIG (S, F, 1, tan, -3.1, 3.1)
+TEST_SIG (S, F, 1, tan, -3.1, 3.1)
 TEST_ULP (tanf, 2.80)
 TEST_INTERVAL (tanf, 0, 0xffff0000, 10000)
 TEST_SYM_INTERVAL (tanf, 0x1p-127, 0x1p-14, 50000)

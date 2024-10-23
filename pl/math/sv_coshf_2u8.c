@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #include "sv_expf_inline.h"
@@ -54,7 +54,7 @@ svfloat32_t SV_NAME_F1 (cosh) (svfloat32_t x, svbool_t pg)
   return svadd_x (svptrue_b32 (), half_e, half_over_e);
 }
 
-PL_SIG (SV, F, 1, cosh, -10.0, 10.0)
+TEST_SIG (SV, F, 1, cosh, -10.0, 10.0)
 TEST_ULP (SV_NAME_F1 (cosh), 2.28)
 TEST_DISABLE_FENV (SV_NAME_F1 (cosh))
 TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1p-63, 100)

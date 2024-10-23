@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_advsimd_f32.h"
 
@@ -98,7 +98,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (atan) (float32x4_t x)
   return y;
 }
 
-PL_SIG (V, F, 1, atan, -10.0, 10.0)
+TEST_SIG (V, F, 1, atan, -10.0, 10.0)
 TEST_ULP (V_NAME_F1 (atan), 2.5)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (atan), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (atan), 0, 0x1p-30, 5000)

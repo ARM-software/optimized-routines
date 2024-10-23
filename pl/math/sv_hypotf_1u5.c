@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define TinyBound 0x0c800000 /* asuint (0x1p-102).  */
@@ -37,7 +37,7 @@ svfloat32_t SV_NAME_F2 (hypot) (svfloat32_t x, svfloat32_t y,
   return svsqrt_x (pg, sqsum);
 }
 
-PL_SIG (SV, F, 2, hypot, -10.0, 10.0)
+TEST_SIG (SV, F, 2, hypot, -10.0, 10.0)
 TEST_ULP (SV_NAME_F2 (hypot), 0.71)
 TEST_DISABLE_FENV (SV_NAME_F2 (hypot))
 TEST_INTERVAL2 (SV_NAME_F2 (hypot), 0, inf, 0, inf, 10000)

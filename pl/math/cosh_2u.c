@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "exp_inline.h"
 
@@ -54,7 +54,7 @@ cosh (double x)
   return 0.5 * t + 0.5 / t;
 }
 
-PL_SIG (S, D, 1, cosh, -10.0, 10.0)
+TEST_SIG (S, D, 1, cosh, -10.0, 10.0)
 TEST_ULP (cosh, 1.43)
 TEST_SYM_INTERVAL (cosh, 0, 0x1.61da04cbafe44p+9, 100000)
 TEST_SYM_INTERVAL (cosh, 0x1.61da04cbafe44p+9, 0x1p10, 1000)

@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 /* Defines parameters of the approximation and scalar fallback.  */
@@ -238,7 +238,7 @@ float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
   return v_exp_inline (vehi, velo, d);
 }
 
-PL_SIG (V, D, 2, pow)
+TEST_SIG (V, D, 2, pow)
 TEST_ULP (V_NAME_D2 (pow), 0.55)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D2 (pow), WANT_SIMD_EXCEPT)
 /* Wide intervals spanning the whole domain but shared between x and y.  */

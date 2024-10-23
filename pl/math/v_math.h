@@ -1,7 +1,7 @@
 /*
  * Vector math abstractions.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -20,6 +20,13 @@
 # else
 #  error "Cannot build without AArch64"
 # endif
+
+# define V_NAME_F1(fun) _ZGVnN4v_##fun##f
+# define V_NAME_D1(fun) _ZGVnN2v_##fun
+# define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
+# define V_NAME_D2(fun) _ZGVnN2vv_##fun
+# define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
+# define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
 
 # include <stdint.h>
 # include "math_config.h"

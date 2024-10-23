@@ -5,7 +5,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "v_log1pf_inline.h"
 
@@ -63,7 +63,7 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
   return log1pf_inline (y, &d->log1pf_consts);
 }
 
-PL_SIG (V, F, 1, acosh, 1.0, 10.0)
+TEST_SIG (V, F, 1, acosh, 1.0, 10.0)
 #if WANT_SIMD_EXCEPT
 TEST_ULP (V_NAME_F1 (acosh), 2.50)
 #else

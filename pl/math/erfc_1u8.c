@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define Shift 0x1p45
@@ -144,7 +144,7 @@ erfc (double x)
   return __math_uflow (0);
 }
 
-PL_SIG (S, D, 1, erfc, -6.0, 28.0)
+TEST_SIG (S, D, 1, erfc, -6.0, 28.0)
 TEST_ULP (erfc, 1.21)
 TEST_SYM_INTERVAL (erfc, 0, 0x1p-26, 40000)
 TEST_INTERVAL (erfc, 0x1p-26, 28.0, 100000)

@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_sve_f32.h"
 
@@ -68,7 +68,7 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
   return svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (y), sign));
 }
 
-PL_SIG (SV, F, 1, atan, -3.1, 3.1)
+TEST_SIG (SV, F, 1, atan, -3.1, 3.1)
 TEST_ULP (SV_NAME_F1 (atan), 2.9)
 TEST_DISABLE_FENV (SV_NAME_F1 (atan))
 TEST_INTERVAL (SV_NAME_F1 (atan), 0.0, 1.0, 40000)

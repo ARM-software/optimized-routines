@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "poly_sve_f32.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -67,7 +67,7 @@ svfloat32_t SV_NAME_F1 (asin) (svfloat32_t x, const svbool_t pg)
   return svreinterpret_f32 (svorr_x (pg, svreinterpret_u32 (y), sign));
 }
 
-PL_SIG (SV, F, 1, asin, -1.0, 1.0)
+TEST_SIG (SV, F, 1, asin, -1.0, 1.0)
 TEST_ULP (SV_NAME_F1 (asin), 1.91)
 TEST_DISABLE_FENV (SV_NAME_F1 (asin))
 TEST_INTERVAL (SV_NAME_F1 (asin), 0, 0.5, 50000)

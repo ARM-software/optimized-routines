@@ -6,7 +6,7 @@
  */
 
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "exp_inline.h"
 
@@ -54,7 +54,7 @@ sinh (double x)
   return (t + t / (t + 1)) * halfsign;
 }
 
-PL_SIG (S, D, 1, sinh, -10.0, 10.0)
+TEST_SIG (S, D, 1, sinh, -10.0, 10.0)
 TEST_ULP (sinh, 2.08)
 TEST_SYM_INTERVAL (sinh, 0, 0x1p-51, 100)
 TEST_SYM_INTERVAL (sinh, 0x1p-51, 0x1.62e42fefa39fp+9, 100000)

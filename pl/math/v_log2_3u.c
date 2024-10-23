@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_advsimd_f64.h"
 
@@ -100,7 +100,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log2) (float64x2_t x)
   return vfmaq_f64 (w, r2, y);
 }
 
-PL_SIG (V, D, 1, log2, 0.01, 11.1)
+TEST_SIG (V, D, 1, log2, 0.01, 11.1)
 TEST_ULP (V_NAME_D1 (log2), 2.09)
 TEST_INTERVAL (V_NAME_D1 (log2), -0.0, -0x1p126, 100)
 TEST_INTERVAL (V_NAME_D1 (log2), 0x1p-149, 0x1p-126, 4000)

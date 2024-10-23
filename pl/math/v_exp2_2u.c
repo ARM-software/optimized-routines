@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "poly_advsimd_f64.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define N (1 << V_EXP_TABLE_BITS)
@@ -119,7 +119,7 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   return vfmaq_f64 (s, s, y);
 }
 
-PL_SIG (V, D, 1, exp2, -9.9, 9.9)
+TEST_SIG (V, D, 1, exp2, -9.9, 9.9)
 TEST_ULP (V_NAME_D1 (exp2), 1.15)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp2), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp2), 0, TinyBound, 5000)

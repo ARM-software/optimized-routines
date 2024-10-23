@@ -7,7 +7,7 @@
 
 #include "mathlib.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 /* Taylor series coefficents for sin(pi * x).  */
@@ -77,7 +77,7 @@ cospif (float x)
 }
 
 #if WANT_TRIGPI_TESTS
-PL_SIG (S, F, 1, cospi, -0.9, 0.9)
+TEST_SIG (S, F, 1, cospi, -0.9, 0.9)
 TEST_ULP (cospif, 2.15)
 TEST_SYM_INTERVAL (cospif, 0, 0x1p-31, 5000)
 TEST_SYM_INTERVAL (cospif, 0x1p-31, 0.5, 10000)

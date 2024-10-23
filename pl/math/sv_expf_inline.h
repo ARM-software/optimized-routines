@@ -10,7 +10,7 @@
 #define PL_MATH_SV_EXPF_INLINE_H
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 struct sv_expf_data

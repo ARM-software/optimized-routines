@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 #include "poly_advsimd_f32.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -75,7 +75,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cospi) (float32x4_t x)
 }
 
 #if WANT_TRIGPI_TESTS
-PL_SIG (V, F, 1, cospi, -0.9, 0.9)
+TEST_SIG (V, F, 1, cospi, -0.9, 0.9)
 TEST_ULP (V_NAME_F1 (cospi), 2.67)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (cospi), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0, 0x1p-31, 5000)

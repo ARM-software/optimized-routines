@@ -1,7 +1,7 @@
 /*
  * Wrapper functions for SVE ACLE.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -19,6 +19,14 @@
 # include <stdbool.h>
 
 # include "math_config.h"
+
+# define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
+# define SV_NAME_D1(fun) _ZGVsMxv_##fun
+# define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
+# define SV_NAME_D2(fun) _ZGVsMxvv_##fun
+# define SV_NAME_F1_L1(fun) _ZGVsMxvl4_##fun##f
+# define SV_NAME_D1_L1(fun) _ZGVsMxvl8_##fun
+# define SV_NAME_F1_L2(fun) _ZGVsMxvl4l4_##fun##f
 
 /* Double precision.  */
 static inline svint64_t

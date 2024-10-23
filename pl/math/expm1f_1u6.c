@@ -7,7 +7,7 @@
 
 #include "poly_scalar_f32.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define Shift (0x1.8p23f)
@@ -70,7 +70,7 @@ expm1f (float x)
   return 2 * fmaf (p, t, t - 0.5f);
 }
 
-PL_SIG (S, F, 1, expm1, -9.9, 9.9)
+TEST_SIG (S, F, 1, expm1, -9.9, 9.9)
 TEST_ULP (expm1f, 1.02)
 TEST_SYM_INTERVAL (expm1f, 0, 0x1p-23, 1000)
 TEST_INTERVAL (expm1f, 0x1p-23, 0x1.644716p6, 100000)

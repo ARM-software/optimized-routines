@@ -3,6 +3,8 @@
 # Copyright (c) 2019-2024, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
+.SECONDEXPANSION:
+
 ifneq ($(OS),Linux)
   ifeq ($(WANT_SIMD_EXCEPT),1)
     $(error WANT_SIMD_EXCEPT is not supported outside Linux)
@@ -86,24 +88,21 @@ pl-ulp-funcs-dir = build/pl/test/ulp-funcs/
 pl-ulp-wrappers-dir = build/pl/test/ulp-wrappers/
 pl-mathbench-funcs-dir = build/pl/test/mathbench-funcs/
 pl-sig-dirs = $(pl-ulp-funcs-dir) $(pl-ulp-wrappers-dir) $(pl-mathbench-funcs-dir)
-
 $(pl-sig-dirs):
 	mkdir -p $@
 
-pl-ulp-funcs = $(patsubst $(PLM)/%,$(pl-ulp-funcs-dir)%,$(basename $(pl-lib-srcs)))
-pl-ulp-wrappers = $(patsubst $(PLM)/%,$(pl-ulp-wrappers-dir)%,$(basename $(pl-lib-srcs)))
-pl-mathbench-funcs = $(patsubst $(PLM)/%,$(pl-mathbench-funcs-dir)%,$(basename $(pl-lib-srcs)))
-pl-sig-autogen-files = $(pl-ulp-funcs) $(pl-ulp-wrappers) $(pl-mathbench-funcs)
+pl-ulp-funcs = $(patsubst $(PLM)/%,$(pl-ulp-funcs-dir)/%,$(basename $(pl-lib-srcs)))
+pl-ulp-wrappers = $(patsubst $(PLM)/%,$(pl-ulp-wrappers-dir)/%,$(basename $(pl-lib-srcs)))
+pl-mathbench-funcs = $(patsubst $(PLM)/%,$(pl-mathbench-funcs-dir)/%,$(basename $(pl-lib-srcs)))
 
-$(pl-sig-autogen-files): CFLAGS_PL += -DWANT_TRIGPI_TESTS=$(WANT_TRIGPI_TESTS)
+define pl_emit_sig
+$1/%: $(PLM)/%.c | $$$$(@D)
+	$(CC) $$< $(math-cflags) -I$(PLM)/include -D$2 -E -o - | { grep TEST_SIG || true; } | cut -f 2- -d ' ' > $$@
+endef
 
-$(pl-ulp-funcs): PLSIG_DIRECTIVE = EMIT_ULP_FUNCS
-$(pl-ulp-wrappers): PLSIG_DIRECTIVE = EMIT_ULP_WRAPPERS
-$(pl-mathbench-funcs): PLSIG_DIRECTIVE = EMIT_MATHBENCH_FUNCS
-
-.SECONDEXPANSION:
-$(pl-sig-autogen-files): %: $(PLM)/$$(notdir $$@).c | $$(dir $$@)
-	$(CC) $< $(CFLAGS_PL) -D$(PLSIG_DIRECTIVE) -E -o - | { grep PL_SIG || true; } | cut -f 2- -d ' ' > $@
+$(eval $(call pl_emit_sig,$(pl-ulp-funcs-dir),EMIT_ULP_FUNCS))
+$(eval $(call pl_emit_sig,$(pl-ulp-wrappers-dir),EMIT_ULP_WRAPPERS))
+$(eval $(call pl_emit_sig,$(pl-mathbench-funcs-dir),EMIT_MATHBENCH_FUNCS))
 
 pl-ulp-funcs-gen = build/pl/include/test/ulp_funcs_gen.h
 pl-ulp-wrappers-gen = build/pl/include/test/ulp_wrappers_gen.h

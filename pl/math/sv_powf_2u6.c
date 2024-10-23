@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 /* The following data is used in the SVE pow core computation
@@ -323,7 +323,7 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
   return ret;
 }
 
-PL_SIG (SV, F, 2, pow)
+TEST_SIG (SV, F, 2, pow)
 TEST_ULP (SV_NAME_F2 (pow), 2.06)
 TEST_DISABLE_FENV (SV_NAME_F2 (pow))
 /* Wide intervals spanning the whole domain but shared between x and y.  */

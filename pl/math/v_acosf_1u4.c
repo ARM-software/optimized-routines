@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "poly_advsimd_f32.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -102,7 +102,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (acos) (float32x4_t x)
   return vfmaq_f32 (add, mul, y);
 }
 
-PL_SIG (V, F, 1, acos, -1.0, 1.0)
+TEST_SIG (V, F, 1, acos, -1.0, 1.0)
 TEST_ULP (V_NAME_F1 (acos), 0.82)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (acos), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_F1 (acos), 0, 0x1p-26, 5000)

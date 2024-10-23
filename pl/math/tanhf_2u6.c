@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define BoringBound                                                            \
@@ -81,7 +81,7 @@ tanhf (float x)
   return q / (q + 2);
 }
 
-PL_SIG (S, F, 1, tanh, -10.0, 10.0)
+TEST_SIG (S, F, 1, tanh, -10.0, 10.0)
 TEST_ULP (tanhf, 2.09)
 TEST_SYM_INTERVAL (tanhf, 0, 0x1p-23, 1000)
 TEST_SYM_INTERVAL (tanhf, 0x1p-23, 0x1.205966p+3, 100000)

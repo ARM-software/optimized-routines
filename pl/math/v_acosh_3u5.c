@@ -5,7 +5,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define WANT_V_LOG1P_K0_SHORTCUT 1
@@ -57,7 +57,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
   return log1p_inline (y, &d->log1p_consts);
 }
 
-PL_SIG (V, D, 1, acosh, 1.0, 10.0)
+TEST_SIG (V, D, 1, acosh, 1.0, 10.0)
 TEST_ULP (V_NAME_D1 (acosh), 2.53)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (acosh), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (acosh), 1, 0x1p511, 90000)

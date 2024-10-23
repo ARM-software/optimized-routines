@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 static const struct data
@@ -102,7 +102,7 @@ svfloat32_t SV_NAME_F1 (erfc) (svfloat32_t x, const svbool_t pg)
   return svmla_x (pg, off, fac, y);
 }
 
-PL_SIG (SV, F, 1, erfc, -4.0, 10.0)
+TEST_SIG (SV, F, 1, erfc, -4.0, 10.0)
 TEST_ULP (SV_NAME_F1 (erfc), 1.14)
 TEST_DISABLE_FENV (SV_NAME_F1 (erfc))
 TEST_SYM_INTERVAL (SV_NAME_F1 (erfc), 0.0, 0x1p-26, 40000)

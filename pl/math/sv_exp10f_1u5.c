@@ -8,7 +8,7 @@
 #define _GNU_SOURCE
 #include "sv_math.h"
 #include "include/mathlib.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_sve_f32.h"
 
@@ -93,7 +93,7 @@ svfloat32_t SV_NAME_F1 (exp10) (svfloat32_t x, const svbool_t pg)
 }
 
 #if WANT_EXP10_TESTS
-PL_SIG (SV, F, 1, exp10, -9.9, 9.9)
+TEST_SIG (SV, F, 1, exp10, -9.9, 9.9)
 TEST_ULP (SV_NAME_F1 (exp10), 0.52)
 TEST_DISABLE_FENV (SV_NAME_F1 (exp10))
 TEST_SYM_INTERVAL (SV_NAME_F1 (exp10), 0, Thres, 50000)

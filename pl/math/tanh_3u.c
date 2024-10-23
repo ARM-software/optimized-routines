@@ -6,7 +6,7 @@
  */
 #include "math_config.h"
 #include "poly_scalar_f64.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
@@ -71,7 +71,7 @@ tanh (double x)
   return q / (q + 2);
 }
 
-PL_SIG (S, D, 1, tanh, -10.0, 10.0)
+TEST_SIG (S, D, 1, tanh, -10.0, 10.0)
 TEST_ULP (tanh, 2.27)
 TEST_SYM_INTERVAL (tanh, 0, TinyBound, 1000)
 TEST_SYM_INTERVAL (tanh, TinyBound, BoringBound, 100000)

@@ -8,7 +8,7 @@
 #include "test_defs.h"
 #include "mathlib.h"
 #include "math_config.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "poly_advsimd_f64.h"
 #define V_LOG_INLINE_POLY_ORDER 4
 #include "v_log_inline.h"
@@ -153,7 +153,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
 #if USE_MPFR
 # warning Not generating tests for _ZGVnN2v_erfinv, as MPFR has no suitable reference
 #else
-PL_SIG (V, D, 1, erfinv, -0.99, 0.99)
+TEST_SIG (V, D, 1, erfinv, -0.99, 0.99)
 TEST_ULP (V_NAME_D1 (erfinv), 24.8)
 TEST_DISABLE_FENV (V_NAME_D1 (erfinv))
 TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)

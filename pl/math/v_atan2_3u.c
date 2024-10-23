@@ -6,7 +6,7 @@
  */
 
 #include "v_math.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 #include "poly_advsimd_f64.h"
 
@@ -111,7 +111,7 @@ float64x2_t VPCS_ATTR V_NAME_D2 (atan2) (float64x2_t y, float64x2_t x)
 }
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
-PL_SIG (V, D, 2, atan2)
+TEST_SIG (V, D, 2, atan2)
 // TODO tighten this once __v_atan2 is fixed
 TEST_ULP (V_NAME_D2 (atan2), 2.9)
 TEST_DISABLE_FENV (V_NAME_D2 (atan2))

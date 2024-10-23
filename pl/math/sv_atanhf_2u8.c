@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "mathlib.h"
-#include "pl_sig.h"
+#include "test_sig.h"
 #include "test_defs.h"
 
 #include "sv_log1pf_inline.h"
@@ -46,7 +46,7 @@ svfloat32_t SV_NAME_F1 (atanh) (svfloat32_t x, const svbool_t pg)
   return svmul_x (pg, halfsign, y);
 }
 
-PL_SIG (SV, F, 1, atanh, -1.0, 1.0)
+TEST_SIG (SV, F, 1, atanh, -1.0, 1.0)
 TEST_ULP (SV_NAME_F1 (atanh), 2.59)
 TEST_DISABLE_FENV (SV_NAME_F1 (atanh))
 TEST_SYM_INTERVAL (SV_NAME_F1 (atanh), 0, 0x1p-12, 1000)

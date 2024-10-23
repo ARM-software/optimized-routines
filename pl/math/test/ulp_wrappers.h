@@ -101,7 +101,7 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #endif
 
-/* No wrappers for scalar routines, but PL_SIG will emit them.  */
+/* No wrappers for scalar routines, but TEST_SIG will emit them.  */
 #define ZSNF1_WRAP(func)
 #define ZSNF2_WRAP(func)
 #define ZSND1_WRAP(func)
