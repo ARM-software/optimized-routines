@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_advsimd_f32.h"
 
 const static struct v_tanpif_data
@@ -62,10 +62,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tanpi) (float32x4_t x)
 
 #if WANT_TRIGPI_TESTS
 PL_SIG (V, F, 1, tanpi, -3.1, 3.1)
-PL_TEST_DISABLE_FENV (V_NAME_F1 (tanpi))
-PL_TEST_ULP (V_NAME_F1 (tanpi), 2.84)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0, 0x1p-31, 50000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0x1p-31, 0.5, 100000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0.5, 0x1p23f, 100000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0x1p23f, inf, 100000)
+TEST_DISABLE_FENV (V_NAME_F1 (tanpi))
+TEST_ULP (V_NAME_F1 (tanpi), 2.84)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0, 0x1p-31, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0x1p-31, 0.5, 100000)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0.5, 0x1p23f, 100000)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0x1p23f, inf, 100000)
 #endif

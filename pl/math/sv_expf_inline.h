@@ -11,7 +11,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 struct sv_expf_data
 {

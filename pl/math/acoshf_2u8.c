@@ -1,13 +1,13 @@
 /*
  * Single-precision acosh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define Ln2 (0x1.62e4p-1f)
 #define MinusZero 0x80000000
@@ -55,9 +55,9 @@ acoshf (float x)
 }
 
 PL_SIG (S, F, 1, acosh, 1.0, 10.0)
-PL_TEST_ULP (acoshf, 2.30)
-PL_TEST_INTERVAL (acoshf, 0, 1, 100)
-PL_TEST_INTERVAL (acoshf, 1, 2, 10000)
-PL_TEST_INTERVAL (acoshf, 2, 0x1p64, 100000)
-PL_TEST_INTERVAL (acoshf, 0x1p64, inf, 100000)
-PL_TEST_INTERVAL (acoshf, -0, -inf, 10000)
+TEST_ULP (acoshf, 2.30)
+TEST_INTERVAL (acoshf, 0, 1, 100)
+TEST_INTERVAL (acoshf, 1, 2, 10000)
+TEST_INTERVAL (acoshf, 2, 0x1p64, 100000)
+TEST_INTERVAL (acoshf, 0x1p64, inf, 100000)
+TEST_INTERVAL (acoshf, -0, -inf, 10000)

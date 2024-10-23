@@ -6,7 +6,7 @@
  */
 
 #include "sv_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "mathlib.h"
 #include "sv_sincospi_common.h"
 
@@ -32,13 +32,13 @@ _ZGVsMxvl8l8_sincospi (svfloat64_t x, double *out_sin, double *out_cos,
 }
 
 #if WANT_TRIGPI_TESTS
-PL_TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_sin)
-PL_TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_cos)
-PL_TEST_ULP (_ZGVsMxvl8l8_sincospi_sin, 2.59)
-PL_TEST_ULP (_ZGVsMxvl8l8_sincospi_cos, 2.66)
+TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_sin)
+TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_cos)
+TEST_ULP (_ZGVsMxvl8l8_sincospi_sin, 2.59)
+TEST_ULP (_ZGVsMxvl8l8_sincospi_cos, 2.66)
 #  define SV_SINCOSPI_INTERVAL(lo, hi, n)                                     \
-    PL_TEST_SYM_INTERVAL (_ZGVsMxvl8l8_sincospi_sin, lo, hi, n)               \
-    PL_TEST_SYM_INTERVAL (_ZGVsMxvl8l8_sincospi_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (_ZGVsMxvl8l8_sincospi_sin, lo, hi, n)                  \
+    TEST_SYM_INTERVAL (_ZGVsMxvl8l8_sincospi_cos, lo, hi, n)
 SV_SINCOSPI_INTERVAL (0, 0x1p-63, 10000)
 SV_SINCOSPI_INTERVAL (0x1p-63, 0.5, 50000)
 SV_SINCOSPI_INTERVAL (0.5, 0x1p53, 50000)

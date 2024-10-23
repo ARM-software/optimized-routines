@@ -8,7 +8,7 @@
 #include "sv_math.h"
 #include "poly_sve_f64.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define SpecialBound 0x1.62b7d369a5aa9p+9
 #define ExponentBias 0x3ff0000000000000
@@ -89,8 +89,8 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 }
 
 PL_SIG (SV, D, 1, expm1, -9.9, 9.9)
-PL_TEST_ULP (SV_NAME_D1 (expm1), 1.68)
-PL_TEST_DISABLE_FENV (SV_NAME_D1 (expm1))
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0, 0x1p-23, 1000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0x1p-23, SpecialBound, 200000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), SpecialBound, inf, 1000)
+TEST_ULP (SV_NAME_D1 (expm1), 1.68)
+TEST_DISABLE_FENV (SV_NAME_D1 (expm1))
+TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0, 0x1p-23, 1000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0x1p-23, SpecialBound, 200000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), SpecialBound, inf, 1000)

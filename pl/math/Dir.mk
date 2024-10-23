@@ -210,16 +210,16 @@ pl-ulp-inputs = $(pl-math-lib-lims) $(pl-math-lib-fenvs) $(pl-math-lib-itvs) $(p
 $(pl-ulp-inputs): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
 
 $(pl-ulp-input-dir)/%.ulp: $(PLM)/%.c | $(pl-ulp-input-dir)
-	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_ULP " || true; } > $@
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_ULP " || true; } > $@
 
 $(pl-ulp-input-dir)/%.fenv: $(PLM)/%.c | $(pl-ulp-input-dir)
-	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_DISABLE_FENV " || true; } > $@
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_DISABLE_FENV " || true; } > $@
 
 $(pl-ulp-input-dir)/%.itv: $(PLM)/%.c | $(pl-ulp-input-dir)
-	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_INTERVAL " || true; } | sed "s/ PL_TEST_INTERVAL/\nPL_TEST_INTERVAL/g" > $@
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_INTERVAL " || true; } | sed "s/ TEST_INTERVAL/\nTEST_INTERVAL/g" > $@
 
 $(pl-ulp-input-dir)/%.cval: $(PLM)/%.c | $(pl-ulp-input-dir)
-	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "PL_TEST_CONTROL_VALUE " || true; } > $@
+	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_CONTROL_VALUE " || true; } > $@
 
 pl-ulp-lims := $(pl-ulp-input-dir)/limits
 $(pl-ulp-lims): $(pl-math-lib-lims)
@@ -233,9 +233,9 @@ $(pl-ulp-itvs): $(pl-math-lib-itvs)
 pl-ulp-cvals := $(pl-ulp-input-dir)/cvals
 $(pl-ulp-cvals): $(pl-math-lib-cvals)
 
-# Remove first word, which will be PL_TEST directive
+# Remove first word, which will be TEST directive
 $(pl-ulp-lims) $(pl-fenv-exps) $(pl-ulp-itvs) $(pl-ulp-cvals): | $$(@D)
-	sed "s/PL[^ ]* //g" $^ | sort -u > $@
+	sed "s/TEST_[^ ]* //g" $^ | sort -u > $@
 
 check-pl/math-ulp: $(math-tools) $(pl-ulp-lims) $(pl-fenv-exps) $(pl-ulp-itvs) $(pl-ulp-cvals)
 	WANT_SVE_MATH=$(WANT_SVE_MATH) \

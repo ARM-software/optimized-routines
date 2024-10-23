@@ -1,14 +1,14 @@
 /*
  * Double-precision atanh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include "poly_scalar_f64.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define Half 0x3fe0000000000000
@@ -77,7 +77,7 @@ atanh (double x)
 }
 
 PL_SIG (S, D, 1, atanh, -1.0, 1.0)
-PL_TEST_ULP (atanh, 3.00)
-PL_TEST_SYM_INTERVAL (atanh, 0, 0x1p-23, 10000)
-PL_TEST_SYM_INTERVAL (atanh, 0x1p-23, 1, 90000)
-PL_TEST_SYM_INTERVAL (atanh, 1, inf, 100)
+TEST_ULP (atanh, 3.00)
+TEST_SYM_INTERVAL (atanh, 0, 0x1p-23, 10000)
+TEST_SYM_INTERVAL (atanh, 0x1p-23, 1, 90000)
+TEST_SYM_INTERVAL (atanh, 1, inf, 100)

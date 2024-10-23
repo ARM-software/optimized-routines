@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_scalar_f64.h"
 
 /* Taylor series coefficents for sin(pi * x).
@@ -144,13 +144,13 @@ sincospi (double x, double *out_sin, double *out_cos)
 }
 
 #if WANT_TRIGPI_TESTS
-PL_TEST_DISABLE_FENV (sincospi_sin)
-PL_TEST_DISABLE_FENV (sincospi_cos)
-PL_TEST_ULP (sincospi_sin, 2.96)
-PL_TEST_ULP (sincospi_cos, 3.16)
+TEST_DISABLE_FENV (sincospi_sin)
+TEST_DISABLE_FENV (sincospi_cos)
+TEST_ULP (sincospi_sin, 2.96)
+TEST_ULP (sincospi_cos, 3.16)
 #  define SINCOS_INTERVAL(lo, hi, n)                                          \
-    PL_TEST_SYM_INTERVAL (sincospi_sin, lo, hi, n)                            \
-    PL_TEST_SYM_INTERVAL (sincospi_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (sincospi_sin, lo, hi, n)                               \
+    TEST_SYM_INTERVAL (sincospi_cos, lo, hi, n)
 SINCOS_INTERVAL (0, 0x1p-63, 10000)
 SINCOS_INTERVAL (0x1p-63, 0.5, 50000)
 SINCOS_INTERVAL (0.5, 0x1p51, 50000)

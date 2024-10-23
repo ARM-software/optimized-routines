@@ -1,13 +1,13 @@
 /*
  * Double-precision cbrt(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 PL_SIG (S, D, 1, cbrt, -10.0, 10.0)
 
@@ -65,5 +65,5 @@ cbrt (double x)
   return asdouble (asuint64 (ldexp (a * T (2 + e % 3), e / 3)) | sign);
 }
 
-PL_TEST_ULP (cbrt, 1.30)
-PL_TEST_SYM_INTERVAL (cbrt, 0, inf, 1000000)
+TEST_ULP (cbrt, 1.30)
+TEST_SYM_INTERVAL (cbrt, 0, inf, 1000000)

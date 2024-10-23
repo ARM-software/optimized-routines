@@ -1,14 +1,14 @@
 /*
  * Single-precision cbrt(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "poly_scalar_f32.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define AbsMask 0x7fffffff
 #define SignMask 0x80000000
@@ -62,5 +62,5 @@ cbrtf (float x)
 }
 
 PL_SIG (S, F, 1, cbrt, -10.0, 10.0)
-PL_TEST_ULP (cbrtf, 1.03)
-PL_TEST_SYM_INTERVAL (cbrtf, 0, inf, 1000000)
+TEST_ULP (cbrtf, 1.03)
+TEST_SYM_INTERVAL (cbrtf, 0, inf, 1000000)

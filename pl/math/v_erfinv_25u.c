@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
@@ -154,13 +154,13 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
 # warning Not generating tests for _ZGVnN2v_erfinv, as MPFR has no suitable reference
 #else
 PL_SIG (V, D, 1, erfinv, -0.99, 0.99)
-PL_TEST_ULP (V_NAME_D1 (erfinv), 24.8)
-PL_TEST_DISABLE_FENV (V_NAME_D1 (erfinv))
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
+TEST_ULP (V_NAME_D1 (erfinv), 24.8)
+TEST_DISABLE_FENV (V_NAME_D1 (erfinv))
+TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
+TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
+TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
 /* Test with control lane in each interval.  */
-PL_TEST_CONTROL_VALUE (V_NAME_D1 (erfinv), 0.5)
-PL_TEST_CONTROL_VALUE (V_NAME_D1 (erfinv), 0.8)
-PL_TEST_CONTROL_VALUE (V_NAME_D1 (erfinv), 0.95)
+TEST_CONTROL_VALUE (V_NAME_D1 (erfinv), 0.5)
+TEST_CONTROL_VALUE (V_NAME_D1 (erfinv), 0.8)
+TEST_CONTROL_VALUE (V_NAME_D1 (erfinv), 0.95)
 #endif

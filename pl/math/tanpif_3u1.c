@@ -7,7 +7,7 @@
 #include "mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_scalar_f32.h"
 
 const static struct tanpif_data
@@ -130,9 +130,9 @@ tanpif (float x)
 
 #if WANT_TRIGPI_TESTS
 PL_SIG (S, F, 1, tanpi, -3.1, 3.1)
-PL_TEST_ULP (tanpif, 2.57)
-PL_TEST_SYM_INTERVAL (tanpif, 0, 0x1p-31f, 50000)
-PL_TEST_SYM_INTERVAL (tanpif, 0x1p-31f, 0.5, 100000)
-PL_TEST_SYM_INTERVAL (tanpif, 0.5, 0x1p23f, 100000)
-PL_TEST_SYM_INTERVAL (tanpif, 0x1p23f, inf, 100000)
+TEST_ULP (tanpif, 2.57)
+TEST_SYM_INTERVAL (tanpif, 0, 0x1p-31f, 50000)
+TEST_SYM_INTERVAL (tanpif, 0x1p-31f, 0.5, 100000)
+TEST_SYM_INTERVAL (tanpif, 0.5, 0x1p23f, 100000)
+TEST_SYM_INTERVAL (tanpif, 0x1p23f, inf, 100000)
 #endif

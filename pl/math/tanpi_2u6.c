@@ -7,7 +7,7 @@
 #include "mathlib.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_scalar_f64.h"
 
 #define SIGN_MASK 0x8000000000000000
@@ -143,9 +143,9 @@ tanpi (double x)
 
 #if WANT_TRIGPI_TESTS
 PL_SIG (S, D, 1, tanpi, -3.1, 3.1)
-PL_TEST_ULP (tanpi, 2.03)
-PL_TEST_SYM_INTERVAL (tanpi, 0, 0x1p-63, 50000)
-PL_TEST_SYM_INTERVAL (tanpi, 0x1p-63, 0.5, 100000)
-PL_TEST_SYM_INTERVAL (tanpi, 0.5, 0x1p53, 100000)
-PL_TEST_SYM_INTERVAL (tanpi, 0x1p53, inf, 100000)
+TEST_ULP (tanpi, 2.03)
+TEST_SYM_INTERVAL (tanpi, 0, 0x1p-63, 50000)
+TEST_SYM_INTERVAL (tanpi, 0x1p-63, 0.5, 100000)
+TEST_SYM_INTERVAL (tanpi, 0.5, 0x1p53, 100000)
+TEST_SYM_INTERVAL (tanpi, 0x1p53, inf, 100000)
 #endif

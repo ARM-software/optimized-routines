@@ -9,7 +9,7 @@
 #include "v_math.h"
 #include "poly_advsimd_f32.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 static const struct data
 {
@@ -76,10 +76,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cospi) (float32x4_t x)
 
 #if WANT_TRIGPI_TESTS
 PL_SIG (V, F, 1, cospi, -0.9, 0.9)
-PL_TEST_ULP (V_NAME_F1 (cospi), 2.67)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (cospi), WANT_SIMD_EXCEPT)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0, 0x1p-31, 5000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p-31, 0.5, 10000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0.5, 0x1p32f, 10000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p32f, inf, 10000)
+TEST_ULP (V_NAME_F1 (cospi), 2.67)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (cospi), WANT_SIMD_EXCEPT)
+TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0, 0x1p-31, 5000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p-31, 0.5, 10000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0.5, 0x1p32f, 10000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p32f, inf, 10000)
 #endif

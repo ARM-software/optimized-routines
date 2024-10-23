@@ -8,7 +8,7 @@
 #include "poly_scalar_f32.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define AbsMask 0x7fffffff
 #define Half 0x3f000000
@@ -90,10 +90,10 @@ acosf (float x)
 }
 
 PL_SIG (S, F, 1, acos, -1.0, 1.0)
-PL_TEST_ULP (acosf, 0.82)
-PL_TEST_INTERVAL (acosf, 0, Small, 5000)
-PL_TEST_INTERVAL (acosf, Small, 0.5, 50000)
-PL_TEST_INTERVAL (acosf, 0.5, 1.0, 50000)
-PL_TEST_INTERVAL (acosf, 1.0, 0x1p11, 50000)
-PL_TEST_INTERVAL (acosf, 0x1p11, inf, 20000)
-PL_TEST_INTERVAL (acosf, -0, -inf, 20000)
+TEST_ULP (acosf, 0.82)
+TEST_INTERVAL (acosf, 0, Small, 5000)
+TEST_INTERVAL (acosf, Small, 0.5, 50000)
+TEST_INTERVAL (acosf, 0.5, 1.0, 50000)
+TEST_INTERVAL (acosf, 1.0, 0x1p11, 50000)
+TEST_INTERVAL (acosf, 0x1p11, inf, 20000)
+TEST_INTERVAL (acosf, -0, -inf, 20000)

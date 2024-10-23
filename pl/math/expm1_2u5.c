@@ -1,14 +1,14 @@
 /*
  * Double-precision e^x - 1 function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "poly_scalar_f64.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define InvLn2 0x1.71547652b82fep0
 #define Ln2hi 0x1.62e42fefa39efp-1
@@ -77,9 +77,9 @@ expm1 (double x)
 }
 
 PL_SIG (S, D, 1, expm1, -9.9, 9.9)
-PL_TEST_ULP (expm1, 1.68)
-PL_TEST_SYM_INTERVAL (expm1, 0, 0x1p-51, 1000)
-PL_TEST_INTERVAL (expm1, 0x1p-51, 0x1.63108c75a1937p+9, 100000)
-PL_TEST_INTERVAL (expm1, -0x1p-51, -0x1.740bf7c0d927dp+9, 100000)
-PL_TEST_INTERVAL (expm1, 0x1.63108c75a1937p+9, inf, 100)
-PL_TEST_INTERVAL (expm1, -0x1.740bf7c0d927dp+9, -inf, 100)
+TEST_ULP (expm1, 1.68)
+TEST_SYM_INTERVAL (expm1, 0, 0x1p-51, 1000)
+TEST_INTERVAL (expm1, 0x1p-51, 0x1.63108c75a1937p+9, 100000)
+TEST_INTERVAL (expm1, -0x1p-51, -0x1.740bf7c0d927dp+9, 100000)
+TEST_INTERVAL (expm1, 0x1.63108c75a1937p+9, inf, 100)
+TEST_INTERVAL (expm1, -0x1.740bf7c0d927dp+9, -inf, 100)

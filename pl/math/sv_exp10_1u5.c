@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_sve_f64.h"
 
 #define SpecialBound 307.0 /* floor (log10 (2^1023)).  */
@@ -118,8 +118,8 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
 
 #if WANT_EXP10_TESTS
 PL_SIG (SV, D, 1, exp10, -9.9, 9.9)
-PL_TEST_ULP (SV_NAME_D1 (exp10), 0.52)
-PL_TEST_DISABLE_FENV (SV_NAME_D1 (exp10))
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 0, 307, 10000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 307, inf, 1000)
+TEST_ULP (SV_NAME_D1 (exp10), 0.52)
+TEST_DISABLE_FENV (SV_NAME_D1 (exp10))
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 0, 307, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 307, inf, 1000)
 #endif

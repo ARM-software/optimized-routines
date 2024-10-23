@@ -7,7 +7,7 @@
 
 #include "v_sincos_common.h"
 #include "v_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 static float64x2x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, uint64x2_t special, float64x2x2_t y)
@@ -34,13 +34,13 @@ _ZGVnN2v_cexpi (float64x2_t x)
   return sc;
 }
 
-PL_TEST_DISABLE_FENV (_ZGVnN2v_cexpi_cos)
-PL_TEST_DISABLE_FENV (_ZGVnN2v_cexpi_sin)
-PL_TEST_ULP (_ZGVnN2v_cexpi_sin, 2.73)
-PL_TEST_ULP (_ZGVnN2v_cexpi_cos, 2.73)
+TEST_DISABLE_FENV (_ZGVnN2v_cexpi_cos)
+TEST_DISABLE_FENV (_ZGVnN2v_cexpi_sin)
+TEST_ULP (_ZGVnN2v_cexpi_sin, 2.73)
+TEST_ULP (_ZGVnN2v_cexpi_cos, 2.73)
 #define V_CEXPI_INTERVAL(lo, hi, n)                                           \
-  PL_TEST_INTERVAL (_ZGVnN2v_cexpi_sin, lo, hi, n)                            \
-  PL_TEST_INTERVAL (_ZGVnN2v_cexpi_cos, lo, hi, n)
+  TEST_INTERVAL (_ZGVnN2v_cexpi_sin, lo, hi, n)                               \
+  TEST_INTERVAL (_ZGVnN2v_cexpi_cos, lo, hi, n)
 V_CEXPI_INTERVAL (0, 0x1p23, 500000)
 V_CEXPI_INTERVAL (-0, -0x1p23, 500000)
 V_CEXPI_INTERVAL (0x1p23, inf, 10000)

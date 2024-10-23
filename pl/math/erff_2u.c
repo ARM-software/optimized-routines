@@ -1,13 +1,13 @@
 /*
  * Single-precision erf(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define TwoOverSqrtPiMinusOne 0x1.06eba8p-3f
 #define Shift 0x1p16f
@@ -76,7 +76,7 @@ erff (float x)
 }
 
 PL_SIG (S, F, 1, erf, -4.0, 4.0)
-PL_TEST_ULP (erff, 1.43)
-PL_TEST_SYM_INTERVAL (erff, 0, 3.9375, 40000)
-PL_TEST_SYM_INTERVAL (erff, 3.9375, inf, 40000)
-PL_TEST_SYM_INTERVAL (erff, 0, inf, 40000)
+TEST_ULP (erff, 1.43)
+TEST_SYM_INTERVAL (erff, 0, 3.9375, 40000)
+TEST_SYM_INTERVAL (erff, 3.9375, inf, 40000)
+TEST_SYM_INTERVAL (erff, 0, inf, 40000)

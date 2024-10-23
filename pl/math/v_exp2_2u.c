@@ -8,7 +8,7 @@
 #include "v_math.h"
 #include "poly_advsimd_f64.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask (N - 1)
@@ -120,9 +120,9 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 }
 
 PL_SIG (V, D, 1, exp2, -9.9, 9.9)
-PL_TEST_ULP (V_NAME_D1 (exp2), 1.15)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp2), WANT_SIMD_EXCEPT)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (exp2), 0, TinyBound, 5000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (exp2), TinyBound, BigBound, 10000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (exp2), BigBound, UOFlowBound, 5000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (exp2), UOFlowBound, inf, 10000)
+TEST_ULP (V_NAME_D1 (exp2), 1.15)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp2), WANT_SIMD_EXCEPT)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2), 0, TinyBound, 5000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2), TinyBound, BigBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2), BigBound, UOFlowBound, 5000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2), UOFlowBound, inf, 10000)

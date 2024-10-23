@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_sve_f32.h"
 
 static const struct data
@@ -69,9 +69,9 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
 }
 
 PL_SIG (SV, F, 1, atan, -3.1, 3.1)
-PL_TEST_ULP (SV_NAME_F1 (atan), 2.9)
-PL_TEST_DISABLE_FENV (SV_NAME_F1 (atan))
-PL_TEST_INTERVAL (SV_NAME_F1 (atan), 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (SV_NAME_F1 (atan), 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (SV_NAME_F1 (atan), 100, inf, 40000)
-PL_TEST_INTERVAL (SV_NAME_F1 (atan), -0, -inf, 40000)
+TEST_ULP (SV_NAME_F1 (atan), 2.9)
+TEST_DISABLE_FENV (SV_NAME_F1 (atan))
+TEST_INTERVAL (SV_NAME_F1 (atan), 0.0, 1.0, 40000)
+TEST_INTERVAL (SV_NAME_F1 (atan), 1.0, 100.0, 40000)
+TEST_INTERVAL (SV_NAME_F1 (atan), 100, inf, 40000)
+TEST_INTERVAL (SV_NAME_F1 (atan), -0, -inf, 40000)

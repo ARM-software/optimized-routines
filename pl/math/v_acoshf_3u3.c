@@ -6,7 +6,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "v_log1pf_inline.h"
 
 #define SquareLim 0x1p64
@@ -65,12 +65,12 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
 
 PL_SIG (V, F, 1, acosh, 1.0, 10.0)
 #if WANT_SIMD_EXCEPT
-PL_TEST_ULP (V_NAME_F1 (acosh), 2.50)
+TEST_ULP (V_NAME_F1 (acosh), 2.50)
 #else
-PL_TEST_ULP (V_NAME_F1 (acosh), 2.78)
+TEST_ULP (V_NAME_F1 (acosh), 2.78)
 #endif
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (acosh), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_F1 (acosh), 0, 1, 500)
-PL_TEST_INTERVAL (V_NAME_F1 (acosh), 1, SquareLim, 100000)
-PL_TEST_INTERVAL (V_NAME_F1 (acosh), SquareLim, inf, 1000)
-PL_TEST_INTERVAL (V_NAME_F1 (acosh), -0, -inf, 1000)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (acosh), WANT_SIMD_EXCEPT)
+TEST_INTERVAL (V_NAME_F1 (acosh), 0, 1, 500)
+TEST_INTERVAL (V_NAME_F1 (acosh), 1, SquareLim, 100000)
+TEST_INTERVAL (V_NAME_F1 (acosh), SquareLim, inf, 1000)
+TEST_INTERVAL (V_NAME_F1 (acosh), -0, -inf, 1000)

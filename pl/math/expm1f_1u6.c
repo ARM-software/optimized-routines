@@ -1,14 +1,14 @@
 /*
  * Single-precision e^x - 1 function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "poly_scalar_f32.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define Shift (0x1.8p23f)
 #define InvLn2 (0x1.715476p+0f)
@@ -71,9 +71,9 @@ expm1f (float x)
 }
 
 PL_SIG (S, F, 1, expm1, -9.9, 9.9)
-PL_TEST_ULP (expm1f, 1.02)
-PL_TEST_SYM_INTERVAL (expm1f, 0, 0x1p-23, 1000)
-PL_TEST_INTERVAL (expm1f, 0x1p-23, 0x1.644716p6, 100000)
-PL_TEST_INTERVAL (expm1f, 0x1.644716p6, inf, 1000)
-PL_TEST_INTERVAL (expm1f, -0x1p-23, -0x1.9bbabcp+6, 100000)
-PL_TEST_INTERVAL (expm1f, -0x1.9bbabcp+6, -inf, 1000)
+TEST_ULP (expm1f, 1.02)
+TEST_SYM_INTERVAL (expm1f, 0, 0x1p-23, 1000)
+TEST_INTERVAL (expm1f, 0x1p-23, 0x1.644716p6, 100000)
+TEST_INTERVAL (expm1f, 0x1.644716p6, inf, 1000)
+TEST_INTERVAL (expm1f, -0x1p-23, -0x1.9bbabcp+6, 100000)
+TEST_INTERVAL (expm1f, -0x1.9bbabcp+6, -inf, 1000)

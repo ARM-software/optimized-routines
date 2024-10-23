@@ -7,7 +7,7 @@
 
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define Shift 0x1p45
 #define P20 0x1.5555555555555p-2 /* 1/3.  */
@@ -145,9 +145,9 @@ erfc (double x)
 }
 
 PL_SIG (S, D, 1, erfc, -6.0, 28.0)
-PL_TEST_ULP (erfc, 1.21)
-PL_TEST_SYM_INTERVAL (erfc, 0, 0x1p-26, 40000)
-PL_TEST_INTERVAL (erfc, 0x1p-26, 28.0, 100000)
-PL_TEST_INTERVAL (erfc, -0x1p-26, -6.0, 100000)
-PL_TEST_INTERVAL (erfc, 28.0, inf, 40000)
-PL_TEST_INTERVAL (erfc, -6.0, -inf, 40000)
+TEST_ULP (erfc, 1.21)
+TEST_SYM_INTERVAL (erfc, 0, 0x1p-26, 40000)
+TEST_INTERVAL (erfc, 0x1p-26, 28.0, 100000)
+TEST_INTERVAL (erfc, -0x1p-26, -6.0, 100000)
+TEST_INTERVAL (erfc, 28.0, inf, 40000)
+TEST_INTERVAL (erfc, -6.0, -inf, 40000)

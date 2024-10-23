@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define P(i) sv_f64 (__v_log_data.poly[i])
 #define N (1 << V_LOG_TABLE_BITS)
@@ -66,12 +66,12 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
 }
 
 PL_SIG (SV, D, 1, log, 0.01, 11.1)
-PL_TEST_ULP (SV_NAME_D1 (log), 1.68)
-PL_TEST_DISABLE_FENV (SV_NAME_D1 (log))
-PL_TEST_INTERVAL (SV_NAME_D1 (log), -0.0, -inf, 1000)
-PL_TEST_INTERVAL (SV_NAME_D1 (log), 0, 0x1p-149, 1000)
-PL_TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-23, 1.0, 50000)
-PL_TEST_INTERVAL (SV_NAME_D1 (log), 1.0, 100, 50000)
-PL_TEST_INTERVAL (SV_NAME_D1 (log), 100, inf, 50000)
+TEST_ULP (SV_NAME_D1 (log), 1.68)
+TEST_DISABLE_FENV (SV_NAME_D1 (log))
+TEST_INTERVAL (SV_NAME_D1 (log), -0.0, -inf, 1000)
+TEST_INTERVAL (SV_NAME_D1 (log), 0, 0x1p-149, 1000)
+TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-149, 0x1p-126, 4000)
+TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-126, 0x1p-23, 50000)
+TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-23, 1.0, 50000)
+TEST_INTERVAL (SV_NAME_D1 (log), 1.0, 100, 50000)
+TEST_INTERVAL (SV_NAME_D1 (log), 100, inf, 50000)

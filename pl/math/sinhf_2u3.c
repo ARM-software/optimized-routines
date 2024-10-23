@@ -1,13 +1,13 @@
 /*
  * Single-precision sinh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define AbsMask 0x7fffffff
 #define Half 0x3f000000
@@ -67,7 +67,7 @@ sinhf (float x)
 }
 
 PL_SIG (S, F, 1, sinh, -10.0, 10.0)
-PL_TEST_ULP (sinhf, 1.76)
-PL_TEST_SYM_INTERVAL (sinhf, 0, 0x1.62e43p+6, 100000)
-PL_TEST_SYM_INTERVAL (sinhf, 0x1.62e43p+6, 0x1.65a9fap+6, 100)
-PL_TEST_SYM_INTERVAL (sinhf, 0x1.65a9fap+6, inf, 100)
+TEST_ULP (sinhf, 1.76)
+TEST_SYM_INTERVAL (sinhf, 0, 0x1.62e43p+6, 100000)
+TEST_SYM_INTERVAL (sinhf, 0x1.62e43p+6, 0x1.65a9fap+6, 100)
+TEST_SYM_INTERVAL (sinhf, 0x1.65a9fap+6, inf, 100)

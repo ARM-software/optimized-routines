@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 static const struct data
 {
@@ -105,8 +105,8 @@ svfloat64_t SV_NAME_D1 (erf) (svfloat64_t x, const svbool_t pg)
 }
 
 PL_SIG (SV, D, 1, erf, -6.0, 6.0)
-PL_TEST_ULP (SV_NAME_D1 (erf), 1.79)
-PL_TEST_DISABLE_FENV (SV_NAME_D1 (erf))
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (erf), 0, 5.9921875, 40000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (erf), 5.9921875, inf, 40000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (erf), 0, inf, 4000)
+TEST_ULP (SV_NAME_D1 (erf), 1.79)
+TEST_DISABLE_FENV (SV_NAME_D1 (erf))
+TEST_SYM_INTERVAL (SV_NAME_D1 (erf), 0, 5.9921875, 40000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (erf), 5.9921875, inf, 40000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (erf), 0, inf, 4000)

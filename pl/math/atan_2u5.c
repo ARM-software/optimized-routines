@@ -1,12 +1,12 @@
 /*
  * Double-precision atan(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "atan_common.h"
 
 #define AbsMask 0x7fffffffffffffff
@@ -64,10 +64,10 @@ atan (double x)
 }
 
 PL_SIG (S, D, 1, atan, -10.0, 10.0)
-PL_TEST_ULP (atan, 1.78)
-PL_TEST_INTERVAL (atan, 0, 0x1p-30, 10000)
-PL_TEST_INTERVAL (atan, -0, -0x1p-30, 1000)
-PL_TEST_INTERVAL (atan, 0x1p-30, 0x1p53, 900000)
-PL_TEST_INTERVAL (atan, -0x1p-30, -0x1p53, 90000)
-PL_TEST_INTERVAL (atan, 0x1p53, inf, 10000)
-PL_TEST_INTERVAL (atan, -0x1p53, -inf, 1000)
+TEST_ULP (atan, 1.78)
+TEST_INTERVAL (atan, 0, 0x1p-30, 10000)
+TEST_INTERVAL (atan, -0, -0x1p-30, 1000)
+TEST_INTERVAL (atan, 0x1p-30, 0x1p53, 900000)
+TEST_INTERVAL (atan, -0x1p-30, -0x1p53, 90000)
+TEST_INTERVAL (atan, 0x1p53, inf, 10000)
+TEST_INTERVAL (atan, -0x1p53, -inf, 1000)

@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 /* Largest value of x for which expm1(x) should round to -1.  */
 #define SpecialBound 0x1.5ebc4p+6f
@@ -88,7 +88,7 @@ svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
 }
 
 PL_SIG (SV, F, 1, expm1, -9.9, 9.9)
-PL_TEST_ULP (SV_NAME_F1 (expm1), 1.02)
-PL_TEST_DISABLE_FENV (SV_NAME_F1 (expm1))
-PL_TEST_SYM_INTERVAL (SV_NAME_F1 (expm1), 0, SpecialBound, 100000)
-PL_TEST_SYM_INTERVAL (SV_NAME_F1 (expm1), SpecialBound, inf, 1000)
+TEST_ULP (SV_NAME_F1 (expm1), 1.02)
+TEST_DISABLE_FENV (SV_NAME_F1 (expm1))
+TEST_SYM_INTERVAL (SV_NAME_F1 (expm1), 0, SpecialBound, 100000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (expm1), SpecialBound, inf, 1000)

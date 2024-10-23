@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "v_expm1f_inline.h"
 
 static const struct data
@@ -72,8 +72,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tanh) (float32x4_t x)
 }
 
 PL_SIG (V, F, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (V_NAME_F1 (tanh), 2.09)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (tanh), WANT_SIMD_EXCEPT)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0, 0x1p-23, 1000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0x1p-23, 0x1.205966p+3, 100000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0x1.205966p+3, inf, 100)
+TEST_ULP (V_NAME_F1 (tanh), 2.09)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (tanh), WANT_SIMD_EXCEPT)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0, 0x1p-23, 1000)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0x1p-23, 0x1.205966p+3, 100000)
+TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0x1.205966p+3, inf, 100)

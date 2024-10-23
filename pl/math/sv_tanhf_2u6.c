@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #include "sv_expm1f_inline.h"
 
@@ -53,8 +53,8 @@ svfloat32_t SV_NAME_F1 (tanh) (svfloat32_t x, const svbool_t pg)
 }
 
 PL_SIG (SV, F, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (SV_NAME_F1 (tanh), 2.07)
-PL_TEST_DISABLE_FENV (SV_NAME_F1 (tanh))
-PL_TEST_SYM_INTERVAL (SV_NAME_F1 (tanh), 0, 0x1p-23, 1000)
-PL_TEST_SYM_INTERVAL (SV_NAME_F1 (tanh), 0x1p-23, 0x1.205966p+3, 100000)
-PL_TEST_SYM_INTERVAL (SV_NAME_F1 (tanh), 0x1.205966p+3, inf, 100)
+TEST_ULP (SV_NAME_F1 (tanh), 2.07)
+TEST_DISABLE_FENV (SV_NAME_F1 (tanh))
+TEST_SYM_INTERVAL (SV_NAME_F1 (tanh), 0, 0x1p-23, 1000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (tanh), 0x1p-23, 0x1.205966p+3, 100000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (tanh), 0x1.205966p+3, inf, 100)

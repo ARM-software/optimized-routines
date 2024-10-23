@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "v_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "v_sincos_common.h"
 
 /* sincos not available for all scalar libm implementations.  */
@@ -55,13 +55,13 @@ _ZGVnN2vl8l8_sincos (float64x2_t x, double *out_sin, double *out_cos)
     special_case (x, special, out_sin, out_cos);
 }
 
-PL_TEST_DISABLE_FENV (_ZGVnN2v_sincos_cos)
-PL_TEST_DISABLE_FENV (_ZGVnN2v_sincos_sin)
-PL_TEST_ULP (_ZGVnN2v_sincos_sin, 2.73)
-PL_TEST_ULP (_ZGVnN2v_sincos_cos, 2.73)
+TEST_DISABLE_FENV (_ZGVnN2v_sincos_cos)
+TEST_DISABLE_FENV (_ZGVnN2v_sincos_sin)
+TEST_ULP (_ZGVnN2v_sincos_sin, 2.73)
+TEST_ULP (_ZGVnN2v_sincos_cos, 2.73)
 #define V_SINCOS_INTERVAL(lo, hi, n)                                          \
-  PL_TEST_INTERVAL (_ZGVnN2v_sincos_sin, lo, hi, n)                           \
-  PL_TEST_INTERVAL (_ZGVnN2v_sincos_cos, lo, hi, n)
+  TEST_INTERVAL (_ZGVnN2v_sincos_sin, lo, hi, n)                              \
+  TEST_INTERVAL (_ZGVnN2v_sincos_cos, lo, hi, n)
 V_SINCOS_INTERVAL (0, 0x1p-31, 50000)
 V_SINCOS_INTERVAL (0x1p-31, 0x1p23, 500000)
 V_SINCOS_INTERVAL (0x1p23, inf, 10000)

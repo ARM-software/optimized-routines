@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 /* The following data is used in the SVE pow core computation
    and special case detection.  */
@@ -324,14 +324,14 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 }
 
 PL_SIG (SV, F, 2, pow)
-PL_TEST_ULP (SV_NAME_F2 (pow), 2.06)
-PL_TEST_DISABLE_FENV (SV_NAME_F2 (pow))
+TEST_ULP (SV_NAME_F2 (pow), 2.06)
+TEST_DISABLE_FENV (SV_NAME_F2 (pow))
 /* Wide intervals spanning the whole domain but shared between x and y.  */
-#define SV_POWF_INTERVAL2(xlo, xhi, ylo, yhi, n)                               \
-  PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), xlo, xhi, ylo, yhi, n)                  \
-  PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), xlo, xhi, -ylo, -yhi, n)                \
-  PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -xlo, -xhi, ylo, yhi, n)                \
-  PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -xlo, -xhi, -ylo, -yhi, n)
+#define SV_POWF_INTERVAL2(xlo, xhi, ylo, yhi, n)                              \
+  TEST_INTERVAL2 (SV_NAME_F2 (pow), xlo, xhi, ylo, yhi, n)                    \
+  TEST_INTERVAL2 (SV_NAME_F2 (pow), xlo, xhi, -ylo, -yhi, n)                  \
+  TEST_INTERVAL2 (SV_NAME_F2 (pow), -xlo, -xhi, ylo, yhi, n)                  \
+  TEST_INTERVAL2 (SV_NAME_F2 (pow), -xlo, -xhi, -ylo, -yhi, n)
 SV_POWF_INTERVAL2 (0, 0x1p-126, 0, inf, 40000)
 SV_POWF_INTERVAL2 (0x1p-126, 1, 0, inf, 50000)
 SV_POWF_INTERVAL2 (1, inf, 0, inf, 50000)
@@ -343,10 +343,10 @@ SV_POWF_INTERVAL2 (0x1p-500, 0x1p500, 0x1p-1, 0x1p1, 10000)
 SV_POWF_INTERVAL2 (0x1p-300, 0x1p-200, 0x1p-20, 0x1p-10, 10000)
 SV_POWF_INTERVAL2 (0x1p50, 0x1p100, 0x1p-20, 0x1p-10, 10000)
 /* x is negative, y is odd or even integer, or y is real not integer.  */
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 3.0, 3.0, 10000)
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 4.0, 4.0, 10000)
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 0.0, 10.0, 10000)
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 0.0, 10.0, -0.0, -10.0, 10000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 3.0, 3.0, 10000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 4.0, 4.0, 10000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 0.0, 10.0, 10000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), 0.0, 10.0, -0.0, -10.0, 10000)
 /* |x| is inf, y is odd or even integer, or y is real not integer.  */
 SV_POWF_INTERVAL2 (inf, inf, 0.5, 0.5, 1)
 SV_POWF_INTERVAL2 (inf, inf, 1.0, 1.0, 1)
@@ -355,7 +355,7 @@ SV_POWF_INTERVAL2 (inf, inf, 3.0, 3.0, 1)
 /* 0.0^y.  */
 SV_POWF_INTERVAL2 (0.0, 0.0, 0.0, 0x1p120, 1000)
 /* 1.0^y.  */
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 0.0, 0x1p-50, 1000)
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 0x1p-50, 1.0, 1000)
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 1.0, 0x1p100, 1000)
-PL_TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 0.0, 0x1p-50, 1000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 0x1p-50, 1.0, 1000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, 1.0, 0x1p100, 1000)
+TEST_INTERVAL2 (SV_NAME_F2 (pow), 1.0, 1.0, -1.0, -0x1p120, 1000)

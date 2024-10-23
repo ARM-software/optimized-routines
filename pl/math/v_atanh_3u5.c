@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define WANT_V_LOG1P_K0_SHORTCUT 0
 #include "v_log1p_inline.h"
@@ -56,12 +56,12 @@ float64x2_t V_NAME_D1 (atanh) (float64x2_t x)
 }
 
 PL_SIG (V, D, 1, atanh, -1.0, 1.0)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atanh), WANT_SIMD_EXCEPT)
-PL_TEST_ULP (V_NAME_D1 (atanh), 3.32)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 0, 0x1p-23, 10000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 0x1p-23, 1, 90000)
-PL_TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 1, inf, 100)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atanh), WANT_SIMD_EXCEPT)
+TEST_ULP (V_NAME_D1 (atanh), 3.32)
+TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 0, 0x1p-23, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 0x1p-23, 1, 90000)
+TEST_SYM_INTERVAL (V_NAME_D1 (atanh), 1, inf, 100)
 /* atanh is asymptotic at 1, which is the default control value - have to set
    -c 0 specially to ensure fp exceptions are triggered correctly (choice of
    control lane is irrelevant if fp exceptions are disabled).  */
-PL_TEST_CONTROL_VALUE (V_NAME_D1 (atanh), 0)
+TEST_CONTROL_VALUE (V_NAME_D1 (atanh), 0)

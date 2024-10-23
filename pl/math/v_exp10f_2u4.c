@@ -9,7 +9,7 @@
 #include "mathlib.h"
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_advsimd_f32.h"
 
 #define ScaleBound 192.0f
@@ -135,9 +135,9 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
 #if WANT_EXP10_TESTS
 PL_SIG (S, F, 1, exp10, -9.9, 9.9)
 PL_SIG (V, F, 1, exp10, -9.9, 9.9)
-PL_TEST_ULP (V_NAME_F1 (exp10), 1.86)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (exp10), WANT_SIMD_EXCEPT)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (exp10), 0, SpecialBound, 5000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (exp10), SpecialBound, ScaleBound, 5000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (exp10), ScaleBound, inf, 10000)
+TEST_ULP (V_NAME_F1 (exp10), 1.86)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (exp10), WANT_SIMD_EXCEPT)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10), 0, SpecialBound, 5000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10), SpecialBound, ScaleBound, 5000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10), ScaleBound, inf, 10000)
 #endif

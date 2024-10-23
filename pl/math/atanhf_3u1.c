@@ -1,14 +1,14 @@
 /*
  * Single-precision atanh(x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
 #include "mathlib.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define AbsMask 0x7fffffff
 #define Half 0x3f000000
@@ -80,7 +80,7 @@ atanhf (float x)
 }
 
 PL_SIG (S, F, 1, atanh, -1.0, 1.0)
-PL_TEST_ULP (atanhf, 2.59)
-PL_TEST_SYM_INTERVAL (atanhf, 0, 0x1p-12, 500)
-PL_TEST_SYM_INTERVAL (atanhf, 0x1p-12, 1, 200000)
-PL_TEST_SYM_INTERVAL (atanhf, 1, inf, 1000)
+TEST_ULP (atanhf, 2.59)
+TEST_SYM_INTERVAL (atanhf, 0, 0x1p-12, 500)
+TEST_SYM_INTERVAL (atanhf, 0x1p-12, 1, 200000)
+TEST_SYM_INTERVAL (atanhf, 1, inf, 1000)

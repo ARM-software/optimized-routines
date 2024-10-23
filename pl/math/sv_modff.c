@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 /* Modff algorithm. Produces exact values in all rounding modes.  */
 svfloat32_t SV_NAME_F1_L1 (modf) (svfloat32_t x, float *out_int,
@@ -26,10 +26,10 @@ svfloat32_t SV_NAME_F1_L1 (modf) (svfloat32_t x, float *out_int,
   return svsel (is_integer, sv_f32 (0), remaining);
 }
 
-PL_TEST_ULP (_ZGVsMxvl4_modff_frac, 0.0)
-PL_TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_frac, 0, 1, 20000)
-PL_TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_frac, 1, inf, 20000)
+TEST_ULP (_ZGVsMxvl4_modff_frac, 0.0)
+TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_frac, 0, 1, 20000)
+TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_frac, 1, inf, 20000)
 
-PL_TEST_ULP (_ZGVsMxvl4_modff_int, 0.0)
-PL_TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_int, 0, 1, 20000)
-PL_TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_int, 1, inf, 20000)
+TEST_ULP (_ZGVsMxvl4_modff_int, 0.0)
+TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_int, 0, 1, 20000)
+TEST_SYM_INTERVAL (_ZGVsMxvl4_modff_int, 1, inf, 20000)

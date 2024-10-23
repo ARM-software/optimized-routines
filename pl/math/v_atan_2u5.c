@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_advsimd_f64.h"
 
 static const struct data
@@ -94,11 +94,11 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atan) (float64x2_t x)
 }
 
 PL_SIG (V, D, 1, atan, -10.0, 10.0)
-PL_TEST_ULP (V_NAME_D1 (atan), 1.78)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atan), WANT_SIMD_EXCEPT)
-PL_TEST_INTERVAL (V_NAME_D1 (atan), 0, 0x1p-30, 10000)
-PL_TEST_INTERVAL (V_NAME_D1 (atan), -0, -0x1p-30, 1000)
-PL_TEST_INTERVAL (V_NAME_D1 (atan), 0x1p-30, 0x1p53, 900000)
-PL_TEST_INTERVAL (V_NAME_D1 (atan), -0x1p-30, -0x1p53, 90000)
-PL_TEST_INTERVAL (V_NAME_D1 (atan), 0x1p53, inf, 10000)
-PL_TEST_INTERVAL (V_NAME_D1 (atan), -0x1p53, -inf, 1000)
+TEST_ULP (V_NAME_D1 (atan), 1.78)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atan), WANT_SIMD_EXCEPT)
+TEST_INTERVAL (V_NAME_D1 (atan), 0, 0x1p-30, 10000)
+TEST_INTERVAL (V_NAME_D1 (atan), -0, -0x1p-30, 1000)
+TEST_INTERVAL (V_NAME_D1 (atan), 0x1p-30, 0x1p53, 900000)
+TEST_INTERVAL (V_NAME_D1 (atan), -0x1p-30, -0x1p53, 90000)
+TEST_INTERVAL (V_NAME_D1 (atan), 0x1p53, inf, 10000)
+TEST_INTERVAL (V_NAME_D1 (atan), -0x1p53, -inf, 1000)

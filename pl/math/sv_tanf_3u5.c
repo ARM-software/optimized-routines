@@ -7,7 +7,7 @@
 
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 static const struct data
 {
@@ -108,13 +108,13 @@ svfloat32_t SV_NAME_F1 (tan) (svfloat32_t x, const svbool_t pg)
 }
 
 PL_SIG (SV, F, 1, tan, -3.1, 3.1)
-PL_TEST_ULP (SV_NAME_F1 (tan), 2.96)
-PL_TEST_DISABLE_FENV (SV_NAME_F1 (tan))
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), -0.0, -0x1p126, 100)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p-149, 0x1p-126, 4000)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p-126, 0x1p-23, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p-23, 0.7, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0.7, 1.5, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 1.5, 100, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 100, 0x1p17, 50000)
-PL_TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p17, inf, 50000)
+TEST_ULP (SV_NAME_F1 (tan), 2.96)
+TEST_DISABLE_FENV (SV_NAME_F1 (tan))
+TEST_INTERVAL (SV_NAME_F1 (tan), -0.0, -0x1p126, 100)
+TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p-149, 0x1p-126, 4000)
+TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p-126, 0x1p-23, 50000)
+TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p-23, 0.7, 50000)
+TEST_INTERVAL (SV_NAME_F1 (tan), 0.7, 1.5, 50000)
+TEST_INTERVAL (SV_NAME_F1 (tan), 1.5, 100, 50000)
+TEST_INTERVAL (SV_NAME_F1 (tan), 100, 0x1p17, 50000)
+TEST_INTERVAL (SV_NAME_F1 (tan), 0x1p17, inf, 50000)

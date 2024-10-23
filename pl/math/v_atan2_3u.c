@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_advsimd_f64.h"
 
 static const struct data
@@ -113,10 +113,10 @@ float64x2_t VPCS_ATTR V_NAME_D2 (atan2) (float64x2_t y, float64x2_t x)
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 PL_SIG (V, D, 2, atan2)
 // TODO tighten this once __v_atan2 is fixed
-PL_TEST_ULP (V_NAME_D2 (atan2), 2.9)
-PL_TEST_DISABLE_FENV (V_NAME_D2 (atan2))
-PL_TEST_INTERVAL (V_NAME_D2 (atan2), -10.0, 10.0, 50000)
-PL_TEST_INTERVAL (V_NAME_D2 (atan2), -1.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME_D2 (atan2), 0.0, 1.0, 40000)
-PL_TEST_INTERVAL (V_NAME_D2 (atan2), 1.0, 100.0, 40000)
-PL_TEST_INTERVAL (V_NAME_D2 (atan2), 1e6, 1e32, 40000)
+TEST_ULP (V_NAME_D2 (atan2), 2.9)
+TEST_DISABLE_FENV (V_NAME_D2 (atan2))
+TEST_INTERVAL (V_NAME_D2 (atan2), -10.0, 10.0, 50000)
+TEST_INTERVAL (V_NAME_D2 (atan2), -1.0, 1.0, 40000)
+TEST_INTERVAL (V_NAME_D2 (atan2), 0.0, 1.0, 40000)
+TEST_INTERVAL (V_NAME_D2 (atan2), 1.0, 100.0, 40000)
+TEST_INTERVAL (V_NAME_D2 (atan2), 1e6, 1e32, 40000)

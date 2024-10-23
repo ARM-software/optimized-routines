@@ -8,7 +8,7 @@
 #include "mathlib.h"
 #include "sv_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "poly_sve_f64.h"
 
 static const struct data
@@ -53,10 +53,10 @@ svfloat64_t SV_NAME_D1 (sinpi) (svfloat64_t x, const svbool_t pg)
 
 #if WANT_TRIGPI_TESTS
 PL_SIG (SV, D, 1, sinpi, -0.9, 0.9)
-PL_TEST_ULP (SV_NAME_D1 (sinpi), 2.61)
-PL_TEST_DISABLE_FENV (SV_NAME_D1 (sinpi))
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0, 0x1p-63, 5000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0x1p-63, 0.5, 10000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0.5, 0x1p51, 10000)
-PL_TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0x1p51, inf, 10000)
+TEST_ULP (SV_NAME_D1 (sinpi), 2.61)
+TEST_DISABLE_FENV (SV_NAME_D1 (sinpi))
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0, 0x1p-63, 5000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0x1p-63, 0.5, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0.5, 0x1p51, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinpi), 0x1p51, inf, 10000)
 #endif

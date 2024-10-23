@@ -1,13 +1,13 @@
 /*
  * Double-precision tanh(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
 #include "poly_scalar_f64.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define AbsMask 0x7fffffffffffffff
 #define InvLn2 0x1.71547652b82fep0
@@ -72,7 +72,7 @@ tanh (double x)
 }
 
 PL_SIG (S, D, 1, tanh, -10.0, 10.0)
-PL_TEST_ULP (tanh, 2.27)
-PL_TEST_SYM_INTERVAL (tanh, 0, TinyBound, 1000)
-PL_TEST_SYM_INTERVAL (tanh, TinyBound, BoringBound, 100000)
-PL_TEST_SYM_INTERVAL (tanh, BoringBound, inf, 1000)
+TEST_ULP (tanh, 2.27)
+TEST_SYM_INTERVAL (tanh, 0, TinyBound, 1000)
+TEST_SYM_INTERVAL (tanh, TinyBound, BoringBound, 100000)
+TEST_SYM_INTERVAL (tanh, BoringBound, inf, 1000)

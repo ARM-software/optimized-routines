@@ -7,7 +7,7 @@
 
 #include "v_sincospif_common.h"
 #include "v_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "mathlib.h"
 
 /* Single-precision vector function allowing calculation of both sinpi and
@@ -30,13 +30,13 @@ _ZGVnN4vl4l4_sincospif (float32x4_t x, float32x4_t *out_sin,
 }
 
 #if WANT_TRIGPI_TESTS
-PL_TEST_DISABLE_FENV (_ZGVnN4v_sincospif_sin)
-PL_TEST_DISABLE_FENV (_ZGVnN4v_sincospif_cos)
-PL_TEST_ULP (_ZGVnN4v_sincospif_sin, 2.54)
-PL_TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
+TEST_DISABLE_FENV (_ZGVnN4v_sincospif_sin)
+TEST_DISABLE_FENV (_ZGVnN4v_sincospif_cos)
+TEST_ULP (_ZGVnN4v_sincospif_sin, 2.54)
+TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
 #  define V_SINCOSPIF_INTERVAL(lo, hi, n)                                     \
-    PL_TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_sin, lo, hi, n)                  \
-    PL_TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_sin, lo, hi, n)                     \
+    TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_cos, lo, hi, n)
 V_SINCOSPIF_INTERVAL (0, 0x1p-63, 10000)
 V_SINCOSPIF_INTERVAL (0x1p-63, 0.5, 50000)
 V_SINCOSPIF_INTERVAL (0.5, 0x1p31, 50000)

@@ -6,7 +6,7 @@
  */
 #include "v_sincospi_common.h"
 #include "v_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 /* Double-precision vector function allowing calculation of both sin and cos in
    one function call, using separate argument reduction and shared low-order
@@ -31,13 +31,13 @@ _ZGVnN2vl8l8_sincospi (float64x2_t x, float64x2_t *out_sin,
 }
 
 #if WANT_TRIGPI_TESTS
-PL_TEST_DISABLE_FENV (_ZGVnN2v_sincospi_cos)
-PL_TEST_DISABLE_FENV (_ZGVnN2v_sincospi_sin)
-PL_TEST_ULP (_ZGVnN2v_sincospi_sin, 2.59)
-PL_TEST_ULP (_ZGVnN2v_sincospi_cos, 2.66)
+TEST_DISABLE_FENV (_ZGVnN2v_sincospi_cos)
+TEST_DISABLE_FENV (_ZGVnN2v_sincospi_sin)
+TEST_ULP (_ZGVnN2v_sincospi_sin, 2.59)
+TEST_ULP (_ZGVnN2v_sincospi_cos, 2.66)
 #  define V_SINCOSPI_INTERVAL(lo, hi, n)                                      \
-    PL_TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_sin, lo, hi, n)                   \
-    PL_TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_sin, lo, hi, n)                      \
+    TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_cos, lo, hi, n)
 V_SINCOSPI_INTERVAL (0, 0x1p-63, 10000)
 V_SINCOSPI_INTERVAL (0x1p-63, 0.5, 50000)
 V_SINCOSPI_INTERVAL (0.5, 0x1p63, 50000)

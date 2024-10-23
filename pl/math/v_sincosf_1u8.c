@@ -13,7 +13,7 @@
 
 #include "v_sincosf_common.h"
 #include "v_math.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 /* sincos not available for all scalar libm implementations.  */
 #if defined(_MSC_VER) || ! defined(__GLIBC__)
@@ -56,13 +56,13 @@ _ZGVnN4vl4l4_sincosf (float32x4_t x, float *out_sin, float *out_cos)
     special_case (x, special, out_sin, out_cos);
 }
 
-PL_TEST_DISABLE_FENV (_ZGVnN4v_sincosf_sin)
-PL_TEST_DISABLE_FENV (_ZGVnN4v_sincosf_cos)
-PL_TEST_ULP (_ZGVnN4v_sincosf_sin, 1.17)
-PL_TEST_ULP (_ZGVnN4v_sincosf_cos, 1.31)
+TEST_DISABLE_FENV (_ZGVnN4v_sincosf_sin)
+TEST_DISABLE_FENV (_ZGVnN4v_sincosf_cos)
+TEST_ULP (_ZGVnN4v_sincosf_sin, 1.17)
+TEST_ULP (_ZGVnN4v_sincosf_cos, 1.31)
 #define V_SINCOSF_INTERVAL(lo, hi, n)                                         \
-  PL_TEST_INTERVAL (_ZGVnN4v_sincosf_sin, lo, hi, n)                          \
-  PL_TEST_INTERVAL (_ZGVnN4v_sincosf_cos, lo, hi, n)
+  TEST_INTERVAL (_ZGVnN4v_sincosf_sin, lo, hi, n)                             \
+  TEST_INTERVAL (_ZGVnN4v_sincosf_cos, lo, hi, n)
 V_SINCOSF_INTERVAL (0, 0x1p-31, 50000)
 V_SINCOSF_INTERVAL (0x1p-31, 0x1p20, 500000)
 V_SINCOSF_INTERVAL (0x1p20, inf, 10000)

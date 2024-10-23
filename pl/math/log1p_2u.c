@@ -1,14 +1,14 @@
 /*
  * Double-precision log(1+x) function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "poly_scalar_f64.h"
 #include "math_config.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 
 #define Ln2Hi 0x1.62e42fefa3800p-1
 #define Ln2Lo 0x1.ef35793c76730p-45
@@ -124,8 +124,8 @@ log1p (double x)
 }
 
 PL_SIG (S, D, 1, log1p, -0.9, 10.0)
-PL_TEST_ULP (log1p, 1.26)
-PL_TEST_SYM_INTERVAL (log1p, 0.0, 0x1p-23, 50000)
-PL_TEST_SYM_INTERVAL (log1p, 0x1p-23, 0.001, 50000)
-PL_TEST_SYM_INTERVAL (log1p, 0.001, 1.0, 50000)
-PL_TEST_SYM_INTERVAL (log1p, 1.0, inf, 5000)
+TEST_ULP (log1p, 1.26)
+TEST_SYM_INTERVAL (log1p, 0.0, 0x1p-23, 50000)
+TEST_SYM_INTERVAL (log1p, 0x1p-23, 0.001, 50000)
+TEST_SYM_INTERVAL (log1p, 0.001, 1.0, 50000)
+TEST_SYM_INTERVAL (log1p, 1.0, inf, 5000)

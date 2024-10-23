@@ -7,7 +7,7 @@
 
 #include "v_math.h"
 #include "pl_sig.h"
-#include "pl_test.h"
+#include "test_defs.h"
 #include "v_log1pf_inline.h"
 
 #if WANT_SIMD_EXCEPT
@@ -82,9 +82,9 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
 #endif
 
 PL_SIG (V, F, 1, log1p, -0.9, 10.0)
-PL_TEST_ULP (V_NAME_F1 (log1p), 1.20)
-PL_TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (log1p), WANT_SIMD_EXCEPT)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (log1p), 0.0, 0x1p-23, 30000)
-PL_TEST_SYM_INTERVAL (V_NAME_F1 (log1p), 0x1p-23, 1, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (log1p), 1, inf, 50000)
-PL_TEST_INTERVAL (V_NAME_F1 (log1p), -1.0, -inf, 1000)
+TEST_ULP (V_NAME_F1 (log1p), 1.20)
+TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (log1p), WANT_SIMD_EXCEPT)
+TEST_SYM_INTERVAL (V_NAME_F1 (log1p), 0.0, 0x1p-23, 30000)
+TEST_SYM_INTERVAL (V_NAME_F1 (log1p), 0x1p-23, 1, 50000)
+TEST_INTERVAL (V_NAME_F1 (log1p), 1, inf, 50000)
+TEST_INTERVAL (V_NAME_F1 (log1p), -1.0, -inf, 1000)
