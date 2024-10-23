@@ -1,11 +1,11 @@
 /*
  * Shared data between exp, exp2 and pow.
  *
- * Copyright (c) 2018-2023, Arm Limited.
+ * Copyright (c) 2018-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
 #define N (1 << V_POW_EXP_TABLE_BITS)
 

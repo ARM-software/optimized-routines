@@ -22,12 +22,14 @@ F (ypowf, -9.9, 9.9)
 {"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 {"_ZGVnN4vv_hypotf", 'f', 'n', -10.0, 10.0, {.vnf = _Z_hypotf_wrap}},
 {"_ZGVnN2vv_hypot",  'd', 'n', -10.0, 10.0, {.vnd = _Z_hypot_wrap}},
-{"_ZGVnN2vv_pow", 'd', 'n', 0.01, 11.1, {.vnd = xy_Z_pow}},
-VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
-VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
+{"_ZGVnN2vv_pow",    'd', 'n', -10.0, 10.0, {.vnd = xy_Z_pow}},
+{"x_ZGVnN2vv_pow",   'd', 'n', -10.0, 10.0, {.vnd = x_Z_pow}},
+{"y_ZGVnN2vv_pow",   'd', 'n', -10.0, 10.0, {.vnd = y_Z_pow}},
 {"_ZGVnN4vv_powf",  'f', 'n',   0.01, 11.1, {.vnf = xy_Z_powf}},
 {"x_ZGVnN4vv_powf", 'f', 'n',   0.01, 11.1, {.vnf = x_Z_powf}},
 {"y_ZGVnN4vv_powf", 'f', 'n', -10.0,  10.0, {.vnf = y_Z_powf}},
+VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
+VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
 #endif
 
 #if WANT_SVE_MATH
@@ -35,6 +37,12 @@ VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
 { "_ZGVsMxvv_atan2", 'd', 's', -10.0, 10.0, { .svd = _Z_sv_atan2_wrap } },
 { "_ZGVsMxvv_hypotf", 'f', 's', -10.0, 10.0, { .svf = _Z_sv_hypotf_wrap } },
 { "_ZGVsMxvv_hypot", 'd', 's', -10.0, 10.0, { .svd = _Z_sv_hypot_wrap } },
+{"_ZGVsMxvv_powf",   'f', 's', -10.0, 10.0, {.svf = xy_Z_sv_powf}},
+{"x_ZGVsMxvv_powf",  'f', 's', -10.0, 10.0, {.svf = x_Z_sv_powf}},
+{"y_ZGVsMxvv_powf",  'f', 's', -10.0, 10.0, {.svf = y_Z_sv_powf}},
+{"_ZGVsMxvv_pow",    'd', 's', -10.0, 10.0, {.svd = xy_Z_sv_pow}},
+{"x_ZGVsMxvv_pow",   'd', 's', -10.0, 10.0, {.svd = x_Z_sv_pow}},
+{"y_ZGVsMxvv_pow",   'd', 's', -10.0, 10.0, {.svd = y_Z_sv_pow}},
 #endif
     /* clang-format on */
 

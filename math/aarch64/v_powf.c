@@ -7,6 +7,7 @@
 
 #include "v_math.h"
 #include "test_defs.h"
+#include "test_sig.h"
 
 #define Min v_u32 (0x00800000)
 #define Max v_u32 (0x7f800000)
@@ -195,6 +196,7 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
   return vcombine_f32 (p_lo, p_hi);
 }
 
+TEST_SIG (V, F, 2, pow)
 TEST_ULP (V_NAME_F2 (pow), 2.1)
 TEST_DISABLE_FENV (V_NAME_F2 (pow))
 TEST_INTERVAL2 (V_NAME_F2 (pow), 0x1p-1, 0x1p1, 0x1p-7, 0x1p7, 50000)

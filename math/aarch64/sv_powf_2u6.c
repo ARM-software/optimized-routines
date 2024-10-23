@@ -208,8 +208,8 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
 {
   const svbool_t ptrue = svptrue_b64 ();
 
-  /* Unpack and promote input vectors (pg, y, z, i, k and sign_bias) into two in
-     order to perform core computation in double precision.  */
+  /* Unpack and promote input vectors (pg, y, z, i, k and sign_bias) into two
+     in order to perform core computation in double precision.  */
   const svbool_t pg_lo = svunpklo (pg);
   const svbool_t pg_hi = svunpkhi (pg);
   svfloat64_t y_lo = svcvt_f64_x (
@@ -301,8 +301,8 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
   svint32_t k
       = svasr_x (pg, svreinterpret_s32 (top), (23 - V_POWF_EXP2_TABLE_BITS));
 
-  /* Compute core in extended precision and return intermediate ylogx results to
-      handle cases of underflow and underflow in exp.  */
+  /* Compute core in extended precision and return intermediate ylogx results
+     to handle cases of underflow and underflow in exp.  */
   svfloat32_t ylogx;
   svfloat32_t ret = sv_powf_core (pg, i, iz, k, y, sign_bias, &ylogx, d);
 

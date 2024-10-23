@@ -1,11 +1,11 @@
 /*
  * Coefficients for single-precision SVE pow(x) function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
 const struct v_powf_data __v_powf_data = {
   .invc = { 0x1.6489890582816p+0,

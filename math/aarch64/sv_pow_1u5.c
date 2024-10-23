@@ -23,8 +23,8 @@
    The SVE algorithm drops the tail in the exp computation at the price of
    a lower accuracy, slightly above 1ULP.
    The SVE algorithm also drops the special treatement of small (< 2^-65) and
-   large (> 2^63) finite values of |y|, as they only affect non-round to nearest
-   modes.
+   large (> 2^63) finite values of |y|, as they only affect non-round to
+   nearest modes.
 
    Maximum measured error is 1.04 ULPs:
    SV_NAME_D2 (pow) (0x1.3d2d45bc848acp+63, -0x1.a48a38b40cd43p-12)
@@ -178,8 +178,8 @@ sv_log_inline (svbool_t pg, svuint64_t ix, svfloat64_t *tail)
 
   /* log(x) = k*Ln2 + log(c) + log1p(z/c-1).  */
   /* SVE lookup requires 3 separate lookup tables, as opposed to scalar version
-     that uses array of structures. We also do the lookup earlier in the code to
-     make sure it finishes as early as possible.  */
+     that uses array of structures. We also do the lookup earlier in the code
+     to make sure it finishes as early as possible.  */
   svfloat64_t invc = svld1_gather_index (pg, __v_pow_log_data.invc, i);
   svfloat64_t logc = svld1_gather_index (pg, __v_pow_log_data.logc, i);
   svfloat64_t logctail = svld1_gather_index (pg, __v_pow_log_data.logctail, i);

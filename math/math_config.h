@@ -529,4 +529,35 @@ extern const struct v_log_data
   } table[1 << V_LOG_TABLE_BITS];
 } __v_log_data HIDDEN;
 
+/* Some data for SVE powf's internal exp and log.  */
+#define V_POWF_EXP2_TABLE_BITS 5
+#define V_POWF_EXP2_N (1 << V_POWF_EXP2_TABLE_BITS)
+#define V_POWF_LOG2_TABLE_BITS 5
+#define V_POWF_LOG2_N (1 << V_POWF_LOG2_TABLE_BITS)
+extern const struct v_powf_data
+{
+  double invc[V_POWF_LOG2_N];
+  double logc[V_POWF_LOG2_N];
+  uint64_t scale[V_POWF_EXP2_N];
+} __v_powf_data HIDDEN;
+
+/* Some data for AdvSIMD and SVE pow's internal exp and log.  */
+#define V_POW_EXP_TABLE_BITS 8
+extern const struct v_pow_exp_data
+{
+  double poly[3];
+  double n_over_ln2, ln2_over_n_hi, ln2_over_n_lo, shift;
+  uint64_t sbits[1 << V_POW_EXP_TABLE_BITS];
+} __v_pow_exp_data HIDDEN;
+
+#define V_POW_LOG_TABLE_BITS 7
+extern const struct v_pow_log_data
+{
+  double poly[7]; /* First coefficient is 1.  */
+  double ln2_hi, ln2_lo;
+  double invc[1 << V_POW_LOG_TABLE_BITS];
+  double logc[1 << V_POW_LOG_TABLE_BITS];
+  double logctail[1 << V_POW_LOG_TABLE_BITS];
+} __v_pow_log_data HIDDEN;
+
 #endif
