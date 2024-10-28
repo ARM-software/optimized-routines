@@ -1,5 +1,5 @@
 /*
- * Single-precision vector acosh(x) function.
+ * Double-precision vector acosh(x) function.
  * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
@@ -45,9 +45,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
     x = vbslq_f64 (special, vreinterpretq_f64_u64 (d->one), x);
 #endif
 
-  float64x2_t xm1 = vsubq_f64 (x, v_f64 (1));
-  float64x2_t y;
-  y = vaddq_f64 (x, v_f64 (1));
+  float64x2_t xm1 = vsubq_f64 (x, v_f64 (1.0));
+  float64x2_t y = vaddq_f64 (x, v_f64 (1.0));
   y = vmulq_f64 (y, xm1);
   y = vsqrtq_f64 (y);
   y = vaddq_f64 (xm1, y);
