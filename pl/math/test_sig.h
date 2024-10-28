@@ -11,16 +11,12 @@
 #define TEST_DECL_SD1(fun) double fun (double);
 #define TEST_DECL_SD2(fun) double fun (double, double);
 
-#if WANT_VMATH
-# define TEST_DECL_VF1(fun)                                                  \
-    VPCS_ATTR float32x4_t V_NAME_F1 (fun) (float32x4_t);
-# define TEST_DECL_VF2(fun)                                                  \
-    VPCS_ATTR float32x4_t V_NAME_F2 (fun) (float32x4_t, float32x4_t);
-# define TEST_DECL_VD1(fun)                                                  \
-    VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
-# define TEST_DECL_VD2(fun)                                                  \
-    VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
-#endif
+#define TEST_DECL_VF1(fun) VPCS_ATTR float32x4_t V_NAME_F1 (fun) (float32x4_t);
+#define TEST_DECL_VF2(fun)                                                    \
+  VPCS_ATTR float32x4_t V_NAME_F2 (fun) (float32x4_t, float32x4_t);
+#define TEST_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
+#define TEST_DECL_VD2(fun)                                                    \
+  VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
 
 #if WANT_SVE_MATH
 # define TEST_DECL_SVF1(fun)                                                 \

@@ -8,25 +8,18 @@
 #ifndef SV_MATH_H
 #define SV_MATH_H
 
-#ifndef WANT_VMATH
-/* Enable the build of vector math code.  */
-# define WANT_VMATH 1
-#endif
+#include <arm_sve.h>
+#include <stdbool.h>
 
-#if WANT_VMATH
+#include "math_config.h"
 
-# include <arm_sve.h>
-# include <stdbool.h>
-
-# include "math_config.h"
-
-# define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
-# define SV_NAME_D1(fun) _ZGVsMxv_##fun
-# define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
-# define SV_NAME_D2(fun) _ZGVsMxvv_##fun
-# define SV_NAME_F1_L1(fun) _ZGVsMxvl4_##fun##f
-# define SV_NAME_D1_L1(fun) _ZGVsMxvl8_##fun
-# define SV_NAME_F1_L2(fun) _ZGVsMxvl4l4_##fun##f
+#define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
+#define SV_NAME_D1(fun) _ZGVsMxv_##fun
+#define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
+#define SV_NAME_D2(fun) _ZGVsMxvv_##fun
+#define SV_NAME_F1_L1(fun) _ZGVsMxvl4_##fun##f
+#define SV_NAME_D1_L1(fun) _ZGVsMxvl8_##fun
+#define SV_NAME_F1_L2(fun) _ZGVsMxvl4l4_##fun##f
 
 /* Double precision.  */
 static inline svint64_t
@@ -136,6 +129,4 @@ sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
     }
   return y;
 }
-#endif
-
 #endif

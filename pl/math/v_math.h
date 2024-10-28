@@ -8,36 +8,38 @@
 #ifndef _V_MATH_H
 #define _V_MATH_H
 
-#ifndef WANT_VMATH
-/* Enable the build of vector math code.  */
-# define WANT_VMATH 1
+#if __aarch64__
+# define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
+#else
+# error "Cannot build without AArch64"
 #endif
 
-#if WANT_VMATH
+#define V_NAME_F1(fun) _ZGVnN4v_##fun##f
+#define V_NAME_D1(fun) _ZGVnN2v_##fun
+#define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
+#define V_NAME_D2(fun) _ZGVnN2vv_##fun
+#define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
+#define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
 
-# if __aarch64__
-#  define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
-# else
-#  error "Cannot build without AArch64"
-# endif
+#include <stdint.h>
+#include "math_config.h"
+#if __aarch64__
 
-# define V_NAME_F1(fun) _ZGVnN4v_##fun##f
-# define V_NAME_D1(fun) _ZGVnN2v_##fun
-# define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
-# define V_NAME_D2(fun) _ZGVnN2vv_##fun
-# define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
-# define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
-
-# include <stdint.h>
-# include "math_config.h"
-# if __aarch64__
-
-#  include <arm_neon.h>
+# include <arm_neon.h>
 
 /* Shorthand helpers for declaring constants.  */
-#  define V2(X) { X, X }
-#  define V4(X) { X, X, X, X }
-#  define V8(X) { X, X, X, X, X, X, X, X }
+# define V2(X)                                                                \
+    {                                                                         \
+      X, X                                                                    \
+    }
+# define V4(X)                                                                \
+    {                                                                         \
+      X, X, X, X                                                              \
+    }
+# define V8(X)                                                                \
+    {                                                                         \
+      X, X, X, X, X, X, X, X                                                  \
+    }
 
 static inline int
 v_any_u16h (uint16x4_t x)
@@ -176,7 +178,6 @@ v_zerofy_f64 (float64x2_t x, uint64x2_t mask)
   return vreinterpretq_f64_u64 (vbicq_u64 (vreinterpretq_u64_f64 (x), mask));
 }
 
-# endif
 #endif
 
 #endif
