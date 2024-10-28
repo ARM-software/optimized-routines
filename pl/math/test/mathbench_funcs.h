@@ -9,7 +9,7 @@
 #define _ZSF1(fun, a, b) F(fun##f, a, b)
 #define _ZSD1(f, a, b) D(f, a, b)
 
-#if defined(__vpcs) && __aarch64__
+#if WANT_SIMD_TESTS
 
 #define _ZVF1(fun, a, b) VNF(_ZGVnN4v_##fun##f, a, b)
 #define _ZVD1(f, a, b) VND(_ZGVnN2v_##f, a, b)

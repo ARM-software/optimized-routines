@@ -204,7 +204,7 @@ next_d2 (void *g)
 static int secondcall;
 
 /* Wrappers for vector functions.  */
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
 typedef __f32x4_t v_float;
 typedef __f64x2_t v_double;
 /* First element of fv and dv may be changed by -c argument.  */
@@ -829,7 +829,7 @@ main (int argc, char *argv[])
 	case 'z':
 	  conf.ignore_zero_sign = 1;
 	  break;
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
 	case 'c':
 	  argc--;
 	  argv++;

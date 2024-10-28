@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#if WANT_SIMD_TESTS && defined(__vpcs)
+#if WANT_SIMD_TESTS
 
 __vpcs static v_float
 xy_Z_powf (v_float x)

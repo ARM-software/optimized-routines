@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#if defined(__vpcs) && __aarch64__
+#if WANT_SIMD_TESTS
 
-#define _ZVF1(f) ZVNF1 (f)
-#define _ZVD1(f) ZVND1 (f)
-#define _ZVF2(f) ZVNF2 (f)
-#define _ZVD2(f) ZVND2 (f)
+#  define _ZVF1(f) ZVNF1 (f)
+#  define _ZVD1(f) ZVND1 (f)
+#  define _ZVF2(f) ZVNF2 (f)
+#  define _ZVD2(f) ZVND2 (f)
 
 #else
 
@@ -52,8 +52,8 @@ F (sincospi_sin, sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1, 0)
 F (sincospi_cos, sincospi_cos, cospil, mpfr_cospi, 1, 0, d1, 0)
 #endif
 
-#if __linux__
-# if WANT_TRIGPI_TESTS
+#if WANT_SIMD_TESTS
+#  if WANT_TRIGPI_TESTS
 F (_ZGVnN4v_sincospif_sin, v_sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
 F (_ZGVnN4v_sincospif_cos, v_sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
 

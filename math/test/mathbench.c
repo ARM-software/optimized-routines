@@ -29,7 +29,7 @@ static float Af[N];
 static long measurecount = MEASURE;
 static long itercount = ITER;
 
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
 #include <arm_neon.h>
 typedef float64x2_t v_double;
 
@@ -128,7 +128,7 @@ dummyf (float x)
 {
   return x;
 }
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
 __vpcs static v_double
 __vn_dummy (v_double x)
 {
@@ -169,7 +169,7 @@ static const struct fun
   {
     double (*d) (double);
     float (*f) (float);
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
     __vpcs v_double (*vnd) (v_double);
     __vpcs v_float (*vnf) (v_float);
 #endif
@@ -179,6 +179,7 @@ static const struct fun
 #endif
   } fun;
 } funtab[] = {
+// clang-format off
 #define D(func, lo, hi) {#func, 'd', 0, lo, hi, {.d = func}},
 #define F(func, lo, hi) {#func, 'f', 0, lo, hi, {.f = func}},
 #define VND(func, lo, hi) {#func, 'd', 'n', lo, hi, {.vnd = func}},
@@ -187,7 +188,7 @@ static const struct fun
 #define SVF(func, lo, hi) {#func, 'f', 's', lo, hi, {.svf = func}},
 D (dummy, 1.0, 2.0)
 F (dummyf, 1.0, 2.0)
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
 VND (__vn_dummy, 1.0, 2.0)
 VNF (__vn_dummyf, 1.0, 2.0)
 #endif
@@ -203,6 +204,7 @@ SVF (__sv_dummyf, 1.0, 2.0)
 #undef VND
 #undef SVF
 #undef SVD
+  // clang-format on
 };
 
 static void
@@ -301,7 +303,7 @@ runf_latency (float f (float))
     prev = f (Af[i] + prev * z);
 }
 
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
 static void
 run_vn_thruput (__vpcs v_double f (v_double))
 {
@@ -421,7 +423,7 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_thruput, f->fun.f);
   else if (f->prec == 'f' && type == 'l' && f->vec == 0)
     TIMEIT (runf_latency, f->fun.f);
-#ifdef __vpcs
+#if WANT_SIMD_TESTS
   else if (f->prec == 'd' && type == 't' && f->vec == 'n')
     TIMEIT (run_vn_thruput, f->fun.vnd);
   else if (f->prec == 'd' && type == 'l' && f->vec == 'n')

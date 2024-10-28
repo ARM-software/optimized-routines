@@ -64,7 +64,7 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 #define ZVD1_WRAP(func) static double Z_##func(double x) { return _ZGVnN2v_##func(argd(x))[0]; }
 #define ZVD2_WRAP(func) static double Z_##func(double x, double y) { return _ZGVnN2vv_##func(argd(x), argd(y))[0]; }
 
-#if defined(__vpcs) && __aarch64__
+#if WANT_SIMD_TESTS
 
 #define ZVNF1_WRAP(func) ZVF1_WRAP(func)
 #define ZVNF2_WRAP(func) ZVF2_WRAP(func)

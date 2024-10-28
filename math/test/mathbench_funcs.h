@@ -17,7 +17,7 @@ F (ypowf, -9.9, 9.9)
 {"sincosf", 'f', 0, 3.3, 33.3, {.f = sincosf_wrap}},
 {"sincosf", 'f', 0, 100, 1000, {.f = sincosf_wrap}},
 {"sincosf", 'f', 0, 1e6, 1e32, {.f = sincosf_wrap}},
-#if WANT_SIMD_TESTS && defined (__vpcs)
+#if WANT_SIMD_TESTS
 {"_ZGVnN2vv_pow", 'd', 'n', 0.01, 11.1, {.vnd = xy_Z_pow}},
 VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
 VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)

@@ -17,6 +17,12 @@ ifneq ($(OS),Linux)
   endif
 endif
 
+ifeq ($(WANT_SIMD_TESTS),1)
+  ifneq ($(ARCH),aarch64)
+    $(error WANT_SIMD_TESTS only supported on aarch64)
+  endif
+endif
+
 S := $(srcdir)/math
 B := build/math
 

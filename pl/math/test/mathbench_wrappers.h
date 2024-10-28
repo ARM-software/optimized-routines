@@ -39,7 +39,7 @@ sincospi_wrap (double x)
   return s + c;
 }
 
-#if __aarch64__ && defined(__vpcs)
+#if WANT_SIMD_TESTS
 
 __vpcs static v_double
 _Z_atan2_wrap (v_double x)
