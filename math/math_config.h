@@ -131,6 +131,16 @@
 #define __erf_data arm_math_erf_data
 #define __v_exp_data arm_math_v_exp_data
 #define __v_log_data arm_math_v_log_data
+#define __v_erf_data arm_math_v_erf_data
+#define __v_erfc_data arm_math_v_erfc_data
+#define __v_erfcf_data arm_math_v_erfcf_data
+#define __v_erff_data arm_math_v_erff_data
+#define __v_exp_tail_data arm_math_v_exp_tail_data
+#define __v_log10_data arm_math_v_log10_data
+#define __v_log2_data arm_math_v_log2_data
+#define __v_pow_exp_data arm_math_v_pow_exp_data
+#define __v_pow_log_data arm_math_v_pow_log_data
+#define __v_powf_data arm_math_v_powf_data
 
 /* On some platforms (in particular Windows) INFINITY and HUGE_VAL might
    be defined in such a way that might not produce the expected bit pattern,

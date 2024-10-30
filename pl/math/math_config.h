@@ -70,7 +70,28 @@
 #endif
 
 /* Symbol renames to avoid libc conflicts.  */
-#define __exp_data __pl_math_exp_data
+#define __exp_data pl_math_exp_data
+#define __asin_poly pl_math_asin_poly
+#define __asinf_poly pl_math_asinf_poly
+#define __asinh_data pl_math_asinh_data
+#define __asinhf_data pl_math_asinhf_data
+#define __atan_poly_data pl_math_atan_poly_data
+#define __atanf_poly_data pl_math_atanf_poly_data
+#define __cbrt_data pl_math_cbrt_data
+#define __cbrtf_data pl_math_cbrtf_data
+#define __erf_data pl_math_erf_data
+#define __erfc_data pl_math_erfc_data
+#define __erfcf_data pl_math_erfcf_data
+#define __erff_data pl_math_erff_data
+#define __expf_data pl_math_expf_data
+#define __expm1_poly pl_math_expm1_poly
+#define __expm1f_poly pl_math_expm1f_poly
+#define __log10_data pl_math_log10_data
+#define __log1p_data pl_math_log1p_data
+#define __log1pf_data pl_math_log1pf_data
+#define __log_data pl_math_log_data
+#define __tanf_poly_data pl_math_tanf_poly_data
+#define __v_log_data pl_math_v_log_data
 
 /* Optionally used extensions.  */
 #ifdef __GNUC__
