@@ -1,13 +1,13 @@
 /*
  * Lookup table for double-precision e^x vector function.
  *
- * Copyright (c) 2019-2023, Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
-/* 2^(j/N), j=0..N, N=2^8=256. Copied from math/v_exp_data.c.  */
+/* 2^(j/N), j=0..N, N=2^8=256.  */
 const uint64_t __v_exp_tail_data[] = {
   0x3ff0000000000000, 0x3feffb1afa5abcbf, 0x3feff63da9fb3335,
   0x3feff168143b0281, 0x3fefec9a3e778061, 0x3fefe7d42e11bbcc,

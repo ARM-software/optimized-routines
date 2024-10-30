@@ -586,4 +586,7 @@ extern const struct v_log10_data
   } table[1 << V_LOG10_TABLE_BITS];
 } __v_log10_data HIDDEN;
 
+#define V_EXP_TAIL_TABLE_BITS 8
+extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
+
 #endif

@@ -94,7 +94,6 @@ __vpcs __f32x4_t _ZGVnN4vl4_modff (__f32x4_t, __f32x4_t *);
 __vpcs __f32x4x2_t _ZGVnN4v_cexpif (__f32x4_t);
 
 __vpcs __f64x2_t _ZGVnN2v_cbrt (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_cosh (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_cospi (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_erf (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_erfc (__f64x2_t);
@@ -122,7 +121,6 @@ svfloat32_t _ZGVsMxvv_powi (svfloat32_t, svint32_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
 
 svfloat64_t _ZGVsMxv_cbrt (svfloat64_t, svbool_t);
-svfloat64_t _ZGVsMxv_cosh (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_cospi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_erf (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_erfc (svfloat64_t, svbool_t);
