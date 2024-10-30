@@ -591,4 +591,36 @@ extern const struct v_log10_data
 #define V_EXP_TAIL_TABLE_BITS 8
 extern const uint64_t __v_exp_tail_data[1 << V_EXP_TAIL_TABLE_BITS] HIDDEN;
 
+extern const struct v_erff_data
+{
+  struct
+  {
+    float erf, scale;
+  } tab[513];
+} __v_erff_data HIDDEN;
+
+extern const struct v_erfcf_data
+{
+  struct
+  {
+    float erfc, scale;
+  } tab[645];
+} __v_erfcf_data HIDDEN;
+
+extern const struct v_erf_data
+{
+  struct
+  {
+    double erf, scale;
+  } tab[769];
+} __v_erf_data HIDDEN;
+
+extern const struct v_erfc_data
+{
+  struct
+  {
+    double erfc, scale;
+  } tab[3488];
+} __v_erfc_data HIDDEN;
+
 #endif

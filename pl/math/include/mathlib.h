@@ -85,8 +85,6 @@ typedef struct __f64x2x2_t
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_cbrtf (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_cospif (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_erfcf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_erff (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_erfinvf (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_sinpif (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4v_tanpif (__f32x4_t);
@@ -95,8 +93,6 @@ __vpcs __f32x4x2_t _ZGVnN4v_cexpif (__f32x4_t);
 
 __vpcs __f64x2_t _ZGVnN2v_cbrt (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_cospi (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_erf (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_erfc (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_erfinv (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_sinpi (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2vl8_modf (__f64x2_t, __f64x2_t *);
@@ -112,8 +108,6 @@ __vpcs void _ZGVnN4vl4l4_sincospif (__f32x4_t, __f32x4_t *, __f32x4_t *);
 #  include <arm_sve.h>
 svfloat32_t _ZGVsMxv_cbrtf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_cospif (svfloat32_t, svbool_t);
-svfloat32_t _ZGVsMxv_erfcf (svfloat32_t, svbool_t);
-svfloat32_t _ZGVsMxv_erff (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_erfinvf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_sinpif (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvl4_modff (svfloat32_t, float *, svbool_t);
@@ -122,8 +116,6 @@ svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
 
 svfloat64_t _ZGVsMxv_cbrt (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_cospi (svfloat64_t, svbool_t);
-svfloat64_t _ZGVsMxv_erf (svfloat64_t, svbool_t);
-svfloat64_t _ZGVsMxv_erfc (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_erfinv (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_sinpi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvl8_modf (svfloat64_t, double *, svbool_t);

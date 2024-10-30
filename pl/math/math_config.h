@@ -364,12 +364,6 @@ extern const struct erff_data
   } tab[513];
 } __erff_data HIDDEN;
 
-extern const struct sv_erff_data
-{
-  float erf[513];
-  float scale[513];
-} __sv_erff_data HIDDEN;
-
 extern const struct erfcf_data
 {
   struct
@@ -448,12 +442,6 @@ extern const struct erf_data
     double erf, scale;
   } tab[769];
 } __erf_data HIDDEN;
-
-extern const struct sv_erf_data
-{
-  double erf[769];
-  double scale[769];
-} __sv_erf_data HIDDEN;
 
 extern const struct erfc_data
 {
