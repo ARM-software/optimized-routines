@@ -379,6 +379,7 @@ extern const struct exp2f_data
   double shift;
 } __exp2f_data HIDDEN;
 
+/* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
 #define LOGF_POLY_ORDER 4
 extern const struct logf_data
@@ -388,6 +389,7 @@ extern const struct logf_data
     double invc, logc;
   } tab[1 << LOGF_TABLE_BITS];
   double ln2;
+  double invln10;
   double poly[LOGF_POLY_ORDER - 1]; /* First order coefficient is 1.  */
 } __logf_data HIDDEN;
 

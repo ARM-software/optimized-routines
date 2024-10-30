@@ -14,14 +14,6 @@
 #define SquareLim 0x5f800000 /* asuint(0x1p64).  */
 #define Two 0x40000000
 
-/* Single-precision log from math/.  */
-float
-optr_aor_log_f32 (float);
-
-/* Single-precision log(1+x) from pl/math.  */
-float
-log1pf (float);
-
 /* acoshf approximation using a variety of approaches on different intervals:
 
    x >= 2^64: We cannot square x without overflow. For huge x, sqrt(x*x - 1) is
@@ -45,10 +37,10 @@ acoshf (float x)
     return __math_invalidf (x);
 
   if (unlikely (ix >= SquareLim))
-    return optr_aor_log_f32 (x) + Ln2;
+    return logf (x) + Ln2;
 
   if (ix > Two)
-    return optr_aor_log_f32 (x + sqrtf (x * x - 1));
+    return logf (x + sqrtf (x * x - 1));
 
   float xm1 = x - 1;
   return log1pf (xm1 + sqrtf (2 * xm1 + xm1 * xm1));

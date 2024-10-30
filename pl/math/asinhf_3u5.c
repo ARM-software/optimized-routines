@@ -16,9 +16,6 @@
 #define One (0x3f8)
 #define ExpM12 (0x398)
 
-float
-optr_aor_log_f32 (float);
-
 /* asinhf approximation using a variety of approaches on different intervals:
 
    |x| < 2^-12: Return x. Function is exactly rounded in this region.
@@ -62,10 +59,10 @@ asinhf (float x)
 
   if (unlikely (ax > SqrtFltMax))
     {
-      return asfloat (asuint (optr_aor_log_f32 (ax) + Ln2) | sign);
+      return asfloat (asuint (logf (ax) + Ln2) | sign);
     }
 
-  return asfloat (asuint (optr_aor_log_f32 (ax + sqrtf (ax * ax + 1))) | sign);
+  return asfloat (asuint (logf (ax + sqrtf (ax * ax + 1))) | sign);
 }
 
 TEST_SIG (S, F, 1, asinh, -10.0, 10.0)
