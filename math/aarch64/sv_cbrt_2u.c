@@ -48,10 +48,16 @@ shifted_lookup (const svbool_t pg, const float64_t *table, svint64_t i)
 }
 
 /* Approximation for double-precision vector cbrt(x), using low-order
-   polynomial and two Newton iterations. Greatest observed error is 1.79 ULP.
-   Errors repeat according to the exponent, for instance an error observed for
-   double value m * 2^e will be observed for any input m * 2^(e + 3*i), where i
-   is an integer.
+   polynomial and two Newton iterations.
+
+   The vector version of frexp does not handle subnormals
+   correctly. As a result these need to be handled by the scalar
+   fallback, where accuracy may be worse than that of the vector code
+   path.
+
+   Greatest observed error in the normal range is 1.79 ULP. Errors repeat
+   according to the exponent, for instance an error observed for double value m
+   * 2^e will be observed for any input m * 2^(e + 3*i), where i is an integer.
    _ZGVsMxv_cbrt (0x0.3fffb8d4413f3p-1022) got 0x1.965f53b0e5d97p-342
 					  want 0x1.965f53b0e5d95p-342.  */
 svfloat64_t SV_NAME_D1 (cbrt) (svfloat64_t x, const svbool_t pg)
@@ -117,7 +123,12 @@ svfloat64_t SV_NAME_D1 (cbrt) (svfloat64_t x, const svbool_t pg)
   return svreinterpret_f64 (svorr_x (pg, svreinterpret_u64 (y), sign));
 }
 
+/* Worse-case ULP error assumes that scalar fallback is GLIBC 2.40 cbrt, which
+   has ULP error of 3.67 at 0x1.7a337e1ba1ec2p-257 [1]. Largest observed error
+   in the vector path is 1.79 ULP.
+   [1] Innocente, V., & Zimmermann, P. (2024). Accuracy of Mathematical
+   Functions in Single, Double, Double Extended, and Quadruple Precision.  */
 TEST_SIG (SV, D, 1, cbrt, -10.0, 10.0)
-TEST_ULP (SV_NAME_D1 (cbrt), 1.30)
+TEST_ULP (SV_NAME_D1 (cbrt), 3.17)
 TEST_DISABLE_FENV (SV_NAME_D1 (cbrt))
 TEST_SYM_INTERVAL (SV_NAME_D1 (cbrt), 0, inf, 1000000)

@@ -40,13 +40,20 @@ special_case (float64x2_t x, float64x2_t y, uint32x2_t special)
   return v_call_f64 (cbrt, x, y, vmovl_u32 (special));
 }
 
-/* Approximation for double-precision vector cbrt(x), using low-order polynomial
-   and two Newton iterations. Greatest observed error is 1.79 ULP. Errors repeat
+/* Approximation for double-precision vector cbrt(x), using low-order
+   polynomial and two Newton iterations.
+
+   The vector version of frexp does not handle subnormals
+   correctly. As a result these need to be handled by the scalar
+   fallback, where accuracy may be worse than that of the vector code
+   path.
+
+   Greatest observed error in the normal range is 1.79 ULP. Errors repeat
    according to the exponent, for instance an error observed for double value
    m * 2^e will be observed for any input m * 2^(e + 3*i), where i is an
    integer.
-   __v_cbrt(0x1.fffff403f0bc6p+1) got 0x1.965fe72821e9bp+0
-				 want 0x1.965fe72821e99p+0.  */
+   _ZGVnN2v_cbrt (0x1.fffff403f0bc6p+1) got 0x1.965fe72821e9bp+0
+				       want 0x1.965fe72821e99p+0.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -64,8 +71,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
   uint64x2_t ia12 = vshrq_n_u64 (iax, 52);
   int64x2_t e = vsubq_s64 (vreinterpretq_s64_u64 (ia12), exp_bias);
 
-  /* Calculate rough approximation for cbrt(m) in [0.5, 1.0], starting point for
-     Newton iterations.  */
+  /* Calculate rough approximation for cbrt(m) in [0.5, 1.0], starting point
+     for Newton iterations.  */
   float64x2_t p = v_pairwise_poly_3_f64 (m, vmulq_f64 (m, m), d->poly);
   float64x2_t one_third = d->one_third;
   /* Two iterations of Newton's method for iteratively approximating cbrt.  */
@@ -84,8 +91,8 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
 
      Let q = 2 ^ round(e / 3), then t = 2 ^ (e / 3) / q.
 
-     Then we know t = 2 ^ (i / 3), where i is the remainder from e / 3, which is
-     an integer in [-2, 2], and can be looked up in the table T. Hence the
+     Then we know t = 2 ^ (i / 3), where i is the remainder from e / 3, which
+     is an integer in [-2, 2], and can be looked up in the table T. Hence the
      result is assembled as:
 
      cbrt(x) = cbrt(m) * t * 2 ^ round(e / 3) * sign.  */
@@ -110,6 +117,11 @@ VPCS_ATTR float64x2_t V_NAME_D1 (cbrt) (float64x2_t x)
   return vbslq_f64 (d->abs_mask, y, x);
 }
 
-TEST_ULP (V_NAME_D1 (cbrt), 1.30)
+/* Worse-case ULP error assumes that scalar fallback is GLIBC 2.40 cbrt, which
+   has ULP error of 3.67 at 0x1.7a337e1ba1ec2p-257 [1]. Largest observed error
+   in the vector path is 1.79 ULP.
+   [1] Innocente, V., & Zimmermann, P. (2024). Accuracy of Mathematical
+   Functions in Single, Double, Double Extended, and Quadruple Precision.  */
+TEST_ULP (V_NAME_D1 (cbrt), 3.17)
 TEST_SIG (V, D, 1, cbrt, -10.0, 10.0)
 TEST_SYM_INTERVAL (V_NAME_D1 (cbrt), 0, inf, 1000000)
