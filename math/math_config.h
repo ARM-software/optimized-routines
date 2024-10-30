@@ -520,9 +520,13 @@ extern const struct erf_data
 #define V_EXP_TABLE_BITS 7
 extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 
+#define V_LOG_POLY_ORDER 6
 #define V_LOG_TABLE_BITS 7
 extern const struct v_log_data
 {
+  /* Shared data for vector log and log-derived routines (e.g. asinh).  */
+  double poly[V_LOG_POLY_ORDER - 1];
+  double ln2;
   struct
   {
     double invc, logc;
