@@ -534,28 +534,6 @@ extern const struct tanf_poly_data
   float poly_cotan[TANF_Q_POLY_NCOEFFS];
 } __tanf_poly_data HIDDEN;
 
-#define V_LOG2_TABLE_BITS 7
-extern const struct v_log2_data
-{
-  double poly[5];
-  double invln2;
-  struct
-  {
-    double invc, log2c;
-  } table[1 << V_LOG2_TABLE_BITS];
-} __v_log2_data HIDDEN;
-
-#define V_LOG10_TABLE_BITS 7
-extern const struct v_log10_data
-{
-  double poly[5];
-  double invln10, log10_2;
-  struct
-  {
-    double invc, log10c;
-  } table[1 << V_LOG10_TABLE_BITS];
-} __v_log10_data HIDDEN;
-
 #define V_LOG_POLY_ORDER 6
 #define V_LOG_TABLE_BITS 7
 extern const struct v_log_data

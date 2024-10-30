@@ -1,11 +1,11 @@
 /*
  * Lookup table for double-precision log10(x) vector function.
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
 const struct v_log10_data __v_log10_data = {
   /* Computed from log's coefficients div by log(10) then rounded to double

@@ -62,8 +62,8 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n,
   /* 2^(n/N) may overflow, break it up into s1*s2.  */
   uint64x2_t b = vandq_u64 (vclezq_f64 (n), v_u64 (SpecialOffset));
   float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (v_u64 (SpecialBias1), b));
-  float64x2_t s2 = vreinterpretq_f64_u64 (
-    vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), v_u64 (SpecialBias2)), b));
+  float64x2_t s2 = vreinterpretq_f64_u64 (vaddq_u64 (
+      vsubq_u64 (vreinterpretq_u64_f64 (s), v_u64 (SpecialBias2)), b));
   uint64x2_t cmp = vcagtq_f64 (n, d->scale_uoflow_bound);
   float64x2_t r1 = vmulq_f64 (s1, s1);
   float64x2_t r0 = vmulq_f64 (vfmaq_f64 (s2, s2, y), s1);

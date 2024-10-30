@@ -1,11 +1,11 @@
 /*
  * Coefficients and table entries for vector log2
  *
- * Copyright (c) 2022-2023, Arm Limited.
+ * Copyright (c) 2022-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
 #define N (1 << V_LOG2_TABLE_BITS)
 
