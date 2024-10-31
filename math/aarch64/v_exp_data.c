@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "../math_config.h"
+#include "math_config.h"
 
-/* 2^(j/N), j=0..N, N=2^7=128. Copied from math/v_exp_data.c.  */
+/* 2^(j/N), j=0..N, N=2^7=128.  */
 const uint64_t __v_exp_data[] = {
   0x3ff0000000000000, 0x3feff63da9fb3335, 0x3fefec9a3e778061,
   0x3fefe315e86e7f85, 0x3fefd9b0d3158574, 0x3fefd06b29ddf6de,

@@ -25,15 +25,14 @@ AOR := $(srcdir)/math
 PLB := build/pl/math
 
 pl-lib-srcs := $(wildcard $(PLM)/*.[cS])
-
-ifeq ($(WANT_SVE_MATH), 0)
-pl-lib-srcs := $(filter-out $(PLM)/sv_%, $(pl-lib-srcs))
+ifeq ($(OS),Linux)
+# Vector symbols only supported on Linux
+pl-lib-srcs += $(wildcard $(PLM)/$(ARCH)/*.[cS])
+pl-lib-srcs += $(wildcard $(PLM)/$(ARCH)/*/*.[cS])
 endif
 
-ifneq ($(OS),Linux)
-# Disable all vector symbols if not on Linux
-pl-lib-srcs := $(filter-out $(PLM)/sv_%, $(pl-lib-srcs))
-pl-lib-srcs := $(filter-out $(PLM)/v_%, $(pl-lib-srcs))
+ifeq ($(WANT_SVE_MATH), 0)
+pl-lib-srcs := $(filter-out $(PLM)/aarch64/sve/%, $(pl-lib-srcs))
 endif
 
 math-test-srcs := \
@@ -77,18 +76,19 @@ pl/math-files := \
 all-pl/math: $(pl-libs) $(math-tools) $(pl-includes) $(pl-test-includes)
 
 $(pl-objs): $(pl-includes) $(pl-test-includes)
-$(pl-objs): CFLAGS_PL += $(math-cflags)
+$(pl-objs): CFLAGS_PL += $(math-cflags) -I$(PLM)
 $(PLB)/test/mathtest.o: CFLAGS_PL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_PL = $(HOST_CFLAGS)
 
-$(PLB)/sv_%: CFLAGS_PL += $(math-sve-cflags)
+$(PLB)/aarch64/sve/%: CFLAGS_PL += $(math-sve-cflags)
 
 pl-ulp-funcs-dir = build/pl/test/ulp-funcs/
 pl-ulp-wrappers-dir = build/pl/test/ulp-wrappers/
 pl-mathbench-funcs-dir = build/pl/test/mathbench-funcs/
 pl-sig-dirs = $(pl-ulp-funcs-dir) $(pl-ulp-wrappers-dir) $(pl-mathbench-funcs-dir)
-$(pl-sig-dirs):
+$(pl-sig-dirs) $(addsuffix /$(ARCH),$(pl-sig-dirs)) \
+$(addsuffix /aarch64/advsimd,$(pl-sig-dirs)) $(addsuffix /aarch64/sve,$(pl-sig-dirs)):
 	mkdir -p $@
 
 pl-ulp-funcs = $(patsubst $(PLM)/%,$(pl-ulp-funcs-dir)/%,$(basename $(pl-lib-srcs)))
@@ -97,7 +97,7 @@ pl-mathbench-funcs = $(patsubst $(PLM)/%,$(pl-mathbench-funcs-dir)/%,$(basename 
 
 define pl_emit_sig
 $1/%: $(PLM)/%.c | $$$$(@D)
-	$(CC) $$< $(math-cflags) -I$(PLM)/include -D$2 -E -o - | { grep TEST_SIG || true; } | cut -f 2- -d ' ' > $$@
+	$(CC) $$< $(math-cflags) -I$(PLM)/include -I$(PLM) -D$2 -E -o - | { grep TEST_SIG || true; } | cut -f 2- -d ' ' > $$@
 endef
 
 $(eval $(call pl_emit_sig,$(pl-ulp-funcs-dir),EMIT_ULP_FUNCS))
@@ -200,7 +200,7 @@ check-pl/math-rtest: $(math-host-tools) $(math-tools)
 	cat $(pl-math-rtests) | build/pl/bin/rtest | $(EMULATOR) build/pl/bin/mathtest $(math-testflags)
 
 pl-ulp-input-dir=$(PLB)/test/inputs
-$(pl-ulp-input-dir):
+$(pl-ulp-input-dir) $(pl-ulp-input-dir)/$(ARCH) $(pl-ulp-input-dir)/aarch64/sve $(pl-ulp-input-dir)/aarch64/advsimd:
 	mkdir -p $@
 
 pl-math-lib-lims = $(patsubst $(PLM)/%,$(pl-ulp-input-dir)/%.ulp,$(basename $(pl-lib-srcs)))
@@ -211,16 +211,16 @@ pl-math-lib-cvals = $(patsubst $(PLM)/%,$(pl-ulp-input-dir)/%.cval,$(basename $(
 pl-ulp-inputs = $(pl-math-lib-lims) $(pl-math-lib-fenvs) $(pl-math-lib-itvs) $(pl-math-lib-cvals)
 $(pl-ulp-inputs): CFLAGS_PL += -I$(PLM) -I$(PLM)/include $(math-cflags)
 
-$(pl-ulp-input-dir)/%.ulp: $(PLM)/%.c | $(pl-ulp-input-dir)
+$(pl-ulp-input-dir)/%.ulp: $(PLM)/%.c | $$(@D)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_ULP " || true; } > $@
 
-$(pl-ulp-input-dir)/%.fenv: $(PLM)/%.c | $(pl-ulp-input-dir)
+$(pl-ulp-input-dir)/%.fenv: $(PLM)/%.c | $$(@D)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_DISABLE_FENV " || true; } > $@
 
-$(pl-ulp-input-dir)/%.itv: $(PLM)/%.c | $(pl-ulp-input-dir)
+$(pl-ulp-input-dir)/%.itv: $(PLM)/%.c | $$(@D)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_INTERVAL " || true; } | sed "s/ TEST_INTERVAL/\nTEST_INTERVAL/g" > $@
 
-$(pl-ulp-input-dir)/%.cval: $(PLM)/%.c | $(pl-ulp-input-dir)
+$(pl-ulp-input-dir)/%.cval: $(PLM)/%.c | $$(@D)
 	$(CC) -I$(PLM)/test $(CFLAGS_PL) $< -o - -E | { grep "TEST_CONTROL_VALUE " || true; } > $@
 
 pl-ulp-lims := $(pl-ulp-input-dir)/limits

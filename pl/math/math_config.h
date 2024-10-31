@@ -452,7 +452,7 @@ extern const struct exp_data
   uint64_t tab[2 * (1 << EXP_TABLE_BITS)];
 } __exp_data HIDDEN;
 
-/* Copied from math/v_exp.h for use in vector exp2.  */
+/* Copied from math/ for use in vector exp.  */
 #define V_EXP_TABLE_BITS 7
 extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
 

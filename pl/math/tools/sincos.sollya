@@ -1,9 +1,9 @@
 // polynomial for approximating cos(x)
 //
-// Copyright (c) 2023, Arm Limited.
+// Copyright (c) 2023-2024, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
-// This script only finds the coeffs for cos - see math/aarch64/v_sin.c for sin coeffs
+// This script only finds the coeffs for cos - see math/aarch64/advsimd/sin.c for sin coeffs
 
 deg = 14;   // polynomial degree
 a = -pi/4; // interval
