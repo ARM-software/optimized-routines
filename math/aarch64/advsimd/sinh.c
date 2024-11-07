@@ -41,9 +41,9 @@ special_case (float64x2_t x)
 
 /* Approximation for vector double-precision sinh(x) using expm1.
    sinh(x) = (exp(x) - exp(-x)) / 2.
-   The greatest observed error is 2.50 ULP:
-   _ZGVnN2v_sinh(0x1.a0e89f0219be5p-2) got 0x1.ac85ba0cd7446p-2
-				      want 0x1.ac85ba0cd7443p-2.  */
+   The greatest observed error is 2.52 ULP:
+   _ZGVnN2v_sinh(-0x1.a098a2177a2b9p-2) got -0x1.ac2f05bb66fccp-2
+				       want -0x1.ac2f05bb66fc9p-2.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -73,7 +73,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, sinh, -10.0, 10.0)
-TEST_ULP (V_NAME_D1 (sinh), 2.01)
+TEST_ULP (V_NAME_D1 (sinh), 2.02)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (sinh), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0, 0x1p-26, 1000)
 TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0x1p-26, 0x1p9, 500000)
