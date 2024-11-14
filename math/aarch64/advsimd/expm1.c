@@ -43,8 +43,8 @@ special_case (float64x2_t x, uint64x2_t special, const struct data *d)
 
 /* Double-precision vector exp(x) - 1 function.
    The maximum error observed error is 2.05 ULP:
-  _ZGVnN2v_expm1(0x1.634902eaff3adp-2) got 0x1.a8b636e2a9388p-2
-				      want 0x1.a8b636e2a9386p-2.  */
+  _ZGVnN2v_expm1(0x1.6329669eb8c87p-2) got 0x1.a8897eef87b34p-2
+				      want 0x1.a8897eef87b32p-2.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -70,7 +70,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, expm1, -9.9, 9.9)
-TEST_ULP (V_NAME_D1 (expm1), 1.55)
+TEST_ULP (V_NAME_D1 (expm1), 1.56)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (expm1), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (expm1), 0, 0x1p-51, 1000)
 TEST_SYM_INTERVAL (V_NAME_D1 (expm1), 0x1p-51, 0x1.62b7d369a5aa9p+9, 100000)

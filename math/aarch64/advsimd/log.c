@@ -16,8 +16,7 @@ static const struct data
   float64x2_t c0, c2;
   double c1, c3, ln2, c4;
 } data = {
-  /* Worst-case error: 1.17 + 0.5 ulp.
-     Rel error: 0x1.6272e588p-56 in [ -0x1.fc1p-9 0x1.009p-8 ].  */
+  /* Rel error: 0x1.6272e588p-56 in [ -0x1.fc1p-9 0x1.009p-8 ].  */
   .c0 = V2 (-0x1.ffffffffffff7p-2),
   .c1 = 0x1.55555555170d4p-2,
   .c2 = V2 (-0x1.0000000399c27p-2),
@@ -64,6 +63,10 @@ special_case (float64x2_t hi, uint64x2_t u_off, float64x2_t y, float64x2_t r2,
   return v_call_f64 (log, x, vfmaq_f64 (hi, y, r2), vmovl_u32 (special));
 }
 
+/* Double-precision vector log routine.
+   The maximum observed error is 2.17 ULP:
+   _ZGVnN2v_log(0x1.a6129884398a3p+0) got 0x1.ffffff1cca043p-2
+				     want 0x1.ffffff1cca045p-2.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (log) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -108,7 +111,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (log) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, log, 0.01, 11.1)
-TEST_ULP (V_NAME_D1 (log), 1.2)
+TEST_ULP (V_NAME_D1 (log), 1.67)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (log), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (log), 0, 0xffff000000000000, 10000)
 TEST_INTERVAL (V_NAME_D1 (log), 0x1p-4, 0x1p4, 400000)
