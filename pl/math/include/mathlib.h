@@ -95,6 +95,7 @@ __vpcs void _ZGVnN4vl4l4_sincospif (__f32x4_t, __f32x4_t *, __f32x4_t *);
 __vpcs __f64x2_t _ZGVnN2v_cospi (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_erfinv (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2v_sinpi (__f64x2_t);
+__vpcs __f64x2_t _ZGVnN2v_tanpi (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2vl8_modf (__f64x2_t, __f64x2_t *);
 __vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
 __vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);

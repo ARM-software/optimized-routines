@@ -50,9 +50,9 @@ const static struct tanpi_data
 };
 
 /* Double-precision scalar tanpi(x) implementation.
-   Maximum error 2.03 ULP:
-   tanpi(0x1.68c5f2cbbec5cp-2) got 0x1.ff9a62f40b642p+0
-			      want 0x1.ff9a62f40b63fp+0.  */
+   Maximum error 2.19 ULP:
+   tanpi(0x1.68847e177a855p-2) got 0x1.fe9a0ff9bb9d7p+0
+			      want 0x1.fe9a0ff9bb9d5p+0.  */
 double
 tanpi (double x)
 {
@@ -143,7 +143,7 @@ tanpi (double x)
 
 #if WANT_TRIGPI_TESTS
 TEST_SIG (S, D, 1, tanpi, -3.1, 3.1)
-TEST_ULP (tanpi, 2.03)
+TEST_ULP (tanpi, 1.69)
 TEST_SYM_INTERVAL (tanpi, 0, 0x1p-63, 50000)
 TEST_SYM_INTERVAL (tanpi, 0x1p-63, 0.5, 100000)
 TEST_SYM_INTERVAL (tanpi, 0.5, 0x1p53, 100000)

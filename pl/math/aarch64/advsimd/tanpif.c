@@ -1,5 +1,5 @@
 /*
- * Single-precision vector tanpif(x) function.
+ * Single-precision vector tanpi(x) function.
  *
  * Copyright (c) 2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -8,7 +8,6 @@
 #include "v_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
-#include "v_poly_f32.h"
 
 const static struct v_tanpif_data
 {
@@ -21,43 +20,42 @@ const static struct v_tanpif_data
   .c6 = V4 (0x1.e85558p11f), .c7 = 0x1.a52e08p16f,
 };
 
-/* Approximation for single-precision vector tanpif(x)
+/* Approximation for single-precision vector tanpi(x)
    The maximum error is 3.34 ULP:
    _ZGVnN4v_tanpif(0x1.d6c09ap-2) got 0x1.f70aacp+2
 				 want 0x1.f70aa6p+2.  */
 float32x4_t VPCS_ATTR V_NAME_F1 (tanpi) (float32x4_t x)
 {
   const struct v_tanpif_data *d = ptr_barrier (&tanpif_data);
+
+  float32x4_t n = vrndnq_f32 (x);
+
+  /* inf produces nan that propagates.  */
+  float32x4_t xr = vsubq_f32 (x, n);
+  float32x4_t ar = vabdq_f32 (x, n);
+  uint32x4_t flip = vcgtq_f32 (ar, v_f32 (0.25f));
+  float32x4_t r = vbslq_f32 (flip, vsubq_f32 (v_f32 (0.5f), ar), ar);
+
+  /* Order-7 pairwise Horner polynomial evaluation scheme.  */
+  float32x4_t r2 = vmulq_f32 (r, r);
+  float32x4_t r4 = vmulq_f32 (r2, r2);
+
   float32x4_t odd_coeffs = vld1q_f32 (&d->c1);
-  float32x4_t rounded = vrndnq_f32 (x);
+  float32x4_t p01 = vfmaq_laneq_f32 (d->c0, r2, odd_coeffs, 0);
+  float32x4_t p23 = vfmaq_laneq_f32 (d->c2, r2, odd_coeffs, 1);
+  float32x4_t p45 = vfmaq_laneq_f32 (d->c4, r2, odd_coeffs, 2);
+  float32x4_t p67 = vfmaq_laneq_f32 (d->c6, r2, odd_coeffs, 3);
+  float32x4_t p = vfmaq_f32 (p45, r4, p67);
+  p = vfmaq_f32 (p23, r4, p);
+  p = vfmaq_f32 (p01, r4, p);
 
-  // inf produces nan that propagates.
-  float32x4_t x_reduced = vsubq_f32 (x, rounded);
-  float32x4_t abs_x_reduced = vabdq_f32 (x, rounded);
-  uint32x4_t should_flip = vcgtq_f32 (abs_x_reduced, v_f32 (0.25f));
-  float32x4_t r_x = vbslq_f32 (
-      should_flip, vsubq_f32 (v_f32 (0.5f), abs_x_reduced), abs_x_reduced);
+  p = vmulq_f32 (r, p);
+  float32x4_t p_recip = vdivq_f32 (v_f32 (1.0f), p);
+  float32x4_t y = vbslq_f32 (flip, p_recip, p);
 
-  float32x4_t r_x2 = vmulq_f32 (r_x, r_x);
-  float32x4_t r_x4 = vmulq_f32 (r_x2, r_x2);
-
-  // pw_horner_7:
-  float32x4_t p01 = vfmaq_laneq_f32 (d->c0, r_x2, odd_coeffs, 0);
-  float32x4_t p23 = vfmaq_laneq_f32 (d->c2, r_x2, odd_coeffs, 1);
-  float32x4_t p45 = vfmaq_laneq_f32 (d->c4, r_x2, odd_coeffs, 2);
-  float32x4_t p67 = vfmaq_laneq_f32 (d->c6, r_x2, odd_coeffs, 3);
-  float32x4_t p = vfmaq_f32 (p45, r_x4, p67);
-  p = vfmaq_f32 (p23, r_x4, p);
-  p = vfmaq_f32 (p01, r_x4, p);
-  float32x4_t poly = vmulq_f32 (r_x, p);
-
-  float32x4_t poly_recip = vdivq_f32 (v_f32 (1.0f), poly);
-  float32x4_t result = vbslq_f32 (should_flip, poly_recip, poly);
-
-  uint32x4_t sign = veorq_u32 (vreinterpretq_u32_f32 (x_reduced),
-			       vreinterpretq_u32_f32 (abs_x_reduced));
-  return vreinterpretq_f32_u32 (
-      vorrq_u32 (vreinterpretq_u32_f32 (result), sign));
+  uint32x4_t sign
+      = veorq_u32 (vreinterpretq_u32_f32 (xr), vreinterpretq_u32_f32 (ar));
+  return vreinterpretq_f32_u32 (vorrq_u32 (vreinterpretq_u32_f32 (y), sign));
 }
 
 #if WANT_TRIGPI_TESTS
