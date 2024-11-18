@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
 /* Lookup table used in vector erff.
    For each possible rounded input r (multiples of 1/128), between

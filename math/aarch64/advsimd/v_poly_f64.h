@@ -16,7 +16,7 @@
 #define VTYPE float64x2_t
 #define FMA(x, y, z) vfmaq_f64 (z, x, y)
 #define VWRAP(f) v_##f##_f64
-#include "poly_generic.h"
+#include "../../poly_generic.h"
 #undef VWRAP
 #undef FMA
 #undef VTYPE

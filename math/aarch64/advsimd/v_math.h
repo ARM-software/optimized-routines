@@ -20,7 +20,7 @@
 #define V_NAME_D2(fun) _ZGVnN2vv_##fun
 
 #include <stdint.h>
-#include "math_config.h"
+#include "../../math_config.h"
 #include <arm_neon.h>
 
 /* Shorthand helpers for declaring constants.  */

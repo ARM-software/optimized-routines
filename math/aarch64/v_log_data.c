@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "math_config.h"
+#include "../math_config.h"
 
 const struct v_log_data __v_log_data = {
   /* Worst-case error: 1.17 + 0.5 ulp.
