@@ -118,6 +118,7 @@ void _ZGVsMxvl4l4_sincospif (svfloat32_t, float *, float *, svbool_t);
 svfloat64_t _ZGVsMxv_cospi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_erfinv (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_sinpi (svfloat64_t, svbool_t);
+svfloat64_t _ZGVsMxv_tanpi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvl8_modf (svfloat64_t, double *, svbool_t);
 svfloat64_t _ZGVsMxvv_powk (svfloat64_t, svint64_t, svbool_t);
 svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);
