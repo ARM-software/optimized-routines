@@ -13,7 +13,7 @@
 
 #include "asmdefs.h"
 
-#ifdef HAVE_SVE
+#if HAVE_SVE
 
 .arch armv8-a+sve
 
