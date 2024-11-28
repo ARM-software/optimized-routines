@@ -196,29 +196,6 @@ int main (void)
       printf( "avg %5.2f\n", (double)total / tsum);
     }
 
-  size_t total = 0;
-  uint64_t tsum = 0;
-  printf ("%22s ", "memcpy_call");
-  rand32 (0x12345678);
-
-  for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
-    {
-      size_t copy_size = init_copies (size) * ITERS;
-
-      for (int c = 0; c < NUM_TESTS; c++)
-	memcpy (b + test_arr[c].dst, a + test_arr[c].src, test_arr[c].len);
-
-      uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS; i++)
-	for (int c = 0; c < NUM_TESTS; c++)
-	  memcpy (b + test_arr[c].dst, a + test_arr[c].src, test_arr[c].len);
-      t = clock_get_ns () - t;
-      total += copy_size;
-      tsum += t;
-      printf ("%dK: %5.2f ", size / 1024, (double)copy_size / t);
-    }
-  printf( "avg %5.2f\n", (double)total / tsum);
-
 
   printf ("\nAligned medium memcpy (bytes/ns):\n");
   for (int f = 0; funtab[f].name != 0; f++)
@@ -235,17 +212,6 @@ int main (void)
 	}
       printf ("\n");
     }
-
-  printf ("%22s ", "memcpy_call");
-  for (int size = 8; size <= 512; size *= 2)
-    {
-      uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
-	memcpy (b, a, size);
-      t = clock_get_ns () - t;
-      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
-    }
-  printf ("\n");
 
 
   printf ("\nUnaligned medium memcpy (bytes/ns):\n");
@@ -264,17 +230,6 @@ int main (void)
       printf ("\n");
     }
 
-  printf ("%22s ", "memcpy_call");
-  for (int size = 8; size <= 512; size *= 2)
-    {
-      uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
-	memcpy (b + 3, a + 1, size);
-      t = clock_get_ns () - t;
-      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
-    }
-  printf ("\n");
-
 
   printf ("\nLarge memcpy (bytes/ns):\n");
   for (int f = 0; funtab[f].name != 0; f++)
@@ -291,17 +246,6 @@ int main (void)
 	}
       printf ("\n");
     }
-
-  printf ("%22s ", "memcpy_call");
-  for (int size = 1024; size <= 65536; size *= 2)
-    {
-      uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS3; i++)
-	memcpy (b, a, size);
-      t = clock_get_ns () - t;
-      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
-    }
-  printf ("\n");
 
 
   printf ("\nUnaligned forwards memmove (bytes/ns):\n");
