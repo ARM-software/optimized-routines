@@ -21,6 +21,7 @@ ENTRY (__strrchr_aarch64_sve)
 	ptrue	p1.b			/* all ones; loop invariant */
 	mov	x2, 0			/* no match found so far */
 	pfalse	p2.b
+	cntb	x3
 
 	.p2align 4
 	/* Read a vector's worth of bytes, stopping on first fault.  */
@@ -30,7 +31,7 @@ ENTRY (__strrchr_aarch64_sve)
 
 	/* First fault did not fail: the whole vector is valid.
 	   Avoid depending on the contents of FFR beyond the branch.  */
-	incb	x0, all			/* skip bytes this round */
+	add	x0, x0, x3		/* skip bytes this round with ADD rather than INCB */
 	cmpeq	p3.b, p1/z, z0.b, 0	/* search for 0 */
 	b.any	3f
 
@@ -57,7 +58,7 @@ ENTRY (__strrchr_aarch64_sve)
 	b	0b
 
 	/* Found end-of-string.  */
-2:	incb	x0, all			/* advance base */
+2:	add	x0, x0, x3		/* advance base with ADD rather than INCB */
 3:	brka	p3.b, p1/z, p3.b	/* mask after first 0 */
 	cmpeq	p3.b, p3/z, z0.b, z1.b	/* search for c not after eos */
 	b.any	4f
