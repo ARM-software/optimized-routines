@@ -380,7 +380,7 @@ tic (void)
 {
   struct timespec ts;
 #if defined(_MSC_VER)
-  if (timespec_get (&ts, TIME_UTC))
+  if (!timespec_get (&ts, TIME_UTC))
 #else
   if (clock_gettime (CLOCK_REALTIME, &ts))
 #endif
