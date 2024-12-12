@@ -59,3 +59,48 @@ arm_math_cospil (long double x)
 
   return cosl (ax * M_PIl);
 }
+
+long double
+arm_math_tanpil (long double x)
+{
+  /* inf and x = n + 0.5 for any integral n should return nan.  */
+  if (fabsl (x) >= 0x1p54l)
+    {
+      if (isinf (x))
+	return __math_invalid (x);
+      return x < 0 ? -0.0l : 0.0l;
+    }
+
+  long double i = roundl (x);
+  long double f = x - i;
+  int64_t m = (int64_t) i;
+
+  if (x == 0)
+    {
+      return x;
+    }
+  else if (x == i)
+    {
+      if (x < 0)
+	{
+	  return m & 1 ? 0.0l : -0.0l;
+	}
+      else
+	{
+	  return m & 1 ? -0.0l : 0.0l;
+	}
+    }
+  else if (fabsl (f) == 0.5l)
+    {
+      if (x < 0)
+	{
+	  return m & 1 ? -1.0l / 0.0l : 1.0l / 0.0l;
+	}
+      else
+	{
+	  return m & 1 ? 1.0l / 0.0l : -1.0l / 0.0l;
+	}
+    }
+
+  return tanl (f * M_PIl);
+}

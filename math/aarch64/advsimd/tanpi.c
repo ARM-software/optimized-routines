@@ -78,7 +78,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tanpi) (float64x2_t x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (V, D, 1, tanpi, -3.1, 3.1)
 TEST_DISABLE_FENV (V_NAME_D1 (tanpi))
 TEST_ULP (V_NAME_D1 (tanpi), 2.57)
 TEST_SYM_INTERVAL (V_NAME_D1 (tanpi), 0, 0x1p-31, 50000)

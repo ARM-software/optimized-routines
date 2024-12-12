@@ -17,28 +17,6 @@ static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t
   mpfr_trunc(y2, y);
   return mpfr_pow(ret, x, y2, rnd);
 }
-# if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
-static int mpfr_tanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
-  MPFR_DECL_INIT (frd, 1080);
-  mpfr_const_pi (frd, GMP_RNDN);
-  mpfr_mul (frd, frd, arg, GMP_RNDN);
-  return mpfr_tan (ret, frd, GMP_RNDN);
-}
-
-static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
-  MPFR_DECL_INIT (frd, 1080);
-  mpfr_const_pi (frd, GMP_RNDN);
-  mpfr_mul (frd, frd, arg, GMP_RNDN);
-  return mpfr_sin (ret, frd, GMP_RNDN);
-}
-
-static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
-  MPFR_DECL_INIT (frd, 1080);
-  mpfr_const_pi (frd, GMP_RNDN);
-  mpfr_mul (frd, frd, arg, GMP_RNDN);
-  return mpfr_cos (ret, frd, GMP_RNDN);
-}
-# endif
 #endif
 
 /* Our implementations of powi/powk are too imprecise to verify

@@ -20,6 +20,12 @@ static double sincos_cos(double x) {(void)sin(x); return cos(x);}
 static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_cos(y,x,r); return mpfr_sin(y,x,r); }
 static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,x,r); return mpfr_cos(y,x,r); }
 # if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
+static int mpfr_tanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  mpfr_const_pi (frd, GMP_RNDN);
+  mpfr_mul (frd, frd, arg, GMP_RNDN);
+  return mpfr_tan (ret, frd, GMP_RNDN);
+}
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   mpfr_const_pi (frd, GMP_RNDN);
@@ -104,6 +110,8 @@ ZVNF1_WRAP (cospi)
 ZVND1_WRAP (cospi)
 ZVNF1_WRAP (sinpi)
 ZVND1_WRAP (sinpi)
+ZVNF1_WRAP (tanpi)
+ZVND1_WRAP (tanpi)
 
 double
 v_sincospi_sin (double x)
@@ -163,6 +171,8 @@ ZSVNF1_WRAP (cospi)
 ZSVND1_WRAP (cospi)
 ZSVNF1_WRAP (sinpi)
 ZSVND1_WRAP (sinpi)
+ZSVNF1_WRAP (tanpi)
+ZSVND1_WRAP (tanpi)
 double
 sv_sincospi_sin (svbool_t pg, double x)
 {

@@ -39,7 +39,7 @@ const static struct tanpif_data
    tanpif(0x1.4bf948p-1) got -0x1.fcc9ep+0
 			want -0x1.fcc9e6p+0.  */
 float
-tanpif (float x)
+arm_math_tanpif (float x)
 {
   uint32_t xabs_12 = asuint (x) >> 20 & 0x7f8;
 
@@ -129,10 +129,9 @@ tanpif (float x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (S, F, 1, tanpi, -3.1, 3.1)
-TEST_ULP (tanpif, 2.57)
-TEST_SYM_INTERVAL (tanpif, 0, 0x1p-31f, 50000)
-TEST_SYM_INTERVAL (tanpif, 0x1p-31f, 0.5, 100000)
-TEST_SYM_INTERVAL (tanpif, 0.5, 0x1p23f, 100000)
-TEST_SYM_INTERVAL (tanpif, 0x1p23f, inf, 100000)
+TEST_ULP (arm_math_tanpif, 2.57)
+TEST_SYM_INTERVAL (arm_math_tanpif, 0, 0x1p-31f, 50000)
+TEST_SYM_INTERVAL (arm_math_tanpif, 0x1p-31f, 0.5, 100000)
+TEST_SYM_INTERVAL (arm_math_tanpif, 0.5, 0x1p23f, 100000)
+TEST_SYM_INTERVAL (arm_math_tanpif, 0x1p23f, inf, 100000)
 #endif

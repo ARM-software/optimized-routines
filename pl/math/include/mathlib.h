@@ -26,7 +26,6 @@ float log1pf (float);
 float sinhf (float);
 float tanf (float);
 float tanhf (float);
-float tanpif (float);
 
 double acos (double);
 double acosh (double);
@@ -44,11 +43,9 @@ double log10 (double);
 double log1p (double);
 double sinh (double);
 double tanh (double);
-double tanpi (double);
 
 long double erfinvl (long double);
 long double exp10l (long double);
-long double tanpil (long double);
 
 #if __aarch64__ && __linux__
 # if __GNUC__ >= 5
@@ -76,13 +73,11 @@ typedef struct __f64x2x2_t
 
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_erfinvf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_tanpif (__f32x4_t);
 __vpcs __f32x4_t _ZGVnN4vl4_modff (__f32x4_t, __f32x4_t *);
 __vpcs __f32x4x2_t _ZGVnN4v_cexpif (__f32x4_t);
 __vpcs void _ZGVnN4vl4l4_sincosf (__f32x4_t, __f32x4_t *, __f32x4_t *);
 
 __vpcs __f64x2_t _ZGVnN2v_erfinv (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_tanpi (__f64x2_t);
 __vpcs __f64x2_t _ZGVnN2vl8_modf (__f64x2_t, __f64x2_t *);
 __vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
 __vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
@@ -92,14 +87,12 @@ __vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
 # if WANT_SVE_MATH
 #  include <arm_sve.h>
 svfloat32_t _ZGVsMxv_erfinvf (svfloat32_t, svbool_t);
-svfloat32_t _ZGVsMxv_tanpif (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvl4_modff (svfloat32_t, float *, svbool_t);
 svfloat32_t _ZGVsMxvv_powi (svfloat32_t, svint32_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
 void _ZGVsMxvl4l4_sincosf (svfloat32_t, float *, float *, svbool_t);
 
 svfloat64_t _ZGVsMxv_erfinv (svfloat64_t, svbool_t);
-svfloat64_t _ZGVsMxv_tanpi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvl8_modf (svfloat64_t, double *, svbool_t);
 svfloat64_t _ZGVsMxvv_powk (svfloat64_t, svint64_t, svbool_t);
 svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);

@@ -22,6 +22,8 @@ F (arm_math_cospif, -0.9, 0.9)
 D (arm_math_cospi, -0.9, 0.9)
 F (arm_math_sinpif, -0.9, 0.9)
 D (arm_math_sinpi, -0.9, 0.9)
+F (arm_math_tanpif, -0.9, 0.9)
+D (arm_math_tanpi, -0.9, 0.9)
 {"sincospif", 'f', 0, -0.9, 0.9, {.f = sincospif_wrap}},
 {"sincospi", 'd', 0, -0.9, 0.9, {.d = sincospi_wrap}},
 #endif
@@ -43,6 +45,8 @@ VNF (_ZGVnN4v_cospif, -0.9, 0.9)
 VND (_ZGVnN2v_cospi, -0.9, 0.9)
 VNF (_ZGVnN4v_sinpif, -0.9, 0.9)
 VND (_ZGVnN2v_sinpi, -0.9, 0.9)
+VNF (_ZGVnN4v_tanpif, -0.9, 0.9)
+VND (_ZGVnN2v_tanpi, -0.9, 0.9)
 {"_ZGVnN4vl4l4_sincospif", 'f', 'n', -0.9, 0.9, {.vnf = _Z_sincospif_wrap}},
 {"_ZGVnN2vl8l8_sincospi", 'd', 'n', -0.9, 0.9, {.vnd = _Z_sincospi_wrap}},
 # endif
@@ -64,6 +68,8 @@ SVF (_ZGVsMxv_cospif, -0.9, 0.9)
 SVD (_ZGVsMxv_cospi, -0.9, 0.9)
 SVF (_ZGVsMxv_sinpif, -0.9, 0.9)
 SVD (_ZGVsMxv_sinpi, -0.9, 0.9)
+SVF (_ZGVsMxv_tanpif, -0.9, 0.9)
+SVD (_ZGVsMxv_tanpi, -0.9, 0.9)
 {"_ZGVsMxvl4l4_sincospif", 'f', 's', -0.9, 0.9, {.svf = _Z_sv_sincospif_wrap}},
 {"_ZGVsMxvl8l8_sincospi", 'd', 's', -0.9, 0.9, {.svd = _Z_sv_sincospi_wrap}},
 # endif

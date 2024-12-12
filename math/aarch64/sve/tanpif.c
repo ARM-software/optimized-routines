@@ -58,7 +58,6 @@ svfloat32_t SV_NAME_F1 (tanpi) (svfloat32_t x, const svbool_t pg)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (SV, F, 1, tanpi, -3.1, 3.1)
 TEST_DISABLE_FENV (SV_NAME_F1 (tanpi))
 TEST_ULP (SV_NAME_F1 (tanpi), 2.84)
 TEST_SYM_INTERVAL (SV_NAME_F1 (tanpi), 0, 0x1p-31, 50000)
