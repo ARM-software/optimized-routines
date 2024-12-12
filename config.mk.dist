@@ -138,8 +138,13 @@ math-cflags += -DWANT_SIMD_EXCEPT=$(WANT_SIMD_EXCEPT)
 WANT_EXP10_TESTS = 1
 math-cflags += -DWANT_EXP10_TESTS=$(WANT_EXP10_TESTS)
 
-# If set to 1, enable tests for sinpi and cospi.
-WANT_TRIGPI_TESTS = 1
+# If set to 1, enable tests for sinpi and cospi. These functions are
+# only supported on aarch64
+ifeq ($(ARCH),aarch64)
+  WANT_TRIGPI_TESTS = 1
+else
+  WANT_TRIGPI_TESTS = 0
+endif
 math-cflags += -DWANT_TRIGPI_TESTS=$(WANT_TRIGPI_TESTS)
 
 # Remove GNU Property Notes from asm files.

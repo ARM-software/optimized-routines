@@ -25,7 +25,7 @@
    sinpif(0x1.d062b6p-2) got 0x1.fa8c06p-1
 			want 0x1.fa8c02p-1.  */
 float
-sinpif (float x)
+arm_math_sinpif (float x)
 {
   if (isinf (x) || isnan (x))
     return __math_invalidf (x);
@@ -76,10 +76,9 @@ sinpif (float x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (S, F, 1, sinpi, -0.9, 0.9)
-TEST_ULP (sinpif, 1.99)
-TEST_SYM_INTERVAL (sinpif, 0, 0x1p-31, 5000)
-TEST_SYM_INTERVAL (sinpif, 0x1p-31, 0.5, 10000)
-TEST_SYM_INTERVAL (sinpif, 0.5, 0x1p22f, 10000)
-TEST_SYM_INTERVAL (sinpif, 0x1p22f, inf, 10000)
+TEST_ULP (arm_math_sinpif, 1.99)
+TEST_SYM_INTERVAL (arm_math_sinpif, 0, 0x1p-31, 5000)
+TEST_SYM_INTERVAL (arm_math_sinpif, 0x1p-31, 0.5, 10000)
+TEST_SYM_INTERVAL (arm_math_sinpif, 0.5, 0x1p22f, 10000)
+TEST_SYM_INTERVAL (arm_math_sinpif, 0x1p22f, inf, 10000)
 #endif

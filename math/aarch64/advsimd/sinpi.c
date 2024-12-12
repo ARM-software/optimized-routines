@@ -34,7 +34,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
   /* Fall back to scalar code.  */
   y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
-  return v_call_f64 (sinpi, x, y, cmp);
+  return v_call_f64 (arm_math_sinpi, x, y, cmp);
 }
 #endif
 
@@ -78,7 +78,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinpi) (float64x2_t x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (V, D, 1, sinpi, -0.9, 0.9)
 TEST_ULP (V_NAME_D1 (sinpi), 2.56)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (sinpi), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (sinpi), 0, 0x1p-63, 5000)

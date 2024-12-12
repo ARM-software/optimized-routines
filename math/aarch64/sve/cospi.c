@@ -56,7 +56,6 @@ svfloat64_t SV_NAME_D1 (cospi) (svfloat64_t x, const svbool_t pg)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (SV, D, 1, cospi, -0.9, 0.9)
 TEST_ULP (SV_NAME_D1 (cospi), 2.71)
 TEST_DISABLE_FENV (SV_NAME_D1 (cospi))
 TEST_SYM_INTERVAL (SV_NAME_D1 (cospi), 0, 0x1p-63, 5000)

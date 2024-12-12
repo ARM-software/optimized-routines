@@ -25,7 +25,7 @@
    cospif(0x1.37e844p-4) got 0x1.f16b3p-1
 			want 0x1.f16b2ap-1.  */
 float
-cospif (float x)
+arm_math_cospif (float x)
 {
   if (isinf (x) || isnan (x))
     return __math_invalidf (x);
@@ -77,10 +77,9 @@ cospif (float x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (S, F, 1, cospi, -0.9, 0.9)
-TEST_ULP (cospif, 2.15)
-TEST_SYM_INTERVAL (cospif, 0, 0x1p-31, 5000)
-TEST_SYM_INTERVAL (cospif, 0x1p-31, 0.5, 10000)
-TEST_SYM_INTERVAL (cospif, 0.5, 0x1p22f, 10000)
-TEST_SYM_INTERVAL (cospif, 0x1p22f, inf, 10000)
+TEST_ULP (arm_math_cospif, 2.15)
+TEST_SYM_INTERVAL (arm_math_cospif, 0, 0x1p-31, 5000)
+TEST_SYM_INTERVAL (arm_math_cospif, 0x1p-31, 0.5, 10000)
+TEST_SYM_INTERVAL (arm_math_cospif, 0.5, 0x1p22f, 10000)
+TEST_SYM_INTERVAL (arm_math_cospif, 0x1p22f, inf, 10000)
 #endif

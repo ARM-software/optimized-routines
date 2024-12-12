@@ -29,7 +29,7 @@ static const double poly[]
    cospi(0x1.160b129300112p-21) got 0x1.fffffffffd16bp-1
 			       want 0x1.fffffffffd16ep-1.  */
 double
-cospi (double x)
+arm_math_cospi (double x)
 {
   if (isinf (x) || isnan (x))
     return __math_invalid (x);
@@ -82,10 +82,9 @@ cospi (double x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (S, D, 1, cospi, -0.9, 0.9)
-TEST_ULP (cospi, 2.63)
-TEST_SYM_INTERVAL (cospi, 0, 0x1p-63, 5000)
-TEST_SYM_INTERVAL (cospi, 0x1p-63, 0.5, 10000)
-TEST_SYM_INTERVAL (cospi, 0.5, 0x1p51f, 10000)
-TEST_SYM_INTERVAL (cospi, 0x1p51f, inf, 10000)
+TEST_ULP (arm_math_cospi, 2.63)
+TEST_SYM_INTERVAL (arm_math_cospi, 0, 0x1p-63, 5000)
+TEST_SYM_INTERVAL (arm_math_cospi, 0x1p-63, 0.5, 10000)
+TEST_SYM_INTERVAL (arm_math_cospi, 0.5, 0x1p51f, 10000)
+TEST_SYM_INTERVAL (arm_math_cospi, 0x1p51f, inf, 10000)
 #endif

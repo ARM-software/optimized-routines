@@ -15,7 +15,39 @@
  F (_ZGVnN4vv_powf, Z_powf, pow, mpfr_pow, 2, 1, f2, 1)
  F (_ZGVnN2vv_pow, Z_pow, powl, mpfr_pow, 2, 0, d2, 1)
 #endif
-/* clang-format on */
+
+#if WANT_TRIGPI_TESTS
+ F (arm_math_cospif, arm_math_cospif, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
+ F (arm_math_cospi,  arm_math_cospi,  arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+ F (arm_math_sinpif, arm_math_sinpif, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
+ F (arm_math_sinpi,  arm_math_sinpi,  arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ F (arm_math_sincospif_sin, arm_math_sincospif_sin, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
+ F (arm_math_sincospif_cos, arm_math_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
+ F (arm_math_sincospi_sin, arm_math_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ F (arm_math_sincospi_cos, arm_math_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+# if WANT_SIMD_TESTS
+ F (_ZGVnN4v_cospif, Z_cospif, arm_math_cospi,  mpfr_cospi, 1, 1, f1, 0)
+ F (_ZGVnN2v_cospi,  Z_cospi,  arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+ F (_ZGVnN4v_sinpif, Z_sinpif, arm_math_sinpi,  mpfr_sinpi, 1, 1, f1, 0)
+ F (_ZGVnN2v_sinpi,  Z_sinpi,  arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ F (_ZGVnN4v_sincospif_sin, v_sincospif_sin, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
+ F (_ZGVnN4v_sincospif_cos, v_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
+ F (_ZGVnN2v_sincospi_sin, v_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ F (_ZGVnN2v_sincospi_cos, v_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+# endif
+# if WANT_SVE_MATH
+ SVF (_ZGVsMxv_cospif, Z_sv_cospif, arm_math_cospi,  mpfr_cospi, 1, 1, f1, 0)
+ SVF (_ZGVsMxv_cospi,  Z_sv_cospi,  arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+ SVF (_ZGVsMxv_sinpif, Z_sv_sinpif, arm_math_sinpi,  mpfr_sinpi, 1, 1, f1, 0)
+ SVF (_ZGVsMxv_sinpi,  Z_sv_sinpi,  arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ SVF (_ZGVsMxvl4l4_sincospif_sin, sv_sincospif_sin, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
+ SVF (_ZGVsMxvl4l4_sincospif_cos, sv_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
+ SVF (_ZGVsMxvl8l8_sincospi_sin, sv_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ SVF (_ZGVsMxvl8l8_sincospi_cos, sv_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+# endif
+#endif
+
+ /* clang-format on */
 
 #define _ZSF1(f) F1 (f)
 #define _ZSF2(f) F2 (f)

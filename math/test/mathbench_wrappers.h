@@ -7,6 +7,22 @@
 
 #if WANT_SIMD_TESTS
 
+__vpcs static v_float
+_Z_sincospif_wrap (v_float x)
+{
+  v_float s, c;
+  _ZGVnN4vl4l4_sincospif (x, &s, &c);
+  return s + c;
+}
+
+__vpcs static v_double
+_Z_sincospi_wrap (v_double x)
+{
+  v_double s, c;
+  _ZGVnN2vl8l8_sincospi (x, &s, &c);
+  return s + c;
+}
+
 __vpcs static v_double
 _Z_atan2_wrap (v_double x)
 {
@@ -131,6 +147,40 @@ y_Z_sv_pow (sv_double x, sv_bool pg)
   return _ZGVsMxvv_pow (svdup_f64 (2.34), x, pg);
 }
 
+static sv_float
+_Z_sv_sincospif_wrap (sv_float x, sv_bool pg)
+{
+  float s[svcntw ()], c[svcntw ()];
+  _ZGVsMxvl4l4_sincospif (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
+}
+
+static sv_double
+_Z_sv_sincospi_wrap (sv_double x, sv_bool pg)
+{
+  double s[svcntd ()], c[svcntd ()];
+  _ZGVsMxvl8l8_sincospi (x, s, c, pg);
+  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
+}
+
+#endif
+
+#if __aarch64__
+static float
+sincospif_wrap (float x)
+{
+  float s, c;
+  arm_math_sincospif (x, &s, &c);
+  return s + c;
+}
+
+static double
+sincospi_wrap (double x)
+{
+  double s, c;
+  arm_math_sincospi (x, &s, &c);
+  return s + c;
+}
 #endif
 
 static double

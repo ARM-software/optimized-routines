@@ -31,7 +31,7 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
   /* Fall back to scalar code.  */
   y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
-  return v_call_f64 (cospi, x, y, cmp);
+  return v_call_f64 (arm_math_cospi, x, y, cmp);
 }
 
 /* Approximation for vector double-precision cospi(x).
@@ -78,7 +78,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cospi) (float64x2_t x)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_SIG (V, D, 1, cospi, -0.9, 0.9)
 TEST_ULP (V_NAME_D1 (cospi), 2.56)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (cospi), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (cospi), 0, 0x1p-63, 5000)

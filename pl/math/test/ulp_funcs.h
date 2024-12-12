@@ -44,21 +44,8 @@
 
 #include "ulp_funcs_gen.h"
 
-#if WANT_TRIGPI_TESTS
-F (sincospif_sin, sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
-F (sincospif_cos, sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
-
-F (sincospi_sin, sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1, 0)
-F (sincospi_cos, sincospi_cos, cospil, mpfr_cospi, 1, 0, d1, 0)
-#endif
-
 #if WANT_SIMD_TESTS
 #  if WANT_TRIGPI_TESTS
-F (_ZGVnN4v_sincospif_sin, v_sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1, 0)
-F (_ZGVnN4v_sincospif_cos, v_sincospif_cos, cospi, mpfr_cospi, 1, 1, f1, 0)
-
-F (_ZGVnN2v_sincospi_sin, v_sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1, 0)
-F (_ZGVnN2v_sincospi_cos, v_sincospi_cos, cospil, mpfr_cospi, 1, 0, d1, 0)
 # endif
 
 F (_ZGVnN4v_sincosf_sin, v_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
@@ -96,16 +83,5 @@ SVF (_ZGVsMxv_cexpi_cos, sv_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 SVF (_ZGVsMxvl8_modf_frac, sv_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1,
      0)
 SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
-
-#  if WANT_TRIGPI_TESTS
-SVF (_ZGVsMxvl4l4_sincospif_sin, sv_sincospif_sin, sinpi, mpfr_sinpi, 1, 1, f1,
-     0)
-SVF (_ZGVsMxvl4l4_sincospif_cos, sv_sincospif_cos, cospi, mpfr_cospi, 1, 1, f1,
-     0)
-SVF (_ZGVsMxvl8l8_sincospi_sin, sv_sincospi_sin, sinpil, mpfr_sinpi, 1, 0, d1,
-     0)
-SVF (_ZGVsMxvl8l8_sincospi_cos, sv_sincospi_cos, cospil, mpfr_cospi, 1, 0, d1,
-     0)
-#  endif
 # endif
 #endif

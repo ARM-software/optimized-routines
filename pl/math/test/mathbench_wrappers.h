@@ -23,22 +23,6 @@ powi_wrap (double x)
   return __builtin_powi (x, (int) round (x));
 }
 
-static float
-sincospif_wrap (float x)
-{
-  float s, c;
-  sincospif (x, &s, &c);
-  return s + c;
-}
-
-static double
-sincospi_wrap (double x)
-{
-  double s, c;
-  sincospi (x, &s, &c);
-  return s + c;
-}
-
 #if WANT_SIMD_TESTS
 
 __vpcs static v_float
@@ -77,22 +61,6 @@ _Z_sincos_wrap (v_double x)
 {
   v_double s, c;
   _ZGVnN2vl8l8_sincos (x, &s, &c);
-  return s + c;
-}
-
-__vpcs static v_float
-_Z_sincospif_wrap (v_float x)
-{
-  v_float s, c;
-  _ZGVnN4vl4l4_sincospif (x, &s, &c);
-  return s + c;
-}
-
-__vpcs static v_double
-_Z_sincospi_wrap (v_double x)
-{
-  v_double s, c;
-  _ZGVnN2vl8l8_sincospi (x, &s, &c);
   return s + c;
 }
 
@@ -156,22 +124,6 @@ _Z_sv_sincos_wrap (sv_double x, sv_bool pg)
   double s[svcntd ()], c[svcntd ()];
   _ZGVsMxvl8l8_sincos (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
-}
-
-static sv_float
-_Z_sv_sincospif_wrap (sv_float x, sv_bool pg)
-{
-  float s[svcntw ()], c[svcntw ()];
-  _ZGVsMxvl4l4_sincospif (x, s, c, pg);
-  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
-}
-
-static sv_double
-_Z_sv_sincospi_wrap (sv_double x, sv_bool pg)
-{
-  double s[svcntd ()], c[svcntd ()];
-  _ZGVsMxvl8l8_sincospi (x, s, c, pg);
-  return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
 }
 
 static sv_double

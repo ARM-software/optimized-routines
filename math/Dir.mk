@@ -23,13 +23,19 @@ ifeq ($(WANT_SIMD_TESTS),1)
   endif
 endif
 
+ifeq ($(WANT_TRIGPI_TESTS),1)
+  ifneq ($(ARCH),aarch64)
+    $(error trigpi functions only supported on aarch64)
+  endif
+endif
+
 math-src-dir := $(srcdir)/math
 math-build-dir := build/math
 
 math-lib-srcs := $(wildcard $(math-src-dir)/*.[cS])
+math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/*.[cS])
 ifeq ($(OS),Linux)
 # Vector symbols only supported on Linux
-math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/*.[cS])
 math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/*/*.[cS])
 endif
 

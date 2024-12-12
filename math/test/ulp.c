@@ -16,6 +16,8 @@
 #include <string.h>
 #include "mathlib.h"
 
+#include "trigpi_references.h"
+
 /* Don't depend on mpfr by default.  */
 #ifndef USE_MPFR
 # define USE_MPFR 0
@@ -23,50 +25,6 @@
 #if USE_MPFR
 # include <mpfr.h>
 #endif
-
-static inline uint64_t
-asuint64 (double f)
-{
-  union
-  {
-    double f;
-    uint64_t i;
-  } u = {f};
-  return u.i;
-}
-
-static inline double
-asdouble (uint64_t i)
-{
-  union
-  {
-    uint64_t i;
-    double f;
-  } u = {i};
-  return u.f;
-}
-
-static inline uint32_t
-asuint (float f)
-{
-  union
-  {
-    float f;
-    uint32_t i;
-  } u = {f};
-  return u.i;
-}
-
-static inline float
-asfloat (uint32_t i)
-{
-  union
-  {
-    uint32_t i;
-    float f;
-  } u = {i};
-  return u.f;
-}
 
 static uint64_t seed = 0x0123456789abcdef;
 static uint64_t

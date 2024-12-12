@@ -69,7 +69,7 @@ checkint (uint64_t iy)
       sincospif_cos(0x1.a0ec6997557eep-24) got 0x1.ffffffffffe59p-1 want
    0x1.ffffffffffe5dp-1.  */
 void
-sincospi (double x, double *out_sin, double *out_cos)
+arm_math_sincospi (double x, double *out_sin, double *out_cos)
 {
   const struct sincospi_data *d = ptr_barrier (&sincospi_data);
   uint64_t sign = asuint64 (x) & 0x8000000000000000;
@@ -144,13 +144,13 @@ sincospi (double x, double *out_sin, double *out_cos)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_DISABLE_FENV (sincospi_sin)
-TEST_DISABLE_FENV (sincospi_cos)
-TEST_ULP (sincospi_sin, 2.96)
-TEST_ULP (sincospi_cos, 3.16)
+TEST_DISABLE_FENV (arm_math_sincospi_sin)
+TEST_DISABLE_FENV (arm_math_sincospi_cos)
+TEST_ULP (arm_math_sincospi_sin, 2.96)
+TEST_ULP (arm_math_sincospi_cos, 3.16)
 #  define SINCOS_INTERVAL(lo, hi, n)                                          \
-    TEST_SYM_INTERVAL (sincospi_sin, lo, hi, n)                               \
-    TEST_SYM_INTERVAL (sincospi_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (arm_math_sincospi_sin, lo, hi, n)                      \
+    TEST_SYM_INTERVAL (arm_math_sincospi_cos, lo, hi, n)
 SINCOS_INTERVAL (0, 0x1p-63, 10000)
 SINCOS_INTERVAL (0x1p-63, 0.5, 50000)
 SINCOS_INTERVAL (0.5, 0x1p51, 50000)

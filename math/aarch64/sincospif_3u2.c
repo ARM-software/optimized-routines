@@ -60,7 +60,7 @@ checkint (uint32_t iy)
    Maximum error for cos: 3.18 ULP:
       sincospif_cos(0x1.d341a8p-5) got 0x1.f7cd56p-1 want 0x1.f7cd5p-1.  */
 void
-sincospif (float x, float *out_sin, float *out_cos)
+arm_math_sincospif (float x, float *out_sin, float *out_cos)
 {
 
   const struct sincospif_data *d = ptr_barrier (&sincospif_data);
@@ -131,13 +131,13 @@ sincospif (float x, float *out_sin, float *out_cos)
 }
 
 #if WANT_TRIGPI_TESTS
-TEST_DISABLE_FENV (sincospif_sin)
-TEST_DISABLE_FENV (sincospif_cos)
-TEST_ULP (sincospif_sin, 2.54)
-TEST_ULP (sincospif_cos, 2.68)
+TEST_DISABLE_FENV (arm_math_sincospif_sin)
+TEST_DISABLE_FENV (arm_math_sincospif_cos)
+TEST_ULP (arm_math_sincospif_sin, 2.54)
+TEST_ULP (arm_math_sincospif_cos, 2.68)
 #  define SINCOSPIF_INTERVAL(lo, hi, n)                                       \
-    TEST_SYM_INTERVAL (sincospif_sin, lo, hi, n)                              \
-    TEST_SYM_INTERVAL (sincospif_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (arm_math_sincospif_sin, lo, hi, n)                     \
+    TEST_SYM_INTERVAL (arm_math_sincospif_cos, lo, hi, n)
 SINCOSPIF_INTERVAL (0, 0x1p-31, 10000)
 SINCOSPIF_INTERVAL (0x1p-31, 1, 50000)
 SINCOSPIF_INTERVAL (1, 0x1p22f, 50000)
