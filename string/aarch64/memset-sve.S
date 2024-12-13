@@ -27,9 +27,6 @@
 #define vlen	x5
 
 ENTRY (__memset_aarch64_sve)
-	PTR_ARG (0)
-	SIZE_ARG (2)
-
 	dup	z0.b, valw
 	cmp	count, 128
 	b.hs	L(set_long)

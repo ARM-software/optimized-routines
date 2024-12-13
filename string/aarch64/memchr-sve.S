@@ -15,8 +15,6 @@
  */
 
 ENTRY (__memchr_aarch64_sve)
-	PTR_ARG (0)
-	SIZE_ARG (2)
 	dup	z1.b, w1			/* duplicate c to a vector */
 	setffr					/* initialize FFR */
 	mov	x3, 0				/* initialize off */

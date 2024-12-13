@@ -15,9 +15,6 @@
  */
 
 ENTRY (__strncmp_aarch64_sve)
-	PTR_ARG (0)
-	PTR_ARG (1)
-	SIZE_ARG (2)
 	setffr				/* initialize FFR */
 	mov	x3, 0			/* initialize off */
 

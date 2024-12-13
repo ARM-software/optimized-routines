@@ -24,8 +24,6 @@
 #define dstend2	x5
 
 ENTRY (__memset_aarch64)
-	PTR_ARG (0)
-	SIZE_ARG (2)
 	dup	v0.16B, valw
 	cmp	count, 16
 	b.lo	L(set_small)

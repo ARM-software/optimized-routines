@@ -33,7 +33,6 @@
    identifies the first zero byte.  */
 
 ENTRY (__strlen_aarch64_mte)
-	PTR_ARG (0)
 	bic	src, srcin, 15
 	ld1	{vdata.16b}, [src]
 	cmeq	vhas_nul.16b, vdata.16b, 0

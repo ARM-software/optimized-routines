@@ -22,8 +22,6 @@
 #endif
 
 ENTRY (FUNC)
-	PTR_ARG (0)
-	PTR_ARG (1)
 	setffr				/* initialize FFR */
 	ptrue	p2.b, all		/* all ones; loop invariant */
 	mov	x2, 0			/* initialize offset */

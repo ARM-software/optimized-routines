@@ -15,8 +15,6 @@
  */
 
 ENTRY (__strcmp_aarch64_sve)
-	PTR_ARG (0)
-	PTR_ARG (1)
 	setffr				/* initialize FFR */
 	ptrue	p1.b, all		/* all ones; loop invariant */
 	mov	x2, 0			/* initialize offset */
