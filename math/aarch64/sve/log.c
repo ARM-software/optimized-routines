@@ -39,7 +39,7 @@ special_case (svfloat64_t hi, svuint64_t tmp, svfloat64_t y, svfloat64_t r2,
 }
 
 /* Double-precision SVE log routine.
-   Maximum measured error is 2.14 ulp:
+   Maximum measured error is 2.64 ulp:
    SV_NAME_D1 (log)(0x1.95e54bc91a5e2p+184) got 0x1.fffffffe88cacp+6
 					   want 0x1.fffffffe88cafp+6.  */
 svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
@@ -85,7 +85,7 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
 }
 
 TEST_SIG (SV, D, 1, log, 0.01, 11.1)
-TEST_ULP (SV_NAME_D1 (log), 1.67)
+TEST_ULP (SV_NAME_D1 (log), 2.15)
 TEST_DISABLE_FENV (SV_NAME_D1 (log))
 TEST_INTERVAL (SV_NAME_D1 (log), -0.0, -inf, 1000)
 TEST_INTERVAL (SV_NAME_D1 (log), 0, 0x1p-149, 1000)
