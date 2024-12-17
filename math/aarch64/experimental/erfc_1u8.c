@@ -89,8 +89,8 @@ erfc (double x)
       uint64_t i = asuint64 (z) - asuint64 (Shift);
       double r = z - Shift;
       /* These values are scaled by 2^128.  */
-      double erfcr = __erfc_data.tab[i].erfc;
-      double scale = __erfc_data.tab[i].scale;
+      double erfcr = __v_erfc_data.tab[i].erfc;
+      double scale = __v_erfc_data.tab[i].scale;
 
       /* erfc(x) ~ erfc(r) - scale * d * poly (r, d).  */
       double d = a - r;

@@ -59,8 +59,8 @@ erfcf (float x)
       float r = z - Shift;
 
       /* These values are scaled by 2^-47.  */
-      float erfcr = __erfcf_data.tab[i].erfc;
-      float scale = __erfcf_data.tab[i].scale;
+      float erfcr = __v_erfcf_data.tab[i].erfc;
+      float scale = __v_erfcf_data.tab[i].scale;
 
       /* erfc(x) ~ erfc(r) - scale * d * poly (r, d).  */
       float d = a - r;

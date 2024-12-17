@@ -39,8 +39,12 @@ void arm_math_sincospi (double, double *, double *);
 
 #if WANT_EXPERIMENTAL_MATH
 
+float arm_math_erff (float);
+float erfcf (float);
 float erfinvf (float);
 
+double arm_math_erf (double);
+double erfc (double);
 double erfinv (double);
 
 long double erfinvl (long double);

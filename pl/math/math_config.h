@@ -79,10 +79,6 @@
 #define __atanf_poly_data pl_math_atanf_poly_data
 #define __cbrt_data pl_math_cbrt_data
 #define __cbrtf_data pl_math_cbrtf_data
-#define __erf_data pl_math_erf_data
-#define __erfc_data pl_math_erfc_data
-#define __erfcf_data pl_math_erfcf_data
-#define __erff_data pl_math_erff_data
 #define __expf_data pl_math_expf_data
 #define __expm1_poly pl_math_expm1_poly
 #define __expm1f_poly pl_math_expm1f_poly
@@ -377,22 +373,6 @@ check_uflowf (float x)
   return WANT_ERRNO ? __math_check_uflowf (x) : x;
 }
 
-extern const struct erff_data
-{
-  struct
-  {
-    float erf, scale;
-  } tab[513];
-} __erff_data HIDDEN;
-
-extern const struct erfcf_data
-{
-  struct
-  {
-    float erfc, scale;
-  } tab[645];
-} __erfcf_data HIDDEN;
-
 /* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
 #define LOGF_POLY_ORDER 4
@@ -455,22 +435,6 @@ extern const struct exp_data
 /* Copied from math/ for use in vector exp.  */
 #define V_EXP_TABLE_BITS 7
 extern const uint64_t __v_exp_data[1 << V_EXP_TABLE_BITS] HIDDEN;
-
-extern const struct erf_data
-{
-  struct
-  {
-    double erf, scale;
-  } tab[769];
-} __erf_data HIDDEN;
-
-extern const struct erfc_data
-{
-  struct
-  {
-    double erfc, scale;
-  } tab[3488];
-} __erfc_data HIDDEN;
 
 #define ATAN_POLY_NCOEFFS 20
 extern const struct atan_poly_data

@@ -42,7 +42,7 @@
    erf(-0x1.00003c924e5d1p-8) got -0x1.20dd59132ebadp-8
 			     want -0x1.20dd59132ebafp-8.  */
 double
-erf (double x)
+arm_math_erf (double x)
 {
   /* Get absolute value and sign.  */
   uint64_t ix = asuint64 (x);
@@ -62,8 +62,8 @@ erf (double x)
       double r = z - Shift;
       /* Lookup erf(r) and scale(r) in table.
 	 Set erf(r) to 0 and scale to 2/sqrt(pi) for |x| <= 0x1.cp-9.  */
-      double erfr = __erf_data.tab[i].erf;
-      double scale = __erf_data.tab[i].scale;
+      double erfr = __v_erf_data.tab[i].erf;
+      double scale = __v_erf_data.tab[i].scale;
 
       /* erf(x) ~ erf(r) + scale * d * poly (d, r).  */
       double d = a - r;
@@ -95,8 +95,7 @@ erf (double x)
   return asdouble (sign | asuint64 (1.0));
 }
 
-TEST_SIG (S, D, 1, erf, -6.0, 6.0)
-TEST_ULP (erf, 1.79)
-TEST_SYM_INTERVAL (erf, 0, 5.9921875, 40000)
-TEST_SYM_INTERVAL (erf, 5.9921875, inf, 40000)
-TEST_SYM_INTERVAL (erf, 0, inf, 40000)
+TEST_ULP (arm_math_erf, 1.79)
+TEST_SYM_INTERVAL (arm_math_erf, 0, 5.9921875, 40000)
+TEST_SYM_INTERVAL (arm_math_erf, 5.9921875, inf, 40000)
+TEST_SYM_INTERVAL (arm_math_erf, 0, inf, 40000)

@@ -43,6 +43,11 @@ SVF (_ZGVsMxvl8_modf_frac, sv_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1, 0
 SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
 #endif
 
+#if WANT_EXPERIMENTAL_MATH
+ F (arm_math_erff, arm_math_erff, erf, mpfr_erf, 1, 1, f1, 0)
+ F (arm_math_erf,  arm_math_erf,  erfl, mpfr_erf, 1, 0, d1, 0)
+#endif
+
 #if WANT_TRIGPI_TESTS
  F (arm_math_cospif, arm_math_cospif, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
  F (arm_math_cospi,  arm_math_cospi,  arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)

@@ -37,7 +37,7 @@
    erff(0x1.c373e6p-9) got 0x1.fd686cp-9
 		      want 0x1.fd6868p-9.  */
 float
-erff (float x)
+arm_math_erff (float x)
 {
   /* Get absolute value and sign.  */
   uint32_t ix = asuint (x);
@@ -56,8 +56,8 @@ erff (float x)
       float z = a + Shift;
       uint32_t i = asuint (z) - asuint (Shift);
       float r = z - Shift;
-      float erfr = __erff_data.tab[i].erf;
-      float scale = __erff_data.tab[i].scale;
+      float erfr = __v_erff_data.tab[i].erf;
+      float scale = __v_erff_data.tab[i].scale;
 
       /* erf(x) ~ erf(r) + scale * d * (1 - r * d - 1/3 * d^2).  */
       float d = a - r;
@@ -75,8 +75,7 @@ erff (float x)
   return asfloat (sign | asuint (1.0f));
 }
 
-TEST_SIG (S, F, 1, erf, -4.0, 4.0)
-TEST_ULP (erff, 1.43)
-TEST_SYM_INTERVAL (erff, 0, 3.9375, 40000)
-TEST_SYM_INTERVAL (erff, 3.9375, inf, 40000)
-TEST_SYM_INTERVAL (erff, 0, inf, 40000)
+TEST_ULP (arm_math_erff, 1.43)
+TEST_SYM_INTERVAL (arm_math_erff, 0, 3.9375, 40000)
+TEST_SYM_INTERVAL (arm_math_erff, 3.9375, inf, 40000)
+TEST_SYM_INTERVAL (arm_math_erff, 0, inf, 40000)

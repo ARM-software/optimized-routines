@@ -27,6 +27,10 @@ D (arm_math_tanpi, -0.9, 0.9)
 {"sincospif", 'f', 0, -0.9, 0.9, {.f = sincospif_wrap}},
 {"sincospi", 'd', 0, -0.9, 0.9, {.d = sincospi_wrap}},
 #endif
+#if WANT_EXPERIMENTAL_MATH
+D (arm_math_erf, -6.0, 6.0)
+F (arm_math_erff, -4.0, 4.0)
+#endif
 #if WANT_SIMD_TESTS
 {"_ZGVnN4vv_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = _Z_atan2f_wrap}},
 {"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
