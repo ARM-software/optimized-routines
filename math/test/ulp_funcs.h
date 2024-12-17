@@ -77,6 +77,10 @@ SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
  SVF (_ZGVsMxvl4l4_sincospif_cos, sv_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
  SVF (_ZGVsMxvl8l8_sincospi_sin, sv_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
  SVF (_ZGVsMxvl8l8_sincospi_cos, sv_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+#  if WANT_EXPERIMENTAL_MATH
+SVF (_ZGVsMxvv_powk, Z_sv_powk, ref_powi, mpfr_powi, 2, 0, d2, 0)
+SVF (_ZGVsMxvv_powi, Z_sv_powi, ref_powif, mpfr_powi, 2, 1, f2, 0)
+#  endif
 # endif
 #endif
 

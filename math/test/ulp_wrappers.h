@@ -11,6 +11,8 @@
 #include <arm_neon.h>
 #endif
 
+#include <stdbool.h>
+
 /* Wrappers for sincos.  */
 static float sincosf_sinf(float x) {(void)cosf(x); return sinf(x);}
 static float sincosf_cosf(float x) {(void)sinf(x); return cosf(x);}
@@ -42,7 +44,14 @@ static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   return mpfr_cos (ret, frd, GMP_RNDN);
 }
 # endif
-
+# if WANT_EXPERIMENTAL_MATH
+static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
+  mpfr_t y2;
+  mpfr_init(y2);
+  mpfr_trunc(y2, y);
+  return mpfr_pow(ret, x, y2, rnd);
+}
+# endif
 #endif
 
 float modff_frac(float x) { float i; return modff(x, &i); }
@@ -364,6 +373,57 @@ sv_modf_int (svbool_t pg, double x)
   _ZGVsMxvl8_modf (svdup_f64 (x), i, pg);
   return svretd (svld1 (pg, i), pg);
 }
+
+# if WANT_EXPERIMENTAL_MATH
+
+/* Our implementations of powi/powk are too imprecise to verify
+   against any established pow implementation. Instead we have the
+   following simple implementation, against which it is enough to
+   maintain bitwise reproducibility. Note the test framework expects
+   the reference impl to be of higher precision than the function
+   under test. For instance this means that the reference for
+   double-precision powi will be passed a long double, so to check
+   bitwise reproducibility we have to cast it back down to
+   double. This is fine since a round-trip to higher precision and
+   back down is correctly rounded.  */
+#  define DECL_POW_INT_REF(NAME, DBL_T, FLT_T, INT_T)                       \
+      static DBL_T __attribute__ ((unused)) NAME (DBL_T in_val, DBL_T y)      \
+      {                                                                       \
+	INT_T n = (INT_T) round (y);                                          \
+	FLT_T acc = 1.0;                                                      \
+	bool want_recip = n < 0;                                              \
+	n = n < 0 ? -n : n;                                                   \
+                                                                              \
+	for (FLT_T c = in_val; n; c *= c, n >>= 1)                            \
+	  {                                                                   \
+	    if (n & 0x1)                                                      \
+	      {                                                               \
+		acc *= c;                                                     \
+	      }                                                               \
+	  }                                                                   \
+	if (want_recip)                                                       \
+	  {                                                                   \
+	    acc = 1.0 / acc;                                                  \
+	  }                                                                   \
+	return acc;                                                           \
+      }
+
+DECL_POW_INT_REF (ref_powif, double, float, int)
+DECL_POW_INT_REF (ref_powi, long double, double, int)
+static float
+Z_sv_powi (svbool_t pg, float x, float y)
+{
+  return svretf (_ZGVsMxvv_powi (svargf (x), svdup_s32 ((int) round (y)), pg),
+		 pg);
+}
+static double
+Z_sv_powk (svbool_t pg, double x, double y)
+{
+  return svretd (_ZGVsMxvv_powk (svargd (x), svdup_s64 ((long) round (y)), pg),
+		 pg);
+}
+
+# endif // WANT_EXPERIMENTAL_MATH
 #endif // WANT_SVE_MATH
 
 #include "ulp_wrappers_gen.h"

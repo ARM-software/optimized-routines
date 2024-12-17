@@ -161,3 +161,7 @@ networking-cflags += -O2 -fno-tree-vectorize -funroll-loops
 # to interpose math functions with both static and dynamic linking
 USE_GLIBC_ABI = 1
 math-cflags += -DUSE_GLIBC_ABI=$(USE_GLIBC_ABI)
+
+# Enable experimental math routines - non-C23 vector math and low-accuracy scalar
+WANT_EXPERIMENTAL_MATH = 0
+math-cflags += -DWANT_EXPERIMENTAL_MATH=$(WANT_EXPERIMENTAL_MATH)

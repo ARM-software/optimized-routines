@@ -37,6 +37,16 @@ void arm_math_sincospif (float, float *, float *);
 void arm_math_sincospi (double, double *, double *);
 #endif
 
+#if WANT_EXPERIMENTAL_MATH
+
+float erfinvf (float);
+
+double erfinv (double);
+
+long double erfinvl (long double);
+
+#endif
+
 #if __aarch64__ && __linux__
 # if __GNUC__ >= 5
 typedef __Float32x4_t __f32x4_t;
@@ -132,6 +142,12 @@ __vpcs __f64x2_t _ZGVnN2vv_pow (__f64x2_t, __f64x2_t);
 __vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
 __vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
 __vpcs void _ZGVnN2vl8l8_sincospi (__f64x2_t, __f64x2_t *, __f64x2_t *);
+
+#  if WANT_EXPERIMENTAL_MATH
+__vpcs __f32x4_t _ZGVnN4v_erfinvf (__f32x4_t);
+__vpcs __f64x2_t _ZGVnN2v_erfinv (__f64x2_t);
+#  endif
+
 # endif
 
 # if WANT_SVE_MATH
@@ -203,6 +219,16 @@ svfloat64_t _ZGVsMxvv_pow (svfloat64_t, svfloat64_t, svbool_t);
 svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);
 void _ZGVsMxvl8l8_sincos (svfloat64_t, double *, double *, svbool_t);
 void _ZGVsMxvl8l8_sincospi (svfloat64_t, double *, double *, svbool_t);
+
+#  if WANT_EXPERIMENTAL_MATH
+
+svfloat32_t _ZGVsMxv_erfinvf (svfloat32_t, svbool_t);
+svfloat32_t _ZGVsMxvv_powi (svfloat32_t, svint32_t, svbool_t);
+
+svfloat64_t _ZGVsMxvv_powk (svfloat64_t, svint64_t, svbool_t);
+svfloat64_t _ZGVsMxv_erfinv (svfloat64_t, svbool_t);
+
+#  endif
 # endif
 #endif
 

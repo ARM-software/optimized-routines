@@ -75,22 +75,7 @@ fi
 # vector functions
 flags="${ULPFLAGS:--q}"
 runsv=
-if [ $WANT_SVE_MATH -eq 1 ] && [[ $USE_MPFR -eq 0 ]]; then
-# No guarantees about powi accuracy, so regression-test for exactness
-# w.r.t. the custom reference impl in ulp_wrappers.h
-    if [ -z "$FUNC" ] || [ "$FUNC" == "_ZGVsMxvv_powi" ]; then
-	check -q -f -e 0 _ZGVsMxvv_powi  0  inf x  0  1000 100000 && runsv=1
-	check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x  0  1000 100000 && runsv=1
-	check -q -f -e 0 _ZGVsMxvv_powi  0  inf x -0 -1000 100000 && runsv=1
-	check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x -0 -1000 100000 && runsv=1
-    fi
-    if [ -z "$FUNC" ] || [ "$FUNC" == "_ZGVsMxvv_powk" ]; then
-	check -q -f -e 0 _ZGVsMxvv_powk  0  inf x  0  1000 100000 && runsv=1
-	check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x  0  1000 100000 && runsv=1
-	check -q -f -e 0 _ZGVsMxvv_powk  0  inf x -0 -1000 100000 && runsv=1
-	check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x -0 -1000 100000 && runsv=1
-    fi
-fi
+
 
 while read F LO HI N
 do

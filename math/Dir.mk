@@ -17,15 +17,15 @@ ifneq ($(OS),Linux)
   endif
 endif
 
-ifeq ($(WANT_SIMD_TESTS),1)
-  ifneq ($(ARCH),aarch64)
+ifneq ($(ARCH),aarch64)
+  ifeq ($(WANT_SIMD_TESTS),1)
     $(error WANT_SIMD_TESTS only supported on aarch64)
   endif
-endif
-
-ifeq ($(WANT_TRIGPI_TESTS),1)
-  ifneq ($(ARCH),aarch64)
+  ifeq ($(WANT_TRIGPI_TESTS),1)
     $(error trigpi functions only supported on aarch64)
+  endif
+  ifeq ($(WANT_EXPERIMENTAL_MATH),1)
+    $(error Experimental math only supported on aarch64)
   endif
 endif
 
@@ -39,8 +39,17 @@ ifeq ($(OS),Linux)
 math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/*/*.[cS])
 endif
 
+ifeq ($(WANT_EXPERIMENTAL_MATH), 1)
+math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/experimental/*.[cS])
+ifeq ($(OS),Linux)
+# Vector symbols only supported on Linux
+math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/experimental/*/*.[cS])
+endif
+endif
+
 ifeq ($(WANT_SVE_MATH), 0)
 math-lib-srcs := $(filter-out $(math-src-dir)/aarch64/sve/%, $(math-lib-srcs))
+math-lib-srcs := $(filter-out $(math-src-dir)/aarch64/experimental/sve/%, $(math-lib-srcs))
 endif
 
 math-test-srcs := \
@@ -90,6 +99,10 @@ $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_ALL = $(HOST_CFLAGS)
 
 $(math-build-dir)/aarch64/sve/%: CFLAGS_ALL += $(math-sve-cflags)
+$(math-build-dir)/aarch64/experimental/sve/%: CFLAGS_ALL += $(math-sve-cflags)
+# Add include path for experimental routines so they can share helpers with non-experimental
+$(math-build-dir)/aarch64/experimental/advsimd/%: CFLAGS_ALL += -I$(math-src-dir)/aarch64/advsimd
+$(math-build-dir)/aarch64/experimental/sve/%: CFLAGS_ALL += -I$(math-src-dir)/aarch64/sve
 
 $(math-objs): CFLAGS_ALL += -I$(math-src-dir)
 
@@ -97,7 +110,8 @@ ulp-funcs-dir = build/test/ulp-funcs/
 ulp-wrappers-dir = build/test/ulp-wrappers/
 mathbench-funcs-dir = build/test/mathbench-funcs/
 test-sig-dirs = $(ulp-funcs-dir) $(ulp-wrappers-dir) $(mathbench-funcs-dir)
-$(test-sig-dirs) $(addsuffix /$(ARCH),$(test-sig-dirs)) \
+$(test-sig-dirs) $(addsuffix /$(ARCH),$(test-sig-dirs)) $(addsuffix /aarch64/experimental,$(test-sig-dirs)) \
+$(addsuffix /aarch64/experimental/advsimd,$(test-sig-dirs)) $(addsuffix /aarch64/experimental/sve,$(test-sig-dirs)) \
 $(addsuffix /aarch64/advsimd,$(test-sig-dirs)) $(addsuffix /aarch64/sve,$(test-sig-dirs)):
 	mkdir -p $@
 
@@ -106,10 +120,12 @@ ulp-wrappers = $(patsubst $(math-src-dir)/%,$(ulp-wrappers-dir)/%,$(basename $(m
 mathbench-funcs = $(patsubst $(math-src-dir)/%,$(mathbench-funcs-dir)/%,$(basename $(math-lib-srcs)))
 
 define emit_sig
-$1/aarch64/sve/%: $(math-src-dir)/aarch64/sve/%.c | $$$$(@D)
-$1/aarch64/advsimd/%: $(math-src-dir)/aarch64/advsimd/%.c | $$$$(@D)
-$1/%: $(math-src-dir)/%.c | $$$$(@D)
-	$(CC) $$< $(math-cflags) -I$(math-src-dir)/include -I$(math-src-dir) -D$2 -E -o - | { grep TEST_SIG || true; } | cut -f 2- -d ' ' > $$@
+$1/aarch64/experimental/sve/%.i: EXTRA_INC = -I$(math-src-dir)/aarch64/sve
+$1/aarch64/experimental/advsimd/%.i: EXTRA_INC = -I$(math-src-dir)/aarch64/advsimd
+$1/%.i: $(math-src-dir)/%.c | $$$$(@D)
+	$(CC) $$< $(math-cflags) -I$(math-src-dir)/include -I$(math-src-dir) $$(EXTRA_INC) -D$2 -E -o $$@
+$1/%: $1/%.i
+	{ grep TEST_SIG $$< || true; } | cut -f 2- -d ' ' > $$@
 endef
 
 $(eval $(call emit_sig,$(ulp-funcs-dir),EMIT_ULP_FUNCS))
@@ -186,7 +202,8 @@ check-math-rtest: $(math-host-tools) $(math-tools)
 	cat $(math-rtests) | build/bin/rtest | $(EMULATOR) build/bin/mathtest $(math-testflags)
 
 ulp-input-dir = $(math-build-dir)/test/inputs
-$(ulp-input-dir) $(ulp-input-dir)/$(ARCH) $(ulp-input-dir)/aarch64/sve $(ulp-input-dir)/aarch64/advsimd:
+$(ulp-input-dir) $(ulp-input-dir)/$(ARCH) $(ulp-input-dir)/aarch64/sve $(ulp-input-dir)/aarch64/advsimd \
+$(ulp-input-dir)/aarch64/experimental $(ulp-input-dir)/aarch64/experimental/advsimd $(ulp-input-dir)/aarch64/experimental/sve:
 	mkdir -p $@
 
 math-lib-lims = $(patsubst $(math-src-dir)/%.c,$(ulp-input-dir)/%.ulp,$(math-lib-srcs))
@@ -196,22 +213,38 @@ math-lib-itvs = $(patsubst $(math-src-dir)/%.c,$(ulp-input-dir)/%.itv,$(math-lib
 math-lib-cvals = $(patsubst $(math-src-dir)/%.c,$(ulp-input-dir)/%.cval,$(math-lib-srcs))
 
 ulp-inputs = $(math-lib-lims) $(math-lib-lims-nn) $(math-lib-fenvs) $(math-lib-itvs) $(math-lib-cvals)
-$(ulp-inputs): CFLAGS = -I$(math-src-dir)/test -I$(math-src-dir)/include -I$(math-src-dir) $(math-cflags)
+$(ulp-inputs): CFLAGS = -I$(math-src-dir)/test -I$(math-src-dir)/include -I$(math-src-dir) $(math-cflags)\
+                        -I$(math-src-dir)/aarch64/advsimd -I$(math-src-dir)/aarch64/sve
 
-$(ulp-input-dir)/%.ulp: $(math-src-dir)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_ULP " || true; } > $@
+$(ulp-input-dir)/%.ulp.i: $(math-src-dir)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -E -o $@
 
-$(ulp-input-dir)/%.ulp_nn: $(math-src-dir)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_ULP_NONNEAREST " || true; } > $@
+$(ulp-input-dir)/%.ulp: $(ulp-input-dir)/%.ulp.i
+	{ grep "TEST_ULP " $< || true; } > $@
 
-$(ulp-input-dir)/%.fenv: $(math-src-dir)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_DISABLE_FENV " || true; } > $@
+$(ulp-input-dir)/%.ulp_nn.i: $(math-src-dir)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -E -o $@
 
-$(ulp-input-dir)/%.itv: $(math-src-dir)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_INTERVAL " || true; } | sed "s/ TEST_INTERVAL/\nTEST_INTERVAL/g" > $@
+$(ulp-input-dir)/%.ulp_nn: $(ulp-input-dir)/%.ulp_nn.i
+	{ grep "TEST_ULP_NONNEAREST " $< || true; } > $@
 
-$(ulp-input-dir)/%.cval: $(math-src-dir)/%.c | $$(@D)
-	$(CC) $(CFLAGS) $< -o - -E | { grep "TEST_CONTROL_VALUE " || true; } > $@
+$(ulp-input-dir)/%.fenv.i: $(math-src-dir)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -E -o $@
+
+$(ulp-input-dir)/%.fenv: $(ulp-input-dir)/%.fenv.i
+	{ grep "TEST_DISABLE_FENV " $< || true; } > $@
+
+$(ulp-input-dir)/%.itv.i: $(math-src-dir)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -E -o $@
+
+$(ulp-input-dir)/%.itv: $(ulp-input-dir)/%.itv.i
+	{ grep "TEST_INTERVAL " $< || true; } | sed "s/ TEST_INTERVAL/\nTEST_INTERVAL/g" > $@
+
+$(ulp-input-dir)/%.cval.i: $(math-src-dir)/%.c | $$(@D)
+	$(CC) $(CFLAGS) $< -E -o $@
+
+$(ulp-input-dir)/%.cval: $(ulp-input-dir)/%.cval.i
+	{ grep "TEST_CONTROL_VALUE " $< || true; } > $@
 
 ulp-lims = $(ulp-input-dir)/limits
 $(ulp-lims): $(math-lib-lims)
@@ -246,6 +279,9 @@ check-math-ulp: $(math-tools)
 	DISABLE_FENV=../../$(fenv-exps) \
 	CVALS=../../$(ulp-cvals) \
 	FUNC=$(func) \
+	WANT_EXPERIMENTAL_MATH=$(WANT_EXPERIMENTAL_MATH) \
+	WANT_SVE_MATH=$(WANT_SVE_MATH) \
+	USE_MPFR=$(USE_MPFR) \
 	build/bin/runulp.sh $(EMULATOR)
 
 check-math: check-math-test check-math-rtest check-math-ulp

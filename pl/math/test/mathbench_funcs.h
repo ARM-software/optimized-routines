@@ -54,8 +54,4 @@
 {"atan2",  'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
 {"powi",   'd', 0,  0.01, 11.1, {.d = powi_wrap}},
 
-#if __linux__ &&  WANT_SVE_MATH
-{"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
-{"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
-#endif
     // clang-format on

@@ -255,6 +255,22 @@ _Z_sv_cexpi_wrap (sv_double x, sv_bool pg)
   return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
 
+# if WANT_EXPERIMENTAL_MATH
+
+static sv_float
+_Z_sv_powi_wrap (sv_float x, sv_bool pg)
+{
+  return _ZGVsMxvv_powi (x, svcvt_s32_f32_x (pg, x), pg);
+}
+
+static sv_double
+_Z_sv_powk_wrap (sv_double x, sv_bool pg)
+{
+  return _ZGVsMxvv_powk (x, svcvt_s64_f64_x (pg, x), pg);
+}
+
+# endif
+
 #endif
 
 #if __aarch64__

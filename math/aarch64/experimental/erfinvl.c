@@ -1,7 +1,7 @@
 /*
  * Extended precision inverse error function.
  *
- * Copyright (c) 2023, Arm Limited.
+ * Copyright (c) 2023-2024, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #define _GNU_SOURCE

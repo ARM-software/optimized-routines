@@ -59,8 +59,25 @@ t() {
 }
 
 check() {
-	$emu ./ulp -f -q "$@" >/dev/null
+	$emu ./ulp -f -q "$@"
 }
+
+if [ $WANT_EXPERIMENTAL_MATH -eq 1 ] && [ $WANT_SVE_MATH -eq 1 ] && [ $USE_MPFR -eq 0 ]; then
+    # No guarantees about powi accuracy, so regression-test for exactness
+    # w.r.t. the custom reference impl in ulp_wrappers.h
+    if [ -z "$FUNC" ] || [ "$FUNC" == "_ZGVsMxvv_powi" ]; then
+	check -q -f -e 0 _ZGVsMxvv_powi  0  inf x  0  1000 100000
+	check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x  0  1000 100000
+	check -q -f -e 0 _ZGVsMxvv_powi  0  inf x -0 -1000 100000
+	check -q -f -e 0 _ZGVsMxvv_powi -0 -inf x -0 -1000 100000
+    fi
+    if [ -z "$FUNC" ] || [ "$FUNC" == "_ZGVsMxvv_powk" ]; then
+	check -q -f -e 0 _ZGVsMxvv_powk  0  inf x  0  1000 100000
+	check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x  0  1000 100000
+	check -q -f -e 0 _ZGVsMxvv_powk  0  inf x -0 -1000 100000
+	check -q -f -e 0 _ZGVsMxvv_powk -0 -inf x -0 -1000 100000
+    fi
+fi
 
 # Test generic routines in all rounding modes
 for r in $rmodes
