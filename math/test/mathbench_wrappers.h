@@ -5,6 +5,26 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#if WANT_EXPERIMENTAL_MATH
+static double
+atan2_wrap (double x)
+{
+  return atan2 (5.0, x);
+}
+
+static float
+atan2f_wrap (float x)
+{
+  return atan2f (5.0f, x);
+}
+
+static double
+powi_wrap (double x)
+{
+  return __builtin_powi (x, (int) round (x));
+}
+#endif /* WANT_EXPERIMENTAL_MATH.  */
+
 #if WANT_SIMD_TESTS
 
 __vpcs static v_float

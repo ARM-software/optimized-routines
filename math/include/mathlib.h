@@ -39,13 +39,43 @@ void arm_math_sincospi (double, double *, double *);
 
 #if WANT_EXPERIMENTAL_MATH
 
+float acosf (float);
+float acoshf (float);
 float arm_math_erff (float);
+float asinf (float);
+float asinhf (float);
+float atan2f (float, float);
+float atanf (float);
+float atanhf (float);
+float cbrtf (float);
+float coshf (float);
+float erfcf (float);
 float erfcf (float);
 float erfinvf (float);
+float expm1f (float);
+float log10f (float);
+float log1pf (float);
+float sinhf (float);
+float tanf (float);
+float tanhf (float);
 
+double acos (double);
+double acosh (double);
 double arm_math_erf (double);
+double asin (double);
+double asinh (double);
+double atan (double);
+double atan2 (double, double);
+double atanh (double);
+double cbrt (double);
+double cosh (double);
 double erfc (double);
 double erfinv (double);
+double expm1 (double);
+double log10 (double);
+double log1p (double);
+double sinh (double);
+double tanh (double);
 
 long double erfinvl (long double);
 

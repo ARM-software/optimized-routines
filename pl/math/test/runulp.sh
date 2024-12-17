@@ -65,13 +65,6 @@ check() {
 	$emu ./ulp -f -q "$@" #>/dev/null
 }
 
-if [ "$FUNC" == "atan2" ] || [ -z "$FUNC" ]; then
-    # Regression-test for correct NaN handling in atan2
-    check atan2 0x1p-1022 0x1p-1000 x 0 0x1p-1022 40000
-    check atan2 0x1.7887a0a717aefp+1017 0x1.7887a0a717aefp+1017 x -nan -nan
-    check atan2 nan nan x -nan -nan
-fi
-
 # vector functions
 flags="${ULPFLAGS:--q}"
 runsv=

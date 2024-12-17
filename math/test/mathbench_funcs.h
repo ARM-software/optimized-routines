@@ -30,6 +30,9 @@ D (arm_math_tanpi, -0.9, 0.9)
 #if WANT_EXPERIMENTAL_MATH
 D (arm_math_erf, -6.0, 6.0)
 F (arm_math_erff, -4.0, 4.0)
+{"atan2f", 'f', 0, -10.0, 10.0, {.f = atan2f_wrap}},
+{"atan2",  'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
+{"powi",   'd', 0,  0.01, 11.1, {.d = powi_wrap}},
 #endif
 #if WANT_SIMD_TESTS
 {"_ZGVnN4vv_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = _Z_atan2f_wrap}},

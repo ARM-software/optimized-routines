@@ -40,11 +40,15 @@ math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/*/*.[cS])
 endif
 
 ifeq ($(WANT_EXPERIMENTAL_MATH), 1)
-math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/experimental/*.[cS])
 ifeq ($(OS),Linux)
 # Vector symbols only supported on Linux
 math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/experimental/*/*.[cS])
+else
+math-lib-srcs += $(wildcard $(math-src-dir)/$(ARCH)/experimental/*.[cS])
 endif
+else
+# Scalar experimental symbols will have been added by wildcard, so remove them
+math-lib-srcs := $(filter-out $(math-src-dir)/aarch64/experimental/%, $(math-lib-srcs))
 endif
 
 ifeq ($(WANT_SVE_MATH), 0)

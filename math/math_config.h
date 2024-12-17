@@ -117,6 +117,25 @@
 #define __math_check_oflowf arm_math_check_oflowf
 #define __math_check_uflowf arm_math_check_uflowf
 
+#define __exp_data arm_math_exp_data
+#define __asin_poly arm_math_asin_poly
+#define __asinf_poly arm_math_asinf_poly
+#define __asinh_data arm_math_asinh_data
+#define __asinhf_data arm_math_asinhf_data
+#define __atan_poly_data arm_math_atan_poly_data
+#define __atanf_poly_data arm_math_atanf_poly_data
+#define __cbrt_data arm_math_cbrt_data
+#define __cbrtf_data arm_math_cbrtf_data
+#define __erf_data arm_math_erf_data
+#define __expf_data arm_math_expf_data
+#define __expm1_poly arm_math_expm1_poly
+#define __expm1f_poly arm_math_expm1f_poly
+#define __log10_data arm_math_log10_data
+#define __log1p_data arm_math_log1p_data
+#define __log1pf_data arm_math_log1pf_data
+#define __log_data arm_math_log_data
+#define __tanf_poly_data arm_math_tanf_poly_data
+#define __v_log_data arm_math_v_log_data
 #define __sincosf_table arm_math_sincosf_table
 #define __inv_pio4 arm_math_inv_pio4
 #define __exp2f_data arm_math_exp2f_data
@@ -632,5 +651,114 @@ extern const struct v_erfc_data
     double erfc, scale;
   } tab[3488];
 } __v_erfc_data HIDDEN;
+
+/* Table with 4/PI to 192 bit precision.  */
+extern const uint32_t __inv_pio4[] HIDDEN;
+
+#if WANT_EXPERIMENTAL_MATH
+
+# define LOG1P_NCOEFFS 19
+extern const struct log1p_data
+{
+  double coeffs[LOG1P_NCOEFFS];
+} __log1p_data HIDDEN;
+
+# define LOG1PF_2U5
+# define LOG1PF_NCOEFFS 9
+extern const struct log1pf_data
+{
+  float coeffs[LOG1PF_NCOEFFS];
+} __log1pf_data HIDDEN;
+
+# define ASINF_POLY_ORDER 4
+extern const float __asinf_poly[ASINF_POLY_ORDER + 1] HIDDEN;
+
+# define ASIN_POLY_ORDER 11
+extern const double __asin_poly[ASIN_POLY_ORDER + 1] HIDDEN;
+
+# define ASINHF_NCOEFFS 8
+extern const struct asinhf_data
+{
+  float coeffs[ASINHF_NCOEFFS];
+} __asinhf_data HIDDEN;
+
+# define ASINH_NCOEFFS 18
+extern const struct asinh_data
+{
+  double poly[ASINH_NCOEFFS];
+} __asinh_data HIDDEN;
+
+# define ATAN_POLY_NCOEFFS 20
+extern const struct atan_poly_data
+{
+  double poly[ATAN_POLY_NCOEFFS];
+} __atan_poly_data HIDDEN;
+
+# define ATANF_POLY_NCOEFFS 8
+extern const struct atanf_poly_data
+{
+  float poly[ATANF_POLY_NCOEFFS];
+} __atanf_poly_data HIDDEN;
+
+extern const struct cbrtf_data
+{
+  float poly[4];
+  float table[5];
+} __cbrtf_data HIDDEN;
+
+extern const struct cbrt_data
+{
+  double poly[4];
+  double table[5];
+} __cbrt_data HIDDEN;
+
+# define EXPF_TABLE_BITS 5
+# define EXPF_POLY_ORDER 3
+extern const struct expf_data
+{
+  uint64_t tab[1 << EXPF_TABLE_BITS];
+  double invln2_scaled;
+  double poly_scaled[EXPF_POLY_ORDER];
+} __expf_data HIDDEN;
+
+# define EXPM1F_POLY_ORDER 5
+extern const float __expm1f_poly[EXPM1F_POLY_ORDER] HIDDEN;
+
+# define EXPM1_POLY_ORDER 11
+extern const double __expm1_poly[EXPM1_POLY_ORDER] HIDDEN;
+
+/* Data for low accuracy log10 (with 1/ln(10) included in coefficients).  */
+# define LOG10_TABLE_BITS 7
+# define LOG10_POLY_ORDER 6
+# define LOG10_POLY1_ORDER 12
+extern const struct log10_data
+{
+  double ln2hi;
+  double ln2lo;
+  double invln10;
+  double poly[LOG10_POLY_ORDER - 1]; /* First coefficient is 1/log(10).  */
+  double poly1[LOG10_POLY1_ORDER - 1];
+  struct
+  {
+    double invc, logc;
+  } tab[1 << LOG10_TABLE_BITS];
+#  if !HAVE_FAST_FMA
+  struct
+  {
+    double chi, clo;
+  } tab2[1 << LOG10_TABLE_BITS];
+#  endif
+} __log10_data HIDDEN;
+
+# define TANF_P_POLY_NCOEFFS 6
+/* cotan approach needs order 3 on [0, pi/4] to reach <3.5ulps.  */
+# define TANF_Q_POLY_NCOEFFS 4
+extern const struct tanf_poly_data
+{
+  float poly_tan[TANF_P_POLY_NCOEFFS];
+  float poly_cotan[TANF_Q_POLY_NCOEFFS];
+} __tanf_poly_data HIDDEN;
+
+#endif /* WANT_EXPERIMENTAL_MATH.  */
 
 #endif
