@@ -104,52 +104,8 @@ DECL_POW_INT_REF(ref_powi, long double, double, int)
 
 #include "ulp_wrappers_gen.h"
 
-#if USE_MPFR
-static int modf_mpfr_frac(mpfr_t f, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(i, 80); return mpfr_modf(i,f,x,r); }
-static int modf_mpfr_int(mpfr_t i, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(f, 80); return mpfr_modf(i,f,x,r); }
-#endif
-
-float modff_frac(float x) { float i; return modff(x, &i); }
-float modff_int(float x) { float i; modff(x, &i); return i; }
-double modf_frac(double x) { double i; return modf(x, &i); }
-double modf_int(double x) { double i; modf(x, &i); return i; }
-long double modfl_frac(long double x) { long double i; return modfl(x, &i); }
-long double modfl_int(long double x) { long double i; modfl(x, &i); return i; }
-
-#if __linux__
-
-float v_sincosf_sin(float x) { float32x4_t s, c; _ZGVnN4vl4l4_sincosf(vdupq_n_f32(x), &s, &c); return s[0]; }
-float v_sincosf_cos(float x) { float32x4_t s, c; _ZGVnN4vl4l4_sincosf(vdupq_n_f32(x), &s, &c); return c[0]; }
-float v_cexpif_sin(float x) { return _ZGVnN4v_cexpif(vdupq_n_f32(x)).val[0][0]; }
-float v_cexpif_cos(float x) { return _ZGVnN4v_cexpif(vdupq_n_f32(x)).val[1][0]; }
-float v_modff_frac(float x) { float32x4_t y; return _ZGVnN4vl4_modff(vdupq_n_f32(x), &y)[0]; }
-float v_modff_int(float x) { float32x4_t y; _ZGVnN4vl4_modff(vdupq_n_f32(x), &y); return y[0]; }
-
-double v_sincos_sin(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincos(vdupq_n_f64(x), &s, &c); return s[0]; }
-double v_sincos_cos(double x) { float64x2_t s, c; _ZGVnN2vl8l8_sincos(vdupq_n_f64(x), &s, &c); return c[0]; }
-double v_cexpi_sin(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[0][0]; }
-double v_cexpi_cos(double x) { return _ZGVnN2v_cexpi(vdupq_n_f64(x)).val[1][0]; }
-double v_modf_frac(double x) { float64x2_t y; return _ZGVnN2vl8_modf(vdupq_n_f64(x), &y)[0]; }
-double v_modf_int(double x) { float64x2_t y; _ZGVnN2vl8_modf(vdupq_n_f64(x), &y); return y[0]; }
-
-
-# if WANT_SVE_MATH
+#if __linux__ &&  WANT_SVE_MATH
 static float Z_sv_powi(svbool_t pg, float x, float y) { return svretf(_ZGVsMxvv_powi(svargf(x), svdup_s32((int)round(y)), pg), pg); }
 static double Z_sv_powk(svbool_t pg, double x, double y) { return svretd(_ZGVsMxvv_powk(svargd(x), svdup_s64((long)round(y)), pg), pg); }
-
-float sv_sincosf_sin(svbool_t pg, float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, pg); return svretf(svld1(pg, s), pg); }
-float sv_sincosf_cos(svbool_t pg, float x) { float s[svcntw()], c[svcntw()]; _ZGVsMxvl4l4_sincosf(svdup_f32(x), s, c, pg); return svretf(svld1(pg, c), pg); }
-float sv_cexpif_sin(svbool_t pg, float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), pg), 0), pg); }
-float sv_cexpif_cos(svbool_t pg, float x) { return svretf(svget2(_ZGVsMxv_cexpif(svdup_f32(x), pg), 1), pg); }
-float sv_modff_frac(svbool_t pg, float x) { float i[svcntw()]; return svretf(_ZGVsMxvl4_modff(svdup_f32(x), i, pg), pg); }
-float sv_modff_int(svbool_t pg, float x) { float i[svcntw()]; _ZGVsMxvl4_modff(svdup_f32(x), i, pg); return svretf(svld1(pg, i), pg); }
-
-double sv_sincos_sin(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, s), pg); }
-double sv_sincos_cos(svbool_t pg, double x) { double s[svcntd()], c[svcntd()]; _ZGVsMxvl8l8_sincos(svdup_f64(x), s, c, pg); return svretd(svld1(pg, c), pg); }
-double sv_cexpi_sin(svbool_t pg, double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), pg), 0), pg); }
-double sv_cexpi_cos(svbool_t pg, double x) { return svretd(svget2(_ZGVsMxv_cexpi(svdup_f64(x), pg), 1), pg); }
-double sv_modf_frac(svbool_t pg, double x) { double i[svcntd()]; return svretd(_ZGVsMxvl8_modf(svdup_f64(x), i, pg), pg); }
-double sv_modf_int(svbool_t pg, double x) { double i[svcntd()]; _ZGVsMxvl8_modf(svdup_f64(x), i, pg); return svretd(svld1(pg, i), pg); }
-# endif
 #endif
 // clang-format on

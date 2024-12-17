@@ -61,42 +61,19 @@ typedef __attribute__ ((__neon_vector_type__ (2))) double __f64x2_t;
 # if __GNUC__ >= 9 || __clang_major__ >= 8
 #  define __vpcs __attribute__ ((__aarch64_vector_pcs__))
 
-typedef struct __f32x4x2_t
-{
-  __f32x4_t val[2];
-} __f32x4x2_t;
-
-typedef struct __f64x2x2_t
-{
-  __f64x2_t val[2];
-} __f64x2x2_t;
-
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs __f32x4_t _ZGVnN4v_erfinvf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4vl4_modff (__f32x4_t, __f32x4_t *);
-__vpcs __f32x4x2_t _ZGVnN4v_cexpif (__f32x4_t);
-__vpcs void _ZGVnN4vl4l4_sincosf (__f32x4_t, __f32x4_t *, __f32x4_t *);
-
 __vpcs __f64x2_t _ZGVnN2v_erfinv (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2vl8_modf (__f64x2_t, __f64x2_t *);
-__vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
-__vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
 
 # endif
 
 # if WANT_SVE_MATH
 #  include <arm_sve.h>
 svfloat32_t _ZGVsMxv_erfinvf (svfloat32_t, svbool_t);
-svfloat32_t _ZGVsMxvl4_modff (svfloat32_t, float *, svbool_t);
 svfloat32_t _ZGVsMxvv_powi (svfloat32_t, svint32_t, svbool_t);
-svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
-void _ZGVsMxvl4l4_sincosf (svfloat32_t, float *, float *, svbool_t);
 
 svfloat64_t _ZGVsMxv_erfinv (svfloat64_t, svbool_t);
-svfloat64_t _ZGVsMxvl8_modf (svfloat64_t, double *, svbool_t);
 svfloat64_t _ZGVsMxvv_powk (svfloat64_t, svint64_t, svbool_t);
-svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);
-void _ZGVsMxvl8l8_sincos (svfloat64_t, double *, double *, svbool_t);
 #  endif
 
 # endif
