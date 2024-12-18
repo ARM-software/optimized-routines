@@ -62,7 +62,7 @@ check() {
 	$emu ./ulp -f -q "$@"
 }
 
-if [ $WANT_EXPERIMENTAL_MATH -eq 1 ] && [ $WANT_SVE_MATH -eq 1 ] && [ $USE_MPFR -eq 0 ]; then
+if [[ $WANT_EXPERIMENTAL_MATH -eq 1 ]] && [[ $WANT_SVE_MATH -eq 1 ]] && [[ $USE_MPFR -eq 0 ]]; then
     # No guarantees about powi accuracy, so regression-test for exactness
     # w.r.t. the custom reference impl in ulp_wrappers.h
     if [ -z "$FUNC" ] || [ "$FUNC" == "_ZGVsMxvv_powi" ]; then
