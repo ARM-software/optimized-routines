@@ -426,4 +426,4 @@ Z_sv_powk (svbool_t pg, double x, double y)
 # endif // WANT_EXPERIMENTAL_MATH
 #endif // WANT_SVE_MATH
 
-#include "ulp_wrappers_gen.h"
+#include "test/ulp_wrappers_gen.h"

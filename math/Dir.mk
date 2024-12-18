@@ -64,7 +64,6 @@ math-test-srcs := \
 math-test-host-srcs := $(wildcard $(math-src-dir)/test/rtest/*.[cS])
 
 math-includes := $(patsubst $(math-src-dir)/%,build/%,$(wildcard $(math-src-dir)/include/*.h))
-math-test-includes := $(patsubst $(math-src-dir)/%,build/include/%,$(wildcard $(math-src-dir)/test/*.h))
 
 math-libs := \
 	build/lib/libmathlib.so \
@@ -91,12 +90,11 @@ math-files := \
 	$(math-libs) \
 	$(math-tools) \
 	$(math-host-tools) \
-	$(math-includes) \
-	$(math-test-includes) \
+	$(math-includes)
 
-all-math: $(math-libs) $(math-tools) $(math-includes) $(math-test-includes)
+all-math: $(math-libs) $(math-tools) $(math-includes)
 
-$(math-objs): $(math-includes) $(math-test-includes)
+$(math-objs): $(math-includes)
 $(math-objs): CFLAGS_ALL += $(math-cflags)
 $(math-build-dir)/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
@@ -114,7 +112,7 @@ ulp-funcs-dir = build/test/ulp-funcs/
 ulp-wrappers-dir = build/test/ulp-wrappers/
 mathbench-funcs-dir = build/test/mathbench-funcs/
 test-sig-dirs = $(ulp-funcs-dir) $(ulp-wrappers-dir) $(mathbench-funcs-dir)
-$(test-sig-dirs) $(addsuffix /$(ARCH),$(test-sig-dirs)) $(addsuffix /aarch64/experimental,$(test-sig-dirs)) \
+build/include/test $(test-sig-dirs) $(addsuffix /$(ARCH),$(test-sig-dirs)) $(addsuffix /aarch64/experimental,$(test-sig-dirs)) \
 $(addsuffix /aarch64/experimental/advsimd,$(test-sig-dirs)) $(addsuffix /aarch64/experimental/sve,$(test-sig-dirs)) \
 $(addsuffix /aarch64/advsimd,$(test-sig-dirs)) $(addsuffix /aarch64/sve,$(test-sig-dirs)):
 	mkdir -p $@
@@ -141,9 +139,9 @@ ulp-wrappers-gen = build/include/test/ulp_wrappers_gen.h
 mathbench-funcs-gen = build/include/test/mathbench_funcs_gen.h
 math-tools-autogen-headers = $(ulp-funcs-gen) $(ulp-wrappers-gen) $(mathbench-funcs-gen)
 
-$(ulp-funcs-gen): $(ulp-funcs)
-$(ulp-wrappers-gen): $(ulp-wrappers)
-$(mathbench-funcs-gen): $(mathbench-funcs)
+$(ulp-funcs-gen): $(ulp-funcs) | $$(@D)
+$(ulp-wrappers-gen): $(ulp-wrappers) | $$(@D)
+$(mathbench-funcs-gen): $(mathbench-funcs) | $$(@D)
 
 $(math-tools-autogen-headers): | $$(@D)
 	cat $^ | sort -u > $@
@@ -185,9 +183,6 @@ build/bin/ulp: $(math-build-dir)/test/ulp.o build/lib/libmathlib.a
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 build/include/%.h: $(math-src-dir)/include/%.h
-	cp $< $@
-
-build/include/test/%.h: $(math-src-dir)/test/%.h
 	cp $< $@
 
 build/bin/%.sh: $(math-src-dir)/test/%.sh

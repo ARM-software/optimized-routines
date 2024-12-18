@@ -106,4 +106,4 @@ SVF (_ZGVsMxvv_powi, Z_sv_powi, ref_powif, mpfr_powi, 2, 1, f2, 0)
 #define _ZSVD1(f) ZSVD1 (f)
 #define _ZSVD2(f) ZSVD2 (f)
 
-#include "ulp_funcs_gen.h"
+#include "test/ulp_funcs_gen.h"

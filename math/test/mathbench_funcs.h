@@ -118,4 +118,4 @@ SVD (_ZGVsMxv_tanpi, -0.9, 0.9)
 #define _ZSVF2(...)
 #define _ZSVD2(...)
 
-#include "mathbench_funcs_gen.h"
+#include "test/mathbench_funcs_gen.h"
