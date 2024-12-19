@@ -25,6 +25,7 @@ ENTRY (FUNC)
 	dup	z1.b, w1		/* replicate byte across vector */
 	setffr				/* initialize FFR */
 	ptrue	p1.b			/* all ones; loop invariant */
+	cntb    x1
 
 	.p2align 4
 	/* Read a vector's worth of bytes, stopping on first fault.  */
@@ -34,12 +35,12 @@ ENTRY (FUNC)
 
 	/* First fault did not fail: the whole vector is valid.
 	   Avoid depending on the contents of FFR beyond the branch.  */
-	incb	x0				/* speculate increment */
+	add	x0, x0, x1			/* speculate increment with ADD rather than INCB */
 	cmpeq	p2.b, p1/z, z0.b, z1.b		/* search for c */
 	cmpeq	p3.b, p1/z, z0.b, 0		/* search for 0 */
 	orrs	p4.b, p1/z, p2.b, p3.b		/* c | 0 */
 	b.none	0b
-	decb	x0				/* undo speculate */
+	sub	x0, x0, x1			/* undo speculate */
 
 	/* Found C or 0.  */
 1:	brka	p4.b, p1/z, p4.b	/* find first such */

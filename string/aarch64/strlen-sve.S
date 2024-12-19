@@ -18,6 +18,7 @@ ENTRY (__strlen_aarch64_sve)
 	setffr			/* initialize FFR */
 	ptrue	p2.b		/* all ones; loop invariant */
 	mov	x1, 0		/* initialize length */
+	cntb    x2
 
 	/* Read a vector's worth of bytes, stopping on first fault.  */
 	.p2align 4
@@ -27,10 +28,10 @@ ENTRY (__strlen_aarch64_sve)
 
 	/* First fault did not fail: the whole vector is valid.
 	   Avoid depending on the contents of FFR beyond the branch.  */
-	incb	x1, all			/* speculate increment */
+	add	x1, x1, x2		/* speculate increment with ADD rather than INCB */
 	cmpeq	p1.b, p2/z, z0.b, 0	/* loop if no zeros */
 	b.none	0b
-	decb	x1, all			/* undo speculate */
+	sub	x1, x1, x2		/* undo speculate */
 
 	/* Zero found.  Select the bytes before the first and count them.  */
 1:	brkb	p0.b, p2/z, p1.b

@@ -18,6 +18,7 @@ ENTRY (__strcmp_aarch64_sve)
 	setffr				/* initialize FFR */
 	ptrue	p1.b, all		/* all ones; loop invariant */
 	mov	x2, 0			/* initialize offset */
+	cntb    x3
 
 	/* Read a vector's worth of bytes, stopping on first fault.  */
 	.p2align 4
@@ -28,7 +29,7 @@ ENTRY (__strcmp_aarch64_sve)
 
 	/* First fault did not fail: the whole vector is valid.
 	   Avoid depending on the contents of FFR beyond the branch.  */
-	incb	x2, all			/* skip bytes for next round */
+	add	x2, x2, x3		/* skip bytes for next round with ADD rather than INCB */
 	cmpeq	p2.b, p1/z, z0.b, z1.b	/* compare strings */
 	cmpne	p3.b, p1/z, z0.b, 0	/* search for ~zero */
 	nands	p2.b, p1/z, p2.b, p3.b	/* ~(eq & ~zero) -> ne | zero */
