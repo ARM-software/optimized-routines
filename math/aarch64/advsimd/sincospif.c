@@ -18,15 +18,14 @@
    _ZGVnN4v_sincospif_cos(0x1.d341a8p-5) got 0x1.f7cd56p-1 want 0x1.f7cd5p-1.
  */
 VPCS_ATTR void
-_ZGVnN4vl4l4_sincospif (float32x4_t x, float32x4_t *out_sin,
-			float32x4_t *out_cos)
+_ZGVnN4vl4l4_sincospif (float32x4_t x, float *out_sin, float *out_cos)
 {
   const struct v_sincospif_data *d = ptr_barrier (&v_sincospif_data);
 
   float32x4x2_t sc = v_sincospif_inline (x, d);
 
-  vst1q_f32 ((float *) out_sin, sc.val[0]);
-  vst1q_f32 ((float *) out_cos, sc.val[1]);
+  vst1q_f32 (out_sin, sc.val[0]);
+  vst1q_f32 (out_cos, sc.val[1]);
 }
 
 #if WANT_TRIGPI_TESTS

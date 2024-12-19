@@ -10,16 +10,17 @@
 #include "test_defs.h"
 
 /* Modf algorithm. Produces exact values in all rounding modes.  */
-float64x2_t VPCS_ATTR V_NAME_D1_L1 (modf) (float64x2_t x, float64x2_t *out_int)
+float64x2_t VPCS_ATTR V_NAME_D1_L1 (modf) (float64x2_t x, double *out_int)
 {
   /* Get integer component of x.  */
-  *out_int = vrndq_f64 (x);
+  float64x2_t rounded = vrndq_f64 (x);
+  vst1q_f64 (out_int, rounded);
 
   /* Subtract integer component from input.  */
-  uint64x2_t remaining = vreinterpretq_u64_f64 (vsubq_f64 (x, *out_int));
+  uint64x2_t remaining = vreinterpretq_u64_f64 (vsubq_f64 (x, rounded));
 
   /* Return +0 for integer x.  */
-  uint64x2_t is_integer = vceqq_f64 (x, *out_int);
+  uint64x2_t is_integer = vceqq_f64 (x, rounded);
   return vreinterpretq_f64_u64 (vbicq_u64 (remaining, is_integer));
 }
 

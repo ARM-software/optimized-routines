@@ -65,7 +65,7 @@ VND (_ZGVnN2v_tanpi, -0.9, 0.9)
 # endif
 #endif
 
-#if WANT_SVE_MATH
+#if WANT_SVE_TESTS
 { "_ZGVsMxvv_atan2f", 'f', 's', -10.0, 10.0, { .svf = _Z_sv_atan2f_wrap } },
 { "_ZGVsMxvv_atan2", 'd', 's', -10.0, 10.0, { .svd = _Z_sv_atan2_wrap } },
 { "_ZGVsMxvv_hypotf", 'f', 's', -10.0, 10.0, { .svf = _Z_sv_hypotf_wrap } },

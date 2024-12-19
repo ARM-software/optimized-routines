@@ -82,109 +82,87 @@ long double erfinvl (long double);
 #endif
 
 #if __aarch64__ && __linux__
-# if __GNUC__ >= 5
-typedef __Float32x4_t __f32x4_t;
-typedef __Float64x2_t __f64x2_t;
-# elif __clang_major__*100+__clang_minor__ >= 305
-typedef __attribute__((__neon_vector_type__(4))) float __f32x4_t;
-typedef __attribute__((__neon_vector_type__(2))) double __f64x2_t;
-# else
-#  error Unsupported compiler
-# endif
-
-# if __GNUC__ >= 9 || __clang_major__ >= 8
-#  undef __vpcs
-#  define __vpcs __attribute__((__aarch64_vector_pcs__))
-
-typedef struct __f32x4x2_t
-{
-  __f32x4_t val[2];
-} __f32x4x2_t;
-
-typedef struct __f64x2x2_t
-{
-  __f64x2_t val[2];
-} __f64x2x2_t;
+# include <arm_neon.h>
+# undef __vpcs
+# define __vpcs __attribute__((__aarch64_vector_pcs__))
 
 /* Vector functions following the vector PCS using ABI names.  */
-__vpcs __f32x4_t _ZGVnN4v_acosf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_acoshf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_asinf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_asinhf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_atanf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_atanhf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_cbrtf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_cosf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_coshf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_cospif (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_erfcf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_erff (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_exp10f (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_exp2f (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_exp2f_1u (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_expf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_expf_1u (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_expm1f (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_log10f (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_log1pf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_log2f (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_logf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_sinf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_sinhf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_sinpif (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_tanf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_tanhf (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4v_tanpif (__f32x4_t);
-__vpcs __f32x4_t _ZGVnN4vl4_modff (__f32x4_t, __f32x4_t *);
-__vpcs __f32x4_t _ZGVnN4vv_atan2f (__f32x4_t, __f32x4_t);
-__vpcs __f32x4_t _ZGVnN4vv_hypotf (__f32x4_t, __f32x4_t);
-__vpcs __f32x4_t _ZGVnN4vv_powf (__f32x4_t, __f32x4_t);
-__vpcs __f32x4x2_t _ZGVnN4v_cexpif (__f32x4_t);
-__vpcs void _ZGVnN4vl4l4_sincosf (__f32x4_t, __f32x4_t *, __f32x4_t *);
-__vpcs void _ZGVnN4vl4l4_sincospif (__f32x4_t, __f32x4_t *, __f32x4_t *);
+__vpcs float32x4_t _ZGVnN4v_acosf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_acoshf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_asinf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_asinhf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_atanf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_atanhf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_cbrtf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_cosf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_coshf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_cospif (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_erfcf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_erff (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_exp10f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_exp2f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_exp2f_1u (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_expf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_expf_1u (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_expm1f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_log10f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_log1pf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_log2f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_logf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_sinf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_sinhf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_sinpif (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_tanf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_tanhf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_tanpif (float32x4_t);
+__vpcs float32x4_t _ZGVnN4vl4_modff (float32x4_t, float *);
+__vpcs float32x4_t _ZGVnN4vv_atan2f (float32x4_t, float32x4_t);
+__vpcs float32x4_t _ZGVnN4vv_hypotf (float32x4_t, float32x4_t);
+__vpcs float32x4_t _ZGVnN4vv_powf (float32x4_t, float32x4_t);
+__vpcs float32x4x2_t _ZGVnN4v_cexpif (float32x4_t);
+__vpcs void _ZGVnN4vl4l4_sincosf (float32x4_t, float *, float *);
+__vpcs void _ZGVnN4vl4l4_sincospif (float32x4_t, float *, float *);
 
-__vpcs __f64x2_t _ZGVnN2v_acos (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_acosh (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_asin (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_asinh (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_atan (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_atanh (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_cbrt (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_cos (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_cosh (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_cospi (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_erf (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_erfc (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_exp (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_exp10 (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_exp2 (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_expm1 (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_log (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_log10 (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_log1p (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_log2 (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_sin (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_sinh (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_sinpi (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_tan (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_tanh (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2v_tanpi (__f64x2_t);
-__vpcs __f64x2_t _ZGVnN2vl8_modf (__f64x2_t, __f64x2_t *);
-__vpcs __f64x2_t _ZGVnN2vv_atan2 (__f64x2_t, __f64x2_t);
-__vpcs __f64x2_t _ZGVnN2vv_hypot (__f64x2_t, __f64x2_t);
-__vpcs __f64x2_t _ZGVnN2vv_pow (__f64x2_t, __f64x2_t);
-__vpcs __f64x2x2_t _ZGVnN2v_cexpi (__f64x2_t);
-__vpcs void _ZGVnN2vl8l8_sincos (__f64x2_t, __f64x2_t *, __f64x2_t *);
-__vpcs void _ZGVnN2vl8l8_sincospi (__f64x2_t, __f64x2_t *, __f64x2_t *);
+__vpcs float64x2_t _ZGVnN2v_acos (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_acosh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_asin (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_asinh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_atan (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_atanh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_cbrt (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_cos (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_cosh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_cospi (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_erf (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_erfc (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_exp (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_exp10 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_exp2 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_expm1 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_log (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_log10 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_log1p (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_log2 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_sin (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_sinh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_sinpi (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_tan (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_tanh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_tanpi (float64x2_t);
+__vpcs float64x2_t _ZGVnN2vl8_modf (float64x2_t, double *);
+__vpcs float64x2_t _ZGVnN2vv_atan2 (float64x2_t, float64x2_t);
+__vpcs float64x2_t _ZGVnN2vv_hypot (float64x2_t, float64x2_t);
+__vpcs float64x2_t _ZGVnN2vv_pow (float64x2_t, float64x2_t);
+__vpcs float64x2x2_t _ZGVnN2v_cexpi (float64x2_t);
+__vpcs void _ZGVnN2vl8l8_sincos (float64x2_t, double *, double *);
+__vpcs void _ZGVnN2vl8l8_sincospi (float64x2_t, double *, double *);
 
-#  if WANT_EXPERIMENTAL_MATH
-__vpcs __f32x4_t _ZGVnN4v_erfinvf (__f32x4_t);
-__vpcs __f64x2_t _ZGVnN2v_erfinv (__f64x2_t);
-#  endif
-
+# if WANT_EXPERIMENTAL_MATH
+__vpcs float32x4_t _ZGVnN4v_erfinvf (float32x4_t);
+__vpcs float64x2_t _ZGVnN2v_erfinv (float64x2_t);
 # endif
 
-# if WANT_SVE_MATH
+# ifdef __ARM_FEATURE_SVE
 #  include <arm_sve.h>
 svfloat32_t _ZGVsMxv_acosf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_acoshf (svfloat32_t, svbool_t);

@@ -51,11 +51,6 @@ else
 math-lib-srcs := $(filter-out $(math-src-dir)/aarch64/experimental/%, $(math-lib-srcs))
 endif
 
-ifeq ($(WANT_SVE_MATH), 0)
-math-lib-srcs := $(filter-out $(math-src-dir)/aarch64/sve/%, $(math-lib-srcs))
-math-lib-srcs := $(filter-out $(math-src-dir)/aarch64/experimental/sve/%, $(math-lib-srcs))
-endif
-
 math-test-srcs := \
 	$(math-src-dir)/test/mathtest.c \
 	$(math-src-dir)/test/mathbench.c \
@@ -121,6 +116,13 @@ ulp-funcs = $(patsubst $(math-src-dir)/%,$(ulp-funcs-dir)/%,$(basename $(math-li
 ulp-wrappers = $(patsubst $(math-src-dir)/%,$(ulp-wrappers-dir)/%,$(basename $(math-lib-srcs)))
 mathbench-funcs = $(patsubst $(math-src-dir)/%,$(mathbench-funcs-dir)/%,$(basename $(math-lib-srcs)))
 
+ifeq ($(WANT_SVE_TESTS), 0)
+  # Filter out anything with sve in the path
+  ulp-funcs := $(foreach a,$(ulp-funcs),$(if $(findstring sve,$a),,$a))
+  ulp-wrappers := $(foreach a,$(ulp-wrappers),$(if $(findstring sve,$a),,$a))
+  mathbench-funcs := $(foreach a,$(mathbench-funcs),$(if $(findstring sve,$a),,$a))
+endif
+
 define emit_sig
 $1/aarch64/experimental/sve/%.i: EXTRA_INC = -I$(math-src-dir)/aarch64/sve
 $1/aarch64/experimental/advsimd/%.i: EXTRA_INC = -I$(math-src-dir)/aarch64/advsimd
@@ -160,8 +162,10 @@ build/lib/libmathlib.a: $(math-lib-objs)
 $(math-host-tools): HOST_LDLIBS += $(libm-libs) $(mpfr-libs) $(mpc-libs)
 $(math-tools): LDLIBS += $(math-ldlibs) $(libm-libs)
 
-# math-sve-cflags should be empty if WANT_SVE_MATH is not enabled
+ifeq ($(WANT_SVE_TESTS), 1)
 $(math-tools): CFLAGS_ALL += $(math-sve-cflags)
+endif
+
 ifneq ($(OS),Darwin)
   $(math-tools): LDFLAGS += -static
 endif
@@ -279,7 +283,7 @@ check-math-ulp: $(math-tools)
 	CVALS=../../$(ulp-cvals) \
 	FUNC=$(func) \
 	WANT_EXPERIMENTAL_MATH=$(WANT_EXPERIMENTAL_MATH) \
-	WANT_SVE_MATH=$(WANT_SVE_MATH) \
+	WANT_SVE_TESTS=$(WANT_SVE_TESTS) \
 	USE_MPFR=$(USE_MPFR) \
 	build/bin/runulp.sh $(EMULATOR)
 

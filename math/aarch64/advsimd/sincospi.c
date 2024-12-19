@@ -19,15 +19,14 @@
   _ZGVnN2v_sincospi_cos(-0x1.11e3c7e284adep-5) got 0x1.fd2da484ff3ffp-1
 					      want 0x1.fd2da484ff402p-1.  */
 VPCS_ATTR void
-_ZGVnN2vl8l8_sincospi (float64x2_t x, float64x2_t *out_sin,
-		       float64x2_t *out_cos)
+_ZGVnN2vl8l8_sincospi (float64x2_t x, double *out_sin, double *out_cos)
 {
   const struct v_sincospi_data *d = ptr_barrier (&v_sincospi_data);
 
   float64x2x2_t sc = v_sincospi_inline (x, d);
 
-  vst1q_f64 ((double *) out_sin, sc.val[0]);
-  vst1q_f64 ((double *) out_cos, sc.val[1]);
+  vst1q_f64 (out_sin, sc.val[0]);
+  vst1q_f64 (out_cos, sc.val[1]);
 }
 
 #if WANT_TRIGPI_TESTS

@@ -98,17 +98,6 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 # Use with clang.
 #math-cflags += -ffp-contract=fast
 
-# Disable/enable SVE vector math code and tests.
-# If WANT_SVE_MATH is enabled, math-sve-cflags is added for SVE
-# routines only so that SVE code does not leak into scalar
-# routines. It is also necessary to add it for tools (e.g. ulp,
-# mathbench)
-WANT_SVE_MATH = 0
-ifeq ($(WANT_SVE_MATH), 1)
-  math-sve-cflags = -march=armv8-a+sve
-endif
-math-cflags += -DWANT_SVE_MATH=$(WANT_SVE_MATH)
-
 # If defined to 1, set errno in math functions according to ISO C.  Many math
 # libraries do not set errno, so this is 0 by default.  It may need to be
 # set to 1 if math.h has (math_errhandling & MATH_ERRNO) != 0.
@@ -126,6 +115,15 @@ else
   WANT_SIMD_TESTS = 0
 endif
 math-cflags += -DWANT_SIMD_TESTS=$(WANT_SIMD_TESTS)
+
+# Disable/enable SVE vector math tests/tools.
+# Note math-sve-cflags is added for SVE routines only so that SVE code
+# does not leak into scalar routines
+WANT_SVE_TESTS = 1
+# Arch flag to enable SVE - this is only used for tools and tests if
+# WANT_SVE_TESTS is enabled
+math-sve-cflags = -march=armv8-a+sve
+math-cflags += -DWANT_SVE_TESTS=$(WANT_SVE_TESTS)
 
 # If set to 1, set fenv in vector math routines.
 WANT_SIMD_EXCEPT = 0

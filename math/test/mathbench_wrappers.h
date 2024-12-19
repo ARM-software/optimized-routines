@@ -27,249 +27,249 @@ powi_wrap (double x)
 
 #if WANT_SIMD_TESTS
 
-__vpcs static v_float
-_Z_sincospif_wrap (v_float x)
+__vpcs static float32x4_t
+_Z_sincospif_wrap (float32x4_t x)
 {
-  v_float s, c;
-  _ZGVnN4vl4l4_sincospif (x, &s, &c);
-  return s + c;
+  float s[4], c[4];
+  _ZGVnN4vl4l4_sincospif (x, s, c);
+  return vld1q_f32 (s) + vld1q_f32 (c);
 }
 
-__vpcs static v_double
-_Z_sincospi_wrap (v_double x)
+__vpcs static float64x2_t
+_Z_sincospi_wrap (float64x2_t x)
 {
-  v_double s, c;
-  _ZGVnN2vl8l8_sincospi (x, &s, &c);
-  return s + c;
+  double s[2], c[2];
+  _ZGVnN2vl8l8_sincospi (x, s, c);
+  return vld1q_f64 (s) + vld1q_f64 (c);
 }
 
-__vpcs static v_double
-_Z_atan2_wrap (v_double x)
+__vpcs static float64x2_t
+_Z_atan2_wrap (float64x2_t x)
 {
-  return _ZGVnN2vv_atan2 (v_double_dup (5.0), x);
+  return _ZGVnN2vv_atan2 (vdupq_n_f64 (5.0), x);
 }
 
-__vpcs static v_float
-_Z_atan2f_wrap (v_float x)
+__vpcs static float32x4_t
+_Z_atan2f_wrap (float32x4_t x)
 {
-  return _ZGVnN4vv_atan2f (v_float_dup (5.0f), x);
+  return _ZGVnN4vv_atan2f (vdupq_n_f32 (5.0f), x);
 }
 
-__vpcs static v_float
-_Z_hypotf_wrap (v_float x)
+__vpcs static float32x4_t
+_Z_hypotf_wrap (float32x4_t x)
 {
-  return _ZGVnN4vv_hypotf (v_float_dup (5.0f), x);
+  return _ZGVnN4vv_hypotf (vdupq_n_f32 (5.0f), x);
 }
 
-__vpcs static v_double
-_Z_hypot_wrap (v_double x)
+__vpcs static float64x2_t
+_Z_hypot_wrap (float64x2_t x)
 {
-  return _ZGVnN2vv_hypot (v_double_dup (5.0), x);
+  return _ZGVnN2vv_hypot (vdupq_n_f64 (5.0), x);
 }
 
-__vpcs static v_float
-xy_Z_powf (v_float x)
+__vpcs static float32x4_t
+xy_Z_powf (float32x4_t x)
 {
   return _ZGVnN4vv_powf (x, x);
 }
 
-__vpcs static v_float
-x_Z_powf (v_float x)
+__vpcs static float32x4_t
+x_Z_powf (float32x4_t x)
 {
-  return _ZGVnN4vv_powf (x, v_float_dup (23.4));
+  return _ZGVnN4vv_powf (x, vdupq_n_f32 (23.4));
 }
 
-__vpcs static v_float
-y_Z_powf (v_float x)
+__vpcs static float32x4_t
+y_Z_powf (float32x4_t x)
 {
-  return _ZGVnN4vv_powf (v_float_dup (2.34), x);
+  return _ZGVnN4vv_powf (vdupq_n_f32 (2.34), x);
 }
 
-__vpcs static v_double
-xy_Z_pow (v_double x)
+__vpcs static float64x2_t
+xy_Z_pow (float64x2_t x)
 {
   return _ZGVnN2vv_pow (x, x);
 }
 
-__vpcs static v_double
-x_Z_pow (v_double x)
+__vpcs static float64x2_t
+x_Z_pow (float64x2_t x)
 {
-  return _ZGVnN2vv_pow (x, v_double_dup (23.4));
+  return _ZGVnN2vv_pow (x, vdupq_n_f64 (23.4));
 }
 
-__vpcs static v_double
-y_Z_pow (v_double x)
+__vpcs static float64x2_t
+y_Z_pow (float64x2_t x)
 {
-  return _ZGVnN2vv_pow (v_double_dup (2.34), x);
+  return _ZGVnN2vv_pow (vdupq_n_f64 (2.34), x);
 }
 
-__vpcs static v_float
-_Z_modff_wrap (v_float x)
+__vpcs static float32x4_t
+_Z_modff_wrap (float32x4_t x)
 {
-  v_float y;
-  v_float ret = _ZGVnN4vl4_modff (x, &y);
-  return ret + y;
+  float y[4];
+  float32x4_t ret = _ZGVnN4vl4_modff (x, y);
+  return ret + vld1q_f32 (y);
 }
 
-__vpcs static v_double
-_Z_modf_wrap (v_double x)
+__vpcs static float64x2_t
+_Z_modf_wrap (float64x2_t x)
 {
-  v_double y;
-  v_double ret = _ZGVnN2vl8_modf (x, &y);
-  return ret + y;
+  double y[2];
+  float64x2_t ret = _ZGVnN2vl8_modf (x, y);
+  return ret + vld1q_f64 (y);
 }
 
-__vpcs static v_float
-_Z_sincosf_wrap (v_float x)
+__vpcs static float32x4_t
+_Z_sincosf_wrap (float32x4_t x)
 {
-  v_float s, c;
-  _ZGVnN4vl4l4_sincosf (x, &s, &c);
-  return s + c;
+  float s[4], c[4];
+  _ZGVnN4vl4l4_sincosf (x, s, c);
+  return vld1q_f32 (s) + vld1q_f32 (c);
 }
 
-__vpcs static v_float
-_Z_cexpif_wrap (v_float x)
+__vpcs static float32x4_t
+_Z_cexpif_wrap (float32x4_t x)
 {
-  __f32x4x2_t sc = _ZGVnN4v_cexpif (x);
+  float32x4x2_t sc = _ZGVnN4v_cexpif (x);
   return sc.val[0] + sc.val[1];
 }
 
-__vpcs static v_double
-_Z_sincos_wrap (v_double x)
+__vpcs static float64x2_t
+_Z_sincos_wrap (float64x2_t x)
 {
-  v_double s, c;
-  _ZGVnN2vl8l8_sincos (x, &s, &c);
-  return s + c;
+  double s[2], c[2];
+  _ZGVnN2vl8l8_sincos (x, s, c);
+  return vld1q_f64 (s) + vld1q_f64 (c);
 }
 
-__vpcs static v_double
-_Z_cexpi_wrap (v_double x)
+__vpcs static float64x2_t
+_Z_cexpi_wrap (float64x2_t x)
 {
-  __f64x2x2_t sc = _ZGVnN2v_cexpi (x);
+  float64x2x2_t sc = _ZGVnN2v_cexpi (x);
   return sc.val[0] + sc.val[1];
 }
 
 #endif
 
-#if WANT_SVE_MATH
+#if WANT_SVE_TESTS
 
-static sv_float
-_Z_sv_atan2f_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_atan2f_wrap (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_atan2f (x, svdup_f32 (5.0f), pg);
 }
 
-static sv_double
-_Z_sv_atan2_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_atan2_wrap (svfloat64_t x, svbool_t pg)
 {
   return _ZGVsMxvv_atan2 (x, svdup_f64 (5.0), pg);
 }
 
-static sv_float
-_Z_sv_hypotf_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_hypotf_wrap (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_hypotf (x, svdup_f32 (5.0), pg);
 }
 
-static sv_double
-_Z_sv_hypot_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_hypot_wrap (svfloat64_t x, svbool_t pg)
 {
   return _ZGVsMxvv_hypot (x, svdup_f64 (5.0), pg);
 }
 
-static sv_float
-xy_Z_sv_powf (sv_float x, sv_bool pg)
+static svfloat32_t
+xy_Z_sv_powf (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_powf (x, x, pg);
 }
 
-static sv_float
-x_Z_sv_powf (sv_float x, sv_bool pg)
+static svfloat32_t
+x_Z_sv_powf (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_powf (x, svdup_f32 (23.4f), pg);
 }
 
-static sv_float
-y_Z_sv_powf (sv_float x, sv_bool pg)
+static svfloat32_t
+y_Z_sv_powf (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_powf (svdup_f32 (2.34f), x, pg);
 }
 
-static sv_double
-xy_Z_sv_pow (sv_double x, sv_bool pg)
+static svfloat64_t
+xy_Z_sv_pow (svfloat64_t x, svbool_t pg)
 {
   return _ZGVsMxvv_pow (x, x, pg);
 }
 
-static sv_double
-x_Z_sv_pow (sv_double x, sv_bool pg)
+static svfloat64_t
+x_Z_sv_pow (svfloat64_t x, svbool_t pg)
 {
   return _ZGVsMxvv_pow (x, svdup_f64 (23.4), pg);
 }
 
-static sv_double
-y_Z_sv_pow (sv_double x, sv_bool pg)
+static svfloat64_t
+y_Z_sv_pow (svfloat64_t x, svbool_t pg)
 {
   return _ZGVsMxvv_pow (svdup_f64 (2.34), x, pg);
 }
 
-static sv_float
-_Z_sv_sincospif_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_sincospif_wrap (svfloat32_t x, svbool_t pg)
 {
   float s[svcntw ()], c[svcntw ()];
   _ZGVsMxvl4l4_sincospif (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
 }
 
-static sv_double
-_Z_sv_sincospi_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_sincospi_wrap (svfloat64_t x, svbool_t pg)
 {
   double s[svcntd ()], c[svcntd ()];
   _ZGVsMxvl8l8_sincospi (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
 }
 
-static sv_float
-_Z_sv_modff_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_modff_wrap (svfloat32_t x, svbool_t pg)
 {
   float i[svcntw ()];
   svfloat32_t r = _ZGVsMxvl4_modff (x, i, pg);
   return svadd_x (pg, r, svld1 (pg, i));
 }
 
-static sv_double
-_Z_sv_modf_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_modf_wrap (svfloat64_t x, svbool_t pg)
 {
   double i[svcntd ()];
   svfloat64_t r = _ZGVsMxvl8_modf (x, i, pg);
   return svadd_x (pg, r, svld1 (pg, i));
 }
 
-static sv_float
-_Z_sv_sincosf_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_sincosf_wrap (svfloat32_t x, svbool_t pg)
 {
   float s[svcntw ()], c[svcntw ()];
   _ZGVsMxvl4l4_sincosf (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
 }
 
-static sv_float
-_Z_sv_cexpif_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_cexpif_wrap (svfloat32_t x, svbool_t pg)
 {
   svfloat32x2_t sc = _ZGVsMxv_cexpif (x, pg);
   return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
 
-static sv_double
-_Z_sv_sincos_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_sincos_wrap (svfloat64_t x, svbool_t pg)
 {
   double s[svcntd ()], c[svcntd ()];
   _ZGVsMxvl8l8_sincos (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, s));
 }
 
-static sv_double
-_Z_sv_cexpi_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_cexpi_wrap (svfloat64_t x, svbool_t pg)
 {
   svfloat64x2_t sc = _ZGVsMxv_cexpi (x, pg);
   return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
@@ -277,14 +277,14 @@ _Z_sv_cexpi_wrap (sv_double x, sv_bool pg)
 
 # if WANT_EXPERIMENTAL_MATH
 
-static sv_float
-_Z_sv_powi_wrap (sv_float x, sv_bool pg)
+static svfloat32_t
+_Z_sv_powi_wrap (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_powi (x, svcvt_s32_f32_x (pg, x), pg);
 }
 
-static sv_double
-_Z_sv_powk_wrap (sv_double x, sv_bool pg)
+static svfloat64_t
+_Z_sv_powk_wrap (svfloat64_t x, svbool_t pg)
 {
   return _ZGVsMxvv_powk (x, svcvt_s64_f64_x (pg, x), pg);
 }

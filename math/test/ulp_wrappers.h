@@ -137,29 +137,29 @@ ZVND1_WRAP (tanpi)
 double
 v_sincospi_sin (double x)
 {
-  float64x2_t s, c;
-  _ZGVnN2vl8l8_sincospi (vdupq_n_f64 (x), &s, &c);
+  double s[2], c[2];
+  _ZGVnN2vl8l8_sincospi (vdupq_n_f64 (x), s, c);
   return s[0];
 }
 double
 v_sincospi_cos (double x)
 {
-  float64x2_t s, c;
-  _ZGVnN2vl8l8_sincospi (vdupq_n_f64 (x), &s, &c);
+  double s[2], c[2];
+  _ZGVnN2vl8l8_sincospi (vdupq_n_f64 (x), s, c);
   return c[0];
 }
 float
 v_sincospif_sin (float x)
 {
-  float32x4_t s, c;
-  _ZGVnN4vl4l4_sincospif (vdupq_n_f32 (x), &s, &c);
+  float s[4], c[4];
+  _ZGVnN4vl4l4_sincospif (vdupq_n_f32 (x), s, c);
   return s[0];
 }
 float
 v_sincospif_cos (float x)
 {
-  float32x4_t s, c;
-  _ZGVnN4vl4l4_sincospif (vdupq_n_f32 (x), &s, &c);
+  float s[4], c[4];
+  _ZGVnN4vl4l4_sincospif (vdupq_n_f32 (x), s, c);
   return c[0];
 }
 # endif // WANT_TRIGPI_TESTS
@@ -167,15 +167,15 @@ v_sincospif_cos (float x)
 float
 v_sincosf_sin (float x)
 {
-  float32x4_t s, c;
-  _ZGVnN4vl4l4_sincosf (vdupq_n_f32 (x), &s, &c);
+  float s[4], c[4];
+  _ZGVnN4vl4l4_sincosf (vdupq_n_f32 (x), s, c);
   return s[0];
 }
 float
 v_sincosf_cos (float x)
 {
-  float32x4_t s, c;
-  _ZGVnN4vl4l4_sincosf (vdupq_n_f32 (x), &s, &c);
+  float s[4], c[4];
+  _ZGVnN4vl4l4_sincosf (vdupq_n_f32 (x), s, c);
   return c[0];
 }
 float
@@ -191,28 +191,28 @@ v_cexpif_cos (float x)
 float
 v_modff_frac (float x)
 {
-  float32x4_t y;
-  return _ZGVnN4vl4_modff (vdupq_n_f32 (x), &y)[0];
+  float y[4];
+  return _ZGVnN4vl4_modff (vdupq_n_f32 (x), y)[0];
 }
 float
 v_modff_int (float x)
 {
-  float32x4_t y;
-  _ZGVnN4vl4_modff (vdupq_n_f32 (x), &y);
+  float y[4];
+  _ZGVnN4vl4_modff (vdupq_n_f32 (x), y);
   return y[0];
 }
 double
 v_sincos_sin (double x)
 {
-  float64x2_t s, c;
-  _ZGVnN2vl8l8_sincos (vdupq_n_f64 (x), &s, &c);
+  double s[2], c[2];
+  _ZGVnN2vl8l8_sincos (vdupq_n_f64 (x), s, c);
   return s[0];
 }
 double
 v_sincos_cos (double x)
 {
-  float64x2_t s, c;
-  _ZGVnN2vl8l8_sincos (vdupq_n_f64 (x), &s, &c);
+  double s[2], c[2];
+  _ZGVnN2vl8l8_sincos (vdupq_n_f64 (x), s, c);
   return c[0];
 }
 double
@@ -228,19 +228,19 @@ v_cexpi_cos (double x)
 double
 v_modf_frac (double x)
 {
-  float64x2_t y;
-  return _ZGVnN2vl8_modf (vdupq_n_f64 (x), &y)[0];
+  double y[2];
+  return _ZGVnN2vl8_modf (vdupq_n_f64 (x), y)[0];
 }
 double
 v_modf_int (double x)
 {
-  float64x2_t y;
-  _ZGVnN2vl8_modf (vdupq_n_f64 (x), &y);
+  double y[2];
+  _ZGVnN2vl8_modf (vdupq_n_f64 (x), y);
   return y[0];
 }
 #endif // WANT_SIMD_TESTS
 
-#if WANT_SVE_MATH
+#if WANT_SVE_TESTS
 # define ZSVNF1_WRAP(func)                                                   \
     static float Z_sv_##func##f (svbool_t pg, float x)                        \
     {                                                                         \
@@ -424,6 +424,6 @@ Z_sv_powk (svbool_t pg, double x, double y)
 }
 
 # endif // WANT_EXPERIMENTAL_MATH
-#endif // WANT_SVE_MATH
+#endif	// WANT_SVE_TESTS
 
 #include "test/ulp_wrappers_gen.h"
