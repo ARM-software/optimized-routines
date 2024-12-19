@@ -49,6 +49,7 @@ float atanf (float);
 float atanhf (float);
 float cbrtf (float);
 float coshf (float);
+float cospif (float);
 float erfcf (float);
 float erfcf (float);
 float erfinvf (float);
@@ -56,8 +57,10 @@ float expm1f (float);
 float log10f (float);
 float log1pf (float);
 float sinhf (float);
+float sinpif (float);
 float tanf (float);
 float tanhf (float);
+float tanpif (float);
 
 double acos (double);
 double acosh (double);
@@ -69,13 +72,16 @@ double atan2 (double, double);
 double atanh (double);
 double cbrt (double);
 double cosh (double);
+double cospi (double);
 double erfc (double);
 double erfinv (double);
 double expm1 (double);
 double log10 (double);
 double log1p (double);
 double sinh (double);
+double sinpi (double);
 double tanh (double);
+double tanpi (double);
 
 long double erfinvl (long double);
 

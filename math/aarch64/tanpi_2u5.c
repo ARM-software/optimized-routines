@@ -141,6 +141,14 @@ arm_math_tanpi (double x)
   return fma (scale, result, offset);
 }
 
+#if WANT_EXPERIMENTAL_MATH
+double
+tanpi (double x)
+{
+  return arm_math_tanpi (x);
+}
+#endif
+
 #if WANT_TRIGPI_TESTS
 TEST_ULP (arm_math_tanpi, 1.69)
 TEST_SYM_INTERVAL (arm_math_tanpi, 0, 0x1p-63, 50000)

@@ -128,6 +128,14 @@ arm_math_tanpif (float x)
   return fmaf (scale, result, offset);
 }
 
+#if WANT_EXPERIMENTAL_MATH
+float
+tanpif (float x)
+{
+  return arm_math_tanpif (x);
+}
+#endif
+
 #if WANT_TRIGPI_TESTS
 TEST_ULP (arm_math_tanpif, 2.57)
 TEST_SYM_INTERVAL (arm_math_tanpif, 0, 0x1p-31f, 50000)

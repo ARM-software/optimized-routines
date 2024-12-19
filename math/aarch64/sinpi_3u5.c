@@ -84,6 +84,14 @@ arm_math_sinpi (double x)
   return asdouble (asuint64 (y) ^ sign);
 }
 
+#if WANT_EXPERIMENTAL_MATH
+double
+sinpi (double x)
+{
+  return arm_math_sinpi (x);
+}
+#endif
+
 #if WANT_TRIGPI_TESTS
 TEST_ULP (arm_math_sinpi, 2.53)
 TEST_SYM_INTERVAL (arm_math_sinpi, 0, 0x1p-63, 5000)

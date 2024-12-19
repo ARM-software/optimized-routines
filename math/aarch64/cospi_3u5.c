@@ -81,6 +81,14 @@ arm_math_cospi (double x)
   return asdouble (asuint64 (y) ^ sign);
 }
 
+#if WANT_EXPERIMENTAL_MATH
+double
+cospi (double x)
+{
+  return arm_math_cospi (x);
+}
+#endif
+
 #if WANT_TRIGPI_TESTS
 TEST_ULP (arm_math_cospi, 2.63)
 TEST_SYM_INTERVAL (arm_math_cospi, 0, 0x1p-63, 5000)

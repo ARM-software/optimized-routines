@@ -75,6 +75,14 @@ arm_math_sinpif (float x)
   return asfloat (asuint (y * r) ^ sign);
 }
 
+#if WANT_EXPERIMENTAL_MATH
+float
+sinpif (float x)
+{
+  return arm_math_sinpif (x);
+}
+#endif
+
 #if WANT_TRIGPI_TESTS
 TEST_ULP (arm_math_sinpif, 1.99)
 TEST_SYM_INTERVAL (arm_math_sinpif, 0, 0x1p-31, 5000)

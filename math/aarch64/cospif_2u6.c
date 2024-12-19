@@ -76,6 +76,14 @@ arm_math_cospif (float x)
   return asfloat (asuint (y * r) ^ sign);
 }
 
+#if WANT_EXPERIMENTAL_MATH
+float
+cospif (float x)
+{
+  return arm_math_cospif (x);
+}
+#endif
+
 #if WANT_TRIGPI_TESTS
 TEST_ULP (arm_math_cospif, 2.15)
 TEST_SYM_INTERVAL (arm_math_cospif, 0, 0x1p-31, 5000)
