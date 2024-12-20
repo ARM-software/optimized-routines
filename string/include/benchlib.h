@@ -30,4 +30,29 @@ rand32 (uint32_t seed)
   return res;
 }
 
+/* Macros to run a benchmark BENCH using string function FN.  */
+#define RUN(BENCH, FN) BENCH(#FN, FN)
 
+#if __aarch64__
+# define RUNA64(BENCH, FN) BENCH(#FN, FN)
+#else
+# define RUNA64(BENCH, FN)
+#endif
+
+#if __ARM_FEATURE_SVE
+# define RUNSVE(BENCH, FN) BENCH(#FN, FN)
+#else
+# define RUNSVE(BENCH, FN)
+#endif
+
+#if WANT_MOPS
+# define RUNMOPS(BENCH, FN) BENCH(#FN, FN)
+#else
+# define RUNMOPS(BENCH, FN)
+#endif
+
+#if __arm__
+# define RUNA32(BENCH, FN) BENCH(#FN, FN)
+#else
+# define RUNA32(BENCH, FN)
+#endif
