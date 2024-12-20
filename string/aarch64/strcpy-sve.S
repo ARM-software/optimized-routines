@@ -25,6 +25,8 @@ ENTRY (FUNC)
 	setffr				/* initialize FFR */
 	ptrue	p2.b, all		/* all ones; loop invariant */
 	mov	x2, 0			/* initialize offset */
+	cntb	x3				/* initialize stride, this is the number of
+						   byte-sized elements in a SVE register */
 
 	.p2align 4
 	/* Read a vector's worth of bytes, stopping on first fault.  */
@@ -39,7 +41,7 @@ ENTRY (FUNC)
 
 	/* No zero found.  Store the whole vector and loop.  */
 	st1b	z0.b, p2, [x0, x2]
-	incb	x2, all
+	add	x2, x2, x3		/* add stride because we're storing the whole vector */
 	b	0b
 
 	/* First fault failed: only some of the vector is valid.
