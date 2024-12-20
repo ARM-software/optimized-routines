@@ -7,7 +7,8 @@
 
 #include "asmdefs.h"
 
-#if __ARM_FEATURE_SVE
+.arch armv8-a+sve
+
 /* Assumptions:
  *
  * ARMv8-a, AArch64
@@ -78,6 +79,3 @@ ENTRY (__strrchr_aarch64_sve)
 	ret
 
 END (__strrchr_aarch64_sve)
-
-#endif
-

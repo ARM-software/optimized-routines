@@ -33,9 +33,7 @@ static const struct fun
 {
 #if __aarch64__
   F(__memcpy_aarch64)
-# if __ARM_NEON
   F(__memcpy_aarch64_simd)
-# endif
 # if __ARM_FEATURE_SVE
   F(__memcpy_aarch64_sve)
 # endif

@@ -66,13 +66,4 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 
 #define L(l) .L ## l
 
-/* Compiler supports SVE instructions  */
-#ifndef HAVE_SVE
-# if __aarch64__ && (__GNUC__ >= 8 || __clang_major__ >= 5)
-#   define HAVE_SVE 1
-# else
-#   define HAVE_SVE 0
-# endif
-#endif
-
 #endif

@@ -13,8 +13,6 @@
 
 #include "asmdefs.h"
 
-#if HAVE_SVE
-
 .arch armv8-a+sve
 
 #define dstin	x0
@@ -101,5 +99,3 @@ L(no_zva_loop):
 	ret
 
 END (__memset_aarch64_sve)
-
-#endif
