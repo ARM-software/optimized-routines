@@ -119,7 +119,11 @@ math-cflags += -DWANT_SIMD_TESTS=$(WANT_SIMD_TESTS)
 # Disable/enable SVE vector math tests/tools.
 # Note math-sve-cflags is added for SVE routines only so that SVE code
 # does not leak into scalar routines
-WANT_SVE_TESTS = 1
+ifeq ($(ARCH),aarch64)
+  WANT_SVE_TESTS = 1
+else
+  WANT_SVE_TESTS = 0
+endif
 # Arch flag to enable SVE - this is only used for tools and tests if
 # WANT_SVE_TESTS is enabled
 math-sve-cflags = -march=armv8-a+sve

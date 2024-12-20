@@ -140,14 +140,14 @@ int main (void)
   printf("Random memset (bytes/ns):\n");
   for (int f = 0; funtab[f].name != 0; f++)
     {
-      size_t total_size = 0;
+      uint64_t total_size = 0;
       uint64_t tsum = 0;
       printf ("%22s ", funtab[f].name);
       rand32 (0x12345678);
 
       for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
 	{
-	  size_t memset_size = init_memset (size) * ITERS;
+	  uint64_t memset_size = init_memset (size) * ITERS;
 
 	  for (int c = 0; c < NUM_TESTS; c++)
 	    funtab[f].fun (a + test_arr[c].offset, 0, test_arr[c].len);
@@ -164,14 +164,14 @@ int main (void)
       printf( "avg %5.2f\n", (double)total_size / tsum);
     }
 
-  size_t total_size = 0;
+  uint64_t total_size = 0;
   uint64_t tsum = 0;
   printf ("%22s ", "memset_call");
   rand32 (0x12345678);
 
   for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
     {
-      size_t memset_size = init_memset (size) * ITERS;
+      uint64_t memset_size = init_memset (size) * ITERS;
 
       for (int c = 0; c < NUM_TESTS; c++)
 	memset (a + test_arr[c].offset, 0, test_arr[c].len);

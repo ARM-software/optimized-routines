@@ -170,7 +170,7 @@ int main (void)
   printf("Random memcpy (bytes/ns):\n");
   for (int f = 0; funtab[f].name != 0; f++)
     {
-      size_t total = 0;
+      uint64_t total = 0;
       uint64_t tsum = 0;
       printf ("%22s ", funtab[f].name);
       rand32 (0x12345678);
@@ -196,14 +196,14 @@ int main (void)
       printf( "avg %5.2f\n", (double)total / tsum);
     }
 
-  size_t total = 0;
+  uint64_t total = 0;
   uint64_t tsum = 0;
   printf ("%22s ", "memcpy_call");
   rand32 (0x12345678);
 
   for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
     {
-      size_t copy_size = init_copies (size) * ITERS;
+      uint64_t copy_size = init_copies (size) * ITERS;
 
       for (int c = 0; c < NUM_TESTS; c++)
 	memcpy (b + test_arr[c].dst, a + test_arr[c].src, test_arr[c].len);

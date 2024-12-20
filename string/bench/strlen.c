@@ -140,7 +140,8 @@ int main (void)
   printf ("\nRandom strlen (bytes/ns):\n");
   for (int f = 0; funtab[f].name != 0; f++)
     {
-      size_t res = 0, strlen_size = 0, mask = maskv;
+      size_t res = 0, mask = maskv;
+      uint64_t strlen_size = 0;
       printf ("%22s ", funtab[f].name);
 
       for (int c = 0; c < NUM_TESTS; c++)
