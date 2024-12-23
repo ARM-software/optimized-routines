@@ -13,9 +13,12 @@ all-string bench-string check-string install-string clean-string:
 else
 
 string-lib-srcs := $(wildcard $(S)/$(ARCH)/*.[cS])
+string-lib-srcs += $(wildcard $(S)/$(ARCH)/experimental/*.[cS])
 string-test-srcs := $(wildcard $(S)/test/*.c)
 string-bench-srcs := $(wildcard $(S)/bench/*.c)
 
+string-arch-include-dir := $(wildcard $(S)/$(ARCH))
+string-arch-includes := $(wildcard $(S)/$(ARCH)/*.h)
 string-includes := $(patsubst $(S)/%,build/%,$(wildcard $(S)/include/*.h))
 
 string-libs := \
@@ -65,8 +68,8 @@ string-files := \
 
 all-string: $(string-libs) $(string-tests) $(string-benches) $(string-includes)
 
-$(string-objs): $(string-includes)
-$(string-objs): CFLAGS_ALL += $(string-cflags)
+$(string-objs): $(string-includes) $(string-arch-includes)
+$(string-objs): CFLAGS_ALL += $(string-cflags) -I$(string-arch-include-dir)
 
 $(string-test-objs): CFLAGS_ALL += -D_GNU_SOURCE
 
