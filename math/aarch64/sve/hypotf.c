@@ -44,3 +44,4 @@ TEST_INTERVAL2 (SV_NAME_F2 (hypot), 0, inf, 0, inf, 10000)
 TEST_INTERVAL2 (SV_NAME_F2 (hypot), 0, inf, -0, -inf, 10000)
 TEST_INTERVAL2 (SV_NAME_F2 (hypot), -0, -inf, 0, inf, 10000)
 TEST_INTERVAL2 (SV_NAME_F2 (hypot), -0, -inf, -0, -inf, 10000)
+CLOSE_SVE_ATTR

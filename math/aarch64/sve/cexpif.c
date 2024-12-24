@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "sv_sincosf_common.h"
 #include "sv_math.h"
+#include "sv_sincosf_common.h"
 #include "test_defs.h"
 
 static svfloat32x2_t NOINLINE
@@ -47,3 +47,4 @@ SV_CEXPIF_INTERVAL (0, 0x1p20, 500000)
 SV_CEXPIF_INTERVAL (-0, -0x1p20, 500000)
 SV_CEXPIF_INTERVAL (0x1p20, inf, 10000)
 SV_CEXPIF_INTERVAL (-0x1p20, -inf, 10000)
+CLOSE_SVE_ATTR

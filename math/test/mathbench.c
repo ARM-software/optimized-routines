@@ -5,6 +5,19 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#if WANT_SVE_TESTS
+#  if __aarch64__ && __linux__
+#    ifdef __clang__
+#      pragma clang attribute push(__attribute__((target("sve"))),            \
+				   apply_to = any(function))
+#    else
+#      pragma GCC target("+sve")
+#    endif
+#  else
+#    error "SVE not supported - please disable WANT_SVE_TESTS"
+#  endif
+#endif
+
 #undef _GNU_SOURCE
 #define _GNU_SOURCE 1
 #include <stdint.h>
@@ -562,3 +575,7 @@ main (int argc, char *argv[])
     }
   return 0;
 }
+
+#if __aarch64__ && __linux__ && WANT_SVE_TESTS && defined(__clang__)
+#  pragma clang attribute pop
+#endif

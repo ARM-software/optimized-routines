@@ -92,8 +92,6 @@ $(math-build-dir)/test/mathtest.o: CFLAGS_ALL += -fmath-errno
 $(math-host-objs): CC = $(HOST_CC)
 $(math-host-objs): CFLAGS_ALL = $(HOST_CFLAGS)
 
-$(math-build-dir)/aarch64/sve/%: CFLAGS_ALL += $(math-sve-cflags)
-$(math-build-dir)/aarch64/experimental/sve/%: CFLAGS_ALL += $(math-sve-cflags)
 # Add include path for experimental routines so they can share helpers with non-experimental
 $(math-build-dir)/aarch64/experimental/advsimd/%: CFLAGS_ALL += -I$(math-src-dir)/aarch64/advsimd
 $(math-build-dir)/aarch64/experimental/sve/%: CFLAGS_ALL += -I$(math-src-dir)/aarch64/sve
@@ -158,10 +156,6 @@ build/lib/libmathlib.a: $(math-lib-objs)
 
 $(math-host-tools): HOST_LDLIBS += $(libm-libs) $(mpfr-libs) $(mpc-libs)
 $(math-tools): LDLIBS += $(math-ldlibs) $(libm-libs)
-
-ifeq ($(WANT_SVE_TESTS), 1)
-$(math-tools): CFLAGS_ALL += $(math-sve-cflags)
-endif
 
 ifneq ($(OS),Darwin)
   $(math-tools): LDFLAGS += -static

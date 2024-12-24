@@ -33,3 +33,4 @@ TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_frac, 1, inf, 20000)
 TEST_ULP (_ZGVsMxvl8_modf_int, 0.0)
 TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_int, 0, 1, 20000)
 TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_int, 1, inf, 20000)
+CLOSE_SVE_ATTR

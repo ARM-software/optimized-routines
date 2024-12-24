@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "mathlib.h"
 #include "sv_math.h"
+#include "mathlib.h"
 #include "test_sig.h"
 #include "test_defs.h"
 #include "sv_poly_f32.h"
@@ -55,3 +55,4 @@ TEST_SYM_INTERVAL (SV_NAME_F1 (sinpi), 0x1p-31, 0.5, 10000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (sinpi), 0.5, 0x1p22f, 10000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (sinpi), 0x1p22f, inf, 10000)
 #endif
+CLOSE_SVE_ATTR

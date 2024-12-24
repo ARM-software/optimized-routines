@@ -9,11 +9,12 @@
    pre-GLIBC 2.1, or on a non-GNU conforming system, this routine will need to
    be linked against the scalar sincosf from math/.  */
 #define _GNU_SOURCE
-#include <math.h>
 
-#include "sv_sincosf_common.h"
 #include "sv_math.h"
+#include "sv_sincosf_common.h"
 #include "test_defs.h"
+
+#include <math.h>
 
 /* sincos not available for all scalar libm implementations.  */
 #ifndef __GLIBC__
@@ -70,3 +71,4 @@ TEST_ULP (_ZGVsMxv_sincosf_cos, 1.31)
 SV_SINCOSF_INTERVAL (0, 0x1p-31, 50000)
 SV_SINCOSF_INTERVAL (0x1p-31, 0x1p20, 500000)
 SV_SINCOSF_INTERVAL (0x1p20, inf, 10000)
+CLOSE_SVE_ATTR

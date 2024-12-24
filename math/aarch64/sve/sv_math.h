@@ -8,6 +8,19 @@
 #ifndef SV_MATH_H
 #define SV_MATH_H
 
+/* Enable SVE in this translation unit. Note, because this is 'pushed' in
+   clang, any file including sv_math.h will have to pop it back off again by
+   ending the source file with CLOSE_SVE_ATTR. It is important that sv_math.h
+   is included first so that all functions have the target attribute.  */
+#ifdef __clang__
+# pragma clang attribute push(__attribute__((target("sve"))),                \
+			       apply_to = any(function))
+# define CLOSE_SVE_ATTR _Pragma("clang attribute pop")
+#else
+# pragma GCC target("+sve")
+# define CLOSE_SVE_ATTR
+#endif
+
 #include <arm_sve.h>
 #include <stdbool.h>
 

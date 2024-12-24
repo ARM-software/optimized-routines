@@ -46,3 +46,4 @@ _ZGVsMxvv_powi (svfloat32_t as, svint32_t ns, svbool_t p)
 
   return acc;
 }
+CLOSE_SVE_ATTR

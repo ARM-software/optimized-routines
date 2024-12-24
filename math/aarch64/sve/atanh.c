@@ -59,3 +59,4 @@ TEST_SYM_INTERVAL (SV_NAME_D1 (atanh), 1, inf, 100)
    -c 0 specially to ensure fp exceptions are triggered correctly (choice of
    control lane is irrelevant if fp exceptions are disabled).  */
 TEST_CONTROL_VALUE (SV_NAME_D1 (atanh), 0)
+CLOSE_SVE_ATTR
