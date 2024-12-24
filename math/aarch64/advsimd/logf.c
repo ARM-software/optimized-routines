@@ -42,7 +42,7 @@ special_case (float32x4_t p, uint32x4_t u_off, float32x4_t y, float32x4_t r2,
 		     vfmaq_f32 (p, y, r2), vmovl_u16 (cmp));
 }
 
-float32x4_t VPCS_ATTR V_NAME_F1 (log) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (log) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   float32x4_t c1350 = vld1q_f32 (&d->c1);
@@ -77,6 +77,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log) (float32x4_t x)
     return special_case (p, u_off, y, r2, cmp, d);
   return vfmaq_f32 (p, y, r2);
 }
+
+HALF_WIDTH_ALIAS_F1 (log)
 
 TEST_SIG (V, F, 1, log, 0.01, 11.1)
 TEST_ULP (V_NAME_F1 (log), 2.9)

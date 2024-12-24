@@ -41,7 +41,7 @@ special_case (float32x4_t x, float32x4_t halfsign, float32x4_t y,
    The maximum error is 2.93 ULP:
    _ZGVnN4v_atanhf(0x1.f43d7p-5) got 0x1.f4dcfep-5
 				want 0x1.f4dcf8p-5.  */
-VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (atanh) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -75,6 +75,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (atanh) (float32x4_t x)
 #endif
   return vmulq_f32 (halfsign, y);
 }
+
+HALF_WIDTH_ALIAS_F1 (atanh)
 
 TEST_SIG (V, F, 1, atanh, -1.0, 1.0)
 TEST_ULP (V_NAME_F1 (atanh), 2.44)

@@ -33,7 +33,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
     Maximum Error: 3.17 ULP:
     _ZGVnN4v_cospif(0x1.d341a8p-5) got 0x1.f7cd56p-1
 				  want 0x1.f7cd5p-1.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (cospi) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cospi) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -73,6 +73,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (cospi) (float32x4_t x)
   /* Reintroduce the sign bit for inputs which round to odd.  */
   return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
+
+HALF_WIDTH_ALIAS_F1 (cospi)
 
 #if WANT_TRIGPI_TESTS
 TEST_ULP (V_NAME_F1 (cospi), 2.67)

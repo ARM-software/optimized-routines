@@ -35,7 +35,7 @@ special_case (float32x4_t x, uint32x4_t is_boring, float32x4_t boring,
    version of expm1f. The maximum error is 2.58 ULP:
    _ZGVnN4v_tanhf (0x1.fa5eep-5) got 0x1.f9ba02p-5
 				want 0x1.f9ba08p-5.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (tanh) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (tanh) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -70,6 +70,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tanh) (float32x4_t x)
   float32x4_t y = vdivq_f32 (q, vaddq_f32 (q, v_f32 (2.0)));
   return vbslq_f32 (is_boring, boring, y);
 }
+
+HALF_WIDTH_ALIAS_F1 (tanh)
 
 TEST_SIG (V, F, 1, tanh, -10.0, 10.0)
 TEST_ULP (V_NAME_F1 (tanh), 2.09)

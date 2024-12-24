@@ -44,7 +44,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
   return v_call_f32 (sinf, x, y, cmp);
 }
 
-float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (sin) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   float32x4_t n, r, r2, y;
@@ -82,6 +82,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sin) (float32x4_t x)
     return special_case (x, y, odd, cmp);
   return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
+
+HALF_WIDTH_ALIAS_F1 (sin)
 
 TEST_SIG (V, F, 1, sin, -3.1, 3.1)
 TEST_ULP (V_NAME_F1 (sin), 1.4)

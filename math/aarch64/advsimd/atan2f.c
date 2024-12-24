@@ -50,7 +50,7 @@ zeroinfnan (uint32x4_t i, const struct data *d)
    2.95 ULP in [0x1.9300d6p+6 0x1.93c0c6p+6] x [0x1.8c2dbp+6 0x1.8cea6p+6]:
    _ZGVnN4vv_atan2f (0x1.93836cp+6, 0x1.8cae1p+6) got 0x1.967f06p-1
 						 want 0x1.967f00p-1.  */
-float32x4_t VPCS_ATTR V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -113,6 +113,8 @@ float32x4_t VPCS_ATTR V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
   return vreinterpretq_f32_u32 (
       veorq_u32 (vreinterpretq_u32_f32 (ret), sign_xy));
 }
+
+HALF_WIDTH_ALIAS_F2 (atan2)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 TEST_SIG (V, F, 2, atan2)

@@ -91,8 +91,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
    Maximum error: 1.63 ULP (~1.0 ULP for x < 0.0).
    _ZGVnN4v_erfcf(0x1.1dbf7ap+3) got 0x1.f51212p-120
 				want 0x1.f51216p-120.  */
-VPCS_ATTR
-float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
+NOINLINE VPCS_ATTR float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
 {
   const struct data *dat = ptr_barrier (&data);
 
@@ -162,6 +161,8 @@ float32x4_t V_NAME_F1 (erfc) (float32x4_t x)
 
   return vfmaq_f32 (off, fac, y);
 }
+
+HALF_WIDTH_ALIAS_F1 (erfc)
 
 TEST_SIG (V, F, 1, erfc, -4.0, 10.0)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (erfc), WANT_SIMD_EXCEPT)

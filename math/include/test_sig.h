@@ -11,9 +11,9 @@
 #define TEST_DECL_SD2(fun) double fun (double, double);
 
 #define TEST_DECL_VF1(fun)                                                    \
-  VPCS_ATTR float32x4_t V_NAME_F1 (fun##f) (float32x4_t);
+  float32x4_t VPCS_ATTR V_NAME_F1 (fun##f) (float32x4_t);
 #define TEST_DECL_VF2(fun)                                                    \
-  VPCS_ATTR float32x4_t V_NAME_F2 (fun##f) (float32x4_t, float32x4_t);
+  float32x4_t VPCS_ATTR V_NAME_F2 (fun##f) (float32x4_t, float32x4_t);
 #define TEST_DECL_VD1(fun) VPCS_ATTR float64x2_t V_NAME_D1 (fun) (float64x2_t);
 #define TEST_DECL_VD2(fun)                                                    \
   VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);

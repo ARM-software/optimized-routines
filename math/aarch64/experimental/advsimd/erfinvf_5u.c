@@ -87,7 +87,7 @@ lookup (float32x4_t tbl, uint8x16_t idx)
    tail region:
    _ZGVnN4v_erfinvf(0x1.f7dbeep-1) got 0x1.b4793p+0
 				  want 0x1.b4793ap+0 .  */
-float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (erfinv) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -155,6 +155,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (erfinv) (float32x4_t x)
 
   return vdivq_f32 (p, q);
 }
+
+HALF_WIDTH_ALIAS_F1 (erfinv)
 
 #if USE_MPFR
 # warning Not generating tests for _ZGVnN4v_erfinvf, as MPFR has no suitable reference

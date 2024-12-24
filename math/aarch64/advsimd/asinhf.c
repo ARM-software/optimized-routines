@@ -42,7 +42,7 @@ special_case (float32x4_t x, uint32x4_t sign, float32x4_t y,
    Worst-case error is 2.59 ULP:
    _ZGVnN4v_asinhf(0x1.d86124p-3) got 0x1.d449bep-3
 				 want 0x1.d449c4p-3.  */
-VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (asinh) (float32x4_t x)
 {
   const struct data *dat = ptr_barrier (&data);
   float32x4_t ax = vabsq_f32 (x);
@@ -73,6 +73,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (asinh) (float32x4_t x)
   return vreinterpretq_f32_u32 (veorq_u32 (
       sign, vreinterpretq_u32_f32 (log1pf_inline (y, &dat->log1pf_consts))));
 }
+
+HALF_WIDTH_ALIAS_F1 (asinh)
 
 TEST_SIG (V, F, 1, asinh, -10.0, 10.0)
 TEST_ULP (V_NAME_F1 (asinh), 2.10)

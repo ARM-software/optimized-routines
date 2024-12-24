@@ -24,7 +24,7 @@ const static struct v_tanpif_data
    The maximum error is 3.34 ULP:
    _ZGVnN4v_tanpif(0x1.d6c09ap-2) got 0x1.f70aacp+2
 				 want 0x1.f70aa6p+2.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (tanpi) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (tanpi) (float32x4_t x)
 {
   const struct v_tanpif_data *d = ptr_barrier (&tanpif_data);
 
@@ -57,6 +57,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (tanpi) (float32x4_t x)
       = veorq_u32 (vreinterpretq_u32_f32 (xr), vreinterpretq_u32_f32 (ar));
   return vreinterpretq_f32_u32 (vorrq_u32 (vreinterpretq_u32_f32 (y), sign));
 }
+
+HALF_WIDTH_ALIAS_F1 (tanpi)
 
 #if WANT_TRIGPI_TESTS
 TEST_DISABLE_FENV (V_NAME_F1 (tanpi))

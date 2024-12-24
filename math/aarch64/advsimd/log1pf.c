@@ -38,7 +38,7 @@ special_case (float32x4_t x, uint32x4_t cmp, const struct data *d)
    error is 1.69 ULP:
    _ZGVnN4v_log1pf(0x1.04418ap-2) got 0x1.cfcbd8p-3
 				 want 0x1.cfcbdcp-3.  */
-VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (log1p) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
@@ -68,7 +68,7 @@ special_case (float32x4_t x, uint32x4_t cmp)
    error is 1.63 ULP:
    _ZGVnN4v_log1pf(0x1.216d12p-2) got 0x1.fdcb12p-3
 				 want 0x1.fdcb16p-3.  */
-VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (log1p) (float32x4_t x)
 {
   uint32x4_t special_cases = vornq_u32 (vcleq_f32 (x, v_f32 (-1)),
 					vcaleq_f32 (x, v_f32 (0x1p127f)));
@@ -80,6 +80,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (log1p) (float32x4_t x)
 }
 
 #endif
+
+HALF_WIDTH_ALIAS_F1 (log1p)
 
 TEST_SIG (V, F, 1, log1p, -0.9, 10.0)
 TEST_ULP (V_NAME_F1 (log1p), 1.20)

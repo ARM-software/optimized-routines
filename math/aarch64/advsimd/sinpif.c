@@ -37,7 +37,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
     Maximum Error 3.03 ULP:
     _ZGVnN4v_sinpif(0x1.c597ccp-2) got 0x1.f7cd56p-1
 				  want 0x1.f7cd5p-1.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (sinpi) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (sinpi) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -71,6 +71,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (sinpi) (float32x4_t x)
 
   return vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), odd));
 }
+
+HALF_WIDTH_ALIAS_F1 (sinpi)
 
 #if WANT_TRIGPI_TESTS
 TEST_ULP (V_NAME_F1 (sinpi), 2.54)

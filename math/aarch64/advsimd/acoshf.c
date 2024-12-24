@@ -36,7 +36,7 @@ special_case (float32x4_t x, float32x4_t y, uint16x4_t special,
    _ZGVnN4v_acoshf(0x1.007ef2p+0) got 0x1.fdcdccp-5
 				 want 0x1.fdcdd2p-5.  */
 
-VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (acosh) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
@@ -62,6 +62,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (acosh) (float32x4_t x)
     return special_case (x, y, special, &d->log1pf_consts);
   return log1pf_inline (y, &d->log1pf_consts);
 }
+
+HALF_WIDTH_ALIAS_F1 (acosh)
 
 TEST_SIG (V, F, 1, acosh, 1.0, 10.0)
 #if WANT_SIMD_EXCEPT

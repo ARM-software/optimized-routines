@@ -49,7 +49,7 @@ shifted_lookup (const float *table, int32x4_t i)
    0x1.85a2aa and the exponent is a multiple of 3, for example:
    _ZGVnN4v_cbrtf(0x1.85a2aap+3) got 0x1.267936p+1
 				want 0x1.267932p+1.  */
-VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cbrt) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t iax = vreinterpretq_u32_f32 (vabsq_f32 (x));
@@ -109,6 +109,8 @@ VPCS_ATTR float32x4_t V_NAME_F1 (cbrt) (float32x4_t x)
   /* Copy sign.  */
   return vbslq_f32 (SignMask, x, y);
 }
+
+HALF_WIDTH_ALIAS_F1 (cbrt)
 
 TEST_SIG (V, F, 1, cbrt, -10.0, 10.0)
 TEST_ULP (V_NAME_F1 (cbrt), 1.15)

@@ -145,7 +145,7 @@ powf_core (const struct data *d, float64x2_t ylogx)
   return vcvt_f32_f64 (p);
 }
 
-float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
 {
   const struct data *d = ptr_barrier (&data);
   uint32x4_t u = vreinterpretq_u32_f32 (x);
@@ -195,6 +195,8 @@ float32x4_t VPCS_ATTR V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
     return special_case (x, y, vcombine_f32 (p_lo, p_hi), cmp);
   return vcombine_f32 (p_lo, p_hi);
 }
+
+HALF_WIDTH_ALIAS_F2 (pow)
 
 TEST_SIG (V, F, 2, pow)
 TEST_ULP (V_NAME_F2 (pow), 2.1)

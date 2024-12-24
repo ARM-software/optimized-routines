@@ -61,7 +61,7 @@ lookup (uint32x4_t i)
    Maximum error: 1.93 ULP
      _ZGVnN4v_erff(0x1.c373e6p-9) got 0x1.fd686cp-9
 				 want 0x1.fd6868p-9.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (erf) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (erf) (float32x4_t x)
 {
   const struct data *dat = ptr_barrier (&data);
 
@@ -109,6 +109,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (erf) (float32x4_t x)
 #endif
   return y;
 }
+
+HALF_WIDTH_ALIAS_F1 (erf)
 
 TEST_SIG (V, F, 1, erf, -4.0, 4.0)
 TEST_ULP (V_NAME_F1 (erf), 1.43)

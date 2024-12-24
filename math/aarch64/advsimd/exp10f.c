@@ -88,7 +88,7 @@ special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
    Algorithm is accurate to 2.36 ULP.
    _ZGVnN4v_exp10f(0x1.be2b36p+1) got 0x1.7e79c4p+11
 				 want 0x1.7e79cp+11.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (exp10) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 #if WANT_SIMD_EXCEPT
@@ -133,6 +133,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp10) (float32x4_t x)
 
   return vfmaq_f32 (scale, poly, scale);
 }
+
+HALF_WIDTH_ALIAS_F1 (exp10)
 
 #if WANT_EXP10_TESTS
 TEST_SIG (S, F, 1, exp10, -9.9, 9.9)

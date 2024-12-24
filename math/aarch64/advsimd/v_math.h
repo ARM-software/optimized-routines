@@ -21,6 +21,26 @@
 #define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
 #define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
 
+#if USE_GLIBC_ABI
+
+# define HALF_WIDTH_ALIAS_F1(fun)                                             \
+    float32x2_t VPCS_ATTR _ZGVnN2v_##fun##f (float32x2_t x)                   \
+    {                                                                         \
+      return vget_low_f32 (_ZGVnN4v_##fun##f (vcombine_f32 (x, x)));          \
+    }
+
+# define HALF_WIDTH_ALIAS_F2(fun)                                             \
+    float32x2_t VPCS_ATTR _ZGVnN2vv_##fun##f (float32x2_t x, float32x2_t y)   \
+    {                                                                         \
+      return vget_low_f32 (                                                   \
+	  _ZGVnN4vv_##fun##f (vcombine_f32 (x, x), vcombine_f32 (y, y)));     \
+    }
+
+#else
+# define HALF_WIDTH_ALIAS_F1(fun)
+# define HALF_WIDTH_ALIAS_F2(fun)
+#endif
+
 #include <stdint.h>
 #include "math_config.h"
 #include <arm_neon.h>

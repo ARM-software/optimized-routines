@@ -8,23 +8,6 @@
 #ifndef _MATHLIB_H
 #define _MATHLIB_H
 
-float expf (float);
-float exp2f (float);
-float logf (float);
-float log10f (float);
-float log2f (float);
-float powf (float, float);
-float sinf (float);
-float cosf (float);
-void sincosf (float, float*, float*);
-
-double exp (double);
-double exp10 (double);
-double exp2 (double);
-double log (double);
-double log2 (double);
-double pow (double, double);
-
 #if __aarch64__
 /* Low-accuracy scalar implementations of C23 routines.  */
 float arm_math_cospif (float);
@@ -37,55 +20,90 @@ void arm_math_sincospif (float, float *, float *);
 void arm_math_sincospi (double, double *, double *);
 #endif
 
+/* SIMD declaration for autovectorisation with fast-math enabled. Only GCC is
+   supported, and vector routines are only supported on Linux on AArch64.  */
+#if defined __aarch64__ && __linux__ && defined(__GNUC__)                     \
+    && !defined(__clang__) && defined(__FAST_MATH__)
+#  define DECL_SIMD_aarch64 __attribute__ ((__simd__ ("notinbranch"), const))
+#else
+#  define DECL_SIMD_aarch64
+#endif
+
 #if WANT_EXPERIMENTAL_MATH
 
-float acosf (float);
-float acoshf (float);
 float arm_math_erff (float);
-float asinf (float);
-float asinhf (float);
-float atan2f (float, float);
-float atanf (float);
-float atanhf (float);
-float cbrtf (float);
-float coshf (float);
-float cospif (float);
-float erfcf (float);
-float erfcf (float);
-float erfinvf (float);
-float expm1f (float);
-float log10f (float);
-float log1pf (float);
-float sinhf (float);
-float sinpif (float);
-float tanf (float);
-float tanhf (float);
-float tanpif (float);
+DECL_SIMD_aarch64 float cospif (float);
+DECL_SIMD_aarch64 float erfinvf (float);
+DECL_SIMD_aarch64 float sinpif (float);
+DECL_SIMD_aarch64 float tanpif (float);
 
-double acos (double);
-double acosh (double);
 double arm_math_erf (double);
-double asin (double);
-double asinh (double);
-double atan (double);
-double atan2 (double, double);
-double atanh (double);
-double cbrt (double);
-double cosh (double);
-double cospi (double);
-double erfc (double);
-double erfinv (double);
-double expm1 (double);
-double log10 (double);
-double log1p (double);
-double sinh (double);
-double sinpi (double);
-double tanh (double);
-double tanpi (double);
+DECL_SIMD_aarch64 double cospi (double);
+DECL_SIMD_aarch64 double erfinv (double);
+DECL_SIMD_aarch64 double sinpi (double);
+DECL_SIMD_aarch64 double tanpi (double);
 
 long double erfinvl (long double);
 
 #endif
+
+/* Note these routines may not be provided by AOR (some are only available with
+   WANT_EXPERIMENTAL_MATH, some are not provided at all. Redeclare them here to
+   add vector annotations.  */
+DECL_SIMD_aarch64 float acosf (float);
+DECL_SIMD_aarch64 float acoshf (float);
+DECL_SIMD_aarch64 float asinf (float);
+DECL_SIMD_aarch64 float asinhf (float);
+DECL_SIMD_aarch64 float atan2f (float, float);
+DECL_SIMD_aarch64 float atanf (float);
+DECL_SIMD_aarch64 float atanhf (float);
+DECL_SIMD_aarch64 float cbrtf (float);
+DECL_SIMD_aarch64 float cosf (float);
+DECL_SIMD_aarch64 float coshf (float);
+DECL_SIMD_aarch64 float erfcf (float);
+DECL_SIMD_aarch64 float erff (float);
+DECL_SIMD_aarch64 float exp10f (float);
+DECL_SIMD_aarch64 float exp2f (float);
+DECL_SIMD_aarch64 float expf (float);
+DECL_SIMD_aarch64 float expm1f (float);
+DECL_SIMD_aarch64 float hypotf (float, float);
+DECL_SIMD_aarch64 float log10f (float);
+DECL_SIMD_aarch64 float log1pf (float);
+DECL_SIMD_aarch64 float log2f (float);
+DECL_SIMD_aarch64 float logf (float);
+DECL_SIMD_aarch64 float powf (float, float);
+DECL_SIMD_aarch64 float sinf (float);
+void sincosf (float, float *, float *);
+DECL_SIMD_aarch64 float sinhf (float);
+DECL_SIMD_aarch64 float tanf (float);
+DECL_SIMD_aarch64 float tanhf (float);
+
+DECL_SIMD_aarch64 double acos (double);
+DECL_SIMD_aarch64 double acosh (double);
+DECL_SIMD_aarch64 double asin (double);
+DECL_SIMD_aarch64 double asinh (double);
+DECL_SIMD_aarch64 double atan2 (double, double);
+DECL_SIMD_aarch64 double atan (double);
+DECL_SIMD_aarch64 double atanh (double);
+DECL_SIMD_aarch64 double cbrt (double);
+DECL_SIMD_aarch64 double cos (double);
+DECL_SIMD_aarch64 double cosh (double);
+DECL_SIMD_aarch64 double erfc (double);
+DECL_SIMD_aarch64 double erf (double);
+DECL_SIMD_aarch64 double exp10 (double);
+DECL_SIMD_aarch64 double exp2 (double);
+DECL_SIMD_aarch64 double exp (double);
+DECL_SIMD_aarch64 double expm1 (double);
+DECL_SIMD_aarch64 double hypot (double, double);
+DECL_SIMD_aarch64 double log10 (double);
+DECL_SIMD_aarch64 double log1p (double);
+DECL_SIMD_aarch64 double log2 (double);
+DECL_SIMD_aarch64 double log (double);
+DECL_SIMD_aarch64 double pow (double, double);
+DECL_SIMD_aarch64 double sin (double);
+DECL_SIMD_aarch64 double sinh (double);
+DECL_SIMD_aarch64 double tan (double);
+DECL_SIMD_aarch64 double tanh (double);
 
 #if __aarch64__ && __linux__
 # include <arm_neon.h>

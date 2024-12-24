@@ -41,7 +41,7 @@ special_case (float32x4_t x, float32x4_t y, float32x4_t sqsum,
 						    want 0x1.6a41dp-13.  */
 #if WANT_SIMD_EXCEPT
 
-float32x4_t VPCS_ATTR V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -68,7 +68,7 @@ float32x4_t VPCS_ATTR V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
 }
 #else
 
-float32x4_t VPCS_ATTR V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -84,6 +84,8 @@ float32x4_t VPCS_ATTR V_NAME_F2 (hypot) (float32x4_t x, float32x4_t y)
   return vsqrtq_f32 (sqsum);
 }
 #endif
+
+HALF_WIDTH_ALIAS_F2 (hypot)
 
 TEST_SIG (V, F, 2, hypot, -10.0, 10.0)
 TEST_ULP (V_NAME_F2 (hypot), 1.21)

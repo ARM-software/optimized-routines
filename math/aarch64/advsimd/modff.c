@@ -10,7 +10,8 @@
 #include "test_defs.h"
 
 /* Modff algorithm. Produces exact values in all rounding modes.  */
-float32x4_t VPCS_ATTR V_NAME_F1_L1 (modf) (float32x4_t x, float *out_int)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1_L1 (modf) (float32x4_t x,
+						    float *out_int)
 {
   /* Get integer component of x.  */
   float32x4_t rounded = vrndq_f32 (x);

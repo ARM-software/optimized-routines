@@ -58,7 +58,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
    The largest observed error in this region is 1.32 ulps,
    _ZGVnN4v_acosf (0x1.15ba56p-1) got 0x1.feb33p-1
 				 want 0x1.feb32ep-1.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (acos) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (acos) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -101,6 +101,8 @@ float32x4_t VPCS_ATTR V_NAME_F1 (acos) (float32x4_t x)
 
   return vfmaq_f32 (add, mul, y);
 }
+
+HALF_WIDTH_ALIAS_F1 (acos)
 
 TEST_SIG (V, F, 1, acos, -1.0, 1.0)
 TEST_ULP (V_NAME_F1 (acos), 0.82)
