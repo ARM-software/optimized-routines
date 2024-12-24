@@ -104,18 +104,6 @@ math-cflags += -ffp-contract=fast -fno-math-errno
 WANT_ERRNO = 0
 math-cflags += -DWANT_ERRNO=$(WANT_ERRNO)
 
-# Enable SIMD in tests
-ifeq ($(ARCH),aarch64)
-ifeq ($(OS),Linux)
-  WANT_SIMD_TESTS = 1
-else
-  WANT_SIMD_TESTS = 0
-endif
-else
-  WANT_SIMD_TESTS = 0
-endif
-math-cflags += -DWANT_SIMD_TESTS=$(WANT_SIMD_TESTS)
-
 # Disable/enable SVE vector math tests/tools.
 # Note math-sve-cflags is added for SVE routines only so that SVE code
 # does not leak into scalar routines

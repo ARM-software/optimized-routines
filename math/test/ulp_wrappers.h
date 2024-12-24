@@ -7,7 +7,7 @@
 
 /* clang-format off */
 
-#if WANT_SIMD_TESTS
+#if  __aarch64__ && __linux__
 #include <arm_neon.h>
 #endif
 
@@ -62,7 +62,7 @@ long double modfl_frac(long double x) { long double i; return modfl(x, &i); }
 long double modfl_int(long double x) { long double i; modfl(x, &i); return i; }
 
 /* Wrappers for vector functions.  */
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
 static float Z_expf_1u(float x) { return _ZGVnN4v_expf_1u(argf(x))[0]; }
 static float Z_exp2f_1u(float x) { return _ZGVnN4v_exp2f_1u(argf(x))[0]; }
 #endif
@@ -124,7 +124,7 @@ arm_math_sincospi_cos (double x)
 }
 #endif
 
-#if WANT_SIMD_TESTS
+#if  __aarch64__ && __linux__
 
 # if WANT_TRIGPI_TESTS
 ZVNF1_WRAP (cospi)
@@ -238,7 +238,7 @@ v_modf_int (double x)
   _ZGVnN2vl8_modf (vdupq_n_f64 (x), y);
   return y[0];
 }
-#endif // WANT_SIMD_TESTS
+#endif //  __aarch64__ && __linux__
 
 #if WANT_SVE_TESTS
 # define ZSVNF1_WRAP(func)                                                   \

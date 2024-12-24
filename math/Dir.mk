@@ -18,9 +18,6 @@ ifneq ($(OS),Linux)
 endif
 
 ifneq ($(ARCH),aarch64)
-  ifeq ($(WANT_SIMD_TESTS),1)
-    $(error WANT_SIMD_TESTS only supported on aarch64)
-  endif
   ifeq ($(WANT_TRIGPI_TESTS),1)
     $(error trigpi functions only supported on aarch64)
   endif

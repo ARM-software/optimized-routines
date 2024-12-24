@@ -40,7 +40,7 @@ dummyf (float x)
 {
   return x;
 }
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
 __vpcs static float64x2_t
 __vn_dummy (float64x2_t x)
 {
@@ -81,7 +81,7 @@ static const struct fun
   {
     double (*d) (double);
     float (*f) (float);
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
     __vpcs float64x2_t (*vnd) (float64x2_t);
     __vpcs float32x4_t (*vnf) (float32x4_t);
 #endif
@@ -100,7 +100,7 @@ static const struct fun
 #define SVF(func, lo, hi) {#func, 'f', 's', lo, hi, {.svf = func}},
 D (dummy, 1.0, 2.0)
 F (dummyf, 1.0, 2.0)
-#if WANT_SIMD_TESTS
+#if  __aarch64__ && __linux__
 VND (__vn_dummy, 1.0, 2.0)
 VNF (__vn_dummyf, 1.0, 2.0)
 #endif
@@ -215,7 +215,7 @@ runf_latency (float f (float))
     prev = f (Af[i] + prev * z);
 }
 
-#if WANT_SIMD_TESTS
+#if  __aarch64__ && __linux__
 static void
 run_vn_thruput (__vpcs float64x2_t f (float64x2_t))
 {
@@ -339,7 +339,7 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_thruput, f->fun.f);
   else if (f->prec == 'f' && type == 'l' && f->vec == 0)
     TIMEIT (runf_latency, f->fun.f);
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
   else if (f->prec == 'd' && type == 't' && f->vec == 'n')
     TIMEIT (run_vn_thruput, f->fun.vnd);
   else if (f->prec == 'd' && type == 'l' && f->vec == 'n')

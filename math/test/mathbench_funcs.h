@@ -34,7 +34,7 @@ F (arm_math_erff, -4.0, 4.0)
 {"atan2",  'd', 0, -10.0, 10.0, {.d = atan2_wrap}},
 {"powi",   'd', 0,  0.01, 11.1, {.d = powi_wrap}},
 #endif
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
 {"_ZGVnN4vv_atan2f", 'f', 'n', -10.0, 10.0, {.vnf = _Z_atan2f_wrap}},
 {"_ZGVnN2vv_atan2",  'd', 'n', -10.0, 10.0, {.vnd = _Z_atan2_wrap}},
 {"_ZGVnN4vv_hypotf", 'f', 'n', -10.0, 10.0, {.vnf = _Z_hypotf_wrap}},

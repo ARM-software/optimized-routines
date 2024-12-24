@@ -25,7 +25,7 @@ powi_wrap (double x)
 }
 #endif /* WANT_EXPERIMENTAL_MATH.  */
 
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
 
 __vpcs static float32x4_t
 _Z_sincospif_wrap (float32x4_t x)

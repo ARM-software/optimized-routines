@@ -162,7 +162,7 @@ next_d2 (void *g)
 static int secondcall;
 
 /* Wrappers for vector functions.  */
-#if WANT_SIMD_TESTS
+#if __aarch64__ && __linux__
 /* First element of fv and dv may be changed by -c argument.  */
 static float fv[2] = {1.0f, -INFINITY};
 static double dv[2] = {1.0, -INFINITY};
@@ -795,7 +795,7 @@ main (int argc, char *argv[])
 	case 'z':
 	  conf.ignore_zero_sign = 1;
 	  break;
-#if WANT_SIMD_TESTS
+#if  __aarch64__ && __linux__
 	case 'c':
 	  argc--;
 	  argv++;
