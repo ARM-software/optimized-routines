@@ -56,3 +56,9 @@ rand32 (uint32_t seed)
 #else
 # define RUNA32(BENCH, FN)
 #endif
+
+#if __arm__ && __ARM_ARCH >= 6 && __ARM_ARCH_ISA_THUMB == 2
+# define RUNT32(BENCH, FN) BENCH(#FN, FN)
+#else
+# define RUNT32(BENCH, FN)
+#endif
