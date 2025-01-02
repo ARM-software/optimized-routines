@@ -59,10 +59,24 @@ sv_sincospif_inline (svbool_t pg, svfloat32_t x,
   sr = svreinterpret_f32 (sveor_x (pt, svreinterpret_u32 (sr), odd));
   cr = svreinterpret_f32 (sveor_m (cmp, svreinterpret_u32 (cr), odd));
 
-  svfloat32_t sinpix = svmul_x (
-      pt, sv_lw_pw_horner_5_f32_x (pg, sr2, sr4, &(d->c0), &(d->c1)), sr);
-  svfloat32_t cospix = svmul_x (
-      pt, sv_lw_pw_horner_5_f32_x (pg, cr2, cr4, &(d->c0), &(d->c1)), cr);
+  svfloat32_t c135 = svld1rq_f32 (svptrue_b32 (), &d->c1);
+
+  svfloat32_t sp01 = svmla_lane (sv_f32 (d->c0), sr2, c135, 0);
+  svfloat32_t sp23 = svmla_lane (sv_f32 (d->c2), sr2, c135, 1);
+  svfloat32_t sp45 = svmla_lane (sv_f32 (d->c4), sr2, c135, 2);
+
+  svfloat32_t cp01 = svmla_lane (sv_f32 (d->c0), cr2, c135, 0);
+  svfloat32_t cp23 = svmla_lane (sv_f32 (d->c2), cr2, c135, 1);
+  svfloat32_t cp45 = svmla_lane (sv_f32 (d->c4), cr2, c135, 2);
+
+  svfloat32_t sp = svmla_x (pg, sp23, sr4, sp45);
+  svfloat32_t cp = svmla_x (pg, cp23, cr4, cp45);
+
+  sp = svmla_x (pg, sp01, sr4, sp);
+  cp = svmla_x (pg, cp01, cr4, cp);
+
+  svfloat32_t sinpix = svmul_x (pt, sp, sr);
+  svfloat32_t cospix = svmul_x (pt, cp, cr);
 
   return svcreate2 (sinpix, cospix);
 }
