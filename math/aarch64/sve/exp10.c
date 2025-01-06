@@ -1,29 +1,31 @@
 /*
  * Double-precision SVE 10^x function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "sv_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
-#include "sv_poly_f64.h"
 
 #define SpecialBound 307.0 /* floor (log10 (2^1023)).  */
 
 static const struct data
 {
-  double poly[5];
+  double poly_even[2];
+  double c0, c2, c1, c3, c5;
   double shift, log10_2, log2_10_hi, log2_10_lo, scale_thres, special_bound;
 } data = {
   /* Coefficients generated using Remez algorithm.
      rel error: 0x1.9fcb9b3p-60
      abs error: 0x1.a20d9598p-60 in [ -log10(2)/128, log10(2)/128 ]
      max ulp err 0.52 +0.5.  */
-  .poly = { 0x1.26bb1bbb55516p1, 0x1.53524c73cd32ap1, 0x1.0470591daeafbp1,
-	    0x1.2bd77b1361ef6p0, 0x1.142b5d54e9621p-1 },
+  .poly_even = { 0x1.53524c73cd32ap1, 0x1.2bd77b1361ef6p0 },
   /* 1.5*2^46+1023. This value is further explained below.  */
+  .c1 = 0x1.0470591daeafbp1,
+  .c3 = 0x1.142b5d54e9621p-1,
+  .c5 = 0x1.26bb1bbb55516p1,
   .shift = 0x1.800000000ffc0p+46,
   .log10_2 = 0x1.a934f0979a371p1,     /* 1/log2(10).  */
   .log2_10_hi = 0x1.34413509f79ffp-2, /* log2(10).  */
@@ -60,9 +62,9 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
   /* |n| > 1280 => 2^(n) overflows.  */
   svbool_t p_cmp = svacgt (pg, n, d->scale_thres);
 
-  svfloat64_t r1 = svmul_x (pg, s1, s1);
+  svfloat64_t r1 = svmul_x (svptrue_b64 (), s1, s1);
   svfloat64_t r2 = svmla_x (pg, s2, s2, y);
-  svfloat64_t r0 = svmul_x (pg, r2, s1);
+  svfloat64_t r0 = svmul_x (svptrue_b64 (), r2, s1);
 
   return svsel (p_cmp, r1, r0);
 }
@@ -93,11 +95,14 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
      comes at significant performance cost.  */
   svuint64_t u = svreinterpret_u64 (z);
   svfloat64_t scale = svexpa (u);
-
+  svfloat64_t c13 = svld1rq (svptrue_b64 (), &d->c1);
   /* Approximate exp10(r) using polynomial.  */
-  svfloat64_t r2 = svmul_x (pg, r, r);
-  svfloat64_t y = svmla_x (pg, svmul_x (pg, r, d->poly[0]), r2,
-			   sv_pairwise_poly_3_f64_x (pg, r, r2, d->poly + 1));
+  svfloat64_t r2 = svmul_x (svptrue_b64 (), r, r);
+  svfloat64_t p01 = svmla_lane (sv_f64 (d->poly_even[0]), r, c13, 0);
+  svfloat64_t p23 = svmla_lane (sv_f64 (d->poly_even[1]), r, c13, 1);
+  svfloat64_t p04 = svmla_x (pg, p01, p23, r2);
+
+  svfloat64_t y = svmla_x (pg, svmul_x (svptrue_b64 (), r, d->c5), r2, p04);
 
   /* Assemble result as exp10(x) = 2^n * exp10(r).  If |x| > SpecialBound
      multiplication may overflow, so use special case routine.  */
@@ -120,7 +125,7 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
 TEST_SIG (SV, D, 1, exp10, -9.9, 9.9)
 TEST_ULP (SV_NAME_D1 (exp10), 0.52)
 TEST_DISABLE_FENV (SV_NAME_D1 (exp10))
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 0, 307, 10000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 307, inf, 1000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 0, SpecialBound, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), SpecialBound, inf, 1000)
 #endif
 CLOSE_SVE_ATTR

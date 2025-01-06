@@ -1,12 +1,11 @@
 /*
  * Double-precision SVE 2^x function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "sv_math.h"
-#include "sv_poly_f64.h"
 #include "test_sig.h"
 #include "test_defs.h"
 
@@ -17,13 +16,16 @@
 
 static const struct data
 {
-  double poly[4];
+  double poly_even[2];
+  double c1, c3;
   double shift, big_bound, uoflow_bound;
 } data = {
   /* Coefficients are computed using Remez algorithm with
      minimisation of the absolute error.  */
-  .poly = { 0x1.62e42fefa3686p-1, 0x1.ebfbdff82c241p-3, 0x1.c6b09b16de99ap-5,
-	    0x1.3b2abf5571ad8p-7 },
+  .poly_even = { 0x1.62e42fefa3686p-1, 0x1.c6b09b16de99ap-5,
+	     },
+      .c1 =  0x1.ebfbdff82c241p-3,
+      .c3 = 0x1.3b2abf5571ad8p-7,
   .shift = 0x1.8p52 / N,
   .uoflow_bound = UOFlowBound,
   .big_bound = BigBound,
@@ -57,9 +59,9 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n,
   /* |n| > 1280 => 2^(n) overflows.  */
   svbool_t p_cmp = svacgt (pg, n, d->uoflow_bound);
 
-  svfloat64_t r1 = svmul_x (pg, s1, s1);
+  svfloat64_t r1 = svmul_x (svptrue_b64 (), s1, s1);
   svfloat64_t r2 = svmla_x (pg, s2, s2, y);
-  svfloat64_t r0 = svmul_x (pg, r2, s1);
+  svfloat64_t r0 = svmul_x (svptrue_b64 (), r2, s1);
 
   return svsel (p_cmp, r1, r0);
 }
@@ -89,11 +91,14 @@ svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
   svuint64_t top = svlsl_x (pg, ki, 52 - V_EXP_TABLE_BITS);
   svfloat64_t scale = svreinterpret_f64 (svadd_x (pg, sbits, top));
 
+  svfloat64_t c13 = svld1rq (svptrue_b64 (), &d->c1);
   /* Approximate exp2(r) using polynomial.  */
-  svfloat64_t r2 = svmul_x (pg, r, r);
-  svfloat64_t p = sv_pairwise_poly_3_f64_x (pg, r, r2, d->poly);
-  svfloat64_t y = svmul_x (pg, r, p);
-
+  /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5.  */
+  svfloat64_t r2 = svmul_x (svptrue_b64 (), r, r);
+  svfloat64_t p01 = svmla_lane (sv_f64 (d->poly_even[0]), r, c13, 0);
+  svfloat64_t p23 = svmla_lane (sv_f64 (d->poly_even[1]), r, c13, 1);
+  svfloat64_t p = svmla_x (pg, p01, p23, r2);
+  svfloat64_t y = svmul_x (svptrue_b64 (), r, p);
   /* Assemble exp2(x) = exp2(r) * scale.  */
   if (unlikely (svptest_any (pg, special)))
     return special_case (pg, scale, y, kd, d);
