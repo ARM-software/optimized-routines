@@ -2,7 +2,7 @@
  * SVE helper for single-precision routines which calculate exp(x) and do
  * not need special-case handling
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 

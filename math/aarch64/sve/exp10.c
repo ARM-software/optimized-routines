@@ -13,19 +13,19 @@
 
 static const struct data
 {
-  double poly_even[2];
-  double c0, c2, c1, c3, c5;
+  double c1, c3, c2, c4, c0;
   double shift, log10_2, log2_10_hi, log2_10_lo, scale_thres, special_bound;
 } data = {
   /* Coefficients generated using Remez algorithm.
      rel error: 0x1.9fcb9b3p-60
      abs error: 0x1.a20d9598p-60 in [ -log10(2)/128, log10(2)/128 ]
      max ulp err 0.52 +0.5.  */
-  .poly_even = { 0x1.53524c73cd32ap1, 0x1.2bd77b1361ef6p0 },
+  .c0 = 0x1.26bb1bbb55516p1,
+  .c1 = 0x1.53524c73cd32ap1,
+  .c2 = 0x1.0470591daeafbp1,
+  .c3 = 0x1.2bd77b1361ef6p0,
+  .c4 = 0x1.142b5d54e9621p-1,
   /* 1.5*2^46+1023. This value is further explained below.  */
-  .c1 = 0x1.0470591daeafbp1,
-  .c3 = 0x1.142b5d54e9621p-1,
-  .c5 = 0x1.26bb1bbb55516p1,
   .shift = 0x1.800000000ffc0p+46,
   .log10_2 = 0x1.a934f0979a371p1,     /* 1/log2(10).  */
   .log2_10_hi = 0x1.34413509f79ffp-2, /* log2(10).  */
@@ -95,14 +95,14 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
      comes at significant performance cost.  */
   svuint64_t u = svreinterpret_u64 (z);
   svfloat64_t scale = svexpa (u);
-  svfloat64_t c13 = svld1rq (svptrue_b64 (), &d->c1);
+  svfloat64_t c24 = svld1rq (svptrue_b64 (), &d->c2);
   /* Approximate exp10(r) using polynomial.  */
   svfloat64_t r2 = svmul_x (svptrue_b64 (), r, r);
-  svfloat64_t p01 = svmla_lane (sv_f64 (d->poly_even[0]), r, c13, 0);
-  svfloat64_t p23 = svmla_lane (sv_f64 (d->poly_even[1]), r, c13, 1);
-  svfloat64_t p04 = svmla_x (pg, p01, p23, r2);
+  svfloat64_t p12 = svmla_lane (sv_f64 (d->c1), r, c24, 0);
+  svfloat64_t p34 = svmla_lane (sv_f64 (d->c3), r, c24, 1);
+  svfloat64_t p14 = svmla_x (pg, p12, p34, r2);
 
-  svfloat64_t y = svmla_x (pg, svmul_x (svptrue_b64 (), r, d->c5), r2, p04);
+  svfloat64_t y = svmla_x (pg, svmul_x (svptrue_b64 (), r, d->c0), r2, p14);
 
   /* Assemble result as exp10(x) = 2^n * exp10(r).  If |x| > SpecialBound
      multiplication may overflow, so use special case routine.  */

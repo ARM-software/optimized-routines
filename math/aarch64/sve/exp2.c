@@ -16,18 +16,15 @@
 
 static const struct data
 {
-  double poly_even[2];
+  double c0, c2;
   double c1, c3;
   double shift, big_bound, uoflow_bound;
 } data = {
   /* Coefficients are computed using Remez algorithm with
      minimisation of the absolute error.  */
-  .poly_even = { 0x1.62e42fefa3686p-1, 0x1.c6b09b16de99ap-5,
-	     },
-      .c1 =  0x1.ebfbdff82c241p-3,
-      .c3 = 0x1.3b2abf5571ad8p-7,
-  .shift = 0x1.8p52 / N,
-  .uoflow_bound = UOFlowBound,
+  .c0 = 0x1.62e42fefa3686p-1, .c1 = 0x1.ebfbdff82c241p-3,
+  .c2 = 0x1.c6b09b16de99ap-5, .c3 = 0x1.3b2abf5571ad8p-7,
+  .shift = 0x1.8p52 / N,      .uoflow_bound = UOFlowBound,
   .big_bound = BigBound,
 };
 
@@ -93,10 +90,10 @@ svfloat64_t SV_NAME_D1 (exp2) (svfloat64_t x, svbool_t pg)
 
   svfloat64_t c13 = svld1rq (svptrue_b64 (), &d->c1);
   /* Approximate exp2(r) using polynomial.  */
-  /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5.  */
+  /* y = exp2(r) - 1 ~= C0 r + C1 r^2 + C2 r^3 + C3 r^4.  */
   svfloat64_t r2 = svmul_x (svptrue_b64 (), r, r);
-  svfloat64_t p01 = svmla_lane (sv_f64 (d->poly_even[0]), r, c13, 0);
-  svfloat64_t p23 = svmla_lane (sv_f64 (d->poly_even[1]), r, c13, 1);
+  svfloat64_t p01 = svmla_lane (sv_f64 (d->c0), r, c13, 0);
+  svfloat64_t p23 = svmla_lane (sv_f64 (d->c2), r, c13, 1);
   svfloat64_t p = svmla_x (pg, p01, p23, r2);
   svfloat64_t y = svmul_x (svptrue_b64 (), r, p);
   /* Assemble exp2(x) = exp2(r) * scale.  */
