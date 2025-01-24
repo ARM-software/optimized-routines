@@ -1,7 +1,7 @@
 /*
  * Function entries for mathbench.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 /* clang-format off */
@@ -54,6 +54,7 @@ F (arm_math_erff, -4.0, 4.0)
 VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
 VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
 # if WANT_TRIGPI_TESTS
+VNF (_ZGVnN4v_asinpif, -0.9, 0.9)
 VNF (_ZGVnN4v_cospif, -0.9, 0.9)
 VND (_ZGVnN2v_cospi, -0.9, 0.9)
 VNF (_ZGVnN4v_sinpif, -0.9, 0.9)

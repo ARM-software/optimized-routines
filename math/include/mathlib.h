@@ -1,7 +1,7 @@
 /*
  * Public API.
  *
- * Copyright (c) 2015-2024, Arm Limited.
+ * Copyright (c) 2015-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -115,6 +115,7 @@ __vpcs float32x4_t _ZGVnN4v_acosf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_acoshf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_asinf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_asinhf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_asinpif (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_atanf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_atanhf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_cbrtf (float32x4_t);

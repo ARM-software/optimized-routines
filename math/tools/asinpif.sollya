@@ -1,0 +1,43 @@
+// polynomial for approximating asinpif(x)
+//
+// Copyright (c) 2025, Arm Limited.
+// SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+
+f = asin(x)/pi;
+dtype = single;
+
+// x^2 lives in [0, 0.25] if x lives in [0, 0.5]
+a = 0x1p-126; // a!=0 facilitates convergence of algorithm
+b = 0.25;
+
+deg = 5;
+
+// We look for a polynomial in x^2 such that f(x) ~ x/pi + x^3 * poly(x^2)
+// basically asin(x)/pi ~ 1/pi * x + c0 * x^3 + c1 * x^5 + ...
+backward = proc(poly, d) {
+  return d/pi + d ^ 3 * poly(d * d);
+};
+
+
+forward = proc(f, d) {
+  return (f(sqrt(d))-sqrt(d)/pi)/(d*sqrt(d));
+};
+
+
+// optimise polynomial iteratively, while minimising relative norm (f(x) - poly(x))/f(x)
+approx = proc(poly, d) {
+  return remez(1 - poly(x) / forward(f, x), deg - d, [a;b], x^d/forward(f, x), 1e-16);
+};
+
+poly = 0;
+for i from 0 to deg do {
+  i;
+  p = roundcoefficients(approx(poly,i), [|dtype ...|]);
+  poly = poly + x^i*coeff(p,0);
+};
+
+// Display relative norm (should be under 2^-23) and coefficients
+display = hexadecimal!;
+print("rel error:", dirtyinfnorm(1-backward(poly, x)/f(x), [a;b])); // fast but approximate
+print("in [", a, b, "]");
+for i from 0 to deg do print(coeff(poly, i));

@@ -1,7 +1,7 @@
 /*
  * Extended precision scalar reference functions for trigpi.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -103,4 +103,10 @@ arm_math_tanpil (long double x)
     }
 
   return tanl (f * M_PIl);
+}
+
+double
+arm_math_asinpi (double x)
+{
+  return asin (x) / M_PIl;
 }
