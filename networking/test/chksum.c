@@ -74,9 +74,9 @@ static struct
 {
     { checksum_simple, "simple"},
     { __chksum, "scalar"},
-#if __arm__
+#if __arm__ && __ARM_NEON
     { __chksum_arm_simd, "simd" },
-#elif __aarch64__
+#elif __aarch64__ && __ARM_NEON
     { __chksum_aarch64_simd, "simd" },
 #endif
     { NULL, NULL}
