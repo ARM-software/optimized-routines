@@ -1,7 +1,7 @@
 /*
  * Double-precision vector asinh(x) function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -132,10 +132,10 @@ log_inline (float64x2_t xm, const struct data *d)
    asinh(x) = sign(x) * log(|x| + sqrt(x^2 + 1)      if |x| >= 1
 	    = sign(x) * (|x| + |x|^3 * P(x^2))       otherwise
    where log(x) is an optimized log approximation, and P(x) is a polynomial
-   shared with the scalar routine. The greatest observed error 2.79 ULP, in
-   |x| >= 1:
-   _ZGVnN2v_asinh(0x1.2cd9d73ea76a6p+0) got 0x1.ffffd003219dap-1
-				       want  0x1.ffffd003219ddp-1.  */
+   shared with the scalar routine.
+   For |x| >= 1, the greatest observed error is 2.87 ULP.
+   _ZGVnN2v_asinh(-0x1.177c6017ce58ap+0) got -0x1.e3ba3d5cb1a46p-1
+					want -0x1.e3ba3d5cb1a49p-1.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -173,9 +173,10 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
      If WANT_SIMD_EXCEPT is enabled, sidestep special lanes, which will
      overflow, and tiny lanes, which will underflow, by setting them to 0. They
      will be fixed later, either by selecting x or falling back to the scalar
-     special-case. The largest observed error in this region is 1.47 ULPs:
-     _ZGVnN2v_asinh(0x1.fdfcd00cc1e6ap-1) got 0x1.c1d6bf874019bp-1
-					 want 0x1.c1d6bf874019cp-1.  */
+     special-case.
+     The largest observed error in this region is 1.36 ULPs:
+     _ZGVnN2v_asinh(0x1.fe1e2aaa8dd54p-1) got 0x1.c1ee60bc0788ap-1
+					 want 0x1.c1ee60bc0788bp-1.  */
   float64x2_t option_2 = v_f64 (0);
 
   if (likely (v_any_u64 (vceqzq_u64 (gt1))))
@@ -229,7 +230,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, asinh, -10.0, 10.0)
-TEST_ULP (V_NAME_D1 (asinh), 2.29)
+TEST_ULP (V_NAME_D1 (asinh), 2.37)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (asinh), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (asinh), 0, 0x1p-26, 50000)
 TEST_SYM_INTERVAL (V_NAME_D1 (asinh), 0x1p-26, 1, 50000)
