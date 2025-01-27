@@ -54,6 +54,7 @@ F (arm_math_erff, -4.0, 4.0)
 VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
 VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
 # if WANT_TRIGPI_TESTS
+VND (_ZGVnN2v_asinpi, -0.9, 0.9)
 VNF (_ZGVnN4v_asinpif, -0.9, 0.9)
 VNF (_ZGVnN4v_cospif, -0.9, 0.9)
 VND (_ZGVnN2v_cospi, -0.9, 0.9)

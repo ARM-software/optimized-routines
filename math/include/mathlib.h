@@ -152,6 +152,7 @@ __vpcs float64x2_t _ZGVnN2v_acos (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_acosh (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_asin (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_asinh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_asinpi (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_atan (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_atanh (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_cbrt (float64x2_t);

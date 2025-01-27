@@ -61,6 +61,7 @@ SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
  F (arm_math_sincospi_cos, arm_math_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
 # if __aarch64__ && __linux__
  F (_ZGVnN4v_asinpif, Z_asinpif, arm_math_asinpi, mpfr_asinpi, 1, 1, f1, 0)
+ F (_ZGVnN2v_asinpi, Z_asinpi, arm_math_asinpil, mpfr_asinpi, 1, 0, d1, 0)
  F (_ZGVnN4v_cospif, Z_cospif, arm_math_cospi,  mpfr_cospi, 1, 1, f1, 0)
  F (_ZGVnN2v_cospi,  Z_cospi,  arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
  F (_ZGVnN4v_sinpif, Z_sinpif, arm_math_sinpi,  mpfr_sinpi, 1, 1, f1, 0)
