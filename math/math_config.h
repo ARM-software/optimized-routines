@@ -398,7 +398,6 @@ check_uflowf (float x)
 /* Shared between expf, exp2f and powf.  */
 #define EXP2F_TABLE_BITS 5
 #define EXP2F_POLY_ORDER 3
-
 extern const struct exp2f_data {
     double poly[EXP2F_POLY_ORDER];
     double invln2_scaled __attribute__((aligned(16)));
@@ -407,7 +406,6 @@ extern const struct exp2f_data {
     double shift_scaled;
     double shift;
 } __exp2f_data HIDDEN __attribute__(aligned(64));
-
 
 /* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
