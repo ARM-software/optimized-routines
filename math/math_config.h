@@ -399,9 +399,9 @@ check_uflowf (float x)
 #define EXP2F_TABLE_BITS 5
 #define EXP2F_POLY_ORDER 3
 extern const struct exp2f_data {
-    double poly[EXP2F_POLY_ORDER];
-    double invln2_scaled __attribute__((aligned(16)));
+    double invln2_scaled;
     double poly_scaled[EXP2F_POLY_ORDER];
+    double poly[EXP2F_POLY_ORDER];
     uint64_t tab[1 << EXP2F_TABLE_BITS];
     double shift_scaled;
     double shift;
