@@ -112,6 +112,12 @@ arm_math_asinpil (long double x)
 }
 
 double
+arm_math_acospi (double x)
+{
+  return acos (x) / M_PIl;
+}
+
+double
 arm_math_asinpi (double x)
 {
   return asin (x) / M_PIl;

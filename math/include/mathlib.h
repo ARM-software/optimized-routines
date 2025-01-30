@@ -113,6 +113,7 @@ DECL_SIMD_aarch64 double tanh (double);
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs float32x4_t _ZGVnN4v_acosf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_acoshf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_acospif (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_asinf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_asinhf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_asinpif (float32x4_t);

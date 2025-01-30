@@ -24,6 +24,13 @@ static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,
 static int modf_mpfr_frac(mpfr_t f, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(i, 80); return mpfr_modf(i,f,x,r); }
 static int modf_mpfr_int(mpfr_t i, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(f, 80); return mpfr_modf(i,f,x,r); }
 # if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
+static int mpfr_acospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  MPFR_DECL_INIT (pi, 1080);
+  mpfr_const_pi (pi, GMP_RNDN);
+  mpfr_acos (frd, arg, GMP_RNDN);
+  return mpfr_div (ret, frd, pi, GMP_RNDN);
+}
 static int mpfr_asinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
@@ -134,6 +141,7 @@ arm_math_sincospi_cos (double x)
 #if  __aarch64__ && __linux__
 
 # if WANT_TRIGPI_TESTS
+ZVNF1_WRAP (acospi)
 ZVNF1_WRAP (asinpi)
 ZVND1_WRAP (asinpi)
 ZVNF1_WRAP (cospi)
