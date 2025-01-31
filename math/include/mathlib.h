@@ -192,6 +192,7 @@ __vpcs float64x2_t _ZGVnN2v_erfinv (float64x2_t);
 #  include <arm_sve.h>
 svfloat32_t _ZGVsMxv_acosf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_acoshf (svfloat32_t, svbool_t);
+svfloat32_t _ZGVsMxv_acospif (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_asinf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_asinhf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_atanf (svfloat32_t, svbool_t);
