@@ -17,6 +17,7 @@ release is v25.01.
 Source code layout:
 
 build/          - build directory (created by make).
+fp/             - FP basic arithmetic sources (not included in Makefile).
 math/           - math subproject sources for generic scalar
                   subroutines and sources shared with
                   subdirectories of math/.
