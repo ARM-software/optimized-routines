@@ -1,21 +1,18 @@
-// polynomial for approximating atanf(x)
+// polynomial for approximating atanpif(x)
 //
-// Copyright (c) 2022-2025, Arm Limited.
+// Copyright (c) 2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
-// Generate list of monomials:
-// Taylor series of atan is of the form x + ax^3 + bx^5 + cx^7 + ...
-// So generate a, b, c, ... such that we can approximate atan(x) by:
-// x + x^3 * (a + bx^2 + cx^4 + ...)
-
-f = atan(x);
+f = atan(x)/pi;
 dtype = single;
-deg = 8;
 
 a = 0x1.0p-126;
 b = 1;
 
-// f(x) ~ x * poly(x^2)
+deg = 8;
+
+// We look for a polynomial in x^2 such that f(x) ~ x * poly(x^2)
+// basically atan(x)/pi ~  c0 * x + c1 * x^3 + c2 * x^5 + ...
 backward = proc(poly, d) {
   return d * poly(d * d);
 };
@@ -26,7 +23,7 @@ forward = proc(f, d) {
   return f(sqrt(d))/(sqrt(d));
 };
 
-// Iterativley optimise polynomial coefficients, while minimising relative norm (f(x) - poly(x))/f(x)
+// Optimise polynomial iteratively, minimising relative norm (f(x) - poly(x))/f(x)
 approx = proc(poly, d) {
   return remez(1 - poly(x) / forward(f, x), deg - d, [a;b], x^d/forward(f, x), 1e-16);
 };
@@ -39,8 +36,7 @@ for i from 0 to deg do {
   poly = poly + x^i*coeff(p,0);
 };
 
-
-display = hexadecimal;
+display = hexadecimal!;
 print("rel error:", dirtyinfnorm(1-backward(poly, x)/f(x), [a;b]));
 print("in [", a, b, "]");
 for i from 0 to deg do print(coeff(poly, i));

@@ -119,6 +119,7 @@ __vpcs float32x4_t _ZGVnN4v_asinhf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_asinpif (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_atanf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_atanhf (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_atanpif (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_cbrtf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_cosf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_coshf (float32x4_t);

@@ -122,3 +122,9 @@ arm_math_asinpi (double x)
 {
   return asin (x) / M_PIl;
 }
+
+double
+arm_math_atanpi (double x)
+{
+  return atan (x) / M_PIl;
+}

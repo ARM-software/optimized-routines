@@ -57,6 +57,13 @@ static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   mpfr_mul (frd, frd, arg, GMP_RNDN);
   return mpfr_cos (ret, frd, GMP_RNDN);
 }
+static int mpfr_atanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  MPFR_DECL_INIT (pi, 1080);
+  mpfr_const_pi (pi, GMP_RNDN);
+  mpfr_atan (frd, arg, GMP_RNDN);
+  return mpfr_div (ret, frd, pi, GMP_RNDN);
+}
 # endif
 # if WANT_EXPERIMENTAL_MATH
 static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
@@ -144,6 +151,7 @@ arm_math_sincospi_cos (double x)
 ZVNF1_WRAP (acospi)
 ZVNF1_WRAP (asinpi)
 ZVND1_WRAP (asinpi)
+ZVNF1_WRAP (atanpi)
 ZVNF1_WRAP (cospi)
 ZVND1_WRAP (cospi)
 ZVNF1_WRAP (sinpi)
