@@ -1,6 +1,6 @@
 // polynomial for approximating atan(x) and atan2(y, x)
 //
-// Copyright (c) 2022-2024, Arm Limited.
+// Copyright (c) 2022-2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 // atan is odd, so approximate with an odd polynomial:
@@ -8,16 +8,39 @@
 // We generate a, b, c, ... such that we can approximate atan(x) by:
 // x + x^3 * (a + bx^2 + cx^4 + ...)
 
-// Assemble monomials
+f = atan(x);
+dtype = double;
+
 deg = 20;
-mons = [|1,...,deg|];
-for i from 0 to deg-1 do mons[i] = mons[i] * 2 + 1;
 
 a = 0x1.0p-1022;
 b = 1;
 
-poly = fpminimax(atan(x)-x, mons, [|double ...|], [a;b]);
+// f(x) ~ x * poly(x^2)
+backward = proc(poly, d) {
+  return d * poly(d * d);
+};
+
+// We need to feed remez algorithm with the inverse of the backward transform
+// g(y) such that g(x^2) = poly(x^2)
+forward = proc(f, d) {
+  return f(sqrt(d))/(sqrt(d));
+};
+
+
+approx = proc(poly, d) {
+  return remez(forward(f, x) - poly(x), deg - d, [a;b], x^d, 1e-16);
+};
+
+p = 0;
+poly = 0;
+for i from 0 to deg do {
+  i;
+  p = roundcoefficients(approx(poly,i), [|dtype ...|]);
+  poly = poly + x^i*coeff(p,0);
+};
 
 display = hexadecimal;
-print("coeffs:");
-for i from 0 to deg-1 do coeff(poly,mons[i]);
+print("rel error:", dirtyinfnorm(1-backward(poly, x)/f(x), [a;b]));
+print("in [", a, b, "]");
+for i from 0 to deg do print(coeff(poly, i));

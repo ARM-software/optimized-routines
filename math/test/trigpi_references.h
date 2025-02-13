@@ -128,3 +128,9 @@ arm_math_atanpi (double x)
 {
   return atan (x) / M_PIl;
 }
+
+long double
+arm_math_atanpil (long double x)
+{
+  return atanl (x) / M_PIl;
+}
