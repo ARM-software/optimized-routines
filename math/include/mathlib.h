@@ -234,6 +234,7 @@ svfloat64_t _ZGVsMxv_asin (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_asinh (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_atan (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_atanh (svfloat64_t, svbool_t);
+svfloat64_t _ZGVsMxv_atanpi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_cbrt (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_cos (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_cosh (svfloat64_t, svbool_t);

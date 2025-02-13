@@ -291,6 +291,7 @@ v_modf_int (double x)
 # if WANT_TRIGPI_TESTS
 ZSVNF1_WRAP (acospi)
 ZSVNF1_WRAP (atanpi)
+ZSVND1_WRAP (atanpi)
 ZSVNF1_WRAP (cospi)
 ZSVND1_WRAP (cospi)
 ZSVNF1_WRAP (sinpi)
