@@ -406,7 +406,7 @@ extern const struct exp2f_data
   double invln2_scaled;
   double poly_scaled[EXP2F_POLY_ORDER];
   double shift;
-} __exp2f_data HIDDEN;
+} __exp2f_data HIDDEN __attribute__((aligned(16)));
 
 /* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
