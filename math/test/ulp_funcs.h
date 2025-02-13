@@ -78,6 +78,7 @@ SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
 # endif
 # if WANT_SVE_TESTS
  SVF (_ZGVsMxv_acospif, Z_sv_acospif, arm_math_acospi,  mpfr_acospi, 1, 1, f1, 0)
+ SVF (_ZGVsMxv_atanpif, Z_sv_atanpif, arm_math_atanpi,  mpfr_tanpi, 1, 1, f1, 0)
  SVF (_ZGVsMxv_cospif, Z_sv_cospif, arm_math_cospi,  mpfr_cospi, 1, 1, f1, 0)
  SVF (_ZGVsMxv_cospi,  Z_sv_cospi,  arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
  SVF (_ZGVsMxv_sinpif, Z_sv_sinpif, arm_math_sinpi,  mpfr_sinpi, 1, 1, f1, 0)

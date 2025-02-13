@@ -199,6 +199,7 @@ svfloat32_t _ZGVsMxv_asinf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_asinhf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_atanf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_atanhf (svfloat32_t, svbool_t);
+svfloat32_t _ZGVsMxv_atanpif (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_cbrtf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_cosf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_coshf (svfloat32_t, svbool_t);

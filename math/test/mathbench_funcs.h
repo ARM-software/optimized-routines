@@ -89,6 +89,7 @@ VND (_ZGVnN2v_tanpi, -0.9, 0.9)
 {"_ZGVsMxv_cexpi", 'd', 's', -3.1, 3.1, {.svd = _Z_sv_cexpi_wrap}},
 # if WANT_TRIGPI_TESTS
 SVF (_ZGVsMxv_acospif, -0.9, 0.9)
+SVF (_ZGVsMxv_atanpif, -0.9, 0.9)
 SVF (_ZGVsMxv_cospif, -0.9, 0.9)
 SVD (_ZGVsMxv_cospi, -0.9, 0.9)
 SVF (_ZGVsMxv_sinpif, -0.9, 0.9)
