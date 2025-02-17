@@ -72,6 +72,7 @@
 # define HIDDEN __attribute__ ((__visibility__ ("hidden")))
 # define NOINLINE __attribute__ ((noinline))
 # define UNUSED __attribute__ ((unused))
+# define ALIGN(X) __attribute__ ((__aligned__(X)))
 # define likely(x) __builtin_expect (!!(x), 1)
 # define unlikely(x) __builtin_expect (x, 0)
 # if __GNUC__ >= 9
@@ -88,6 +89,7 @@
 # define HIDDEN
 # define NOINLINE
 # define UNUSED
+# define ALIGN(X)
 # define likely(x) (x)
 # define unlikely(x) (x)
 #endif
@@ -406,7 +408,7 @@ extern const struct exp2f_data
   double invln2_scaled;
   double poly_scaled[EXP2F_POLY_ORDER];
   double shift;
-} __exp2f_data HIDDEN;
+} __exp2f_data ALIGN(16) HIDDEN;
 
 /* Data for logf and log10f.  */
 #define LOGF_TABLE_BITS 4
@@ -420,7 +422,7 @@ extern const struct logf_data
   double ln2;
   double invln10;
   double poly[LOGF_POLY_ORDER - 1]; /* First order coefficient is 1.  */
-} __logf_data HIDDEN;
+} __logf_data ALIGN(16) HIDDEN;
 
 #define LOG2F_TABLE_BITS 4
 #define LOG2F_POLY_ORDER 4
@@ -431,7 +433,7 @@ extern const struct log2f_data
     double invc, logc;
   } tab[1 << LOG2F_TABLE_BITS];
   double poly[LOG2F_POLY_ORDER];
-} __log2f_data HIDDEN;
+} __log2f_data ALIGN(16) HIDDEN;
 
 #define POWF_LOG2_TABLE_BITS 4
 #define POWF_LOG2_POLY_ORDER 5
@@ -448,7 +450,7 @@ extern const struct powf_log2_data
     double invc, logc;
   } tab[1 << POWF_LOG2_TABLE_BITS];
   double poly[POWF_LOG2_POLY_ORDER];
-} __powf_log2_data HIDDEN;
+} __powf_log2_data ALIGN(16) HIDDEN;
 
 
 #define EXP_TABLE_BITS 7
@@ -480,7 +482,7 @@ extern const struct exp_data
   double exp10_poly[5];
   uint64_t tab[2*(1 << EXP_TABLE_BITS)];
   double invlog10_2N;
-} __exp_data HIDDEN;
+} __exp_data ALIGN(16) HIDDEN;
 
 #define LOG_TABLE_BITS 7
 #define LOG_POLY_ORDER 6
@@ -495,7 +497,7 @@ extern const struct log_data
 #if !HAVE_FAST_FMA
   struct {double chi, clo;} tab2[1 << LOG_TABLE_BITS];
 #endif
-} __log_data HIDDEN;
+} __log_data ALIGN(16) HIDDEN;
 
 #define LOG2_TABLE_BITS 6
 #define LOG2_POLY_ORDER 7
@@ -510,7 +512,7 @@ extern const struct log2_data
 #if !HAVE_FAST_FMA
   struct {double chi, clo;} tab2[1 << LOG2_TABLE_BITS];
 #endif
-} __log2_data HIDDEN;
+} __log2_data ALIGN(16) HIDDEN;
 
 #define POW_LOG_TABLE_BITS 7
 #define POW_LOG_POLY_ORDER 8
@@ -521,7 +523,7 @@ extern const struct pow_log_data
   double poly[POW_LOG_POLY_ORDER - 1]; /* First coefficient is 1.  */
   /* Note: the pad field is unused, but allows slightly faster indexing.  */
   struct {double invc, pad, logc, logctail;} tab[1 << POW_LOG_TABLE_BITS];
-} __pow_log_data HIDDEN;
+} __pow_log_data ALIGN(16) HIDDEN;
 
 extern const struct erff_data
 {
@@ -719,7 +721,7 @@ extern const struct expf_data
   uint64_t tab[1 << EXPF_TABLE_BITS];
   double invln2_scaled;
   double poly_scaled[EXPF_POLY_ORDER];
-} __expf_data HIDDEN;
+} __expf_data ALIGN(16) HIDDEN;
 
 # define EXPM1F_POLY_ORDER 5
 extern const float __expm1f_poly[EXPM1F_POLY_ORDER] HIDDEN;
@@ -748,7 +750,7 @@ extern const struct log10_data
     double chi, clo;
   } tab2[1 << LOG10_TABLE_BITS];
 #  endif
-} __log10_data HIDDEN;
+} __log10_data ALIGN(16) HIDDEN;
 
 # define TANF_P_POLY_NCOEFFS 6
 /* cotan approach needs order 3 on [0, pi/4] to reach <3.5ulps.  */
