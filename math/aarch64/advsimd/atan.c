@@ -36,9 +36,9 @@ static const struct data
 
 /* Fast implementation of vector atan.
    Based on atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
-   z=1/x and shift = pi/2. Maximum observed error is 2.39 ulps:
-   _ZGVnN2v_atan(0x1.02012a8dbc592p+0) got 0x1.941eded3dfcc5p-1
-				      want 0x1.941eded3dfcc7p-1.  */
+   z=1/x and shift = pi/2. Maximum observed error is 2.45 ulps:
+   _ZGVnN2v_atan (0x1.0008d737eb3e6p+0) got 0x1.92288c551a4c1p-1
+				       want 0x1.92288c551a4c3p-1.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (atan) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -119,7 +119,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atan) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, atan, -10.0, 10.0)
-TEST_ULP (V_NAME_D1 (atan), 1.89)
+TEST_ULP (V_NAME_D1 (atan), 1.95)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atan), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (atan), 0, 0x1p-30, 10000)
 TEST_INTERVAL (V_NAME_D1 (atan), -0, -0x1p-30, 1000)

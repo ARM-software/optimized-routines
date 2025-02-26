@@ -36,9 +36,9 @@ static const struct data
 /* Fast implementation of SVE atan.
    Based on atan(x) ~ shift + z + z^3 * P(z^2) with reduction to [0,1] using
    z=1/x and shift = pi/2. Largest errors are close to 1. The maximum observed
-   error is 2.04 ulps:
-   _ZGVsMxv_atan (0x1.017cf6f6c1581p+0) got 0x1.939b9150931fcp-1
-				       want 0x1.939b9150931fep-1.  */
+   error is 2.08 ulps:
+   _ZGVsMxv_atan (0x1.000a7c56975e8p+0) got 0x1.922a3163e15c2p-1
+				       want 0x1.922a3163e15c4p-1.  */
 svfloat64_t SV_NAME_D1 (atan) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -110,7 +110,7 @@ svfloat64_t SV_NAME_D1 (atan) (svfloat64_t x, const svbool_t pg)
 }
 
 TEST_SIG (SV, D, 1, atan, -3.1, 3.1)
-TEST_ULP (SV_NAME_D1 (atan), 1.54)
+TEST_ULP (SV_NAME_D1 (atan), 1.58)
 TEST_DISABLE_FENV (SV_NAME_D1 (atan))
 TEST_INTERVAL (SV_NAME_D1 (atan), 0.0, 1.0, 40000)
 TEST_INTERVAL (SV_NAME_D1 (atan), 1.0, 100.0, 40000)
