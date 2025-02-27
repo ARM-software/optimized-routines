@@ -59,6 +59,7 @@ VNF (arm_math_advsimd_fast_sinf, -3.1, 3.1)
 {"arm_math_advsimd_fast_powf",  'f', 'n',  0.01, 11.1, {.vnf = xy_Z_fast_powf}},
 {"xarm_math_advsimd_fast_powf", 'f', 'n',  0.01, 11.1, {.vnf = x_Z_fast_powf}},
 {"yarm_math_advsimd_fast_powf", 'f', 'n', -10.0, 10.0, {.vnf = y_Z_fast_powf}},
+VNF (arm_math_advsimd_fast_expf, -10.0,10.0)
 # endif
 # if WANT_TRIGPI_TESTS
 VND (_ZGVnN2v_asinpi, -0.9, 0.9)
@@ -115,6 +116,7 @@ SVF (arm_math_sve_fast_sinf, -3.1, 3.1)
 {"yarm_math_sve_fast_powf", 'f', 's', -10.0, 10.0, {.svf = y_Z_sv_fast_powf}},
 {"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
 {"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
+SVF (arm_math_sve_fast_expf, -9.9, 9.9)
 # endif
 #endif
     /* clang-format on */
