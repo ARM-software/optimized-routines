@@ -44,7 +44,7 @@ F (arm_math_erff, -4.0, 4.0)
 {"y_ZGVnN2vv_pow",   'd', 'n', -10.0, 10.0, {.vnd = y_Z_pow}},
 {"_ZGVnN4vv_powf",  'f', 'n',   0.01, 11.1, {.vnf = xy_Z_powf}},
 {"x_ZGVnN4vv_powf", 'f', 'n',   0.01, 11.1, {.vnf = x_Z_powf}},
-{"y_ZGVnN4vv_powf", 'f', 'n', -10.0,  10.0, {.vnf = y_Z_powf}},
+{"y_ZGVnN4vv_powf", 'f', 'n',  -10.0, 10.0, {.vnf = y_Z_powf}},
 {"_ZGVnN4vl4_modff", 'f', 'n', -10.0, 10.0, {.vnf = _Z_modff_wrap}},
 {"_ZGVnN2vl8_modf",  'd', 'n', -10.0, 10.0, {.vnd = _Z_modf_wrap}},
 {"_ZGVnN4vl4l4_sincosf", 'f', 'n', -3.1, 3.1, {.vnf = _Z_sincosf_wrap}},
@@ -56,6 +56,9 @@ VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
 # if WANT_EXPERIMENTAL_MATH
 VNF (arm_math_advsimd_fast_cosf, -3.1, 3.1)
 VNF (arm_math_advsimd_fast_sinf, -3.1, 3.1)
+{"arm_math_advsimd_fast_powf",  'f', 'n',  0.01, 11.1, {.vnf = xy_Z_fast_powf}},
+{"xarm_math_advsimd_fast_powf", 'f', 'n',  0.01, 11.1, {.vnf = x_Z_fast_powf}},
+{"yarm_math_advsimd_fast_powf", 'f', 'n', -10.0, 10.0, {.vnf = y_Z_fast_powf}},
 # endif
 # if WANT_TRIGPI_TESTS
 VND (_ZGVnN2v_asinpi, -0.9, 0.9)
@@ -107,6 +110,9 @@ SVD (_ZGVsMxv_tanpi, -0.9, 0.9)
 # if WANT_EXPERIMENTAL_MATH
 SVF (arm_math_sve_fast_cosf, -3.1, 3.1)
 SVF (arm_math_sve_fast_sinf, -3.1, 3.1)
+{"arm_math_sve_fast_powf",  'f', 's',  0.01, 11.1, {.svf = xy_Z_sv_fast_powf}},
+{"xarm_math_sve_fast_powf", 'f', 's',  0.01, 11.1, {.svf = x_Z_sv_fast_powf}},
+{"yarm_math_sve_fast_powf", 'f', 's', -10.0, 10.0, {.svf = y_Z_sv_fast_powf}},
 {"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
 {"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
 # endif

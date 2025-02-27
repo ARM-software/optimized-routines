@@ -89,6 +89,7 @@ static float Z_exp2f_1u(float x) { return _ZGVnN4v_exp2f_1u(argf(x))[0]; }
 # if WANT_EXPERIMENTAL_MATH
 static float Z_fast_cosf(float x) { return arm_math_advsimd_fast_cosf(argf(x))[0]; }
 static float Z_fast_sinf(float x) { return arm_math_advsimd_fast_sinf(argf(x))[0]; }
+static float Z_fast_powf(float x, float y) { return arm_math_advsimd_fast_powf(argf(x), argf(y))[0]; }
 # endif
 #endif
 
@@ -419,6 +420,12 @@ static float
 Z_sv_fast_cosf (svbool_t pg, float x)
 {
   return svretf (arm_math_sve_fast_cosf (svargf (x), pg), pg);
+}
+
+static float
+Z_sv_fast_powf (svbool_t pg, float x, float y)
+{
+  return svretf (arm_math_sve_fast_powf (svargf (x), svargf (y), pg), pg);
 }
 
 /* Our implementations of powi/powk are too imprecise to verify

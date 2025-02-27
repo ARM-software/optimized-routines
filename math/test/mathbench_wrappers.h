@@ -1,7 +1,7 @@
 /*
  * Function wrappers for mathbench.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -149,6 +149,28 @@ _Z_cexpi_wrap (float64x2_t x)
   return sc.val[0] + sc.val[1];
 }
 
+# if WANT_EXPERIMENTAL_MATH
+
+__vpcs static float32x4_t
+xy_Z_fast_powf (float32x4_t x)
+{
+  return arm_math_advsimd_fast_powf (x, x);
+}
+
+__vpcs static float32x4_t
+x_Z_fast_powf (float32x4_t x)
+{
+  return arm_math_advsimd_fast_powf (x, vdupq_n_f32 (23.4));
+}
+
+__vpcs static float32x4_t
+y_Z_fast_powf (float32x4_t x)
+{
+  return arm_math_advsimd_fast_powf (vdupq_n_f32 (2.34), x);
+}
+
+# endif
+
 #endif
 
 #if WANT_SVE_TESTS
@@ -276,6 +298,24 @@ _Z_sv_cexpi_wrap (svfloat64_t x, svbool_t pg)
 }
 
 # if WANT_EXPERIMENTAL_MATH
+
+static svfloat32_t
+xy_Z_sv_fast_powf (svfloat32_t x, svbool_t pg)
+{
+  return arm_math_sve_fast_powf (x, x, pg);
+}
+
+static svfloat32_t
+x_Z_sv_fast_powf (svfloat32_t x, svbool_t pg)
+{
+  return arm_math_sve_fast_powf (x, svdup_f32 (23.4f), pg);
+}
+
+static svfloat32_t
+y_Z_sv_fast_powf (svfloat32_t x, svbool_t pg)
+{
+  return arm_math_sve_fast_powf (svdup_f32 (2.34f), x, pg);
+}
 
 static svfloat32_t
 _Z_sv_powi_wrap (svfloat32_t x, svbool_t pg)
