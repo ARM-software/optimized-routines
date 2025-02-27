@@ -86,6 +86,10 @@ long double modfl_int(long double x) { long double i; modfl(x, &i); return i; }
 #if __aarch64__ && __linux__
 static float Z_expf_1u(float x) { return _ZGVnN4v_expf_1u(argf(x))[0]; }
 static float Z_exp2f_1u(float x) { return _ZGVnN4v_exp2f_1u(argf(x))[0]; }
+# if WANT_EXPERIMENTAL_MATH
+static float Z_fast_cosf(float x) { return arm_math_advsimd_fast_cosf(argf(x))[0]; }
+static float Z_fast_sinf(float x) { return arm_math_advsimd_fast_sinf(argf(x))[0]; }
+# endif
 #endif
 
 /* clang-format on */
@@ -404,6 +408,18 @@ sv_modf_int (svbool_t pg, double x)
 }
 
 # if WANT_EXPERIMENTAL_MATH
+
+static float
+Z_sv_fast_sinf (svbool_t pg, float x)
+{
+  return svretf (arm_math_sve_fast_sinf (svargf (x), pg), pg);
+}
+
+static float
+Z_sv_fast_cosf (svbool_t pg, float x)
+{
+  return svretf (arm_math_sve_fast_cosf (svargf (x), pg), pg);
+}
 
 /* Our implementations of powi/powk are too imprecise to verify
    against any established pow implementation. Instead we have the

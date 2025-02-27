@@ -53,6 +53,10 @@ F (arm_math_erff, -4.0, 4.0)
 {"_ZGVnN2v_cexpi", 'd', 'n', -3.1, 3.1, {.vnd = _Z_cexpi_wrap}},
 VNF (_ZGVnN4v_expf_1u, -9.9, 9.9)
 VNF (_ZGVnN4v_exp2f_1u, -9.9, 9.9)
+# if WANT_EXPERIMENTAL_MATH
+VNF (arm_math_advsimd_fast_cosf, -3.1, 3.1)
+VNF (arm_math_advsimd_fast_sinf, -3.1, 3.1)
+# endif
 # if WANT_TRIGPI_TESTS
 VND (_ZGVnN2v_asinpi, -0.9, 0.9)
 VNF (_ZGVnN4v_asinpif, -0.9, 0.9)
@@ -101,6 +105,8 @@ SVD (_ZGVsMxv_tanpi, -0.9, 0.9)
 {"_ZGVsMxvl8l8_sincospi", 'd', 's', -0.9, 0.9, {.svd = _Z_sv_sincospi_wrap}},
 # endif
 # if WANT_EXPERIMENTAL_MATH
+SVF (arm_math_sve_fast_cosf, -3.1, 3.1)
+SVF (arm_math_sve_fast_sinf, -3.1, 3.1)
 {"_ZGVsMxvv_powi",   'f', 's', -10.0, 10.0, {.svf = _Z_sv_powi_wrap}},
 {"_ZGVsMxvv_powk",   'd', 's', -10.0, 10.0, {.svd = _Z_sv_powk_wrap}},
 # endif

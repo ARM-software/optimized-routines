@@ -1,7 +1,7 @@
 /*
  * ULP error checking tool for math functions.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -855,7 +855,8 @@ main (int argc, char *argv[])
 	exit (0);
 #endif
 #if !WANT_SVE_TESTS
-      if (strncmp (argv[0], "_ZGVsMxv", 8) == 0)
+      if (strncmp (argv[0], "_ZGVsMxv", 8) == 0
+	  || strncmp (argv[0], "arm_math_sve", 12) == 0)
 	exit (0);
 #endif
       printf ("math function %s not supported\n", argv[0]);

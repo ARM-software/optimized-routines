@@ -46,6 +46,16 @@ SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
 #if WANT_EXPERIMENTAL_MATH
  F (arm_math_erff, arm_math_erff, erf, mpfr_erf, 1, 1, f1, 0)
  F (arm_math_erf,  arm_math_erf,  erfl, mpfr_erf, 1, 0, d1, 0)
+# if __aarch64__ && __linux__
+ F (arm_math_advsimd_fast_cosf, Z_fast_cosf, cos, mpfr_cos, 1, 1, f1, 0)
+ F (arm_math_advsimd_fast_sinf, Z_fast_sinf, sin, mpfr_sin, 1, 1, f1, 0)
+# endif
+# if WANT_SVE_TESTS
+ SVF (arm_math_sve_fast_cosf, Z_sv_fast_cosf, cos, mpfr_cos, 1, 1, f1, 0)
+ SVF (arm_math_sve_fast_sinf, Z_sv_fast_sinf, sin, mpfr_sin, 1, 1, f1, 0)
+ SVF (_ZGVsMxvv_powk, Z_sv_powk, ref_powi, mpfr_powi, 2, 0, d2, 0)
+ SVF (_ZGVsMxvv_powi, Z_sv_powi, ref_powif, mpfr_powi, 2, 1, f2, 0)
+# endif
 #endif
 
 #if WANT_TRIGPI_TESTS
@@ -90,10 +100,6 @@ SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
  SVF (_ZGVsMxvl4l4_sincospif_cos, sv_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
  SVF (_ZGVsMxvl8l8_sincospi_sin, sv_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
  SVF (_ZGVsMxvl8l8_sincospi_cos, sv_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
-#  if WANT_EXPERIMENTAL_MATH
-SVF (_ZGVsMxvv_powk, Z_sv_powk, ref_powi, mpfr_powi, 2, 0, d2, 0)
-SVF (_ZGVsMxvv_powi, Z_sv_powi, ref_powif, mpfr_powi, 2, 1, f2, 0)
-#  endif
 # endif
 #endif
 

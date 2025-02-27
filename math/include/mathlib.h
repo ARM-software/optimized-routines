@@ -187,6 +187,8 @@ __vpcs void _ZGVnN2vl8l8_sincos (float64x2_t, double *, double *);
 __vpcs void _ZGVnN2vl8l8_sincospi (float64x2_t, double *, double *);
 
 # if WANT_EXPERIMENTAL_MATH
+__vpcs float32x4_t arm_math_advsimd_fast_cosf (float32x4_t);
+__vpcs float32x4_t arm_math_advsimd_fast_sinf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_erfinvf (float32x4_t);
 __vpcs float64x2_t _ZGVnN2v_erfinv (float64x2_t);
 # endif
@@ -265,6 +267,8 @@ void _ZGVsMxvl8l8_sincospi (svfloat64_t, double *, double *, svbool_t);
 
 #  if WANT_EXPERIMENTAL_MATH
 
+svfloat32_t arm_math_sve_fast_cosf (svfloat32_t, svbool_t);
+svfloat32_t arm_math_sve_fast_sinf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_erfinvf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvv_powi (svfloat32_t, svint32_t, svbool_t);
 
