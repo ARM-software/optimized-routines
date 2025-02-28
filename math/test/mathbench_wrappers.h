@@ -222,6 +222,12 @@ _Z_sv_atan2_wrap (svfloat64_t x, svbool_t pg)
 }
 
 static svfloat32_t
+_Z_sv_atan2pif_wrap (svfloat32_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_atan2pif (x, svdup_f32 (5.0f), pg);
+}
+
+static svfloat32_t
 _Z_sv_hypotf_wrap (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_hypotf (x, svdup_f32 (5.0), pg);
