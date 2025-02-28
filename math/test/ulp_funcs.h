@@ -95,6 +95,7 @@ SVF (_ZGVsMxvl8_modf_int, sv_modf_int, modfl_int, modf_mpfr_int, 1, 0, d1, 0)
 # if WANT_SVE_TESTS
  SVF (_ZGVsMxv_acospif, Z_sv_acospif, arm_math_acospi,  mpfr_acospi, 1, 1, f1, 0)
  SVF (_ZGVsMxv_asinpif, Z_sv_asinpif, arm_math_asinpi,  mpfr_asinpi, 1, 1, f1, 0)
+ SVF (_ZGVsMxv_asinpi, Z_sv_asinpi, arm_math_asinpil,  mpfr_asinpi, 1, 0, d1, 0)
  SVF (_ZGVsMxv_atanpif, Z_sv_atanpif, arm_math_atanpi,  mpfr_tanpi, 1, 1, f1, 0)
  SVF (_ZGVsMxv_atanpi, Z_sv_atanpi, arm_math_atanpil,  mpfr_tanpi, 1, 0, d1, 0)
  SVF (_ZGVsMxvv_atan2pif, Z_sv_atan2pif, arm_math_atan2pi,  mpfr_atan2pi, 2, 1, f2, 0)
