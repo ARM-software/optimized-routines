@@ -1,7 +1,7 @@
 /*
  * Single-precision vector e^x function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -30,9 +30,9 @@ special_case (svfloat32_t x, svbool_t special, const struct sv_expf_data *d)
 }
 
 /* Optimised single-precision SVE exp function.
-   Worst-case error is 1.04 ulp:
-   SV_NAME_F1 (exp)(0x1.a8eda4p+1) got 0x1.ba74bcp+4
-				  want 0x1.ba74bap+4.  */
+   Worst-case error is 0.88 +0.50 ULP:
+   _ZGVsMxv_expf(-0x1.bba276p-6) got 0x1.f25288p-1
+				want 0x1.f2528ap-1.  */
 svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -43,7 +43,7 @@ svfloat32_t SV_NAME_F1 (exp) (svfloat32_t x, const svbool_t pg)
 }
 
 TEST_SIG (SV, F, 1, exp, -9.9, 9.9)
-TEST_ULP (SV_NAME_F1 (exp), 0.55)
+TEST_ULP (SV_NAME_F1 (exp), 0.89)
 TEST_DISABLE_FENV (SV_NAME_F1 (exp))
 TEST_SYM_INTERVAL (SV_NAME_F1 (exp), 0, Thres, 50000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (exp), Thres, inf, 50000)

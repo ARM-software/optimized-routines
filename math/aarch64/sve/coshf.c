@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE cosh(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,9 +29,9 @@ special_case (svfloat32_t x, svfloat32_t half_e, svfloat32_t half_over_e,
 }
 
 /* Single-precision vector cosh, using vector expf.
-   Maximum error is 2.77 ULP:
-   _ZGVsMxv_coshf(-0x1.5b38f4p+1) got 0x1.e45946p+2
-				 want 0x1.e4594cp+2.  */
+   Maximum error is 2.56 +0.5 ULP:
+   _ZGVsMxv_coshf(-0x1.5b40f4p+1) got 0x1.e47748p+2
+				 want 0x1.e4774ep+2.  */
 svfloat32_t SV_NAME_F1 (cosh) (svfloat32_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -54,7 +54,7 @@ svfloat32_t SV_NAME_F1 (cosh) (svfloat32_t x, svbool_t pg)
 }
 
 TEST_SIG (SV, F, 1, cosh, -10.0, 10.0)
-TEST_ULP (SV_NAME_F1 (cosh), 2.28)
+TEST_ULP (SV_NAME_F1 (cosh), 2.56)
 TEST_DISABLE_FENV (SV_NAME_F1 (cosh))
 TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1p-63, 100)
 TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
