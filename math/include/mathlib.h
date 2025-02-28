@@ -265,6 +265,7 @@ svfloat64_t _ZGVsMxv_tanh (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_tanpi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvl8_modf (svfloat64_t, double *, svbool_t);
 svfloat64_t _ZGVsMxvv_atan2 (svfloat64_t, svfloat64_t, svbool_t);
+svfloat64_t _ZGVsMxvv_atan2pi (svfloat64_t, svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvv_hypot (svfloat64_t, svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvv_pow (svfloat64_t, svfloat64_t, svbool_t);
 svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);
