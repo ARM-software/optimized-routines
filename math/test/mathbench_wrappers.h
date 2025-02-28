@@ -6,6 +6,10 @@
  */
 
 #if WANT_EXPERIMENTAL_MATH
+#ifndef M_PIl
+#  define M_PIl 3.141592653589793238462643383279502884l
+#endif
+
 static double
 atan2_wrap (double x)
 {
@@ -16,6 +20,24 @@ static float
 atan2f_wrap (float x)
 {
   return atan2f (5.0f, x);
+}
+
+static long double
+atan2pil_wrap (long double x)
+{
+  return atan2l (5.0, x) / M_PIl;
+}
+
+static double
+atan2pi_wrap (double x)
+{
+  return atan2 (5.0, x) / M_PIl;
+}
+
+static float
+atan2pif_wrap (float x)
+{
+  return atan2 (5.0f, x) / M_PIl;
 }
 
 static double
@@ -53,6 +75,12 @@ __vpcs static float32x4_t
 _Z_atan2f_wrap (float32x4_t x)
 {
   return _ZGVnN4vv_atan2f (vdupq_n_f32 (5.0f), x);
+}
+
+__vpcs static float32x4_t
+_Z_atan2pif_wrap (float32x4_t x)
+{
+  return _ZGVnN4vv_atan2pif (vdupq_n_f32 (5.0f), x);
 }
 
 __vpcs static float32x4_t

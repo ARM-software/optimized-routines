@@ -38,6 +38,15 @@ static int mpfr_asinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   mpfr_asin (frd, arg, GMP_RNDN);
   return mpfr_div (ret, frd, pi, GMP_RNDN);
 }
+
+static int mpfr_atan2pi (mpfr_t ret, const mpfr_t argx, const mpfr_t argy, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  MPFR_DECL_INIT (pi, 1080);
+  mpfr_const_pi (pi, GMP_RNDN);
+  mpfr_atan2 (frd, argx, argy, GMP_RNDN);
+  return mpfr_div (ret, frd, pi, GMP_RNDN);
+}
+
 static int mpfr_tanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   mpfr_const_pi (frd, GMP_RNDN);
@@ -159,6 +168,7 @@ ZVNF1_WRAP (asinpi)
 ZVND1_WRAP (asinpi)
 ZVNF1_WRAP (atanpi)
 ZVND1_WRAP (atanpi)
+ZVNF2_WRAP (atan2pi)
 ZVNF1_WRAP (cospi)
 ZVND1_WRAP (cospi)
 ZVNF1_WRAP (sinpi)

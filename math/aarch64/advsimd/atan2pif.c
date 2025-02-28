@@ -1,7 +1,7 @@
 /*
- * Single-precision vector atan2(x) function.
+ * Single-precision vector atan2pi(x) function.
  *
- * Copyright (c) 2021-2025, Arm Limited.
+ * Copyright (c) 2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,22 +11,23 @@
 
 static const struct data
 {
-  float32x4_t c0, c4, c6, c2;
-  float c1, c3, c5, c7;
+  float32x4_t c1, c3, c5, c7;
+  float c2, c4, c6, c8;
+  float32x4_t c0;
   uint32x4_t comp_const;
-  float32x4_t pi;
 } data = {
   /* Coefficients of polynomial P such that atan(x)~x+x*P(x^2) on
-     [2**-128, 1.0].
+     [2^-128, 1.0].
      Generated using fpminimax between FLT_MIN and 1.  */
-  .c0 = V4 (-0x1.5554dcp-2), .c1 = 0x1.9978ecp-3,
-  .c2 = V4 (-0x1.230a94p-3), .c3 = 0x1.b4debp-4,
-  .c4 = V4 (-0x1.3550dap-4), .c5 = 0x1.61eebp-5,
-  .c6 = V4 (-0x1.0c17d4p-6), .c7 = 0x1.7ea694p-9,
-  .pi = V4 (0x1.921fb6p+1f), .comp_const = V4 (2 * 0x7f800000lu - 1),
+  .c0 = V4 (0x1.45f306p-2), .c1 = V4 (-0x1.b2975ep-4),
+  .c2 = 0x1.0490e4p-4,	    .c3 = V4 (-0x1.70c272p-5),
+  .c4 = 0x1.0eef52p-5,	    .c5 = V4 (-0x1.6abbbap-6),
+  .c6 = 0x1.78157p-7,	    .c7 = V4 (-0x1.f0b406p-9),
+  .c8 = 0x1.2ae7fep-11,	    .comp_const = V4 (2 * 0x7f800000lu - 1),
 };
 
 #define SignMask v_u32 (0x80000000)
+#define OneOverPi v_f32 (0x1.45f307p-2)
 
 /* Special cases i.e. 0, infinity and nan (fall back to scalar calls).  */
 static float32x4_t VPCS_ATTR NOINLINE
@@ -36,7 +37,13 @@ special_case (float32x4_t y, float32x4_t x, float32x4_t ret,
   /* Account for the sign of y.  */
   ret = vreinterpretq_f32_u32 (
       veorq_u32 (vreinterpretq_u32_f32 (ret), sign_xy));
-  return v_call2_f32 (atan2f, y, x, ret, cmp);
+
+  /* Since we have no scalar fallback for atan2pif,
+     we can instead make a call to atan2f and divide by pi.  */
+  ret = v_call2_f32 (atan2f, y, x, ret, cmp);
+
+  /* Only divide the special cases by pi, and leave the rest unchanged.  */
+  return vbslq_f32 (cmp, vmulq_f32 (ret, OneOverPi), ret);
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */
@@ -47,11 +54,11 @@ zeroinfnan (uint32x4_t i, const struct data *d)
   return vcgeq_u32 (vsubq_u32 (vshlq_n_u32 (i, 1), v_u32 (1)), d->comp_const);
 }
 
-/* Fast implementation of vector atan2f. Maximum observed error is
-   2.13 ULP in [0x1.9300d6p+6 0x1.93c0c6p+6] x [0x1.8c2dbp+6 0x1.8cea6p+6]:
-   _ZGVnN4vv_atan2f (0x1.14a9d4p-87, 0x1.0eb886p-87) got 0x1.97aea2p-1
-						    want 0x1.97ae9ep-1.  */
-float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
+/* Fast implementation of vector atan2f. Maximum observed error is 2.89 ULP:
+   _ZGVnN4vv_atan2pif (0x1.bd397p+54, 0x1.e79a4ap+54) got 0x1.e2678ep-3
+						     want 0x1.e26794p-3.  */
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2pi) (float32x4_t y,
+						    float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
@@ -71,17 +78,16 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
   uint32x4_t pred_xlt0 = vcltzq_f32 (x);
   uint32x4_t pred_aygtax = vcgtq_f32 (ay, ax);
 
-  /* Set up z for evaluation of atanf.  */
+  /* Set up z for evaluation of atanpif.  */
   float32x4_t num = vbslq_f32 (pred_aygtax, vnegq_f32 (ax), ay);
   float32x4_t den = vbslq_f32 (pred_aygtax, ay, ax);
   float32x4_t z = vdivq_f32 (num, den);
 
-  /* Work out the correct shift for atan2:
-     Multiplication by pi is done later.
-     -pi   when x < 0  and ax < ay
-     -pi/2 when x < 0  and ax > ay
-      0    when x >= 0 and ax < ay
-      pi/2 when x >= 0 and ax > ay.  */
+  /* Work out the correct shift for atan2pi:
+     -1.0 when x < 0  and ax < ay
+     -0.5 when x < 0  and ax > ay
+      0   when x >= 0 and ax < ay
+      0.5 when x >= 0 and ax > ay.  */
   float32x4_t shift = vreinterpretq_f32_u32 (
       vandq_u32 (pred_xlt0, vreinterpretq_u32_f32 (v_f32 (-1.0f))));
   float32x4_t shift2 = vreinterpretq_f32_u32 (
@@ -94,19 +100,19 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
   float32x4_t z4 = vmulq_f32 (z2, z2);
   float32x4_t z8 = vmulq_f32 (z4, z4);
 
-  float32x4_t c1357 = vld1q_f32 (&d->c1);
+  float32x4_t c2468 = vld1q_f32 (&d->c2);
 
-  float32x4_t p01 = vfmaq_laneq_f32 (d->c0, z2, c1357, 0);
-  float32x4_t p23 = vfmaq_laneq_f32 (d->c2, z2, c1357, 1);
-  float32x4_t p45 = vfmaq_laneq_f32 (d->c4, z2, c1357, 2);
-  float32x4_t p67 = vfmaq_laneq_f32 (d->c6, z2, c1357, 3);
-  float32x4_t p03 = vfmaq_f32 (p01, z4, p23);
-  float32x4_t p47 = vfmaq_f32 (p45, z4, p67);
+  float32x4_t p12 = vfmaq_laneq_f32 (d->c1, z2, c2468, 0);
+  float32x4_t p34 = vfmaq_laneq_f32 (d->c3, z2, c2468, 1);
+  float32x4_t p56 = vfmaq_laneq_f32 (d->c5, z2, c2468, 2);
+  float32x4_t p78 = vfmaq_laneq_f32 (d->c7, z2, c2468, 3);
+  float32x4_t p14 = vfmaq_f32 (p12, z4, p34);
+  float32x4_t p58 = vfmaq_f32 (p56, z4, p78);
 
-  float32x4_t poly = vfmaq_f32 (p03, z8, p47);
+  float32x4_t poly = vfmaq_f32 (p14, z8, p58);
 
   /* y = shift + z * P(z^2).  */
-  float32x4_t ret = vfmaq_f32 (z, shift, d->pi);
+  float32x4_t ret = vfmaq_f32 (shift, z, d->c0);
   ret = vfmaq_f32 (ret, z3, poly);
 
   if (unlikely (v_any_u32 (special_cases)))
@@ -119,14 +125,11 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2) (float32x4_t y, float32x4_t x)
       veorq_u32 (vreinterpretq_u32_f32 (ret), sign_xy));
 }
 
-HALF_WIDTH_ALIAS_F2 (atan2)
-
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
-TEST_SIG (V, F, 2, atan2)
-TEST_DISABLE_FENV (V_NAME_F2 (atan2))
-TEST_ULP (V_NAME_F2 (atan2), 1.63)
-TEST_INTERVAL (V_NAME_F2 (atan2), -10.0, 10.0, 50000)
-TEST_INTERVAL (V_NAME_F2 (atan2), -1.0, 1.0, 40000)
-TEST_INTERVAL (V_NAME_F2 (atan2), 0.0, 1.0, 40000)
-TEST_INTERVAL (V_NAME_F2 (atan2), 1.0, 100.0, 40000)
-TEST_INTERVAL (V_NAME_F2 (atan2), 1e6, 1e32, 40000)
+TEST_DISABLE_FENV (V_NAME_F2 (atan2pi))
+TEST_ULP (V_NAME_F2 (atan2pi), 2.39)
+TEST_INTERVAL (V_NAME_F2 (atan2pi), -10.0, 10.0, 50000)
+TEST_INTERVAL (V_NAME_F2 (atan2pi), -1.0, 1.0, 40000)
+TEST_INTERVAL (V_NAME_F2 (atan2pi), 0.0, 1.0, 40000)
+TEST_INTERVAL (V_NAME_F2 (atan2pi), 1.0, 100.0, 40000)
+TEST_INTERVAL (V_NAME_F2 (atan2pi), 1e6, 1e32, 40000)

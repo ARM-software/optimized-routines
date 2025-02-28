@@ -16,6 +16,7 @@ float arm_math_sinpif (float);
 double arm_math_sinpi (double);
 float arm_math_tanpif (float);
 double arm_math_tanpi (double);
+double arm_math_atan2pi (double, double);
 void arm_math_sincospif (float, float *, float *);
 void arm_math_sincospi (double, double *, double *);
 #endif
@@ -144,6 +145,7 @@ __vpcs float32x4_t _ZGVnN4v_tanhf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_tanpif (float32x4_t);
 __vpcs float32x4_t _ZGVnN4vl4_modff (float32x4_t, float *);
 __vpcs float32x4_t _ZGVnN4vv_atan2f (float32x4_t, float32x4_t);
+__vpcs float32x4_t _ZGVnN4vv_atan2pif (float32x4_t, float32x4_t);
 __vpcs float32x4_t _ZGVnN4vv_hypotf (float32x4_t, float32x4_t);
 __vpcs float32x4_t _ZGVnN4vv_powf (float32x4_t, float32x4_t);
 __vpcs float32x4x2_t _ZGVnN4v_cexpif (float32x4_t);
