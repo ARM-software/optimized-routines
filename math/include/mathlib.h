@@ -182,6 +182,7 @@ __vpcs float64x2_t _ZGVnN2v_tanh (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_tanpi (float64x2_t);
 __vpcs float64x2_t _ZGVnN2vl8_modf (float64x2_t, double *);
 __vpcs float64x2_t _ZGVnN2vv_atan2 (float64x2_t, float64x2_t);
+__vpcs float64x2_t _ZGVnN2vv_atan2pi (float64x2_t, float64x2_t);
 __vpcs float64x2_t _ZGVnN2vv_hypot (float64x2_t, float64x2_t);
 __vpcs float64x2_t _ZGVnN2vv_pow (float64x2_t, float64x2_t);
 __vpcs float64x2x2_t _ZGVnN2v_cexpi (float64x2_t);

@@ -83,6 +83,12 @@ _Z_atan2pif_wrap (float32x4_t x)
   return _ZGVnN4vv_atan2pif (vdupq_n_f32 (5.0f), x);
 }
 
+__vpcs static float64x2_t
+_Z_atan2pi_wrap (float64x2_t x)
+{
+  return _ZGVnN2vv_atan2pi (vdupq_n_f64 (5.0f), x);
+}
+
 __vpcs static float32x4_t
 _Z_hypotf_wrap (float32x4_t x)
 {

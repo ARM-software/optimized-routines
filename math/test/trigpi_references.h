@@ -140,3 +140,9 @@ arm_math_atan2pi (double x, double y)
 {
   return atan2 (x, y) / M_PIl;
 }
+
+long double
+arm_math_atan2pil (long double x, long double y)
+{
+  return atan2l (x, y) / M_PIl;
+}
