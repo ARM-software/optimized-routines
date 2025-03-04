@@ -22,12 +22,6 @@ atan2f_wrap (float x)
   return atan2f (5.0f, x);
 }
 
-static long double
-atan2pil_wrap (long double x)
-{
-  return atan2l (5.0, x) / M_PIl;
-}
-
 static double
 atan2pi_wrap (double x)
 {
