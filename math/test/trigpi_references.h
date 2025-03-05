@@ -105,22 +105,28 @@ arm_math_tanpil (long double x)
   return tanl (f * M_PIl);
 }
 
-long double
-arm_math_asinpil (long double x)
-{
-  return asinl (x) / M_PIl;
-}
-
 double
 arm_math_acospi (double x)
 {
   return acos (x) / M_PIl;
 }
 
+long double
+arm_math_acospil (long double x)
+{
+  return acosl (x) / M_PIl;
+}
+
 double
 arm_math_asinpi (double x)
 {
   return asin (x) / M_PIl;
+}
+
+long double
+arm_math_asinpil (long double x)
+{
+  return asinl (x) / M_PIl;
 }
 
 double

@@ -164,6 +164,7 @@ arm_math_sincospi_cos (double x)
 
 # if WANT_TRIGPI_TESTS
 ZVNF1_WRAP (acospi)
+ZVND1_WRAP (acospi)
 ZVNF1_WRAP (asinpi)
 ZVND1_WRAP (asinpi)
 ZVNF1_WRAP (atanpi)

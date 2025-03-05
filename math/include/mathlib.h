@@ -154,6 +154,7 @@ __vpcs void _ZGVnN4vl4l4_sincospif (float32x4_t, float *, float *);
 
 __vpcs float64x2_t _ZGVnN2v_acos (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_acosh (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_acospi (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_asin (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_asinh (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_asinpi (float64x2_t);
