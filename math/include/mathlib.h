@@ -240,6 +240,7 @@ void _ZGVsMxvl4l4_sincospif (svfloat32_t, float *, float *, svbool_t);
 
 svfloat64_t _ZGVsMxv_acos (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_acosh (svfloat64_t, svbool_t);
+svfloat64_t _ZGVsMxv_acospi (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_asin (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_asinh (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_asinpi (svfloat64_t, svbool_t);

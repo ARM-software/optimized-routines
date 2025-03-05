@@ -10,13 +10,14 @@
 
 static const struct data
 {
-  float32_t c0, c1, c2, c3, c4, inv_pi;
+  float32_t c0, c1, c2, c3, c4, inv_pi, half;
 } data = {
   /* Coefficients of polynomial P such that asin(x)/pi~ x/pi + x^3 * poly(x^2)
      on [ 0x1p-126 0x1p-2 ]. rel error: 0x1.ef9f94b1p-33. Generated using
      iterative approach for minimisation of relative error.  */
   .c0 = 0x1.b29968p-5f, .c1 = 0x1.871424p-6f, .c2 = 0x1.d56e44p-7f,
   .c3 = 0x1.149bb8p-7f, .c4 = 0x1.8e07fep-7f, .inv_pi = 0x1.45f306p-2f,
+  .half = 0.5f,
 };
 
 /* Single-precision SVE implementation of vector acospi(x).
@@ -41,6 +42,8 @@ svfloat32_t SV_NAME_F1 (acospi) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
 
+  svbool_t ptrue = svptrue_b32 ();
+
   svuint32_t sign = svand_x (pg, svreinterpret_u32 (x), 0x80000000);
   svfloat32_t ax = svabs_x (pg, x);
   svbool_t a_gt_half = svacgt (pg, x, 0.5f);
@@ -49,7 +52,7 @@ svfloat32_t SV_NAME_F1 (acospi) (svfloat32_t x, const svbool_t pg)
      z2 = x ^ 2         and z = |x|     , if |x| < 0.5
      z2 = (1 - |x|) / 2 and z = sqrt(z2), if |x| >= 0.5.  */
   svfloat32_t z2 = svsel (a_gt_half, svmls_x (pg, sv_f32 (0.5f), ax, 0.5f),
-			  svmul_x (svptrue_b32 (), x, x));
+			  svmul_x (ptrue, x, x));
   svfloat32_t z = svsqrt_m (ax, a_gt_half, z2);
 
   /* Use a single polynomial approximation P for both intervals.  */
@@ -60,22 +63,20 @@ svfloat32_t SV_NAME_F1 (acospi) (svfloat32_t x, const svbool_t pg)
   /* Add 1/pi as final coeff.  */
   p = svmla_x (pg, sv_f32 (d->inv_pi), z2, p);
   /* Finalize polynomial: z * P(z^2).  */
-  p = svmul_x (svptrue_b32 (), z, p);
+  p = svmul_x (ptrue, z, p);
 
   /* acospi(|x|)
 			  = 1/2 - sign(x) * Q(|x|), for       |x| < 0.5
 			  = 2 Q(|x|)              , for  0.5 < x < 1.0
 			  = 1 - 2 Q(|x|)          , for -1.0 < x < -0.5.  */
-
   svfloat32_t y
-      = svreinterpret_f32 (svorr_x (pg, svreinterpret_u32 (p), sign));
-
-  svbool_t is_neg = svcmplt (pg, x, 0.0f);
-  svfloat32_t off = svdup_f32_z (is_neg, 1.0f);
+      = svreinterpret_f32 (svorr_x (ptrue, svreinterpret_u32 (p), sign));
   svfloat32_t mul = svsel (a_gt_half, sv_f32 (2.0f), sv_f32 (-1.0f));
-  svfloat32_t add = svsel (a_gt_half, off, sv_f32 (0.5f));
+  svfloat32_t add = svreinterpret_f32 (
+      svorr_x (ptrue, sign, svreinterpret_u32 (sv_f32 (d->half))));
+  add = svsub_m (a_gt_half, sv_f32 (d->half), add);
 
-  return svmla_x (pg, add, mul, y);
+  return svmad_x (pg, y, mul, add);
 }
 
 #if WANT_TRIGPI_TESTS
