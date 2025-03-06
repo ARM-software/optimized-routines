@@ -10,7 +10,7 @@
 static const struct data
 {
   float32x4_t c0, c1;
-  float inv_ln2, ln2_hi, ln2_lo, c2;
+  float inv_ln2, ln2, c2, null;
   float32x4_t special_bound;
   uint32x4_t exponent_bias;
   /* Special case routine.  */
@@ -22,8 +22,7 @@ static const struct data
   .c1 = V4 (0x1.022158p-1f),
   .c2 = 0x1.583e32p-3f,
   .inv_ln2 = 0x1.715476p+0f,
-  .ln2_hi = 0x1.62e4p-1f,
-  .ln2_lo = 0x1.7f7d1cp-20f,
+  .ln2 = 0x1.62e43p-1f,
   .exponent_bias = V4 (0x3f800000),
   /* Lower the bound to maintain accuracy on negative values.  */
   .special_bound = V4 (125.0f),
@@ -52,9 +51,9 @@ special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
 }
 
 /* Low accuracy AdvSIMD expf
-   Maximum error: 1741.7 +0.5 ULP
-   arm_math_advsimd_fast_expf(0x1.6b3588p+5) got 0x1.69fc1ap+65
-					    want 0x1.6a09b6p+65.  */
+   Maximum error: 1741.71 +0.5 ULP
+   arm_math_advsimd_fast_expf(-0x1.5b7322p+6) got 0x1.9b56bep-126
+					     want 0x1.9b491cp-126.  */
 float32x4_t VPCS_ATTR NOINLINE
 arm_math_advsimd_fast_expf (float32x4_t x)
 {
@@ -64,13 +63,11 @@ arm_math_advsimd_fast_expf (float32x4_t x)
   /* exp(x) = 2^n (1 + poly(r)), with 1 + poly(r) in [1/sqrt(2),sqrt(2)]
      x = ln2*n + r, with r in [-ln2/2, ln2/2].  */
   float32x4_t n = vrndaq_f32 (vmulq_laneq_f32 (x, ln2_c2, 0));
-  float32x4_t r = x;
-  r = vfmsq_laneq_f32 (r, n, ln2_c2, 1);
-  r = vfmsq_laneq_f32 (r, n, ln2_c2, 2);
+  float32x4_t r = vfmsq_laneq_f32 (x, n, ln2_c2, 1);
   uint32x4_t e = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtq_s32_f32 (n)), 23);
 
   float32x4_t poly;
-  poly = vfmaq_laneq_f32 (d->c1, r, ln2_c2, 3);
+  poly = vfmaq_laneq_f32 (d->c1, r, ln2_c2, 2);
   poly = vfmaq_f32 (d->c0, r, poly);
 
   uint32x4_t cmp = vcagtq_f32 (n, d->special_bound);

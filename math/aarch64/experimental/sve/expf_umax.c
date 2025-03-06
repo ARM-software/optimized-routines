@@ -29,10 +29,10 @@ special_case (svfloat32_t x, svbool_t special, const struct sv_expf_data *d)
   return sv_call_f32 (expf, x, expf_inline (x, svptrue_b32 (), d), special);
 }
 
-/* Optimised single-precision SVE exp function.
-   Worst-case error is 245.5 +0.5 ULP.
-   arm_math_sve_fast_expf(0x1.365b4ep+3) got 0x1.fd3a4p+13
-					want 0x1.fd3c2cp+13.  */
+/* Low-accuracy SVE expf.
+   Worst-case error is 248.94 +0.5 ULP.
+   arm_math_sve_fast_expf(0x1.5d5314p+6) got 0x1.fd3a6p+125
+					want 0x1.fd3c52p+125.  */
 svfloat32_t
 arm_math_sve_fast_expf (svfloat32_t x, const svbool_t pg)
 {
