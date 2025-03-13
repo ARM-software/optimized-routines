@@ -125,6 +125,8 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (atan2pi) (float32x4_t y,
       veorq_u32 (vreinterpretq_u32_f32 (ret), sign_xy));
 }
 
+HALF_WIDTH_ALIAS_F2 (atan2pi)
+
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 TEST_DISABLE_FENV (V_NAME_F2 (atan2pi))
 TEST_ULP (V_NAME_F2 (atan2pi), 2.39)

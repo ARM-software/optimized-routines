@@ -31,11 +31,20 @@ static int mpfr_acospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   mpfr_acos (frd, arg, GMP_RNDN);
   return mpfr_div (ret, frd, pi, GMP_RNDN);
 }
+
 static int mpfr_asinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
   mpfr_const_pi (pi, GMP_RNDN);
   mpfr_asin (frd, arg, GMP_RNDN);
+  return mpfr_div (ret, frd, pi, GMP_RNDN);
+}
+
+static int mpfr_atanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  MPFR_DECL_INIT (pi, 1080);
+  mpfr_const_pi (pi, GMP_RNDN);
+  mpfr_atan (frd, arg, GMP_RNDN);
   return mpfr_div (ret, frd, pi, GMP_RNDN);
 }
 
@@ -47,12 +56,13 @@ static int mpfr_atan2pi (mpfr_t ret, const mpfr_t argx, const mpfr_t argy, mpfr_
   return mpfr_div (ret, frd, pi, GMP_RNDN);
 }
 
-static int mpfr_tanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   mpfr_const_pi (frd, GMP_RNDN);
   mpfr_mul (frd, frd, arg, GMP_RNDN);
-  return mpfr_tan (ret, frd, GMP_RNDN);
+  return mpfr_cos (ret, frd, GMP_RNDN);
 }
+
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   mpfr_const_pi (frd, GMP_RNDN);
@@ -60,18 +70,11 @@ static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   return mpfr_sin (ret, frd, GMP_RNDN);
 }
 
-static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+static int mpfr_tanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   mpfr_const_pi (frd, GMP_RNDN);
   mpfr_mul (frd, frd, arg, GMP_RNDN);
-  return mpfr_cos (ret, frd, GMP_RNDN);
-}
-static int mpfr_atanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
-  MPFR_DECL_INIT (frd, 1080);
-  MPFR_DECL_INIT (pi, 1080);
-  mpfr_const_pi (pi, GMP_RNDN);
-  mpfr_atan (frd, arg, GMP_RNDN);
-  return mpfr_div (ret, frd, pi, GMP_RNDN);
+  return mpfr_tan (ret, frd, GMP_RNDN);
 }
 # endif
 # if WANT_EXPERIMENTAL_MATH
