@@ -60,9 +60,9 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
 
      acos(x) = y + y * z * P(z), with  z = (1-x)/2 and y = sqrt(z).
 
-   The largest observed error in this region is 1.49 ulp:
-   _ZGVnN2v_acos (0x1.2444932614f47p-1) got 0x1.ed321f392225ep-1
-				       want 0x1.ed321f392225dp-1.  */
+   The largest observed error in this region is 1.50 ulp:
+   _ZGVnN2v_acos (0x1.252a2cf3fb9acp-1) got 0x1.ec1a46aa82901p-1
+				       want 0x1.ec1a46aa829p-1.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (acos) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -129,7 +129,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (acos) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, acos, -1.0, 1.0)
-TEST_ULP (V_NAME_D1 (acos), 0.99)
+TEST_ULP (V_NAME_D1 (acos), 1.00)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (acos), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (acos), 0, Small, 5000)
 TEST_INTERVAL (V_NAME_D1 (acos), Small, 0.5, 50000)

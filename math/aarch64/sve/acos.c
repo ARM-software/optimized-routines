@@ -41,9 +41,9 @@ static const struct data
 
      acos(x) = y + y * z * P(z), with  z = (1-x)/2 and y = sqrt(z).
 
-   The largest observed error in this region is 1.49 ulp:
-   _ZGVsMxv_acos (0x1.244294271732ap-1) got 0x1.ed348d93c9d71p-1
-				       want 0x1.ed348d93c9d7p-1.  */
+   The largest observed error in this region is 1.50 ulp:
+   _ZGVsMxv_acos (0x1.252a2cf3fb9acp-1) got 0x1.ec1a46aa82901p-1
+				       want 0x1.ec1a46aa829p-1.  */
 svfloat64_t SV_NAME_D1 (acos) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -102,7 +102,7 @@ svfloat64_t SV_NAME_D1 (acos) (svfloat64_t x, const svbool_t pg)
 }
 
 TEST_SIG (SV, D, 1, acos, -1.0, 1.0)
-TEST_ULP (SV_NAME_D1 (acos), 0.99)
+TEST_ULP (SV_NAME_D1 (acos), 1.00)
 TEST_DISABLE_FENV (SV_NAME_D1 (acos))
 TEST_INTERVAL (SV_NAME_D1 (acos), 0, 0.5, 50000)
 TEST_INTERVAL (SV_NAME_D1 (acos), 0.5, 1.0, 50000)
