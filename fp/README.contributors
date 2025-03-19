@@ -3,9 +3,15 @@ basic floating-point arithmetic, suitable for use on Arm platforms
 which do not implement the operation in question or hardware FP (or do
 not have hardware FP at all).
 
-The intention is that it will include implementations for multiple
+It includes implementations of the same function for multiple
 versions of the Arm architecture, optimized differently to take
-advantage of instruction availability.
+advantage of instruction availability. The subdirectories are:
+
+ - `armv6-m`, containing Thumb-1 code, compatible with Arm v6-M itself
+   and also Arm v8-M Baseline.
+
+ - `at32`, containing code that can be assembled as either Arm or
+   Thumb-2.
 
 Some helper functions which are not performance-critical are written
 in C. This allows them to be written only once and recompiled for the

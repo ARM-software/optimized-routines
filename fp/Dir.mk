@@ -35,6 +35,9 @@ all-fp: $(fp-libs) $(fp-tests)
 $(fp-objs): $(fp-includes) $(fp-test-includes)
 $(fp-objs): CFLAGS_ALL += $(fp-cflags)
 $(fp-objs): CFLAGS_ALL += -I$(fp-src-dir)
+ifeq ($(FP_SUBDIR),at32)
+$(fp-objs): CFLAGS_ALL += -Wa,-mimplicit-it=always
+endif
 
 build/lib/libfplib.a: $(fp-lib-objs)
 	rm -f $@
