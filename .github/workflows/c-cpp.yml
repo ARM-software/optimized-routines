@@ -19,10 +19,10 @@ jobs:
     - name: inspect hardware
       run: cat /proc/cpuinfo
     - name: install dependencies
-      run: sudo apt-get install libmpfr-dev libmpc-dev clang qemu-user-binfmt
+      run: sudo apt-get install libmpfr-dev libmpc-dev clang qemu-user-static
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
       run: CC="${{ matrix.compiler }}" make -j
     - name: make check
-      run: CC="${{ matrix.compiler }}" make check -j
+      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
