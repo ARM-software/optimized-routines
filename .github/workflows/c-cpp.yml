@@ -58,7 +58,9 @@ jobs:
       run: brew install mpfr
     - name: configure
       run: cp config.mk.dist config.mk
+    - name: update config
+      run: sed -i -e 's/USE_GLIBC_ABI = 1/USE_GLIBC_ABI = 0/g' config.mk
     - name: make
-      run: CC="${{ matrix.compiler }}" USE_GLIBC_ABI=0 make -j
+      run: CC="${{ matrix.compiler }}" make -j
     - name: make check
-      run: CC="${{ matrix.compiler }}" USE_GLIBC_ABI=0 make check -j
+      run: CC="${{ matrix.compiler }}" make check -j
