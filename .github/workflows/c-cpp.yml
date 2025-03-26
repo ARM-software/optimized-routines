@@ -1,4 +1,4 @@
-name: build and test master
+name: build and run
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  linux-aarch64-native:
     runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
@@ -26,3 +26,37 @@ jobs:
       run: CC="${{ matrix.compiler }}" make -j
     - name: make check
       run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
+
+  linux-x86-64-cross:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        compiler: ["gcc"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: inspect hardware
+      run: cat /proc/cpuinfo
+    - name: install dependencies
+      run: sudo apt-get install libmpfr-dev libmpc-dev gcc-aarch64-linux-gnu qemu-user-static
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" make -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
+
+  darwin-aarch64-native:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        compiler: ["clang"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" make -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" make check -j
