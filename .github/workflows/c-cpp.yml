@@ -54,9 +54,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: install dependencies
+      run: brew install mpfr
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
-      run: CC="${{ matrix.compiler }}" make -j
+      run: CC="${{ matrix.compiler }}" USE_GLIBC_ABI=0 make -j
     - name: make check
-      run: CC="${{ matrix.compiler }}" make check -j
+      run: CC="${{ matrix.compiler }}" USE_GLIBC_ABI=0 make check -j
