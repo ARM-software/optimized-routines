@@ -47,7 +47,7 @@ jobs:
       run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
 
   darwin-aarch64-native:
-    runs-on: ubuntu-24.04
+    runs-on: macos-15
     strategy:
       matrix:
         compiler: ["clang"]
