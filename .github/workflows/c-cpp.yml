@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run: sudo apt-get install libmpfr-dev libmpc-dev
+      run: sudo apt-get install libmpfr-dev libmpc-dev clang
     - name: configure
       run: cp config.mk.dist config.mk
     - name: CC="${{ matrix.compiler }}" make
