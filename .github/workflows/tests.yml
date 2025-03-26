@@ -1,0 +1,95 @@
+name: build and run
+
+on:
+  push:
+    branches: [ "master", "add-ci-aor" ]
+  pull_request:
+    branches: [ "master", "add-ci-aor" ]
+  workflow_dispatch:
+
+jobs:
+  linux-aarch64-native:
+    runs-on: ah-ubuntu_24_04-c7g_4x-50
+    strategy:
+      matrix:
+        compiler: ["gcc", "clang-20"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: inspect hardware
+      run: cat /proc/cpuinfo
+    - name: install dependencies
+      run: sudo apt-get install -y libmpfr-dev libmpc-dev wget
+    - name: install clang
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 20
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" make -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" V=1 VERBOSE=1 make check -j
+
+  linux-x86-64-cross:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        compiler: ["aarch64-linux-gnu-gcc"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: inspect hardware
+      run: cat /proc/cpuinfo
+    - name: install dependencies
+      run: sudo apt-get install -y libmpfr-dev libmpc-dev gcc-aarch64-linux-gnu qemu-user-static
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" make -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
+  darwin-aarch64-native:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        compiler: ["gcc-14", "clang"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install dependencies
+      run: brew install mpfr libmpc gmp && brew link gmp mpfr
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" make all -j$(sysctl -n hw.logicalcpu)
+    - name: make check
+      run: CC="${{ matrix.compiler }}" make check -j$(sysctl -n hw.logicalcpu)
+
+#  windows-x86-64-cross:
+#    runs-on: windows-latest
+#    strategy:
+#      matrix:
+#        include:
+#          - { sys: mingw64, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
+#          # - { sys: mingw64, base: x86_64, env: cross, prefix: aarch64-w64-mingw32, compiler: clang }
+#   defaults:
+#      run:
+#        shell: msys2 {0}
+#    steps:
+#    - uses: actions/checkout@v4
+#    - uses: msys2/setup-msys2@v2
+#      with:
+#        msystem: ${{matrix.sys}}
+#        install: >
+#          mingw-w64-${{matrix.base}}-openssl
+#          mingw-w64-${{matrix.base}}-qemu
+#          make
+#          mingw-w64-${{matrix.env}}-${{matrix.compiler}}
+#          mingw-w64-${{matrix.env}}-binutils
+#    - name: OS Version
+#      run: uname -s
+#    - name: configure
+#      run: cp config.mk.dist config.mk
+#    - name: make
+#      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make -j
+#    - name: make check
+#      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make check -j
