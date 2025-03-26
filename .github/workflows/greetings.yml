@@ -1,0 +1,15 @@
+name: New contributors
+
+on: [pull_request_target]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        pr-message: "Thank you for your contribution to Arm's optimized routine repository.  Contribution to this repository does require a signed contributor's license agreement.  See contributor-agreement.pdf for details"
