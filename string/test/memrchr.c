@@ -27,7 +27,9 @@ static const struct fun
   int test_mte;
 } funtab[] = {
   // clang-format off
+#if !defined (__APPLE__)
   F(memrchr, 0)
+#endif
 #if __aarch64__
   F(__memrchr_aarch64, 1)
 #endif
