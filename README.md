@@ -1,5 +1,7 @@
 # 🚀 Arm Optimized Routines
 
+![master branch](https://github.com/ARM-software/optimized-routines/actions/workflows/tests/badge.svg)
+
 **High-performance, architecture-aware implementations of common library
 functions for Arm processors.**
 
