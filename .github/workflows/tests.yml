@@ -59,7 +59,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run: brew install mpfr
+      run: brew install mpfr libmpc
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
