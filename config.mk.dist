@@ -55,7 +55,7 @@ endif
 #CFLAGS += -march=armv8.5-a+memtag -DWANT_MTE_TEST=1
 
 # Use with cross testing.
-EMULATOR ?=
+EMULATOR ?= qemu-aarch64-static
 #EMULATOR = qemu-aarch64-static
 #EMULATOR = sh -c 'scp $$1 user@host:/dir && ssh user@host /dir/"$$@"' --
 

@@ -1,0 +1,68 @@
+name: build and run
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  linux-aarch64-native:
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        compiler: ["gcc", "clang-20"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: inspect hardware
+      run: cat /proc/cpuinfo
+    - name: install dependencies
+      run: sudo apt-get install libmpfr-dev libmpc-dev qemu-user-static wget
+    - name: install clang
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 20
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: check qemu version
+      run: qemu-aarch64-static --version
+    - name: make
+      run: CC="${{ matrix.compiler }}" make -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" V=1 VERBOSE=1 EMULATOR="qemu-aarch64-static" make check -j
+
+  linux-x86-64-cross:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        compiler: ["aarch64-linux-gnu-gcc"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: inspect hardware
+      run: cat /proc/cpuinfo
+    - name: install dependencies
+      run: sudo apt-get install libmpfr-dev libmpc-dev gcc-aarch64-linux-gnu qemu-user-static
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" make -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
+
+  darwin-aarch64-native:
+    runs-on: macos-15
+    strategy:
+      matrix:
+        compiler: ["clang"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install dependencies
+      run: brew install mpfr
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="${{ matrix.compiler }}" WANT_SVE_TESTS=0 USE_GLIBC_ABI=0 WANT_EXP10_TESTS=0  USE_MPFR=0 make all-math -j
+    - name: make check
+      run: CC="${{ matrix.compiler }}" WANT_SVE_TESTS=0 USE_GLIBC_ABI=0 WANT_EXP10_TESTS=0  USE_MPFR=0 make check-math -j
