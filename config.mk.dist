@@ -13,13 +13,13 @@ ARCH = aarch64
 #CROSS_COMPILE = aarch64-none-linux-gnu-
 
 # Compiler for the target
-CC = $(CROSS_COMPILE)gcc
+CC ?= $(CROSS_COMPILE)gcc
 CFLAGS = -std=c99 -pipe -O3
 CFLAGS += -Wall -Wno-missing-braces
 CFLAGS += -Werror=implicit-function-declaration
 
 # Used for test case generator that is executed on the host
-HOST_CC = gcc
+HOST_CC ?= gcc
 HOST_CFLAGS = -std=c99 -O2
 HOST_CFLAGS += -Wall -Wno-unused-function
 
@@ -55,6 +55,7 @@ endif
 #CFLAGS += -march=armv8.5-a+memtag -DWANT_MTE_TEST=1
 
 # Use with cross testing.
+EMULATOR ?=
 #EMULATOR = qemu-aarch64-static
 #EMULATOR = sh -c 'scp $$1 user@host:/dir && ssh user@host /dir/"$$@"' --
 
@@ -81,7 +82,7 @@ endif
 # Use if mpfr is available on the target for ulp error checking. If
 # enabling this, it is advised to disable fenv checks by uncommenting
 # the two lines at the bottom of this block.
-USE_MPFR=0
+USE_MPFR?=0
 math-cflags += -DUSE_MPFR=$(USE_MPFR)
 ifeq ($(USE_MPFR), 1)
   math-ldlibs += $(mpfr-libs) $(gmp-libs)
@@ -106,18 +107,18 @@ math-cflags += -DWANT_ERRNO=$(WANT_ERRNO)
 
 # Disable/enable SVE vector math tests/tools.
 ifeq ($(ARCH),aarch64)
-  WANT_SVE_TESTS = 1
+  WANT_SVE_TESTS ?= 1
 else
-  WANT_SVE_TESTS = 0
+  WANT_SVE_TESTS ?= 0
 endif
 math-cflags += -DWANT_SVE_TESTS=$(WANT_SVE_TESTS)
 
 # If set to 1, set fenv in vector math routines.
-WANT_SIMD_EXCEPT = 0
+WANT_SIMD_EXCEPT ?= 0
 math-cflags += -DWANT_SIMD_EXCEPT=$(WANT_SIMD_EXCEPT)
 
 # If set to 1, enable tests for exp10.
-WANT_EXP10_TESTS = 1
+WANT_EXP10_TESTS ?= 1
 math-cflags += -DWANT_EXP10_TESTS=$(WANT_EXP10_TESTS)
 
 # If set to 1, enable tests for C23 routines.
@@ -141,7 +142,7 @@ networking-cflags += -O2 -fno-tree-vectorize -funroll-loops
 # Provide *_finite symbols and some of the glibc hidden symbols
 # so libmathlib can be used with binaries compiled against glibc
 # to interpose math functions with both static and dynamic linking
-USE_GLIBC_ABI = 1
+USE_GLIBC_ABI ?= 1
 math-cflags += -DUSE_GLIBC_ABI=$(USE_GLIBC_ABI)
 
 # Enable experimental math routines - non-C23 vector math and low-accuracy scalar
