@@ -1,0 +1,20 @@
+string:
+  - changed-files:
+    - any-glob-to-any-file: string/**
+
+networking:
+  - changed-files:
+    - any-glob-to-any-file: networking/**
+
+math:
+  - changed-files:
+    - any-glob-to-any-file: math/**
+
+fp:
+  - changed-files:
+    - any-glob-to-any-file: fp/**
+
+build-system:
+  - changed-files:
+    - any-glob-to-any-file: ['Makefile', 'config.mk.dist', '**/*.mk']
+
