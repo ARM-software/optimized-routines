@@ -19,7 +19,7 @@ jobs:
     - name: inspect hardware
       run: cat /proc/cpuinfo
     - name: install dependencies
-      run: sudo apt-get install libmpfr-dev libmpc-dev clang qemu-user-static qemu-user-binfmt
+      run: sudo apt-get install libmpfr-dev libmpc-dev clang qemu-user-binfmt
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
