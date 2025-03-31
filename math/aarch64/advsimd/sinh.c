@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sinh(x) function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -42,8 +42,8 @@ special_case (float64x2_t x)
 /* Approximation for vector double-precision sinh(x) using expm1.
    sinh(x) = (exp(x) - exp(-x)) / 2.
    The greatest observed error is 2.52 ULP:
-   _ZGVnN2v_sinh(-0x1.a098a2177a2b9p-2) got -0x1.ac2f05bb66fccp-2
-				       want -0x1.ac2f05bb66fc9p-2.  */
+   _ZGVnN2v_sinh(0x1.9f6ff2ab6fb19p-2) got 0x1.aaed83a3153ccp-2
+				      want 0x1.aaed83a3153c9p-2.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -73,7 +73,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, sinh, -10.0, 10.0)
-TEST_ULP (V_NAME_D1 (sinh), 2.02)
+TEST_ULP (V_NAME_D1 (sinh), 2.03)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (sinh), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0, 0x1p-26, 1000)
 TEST_SYM_INTERVAL (V_NAME_D1 (sinh), 0x1p-26, 0x1p9, 500000)

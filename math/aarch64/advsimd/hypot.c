@@ -1,7 +1,7 @@
 /*
  * Double-precision vector hypot(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -87,7 +87,7 @@ float64x2_t VPCS_ATTR V_NAME_D2 (hypot) (float64x2_t x, float64x2_t y)
 #endif
 
 TEST_SIG (V, D, 2, hypot, -10.0, 10.0)
-TEST_ULP (V_NAME_D2 (hypot), 1.21)
+TEST_ULP (V_NAME_D2 (hypot), 0.71)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D2 (hypot), WANT_SIMD_EXCEPT)
 TEST_INTERVAL2 (V_NAME_D2 (hypot), 0, inf, 0, inf, 10000)
 TEST_INTERVAL2 (V_NAME_D2 (hypot), 0, inf, -0, -inf, 10000)
