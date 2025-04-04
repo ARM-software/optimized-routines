@@ -1,32 +1,22 @@
-// polynomial for approximating 10^x
+// polynomial for approximating double precision 10^x
 //
-// Copyright (c) 2023-2024, Arm Limited.
+// Copyright (c) 2023-2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
-// exp10f parameters
-deg = 5; // poly degree
-N = 1; // Neon 1, SVE 64
+// Parameters
+deg = 4; // Neon 4, SVE 5
+N = 128;  // Neon 128, SVE 64
 b = log(2)/(2 * N * log(10)); // interval
 a = -b;
-wp = single;
-
-// exp10 parameters
-//deg = 4; // poly degree - bump to 5 for ~1 ULP
-//N = 128; // table size
-//b = log(2)/(2 * N * log(10)); // interval
-//a = -b;
-//wp = D;
-
-
-// find polynomial with minimal relative error
 
 f = 10^x;
 
-// return p that minimizes |f(x) - poly(x) - x^d*p(x)|/|f(x)|
+// return p that minimizes relative error.
 approx = proc(poly,d) {
   return remez(1 - poly(x)/f(x), deg-d, [a;b], x^d/f(x), 1e-10);
 };
-// return p that minimizes |f(x) - poly(x) - x^d*p(x)|
+
+// return p that minimizes absolute error
 approx_abs = proc(poly,d) {
   return remez(f(x) - poly(x), deg-d, [a;b], x^d, 1e-10);
 };
@@ -34,8 +24,8 @@ approx_abs = proc(poly,d) {
 // first coeff is fixed, iteratively find optimal double prec coeffs
 poly = 1;
 for i from 1 to deg do {
-  p = roundcoefficients(approx(poly,i), [|wp ...|]);
-//  p = roundcoefficients(approx_abs(poly,i), [|wp ...|]);
+  p = roundcoefficients(approx(poly,i), [|D ...|]);
+  //p = roundcoefficients(approx_abs(poly,i), [|D ...|]);
   poly = poly + x^i*coeff(p,0);
 };
 
@@ -46,10 +36,10 @@ print("in [",a,b,"]");
 print("coeffs:");
 for i from 0 to deg do coeff(poly,i);
 
-log10_2 = round(N * log(10) / log(2), wp, RN);
+log10_2 = round(N * log(10) / log(2), D, RN);
 log2_10 = log(2) / (N * log(10));
-log2_10_hi = round(log2_10, wp, RN);
-log2_10_lo = round(log2_10 - log2_10_hi, wp, RN);
+log2_10_hi = round(log2_10, D, RN);
+log2_10_lo = round(log2_10 - log2_10_hi, D, RN);
 print(log10_2);
 print(log2_10_hi);
 print(log2_10_lo);
