@@ -1,29 +1,29 @@
-// polynomial for approximating 2^x
+// polynomial for approximating single precision 2^x
 //
-// Copyright (c) 2019-2025, Arm Limited.
+// Copyright (c) 2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
-//// Parameters
-deg = 5; // poly degree
-N = 128; // table entries
+// Parameters
+deg = 5; // Neon 5, SVE 2
+N = 64;  // Neon 1, SVE 64
 b = 1/(2*N); // interval
 a = -b;
 f = 2^x;
 
 // return p that minimizes |f(x) - poly(x) - x^d*p(x)|/|f(x)|
-approx = proc(poly,d) {
+approx = proc(poly, d) {
   return remez(1 - poly(x)/f(x), deg-d, [a;b], x^d/f(x), 1e-10);
 };
 // return p that minimizes |f(x) - poly(x) - x^d*p(x)|
-approx_abs = proc(poly,d) {
+approx_abs = proc(poly, d) {
   return remez(f(x) - poly(x), deg-d, [a;b], x^d, 1e-10);
 };
 
 // first coeff is fixed, iteratively find optimal coeffs
 poly = 1;
 for i from 1 to deg do {
-  p = roundcoefficients(approx(poly,i), [|D ...|]);
-//  p = roundcoefficients(approx_abs(poly,i), [|D ...|]);
+  p = roundcoefficients(approx(poly,i), [|SG ...|]);
+// p = roundcoefficients(approx_abs(poly,i), [|SG ...|]);
   poly = poly + x^i*coeff(p,0);
 };
 
