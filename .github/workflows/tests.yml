@@ -9,7 +9,7 @@ on:
 
 jobs:
   linux-aarch64-native:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ah-ubuntu_24_04-c7g_4x-50
     strategy:
       matrix:
         compiler: ["gcc", "clang-20"]
