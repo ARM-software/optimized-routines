@@ -3,9 +3,9 @@
 // Copyright (c) 2019-2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
-//// Parameters
+// Parameters
 deg = 5; // poly degree
-N = 128; // table entries
+N = 64; // Neon 128, SVE 64 (fexpa)
 b = 1/(2*N); // interval
 a = -b;
 f = 2^x;
