@@ -94,7 +94,7 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (acospi) (float32x4_t x)
 
 HALF_WIDTH_ALIAS_F1 (acospi)
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (V_NAME_F1 (acospi), 2.03)
 TEST_DISABLE_FENV (V_NAME_F1 (acospi))
 TEST_SYM_INTERVAL (V_NAME_F1 (acospi), 0, 0x1p-31, 5000)

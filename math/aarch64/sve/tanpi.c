@@ -1,7 +1,7 @@
 /*
  * Double-precision vector tanpi(x) function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -77,7 +77,7 @@ svfloat64_t SV_NAME_D1 (tanpi) (svfloat64_t x, const svbool_t pg)
   return svreinterpret_f64 (svorr_x (pg, svreinterpret_u64 (y), sign));
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_DISABLE_FENV (SV_NAME_D1 (tanpi))
 TEST_ULP (SV_NAME_D1 (tanpi), 2.57)
 TEST_SYM_INTERVAL (SV_NAME_D1 (tanpi), 0, 0x1p-31, 50000)

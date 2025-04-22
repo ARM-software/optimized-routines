@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE sincospi(x, *y, *z) function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -31,7 +31,7 @@ _ZGVsMxvl8l8_sincospi (svfloat64_t x, double *out_sin, double *out_cos,
   svst1 (pg, out_cos, svget2 (sc, 1));
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_sin)
 TEST_DISABLE_FENV (_ZGVsMxvl8l8_sincospi_cos)
 TEST_ULP (_ZGVsMxvl8l8_sincospi_sin, 2.59)

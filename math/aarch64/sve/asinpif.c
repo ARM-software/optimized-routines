@@ -76,7 +76,7 @@ svfloat32_t SV_NAME_F1 (asinpi) (svfloat32_t x, const svbool_t pg)
   return svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (y), sign));
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (SV_NAME_F1 (asinpi), 2.96)
 TEST_DISABLE_FENV (SV_NAME_F1 (asinpi))
 TEST_INTERVAL (SV_NAME_F1 (asinpi), 0, 0.5, 50000)

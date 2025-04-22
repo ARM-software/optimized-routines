@@ -1,6 +1,6 @@
 # Makefile fragment - requires GNU make
 #
-# Copyright (c) 2019-2024, Arm Limited.
+# Copyright (c) 2019-2025, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 .SECONDEXPANSION:
@@ -18,8 +18,8 @@ ifneq ($(OS),Linux)
 endif
 
 ifneq ($(ARCH),aarch64)
-  ifeq ($(WANT_TRIGPI_TESTS),1)
-    $(error trigpi functions only supported on aarch64)
+  ifeq ($(WANT_C23_TESTS),1)
+    $(error C23 functions only supported on aarch64)
   endif
   ifeq ($(WANT_EXPERIMENTAL_MATH),1)
     $(error Experimental math only supported on aarch64)

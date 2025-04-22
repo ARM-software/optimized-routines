@@ -1,7 +1,7 @@
 /*
  * Single-precision vector tanpi(x) function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -60,7 +60,7 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (tanpi) (float32x4_t x)
 
 HALF_WIDTH_ALIAS_F1 (tanpi)
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_DISABLE_FENV (V_NAME_F1 (tanpi))
 TEST_ULP (V_NAME_F1 (tanpi), 2.84)
 TEST_SYM_INTERVAL (V_NAME_F1 (tanpi), 0, 0x1p-31, 50000)

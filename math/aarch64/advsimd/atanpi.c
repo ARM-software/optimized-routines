@@ -106,7 +106,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atanpi) (float64x2_t x)
   return vfmaq_f64 (shift, z, y);
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (atanpi), 2.26)
 TEST_DISABLE_FENV (V_NAME_D1 (atanpi))
 TEST_INTERVAL (V_NAME_D1 (atanpi), 0, 0x1p-30, 10000)

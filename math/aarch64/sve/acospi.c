@@ -100,7 +100,7 @@ svfloat64_t SV_NAME_D1 (acospi) (svfloat64_t x, const svbool_t pg)
   return svmsb_x (pg, p, mul, add);
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (SV_NAME_D1 (acospi), 2.05)
 TEST_DISABLE_FENV (SV_NAME_D1 (acospi))
 TEST_INTERVAL (SV_NAME_D1 (acospi), 0, 0x1p-31, 5000)

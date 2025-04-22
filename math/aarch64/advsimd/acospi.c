@@ -106,7 +106,7 @@ float64x2_t VPCS_ATTR NOINLINE V_NAME_D1 (acospi) (float64x2_t x)
   return vfmsq_f64 (add, mul, y);
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (acospi), 2.05)
 TEST_DISABLE_FENV (V_NAME_D1 (acospi))
 TEST_SYM_INTERVAL (V_NAME_D1 (acospi), 0, 0x1p-31, 5000)

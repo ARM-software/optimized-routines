@@ -1,7 +1,7 @@
 /*
  * Single-precision scalar sinpi function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -83,7 +83,7 @@ sinpif (float x)
 }
 #endif
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (arm_math_sinpif, 1.99)
 TEST_SYM_INTERVAL (arm_math_sinpif, 0, 0x1p-31, 5000)
 TEST_SYM_INTERVAL (arm_math_sinpif, 0x1p-31, 0.5, 10000)

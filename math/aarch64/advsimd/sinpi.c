@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sinpi function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -77,7 +77,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinpi) (float64x2_t x)
   return vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (sinpi), 2.56)
 TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (sinpi), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (sinpi), 0, 0x1p-63, 5000)

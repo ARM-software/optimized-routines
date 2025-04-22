@@ -1,7 +1,7 @@
 /*
  * Single-precision scalar tanpi(x) function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "mathlib.h"
@@ -136,7 +136,7 @@ tanpif (float x)
 }
 #endif
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (arm_math_tanpif, 2.57)
 TEST_SYM_INTERVAL (arm_math_tanpif, 0, 0x1p-31f, 50000)
 TEST_SYM_INTERVAL (arm_math_tanpif, 0x1p-31f, 0.5, 100000)

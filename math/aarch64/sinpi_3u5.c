@@ -1,7 +1,7 @@
 /*
  * Double-precision scalar sinpi function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -92,7 +92,7 @@ sinpi (double x)
 }
 #endif
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (arm_math_sinpi, 2.53)
 TEST_SYM_INTERVAL (arm_math_sinpi, 0, 0x1p-63, 5000)
 TEST_SYM_INTERVAL (arm_math_sinpi, 0x1p-63, 0.5, 10000)

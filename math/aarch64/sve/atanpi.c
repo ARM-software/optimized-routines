@@ -116,7 +116,7 @@ svfloat64_t SV_NAME_D1 (atanpi) (svfloat64_t x, const svbool_t pg)
   return svmla_x (pg, shift, z, y);
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (SV_NAME_D1 (atanpi), 2.30)
 TEST_DISABLE_FENV (SV_NAME_D1 (atanpi))
 TEST_INTERVAL (SV_NAME_D1 (atanpi), 0.0, 1.0, 40000)

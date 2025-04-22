@@ -80,7 +80,7 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (atanpi) (float32x4_t x)
 
 HALF_WIDTH_ALIAS_F1 (atanpi)
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (V_NAME_F1 (atanpi), 2.09)
 TEST_DISABLE_FENV (V_NAME_F1 (atanpi))
 TEST_SYM_INTERVAL (V_NAME_F1 (atanpi), 0, 0x1p-30, 5000)

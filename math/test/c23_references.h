@@ -1,5 +1,5 @@
 /*
- * Extended precision scalar reference functions for trigpi.
+ * Extended precision scalar reference functions for C23.
  *
  * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception

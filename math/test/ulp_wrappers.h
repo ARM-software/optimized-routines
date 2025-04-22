@@ -132,7 +132,7 @@ static float Z_fast_expf(float x) { return arm_math_advsimd_fast_expf(argf(x))[0
     return _ZGVnN2vv_##func (argd (x), argd (y))[0];                          \
   }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 float
 arm_math_sincospif_sin (float x)
 {
@@ -165,7 +165,7 @@ arm_math_sincospi_cos (double x)
 
 #if  __aarch64__ && __linux__
 
-# if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 ZVNF1_WRAP (acospi)
 ZVND1_WRAP (acospi)
 ZVNF1_WRAP (asinpi)
@@ -209,7 +209,7 @@ v_sincospif_cos (float x)
   _ZGVnN4vl4l4_sincospif (vdupq_n_f32 (x), s, c);
   return c[0];
 }
-# endif // WANT_TRIGPI_TESTS
+#endif // WANT_C23_TESTS
 
 float
 v_sincosf_sin (float x)
@@ -309,7 +309,7 @@ v_modf_int (double x)
       return svretd (_ZGVsMxvv_##func (svargd (x), svargd (y), pg), pg);      \
     }
 
-# if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 ZSVNF1_WRAP (acospi)
 ZSVND1_WRAP (acospi)
 ZSVNF1_WRAP (asinpi)
@@ -352,7 +352,7 @@ sv_sincospif_cos (svbool_t pg, float x)
   _ZGVsMxvl4l4_sincospif (svdup_f32 (x), s, c, pg);
   return svretf (svld1 (pg, c), pg);
 }
-# endif // WANT_TRIGPI_TESTS
+#endif // WANT_C23_TESTS
 
 float
 sv_sincosf_sin (svbool_t pg, float x)

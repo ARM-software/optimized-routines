@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sincospi function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_sincospi_common.h"
@@ -29,7 +29,7 @@ _ZGVnN2vl8l8_sincospi (float64x2_t x, double *out_sin, double *out_cos)
   vst1q_f64 (out_cos, sc.val[1]);
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_DISABLE_FENV (_ZGVnN2v_sincospi_cos)
 TEST_DISABLE_FENV (_ZGVnN2v_sincospi_sin)
 TEST_ULP (_ZGVnN2v_sincospi_sin, 2.59)

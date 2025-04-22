@@ -29,7 +29,7 @@
 #include <string.h>
 #include "mathlib.h"
 
-#include "trigpi_references.h"
+#include "c23_references.h"
 
 /* Don't depend on mpfr by default.  */
 #ifndef USE_MPFR

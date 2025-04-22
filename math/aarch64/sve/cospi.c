@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE cospi(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -55,7 +55,7 @@ svfloat64_t SV_NAME_D1 (cospi) (svfloat64_t x, const svbool_t pg)
   return svreinterpret_f64 (sveor_x (pg, svreinterpret_u64 (y), sign));
 }
 
-#if WANT_TRIGPI_TESTS
+#if WANT_C23_TESTS
 TEST_ULP (SV_NAME_D1 (cospi), 2.71)
 TEST_DISABLE_FENV (SV_NAME_D1 (cospi))
 TEST_SYM_INTERVAL (SV_NAME_D1 (cospi), 0, 0x1p-63, 5000)
