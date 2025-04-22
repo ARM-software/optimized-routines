@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "add-ci-aor" ]
   workflow_dispatch:
 
 jobs:
