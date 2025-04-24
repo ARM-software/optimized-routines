@@ -84,7 +84,7 @@ ifeq ($(OS),Darwin)
 ifeq ($(ARCH),aarch64)
   math-cflags += -I/opt/homebrew/include
   math-ldlibs += -L/opt/homebrew/lib
-  LDFLAGS += -fuse-ld=lld
+  LDFLAGS += -fuse-ld=/opt/homebrew/opt/llvm/bin/lld
 endif
 endif
 
