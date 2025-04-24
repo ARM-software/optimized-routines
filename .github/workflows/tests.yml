@@ -57,7 +57,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run: brew install mpfr libmpc gmp && brew link gmp mpfr
+      run: brew install mpfr libmpc gmp && brew link gmp mpfr llvm
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
