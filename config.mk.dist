@@ -79,6 +79,14 @@ ifeq ($(OS),Msys)
   mpc-libs = $(SYSROOT)/lib/libmpc.dll.a
 endif
 
+# For Apple Silicon update the paths
+ifeq ($(OS),Darwin)
+ifeq ($(ARCH),aarch64)
+  math-cflags += -I/opt/homebrew/include
+  math-ldlibs += -L/opt/homebrew/lib
+endif
+endif
+
 # Use if mpfr is available on the target for ulp error checking. If
 # enabling this, it is advised to disable fenv checks by uncommenting
 # the two lines at the bottom of this block.
