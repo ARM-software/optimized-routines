@@ -51,8 +51,8 @@ build/lib/libnetworking.a: $(networking-lib-objs)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
-build/bin/test/%: $(B)/test/%.o build/lib/libnetworking.a
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+build/bin/test/%: $(B)/test/%.o build/lib/libnetworking.a build/lib/libnetworking.so
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) $(TEST_BIN_FLAGS) -Lbuild/lib/ -lnetworking -o $@ $^ $(LDLIBS)
 
 build/include/%.h: $(S)/include/%.h
 	cp $< $@

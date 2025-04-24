@@ -26,6 +26,8 @@ AR = $(CROSS_COMPILE)ar
 RANLIB = $(CROSS_COMPILE)ranlib
 INSTALL = install
 FP_SUBDIR = none
+TEST_BIN_FLAGS = -static
+
 # Detect OS.
 # Assume Unix environment: Linux, Darwin, or Msys.
 OS := $(shell uname -s)

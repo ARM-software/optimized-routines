@@ -81,11 +81,11 @@ build/lib/libstringlib.a: $(string-lib-objs)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
-build/bin/test/%: $(B)/test/%.o -lstringlib
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -Lbuild/lib/ -o $@ $^ $(LDLIBS)
+build/bin/test/%: $(B)/test/%.o build/lib/libstringlib.a build/lib/libstringlib.so
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) $(TEST_BIN_FLAGS) -Lbuild/lib/ -lstringlib -o $@ $^ $(LDLIBS)
 
-build/bin/bench/%: $(B)/bench/%.o - lstringlib
-	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -Lbuild/lib/ -o $@ $^ $(LDLIBS)
+build/bin/bench/%: $(B)/bench/%.o build/lib/libstringlib.a build/lib/libstringlib.so
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) $(TEST_BIN_FLAGS) -Lbuild/lib/ -lstringlib -o $@ $^ $(LDLIBS)
 
 build/include/%.h: $(S)/include/%.h
 	cp $< $@
