@@ -27,7 +27,6 @@ RANLIB = $(CROSS_COMPILE)ranlib
 INSTALL = install
 FP_SUBDIR = none
 TEST_BIN_FLAGS = -static
-VPATH = .:build/lib:build/bin
 
 # Detect OS.
 # Assume Unix environment: Linux, Darwin, or Msys.
