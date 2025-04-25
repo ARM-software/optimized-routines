@@ -82,7 +82,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         msystem: ${{matrix.sys}}
-        install: mingw-w64-${{matrix.env}}-openssl mingw-w64-${{matrix.env}}-qemu
+        install: mingw-w64-${{matrix.env}}-openssl mingw-w64-${{matrix.env}}-qemu mingw-w64-${{matrix.env}}-make
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
