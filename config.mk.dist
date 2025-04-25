@@ -87,8 +87,6 @@ ifeq ($(ARCH),aarch64)
   HOST_CFLAGS += -I/opt/homebrew/include
   HOST_LDFLAGS += -L/opt/homebrew/lib
   TEST_BIN_FLAGS =
-  #.LIBPATTERNS = lib%.so
-  #VPATH = .:build/lib:build/bin
 endif
 endif
 
