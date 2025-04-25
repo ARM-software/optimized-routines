@@ -82,10 +82,10 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         msystem: ${{matrix.sys}}
-        install: mingw-w64-${{matrix.env}}-openssl mingw-w64-${{matrix.env}}-qemu mingw-w64-${{matrix.env}}-make
+        install: mingw-w64-${{matrix.env}}-openssl mingw-w64-${{matrix.env}}-qemu make
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
-      run: CC="${{ matrix.compiler }}" mingw-w64-${{matrix.env}}-make -j
+      run: CC="${{ matrix.compiler }}" make -j
     - name: make check
-      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" mingw-w64-${{matrix.env}}-make check -j
+      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
