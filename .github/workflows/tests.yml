@@ -86,6 +86,6 @@ jobs:
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
-      run: CC="${{ matrix.compiler }}" make -j
+      run: CC="${{ matrix.compiler }}" mingw-w64-${{matrix.env}}-make -j
     - name: make check
-      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
+      run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" mingw-w64-${{matrix.env}}-make check -j
