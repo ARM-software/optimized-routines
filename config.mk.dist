@@ -84,7 +84,10 @@ ifeq ($(OS),Darwin)
 ifeq ($(ARCH),aarch64)
   math-cflags += -I/opt/homebrew/include
   math-ldlibs += -L/opt/homebrew/lib
+  HOST_CFLAGS += -I/opt/homebrew/include
+  HOST_LDFLAGS += -L/opt/homebrew/lib
   TEST_BIN_FLAGS =
+  .LIBPATTERNS = lib%.so
 endif
 endif
 
