@@ -86,6 +86,6 @@ jobs:
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
-      run: CC="${{ matrix.compiler }}" USE_GLIBC_ABI=0 make -j
+      run: CC="mingw-w64-${{matrix.env}}-${{ matrix.compiler }}" USE_GLIBC_ABI=0 make -j
     - name: make check
-      run: CC="${{ matrix.compiler }}" USE_GLIBC_ABI=0 EMULATOR="qemu-aarch64-static" make check -j
+      run: CC="mingw-w64-${{matrix.env}}-${{ matrix.compiler }}" USE_GLIBC_ABI=0 EMULATOR="qemu-aarch64-static" make check -j
