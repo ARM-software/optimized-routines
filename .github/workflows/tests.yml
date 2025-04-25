@@ -71,7 +71,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: mingw64, env: cross-mingwarm64, compiler: aarch64-w64-mingw32-gcc }
+          - { sys: mingw64, base: x86_64, env: cross-mingwarm64, compiler: aarch64-w64-mingw32-gcc }
     defaults:
       run:
         shell: msys2 {0}
@@ -80,7 +80,7 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         msystem: ${{matrix.sys}}
-        install: mingw-w64-${{matrix.env}}-openssl mingw-w64-${{matrix.env}}-qemu make
+        install: mingw-w64-${{matrix.base}}-openssl mingw-w64-${{matrix.base}}-qemu make
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
