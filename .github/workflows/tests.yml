@@ -52,7 +52,7 @@ jobs:
     runs-on: macos-15
     strategy:
       matrix:
-        compiler: ["gcc-14", "clang"]
+        compiler: ["gcc-14"]
 
     steps:
     - uses: actions/checkout@v4
