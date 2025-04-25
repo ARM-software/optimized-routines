@@ -64,6 +64,7 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 #define ENTRY(name)	ENTRY_ALIGN(name, 6)
 
 #if defined (__APPLE__)
+#error Using PREF ## name
 # define ENTRY_ALIAS(name)	\
   .global PREF ## name	    SEP \
   PREF ## name:
