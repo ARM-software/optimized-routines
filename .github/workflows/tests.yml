@@ -79,8 +79,6 @@ jobs:
         shell: msys2 {0}
     steps:
     - uses: actions/checkout@v4
-    - name: install dependencies
-      run: powershell choco install -y qemu
     - uses: msys2/setup-msys2@v2
       with:
         msystem: ${{matrix.sys}}
