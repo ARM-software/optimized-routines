@@ -80,11 +80,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: install dependencies
-      run: choco install -y qemu
+      run: powershell choco install -y qemu
     - uses: msys2/setup-msys2@v2
       with:
         msystem: ${{matrix.sys}}
-        install: mingw-w64-${{matrix.env}}-openssl
+        install: mingw-w64-${{matrix.env}}-openssl mingw-w64-${{matrix.env}}-qemu
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
