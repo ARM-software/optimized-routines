@@ -8,8 +8,7 @@
 #ifndef _ASMDEFS_H
 #define _ASMDEFS_H
 
-/* Set the line separator for the assembler.  Darwin is also an underscore
-   platforms as such symbols need an extra _ prefix.  */
+/* Set the line separator for the assembler.  */
 #if defined (__APPLE__)
 # define SEP %%
 # define PREF _
@@ -64,10 +63,9 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 #define ENTRY(name)	ENTRY_ALIGN(name, 6)
 
 #if defined (__APPLE__)
-#error Using PREF ## name
 # define ENTRY_ALIAS(name)	\
-  .global PREF ## name	    SEP \
-  PREF ## name:
+  .global _ ## name	    SEP \
+  _ ## name:
 
 # define END(name)	.cfi_endproc
 #else
