@@ -69,6 +69,12 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
   _ ## name:
 
 # define END(name)	.cfi_endproc
+#elif defined (_WIN32)
+# define ENTRY_ALIAS(name)	\
+  .global name	    \
+  name:
+
+# define END(name)	.cfi_endproc
 #else
 # define ENTRY_ALIAS(name)	\
   .global name;			\
