@@ -68,7 +68,7 @@ string-cflags = -falign-functions=64
 networking-cflags =
 
 $(info $(OS))
-ifeq ($(OS),Msys)
+ifneq (,$(filter $(OS),Msys Mingw64))
   # Libraries can be installed with pacman
   libm-libs = -lmsvcrt -lvcruntime -lucrt
   libc-libs =

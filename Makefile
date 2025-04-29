@@ -32,6 +32,8 @@ TEST_BIN_FLAGS = -static
 # Assume Unix environment: Linux, Darwin, or Msys.
 OS := $(shell uname -s)
 OS := $(patsubst MSYS%,Msys,$(OS))
+OS := $(patsubst MINGW64%,Mingw64,$(OS))
+
 # Following math dependencies can be adjusted in config file
 # if necessary, e.g. for Msys.
 libm-libs = -lm
