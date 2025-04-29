@@ -85,7 +85,7 @@ jobs:
           mingw-w64-${{matrix.base}}-qemu
           make
           mingw-w64-${{matrix.env}}-gcc
-          mingw-w64-${{matrix.base}}-binutils
+          mingw-w64-${{matrix.env}}-binutils
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
