@@ -67,7 +67,6 @@ math-testflags =
 string-cflags = -falign-functions=64
 networking-cflags =
 
-$(info $(OS))
 ifneq (,$(filter $(OS),Msys Mingw64))
   # Libraries can be installed with pacman
   libm-libs = -lmsvcrt -lvcruntime -lucrt
@@ -78,7 +77,7 @@ ifneq (,$(filter $(OS),Msys Mingw64))
   mpfr-libs = $(SYSROOT)/lib/libmpfr.dll.a
   gmp-libs = $(SYSROOT)/lib/libgmp.dll.a
   mpc-libs = $(SYSROOT)/lib/libmpc.dll.a
-  TEST_BIN_FLAGS =
+  # TEST_BIN_FLAGS =
   USE_GLIBC_ABI = 0
   ifneq ($(ARCH),aarch64)
     EMULATOR = "qemu-aarch64-static"
