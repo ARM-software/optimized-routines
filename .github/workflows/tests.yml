@@ -89,6 +89,6 @@ jobs:
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
-      run: CC="/opt/bin/${{matrix.compiler}}.exe" make -j
+      run: CC="/opt/bin/${{matrix.compiler}}.exe" CROSS_COMPILE=aarch64-w64-mingw32- USE_GLIBC_ABI=0 make -j
     - name: make check
-      run: CC="/opt/bin/${{matrix.compiler}}.exe" make check -j
+      run: CC="/opt/bin/${{matrix.compiler}}.exe" CROSS_COMPILE=aarch64-w64-mingw32- USE_GLIBC_ABI=0 make check -j
