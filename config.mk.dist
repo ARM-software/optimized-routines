@@ -67,6 +67,7 @@ math-testflags =
 string-cflags = -falign-functions=64
 networking-cflags =
 
+$(info $(OS))
 ifeq ($(OS),Msys)
   # Libraries can be installed with pacman
   libm-libs = -lmsvcrt -lvcruntime -lucrt
