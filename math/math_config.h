@@ -67,9 +67,18 @@
 # endif
 #endif
 
+/* Windows does not define this and math_errhandling should always be 0.  */
+#if defined (_WIN32)
+/* Bitmasks for the math_errhandling macro.  */
+# define MATH_ERRNO	1	/* errno set by math functions.  */
+# define MATH_ERREXCEPT	2	/* Exceptions raised by math functions.  */
+#endif
+
 /* Optionally used extensions.  */
 #ifdef __GNUC__
-# define HIDDEN __attribute__ ((__visibility__ ("hidden")))
+# if !defined (_WIN32)
+#  define HIDDEN __attribute__ ((__visibility__ ("hidden")))
+# endif
 # define NOINLINE __attribute__ ((noinline))
 # define UNUSED __attribute__ ((unused))
 # define ALIGN(X) __attribute__ ((__aligned__(X)))
