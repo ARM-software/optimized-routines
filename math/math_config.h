@@ -77,7 +77,9 @@
 /* Optionally used extensions.  */
 #ifdef __GNUC__
 # if !defined (_WIN32)
-#  define HIDDEN __attribute__ ((__visibility__ ("hidden")))
+#   define HIDDEN __attribute__ ((__visibility__ ("hidden")))
+# else
+#   define HIDDEN
 # endif
 # define NOINLINE __attribute__ ((noinline))
 # define UNUSED __attribute__ ((unused))
