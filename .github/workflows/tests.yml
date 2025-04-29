@@ -71,7 +71,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: mingw64, base: x86_64, env: cross-mingwarm64, compiler: aarch64-w64-mingw32-gcc }
+          # - { sys: mingw64, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
+          - { sys: mingw64, base: x86_64, env: cross, prefix: aarch64-w64-mingw32, compiler: clang }
     defaults:
       run:
         shell: msys2 {0}
@@ -84,13 +85,13 @@ jobs:
           mingw-w64-${{matrix.base}}-openssl
           mingw-w64-${{matrix.base}}-qemu
           make
-          mingw-w64-${{matrix.env}}-gcc
+          mingw-w64-${{matrix.env}}-${{matrix.compiler}}
           mingw-w64-${{matrix.env}}-binutils
     - name: OS Version
       run: uname -s
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
-      run: CC="/opt/bin/${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/aarch64-w64-mingw32- make -j
+      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make -j
     - name: make check
-      run: CC="/opt/bin/${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/aarch64-w64-mingw32- make check -j
+      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make check -j
