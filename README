@@ -1,6 +1,8 @@
 Arm Optimized Routines
 ----------------------
 
+![master branch](https://github.com/ARM-software/optimized-routines/actions/workflows/tests/badge.svg)
+
 This repository contains implementations of library functions
 provided by Arm. The outbound license is available under a dual
 license, at the user’s election, as reflected in the LICENSE file.
