@@ -17,7 +17,7 @@ fp-libs := \
 
 fp-lib-objs := $(patsubst $(fp-src-dir)/%,$(fp-build-dir)/%.o,$(basename $(fp-lib-srcs)))
 
-all-fp-testnames := test-fmul
+all-fp-testnames := test-fmul test-faddsub
 fp-testnames := $(filter $(all-fp-testnames), $(foreach obj,$(fp-lib-objs),$(patsubst %.o,test-%,$(notdir $(obj)))))
 fp-tests := $(patsubst %,$(fp-build-dir)/%,$(fp-testnames))
 fp-test-objs := $(patsubst %,$(fp-build-dir)/test/%.o,$(fp-testnames))
@@ -44,7 +44,7 @@ build/lib/libfplib.a: $(fp-lib-objs)
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 
-$(fp-tests): $(fp-build-dir)/%: $(fp-build-dir)/test/%.o
+$(fp-tests): $(fp-build-dir)/%: $(fp-build-dir)/test/%.o $(fp-libs)
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -o $@ $^ $(fp-libs)
 
 clean-fp:
