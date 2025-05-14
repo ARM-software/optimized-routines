@@ -2,10 +2,13 @@
  * Helpers for evaluating polynomials with various schemes - specific to SVE
  * but precision-agnostic.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#ifndef PTRUE
+# error Cannot use poly_generic without defining PTRUE
+#endif
 #ifndef VTYPE
 # error Cannot use poly_generic without defining VTYPE
 #endif
@@ -304,7 +307,7 @@ static inline VTYPE VWRAP (lw_pw_horner_5) (svbool_t pg, VTYPE x, VTYPE x2,
 					    const STYPE *poly_even,
 					    const STYPE *poly_odd)
 {
-  VTYPE c13 = svld1rq (pg, poly_odd);
+  VTYPE c13 = svld1rq (PTRUE, poly_odd);
 
   VTYPE p01 = svmla_lane (DUP (poly_even[0]), x, c13, 0);
   VTYPE p23 = svmla_lane (DUP (poly_even[1]), x, c13, 1);
@@ -319,7 +322,7 @@ static inline VTYPE VWRAP (lw_pw_horner_9) (svbool_t pg, VTYPE x, VTYPE x2,
 					    const STYPE *poly_even,
 					    const STYPE *poly_odd)
 {
-  VTYPE c13 = svld1rq (pg, poly_odd);
+  VTYPE c13 = svld1rq (PTRUE, poly_odd);
 
   VTYPE p49 = VWRAP (lw_pw_horner_5) (pg, x, x2, poly_even + 2, poly_odd + 2);
   VTYPE p23 = svmla_lane (DUP (poly_even[1]), x, c13, 1);

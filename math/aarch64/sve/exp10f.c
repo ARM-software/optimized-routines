@@ -37,8 +37,7 @@ sv_exp10f_inline (svfloat32_t x, const svbool_t pg, const struct data *d)
   /* exp10(x) = 2^(n/N) * 10^r = 2^n * (1 + poly (r)),
      with poly(r) in [1/sqrt(2), sqrt(2)] and
      x = r + n * log10(2) / N, with r in [-log10(2)/2N, log10(2)/2N].  */
-
-  svfloat32_t lane_consts = svld1rq (pg, &d->log10_2);
+  svfloat32_t lane_consts = svld1rq (svptrue_b32 (), &d->log10_2);
 
   /* n = round(x/(log10(2)/N)).  */
   svfloat32_t shift = sv_f32 (d->shift);

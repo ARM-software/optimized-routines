@@ -27,7 +27,7 @@ const static struct v_tanpif_data
 svfloat32_t SV_NAME_F1 (tanpi) (svfloat32_t x, const svbool_t pg)
 {
   const struct v_tanpif_data *d = ptr_barrier (&tanpif_data);
-  svfloat32_t odd_coeffs = svld1rq (pg, &d->c1);
+  svfloat32_t odd_coeffs = svld1rq (svptrue_b32 (), &d->c1);
   svfloat32_t n = svrintn_x (pg, x);
 
   /* inf produces nan that propagates.  */
