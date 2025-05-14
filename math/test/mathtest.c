@@ -23,6 +23,13 @@
 # define math_errhandling 0
 #endif
 
+/* Windows does not define this and math_errhandling should always be 0.  */
+#if defined (_WIN32)
+/* Bitmasks for the math_errhandling macro.  */
+# define MATH_ERRNO	1	/* errno set by math functions.  */
+# define MATH_ERREXCEPT	2	/* Exceptions raised by math functions.  */
+#endif
+
 #ifdef __cplusplus
  #define EXTERN_C extern "C"
 #else
