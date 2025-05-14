@@ -18,7 +18,8 @@ fp-libs := \
 fp-lib-objs := $(patsubst $(fp-src-dir)/%,$(fp-build-dir)/%.o,$(basename $(fp-lib-srcs)))
 
 # The full list of FP test programs
-all-fp-testnames := test-fmul test-faddsub test-fdiv test-fcmp
+all-fp-testnames := test-fmul test-faddsub test-fdiv test-fcmp \
+	test-f2uiz test-f2iz test-f2ulz test-f2lz
 
 # Filter the list down to only the tests of functions present in this FP_SUBDIR
 fp-tests-available := $(foreach obj,$(fp-lib-objs),$(patsubst %.o,test-%,$(notdir $(obj))))
@@ -42,7 +43,7 @@ all-fp: $(fp-libs) $(fp-tests)
 
 $(fp-objs): $(fp-includes) $(fp-test-includes)
 $(fp-objs): CFLAGS_ALL += $(fp-cflags)
-$(fp-objs): CFLAGS_ALL += -I$(fp-src-dir)
+$(fp-objs): CFLAGS_ALL += -I$(fp-src-dir)/include
 ifeq ($(FP_SUBDIR),at32)
 $(fp-objs): CFLAGS_ALL += -Wa,-mimplicit-it=always
 endif
