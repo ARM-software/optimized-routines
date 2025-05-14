@@ -17,7 +17,7 @@ fp-libs := \
 
 fp-lib-objs := $(patsubst $(fp-src-dir)/%,$(fp-build-dir)/%.o,$(basename $(fp-lib-srcs)))
 
-all-fp-testnames := test-fmul test-faddsub
+all-fp-testnames := test-fmul test-faddsub test-fdiv
 fp-testnames := $(filter $(all-fp-testnames), $(foreach obj,$(fp-lib-objs),$(patsubst %.o,test-%,$(notdir $(obj)))))
 fp-tests := $(patsubst %,$(fp-build-dir)/%,$(fp-testnames))
 fp-test-objs := $(patsubst %,$(fp-build-dir)/test/%.o,$(fp-testnames))
