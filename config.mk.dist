@@ -67,7 +67,7 @@ math-testflags =
 string-cflags = -falign-functions=64
 networking-cflags =
 
-ifeq ($(OS),Msys)
+ifneq (,$(filter $(OS),Msys Mingw64))
   # Libraries can be installed with pacman
   libm-libs = -lmsvcrt -lvcruntime -lucrt
   libc-libs =
@@ -77,6 +77,13 @@ ifeq ($(OS),Msys)
   mpfr-libs = $(SYSROOT)/lib/libmpfr.dll.a
   gmp-libs = $(SYSROOT)/lib/libgmp.dll.a
   mpc-libs = $(SYSROOT)/lib/libmpc.dll.a
+  # TEST_BIN_FLAGS =
+  # Clear the default flag -fPIC, as not supported on Windows
+  CFLAGS_SHARED =
+  USE_GLIBC_ABI = 0
+  ifneq ($(ARCH),aarch64)
+    EMULATOR = "qemu-aarch64-static"
+  endif
 endif
 
 # For Apple Silicon update the paths
@@ -163,7 +170,7 @@ USE_GLIBC_ABI ?= 1
 math-cflags += -DUSE_GLIBC_ABI=$(USE_GLIBC_ABI)
 
 # Enable experimental math routines - non-C23 vector math and low-accuracy scalar
-WANT_EXPERIMENTAL_MATH = 0
+WANT_EXPERIMENTAL_MATH ?= 0
 math-cflags += -DWANT_EXPERIMENTAL_MATH=$(WANT_EXPERIMENTAL_MATH)
 
 # If you add 'fp' to the SUBS list above, you must also define this to
