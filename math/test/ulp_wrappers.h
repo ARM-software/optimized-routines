@@ -184,11 +184,12 @@ ZVNF2_WRAP (atan2pi)
 ZVND2_WRAP (atan2pi)
 ZVNF1_WRAP (cospi)
 ZVND1_WRAP (cospi)
+ZVNF1_WRAP (exp2m1)
+ZVND1_WRAP (exp2m1)
 ZVNF1_WRAP (sinpi)
 ZVND1_WRAP (sinpi)
 ZVNF1_WRAP (tanpi)
 ZVND1_WRAP (tanpi)
-ZVNF1_WRAP (exp2m1)
 
 double
 v_sincospi_sin (double x)
@@ -334,6 +335,7 @@ ZSVNF1_WRAP (sinpi)
 ZSVND1_WRAP (sinpi)
 ZSVNF1_WRAP (tanpi)
 ZSVND1_WRAP (tanpi)
+
 double
 sv_sincospi_sin (svbool_t pg, double x)
 {

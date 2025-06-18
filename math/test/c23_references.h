@@ -160,3 +160,11 @@ arm_math_exp2m1 (double x)
 	     ? (long double) x * 0x1.62e42fefa39ef35793c7673007e6p-1l
 	     : exp2l ((long double) x) - 1.0l;
 }
+
+long double
+arm_math_exp2m1l (long double x)
+{
+  return (fabs (x) < 0x1p-52)
+	     ? (long double) x * 0x1.62e42fefa39ef35793c7673007e6p-1l
+	     : exp2l ((long double) x) - 1.0l;
+}
