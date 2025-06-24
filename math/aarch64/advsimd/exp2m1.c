@@ -126,6 +126,7 @@ special_case (float64x2_t poly, float64x2_t n, uint64x2_t e, float64x2_t scale,
 					want 0x1.7b1d06f0a7d33p-9.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (exp2m1) (float64x2_t x)
 {
+  float64x2_t ret;
   const struct data *d = ptr_barrier (&data);
 
   /* exp2(x) = 2^n (1 + poly(r))
@@ -158,20 +159,22 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2m1) (float64x2_t x)
       = vfmaq_laneq_f64 (vmulq_f64 (d->log2_hi, r), r, log2lo_c2, 0);
   poly = vfmaq_f64 (poly, p16, r2);
 
-  if (unlikely (v_any_u64 (cmp)))
-    return special_case (poly, n, e, scale, d);
-
   float64x2_t scalem1 = vsubq_f64 (scale, v_f64 (1.0));
   uint64x2_t is_small = vcaltq_f64 (x, v_f64 (TableBound));
-
   if (v_any_u64 (is_small))
     {
       uint64x2_t lookup_sm1 = lookup_sm1bits (x, u, d);
       scalem1
 	  = vbslq_f64 (is_small, vreinterpretq_f64_u64 (lookup_sm1), scalem1);
     }
+  ret = vfmaq_f64 (scalem1, poly, scale);
 
-  return vfmaq_f64 (scalem1, poly, scale);
+  if (unlikely (v_any_u64 (cmp)))
+    {
+      float64x2_t special = special_case (poly, n, e, scale, d);
+      ret = vbslq_f64 (cmp, special, ret);
+    }
+  return ret;
 }
 
 #if WANT_C23_TESTS
