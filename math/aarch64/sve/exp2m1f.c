@@ -75,10 +75,11 @@ svfloat32_t SV_NAME_F1 (exp2m1) (svfloat32_t x, const svbool_t pg)
       svmul_x (svptrue_b32 (), r, sv_f32 (d->log2_hi)), r, log2lo_c246, 0);
   poly = svmla_x (pg, poly, p16, r2);
 
+  svfloat32_t ret = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (poly, n, e, cmp, scale, d);
+    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), ret);
 
-  return svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
+  return ret;
 }
 
 #if WANT_C23_TESTS

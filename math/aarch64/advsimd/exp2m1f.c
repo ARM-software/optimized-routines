@@ -72,10 +72,11 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp2m1) (float32x4_t x)
       = vfmaq_laneq_f32 (vmulq_f32 (d->log2_hi, r), r, log2lo_c246, 0);
   poly = vfmaq_f32 (poly, p16, r2);
 
+  float32x4_t ret = vfmaq_f32 (vsubq_f32 (scale, v_f32 (1.0f)), poly, scale);
   if (unlikely (v_any_u32 (cmp)))
-    return special_case (poly, n, e, cmp, scale, d);
+    return vbslq_f32 (cmp, special_case (poly, n, e, cmp, scale, d), ret);
 
-  return vfmaq_f32 (vsubq_f32 (scale, v_f32 (1.0f)), poly, scale);
+  return ret;
 }
 
 HALF_WIDTH_ALIAS_F1 (exp2m1)
