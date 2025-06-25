@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 // Parameters
-deg = 6;
+deg = 7; // 7 for Neon, 6 for SVE
 N = 64;
 b = log(2)/(2 * N * log(10)); // interval
 a = -b;
