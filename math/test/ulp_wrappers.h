@@ -71,6 +71,14 @@ static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   return mpfr_cos (ret, frd, GMP_RNDN);
 }
 
+static int mpfr_exp10m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  MPFR_DECL_INIT (one, 1080);
+  mpfr_set_d(one, 1.0, GMP_RNDN);
+  mpfr_exp10 (frd, arg, GMP_RNDN);
+  return mpfr_sub (ret, frd, one, GMP_RNDN);
+}
+
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   mpfr_const_pi (frd, GMP_RNDN);
@@ -330,6 +338,7 @@ ZSVNF2_WRAP (atan2pi)
 ZSVND2_WRAP (atan2pi)
 ZSVNF1_WRAP (cospi)
 ZSVND1_WRAP (cospi)
+ZSVND1_WRAP (exp10m1)
 ZSVNF1_WRAP (exp2m1)
 ZSVND1_WRAP (exp2m1)
 ZSVNF1_WRAP (sinpi)

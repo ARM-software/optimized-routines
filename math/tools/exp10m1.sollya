@@ -1,0 +1,45 @@
+// polynomial for approximating double precision 10^x - 1
+//
+// Copyright (c) 2025, Arm Limited.
+// SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+
+// Parameters
+deg = 6;
+N = 64;
+b = log(2)/(2 * N * log(10)); // interval
+a = -b;
+
+f = 10^x;
+
+// return p that minimizes relative error.
+approx = proc(poly,d) {
+  return remez(1 - poly(x)/f(x), deg-d, [a;b], x^d/f(x), 1e-10);
+};
+
+// return p that minimizes absolute error
+approx_abs = proc(poly,d) {
+  return remez(f(x) - poly(x), deg-d, [a;b], x^d, 1e-10);
+};
+
+// first coeff is fixed, iteratively find optimal double prec coeffs
+poly = 1;
+for i from 1 to deg do {
+  p = roundcoefficients(approx(poly,i), [|D ...|]);
+  //p = roundcoefficients(approx_abs(poly,i), [|D ...|]);
+  poly = poly + x^i*coeff(p,0);
+};
+
+display = hexadecimal;
+print("rel error:", accurateinfnorm(1-poly(x)/10^x, [a;b], 30));
+print("abs error:", accurateinfnorm(10^x-poly(x), [a;b], 30));
+print("in [",a,b,"]");
+print("coeffs:");
+for i from 0 to deg do coeff(poly,i);
+
+log10_2 = round(N * log(10) / log(2), D, RN);
+log2_10 = log(2) / (N * log(10));
+log2_10_hi = round(log2_10, D, RN);
+log2_10_lo = round(log2_10 - log2_10_hi, D, RN);
+print(log10_2);
+print(log2_10_hi);
+print(log2_10_lo);
