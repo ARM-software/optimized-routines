@@ -176,3 +176,11 @@ arm_math_exp2m1l (long double x)
 	     ? (long double) x * 0x1.62e42fefa39ef35793c7673007e6p-1l
 	     : exp2l ((long double) x) - 1.0l;
 }
+
+double
+arm_math_exp10m1 (double x)
+{
+  long double xln10 = x * 0x1.26bb1bbb5551582dd4adac5705a6p1l;
+  /* exp10 is a GNU extension, so for comptability, use pow.  */
+  return (fabsl (x) < 0x1p-55) ? xln10 : powl (10, x) - 1.0l;
+}

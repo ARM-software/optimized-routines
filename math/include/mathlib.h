@@ -131,6 +131,7 @@ __vpcs float32x4_t _ZGVnN4v_exp10f (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_exp2f (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_exp2f_1u (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_exp2m1f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_exp10m1f (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_expf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_expf_1u (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_expm1f (float32x4_t);
