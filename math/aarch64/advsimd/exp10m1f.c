@@ -9,9 +9,11 @@
 #include "test_sig.h"
 #include "test_defs.h"
 
+/* Value of |x| above which scale overflows without special treatment.  */
+#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
+
+/* Value of n above which scale overflows even with special treatment.  */
 #define ScaleBound 192.0f
-/* rint (log2 (2^127 / (1 + sqrt (2)))).  */
-#define SpecialBound 126.0f
 
 static const struct data
 {
@@ -37,11 +39,11 @@ static const struct data
   .inv_log10_2 = V4 (0x1.a934fp+1),
   .log10_2_high = 0x1.344136p-2,
   .log10_2_low = 0x1.ec10cp-27,
-  .special_bound = V4 (SpecialBound),
   .exponent_bias = V4 (0x3f800000),
   .special_offset = V4 (0x82000000),
   .special_bias = V4 (0x7f000000),
-  .scale_thresh = V4 (ScaleBound)
+  .scale_thresh = V4 (ScaleBound),
+  .special_bound = V4 (SpecialBound),
 };
 
 static float32x4_t VPCS_ATTR NOINLINE
@@ -58,10 +60,10 @@ special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
   /* Similar to r1 but avoids double rounding in the subnormal range.  */
   float32x4_t r0 = vfmaq_f32 (scale, poly, scale);
   float32x4_t r = vbslq_f32 (cmp1, r1, r0);
-  return vsubq_f32 (vbslq_f32 (cmp2, r2, r), v_f32 (1.0));
+  return vsubq_f32 (vbslq_f32 (cmp2, r2, r), v_f32 (1.0f));
 }
 
-/* Fast vector implementation of single-precision exp10.
+/* Fast vector implementation of single-precision exp10m1.
    Algorithm is accurate to 1.70 + 0.5 ULP.
    _ZGVnN4v_exp10m1f(0x1.36f94cp-3) got 0x1.ac96acp-2
 				   want 0x1.ac96bp-2.  */
@@ -96,11 +98,13 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (exp10m1) (float32x4_t x)
       = vfmaq_laneq_f32 (vmulq_f32 (d->log10_hi, r), r, log10lo_c246, 0);
   poly = vfmaq_f32 (poly, p16, r2);
 
-  float32x4_t ret = vfmaq_f32 (vsubq_f32 (scale, v_f32 (1.0)), poly, scale);
-  if (unlikely (v_any_u32 (cmp)))
-    return vbslq_f32 (cmp, special_case (poly, n, e, cmp, scale, d), ret);
+  float32x4_t y = vfmaq_f32 (vsubq_f32 (scale, v_f32 (1.0f)), poly, scale);
 
-  return ret;
+  /* Fallback to special case for lanes with overflow.  */
+  if (unlikely (v_any_u32 (cmp)))
+    return vbslq_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
+
+  return y;
 }
 
 HALF_WIDTH_ALIAS_F1 (exp10m1)
@@ -109,8 +113,6 @@ HALF_WIDTH_ALIAS_F1 (exp10m1)
 TEST_ULP (V_NAME_F1 (exp10m1), 1.70)
 TEST_DISABLE_FENV (V_NAME_F1 (exp10m1))
 TEST_INTERVAL (V_NAME_F1 (exp10m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0x1p-14, 0x1p-1, 50000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0x1p-1, 0x1p0, 5000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0x1p0, 0x1p1, 5000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0x1p1, 0x1p8, 5000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0, SpecialBound, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), SpecialBound, inf, 50000)
 #endif

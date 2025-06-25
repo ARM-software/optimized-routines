@@ -11,13 +11,15 @@
 
 /* Value of |x| above which scale overflows without special treatment.  */
 #define SpecialBound 306.0 /* floor (log10 (2^1023)) - 1.  */
+
 /* Value of n above which scale overflows even with special treatment.  */
 #define ScaleBound 163840.0 /* 1280.0 * N.  */
+
 /* Value of |x| below which scale - 1 contributes produces large error.  */
 #define TableBound 0x1.a308a4198c9d7p-4 /* log10(2) * 87/256.  */
 
 #define N (1 << V_EXP_TABLE_BITS)
-#define IndexMask N - 1
+#define IndexMask (N - 1)
 
 const static struct data
 {
@@ -29,7 +31,7 @@ const static struct data
   float64x2_t special_bound, scale_thresh;
   uint64x2_t sm1_tbl_off, sm1_tbl_mask;
   float64x2_t rnd2zero;
-  uint64_t exp10m1_data[88];
+  uint64_t scalem1[88];
 } data = {
   /* Coefficients generated using Remez algorithm.  */
   .c0 = 0x1.26bb1bbb55516p1,
@@ -41,7 +43,7 @@ const static struct data
   .c6 = -0x1.76a8d3abd7025p9,
 
   /* Values of x which should round to the zeroth index of the exp10m1 table.  */
-  .rnd2zero = V2 (-0x1.34413509f79ffp-10), // (2^-8)/log2(10)
+  .rnd2zero = V2 (-0x1.34413509f79ffp-10), /* (2^-8)/log2(10).  */
   .sm1_tbl_off = V2 (24),
   .sm1_tbl_mask = V2 (0x3f),
 
@@ -51,7 +53,13 @@ const static struct data
   .shift = V2 (0x1.8p+52),
   .scale_thresh = V2 (ScaleBound),
   .special_bound = V2 (SpecialBound),
-  .exp10m1_data = {
+
+  /* Table containing 2^x - 1, for 2^x values close to 1.
+     The table holds values of 2^(i/128) - 1, computed in
+     arbitrary precision.
+     The 1st half contains values associated to i=0..43.
+     The 2nd half contains values associated to i=-44..-1.  */
+  .scalem1 = {
     0x0000000000000000, 0x3f763da9fb33356e, 0x3f864d1f3bc03077,
     0x3f90c57a1b9fe12f, 0x3f966c34c5615d0f, 0x3f9c1aca777db772,
     0x3fa0e8a30eb37901, 0x3fa3c7d958de7069, 0x3fa6ab0d9f3121ec,
@@ -121,8 +129,8 @@ lookup_sm1bits (float64x2_t x, uint64x2_t u, const struct data *d)
   uint64x2_t base_idx = vandq_u64 (u, d->sm1_tbl_mask);
   uint64x2_t idx = vaddq_u64 (base_idx, offset);
 
-  uint64x2_t lookup = { d->exp10m1_data[idx[0]], d->exp10m1_data[idx[1]] };
-  return vreinterpretq_f64_u64 (lookup);
+  uint64x2_t sm1 = { d->scalem1[idx[0]], d->scalem1[idx[1]] };
+  return vreinterpretq_f64_u64 (sm1);
 }
 
 /* Fast vector implementation of exp10m1.
@@ -167,9 +175,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10m1) (float64x2_t x)
   float64x2_t scale = vreinterpretq_f64_u64 (vaddq_u64 (scale_bits, e));
   float64x2_t scalem1 = vsubq_f64 (scale, v_f64 (1.0));
 
-  uint64x2_t is_small = vcaltq_f64 (x, v_f64 (TableBound));
-
   /* Use table to gather scalem1 for small values of x.  */
+  uint64x2_t is_small = vcaltq_f64 (x, v_f64 (TableBound));
   if (v_any_u64 (is_small))
     scalem1 = vbslq_f64 (is_small, lookup_sm1bits (x, u, d), scalem1);
 
@@ -186,7 +193,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10m1) (float64x2_t x)
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (exp10m1), 2.53)
 TEST_DISABLE_FENV (V_NAME_D1 (exp10m1))
-TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), 0, SpecialBound, 5000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), SpecialBound, ScaleBound, 5000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), ScaleBound, inf, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), 0, TableBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), TableBound, SpecialBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), SpecialBound, inf, 10000)
 #endif

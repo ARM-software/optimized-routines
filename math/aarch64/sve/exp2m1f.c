@@ -1,5 +1,5 @@
 /*
- * Single-precision vector 2^x - 1 function (SVE version).
+ * Single-precision vector 2^x - 1 function.
  *
  * Copyright (c) 2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -7,6 +7,12 @@
 
 #include "test_defs.h"
 #include "sv_math.h"
+
+/* Value of |x| above which scale overflows without special treatment.  */
+#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
+
+/* Value of n above which scale overflows even with special treatment.  */
+#define ScaleBound 192.0f
 
 static const struct data
 {
@@ -16,13 +22,19 @@ static const struct data
   float log2_hi, c1, c3, c5, shift;
 } data = {
   /* Coefficients generated using remez's algorithm for exp2m1f(x).  */
-  .log2_hi = 0x1.62e43p-1,     .log2_lo = -0x1.05c610p-29,
-  .c1 = 0x1.ebfbep-3,	       .c2 = 0x1.c6b06ep-5,
-  .c3 = 0x1.3b2a5cp-7,	       .c4 = 0x1.5da59ep-10,
-  .c5 = 0x1.440dccp-13,	       .c6 = 0x1.e081d6p-17,
-  .exponent_bias = 0x3f800000, .special_offset = 0x82000000,
-  .special_bias = 0x7f000000,  .special_bound = 126.0f,
-  .scale_thresh = 192.0f,
+  .log2_hi = 0x1.62e43p-1,
+  .log2_lo = -0x1.05c610p-29,
+  .c1 = 0x1.ebfbep-3,
+  .c2 = 0x1.c6b06ep-5,
+  .c3 = 0x1.3b2a5cp-7,
+  .c4 = 0x1.5da59ep-10,
+  .c5 = 0x1.440dccp-13,
+  .c6 = 0x1.e081d6p-17,
+  .exponent_bias = 0x3f800000,
+  .special_offset = 0x82000000,
+  .special_bias = 0x7f000000,
+  .scale_thresh = ScaleBound,
+  .special_bound = SpecialBound,
 };
 
 static svfloat32_t NOINLINE
@@ -75,21 +87,20 @@ svfloat32_t SV_NAME_F1 (exp2m1) (svfloat32_t x, const svbool_t pg)
       svmul_x (svptrue_b32 (), r, sv_f32 (d->log2_hi)), r, log2lo_c246, 0);
   poly = svmla_x (pg, poly, p16, r2);
 
-  svfloat32_t ret = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
-  if (unlikely (svptest_any (pg, cmp)))
-    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), ret);
+  svfloat32_t y = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
 
-  return ret;
+  /* Fallback to special case for lanes with overflow.  */
+  if (unlikely (svptest_any (pg, cmp)))
+    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
+
+  return y;
 }
 
 #if WANT_C23_TESTS
 TEST_ULP (SV_NAME_F1 (exp2m1), 1.76)
 TEST_DISABLE_FENV (SV_NAME_F1 (exp2m1))
 TEST_INTERVAL (SV_NAME_F1 (exp2m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), 0x1p-14, 0x1p-1, 50000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), 0x1p-1, 0x1p0, 5000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), 0x1p0, 0x1p1, 5000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), 0x1p1, 0x1p8, 5000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), 0x1p8, inf, 1000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), 0, SpecialBound, 50000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (exp2m1), SpecialBound, inf, 50000)
 #endif
 CLOSE_SVE_ATTR

@@ -8,8 +8,11 @@
 #include "test_defs.h"
 #include "sv_math.h"
 
+/* Value of |x| above which scale overflows without special treatment.  */
+#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
+
+/* Value of n above which scale overflows even with special treatment.  */
 #define ScaleBound 192.0f
-#define SpecialBound 126.0f
 
 static const struct data
 {
@@ -35,12 +38,11 @@ static const struct data
   .inv_log10_2 = 0x1.a934fp+1,
   .log10_2_high = 0x1.344136p-2,
   .log10_2_low = 0x1.ec10cp-27,
-  /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
-  .special_bound = SpecialBound,
   .exponent_bias = 0x3f800000,
   .special_offset = 0x82000000,
   .special_bias = 0x7f000000,
-  .scale_thresh = ScaleBound
+  .scale_thresh = ScaleBound,
+  .special_bound = SpecialBound,
 };
 
 static svfloat32_t NOINLINE
@@ -99,20 +101,20 @@ svfloat32_t SV_NAME_F1 (exp10m1) (svfloat32_t x, const svbool_t pg)
 				    r, d->log10_lo);
   poly = svmla_x (pg, poly, p16, r2);
 
-  svfloat32_t ret = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
-  if (unlikely (svptest_any (pg, cmp)))
-    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), ret);
+  svfloat32_t y = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
 
-  return ret;
+  /* Fallback to special case for lanes with overflow.  */
+  if (unlikely (svptest_any (pg, cmp)))
+    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
+
+  return y;
 }
 
 #if WANT_C23_TESTS
 TEST_ULP (SV_NAME_F1 (exp10m1), 1.68)
 TEST_DISABLE_FENV (SV_NAME_F1 (exp10m1))
 TEST_INTERVAL (SV_NAME_F1 (exp10m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp10m1), 0x1p-14, 0x1p-1, 50000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp10m1), 0x1p-1, 0x1p0, 5000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp10m1), 0x1p0, 0x1p1, 5000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (exp10m1), 0x1p1, 0x1p8, 5000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (exp10m1), 0, SpecialBound, 50000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (exp10m1), SpecialBound, inf, 50000)
 #endif
 CLOSE_SVE_ATTR

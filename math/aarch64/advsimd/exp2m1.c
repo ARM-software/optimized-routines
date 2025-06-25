@@ -8,12 +8,18 @@
 #include "test_defs.h"
 #include "v_math.h"
 
+/* Value of |x| above which scale overflows without special treatment.  */
+#define SpecialBound 1022.0
+
+/* Value of n above which scale overflows even with special treatment.  */
+#define ScaleBound 1280.0
+
+/* 87/256, value of x under which table lookup is used for 2^x-1.  */
+#define TableBound 0x1.5bfffffffffffp-2
+
 /* Number of bits for each value in the table.  */
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask (N - 1)
-#define BigBound 1022.0
-/* 87/256, value of x under which table lookup is used for 2^x-1.  */
-#define TableBound 0x1.5bfffffffffffp-2
 
 static const struct data
 {
@@ -22,7 +28,7 @@ static const struct data
   float64x2_t scale_thresh, special_bound, shift, rnd2zero;
   float64x2_t log2_hi, c1, c3, c5;
   double log2_lo, c2, c4, c6;
-  uint64_t exp2m1_data[88];
+  uint64_t scalem1[88];
 } data = {
   /* Coefficients generated using remez's algorithm for exp2m1(x).  */
   .log2_hi = V2 (0x1.62e42fefa39efp-1),
@@ -37,50 +43,50 @@ static const struct data
   .special_offset = V2 (0x6000000000000000), /* 0x1p513.  */
   .special_bias = V2 (0x7000000000000000),   /* 0x1p769.  */
   .special_bias2 = V2 (0x3010000000000000),  /* 0x1p-254.  */
-  .scale_thresh = V2 (1280.0),
-  .special_bound = V2 (BigBound),
+  .scale_thresh = V2 (ScaleBound),
+  .special_bound = V2 (SpecialBound),
   .shift = V2 (0x1.8p52 / N),
   .rnd2zero = V2 (-0x1p-8),
   .sm1_tbl_off = V2 (24),
   .sm1_tbl_mask = V2 (0x3f),
 
   /* Table containing 2^x - 1, for 2^x values close to 1.
-     The table holds values of 2^(i/128) - 1, computed in arbitrary
-     precision.
-     The first half of the table stores values associated to i
-     from 0 to 43.
-     The second half of the table stores values associated to i from
-     -44 to -1.  */
-  .exp2m1_data = { 0x0000000000000000, 0x3f763da9fb33356e, 0x3f864d1f3bc03077,
-		   0x3f90c57a1b9fe12f, 0x3f966c34c5615d0f, 0x3f9c1aca777db772,
-		   0x3fa0e8a30eb37901, 0x3fa3c7d958de7069, 0x3fa6ab0d9f3121ec,
-		   0x3fa992456e48fee8, 0x3fac7d865a7a3440, 0x3faf6cd5ffda635e,
-		   0x3fb1301d0125b50a, 0x3fb2abdc06c31cc0, 0x3fb429aaea92ddfb,
-		   0x3fb5a98c8a58e512, 0x3fb72b83c7d517ae, 0x3fb8af9388c8de9c,
-		   0x3fba35beb6fcb754, 0x3fbbbe084045cd3a, 0x3fbd4873168b9aa8,
-		   0x3fbed5022fcd91cc, 0x3fc031dc431466b2, 0x3fc0fa4c8beee4b1,
-		   0x3fc1c3d373ab11c3, 0x3fc28e727d9531fa, 0x3fc35a2b2f13e6e9,
-		   0x3fc426ff0fab1c05, 0x3fc4f4efa8fef709, 0x3fc5c3fe86d6cc80,
-		   0x3fc6942d3720185a, 0x3fc7657d49f17ab1, 0x3fc837f0518db8a9,
-		   0x3fc90b87e266c18a, 0x3fc9e0459320b7fa, 0x3fcab62afc94ff86,
-		   0x3fcb8d39b9d54e55, 0x3fcc6573682ec32c, 0x3fcd3ed9a72cffb7,
-		   0x3fce196e189d4724, 0x3fcef5326091a112, 0x3fcfd228256400dd,
-		   0x3fd0582887dcb8a8, 0x3fd0c7d76542a25b, 0xbfcb23213cc8e86c,
-		   0xbfca96ecd0deb7c4, 0xbfca09f58086c6c2, 0xbfc97c3a3cd7e119,
-		   0xbfc8edb9f5703dc0, 0xbfc85e7398737374, 0xbfc7ce6612886a6d,
-		   0xbfc73d904ed74b33, 0xbfc6abf137076a8e, 0xbfc61987b33d329e,
-		   0xbfc58652aa180903, 0xbfc4f25100b03219, 0xbfc45d819a94b14b,
-		   0xbfc3c7e359c9266a, 0xbfc331751ec3a814, 0xbfc29a35c86a9b1a,
-		   0xbfc20224341286e4, 0xbfc1693f3d7be6da, 0xbfc0cf85bed0f8b7,
-		   0xbfc034f690a387de, 0xbfbf332113d56b1f, 0xbfbdfaa500017c2d,
-		   0xbfbcc0768d4175a6, 0xbfbb84935fc8c257, 0xbfba46f918837cb7,
-		   0xbfb907a55511e032, 0xbfb7c695afc3b424, 0xbfb683c7bf93b074,
-		   0xbfb53f391822dbc7, 0xbfb3f8e749b3e342, 0xbfb2b0cfe1266bd4,
-		   0xbfb166f067f25cfe, 0xbfb01b466423250a, 0xbfad9b9eb0a5ed76,
-		   0xbfaafd11874c009e, 0xbfa85ae0438b37cb, 0xbfa5b505d5b6f268,
-		   0xbfa30b7d271980f7, 0xbfa05e4119ea5d89, 0xbf9b5a991288ad16,
-		   0xbf95f134923757f3, 0xbf90804a4c683d8f, 0xbf860f9f985bc9f4,
-		   0xbf761eea3847077b }
+     The table holds values of 2^(i/128) - 1, computed in
+     arbitrary precision.
+     The 1st half contains values associated to i=0..43.
+     The 2nd half contains values associated to i=-44..-1.  */
+  .scalem1 = {
+    0x0000000000000000, 0x3f763da9fb33356e, 0x3f864d1f3bc03077,
+    0x3f90c57a1b9fe12f, 0x3f966c34c5615d0f, 0x3f9c1aca777db772,
+    0x3fa0e8a30eb37901, 0x3fa3c7d958de7069, 0x3fa6ab0d9f3121ec,
+    0x3fa992456e48fee8, 0x3fac7d865a7a3440, 0x3faf6cd5ffda635e,
+    0x3fb1301d0125b50a, 0x3fb2abdc06c31cc0, 0x3fb429aaea92ddfb,
+    0x3fb5a98c8a58e512, 0x3fb72b83c7d517ae, 0x3fb8af9388c8de9c,
+    0x3fba35beb6fcb754, 0x3fbbbe084045cd3a, 0x3fbd4873168b9aa8,
+    0x3fbed5022fcd91cc, 0x3fc031dc431466b2, 0x3fc0fa4c8beee4b1,
+    0x3fc1c3d373ab11c3, 0x3fc28e727d9531fa, 0x3fc35a2b2f13e6e9,
+    0x3fc426ff0fab1c05, 0x3fc4f4efa8fef709, 0x3fc5c3fe86d6cc80,
+    0x3fc6942d3720185a, 0x3fc7657d49f17ab1, 0x3fc837f0518db8a9,
+    0x3fc90b87e266c18a, 0x3fc9e0459320b7fa, 0x3fcab62afc94ff86,
+    0x3fcb8d39b9d54e55, 0x3fcc6573682ec32c, 0x3fcd3ed9a72cffb7,
+    0x3fce196e189d4724, 0x3fcef5326091a112, 0x3fcfd228256400dd,
+    0x3fd0582887dcb8a8, 0x3fd0c7d76542a25b, 0xbfcb23213cc8e86c,
+    0xbfca96ecd0deb7c4, 0xbfca09f58086c6c2, 0xbfc97c3a3cd7e119,
+    0xbfc8edb9f5703dc0, 0xbfc85e7398737374, 0xbfc7ce6612886a6d,
+    0xbfc73d904ed74b33, 0xbfc6abf137076a8e, 0xbfc61987b33d329e,
+    0xbfc58652aa180903, 0xbfc4f25100b03219, 0xbfc45d819a94b14b,
+    0xbfc3c7e359c9266a, 0xbfc331751ec3a814, 0xbfc29a35c86a9b1a,
+    0xbfc20224341286e4, 0xbfc1693f3d7be6da, 0xbfc0cf85bed0f8b7,
+    0xbfc034f690a387de, 0xbfbf332113d56b1f, 0xbfbdfaa500017c2d,
+    0xbfbcc0768d4175a6, 0xbfbb84935fc8c257, 0xbfba46f918837cb7,
+    0xbfb907a55511e032, 0xbfb7c695afc3b424, 0xbfb683c7bf93b074,
+    0xbfb53f391822dbc7, 0xbfb3f8e749b3e342, 0xbfb2b0cfe1266bd4,
+    0xbfb166f067f25cfe, 0xbfb01b466423250a, 0xbfad9b9eb0a5ed76,
+    0xbfaafd11874c009e, 0xbfa85ae0438b37cb, 0xbfa5b505d5b6f268,
+    0xbfa30b7d271980f7, 0xbfa05e4119ea5d89, 0xbf9b5a991288ad16,
+    0xbf95f134923757f3, 0xbf90804a4c683d8f, 0xbf860f9f985bc9f4,
+    0xbf761eea3847077b,
+  }
 };
 
 static inline uint64x2_t
@@ -90,7 +96,7 @@ lookup_sbits (uint64x2_t i)
 		       __v_exp_data[i[1] & IndexMask] };
 }
 
-static inline uint64x2_t
+static inline float64x2_t
 lookup_sm1bits (float64x2_t x, uint64x2_t u, const struct data *d)
 {
   /* Extract sign bit and use as offset into table.  */
@@ -101,7 +107,8 @@ lookup_sm1bits (float64x2_t x, uint64x2_t u, const struct data *d)
 
   /* Fall back to table lookup for 2^x - 1, when x is close to zero to
      avoid large errors.  */
-  return (uint64x2_t){ d->exp2m1_data[idx[0]], d->exp2m1_data[idx[1]] };
+  uint64x2_t sm1 = { d->scalem1[idx[0]], d->scalem1[idx[1]] };
+  return vreinterpretq_f64_u64 (sm1);
 }
 
 static inline VPCS_ATTR float64x2_t
@@ -126,7 +133,6 @@ special_case (float64x2_t poly, float64x2_t n, uint64x2_t e, float64x2_t scale,
 					want 0x1.7b1d06f0a7d33p-9.  */
 VPCS_ATTR float64x2_t V_NAME_D1 (exp2m1) (float64x2_t x)
 {
-  float64x2_t ret;
   const struct data *d = ptr_barrier (&data);
 
   /* exp2(x) = 2^n (1 + poly(r))
@@ -160,29 +166,27 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2m1) (float64x2_t x)
   poly = vfmaq_f64 (poly, p16, r2);
 
   float64x2_t scalem1 = vsubq_f64 (scale, v_f64 (1.0));
+
+  /* Use table to gather scalem1 for small values of x.  */
   uint64x2_t is_small = vcaltq_f64 (x, v_f64 (TableBound));
   if (v_any_u64 (is_small))
-    {
-      uint64x2_t lookup_sm1 = lookup_sm1bits (x, u, d);
-      scalem1
-	  = vbslq_f64 (is_small, vreinterpretq_f64_u64 (lookup_sm1), scalem1);
-    }
-  ret = vfmaq_f64 (scalem1, poly, scale);
+    scalem1 = vbslq_f64 (is_small, lookup_sm1bits (x, u, d), scalem1);
 
+  /* Construct exp2m1 = (scale - 1) + scale * poly.  */
+  float64x2_t y = vfmaq_f64 (scalem1, poly, scale);
+
+  /* Fallback to special case for lanes with overflow.  */
   if (unlikely (v_any_u64 (cmp)))
-    {
-      float64x2_t special = special_case (poly, n, e, scale, d);
-      ret = vbslq_f64 (cmp, special, ret);
-    }
-  return ret;
+    return vbslq_f64 (cmp, special_case (poly, n, e, scale, d), y);
+
+  return y;
 }
 
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (exp2m1), 2.55)
 TEST_DISABLE_FENV (V_NAME_D1 (exp2m1))
 TEST_INTERVAL (V_NAME_D1 (exp2m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0x1p-14, 0x1p-1, 50000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0x1p-1, 0x1p0, 5000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0x1p0, 0x1p1, 5000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0x1p1, 0x1p8, 5000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0, TableBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), TableBound, SpecialBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), SpecialBound, inf, 10000)
 #endif

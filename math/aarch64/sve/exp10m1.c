@@ -8,16 +8,22 @@
 #include "sv_math.h"
 #include "test_defs.h"
 
-#define FexpaBound 0x1.2a9f2b61a7e2p-4	  /* 31*(log10(2)/128).  */
+/* Value of |x| above which scale overflows without special treatment.  */
 #define SpecialBound 0x1.33f4bedd4fa70p+8 /* log10(2^(1023 + 1/128)).  */
+
+/* Value of n above which scale overflows even with special treatment.  */
+#define ScaleBound 1280.0
+
+/* Value of |x| below which scale - 1 contributes produces large error.  */
+#define FexpaBound 0x1.2a9f2b61a7e2p-4 /* 31*(log10(2)/128).  */
 
 static const struct data
 {
   double log2_10_hi, log2_10_lo;
   double c3, c5;
   double c0, c1, c2, c4;
-  double shift, log10_2, scale_thres, special_bound;
-  uint64_t expm1_data[32];
+  double shift, log10_2, special_bound;
+  uint64_t scalem1[32];
 } data = {
   /* Coefficients generated using Remez algorithm.  */
   .c0 = 0x1.26bb1bbb55516p1,
@@ -32,15 +38,13 @@ static const struct data
   .log10_2 = 0x1.a934f0979a371p1,     /* 1/log2(10).  */
   .log2_10_hi = 0x1.34413509f79ffp-2, /* log2(10).  */
   .log2_10_lo = -0x1.9dc1da994fd21p-59,
-  .scale_thres = 1280.0,
   .special_bound = SpecialBound,
 
   /* Table emulating FEXPA - 1, for values of FEXPA close to 1.
      The table holds values of 2^(i/64) - 1, computed in arbitrary precision.
-     The first half of the table stores values associated to i from 0 to 15.
-     The second half of the table stores values associated to i from 0 to -15.
-   */
-  .expm1_data = { 
+     The 1st half contains values associated to i=0..+15.
+     The 2nd half contains values associated to i=0..-15.  */
+  .scalem1 = {
     0x0000000000000000, 0x3f864d1f3bc03077, 0x3f966c34c5615d0f,
     0x3fa0e8a30eb37901, 0x3fa6ab0d9f3121ec, 0x3fac7d865a7a3440,
     0x3fb1301d0125b50a, 0x3fb429aaea92ddfb, 0x3fb72b83c7d517ae,
@@ -82,7 +86,7 @@ special_case (svbool_t pg, svfloat64_t y, svfloat64_t s, svfloat64_t p,
       svadd_x (pg, svsub_x (pg, svreinterpret_u64 (s), SpecialBias2), b));
 
   /* |n| > 1280 => 2^(n) overflows.  */
-  svbool_t p_cmp = svacgt (pg, n, 1280.0);
+  svbool_t p_cmp = svacgt (pg, n, ScaleBound);
 
   svfloat64_t r1 = svmul_x (svptrue_b64 (), s1, s1);
   svfloat64_t r2 = svmla_x (pg, s2, s2, p);
@@ -128,10 +132,10 @@ svfloat64_t SV_NAME_D1 (exp10m1) (svfloat64_t x, svbool_t pg)
 
   svfloat64_t p = svmul_x (pg, p05, r);
 
-  svbool_t is_small = svaclt (pg, x, FexpaBound);
   svfloat64_t scalem1 = svsub_x (pg, scale, 1.0);
 
   /* For small values, use a lookup table for a more accurate scalem1.  */
+  svbool_t is_small = svaclt (pg, x, FexpaBound);
   if (svptest_any (pg, is_small))
     {
       /* Use the low 4 bits of the input of FEXPA as index.  */
@@ -144,8 +148,8 @@ svfloat64_t SV_NAME_D1 (exp10m1) (svfloat64_t x, svbool_t pg)
       svuint64_t idx = svorr_x (pg, base_idx, signBit);
 
       /* Lookup values for scale - 1 for small x.  */
-      svfloat64_t lookup = svreinterpret_f64 (
-	  svld1_gather_index (is_small, d->expm1_data, idx));
+      svfloat64_t lookup
+	  = svreinterpret_f64 (svld1_gather_index (is_small, d->scalem1, idx));
 
       /* Select the appropriate scale - 1 value based on x.  */
       scalem1 = svsel (is_small, lookup, scalem1);
@@ -172,9 +176,8 @@ svfloat64_t SV_NAME_D1 (exp10m1) (svfloat64_t x, svbool_t pg)
 TEST_ULP (SV_NAME_D1 (exp10m1), 2.87)
 TEST_DISABLE_FENV (SV_NAME_D1 (exp10m1))
 TEST_INTERVAL (SV_NAME_D1 (exp10m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), 0x1p-14, 0x1p-1, 50000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), 0x1p-1, 0x1p0, 5000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), 0x1p0, 0x1p1, 5000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), 0x1p1, 0x1p8, 5000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), 0, FexpaBound, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), FexpaBound, SpecialBound, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp10m1), SpecialBound, inf, 10000)
 #endif
 CLOSE_SVE_ATTR

@@ -24,21 +24,6 @@ static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,
 static int modf_mpfr_frac(mpfr_t f, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(i, 80); return mpfr_modf(i,f,x,r); }
 static int modf_mpfr_int(mpfr_t i, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(f, 80); return mpfr_modf(i,f,x,r); }
 # if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
-static int mpfr_exp2m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
-  MPFR_DECL_INIT (frd, 1080);
-  MPFR_DECL_INIT (one, 1080);
-  mpfr_set_d(one, 1.0, GMP_RNDN);
-  mpfr_exp2 (frd, arg, GMP_RNDN);
-  return mpfr_sub (ret, frd, one, GMP_RNDN);
-}
-
-static int mpfr_exp10m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
-  MPFR_DECL_INIT (frd, 1080);
-  MPFR_DECL_INIT (one, 1080);
-  mpfr_set_d (one, 1.0, GMP_RNDN);
-  mpfr_exp10 (frd, arg, GMP_RNDN);
-  return mpfr_sub (ret, frd, one, GMP_RNDN);
-}
 static int mpfr_acospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
@@ -83,6 +68,14 @@ static int mpfr_exp10m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (one, 1080);
   mpfr_set_d(one, 1.0, GMP_RNDN);
   mpfr_exp10 (frd, arg, GMP_RNDN);
+  return mpfr_sub (ret, frd, one, GMP_RNDN);
+}
+
+static int mpfr_exp2m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (frd, 1080);
+  MPFR_DECL_INIT (one, 1080);
+  mpfr_set_d(one, 1.0, GMP_RNDN);
+  mpfr_exp2 (frd, arg, GMP_RNDN);
   return mpfr_sub (ret, frd, one, GMP_RNDN);
 }
 

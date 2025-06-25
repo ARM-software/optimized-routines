@@ -8,21 +8,33 @@
 #include "test_defs.h"
 #include "v_math.h"
 
+/* Value of |x| above which scale overflows without special treatment.  */
+#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
+
+/* Value of n above which scale overflows even with special treatment.  */
+#define ScaleBound 192.0f
+
 static const struct data
 {
   uint32x4_t exponent_bias, special_offset, special_bias;
   float32x4_t scale_thresh, special_bound;
-  float log2_lo, c2, c4, c6;
   float32x4_t log2_hi, c1, c3, c5;
+  float log2_lo, c2, c4, c6;
 } data = {
   /* Coefficients generated using remez's algorithm for exp2m1f(x).  */
-  .log2_hi = V4 (0x1.62e43p-1),	    .log2_lo = -0x1.05c610p-29,
-  .c1 = V4 (0x1.ebfbep-3),	    .c2 = 0x1.c6b06ep-5,
-  .c3 = V4 (0x1.3b2a5cp-7),	    .c4 = 0x1.5da59ep-10,
-  .c5 = V4 (0x1.440dccp-13),	    .c6 = 0x1.e081d6p-17,
-  .exponent_bias = V4 (0x3f800000), .special_offset = V4 (0x82000000),
-  .special_bias = V4 (0x7f000000),  .special_bound = V4 (126.0f),
-  .scale_thresh = V4 (192.0f),
+  .log2_hi = V4 (0x1.62e43p-1),
+  .log2_lo = -0x1.05c610p-29,
+  .c1 = V4 (0x1.ebfbep-3),
+  .c2 = 0x1.c6b06ep-5,
+  .c3 = V4 (0x1.3b2a5cp-7),
+  .c4 = 0x1.5da59ep-10,
+  .c5 = V4 (0x1.440dccp-13),
+  .c6 = 0x1.e081d6p-17,
+  .exponent_bias = V4 (0x3f800000),
+  .special_offset = V4 (0x82000000),
+  .special_bias = V4 (0x7f000000),
+  .scale_thresh = V4 (ScaleBound),
+  .special_bound = V4 (SpecialBound),
 };
 
 static float32x4_t VPCS_ATTR
@@ -72,11 +84,12 @@ float32x4_t VPCS_ATTR V_NAME_F1 (exp2m1) (float32x4_t x)
       = vfmaq_laneq_f32 (vmulq_f32 (d->log2_hi, r), r, log2lo_c246, 0);
   poly = vfmaq_f32 (poly, p16, r2);
 
-  float32x4_t ret = vfmaq_f32 (vsubq_f32 (scale, v_f32 (1.0f)), poly, scale);
-  if (unlikely (v_any_u32 (cmp)))
-    return vbslq_f32 (cmp, special_case (poly, n, e, cmp, scale, d), ret);
+  float32x4_t y = vfmaq_f32 (vsubq_f32 (scale, v_f32 (1.0f)), poly, scale);
 
-  return ret;
+  if (unlikely (v_any_u32 (cmp)))
+    return vbslq_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
+
+  return y;
 }
 
 HALF_WIDTH_ALIAS_F1 (exp2m1)
@@ -85,8 +98,6 @@ HALF_WIDTH_ALIAS_F1 (exp2m1)
 TEST_ULP (V_NAME_F1 (exp2m1), 1.76)
 TEST_DISABLE_FENV (V_NAME_F1 (exp2m1))
 TEST_INTERVAL (V_NAME_F1 (exp2m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp2m1), 0x1p-14, 0x1p-1, 50000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp2m1), 0x1p-1, 0x1p0, 5000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp2m1), 0x1p0, 0x1p1, 5000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp2m1), 0x1p1, 0x1p8, 5000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp2m1), 0, SpecialBound, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp2m1), SpecialBound, inf, 50000)
 #endif
