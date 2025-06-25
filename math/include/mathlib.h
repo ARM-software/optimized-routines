@@ -259,6 +259,7 @@ svfloat64_t _ZGVsMxv_erfc (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_exp (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_exp10 (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_exp2 (svfloat64_t, svbool_t);
+svfloat64_t _ZGVsMxv_exp2m1 (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_expm1 (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_log (svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxv_log10 (svfloat64_t, svbool_t);
