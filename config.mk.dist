@@ -103,25 +103,20 @@ ifeq ($(ARCH),aarch64)
 endif
 endif
 
-# Use if mpfr is available on the target for ulp error checking. If
-# enabling this, it is advised to disable fenv checks by uncommenting
-# the two lines at the bottom of this block.
+# Use if mpfr is available on the target for ulp error checking.
 USE_MPFR?=0
 math-cflags += -DUSE_MPFR=$(USE_MPFR)
 ifeq ($(USE_MPFR), 1)
   math-ldlibs += $(mpfr-libs) $(gmp-libs)
-  math-ulpflags += -m
+  math-ulpflags += -m -q
+  # Disable fenv checks is recommended when using MPFR.
+  math-ulpflags += -f
+  math-testflags += -nostatus
 endif
-# Disable fenv checks
-#math-ulpflags = -q -f
-#math-testflags = -nostatus
 
-# Use with gcc.
+# Use with gcc or llvm.
 math-cflags += -frounding-math -fexcess-precision=standard -fno-stack-protector
 math-cflags += -ffp-contract=fast -fno-math-errno
-
-# Use with clang.
-#math-cflags += -ffp-contract=fast
 
 # If defined to 1, set errno in math functions according to ISO C.  Many math
 # libraries do not set errno, so this is 0 by default.  It may need to be
