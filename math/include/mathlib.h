@@ -138,6 +138,7 @@ __vpcs float32x4_t _ZGVnN4v_expm1f (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_log10f (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_log1pf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_log2f (float32x4_t);
+__vpcs float32x4_t _ZGVnN4v_log2p1f (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_logf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_sinf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_sinhf (float32x4_t);

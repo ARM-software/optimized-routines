@@ -77,6 +77,13 @@ static int mpfr_exp2m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   mpfr_set_d(one, 1.0, GMP_RNDN);
   mpfr_exp2 (frd, arg, GMP_RNDN);
   return mpfr_sub (ret, frd, one, GMP_RNDN);
+
+static int mpfr_log2p1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (m, 1080);
+  MPFR_DECL_INIT (one, 1080);
+  mpfr_set_d(one, 1.0, GMP_RNDN);
+  mpfr_add(m, arg, one, rnd);
+  return mpfr_log2 (ret, m, GMP_RNDN);
 }
 
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
@@ -192,10 +199,11 @@ ZVNF2_WRAP (atan2pi)
 ZVND2_WRAP (atan2pi)
 ZVNF1_WRAP (cospi)
 ZVND1_WRAP (cospi)
-ZVND1_WRAP (exp10m1)
 ZVNF1_WRAP (exp10m1)
+ZVND1_WRAP (exp10m1)
 ZVNF1_WRAP (exp2m1)
 ZVND1_WRAP (exp2m1)
+ZVNF1_WRAP (log2p1)
 ZVNF1_WRAP (sinpi)
 ZVND1_WRAP (sinpi)
 ZVNF1_WRAP (tanpi)
