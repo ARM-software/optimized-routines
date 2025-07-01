@@ -1157,7 +1157,7 @@ int runtest(testdetail t) {
     /* Check the result */
     {
         unsigned resultr[2], resulti[2];
-        unsigned tresultr[3], tresulti[3], wres;
+        unsigned tresultr[3], tresulti[3] = {0}, wres;
 
         switch(t.func->rettype) {
         case rt_d:

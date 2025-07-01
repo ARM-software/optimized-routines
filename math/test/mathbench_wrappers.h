@@ -43,6 +43,7 @@ powi_wrap (double x)
 
 #if __aarch64__ && __linux__
 
+#if WANT_C23_TESTS
 __vpcs static float32x4_t
 _Z_sincospif_wrap (float32x4_t x)
 {
@@ -58,6 +59,7 @@ _Z_sincospi_wrap (float64x2_t x)
   _ZGVnN2vl8l8_sincospi (x, s, c);
   return vld1q_f64 (s) + vld1q_f64 (c);
 }
+#endif
 
 __vpcs static float64x2_t
 _Z_atan2_wrap (float64x2_t x)
@@ -275,6 +277,7 @@ y_Z_sv_pow (svfloat64_t x, svbool_t pg)
   return _ZGVsMxvv_pow (svdup_f64 (2.34), x, pg);
 }
 
+#if WANT_C23_TESTS
 static svfloat32_t
 _Z_sv_sincospif_wrap (svfloat32_t x, svbool_t pg)
 {
@@ -290,6 +293,7 @@ _Z_sv_sincospi_wrap (svfloat64_t x, svbool_t pg)
   _ZGVsMxvl8l8_sincospi (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
 }
+#endif
 
 static svfloat32_t
 _Z_sv_modff_wrap (svfloat32_t x, svbool_t pg)
@@ -373,7 +377,7 @@ _Z_sv_powk_wrap (svfloat64_t x, svbool_t pg)
 
 #endif
 
-#if __aarch64__
+#if __aarch64__ && WANT_C23_TESTS
 static float
 sincospif_wrap (float x)
 {
