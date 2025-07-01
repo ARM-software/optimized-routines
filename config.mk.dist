@@ -15,7 +15,7 @@ ARCH = aarch64
 # Compiler for the target
 CC ?= $(CROSS_COMPILE)gcc
 CFLAGS = -std=c99 -pipe -O3
-CFLAGS += -Wall -Wno-missing-braces -Werror -Wno-error=cpp
+CFLAGS += -Wall -Wno-missing-braces -Werror -Wno-error=cpp -Wno-error=unused-function
 
 # Used for test case generator that is executed on the host
 HOST_CC ?= gcc
