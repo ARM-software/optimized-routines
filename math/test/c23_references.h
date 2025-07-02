@@ -10,7 +10,15 @@
 #ifndef M_PIl
 #  define M_PIl 3.141592653589793238462643383279502884l
 #endif
-#define M_INV_LOG2l 0x1.71547652b82fep+0
+#ifndef M_INV_LOG2l
+#  define M_INV_LOG2l 0x1.71547652b82fep+0
+#endif
+#ifndef M_LOG2
+#  define M_LOG2 0x1.62e42fefa39efp-1
+#endif
+#ifndef M_LOG2l
+#  define M_LOG2l 0x1.62e42fefa39ef35793c7673007e6p-1l
+#endif
 
 long double
 arm_math_sinpil (long double x)
@@ -173,17 +181,13 @@ arm_math_exp10m1l (long double x)
 double
 arm_math_exp2m1 (double x)
 {
-  return (fabs (x) < 0x1p-52)
-	     ? (long double) x * 0x1.62e42fefa39ef35793c7673007e6p-1l
-	     : exp2l ((long double) x) - 1.0l;
+  return (fabs (x) < 0x1p-23) ? x * M_LOG2 : exp2 (x) - 1.0;
 }
 
 long double
 arm_math_exp2m1l (long double x)
 {
-  return (fabsl (x) < 0x1p-52)
-	     ? (long double) x * 0x1.62e42fefa39ef35793c7673007e6p-1l
-	     : exp2l ((long double) x) - 1.0l;
+  return (fabsl (x) < 0x1p-52l) ? x * M_LOG2l : exp2l (x) - 1.0l;
 }
 
 double

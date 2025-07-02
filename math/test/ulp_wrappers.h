@@ -27,33 +27,33 @@ static int modf_mpfr_int(mpfr_t i, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INI
 static int mpfr_acospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
-  mpfr_const_pi (pi, GMP_RNDN);
-  mpfr_acos (frd, arg, GMP_RNDN);
-  return mpfr_div (ret, frd, pi, GMP_RNDN);
+  mpfr_const_pi (pi, rnd);
+  mpfr_acos (frd, arg, rnd);
+  return mpfr_div (ret, frd, pi, rnd);
 }
 
 static int mpfr_asinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
-  mpfr_const_pi (pi, GMP_RNDN);
-  mpfr_asin (frd, arg, GMP_RNDN);
-  return mpfr_div (ret, frd, pi, GMP_RNDN);
+  mpfr_const_pi (pi, rnd);
+  mpfr_asin (frd, arg, rnd);
+  return mpfr_div (ret, frd, pi, rnd);
 }
 
 static int mpfr_atanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
-  mpfr_const_pi (pi, GMP_RNDN);
-  mpfr_atan (frd, arg, GMP_RNDN);
-  return mpfr_div (ret, frd, pi, GMP_RNDN);
+  mpfr_const_pi (pi, rnd);
+  mpfr_atan (frd, arg, rnd);
+  return mpfr_div (ret, frd, pi, rnd);
 }
 
 static int mpfr_atan2pi (mpfr_t ret, const mpfr_t argx, const mpfr_t argy, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (pi, 1080);
-  mpfr_const_pi (pi, GMP_RNDN);
-  mpfr_atan2 (frd, argx, argy, GMP_RNDN);
-  return mpfr_div (ret, frd, pi, GMP_RNDN);
+  mpfr_const_pi (pi, rnd);
+  mpfr_atan2 (frd, argx, argy, rnd);
+  return mpfr_div (ret, frd, pi, rnd);
 }
 
 static inline int mpfr_is_even (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
@@ -88,24 +88,25 @@ static int mpfr_cospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
 static int mpfr_exp10m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (one, 1080);
-  mpfr_set_d(one, 1.0, GMP_RNDN);
-  mpfr_exp10 (frd, arg, GMP_RNDN);
-  return mpfr_sub (ret, frd, one, GMP_RNDN);
+  mpfr_set_d(one, 1.0, rnd);
+  mpfr_exp10 (frd, arg, rnd);
+  return mpfr_sub (ret, frd, one, rnd);
 }
 
 static int mpfr_exp2m1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
   MPFR_DECL_INIT (one, 1080);
-  mpfr_set_d(one, 1.0, GMP_RNDN);
-  mpfr_exp2 (frd, arg, GMP_RNDN);
-  return mpfr_sub (ret, frd, one, GMP_RNDN);
+  mpfr_set_d(one, 1.0, rnd);
+  mpfr_exp2 (frd, arg, rnd);
+  return mpfr_sub (ret, frd, one, rnd);
+}
 
 static int mpfr_log2p1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (m, 1080);
   MPFR_DECL_INIT (one, 1080);
-  mpfr_set_d(one, 1.0, GMP_RNDN);
+  mpfr_set_d(one, 1.0, rnd);
   mpfr_add(m, arg, one, rnd);
-  return mpfr_log2 (ret, m, GMP_RNDN);
+  return mpfr_log2 (ret, m, rnd);
 }
 
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
