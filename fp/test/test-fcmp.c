@@ -366,16 +366,18 @@ make_float (uint32_t x)
   return r;
 }
 
-/* Three-way return value in the flags */
+/* Three-way return value in the flags (plus a fourth state that
+ * should never happen) */
 
 enum Flag3 {
   FLAG3_LO = 0,
   FLAG3_EQ = 1,
   FLAG3_HI = 2,
+  FLAG3_CONFUSED = 3,
 };
 
 static const char *const flag3_strings[] = {
-  "LO", "EQ", "HI",
+  "LO", "EQ", "HI", "confused (C=0 but Z=1)",
 };
 
 #define CALL_FLAG3_RETURNING_FUNCTION(outvar, in0, in1, fn) do { \
@@ -384,17 +386,20 @@ static const char *const flag3_strings[] = {
     r0 = in0;                                                   \
     r1 = in1;                                                   \
     __asm__("bl " fn "\n\t"                                     \
-            "beq 1f \n\t"                                       \
-            "bhi 2f \n\t"                                       \
-            "movs %0, #0 \n\t"                                  \
-            "b 3f \n\t"                                         \
-            "1: movs %0, #1 \n\t"                               \
-            "b 3f \n\t"                                         \
-            "2: movs %0, #2 \n\t"                               \
-            "3:"                                                \
+            "bhi 1f \n\t"                                       \
+            "bcs 2f \n\t"                                       \
+            "bne 3f \n\t"                                       \
+            "movs %0, #3 \n\t"                                  \
+            "b 4f \n\t"                                         \
+            "1: movs %0, #2 \n\t"                               \
+            "b 4f \n\t"                                         \
+            "2: movs %0, #1 \n\t"                               \
+            "b 4f \n\t"                                         \
+            "3: movs %0, #0 \n\t"                               \
+            "4:"                                                \
             : "=r" (outvar)                                     \
             : "r" (r0), "r" (r1)                                \
-            : "r2", "r3", "r12", "r14");                        \
+            : "r2", "r3", "r12", "r14", "cc");                  \
       } while (0)
 
 /* Two-way return value in the flags */
@@ -421,7 +426,7 @@ static const char *const flag2_strings[] = {
             "2:"                                                \
             : "=r" (outvar)                                     \
             : "r" (r0), "r" (r1)                                \
-            : "r2", "r3", "r12", "r14");                        \
+            : "r2", "r3", "r12", "r14", "cc");                  \
       } while (0)
 
 int
