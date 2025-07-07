@@ -20,7 +20,8 @@ fp-lib-objs := $(patsubst $(fp-src-dir)/%,$(fp-build-dir)/%.o,$(basename $(fp-li
 # The full list of FP test programs
 all-fp-testnames := test-fmul test-faddsub test-fdiv test-fcmp \
 	test-f2uiz test-f2iz test-f2ulz test-f2lz \
-	test-i2f test-ui2f test-l2f test-ul2f
+	test-i2f test-ui2f test-l2f test-ul2f \
+	test-dmul
 
 # Filter the list down to only the tests of functions present in this FP_SUBDIR
 fp-tests-available := $(foreach obj,$(fp-lib-objs),$(patsubst %.o,test-%,$(notdir $(obj))))
