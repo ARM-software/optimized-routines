@@ -76,9 +76,9 @@ f2lz_negative:
 #if !__thumb__
   RSC     ah, ah, #0           // negate top word
 #else
-  // Thumb has no RSC, so simulate it by handling the carry flag afterwards
-  RSB     ah, ah, #0
-  SUBCC   ah, ah, #1
+  // Thumb has no RSC, so simulate it by bitwise inversion and then ADC
+  MVN     ah, ah
+  ADC     ah, ah, #0
 #endif
 
   BX      lr
