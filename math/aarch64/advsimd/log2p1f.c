@@ -13,7 +13,8 @@ static const struct data
   uint32x4_t four;
   int32x4_t three_quarters;
   float32x4_t c2, c4, c6, c8, c10, c12;
-  float c1, c3, c5, c7, c9, c11;
+  float c1, c3, c5, c7, c9, c11, one_quarter, small;
+  float32x4_t pinf, minf, nan;
 } data = {
   /* Polynomial generated using FPMinimax in [-0.25, 0.5].  */
   .c1 = 0x1.715476p0,	   .c2 = V4 (-0x1.71548p-1),
@@ -22,17 +23,21 @@ static const struct data
   .c7 = 0x1.ace5b4p-3,	   .c8 = V4 (-0x1.7800fcp-3),
   .c9 = 0x1.226c92p-3,	   .c10 = V4 (-0x1.92cbb2p-4),
   .c11 = 0x1.624cb2p-4,	   .c12 = V4 (-0x1.bb0f1p-5),
-  .four = V4 (0x40800000), .three_quarters = V4 (0x3f400000)
+  .four = V4 (0x40800000), .three_quarters = V4 (0x3f400000),
+  .one_quarter = 0.25f,	   .small = 0x1p-23f,
+  .pinf = V4 (INFINITY),   .minf = V4 (-INFINITY),
+  .nan = V4 (NAN)
 };
 
-static float32x4_t VPCS_ATTR
-special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp)
+static inline float32x4_t VPCS_ATTR
+special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp,
+	      const struct data *d)
 {
-  y = vbslq_f32 (cmp, v_f32 (NAN), y);
-  uint32x4_t ret_pinf = vceqq_f32 (x, v_f32 (INFINITY));
+  y = vbslq_f32 (cmp, d->nan, y);
+  uint32x4_t ret_pinf = vceqq_f32 (x, d->pinf);
   uint32x4_t ret_minf = vceqq_f32 (x, v_f32 (-1.0));
-  y = vbslq_f32 (ret_pinf, v_f32 (INFINITY), y);
-  return vbslq_f32 (ret_minf, v_f32 (-INFINITY), y);
+  y = vbslq_f32 (ret_pinf, d->pinf, y);
+  return vbslq_f32 (ret_minf, d->minf, y);
 }
 
 /* Vector log2p1f approximation using polynomial on reduced interval.
@@ -57,7 +62,7 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log2p1) (float32x4_t x)
 
   int32x4_t k
       = vandq_s32 (vsubq_s32 (vreinterpretq_s32_f32 (m), d->three_quarters),
-		   v_s32 (0xff800000));
+		   vreinterpretq_s32_f32 (d->minf));
   uint32x4_t ku = vreinterpretq_u32_s32 (k);
 
   /* Scale up to ensure that the scale factor is representable as normalised
@@ -67,19 +72,19 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log2p1) (float32x4_t x)
   /* Scale x by exponent manipulation.  */
   float32x4_t m_scale
       = vreinterpretq_f32_u32 (vsubq_u32 (vreinterpretq_u32_f32 (x), ku));
-  m_scale = vaddq_f32 (m_scale, vfmaq_f32 (v_f32 (-1.0f), v_f32 (0.25f), s));
+  float32x4_t consts = vld1q_f32 (&d->c9);
+  m_scale = vaddq_f32 (m_scale, vfmaq_laneq_f32 (v_f32 (-1.0f), s, consts, 2));
 
-  float32x4_t scale_back = vmulq_f32 (vcvtq_f32_s32 (k), v_f32 (0x1.0p-23f));
+  float32x4_t scale_back = vmulq_laneq_f32 (vcvtq_f32_s32 (k), consts, 3);
   float32x4_t m2 = vmulq_f32 (m_scale, m_scale);
 
   /* Order-12 pairwise Horner.  */
   float32x4_t c1357 = vld1q_f32 (&d->c1);
-  float32x4_t c911 = vld1q_f32 (&d->c9);
   float32x4_t p23 = vfmaq_laneq_f32 (d->c2, m_scale, c1357, 1);
   float32x4_t p45 = vfmaq_laneq_f32 (d->c4, m_scale, c1357, 2);
   float32x4_t p67 = vfmaq_laneq_f32 (d->c6, m_scale, c1357, 3);
-  float32x4_t p89 = vfmaq_laneq_f32 (d->c8, m_scale, c911, 0);
-  float32x4_t p1011 = vfmaq_laneq_f32 (d->c10, m_scale, c911, 1);
+  float32x4_t p89 = vfmaq_laneq_f32 (d->c8, m_scale, consts, 0);
+  float32x4_t p1011 = vfmaq_laneq_f32 (d->c10, m_scale, consts, 1);
 
   float32x4_t p = vfmaq_f32 (p1011, m2, d->c12);
   p = vfmaq_f32 (p89, m2, p);
@@ -87,11 +92,10 @@ float32x4_t VPCS_ATTR V_NAME_F1 (log2p1) (float32x4_t x)
   p = vfmaq_f32 (p45, m2, p);
   p = vfmaq_f32 (p23, m2, p);
   float32x4_t scaled_c1 = vfmaq_laneq_f32 (scale_back, m_scale, c1357, 0);
-  uint32x4_t special_cases
-      = vorrq_u32 (vmvnq_u32 (vcaltq_f32 (x, v_f32 (INFINITY))),
-		   vcleq_f32 (x, v_f32 (-1.0)));
+  uint32x4_t special_cases = vorrq_u32 (vmvnq_u32 (vcaltq_f32 (x, d->pinf)),
+					vcleq_f32 (x, v_f32 (-1.0)));
   if (unlikely (v_any_u32 (special_cases)))
-    return special_case (x, vfmaq_f32 (scaled_c1, m2, p), special_cases);
+    return special_case (x, vfmaq_f32 (scaled_c1, m2, p), special_cases, d);
 
   return vfmaq_f32 (scaled_c1, m2, p);
 }
