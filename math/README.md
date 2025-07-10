@@ -4,10 +4,10 @@ The math sub-project contains elementary, transcendental and special math
 routines optimized specifically for Arm architecture.  These routines can be
 used as replacement to math.h routines in the standard C library.
 
-Math provides scalar libm routines as well as vector variants (libmvec) acting
-on input vector registers.  While scalar math tends to be cross-platform,
-vector code is optimised specifically for AdvSIMD or SVE enabled
-micro-architectures.
+Math provides scalar routines (`libm`) as well as vector variants (`libmvec`)
+acting on input vector registers.  While scalar math tends to be
+cross-platform, vector code is optimised specifically for AdvSIMD or SVE
+enabled micro-architectures.
 
 This document provides a user guide, as well as style requirements and
 contribution guidelines for math routines.
@@ -161,7 +161,7 @@ sudo apt install libsollya-dev
 ```
 
 or directly from sources, then run some of the pre-defined `*.sollya` scripts
-in [math/tools/](math/tools/)
+in [math/tools/](tools/)
 
 ```bash
 sollya math/tools/exp.sollya
@@ -236,7 +236,7 @@ requirements.
 - Document relative performance improvement. Use the `mathbench` tool and
   update it with new functions.
 
-- Attention should be paid to the compilation flags: for aarch64 fma
+- Attention should be paid to the compilation flags: for AArch64 fma
   contraction should be on and math errno turned off so some builtins can be
   inlined.
 
