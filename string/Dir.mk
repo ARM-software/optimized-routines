@@ -1,6 +1,6 @@
 # Makefile fragment - requires GNU make
 #
-# Copyright (c) 2019-2021, Arm Limited.
+# Copyright (c) 2019-2025, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 S := $(srcdir)/string
@@ -108,8 +108,8 @@ bench-string: $(string-benches)
 	$(EMULATOR) build/bin/bench/memset
 
 install-string: \
- $(string-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
- $(string-includes:build/include/%=$(DESTDIR)$(includedir)/%)
+ $(string-libs:build/lib/%=$(libdir)/%) \
+ $(string-includes:build/include/%=$(includedir)/%)
 
 clean-string:
 	rm -f $(string-files)

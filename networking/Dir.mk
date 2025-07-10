@@ -66,8 +66,8 @@ check-networking: $(networking-tools)
 	$(EMULATOR) build/bin/test/chksum -i simd || true # simd is not always available
 
 install-networking: \
- $(networking-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
- $(networking-includes:build/include/%=$(DESTDIR)$(includedir)/%)
+ $(networking-libs:build/lib/%=$(libdir)/%) \
+ $(networking-includes:build/include/%=$(includedir)/%)
 
 clean-networking:
 	rm -f $(networking-files)

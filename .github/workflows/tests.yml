@@ -28,6 +28,8 @@ jobs:
       run: CC="${{ matrix.compiler }}" make -j
     - name: make check
       run: CC="${{ matrix.compiler }}" V=1 VERBOSE=1 make check -j
+    - name: make install
+      run: CC="${{ matrix.compiler }}" make prefix=$(pwd)/install install
 
   linux-x86-64-cross:
     runs-on: ubuntu-24.04
@@ -47,6 +49,9 @@ jobs:
       run: CC="${{ matrix.compiler }}" make -j
     - name: make check
       run: CC="${{ matrix.compiler }}" EMULATOR="qemu-aarch64-static" make check -j
+    - name: make install
+      run: CC="${{ matrix.compiler }}" make prefix=$(pwd)/install install
+
   darwin-aarch64-native:
     runs-on: macos-15
     strategy:
@@ -63,6 +68,8 @@ jobs:
       run: CC="${{ matrix.compiler }}" make all -j$(sysctl -n hw.logicalcpu)
     - name: make check
       run: CC="${{ matrix.compiler }}" make check -j$(sysctl -n hw.logicalcpu)
+    - name: make install
+      run: CC="${{ matrix.compiler }}" make prefix=$(pwd)/install install
 
 #  windows-x86-64-cross:
 #    runs-on: windows-latest

@@ -86,17 +86,22 @@ clean: $(SUBS:%=clean-%)
 distclean: clean
 	rm -f config.mk
 
-$(DESTDIR)$(bindir)/%: build/bin/%
-	$(INSTALL) -D $< $@
+INSTALL_DIRS = $(bindir) $(libdir) $(includedir)
 
-$(DESTDIR)$(libdir)/%.so: build/lib/%.so
-	$(INSTALL) -D $< $@
+$(INSTALL_DIRS):
+	mkdir -p $@
 
-$(DESTDIR)$(libdir)/%: build/lib/%
-	$(INSTALL) -m 644 -D $< $@
+$(bindir)/%: build/bin/% | $$(@D)
+	$(INSTALL) $< $@
 
-$(DESTDIR)$(includedir)/%: build/include/%
-	$(INSTALL) -m 644 -D $< $@
+$(libdir)/%.so: build/lib/%.so | $$(@D)
+	$(INSTALL) $< $@
+
+$(libdir)/%: build/lib/% | $$(@D)
+	$(INSTALL) -m 644 $< $@
+
+$(includedir)/%: build/include/% | $$(@D)
+	$(INSTALL) -m 644 $< $@
 
 install: $(SUBS:%=install-%)
 

@@ -281,8 +281,8 @@ check-math-ulp: $(math-tools)
 check-math: check-math-test check-math-rtest check-math-ulp
 
 install-math: \
- $(math-libs:build/lib/%=$(DESTDIR)$(libdir)/%) \
- $(math-includes:build/include/%=$(DESTDIR)$(includedir)/%)
+ $(math-libs:build/lib/%=$(libdir)/%) \
+ $(math-includes:build/include/%=$(includedir)/%)
 
 clean-math:
 	rm -f $(math-files)

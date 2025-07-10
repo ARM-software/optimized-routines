@@ -52,14 +52,21 @@ To build and test the routines in all sub-projects:
    make check
    ```
 
+4. **Install**: By default install headers and library at `prefix=/usr/`
+
+   ```bash
+   make prefix=/path/to/install install
+   ```
+
 **Building and Testing a single subproject**:
 
 In order to build a single subproject `<sub>` use the following commands
 
-```bash
-make all-<sub>
-make check-<sub>
-```
+   ```bash
+   make all-<sub>
+   make check-<sub>
+   make prefix=/path/to/install install-<sub>
+   ```
 
 Alternatively, the `config.mk` file can be updated to specify a list of
 sub-projects.
