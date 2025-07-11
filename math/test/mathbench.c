@@ -1,7 +1,7 @@
 /*
  * Microbenchmark for math functions.
  *
- * Copyright (c) 2018-2024, Arm Limited.
+ * Copyright (c) 2018-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -65,7 +65,6 @@ __vn_dummyf (float32x4_t x)
 {
   return x;
 }
-#endif
 #if WANT_SVE_TESTS
 static svfloat64_t
 __sv_dummy (svfloat64_t x, svbool_t pg)
@@ -78,7 +77,7 @@ __sv_dummyf (svfloat32_t x, svbool_t pg)
 {
   return x;
 }
-
+#endif
 #endif
 
 #include "test/mathbench_wrappers.h"
