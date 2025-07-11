@@ -2,9 +2,9 @@ name: build and run
 
 on:
   push:
-    branches: [ "master", "add-ci-aor" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "master", "add-ci-aor" ]
+    branches: [ "*" ]
   workflow_dispatch:
 
 jobs:
