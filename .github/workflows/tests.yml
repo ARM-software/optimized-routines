@@ -91,6 +91,7 @@ jobs:
 #          make
 #          mingw-w64-${{matrix.env}}-${{matrix.compiler}}
 #          mingw-w64-${{matrix.env}}-binutils
+#          mingw-w64-${{matrix.env}}-winpthreads
 #    - name: OS Version
 #      run: uname -s
 #    - name: configure
