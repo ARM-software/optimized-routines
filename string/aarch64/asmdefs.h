@@ -54,6 +54,14 @@
 GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 #endif
 
+#ifdef __ELF__
+#define SYMBOL_SIZE(name) .size name, .-name
+#define SYMBOL_TYPE(name, _type) .type name, _type
+#else
+#define SYMBOL_SIZE(name)
+#define SYMBOL_TYPE(name, _type)
+#endif
+
 #define ENTRY_ALIGN(name, alignment)	\
   .align alignment		    SEP \
   ENTRY_ALIAS(name)		    SEP \
@@ -78,12 +86,12 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 #else
 # define ENTRY_ALIAS(name)	\
   .global name;			\
-  .type name,%function;		\
+  SYMBOL_TYPE(name, %function;)	\
   name:
 
 # define END(name)	\
   .cfi_endproc;		\
-  .size name, .-name
+  SYMBOL_SIZE(name)
 #endif
 
 #define L(l) .L ## l
