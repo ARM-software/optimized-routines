@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "master" ]
   pull_request:
+    branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
@@ -70,33 +71,41 @@ jobs:
     - name: make install
       run: CC="${{ matrix.compiler }}" make prefix=$(pwd)/install install
 
-#  windows-x86-64-cross:
-#    runs-on: windows-latest
-#    strategy:
-#      matrix:
-#        include:
-#          - { sys: mingw64, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
-#          # - { sys: mingw64, base: x86_64, env: cross, prefix: aarch64-w64-mingw32, compiler: clang }
-#   defaults:
-#      run:
-#        shell: msys2 {0}
-#    steps:
-#    - uses: actions/checkout@v4
-#    - uses: msys2/setup-msys2@v2
-#      with:
-#        msystem: ${{matrix.sys}}
-#        install: >
-#          mingw-w64-${{matrix.base}}-openssl
-#          mingw-w64-${{matrix.base}}-qemu
-#          make
-#          mingw-w64-${{matrix.env}}-${{matrix.compiler}}
-#          mingw-w64-${{matrix.env}}-binutils
-#          mingw-w64-${{matrix.env}}-winpthreads
-#    - name: OS Version
-#      run: uname -s
-#    - name: configure
-#      run: cp config.mk.dist config.mk
-#    - name: make
-#      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make -j
+  windows-x86-64-cross:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - { sys: mingw64, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
+          # - { sys: mingw64, base: x86_64, env: cross, prefix: aarch64-w64-mingw32, compiler: clang }
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{matrix.sys}}
+        install: >
+          mingw-w64-${{matrix.base}}-openssl
+          mingw-w64-${{matrix.base}}-qemu
+          make
+          mingw-w64-${{matrix.base}}-gcc
+          mingw-w64-${{matrix.base}}-mpfr
+          mingw-w64-${{matrix.base}}-gmp
+          mingw-w64-${{matrix.base}}-mpc
+          mingw-w64-${{matrix.base}}-binutils
+          mingw-w64-${{matrix.env}}-${{matrix.compiler}}
+          mingw-w64-${{matrix.env}}-binutils
+          mingw-w64-${{matrix.env}}-winpthreads
+    - name: OS Version
+      run: uname -s
+    - name: configure
+      run: cp config.mk.dist config.mk
+    - name: make
+      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" HOST_CC=/${{matrix.sys}}/bin/${{matrix.compiler}} CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make -j
 #    - name: make check
-#      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make check -j
+#      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" HOST_CC=/${{matrix.sys}}/bin/${{matrix.compiler}} CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make check -j
+    - name: make install
+      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" HOST_CC=/${{matrix.sys}}/bin/${{matrix.compiler}} CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make prefix=$(pwd)/install install
+
