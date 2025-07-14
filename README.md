@@ -119,6 +119,9 @@ submitting your contributions.
 Regular biannual releases are tagged as `vYY.MM`. All release are available at
 [https://github.com/ARM-software/optimized-routines/releases]().
 
+The latest release is
+[https://github.com/ARM-software/optimized-routines/releases/tag/v25.07](v25.07).
+
 ---
 
 ## 📬 Stay Connected
