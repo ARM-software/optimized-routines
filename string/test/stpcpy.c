@@ -26,7 +26,7 @@ static const struct fun
   int test_mte;
 } funtab[] = {
   // clang-format off
-#if !defined (_WIN32)
+#if !defined (_WIN32) && !defined (__CYGWIN__)
   F(stpcpy, 0)
 #endif
 #if __aarch64__
