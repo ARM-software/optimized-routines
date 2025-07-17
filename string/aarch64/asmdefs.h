@@ -21,8 +21,8 @@
 #define BTI_C		hint	34
 #define BTI_J		hint	36
 /* Return address signing support (pac-ret).  */
-#define PACIASP		hint	25 SEP .cfi_window_save
-#define AUTIASP		hint	29 SEP .cfi_window_save
+#define PACIASP		hint	25 SEP .cfi_negate_ra_state
+#define AUTIASP		hint	29 SEP .cfi_negate_ra_state
 
 /* GNU_PROPERTY_AARCH64_* macros from elf.h.  */
 #define FEATURE_1_AND 0xc0000000
