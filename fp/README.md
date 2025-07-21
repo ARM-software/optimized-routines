@@ -87,6 +87,12 @@ In particular, the default semantics are:
    appropriate (taking account of signedness of the integer type). NaN
    inputs return 0.
 
+ - When converting a NaN between single and double precision, the
+   NaN's sign bit is preserved, and so are the bits of the NaN
+   mantissa from the topmost bit downward. Converting to a narrower
+   format, low-order mantissa bits of an input NaN are discarded;
+   converting to a wider format, the output low-order bits are all 0.
+
 The first two of these rules are standard in IEEE 754. The remaining
 four rules are left unspecified by IEEE 754, and these are Arm's
 particular implementation choices.

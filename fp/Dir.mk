@@ -18,7 +18,8 @@ fp-libs := \
 fp-lib-objs := $(patsubst $(fp-src-dir)/%,$(fp-build-dir)/%.o,$(basename $(fp-lib-srcs)))
 
 # The full list of FP test programs
-all-fp-testnames := test-fmul test-faddsub test-fdiv test-fcmp \
+all-fp-testnames := test-f2d test-d2f \
+	test-fmul test-faddsub test-fdiv test-fcmp \
 	test-f2uiz test-f2iz test-f2ulz test-f2lz \
 	test-i2f test-ui2f test-l2f test-ul2f \
 	test-dmul test-daddsub test-ddiv test-dcmp \
