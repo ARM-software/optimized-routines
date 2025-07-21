@@ -80,7 +80,7 @@ $(fp-tests): $(fp-build-dir)/%: $(fp-build-dir)/test/%.o $(fp-libs)
 
 ifeq ($(FP_SUBDIR),at32)
 
-$(fp-build-dir)/ddiv-diagnostics: $(fp-src-dir)/aux/ddiv-diagnostics.c \
+$(fp-build-dir)/ddiv-diagnostics: $(fp-src-dir)/auxiliary/ddiv-diagnostics.c \
 	$(fp-build-dir)/at32/ddiv-diagnostics.o $(fp-libs)
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -o $@ $^ $(fp-libs)
 
