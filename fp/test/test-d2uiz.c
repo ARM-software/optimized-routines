@@ -1,0 +1,262 @@
+/*
+ * Tests of IEEE 754 double-precision to uint32 conversion (round towards zero)
+ *
+ * Copyright (c) 1999-2025, Arm Limited.
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+ */
+
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+struct test
+{
+  uint64_t in;
+  uint32_t out;
+};
+
+static const struct test tests[] = {
+  // Tests that don't depend on Arm-specific handling of invalid operations
+  { 0x0000000000000000, 0x00000000 },
+  { 0x0000000000000001, 0x00000000 },
+  { 0x001fffefffffffff, 0x00000000 },
+  { 0x002ffffffbffffff, 0x00000000 },
+  { 0x380a000000000000, 0x00000000 },
+  { 0x3fd0000000000000, 0x00000000 },
+  { 0x3fe0000000000000, 0x00000000 },
+  { 0x3fe8000000000000, 0x00000000 },
+  { 0x3fe8000000000000, 0x00000000 },
+  { 0x3ff0000000000000, 0x00000001 },
+  { 0x3ff0000000000000, 0x00000001 },
+  { 0x3ff3cf3a9243d54d, 0x00000001 },
+  { 0x3ff4000000000000, 0x00000001 },
+  { 0x3ff8000000000000, 0x00000001 },
+  { 0x3ff8000000000000, 0x00000001 },
+  { 0x3ff907591158c5d8, 0x00000001 },
+  { 0x3ffc000000000000, 0x00000001 },
+  { 0x4000000000000000, 0x00000002 },
+  { 0x4000000000000000, 0x00000002 },
+  { 0x4002000000000000, 0x00000002 },
+  { 0x4004000000000000, 0x00000002 },
+  { 0x4004000000000000, 0x00000002 },
+  { 0x4006000000000000, 0x00000002 },
+  { 0x4006882d42e373c2, 0x00000002 },
+  { 0x400af556280c2c53, 0x00000003 },
+  { 0x400c000000000000, 0x00000003 },
+  { 0x4010e2652ca3b655, 0x00000004 },
+  { 0x4013752289364b88, 0x00000004 },
+  { 0x4018000000000000, 0x00000006 },
+  { 0x401a000000000000, 0x00000006 },
+  { 0x401e000000000000, 0x00000007 },
+  { 0x40213e96e6ee06b6, 0x00000008 },
+  { 0x4028cdf10f8a4e54, 0x0000000c },
+  { 0x402c000000000000, 0x0000000e },
+  { 0x402d000000000000, 0x0000000e },
+  { 0x402f000000000000, 0x0000000f },
+  { 0x4030800000000000, 0x00000010 },
+  { 0x4034eefd80e0249b, 0x00000014 },
+  { 0x4037800000000000, 0x00000017 },
+  { 0x403b000000000000, 0x0000001b },
+  { 0x403d6996adec0f09, 0x0000001d },
+  { 0x4041d25097b9ee14, 0x00000023 },
+  { 0x4047c00000000000, 0x0000002f },
+  { 0x404b400000000000, 0x00000036 },
+  { 0x404c0773be0cb9b7, 0x00000038 },
+  { 0x404e000000000000, 0x0000003c },
+  { 0x4051e00000000000, 0x00000047 },
+  { 0x4053200000000000, 0x0000004c },
+  { 0x405589958f279d42, 0x00000056 },
+  { 0x4059000000000000, 0x00000064 },
+  { 0x405ea94c1daf1a78, 0x0000007a },
+  { 0x40615bb017eb1476, 0x0000008a },
+  { 0x4069500000000000, 0x000000ca },
+  { 0x406a22674b8b878f, 0x000000d1 },
+  { 0x406bf00000000000, 0x000000df },
+  { 0x406d800000000000, 0x000000ec },
+  { 0x4072d80000000000, 0x0000012d },
+  { 0x40757c8231fe92f1, 0x00000157 },
+  { 0x4076a80000000000, 0x0000016a },
+  { 0x4077500000000000, 0x00000175 },
+  { 0x407af61b26e4a441, 0x000001af },
+  { 0x4080f40000000000, 0x0000021e },
+  { 0x4081363310b2470c, 0x00000226 },
+  { 0x40860c0000000000, 0x000002c1 },
+  { 0x408b000000000000, 0x00000360 },
+  { 0x408e9aaa9a478b59, 0x000003d3 },
+  { 0x4091c67f05129ed4, 0x00000471 },
+  { 0x4093a60000000000, 0x000004e9 },
+  { 0x4098140000000000, 0x00000605 },
+  { 0x409a5a0000000000, 0x00000696 },
+  { 0x409ff99df878ad3e, 0x000007fe },
+  { 0x40a3500000000000, 0x000009a8 },
+  { 0x40a5598ffcbb08ba, 0x00000aac },
+  { 0x40a956fba09be449, 0x00000cab },
+  { 0x40ab8f0000000000, 0x00000dc7 },
+  { 0x40ad090000000000, 0x00000e84 },
+  { 0x40b1118000000000, 0x00001111 },
+  { 0x40b3bab731bb5e6d, 0x000013ba },
+  { 0x40b6de0000000000, 0x000016de },
+  { 0x40bac06eeb8b97ba, 0x00001ac0 },
+  { 0x40bce28000000000, 0x00001ce2 },
+  { 0x40c2870000000000, 0x0000250e },
+  { 0x40c84471c85901df, 0x00003088 },
+  { 0x40c9c34000000000, 0x00003386 },
+  { 0x40cd9b94b71f57ea, 0x00003b37 },
+  { 0x40cdc3c000000000, 0x00003b87 },
+  { 0x40d00da000000000, 0x00004036 },
+  { 0x40d19f4000000000, 0x0000467d },
+  { 0x40d79d704d0443f1, 0x00005e75 },
+  { 0x40db84e000000000, 0x00006e13 },
+  { 0x40de81403e6071ea, 0x00007a05 },
+  { 0x40e2a16f9da2ed87, 0x0000950b },
+  { 0x40e92a3000000000, 0x0000c951 },
+  { 0x40e9d5d000000000, 0x0000ceae },
+  { 0x40eb548000000000, 0x0000daa4 },
+  { 0x40ec19b6638d34af, 0x0000e0cd },
+  { 0x40f2d4d49a34df18, 0x00012d4d },
+  { 0x40f2de6800000000, 0x00012de6 },
+  { 0x40f46b9af08e6ece, 0x000146b9 },
+  { 0x40fb2fe000000000, 0x0001b2fe },
+  { 0x40fc81d800000000, 0x0001c81d },
+  { 0x4100669800000000, 0x00020cd3 },
+  { 0x4104a6686f29748d, 0x000294cd },
+  { 0x410a1fc576d6489b, 0x000343f8 },
+  { 0x410b997400000000, 0x0003732e },
+  { 0x410e962c00000000, 0x0003d2c5 },
+  { 0x4113e47a321d351e, 0x0004f91e },
+  { 0x41159158c64c86e2, 0x00056456 },
+  { 0x411ce43e00000000, 0x0007390f },
+  { 0x411eacc400000000, 0x0007ab31 },
+  { 0x411ee00a00000000, 0x0007b802 },
+  { 0x4120eb1f00000000, 0x0008758f },
+  { 0x4121bc002850dcff, 0x0008de00 },
+  { 0x4123669100000000, 0x0009b348 },
+  { 0x4125458fefa849cd, 0x000aa2c7 },
+  { 0x412c5f6600000000, 0x000e2fb3 },
+  { 0x41311f349fdd064e, 0x00111f34 },
+  { 0x4135e3c47a5a7295, 0x0015e3c4 },
+  { 0x413bb95a80000000, 0x001bb95a },
+  { 0x413dc4b980000000, 0x001dc4b9 },
+  { 0x413dded700000000, 0x001dded7 },
+  { 0x4143339380000000, 0x00266727 },
+  { 0x4143f42f7838cebe, 0x0027e85e },
+  { 0x4148d71240000000, 0x0031ae24 },
+  { 0x414f8b46986123ff, 0x003f168d },
+  { 0x414fc468c0000000, 0x003f88d1 },
+  { 0x4152d16760000000, 0x004b459d },
+  { 0x41559b87ac7fd1fb, 0x00566e1e },
+  { 0x415679a847497583, 0x0059e6a1 },
+  { 0x41568d0e20000000, 0x005a3438 },
+  { 0x415efb4d80000000, 0x007bed36 },
+  { 0x41603a2370000000, 0x0081d11b },
+  { 0x4160d14709ee668a, 0x00868a38 },
+  { 0x416705f510000000, 0x00b82fa8 },
+  { 0x41678a2eb167a88f, 0x00bc5175 },
+  { 0x416dc05b40000000, 0x00ee02da },
+  { 0x41730fb978000000, 0x0130fb97 },
+  { 0x417395a4a66fca01, 0x01395a4a },
+  { 0x41756ef08b6d5dd0, 0x0156ef08 },
+  { 0x4179efdb00000000, 0x019efdb0 },
+  { 0x417b4f6208000000, 0x01b4f620 },
+  { 0x4180907a07f893a5, 0x02120f40 },
+  { 0x41862857dc000000, 0x02c50afb },
+  { 0x4187df63b4000000, 0x02fbec76 },
+  { 0x418c997fa8000000, 0x03932ff5 },
+  { 0x418ee2d28aa63b87, 0x03dc5a51 },
+  { 0x419306468a000000, 0x04c191a2 },
+  { 0x41948b47dbc198b6, 0x0522d1f6 },
+  { 0x4195be8a08000000, 0x056fa282 },
+  { 0x419acb35e46baf44, 0x06b2cd79 },
+  { 0x419ec43dfe000000, 0x07b10f7f },
+  { 0x41a68e6716000000, 0x0b47338b },
+  { 0x41a893264f33d251, 0x0c499327 },
+  { 0x41af11d19d000000, 0x0f88e8ce },
+  { 0x41af241394ce98da, 0x0f9209ca },
+  { 0x41afb8d0b7000000, 0x0fdc685b },
+  { 0x41b1a63370800000, 0x11a63370 },
+  { 0x41b23df14b800000, 0x123df14b },
+  { 0x41b6f2d50149e2d9, 0x16f2d501 },
+  { 0x41ba1aa592000000, 0x1a1aa592 },
+  { 0x41bf53402fd53daa, 0x1f53402f },
+  { 0x41c18548afc00000, 0x230a915f },
+  { 0x41c2e365e5345a6b, 0x25c6cbca },
+  { 0x41c4492dac400000, 0x28925b58 },
+  { 0x41ca895f94000000, 0x3512bf28 },
+  { 0x41ccc3e5f1e5b560, 0x3987cbe3 },
+  { 0x41d01a143e200000, 0x406850f8 },
+  { 0x41d01d7605400000, 0x4075d815 },
+  { 0x41ddcda3abe00000, 0x77368eaf },
+  { 0x41de53dafe34e730, 0x794f6bf8 },
+  { 0x41df843af68a9ef5, 0x7e10ebda },
+  { 0x41e2c728e4400000, 0x96394722 },
+  { 0x41e950d535f00000, 0xca86a9af },
+  { 0x41e9afe08a500000, 0xcd7f0452 },
+  { 0x41eb81ce4bd25eaa, 0xdc0e725e },
+  { 0x41ef6975dbc19d7a, 0xfb4baede },
+  { 0x8000000000000000, 0x00000000 },
+  { 0xb818000000000000, 0x00000000 },
+
+  // Tests that do depend on Arm-specific choices
+  { 0x41efffffffffffff, 0xffffffff },
+  { 0x41f0000000000000, 0xffffffff },
+  { 0x41f37bc9c8400000, 0xffffffff },
+  { 0x41f3c0b771e5a126, 0xffffffff },
+  { 0x41fb837587480000, 0xffffffff },
+  { 0x41fc069b87f80000, 0xffffffff },
+  { 0x41feea6325bf9a55, 0xffffffff },
+  { 0x7ff0000000000000, 0xffffffff },
+  { 0x7ff6d1ebdfe15ee3, 0x00000000 },
+  { 0x7ff9a4da74944a09, 0x00000000 },
+  { 0xbfefffffffffffff, 0x00000000 },
+  { 0xbff0000000000000, 0x00000000 },
+  { 0xc000000000000000, 0x00000000 },
+  { 0xfff0000000000000, 0x00000000 },
+};
+
+double
+make_double (uint64_t x)
+{
+  double r;
+  memcpy (&r, &x, sizeof (r));
+  return r;
+}
+
+int
+main (void)
+{
+  bool failed = false;
+
+  for (size_t i = 0; i < sizeof (tests) / sizeof (tests[0]); i++)
+    {
+      const struct test *t = &tests[i];
+
+#ifdef USE_NATIVE_ARITHMETIC
+      /* If you compile with USE_NATIVE_ARITHMETIC defined, the same
+       * set of tests will be run using the toolchain's built in float
+       * arithmetic, instead of calling arm_fp_d2*.
+       *
+       * I have to declare the input float as volatile, to inhibit the
+       * compiler from potentially optimizing away the whole of main()
+       * on the grounds that some of the tests overflow! */
+      volatile double in = make_double (t->in);
+      uint32_t outbits = in;
+#else
+      extern uint32_t arm_fp_d2uiz(uint64_t);
+      uint32_t outbits = arm_fp_d2uiz(t->in);
+#endif
+
+      if (outbits != t->out)
+	{
+	  printf ("FAIL: d2uiz(%016" PRIx64 ") -> %08" PRIx32
+		  ", expected %08" PRIx32 "\n", t->in, outbits, t->out);
+	  failed = true;
+	}
+    }
+
+  if (!failed)
+    printf ("all passed\n");
+
+  return failed;
+}
