@@ -22,7 +22,8 @@ all-fp-testnames := test-fmul test-faddsub test-fdiv test-fcmp \
 	test-f2uiz test-f2iz test-f2ulz test-f2lz \
 	test-i2f test-ui2f test-l2f test-ul2f \
 	test-dmul test-daddsub test-ddiv test-dcmp \
-	test-d2uiz test-d2iz test-d2ulz test-d2lz
+	test-d2uiz test-d2iz test-d2ulz test-d2lz \
+	test-i2d test-ui2d test-l2d test-ul2d
 
 # Filter the list down to only the tests of functions present in this FP_SUBDIR
 fp-tests-available := $(foreach obj,$(fp-lib-objs),$(patsubst %.o,test-%,$(notdir $(obj))))
