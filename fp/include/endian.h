@@ -3,6 +3,9 @@
 // Copyright (c) 2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
+#ifndef AOR_FP_ENDIAN_H
+#define AOR_FP_ENDIAN_H
+
 // This header file should be included from assembly source code (not C). It
 // defines two pairs of register aliases, for handling 64-bit values passed and
 // returned from functions in the AArch32 integer registers:
@@ -26,3 +29,4 @@ bl .req r2
 bh .req r3
 #endif
 
+#endif // AOR_FP_ENDIAN_H

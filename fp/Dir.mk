@@ -21,7 +21,7 @@ fp-lib-objs := $(patsubst $(fp-src-dir)/%,$(fp-build-dir)/%.o,$(basename $(fp-li
 all-fp-testnames := test-fmul test-faddsub test-fdiv test-fcmp \
 	test-f2uiz test-f2iz test-f2ulz test-f2lz \
 	test-i2f test-ui2f test-l2f test-ul2f \
-	test-dmul test-daddsub
+	test-dmul test-daddsub test-ddiv
 
 # Filter the list down to only the tests of functions present in this FP_SUBDIR
 fp-tests-available := $(foreach obj,$(fp-lib-objs),$(patsubst %.o,test-%,$(notdir $(obj))))
@@ -39,12 +39,23 @@ fp-test-objs := $(patsubst %,$(fp-build-dir)/test/%.o,$(fp-testnames))
 fp-target-objs := $(fp-lib-objs) $(fp-test-objs)
 fp-objs := $(fp-target-objs)
 
+fp-aux :=
+
+ifeq ($(FP_SUBDIR),at32)
+fp-objs += $(fp-build-dir)/at32/ddiv-diagnostics.o
+$(fp-build-dir)/at32/ddiv-diagnostics.o: $(fp-src-dir)/at32/ddiv.S
+	$(CC) $(CFLAGS_ALL) -c -o $@ $^ -DDIAGNOSTICS
+
+fp-aux += $(fp-build-dir)/ddiv-diagnostics
+endif
+
 fp-files := \
 	$(fp-objs) \
 	$(fp-libs) \
 	$(fp-tests) \
+	$(fp-aux) \
 
-all-fp: $(fp-libs) $(fp-tests)
+all-fp: $(fp-libs) $(fp-tests) $(fp-aux)
 
 $(fp-objs): $(fp-includes) $(fp-test-includes)
 $(fp-objs): CFLAGS_ALL += $(fp-cflags)
@@ -60,6 +71,14 @@ build/lib/libfplib.a: $(fp-lib-objs)
 
 $(fp-tests): $(fp-build-dir)/%: $(fp-build-dir)/test/%.o $(fp-libs)
 	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -o $@ $^ $(fp-libs)
+
+ifeq ($(FP_SUBDIR),at32)
+
+$(fp-build-dir)/ddiv-diagnostics: $(fp-src-dir)/aux/ddiv-diagnostics.c \
+	$(fp-build-dir)/at32/ddiv-diagnostics.o $(fp-libs)
+	$(CC) $(CFLAGS_ALL) $(LDFLAGS) -o $@ $^ $(fp-libs)
+
+endif
 
 clean-fp:
 	rm -f $(fp-files)
