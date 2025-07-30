@@ -180,6 +180,7 @@ __vpcs float64x2_t _ZGVnN2v_log (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log10 (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log1p (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log2 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_log2p1 (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_sin (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_sinh (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_sinpi (float64x2_t);

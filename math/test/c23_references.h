@@ -195,3 +195,10 @@ arm_math_log2p1 (double x)
 {
   return log1p (x) * M_INV_LOG2l;
 }
+
+long double
+arm_math_log2p1l (long double x)
+{
+  return (fabs (x) < 0x1p-52) ? (long double) x * M_INV_LOG2l
+			      : (log1p ((long double) x) / log (2));
+}
