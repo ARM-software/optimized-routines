@@ -75,7 +75,11 @@ arm_fp_i2f:
   // enough to need rounding at all, so all the exact cases _and_ half the
   // inexact ones will benefit from the saving.
   ADD     r0, r1, r2, LSR #8    // r0 is now sign+exp+mant, unrounded
+#if __thumb__
   LSLS.N  r3, r2, #25           // .N to make sure it's assembled as 16-bit
+#else
+  LSLS    r3, r2, #25           // GNU assembler treats .N as an error in Arm
+#endif
   BXCC    lr
   // Now if we didn't take the return, we must definitely round up, and
   // conditionally round to even.

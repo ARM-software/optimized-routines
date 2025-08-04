@@ -26,7 +26,7 @@ arm_fp_fdiv:
   ANDSNE  r3, r12, r1, LSR #7   // r3 has exponent of denominator. (Is it 0?)
   TEQNE   r2, r12               // if neither was 0, is one FF?
   TEQNE   r3, r12               // or the other?
-  BEQ.W   fdiv_uncommon         // branch out of line if any answer was yes
+  BEQ     fdiv_uncommon         // branch out of line if any answer was yes
 
   // Calculate the output sign, which is always just the XOR of the input
   // signs. Store it in bit 8 of r2, below the numerator exponent.
@@ -320,7 +320,7 @@ fdiv_div:
   // the only problem being that it's currently reversed. So negate r1 (leaving
   // 0 at 0 to indicate exactness).
   RSBS    r1, r1, #0
-  B.W   __funder
+  B     __funder
 
 fdiv_overflow:
   // Here we might or might not have overflow (but we know we don't have

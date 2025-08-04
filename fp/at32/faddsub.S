@@ -34,13 +34,13 @@ arm_fp_fadd:
   EOR     r3, r1, r1, LSL #1   // same for y
   TST     r2, #0x7F000000      // is x uncommon?
   TSTNE   r3, #0x7F000000      // if not, is y uncommon?
-  BEQ.W   fadd_uncommon        // if either, branch out of line
+  BEQ     fadd_uncommon        // if either, branch out of line
 
   // Now we have two normalised numbers. If their signs are opposite, we should
   // be subtracting their magnitudes rather than adding, so cross-jump to fsub.
   TEQ     r0, r1               // set N if signs are unequal
   EORMI   r1, r1, #1 << 31     // if so, flip the sign of y
-  BMI.W   fsub_magnitude       // and go to magnitude subtraction
+  BMI     fsub_magnitude       // and go to magnitude subtraction
 fadd_magnitude:
   // If we get here, we're adding operands with equal signs (i.e. a magnitude
   // addition). First thing to do is put the operands in magnitude order, so
@@ -223,7 +223,7 @@ fadd_uncommon:
   // fast path.
   TEQ     r0, r1             // opposite signs?
   EORMI   r1, r1, #1 << 31   // if so, negate the second operand
-  BMI.W   fsub_zerodenorm    // and cross-jump to the fsub version of this code
+  BMI     fsub_zerodenorm    // and cross-jump to the fsub version of this code
 fadd_zerodenorm:
   // Now we know x and y have the same sign, and at least one of them is zero
   // or denormal. If there aren't any zeroes, we'll end up rejoining the fast
@@ -306,7 +306,7 @@ arm_fp_frsub:
   EOR     r3, r1, r1, LSL #1
   TST     r2, #0x7F000000
   TSTNE   r3, #0x7F000000
-  BEQ.W   frsb_uncommon
+  BEQ     frsb_uncommon
 
   // Now we know we only have finite inputs, it's safe to implement the
   // reversal of the operand order by flipping signs. (Preserving the sign of
@@ -314,9 +314,9 @@ arm_fp_frsub:
 
   EOR     r0, r0, #1 << 31  // flip sign of the operand we're subtracting
   TEQ     r0, r1            // are the signs now the same?
-  BPL.W   fadd_magnitude    // if so, we're doing magnitude addition
+  BPL     fadd_magnitude    // if so, we're doing magnitude addition
   EOR     r1, r1, #1 << 31  // otherwise, flip the other sign too
-  B.W     fsub_magnitude    // and we're doing magnitude subtraction
+  B       fsub_magnitude    // and we're doing magnitude subtraction
 
 frsb_uncommon:
   // Any uncommon operands to frsub are handled by just swapping the two
@@ -325,7 +325,7 @@ frsb_uncommon:
   EOR     r0, r0, r1
   EOR     r1, r1, r0
   EOR     r0, r0, r1
-  B.W     fsub_uncommon
+  B       fsub_uncommon
 
   .size arm_fp_frsub, .-arm_fp_frsub
 
@@ -339,14 +339,14 @@ arm_fp_fsub:
   EOR     r3, r1, r1, LSL #1
   TST     r2, #0x7F000000
   TSTNE   r3, #0x7F000000
-  BEQ.W   fsub_uncommon
+  BEQ     fsub_uncommon
 
   // Check the signs, and if they're unequal, cross-jump into fadd to do
   // magnitude addition. (Now we've excluded NaNs, it's safe to flip the sign
   // of y.)
   TEQ     r0, r1
   EORMI   r1, r1, #1 << 31
-  BMI.W   fadd_magnitude
+  BMI     fadd_magnitude
 
 fsub_magnitude:
   // If we get here, we're subtracting operands with equal signs (i.e. a
@@ -629,7 +629,7 @@ fsub_uncommon:
   // fast path.
   TEQ     r0, r1             // opposite signs?
   EORMI   r1, r1, #1 << 31   // if so, negate the second operand
-  BMI.W   fadd_zerodenorm    // and cross-jump to the fadd version of this code
+  BMI     fadd_zerodenorm    // and cross-jump to the fadd version of this code
 
 fsub_zerodenorm:
   // Now we know x and y have the same sign, and at least one of them is zero

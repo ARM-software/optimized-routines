@@ -36,6 +36,14 @@ usable with either the GNU toolchain or the LLVM toolchain. Avoid
 using assembler idioms that are not supported by both, such as the
 pseudo-instruction `adrl`.
 
+In the `at32` subdirectory, most of the code is legal in both Arm and
+Thumb state, but in a few places `#if __thumb__` is used choose
+between the Arm or Thumb instructions for an operation. To build with
+some toolchains you may have to ensure by hand that the definition of
+`__thumb__` matches the mode the assembler is in, e.g. by using both
+`-mthumb` and `-Wa,-mthumb` to pass the same option to the
+preprocessor and the assembler.
+
 2. **Helper functions**:
 Some helper functions which are not performance-critical are written
 in C. This allows them to be written only once and recompiled for the

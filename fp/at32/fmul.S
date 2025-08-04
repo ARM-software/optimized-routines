@@ -21,7 +21,7 @@ arm_fp_fmul:
   ANDSNE  r3, r12, r1, LSR #7  // otherwise, sets Z if exponent of y is 0
   TEQNE   r2, r12              // otherwise, sets Z if exponent of x is FF
   TEQNE   r3, r12              // otherwise, sets Z if exponent of y is FF
-  BEQ.W   fmul_uncommon        // branch out of line to handle inf/NaN/0/denorm
+  BEQ     fmul_uncommon        // branch out of line to handle inf/NaN/0/denorm
 
   // Calculate the sign of the result, and put it in an unused bit of r2.
   TEQ     r0, r1               // sets N to the XOR of x and y's sign bits
@@ -199,7 +199,7 @@ fmul_mul:
   SUBS    r1, r2, r0, LSL #9      // subtract the output mantissa (likewise)
 
   // And let __funder handle the rest.
-  B.W   __funder
+  B     __funder
 
 fmul_overflow:
   // We come here to handle overflow, but it's not guaranteed that an overflow

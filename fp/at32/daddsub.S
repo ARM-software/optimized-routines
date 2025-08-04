@@ -933,7 +933,7 @@ dsub_renormed:
   ADD     xh, xh, #3 << 29        // rebias exponent as __dunder will expect
   MOV     r2, #0                  // rounding direction = 0 for an exact answer
   POP     {r4, lr}
-  B.W     __dunder
+  B       __dunder
 
 dsub_renorm_clz_xl:
   // This is the alternative renormalization code for the case where xh=0, so

@@ -25,7 +25,7 @@ arm_fp_dmul:
   ANDSNE  r5, r12, yh, LSR #4  // otherwise, sets Z if exponent of y is 0
   TEQNE   r14, r12             // otherwise, sets Z if exponent of x is 7FF
   TEQNE   r5, r12              // otherwise, sets Z if exponent of y is 7FF
-  BEQ.W   dmul_uncommon        // branch out of line to handle inf/NaN/0/denorm
+  BEQ     dmul_uncommon        // branch out of line to handle inf/NaN/0/denorm
 
   // Calculate the sign of the result, and put it in an unused bit of r14.
   EOR     r4, xh, yh           // XOR the input signs to get the result sign
@@ -260,7 +260,7 @@ dmul_rounded:
   // of the job.
   ADD     xh, xh, #0x60000000
   POP     {r4,r5,r6,lr}
-  B.W     __dunder
+  B       __dunder
 
 dmul_overflow:
   // Here, we overflowed, so we must return an infinity of the correct sign.

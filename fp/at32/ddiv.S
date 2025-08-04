@@ -141,7 +141,7 @@ ddiv_normalised: // denormal handler will come back to here
   // lookup table entries, not 256. The 8-bit value we load also has its top
   // bit set.
   LSR     r5, yh, #24           // r5 is the table index plus 0x80
-  ADR.W   r6, reciptbl-128      // so subtract 0x80 from the table address
+  ADR     r6, reciptbl-128      // so subtract 0x80 from the table address
   LDRB    r6, [r6, r5]          // and load the approximation into r6
   debug32 "recip08 = %02X\n", r6
 
