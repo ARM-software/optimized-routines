@@ -4,14 +4,14 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 // The basic strategy of this division code is to use Newton-Raphson iteration
-// to calculate an approximation to 1/b, then multiply it by a. This procedure
+// to calculate an approximation to 1/y, then multiply it by x. This procedure
 // delivers a quotient with 10 extra bits of precision, but which isn't exact.
 // We know an upper bound on its possible error, which gives an interval of
 // possible values for the true quotient. So we can check the 10 extra bits to
 // see whether a rounding boundary lies within the interval. If not, then we
 // can round and return without worrying further; otherwise, we go to slower
-// correction code that multiplies the approximate quotient back up by b and
-// checks it against a.
+// correction code that multiplies the approximate quotient back up by y and
+// checks it against x.
 //
 // This strategy depends critically on the upper bound on the approximation
 // error. Underestimating the error introduces a bug; overestimating it costs
@@ -50,22 +50,22 @@ arm_fp_ddiv:
   // Check if either input exponent 7FF (infinity or NaN), and if so, branch
   // out of line.
   LDR     r12, =0x07FF0000        // mask for exponent cold storage
-  BICS    r4, r12, ah, LSR #4     // test for Infs or NaNs
-  BICSNE  r4, r12, bh, LSR #4
+  BICS    r4, r12, xh, LSR #4     // test for Infs or NaNs
+  BICSNE  r4, r12, yh, LSR #4
   BEQ     ddiv_naninf
 
-  // Extract the exponents of the input values a and b into bits 16..26 of r14
+  // Extract the exponents of the input values x and y into bits 16..26 of r14
   // and r5 respectively, and in the process, check if either exponent is zero
   // (so that one or both inputs are 0 or denormal). In order to combine the
-  // two tests, the second ANDS is performed conditionally, so that if a's
+  // two tests, the second ANDS is performed conditionally, so that if x's
   // exponent is zero then the out-of-line code at ddiv_zerodenorm might find
-  // b's exponent hasn't been set up yet.
+  // y's exponent hasn't been set up yet.
   //
   // We also calculate the sign of the result, which will be needed whether or
   // not we branch. This is saved in the low bit of r4.
-  ANDS    r4, r12, ah, LSR #4     // get exponent of a, setting Z if it's 0
-  ANDSNE  r5, r12, bh, LSR #4     // if not, extract and test exponent of b
-  EOR     r6, ah, bh              // XOR the input signs to get the result sign
+  ANDS    r4, r12, xh, LSR #4     // get exponent of x, setting Z if it's 0
+  ANDSNE  r5, r12, yh, LSR #4     // if not, extract and test exponent of y
+  EOR     r6, xh, yh              // XOR the input signs to get the result sign
   ORR     r4, r4, r6, LSR #31     // save it in the low bit of r4
   BEQ     ddiv_zerodenorm         // branch out of line for zeroes or denormals
 
@@ -92,12 +92,12 @@ ddiv_normalised: // denormal handler will come back to here
   // in the leading 1 bit, which will occupy the high bit of the high word in
   // each case.
   MOV     r5, #1<<31              // high bit for ORing in to both mantissas
-  ORR     ah, r5, ah, LSL #11     // shift up ah and OR in the high bit
-  ORR     bh, r5, bh, LSL #11     // same for bh
-  ORR     ah, ah, al, LSR #21     // OR in the bits shifted out of al into ah
-  ORR     bh, bh, bl, LSR #21     // same for bl and bh
-  LSL     al, al, #11             // shift up the rest of al
-  LSL     bl, bl, #11             // same for bl
+  ORR     xh, r5, xh, LSL #11     // shift up xh and OR in the high bit
+  ORR     yh, r5, yh, LSL #11     // same for yh
+  ORR     xh, xh, xl, LSR #21     // OR in the bits shifted out of xl into xh
+  ORR     yh, yh, yl, LSR #21     // same for yl and yh
+  LSL     xl, xl, #11             // shift up the rest of xl
+  LSL     yl, yl, #11             // same for yl
 
   // Check if the two mantissas are exactly equal, so that the quotient is
   // exactly a power of 2. If so, branch out of line to handle that case
@@ -107,24 +107,24 @@ ddiv_normalised: // denormal handler will come back to here
   // we can't be confused about whether it needs to be renormalised, which
   // would otherwise cost just as much effort as this check. Our reciprocal
   // approximation is always an underestimate (that's in the nature of this
-  // particular Newton-Raphson iteration), so if a < b (meaning the mantissas
+  // particular Newton-Raphson iteration), so if x < y (meaning the mantissas
   // rather than the whole floats) then even the true quotient will be less
-  // than 1, and the approximation even more so. On the other hand, if a > b,
+  // than 1, and the approximation even more so. On the other hand, if x > y,
   // then the true quotient will be enough greater than 1 that even the largest
   // possible error in the approximation can't make it look like less than 1.
   //
-  // (Proof: regard a,b as normalised to the range [1,2). If a > b, then we
-  // have a ≥ b+ε, where ε is the machine epsilon. So a/b ≥ 1+ε/b > 1+ε/2. And
+  // (Proof: regard x,y as normalised to the range [1,2). If x > y, then we
+  // have x ≥ y+ε, where ε is the machine epsilon. So x/y ≥ 1+ε/y > 1+ε/2. And
   // the bound on the approximation error, given below, is far less than ε/2.)
-  CMP     ah, bh
-  CMPEQ   al, bl
+  CMP     xh, yh
+  CMPEQ   xl, yl
   BEQ     ddiv_result_is_power_of_2
 
   // Now we begin the actual calculation of the reciprocal approximation, so we
   // start issuing debug statements to print out the inputs, intermediate
   // results, and outputs.
   //
-  // We begin with our two input mantissas stored in ah:al and bh:bl, each with
+  // We begin with our two input mantissas stored in xh:xl and yh:yl, each with
   // its leading 1 explicit and shifted up to the top of the word. So they can
   // be regarded as 64-bit integers with the high bit set and the bottom 11
   // bits clear.
@@ -133,46 +133,46 @@ ddiv_normalised: // denormal handler will come back to here
   // is the form you'd also use to feed them to 'ddiv-prove.py --eval' to
   // confirm that the Python implementation of this algorithm does the same
   // thing.
-  debug64 "a = 0x%016llX\n", ah, al
-  debug64 "b = 0x%016llX\n", bh, bl
+  debug64 "x = 0x%016llX\n", xh, xl
+  debug64 "y = 0x%016llX\n", yh, yl
 
-  // Obtain an 8-bit reciprocal approximation by using the topmost 8 bits of b
-  // as a lookup table. The top bit of b is always set, so there are only 128
+  // Obtain an 8-bit reciprocal approximation by using the topmost 8 bits of y
+  // as a lookup table. The top bit of y is always set, so there are only 128
   // lookup table entries, not 256. The 8-bit value we load also has its top
   // bit set.
-  LSR     r5, bh, #24           // r5 is the table index plus 0x80
+  LSR     r5, yh, #24           // r5 is the table index plus 0x80
   ADR.W   r6, reciptbl-128      // so subtract 0x80 from the table address
   LDRB    r6, [r6, r5]          // and load the approximation into r6
   debug32 "recip08 = %02X\n", r6
 
   // First Newton-Raphson iteration, which expands that 8-bit approximation to
-  // a 17-bit one, again with its top bit set. We use the top 16 bits of b for
+  // a 17-bit one, again with its top bit set. We use the top 16 bits of y for
   // this, so that we can fit the multiplications into ordinary MUL rather than
   // UMULL.
   //
-  // The Newton-Raphson formula to turn an approximation x ≈ 1/b into a better
-  // one is x → x(2-bx). In this case we're scaling up to integers (informal
+  // The Newton-Raphson formula to turn an approximation r ≈ 1/y into a better
+  // one is r → r(2-yr). In this case we're scaling up to integers (informal
   // fixed point), so the 2 becomes 2^24.
-  LSR     r5, bh, #16           // get top halfword of b
-  MUL     r7, r6, r5            // multiply it by the input value x
+  LSR     r5, yh, #16           // get top halfword of y
+  MUL     r7, r6, r5            // multiply it by the input value r
   RSB     r7, r7, #1<<24        // subtract from 2 (scaled up appropriately)
-  MUL     r7, r6, r7            // multiply again to make x(2-bx)
+  MUL     r7, r6, r7            // multiply again to make r(2-yr)
   LSR     r7, r7, #14           // shift down to keep only 17 bits of it
   debug32 "recip16 = %04X\n", r7
 
   // Second iteration, expanding into a 32-bit reciprocal, using the top 31
-  // bits of b (i.e. bh shifted by 1). The first multiplication (making bx) is
-  // 32x32 → 64 bits, so we use a single UMULL; the second one making x(2-bx)
-  // is 32x64, which we do with a UMULL by the bottom half of bx and then MLA
+  // bits of y (i.e. yh shifted by 1). The first multiplication (making yr) is
+  // 32x32 → 64 bits, so we use a single UMULL; the second one making r(2-yr)
+  // is 32x64, which we do with a UMULL by the bottom half of yr and then MLA
   // by the top half, so we only keep the low 64 bits of the full answer.
   //
   // The subtraction from 2 (again scaled up, this time to 2^48) is done by
   // RSBS+RSC, interleaved with the multiplications so as to use a delay slot
   // on CPUs that have one.
-  LSR     r12, bh, #1
-  UMULL   r6, r8, r7, r12       // r8:r6 = bx
+  LSR     r12, yh, #1
+  UMULL   r6, r8, r7, r12       // r8:r6 = yr
   RSBS    r6, r6, #0            // low half of subtraction from 2
-  UMULL   r12, lr, r7, r6       // multiply x by the low half of 2-bx
+  UMULL   r12, lr, r7, r6       // multiply r by the low half of 2-yr
 #if !__thumb__
   RSC     r8, r8, #1<<16        // high half of subtraction from 2
 #else
@@ -180,17 +180,17 @@ ddiv_normalised: // denormal handler will come back to here
   MVN     r8, r8
   ADC     r8, r8, #1<<16
 #endif
-  MLA     r6, r7, r8, lr        // multiply x by the high half of 2-bx
+  MLA     r6, r7, r8, lr        // multiply r by the high half of 2-yr
   debug32 "recip32 = %08X\n", r6
 
   // Third iteration, expanding into a 64-bit reciprocal, with the leading bit
-  // expected to end up in bit 60. Now the first multiplication to make bx is
+  // expected to end up in bit 60. Now the first multiplication to make yr is
   // 32x64 → 96 bits, so we put the product in three registers lr:r12:r8.
   // However, we're going to discard the low word r8 completely, because it
-  // makes negligible difference. So we'll treat the output bx as 64-bit.
-  UMULL   r8, r12, r6, bl       // multiply x by bottom half of b
+  // makes negligible difference. So we'll treat the output yr as 64-bit.
+  UMULL   r8, r12, r6, yl       // multiply r by bottom half of y
   MOV     lr, #0                // initialize high word to 0
-  UMLAL   r12, lr, r6, bh       // multiply x by top half of b
+  UMLAL   r12, lr, r6, yh       // multiply r by top half of y
   // Subtract from a power of 2, as usual. But in this case the power of 2
   // we're subtracting from is 2^64, which is just off the top of the 64-bit
   // value in lr:r12. So in fact we're just negating the whole thing!
@@ -198,20 +198,20 @@ ddiv_normalised: // denormal handler will come back to here
   // To preserve the invariant that the approximation error is always negative,
   // we negate via one's complement rather than two's. (This would only make a
   // difference if r8 had happened to be exactly 0. That in turn can occur when
-  // bl=0, so one of the test cases in ddiv-diagnostics.c deliberately uses
+  // yl=0, so one of the test cases in ddiv-diagnostics.c deliberately uses
   // such a value, so that the intermediate results can be checked against the
   // reference Python.)
   MVN     r12, r12
   MVN     lr, lr
-  // Now lr:r12:r8 contains 2-bx. We discard the low word r8 to reduce that to
+  // Now lr:r12:r8 contains 2-yr. We discard the low word r8 to reduce that to
   // 64 bits, and do another 32x64 → 96 bit multiplication.
-  UMULL   r5, r8, r6, r12      // multiply x by bottom half of 2-bx
+  UMULL   r5, r8, r6, r12      // multiply r by bottom half of 2-yr
   MOV     r7, #0               // initialize high word to 0
-  UMLAL   r8, r7, r6, lr       // multiply x by top half of 2-bx
+  UMLAL   r8, r7, r6, lr       // multiply r by top half of 2-yr
   debug64 "recip64 = %016llX\n", r7, r8
 
   // That's the Newton-Raphson iteration done: we have a 64-bit approximation
-  // to 1/b. Multiply it by a to get the full approximate quotient.
+  // to 1/y. Multiply it by x to get the full approximate quotient.
   //
   // In principle, this would be a 64x64 → 128 bit multiplication, involving
   // four long multiply instructions. But we only need the top 64 bits, and
@@ -224,17 +224,17 @@ ddiv_normalised: // denormal handler will come back to here
   // implementation which generates Gappa input, so they're all accounted for
   // in the error analysis.)
 #if __ARM_FEATURE_DSP
-  UMULL   r12, r6, ah, r8      // r6 = high word of a * low word of 1/b
-  UMULL   r12, r5, al, r7      // r5 = low word of a * high word of 1/b
-  UMAAL   r6, r5, ah, r7       // add those to the product of both high words
+  UMULL   r12, r6, xh, r8      // r6 = high word of x * low word of 1/y
+  UMULL   r12, r5, xl, r7      // r5 = low word of x * high word of 1/y
+  UMAAL   r6, r5, xh, r7       // add those to the product of both high words
 #else
   // Alternative instruction sequence using UMLAL, if UMAAL isn't available
-  UMULL   r12, r6, ah, r8      // r6 = high word of a * low word of 1/b
-  UMULL   r12, lr, al, r7      // lr = low word of a * high word of 1/b
+  UMULL   r12, r6, xh, r8      // r6 = high word of x * low word of 1/y
+  UMULL   r12, lr, xl, r7      // lr = low word of x * high word of 1/y
   ADDS    r6, r6, lr           // add those together
   MOV     r5, #0               // set r5 to the carry out of that addition
   ADC     r5, r5, #0
-  UMLAL   r6, r5, ah, r7       // add that to the product of both high words
+  UMLAL   r6, r5, xh, r7       // add that to the product of both high words
 #endif
   // Now r5:r6 is the completed approximate quotient, with its leading bit at
   // position either 61 or 62.
@@ -333,10 +333,10 @@ ddiv_normalised: // denormal handler will come back to here
   // word, and already rounded to nearest.
 ddiv_corrected:
   // Recombine the output mantissa with the sign and exponent.
-  ADD     ah, r5, r4, LSL #31     // add sign bit to top word of mantissa
+  ADD     xh, r5, r4, LSL #31     // add sign bit to top word of mantissa
   BIC     r12, r4, #1             // isolate exponent in top half of r4
-  ADD     ah, ah, r12, LSL #4     // add exponent to make the final high word
-  MOV     al, r7                  // move low word into the right register
+  ADD     xh, xh, r12, LSL #4     // add exponent to make the final high word
+  MOV     xl, r7                  // move low word into the right register
 
   // If there's no overflow or underflow, we're done.
   //
@@ -361,10 +361,10 @@ ddiv_corrected:
   // Now check the remaining cases more carefully.
   //
   // If r12 < 0 then we definitely have underflow. We detect overflow precisely
-  // by seeing if the _final_ output exponent (in the output register ah) is
+  // by seeing if the _final_ output exponent (in the output register xh) is
   // 0x7ff or more, by incrementing it and seeing if the sign is opposite from
   // the intended output sign.
-  ADD     lr, ah, #1<<20          // increment the output exponent field
+  ADD     lr, xh, #1<<20          // increment the output exponent field
   TEQ     lr, r4, LSL #31         // set N if the sign now doesn't match r4[0]
   TSTPL   r12, r12                // otherwise, set N if underflow
   POPPL   {r4,r5,r6,r7,r8,pc}     // if neither, we've finished
@@ -376,7 +376,7 @@ ddiv_corrected:
   // For overflow, correct the sign by biasing the exponent downward, and go to
   // code that constructs an infinite return value (shared with the
   // division-by-zero handler).
-  SUB     ah, ah, #0x60000000
+  SUB     xh, xh, #0x60000000
   POP     {r4,r5,r6,r7,r8,lr}     // ddiv_retinf expects no regs on the stack
   B       ddiv_retinf
 
@@ -386,38 +386,38 @@ ddiv_correction:
   // that we can reliably determine the rounding direction, including whether
   // the quotient was exact).
   //
-  // Regarding the input mantissas a,b and our approximate quotient q as
+  // Regarding the input mantissas x,y and our approximate quotient q as
   // integers in [2^52,2^53), the quotient is an approximation to either
-  // a*2^52/b or a*2^53/b, depending on which of a,b was larger. We know that q
+  // x*2^52/y or x*2^53/y, depending on which of x,y was larger. We know that q
   // is less than the true value of that quotient by at most a small fraction
   // of a ULP. So the correct rounded quotient is either equal to q or to q+1,
-  // and we can decide which by multiplying back up by b: we want q - a*2^k/b
+  // and we can decide which by multiplying back up by y: we want q - x*2^k/y
   // to be in the range (-1/2,+1/2) (where k = 52 or 53), which is equivalent
-  // to asking if qb - a*2^k is in the range (-b/2,+b/2).
+  // to asking if qy - x*2^k is in the range (-y/2,+y/2).
   //
   // That's a calculation we can do in integers using only addition and
   // multiplication. And we know that if q itself doesn't have that property
   // then q+1 will.
 
-  // The mantissa of b is currently right at the top of the word, which means
+  // The mantissa of y is currently right at the top of the word, which means
   // that if the result of our check is greater than it, it will overflow. So
-  // we must start by shifting b downward. We'll put it back at the bottom of
+  // we must start by shifting y downward. We'll put it back at the bottom of
   // the word, where it was in the input float.
-  LSR     bl, bl, #11             // shift bl right
-  ORR     bl, bl, bh, LSL #21     // OR in the bits shifted out of bh
-  LSR     bh, bh, #11             // shift bh right
+  LSR     yl, yl, #11             // shift yl right
+  ORR     yl, yl, yh, LSL #21     // OR in the bits shifted out of yh
+  LSR     yh, yh, #11             // shift yh right
 
-  // Compute the integer qb-a. Because q is already very close to the right
-  // quotient, we expect this to be an integer at most twice the size of b,
+  // Compute the integer qy-x. Because q is already very close to the right
+  // quotient, we expect this to be an integer at most twice the size of y,
   // which easily fits in 64 bits. So we don't need to compute the full 128-bit
   // product: the low 64 bits are enough.
-  UMULL   r8, r6, r7, bl          // 64-bit product of the low words
-  MLA     r6, r7, bh, r6          //   + (high word of b) * (low word of q)
-  MLA     r6, r5, bl, r6          //   + (high word of q) * (low word of b)
+  UMULL   r8, r6, r7, yl          // 64-bit product of the low words
+  MLA     r6, r7, yh, r6          //   + (high word of y) * (low word of q)
+  MLA     r6, r5, yl, r6          //   + (high word of q) * (low word of y)
 
-  // Now we must subtract either a << 53 or a << 52. This will only affect the
-  // high word of the product we've just computed. Also the mantissa of a is
-  // already shifted left by 11. So we shift al left by either (52-32-11) or
+  // Now we must subtract either x << 53 or x << 52. This will only affect the
+  // high word of the product we've just computed. Also the mantissa of x is
+  // already shifted left by 11. So we shift xl left by either (52-32-11) or
   // (53-32-11), i.e. by 9 or by 10, and subtract from the high word of the
   // product.
   //
@@ -425,24 +425,24 @@ ddiv_correction:
   // renormalization, which added 0x40000000 to the high word of the initial
   // approximate quotient 'quot'. If that had bit 62 set (so no renormalization
   // needed) then the addition carried into the sign bit; otherwise it didn't.
-  // So lr is positive if and only if we need to shift al left by an extra bit.
+  // So lr is positive if and only if we need to shift xl left by an extra bit.
   TST     lr, lr                  // did we renormalize?
-  SUBPL   r6, r6, al, LSL #10     // if so, subtract a<<53 from q*b
-  SUBMI   r6, r6, al, LSL #9      // if not, subtract a<<52
+  SUBPL   r6, r6, xl, LSL #10     // if so, subtract x<<53 from q*y
+  SUBMI   r6, r6, xl, LSL #9      // if not, subtract x<<52
 
-  // Now r6:r8 contains the residual value r = qb - a*2^k as described above.
-  // If this is between -b/2 and +b/2 then q is already the correctly rounded
+  // Now r6:r8 contains the residual value r = qy - x*2^k as described above.
+  // If this is between -y/2 and +y/2 then q is already the correctly rounded
   // quotient. Otherwise, the correct quotient is q+1, so the value in r6:r8
-  // will be too small (incrementing q would add b to it). So we need to check
-  // whether r < -b/2, or equivalently whether 2r < -b (avoiding having to
-  // worry about what happens when we halve b if it's odd).
+  // will be too small (incrementing q would add y to it). So we need to check
+  // whether r < -y/2, or equivalently whether 2r < -y (avoiding having to
+  // worry about what happens when we halve y if it's odd).
   //
   // As mentioned above, division can't give an exact halfway case, so we don't
-  // need to worry about the case r = b/2.
+  // need to worry about the case r = y/2.
   ADDS    r8, r8, r8              // multiply the residual by 2
   ADC     r6, r6, r6
-  ADDS    lr, r8, bl              // add b to it, discarding the result
-  ADCS    lr, r6, bh
+  ADDS    lr, r8, yl              // add y to it, discarding the result
+  ADCS    lr, r6, yh
   BPL     ddiv_corrected          // if the answer is positive, we're OK
 
   // If we didn't take that branch, then the approximate quotient is too small
@@ -455,8 +455,8 @@ ddiv_correction:
   // update of r6:r8, but the test would cost as much effort as it saved!)
   ADDS    r7, r7, #1              // increment the output quotient
   ADCS    r5, r5, #0
-  ADDS    r8, r8, bl              // repeat the addition of b to the residual,
-  ADCS    r6, r6, bh              //   this time keeping the result in r6:r8
+  ADDS    r8, r8, yl              // repeat the addition of y to the residual,
+  ADCS    r6, r6, yh              //   this time keeping the result in r6:r8
   B       ddiv_corrected          // finally we can rejoin the main code
 
 ddiv_result_is_power_of_2:
@@ -474,14 +474,14 @@ ddiv_result_is_power_of_2:
 
 ddiv_underflow:
   // We come here to handle underflow. The output double, constructed naïvely
-  // from the out-of-range exponent, is in ah:al. We expect in this situation
+  // from the out-of-range exponent, is in xh:xl. We expect in this situation
   // that we've _always_ come via either the ddiv_correction slow path or the
   // ddiv_result_is_power_of_2 special case, both of which will have set up a
-  // residual value in r6:r8 equal to q*b - a*2^k (for appropriate k). This
+  // residual value in r6:r8 equal to q*y - x*2^k (for appropriate k). This
   // value is positive if the quotient is slightly above the true value (i.e.
   // was rounded up), or negative if the quotient was rounded down. But we must
   // also distinguish the third case of the residual being exactly zero.
-  ADD     ah, ah, #0x60000000     // apply IEEE 754 exponent bias for __dunder
+  ADD     xh, xh, #0x60000000     // apply IEEE 754 exponent bias for __dunder
   ORRS    r12, r6, r8             // set r12=0 and Z=1 if quotient was exact
   MOVNE   r12, #1                 // otherwise, set r12 = +1
   ORRNE   r12, r12, r6, ASR #31   // and change to -1 if residual is negative
@@ -493,14 +493,14 @@ ddiv_zerodenorm:
   // or denormal. However, we know there are no infinities or NaNs, because
   // those were checked first and will have gone to ddiv_naninf below.
   //
-  // First we must repeat the instruction which extracted the exponent of b
+  // First we must repeat the instruction which extracted the exponent of y
   // into r5, this time unconditionally, in case the setup code didn't do it.
-  AND     r5, r12, bh, LSR #4
+  AND     r5, r12, yh, LSR #4
 
   // If either or both input is actually zero, the answer is easy.
-  ORRS    lr, al, ah, LSL #1    // is a zero?
-  BEQ     ddiv_azero
-  ORRS    lr, bl, bh, LSL #1    // is b zero?
+  ORRS    lr, xl, xh, LSL #1    // is x zero?
+  BEQ     ddiv_xzero
+  ORRS    lr, yl, yh, LSL #1    // is y zero?
   BEQ     ddiv_divbyzero
 
   // Otherwise, delegate to __dnorm2 to handle denormals, converting them into
@@ -522,22 +522,22 @@ ddiv_zerodenorm:
   ORR     r4, r4, r6, LSR #31      // recover output sign from top bit of r6
   B       ddiv_normalised          // rejoin the main code
 
-ddiv_azero:
-  // We come here if a=0. We return 0 (of the right sign) if b is not 0, and
+ddiv_xzero:
+  // We come here if x=0. We return 0 (of the right sign) if y is not 0, and
   // the default quiet NaN if both inputs are zero.
-  ORRS    lr, bl, bh, LSL #1       // is b zero?
+  ORRS    lr, yl, yh, LSL #1       // is y zero?
   BEQ     ddiv_ivo_pop             // if so, pop registers and return a NaN
-  // We know al=0 already, so we only need to reset ah to contain the right
+  // We know xl=0 already, so we only need to reset xh to contain the right
   // output sign. The setup code left that in the high bit of r6.
-  AND     ah, r6, #0x80000000
+  AND     xh, r6, #0x80000000
   POP     {r4,r5,r6,r7,r8,pc}
 
 ddiv_divbyzero:
-  // We come here if b=0, but a is not 0 (or we'd have gone to ddiv_azero above
+  // We come here if y=0, but x is not 0 (or we'd have gone to ddiv_xzero above
   // instead). So we're dividing a nonzero number by zero, and must return
   // infinity.
   POP     {r4,r5,r6,r7,r8,lr}
-  EOR     ah, ah, bh               // combine signs to get result sign
+  EOR     xh, xh, yh               // combine signs to get result sign
   B       ddiv_retinf
 
 ddiv_naninf:
@@ -548,17 +548,17 @@ ddiv_naninf:
   POP     {r4,r5,r6,r7,r8,lr}
 
   // A number is a NaN if its exponent is 0x7ff and at least one bit below that
-  // is set. The CMP + ADC pair here converts the two words ah:al into a single
-  // word containing ah shifted up by one (throwing away the sign bit which
-  // makes no difference), with its low bit set if al was nonzero. So if that
-  // is strictly greater than 0xffe00000, then a was a NaN.
-  CMP     al, #1
-  ADC     r12, ah, ah
+  // is set. The CMP + ADC pair here converts the two words xh:xl into a single
+  // word containing xh shifted up by one (throwing away the sign bit which
+  // makes no difference), with its low bit set if xl was nonzero. So if that
+  // is strictly greater than 0xffe00000, then x was a NaN.
+  CMP     xl, #1
+  ADC     r12, xh, xh
   CMP     r12, #0xFFE00000
   BHI     __dnan2
-  // Now check b in the same way.
-  CMP     bl, #1
-  ADC     r12, bh, bh
+  // Now check y in the same way.
+  CMP     yl, #1
+  ADC     r12, yh, yh
   CMP     r12, #0xFFE00000
   BHI     __dnan2
 
@@ -566,7 +566,7 @@ ddiv_naninf:
   // both operands are infinity then we have inf / inf = invalid operation and
   // must return a NaN. We detect this by XORing the inputs' exponent fields:
   // knowing one of them is 7FF, they XOR to zero iff the other one is too.
-  EORS    r12, ah, bh              // XOR entire top words of the inputs
+  EORS    r12, xh, yh              // XOR entire top words of the inputs
   LSL     r12, r12, #1             // shift left to discard the sign bit
   LSRS    r12, r12, #21            // shift right again to discard mantissas
   BEQ     ddiv_ivo                 // if what's left is 0, we have inf / inf
@@ -576,22 +576,22 @@ ddiv_naninf:
   //   infinity / anything = infinity
   //   anything / infinity = 0
   //
-  // Determine if a is the infinity, by bitwise inverting the whole word and
+  // Determine if x is the infinity, by bitwise inverting the whole word and
   // then shifting left and right to isolate its exponent bits.
-  MVN     r12, ah, LSL #1          // invert a, shift left to discard sign
+  MVN     r12, xh, LSL #1          // invert x, shift left to discard sign
   LSRS    r12, r12, #21            //   and shift right to discard mantissa
-  EOR     ah, ah, bh               // calculate the output sign bit
-  BEQ     ddiv_retinf              // if a = inf, return infinity of that sign
-  MOV     al, #0                   // otherwise clear all bits of a
-  AND     ah, ah, #0x80000000      //   other than the sign bit
+  EOR     xh, xh, yh               // calculate the output sign bit
+  BEQ     ddiv_retinf              // if x = inf, return infinity of that sign
+  MOV     xl, #0                   // otherwise clear all bits of x
+  AND     xh, xh, #0x80000000      //   other than the sign bit
   BX      lr                       //   and return zero of the same sign
 ddiv_retinf:
-  // Construct and return an infinity in ah:al, with whatever sign bit is
-  // already in the top bit of ah.
-  MOV     al, #0                   // clear low word
-  MVN     ah, ah, LSR #31          // shift ah[31] down to bit 0, inverted
-  MVN     ah, ah, LSL #11          // uninvert, and put exponent 0x7ff below it
-  LSL     ah, ah, #20              // shift back up to the top
+  // Construct and return an infinity in xh:xl, with whatever sign bit is
+  // already in the top bit of xh.
+  MOV     xl, #0                   // clear low word
+  MVN     xh, xh, LSR #31          // shift xh[31] down to bit 0, inverted
+  MVN     xh, xh, LSL #11          // uninvert, and put exponent 0x7ff below it
+  LSL     xh, xh, #20              // shift back up to the top
   BX      lr
 
   // Code to construct and return the default quiet NaN, for the cases inf/inf
@@ -601,9 +601,9 @@ ddiv_retinf:
 ddiv_ivo_pop:
   POP     {r4,r5,r6,r7,r8,lr}
 ddiv_ivo:
-  MOVW    ah, 0x7ff8
-  LSLS    ah, ah, #16
-  MOV     al, #0
+  MOVW    xh, 0x7ff8
+  LSLS    xh, xh, #16
+  MOV     xl, #0
   BX      lr
 
   // Table of approximate reciprocals, generated by running

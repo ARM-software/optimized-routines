@@ -11,17 +11,17 @@
 //
 // There are three actual entry points here, for addition, subtraction and
 // reversed subtraction (just taking the operands the other way round, so that
-// it returns b-a instead of a-b). But the first thing the functions do (after
+// it returns y-x instead of x-y). But the first thing the functions do (after
 // checking for NaNs) is to sort out whether the magnitudes of the two inputs
-// are being added (a+b with like signs, or a-b with different signs), or
+// are being added (x+y with like signs, or x-y with different signs), or
 // subtracted. So fadd jumps across into the middle of fsub if it sees that the
 // signs are different, and vice versa. Then the main code path in fadd handles
 // magnitude addition, and the one in fsub handles magnitude subtraction.
 //
 // NaNs are checked first, so that an input NaN can be propagated exactly,
 // including its sign bit. After ruling out that case, it's safe to flip the
-// sign of one of the inputs, so that during the cross-calls, a - b can be
-// rewritten as a + (-b) and vice versa.
+// sign of one of the inputs, so that during the cross-calls, x - y can be
+// rewritten as x + (-y) and vice versa.
 
   .globl arm_fp_fadd
   .type arm_fp_fadd,%function
@@ -30,29 +30,29 @@ arm_fp_fadd:
   // zeroes. Branch out of line if any are found. We do this by XORing each
   // input with itself shifted left by a bit, which means that exponents 00 and
   // FF will both end up with seven zero bits at the top.
-  EOR     r2, r0, r0, LSL #1   // combine a with itself shifted
-  EOR     r3, r1, r1, LSL #1   // same for b
-  TST     r2, #0x7F000000      // is a uncommon?
-  TSTNE   r3, #0x7F000000      // if not, is b uncommon?
+  EOR     r2, r0, r0, LSL #1   // combine x with itself shifted
+  EOR     r3, r1, r1, LSL #1   // same for y
+  TST     r2, #0x7F000000      // is x uncommon?
+  TSTNE   r3, #0x7F000000      // if not, is y uncommon?
   BEQ.W   fadd_uncommon        // if either, branch out of line
 
   // Now we have two normalised numbers. If their signs are opposite, we should
   // be subtracting their magnitudes rather than adding, so cross-jump to fsub.
   TEQ     r0, r1               // set N if signs are unequal
-  EORMI   r1, r1, #1 << 31     // if so, flip the sign of b
+  EORMI   r1, r1, #1 << 31     // if so, flip the sign of y
   BMI.W   fsub_magnitude       // and go to magnitude subtraction
 fadd_magnitude:
   // If we get here, we're adding operands with equal signs (i.e. a magnitude
   // addition). First thing to do is put the operands in magnitude order, so
-  // that a >= b.
-  SUBS    r2, r0, r1           // compare inputs, also keeping a-b
-  SUBLO   r0, r0, r2           // if a<b then turn a into b, using value in r2
-  ADDLO   r1, r1, r2           // and similarly turn b into a
+  // that x >= y.
+  SUBS    r2, r0, r1           // compare inputs, also keeping x-y
+  SUBLO   r0, r0, r2           // if x<y then turn x into y, using value in r2
+  ADDLO   r1, r1, r2           // and similarly turn y into x
 
   // Keep the sign and exponent of the larger input, to use as the sign and
   // exponent of the output (up to carries and overflows). Also calculate the
-  // exponent difference, which tells us how far we'll need to shift b's
-  // mantissa right to add it to a's.
+  // exponent difference, which tells us how far we'll need to shift y's
+  // mantissa right to add it to x's.
   //
   // The shifted-right values will include the sign bits as well as the
   // exponents, but that's OK, in this branch the two sign bits are the same,
@@ -88,7 +88,7 @@ fadd_doadd:
 
   // Actually shift the smaller mantissa downwards and add them together.
 #if !__thumb__
-  ADDS    r12, r0, r1, LSR r3  // CS if a >= 2.0
+  ADDS    r12, r0, r1, LSR r3  // CS if x >= 2.0
 #else
   // Thumb can't fold a register-controlled shift into an add, so we must use
   // two separate instructions.
@@ -120,7 +120,7 @@ fadd_doadd:
   BXCC    lr
 
   // But if we did round up, then we must also check if we need to round to
-  // even. This occurs if all the bits of b's mantissa shifted off the bottom
+  // even. This occurs if all the bits of y's mantissa shifted off the bottom
   // are zero except for the round bit.
   //
   // Some of those bits are in r12 (the 32-bit version of the sum's mantissa).
@@ -129,10 +129,10 @@ fadd_doadd:
   TST     r12, #127
   BXNE    lr
 
-  // Failing that, we have to go back to the original mantissa of b (still in
+  // Failing that, we have to go back to the original mantissa of y (still in
   // r1) and work out exactly how many bits of it to check.
-  RSB     r3, r3, #32  // opposite of the amount we shifted b right by
-  LSLS    r1, r1, r3   // shift b left by that amount instead
+  RSB     r3, r3, #32  // opposite of the amount we shifted y right by
+  LSLS    r1, r1, r3   // shift y left by that amount instead
 
   // Now if Z is set, we do round to even, which works by just clearing the low
   // bit of the output mantissa. This undoes the round-up if we rounded up to
@@ -190,8 +190,8 @@ fadd_roundeven_ovf:
   // may _also_ have overflowed, and just not have noticed yet.
 
   // Same round-to-even check as in the non-carry case above.
-  RSB     r3, r3, #32  // opposite of the amount we shifted b right by
-  LSLS    r1, r1, r3   // shift b left by that amount instead
+  RSB     r3, r3, #32  // opposite of the amount we shifted y right by
+  LSLS    r1, r1, r3   // shift y left by that amount instead
   BICEQ   r0, r0, #1   // and if the remaining bits are all 0, round to even
 
   // Now check for overflow, and if none, we're done.
@@ -206,7 +206,7 @@ fadd_ovf:
   BX      lr
 
 fadd_uncommon:
-  // We come here if the entry-point check says that at least one of a and b
+  // We come here if the entry-point check says that at least one of x and y
   // has an uncommon (FF or 00) exponent. So we have at least one NaN,
   // infinity, denormal or zero, but we don't know which, or which operand it's
   // in. And we could have any combination of those types of input, in _both_
@@ -225,33 +225,33 @@ fadd_uncommon:
   EORMI   r1, r1, #1 << 31   // if so, negate the second operand
   BMI.W   fsub_zerodenorm    // and cross-jump to the fsub version of this code
 fadd_zerodenorm:
-  // Now we know a and b have the same sign, and at least one of them is zero
+  // Now we know x and y have the same sign, and at least one of them is zero
   // or denormal. If there aren't any zeroes, we'll end up rejoining the fast
   // path, so we must set up all the same registers, and do our checks for zero
   // in line with that.
   //
   // Start by exactly repeating the initial fast-path setup code: sort into
   // magnitude order, get the output sign+exponent and the exponent shift.
-  SUBS    r2, r0, r1           // compare inputs, also keeping a-b
-  SUBLO   r0, r0, r2           // if a<b then turn a into b, using value in r2
-  ADDLO   r1, r1, r2           // and similarly turn b into a
-  MOV     r2, r0, LSR #23      // get exponent of a (the sign bit will cancel)
-  SUB     r3, r2, r1, LSR #23  // subtract exponent of b to get shift count
+  SUBS    r2, r0, r1           // compare inputs, also keeping x-y
+  SUBLO   r0, r0, r2           // if x<y then turn x into y, using value in r2
+  ADDLO   r1, r1, r2           // and similarly turn y into x
+  MOV     r2, r0, LSR #23      // get exponent of x (the sign bit will cancel)
+  SUB     r3, r2, r1, LSR #23  // subtract exponent of y to get shift count
 
-  // Shift b's mantissa up to the top of r1. We know b has exponent 0 (at least
+  // Shift y's mantissa up to the top of r1. We know y has exponent 0 (at least
   // one of the inputs does, and we've sorted them by now). So we definitely
-  // don't need to set the leading bit on b's mantissa; also, if r1 becomes
+  // don't need to set the leading bit on y's mantissa; also, if r1 becomes
   // zero, then we know we have an addition to 0, and otherwise, we know both
   // inputs are nonzero.
-  MOVS    r1, r1, LSL #8       // is b zero?
-  BXEQ    lr                   // if so, just return a
+  MOVS    r1, r1, LSL #8       // is y zero?
+  BXEQ    lr                   // if so, just return x
 
-  // Now we know there aren't any zeroes, and that b is a denormal. a might or
+  // Now we know there aren't any zeroes, and that y is a denormal. x might or
   // might not be a denormal, so we must check that and decide whether to set
   // its top mantissa bit.
-  MOV     r0, r0, LSL #8       // shift mantissa of a to the top of r0
-  TST     r2, #255             // is a's exponent 0? If so, it's denormal
-  ORRNE   r0, r0, #1 << 31     // if not, set leading bit of a,
+  MOV     r0, r0, LSL #8       // shift mantissa of x to the top of r0
+  TST     r2, #255             // is x's exponent 0? If so, it's denormal
+  ORRNE   r0, r0, #1 << 31     // if not, set leading bit of x,
   SUBNE   r3, r3, #1           //   adjust exponent difference,
   BNE     fadd_doadd           //  and go back to mainstream
 
@@ -293,7 +293,7 @@ fadd_inf:
   .globl arm_fp_frsub
   .type arm_fp_frsub,%function
 arm_fp_frsub:
-  // Reversed subtraction, that is, compute b-a, where a is in r0 and b in r1.
+  // Reversed subtraction, that is, compute y-x, where x is in r0 and y in r1.
   //
   // We could implement this by simply swapping r0 with r1. But the point of
   // having a reversed-subtract in the first place is to avoid the caller
@@ -343,7 +343,7 @@ arm_fp_fsub:
 
   // Check the signs, and if they're unequal, cross-jump into fadd to do
   // magnitude addition. (Now we've excluded NaNs, it's safe to flip the sign
-  // of b.)
+  // of y.)
   TEQ     r0, r1
   EORMI   r1, r1, #1 << 31
   BMI.W   fadd_magnitude
@@ -351,8 +351,8 @@ arm_fp_fsub:
 fsub_magnitude:
   // If we get here, we're subtracting operands with equal signs (i.e. a
   // magnitude subtraction). First thing to do is put operands in magnitude
-  // order, so that a >= b. However, if they are swapped, we must also negate
-  // both of them, since A - B = (-B) - (-A).
+  // order, so that x >= y. However, if they are swapped, we must also negate
+  // both of them, since x - y = (-y) - (-x).
   SUBS    r2, r0, r1            // LO if we must swap the operands
 #if !__thumb__
   // Conditional on LO, swap the operands, by adding/subtracting the difference
@@ -397,9 +397,9 @@ fsub_dosub:
   //   r2 = result sign/exponent (in low 9 bits)
   //   r3 = exponent difference.
   //
-  // Begin calculating the output mantissa by shifting b's mantissa right and
+  // Begin calculating the output mantissa by shifting y's mantissa right and
   // subtracting. This may leave the mantissa too large by one, if the bits
-  // shifted out of b are nonzero. We correct this during rounding if
+  // shifted out of y are nonzero. We correct this during rounding if
   // necessary.
 #if !__thumb__
   SUBS    r12, r0, r1, LSR r3    // MI if high bit set
@@ -493,7 +493,7 @@ fsub_renorm_0:
   // Otherwise, fall through to the full check for round to even.
 fsub_roundeven:
   // Same round-to-even check as in the fadd cases: find all the bits we
-  // shifted out of b's mantissa and see if any are zero.
+  // shifted out of y's mantissa and see if any are zero.
   RSB     r3, r3, #32
   LSLS    r1, r1, r3       // set Z if we're rounding to even
 
@@ -612,7 +612,7 @@ fsub_underflow:
   BX      lr                   // and return
 
 fsub_uncommon:
-  // We come here if the entry-point check says that at least one of a and b
+  // We come here if the entry-point check says that at least one of x and y
   // has an uncommon (FF or 00) exponent. So we have at least one NaN,
   // infinity, denormal or zero, but we don't know which, or which operand it's
   // in. And we could have any combination of those types of input, in _both_
@@ -632,45 +632,45 @@ fsub_uncommon:
   BMI.W   fadd_zerodenorm    // and cross-jump to the fadd version of this code
 
 fsub_zerodenorm:
-  // Now we know a and b have the same sign, and at least one of them is zero
+  // Now we know x and y have the same sign, and at least one of them is zero
   // or denormal. If there aren't any zeroes, we'll end up rejoining the fast
   // path, so we must set up all the same registers, and do our checks for zero
   // in line with that.
   //
   // Start by exactly repeating the initial fast-path setup code: sort into
   // magnitude order, get the output sign+exponent and the exponent shift.
-  SUBS    r2, r0, r1         // compare inputs, also keeping a-b
+  SUBS    r2, r0, r1         // compare inputs, also keeping x-y
   EORLO   r2, r2, #1 << 31   // if misordered, flip high bit of difference
   SUBLO   r0, r0, r2         // and use that to swap and sign-flip
   ADDLO   r1, r1, r2         //   the two inputs
   MOV     r2, r0, LSR #23      // r2 = sign<<8 + exponent
   SUB     r3, r2, r1, LSR #23  // shift = 0..254 (sign bits cancel)
 
-  // Shift b's mantissa up to the top of r1. We know b has exponent 0 (at least
+  // Shift y's mantissa up to the top of r1. We know y has exponent 0 (at least
   // one of the inputs does, and we've sorted them by now). So we definitely
-  // don't need to set the leading bit on b's mantissa; also, if r1 becomes
-  // zero, then we know we're subtracting 0 from a.
+  // don't need to set the leading bit on y's mantissa; also, if r1 becomes
+  // zero, then we know we're subtracting 0 from x.
   MOVS    r1, r1, LSL #8
-  BEQ     fsub_bzero
+  BEQ     fsub_yzero
 
-  // Now we know there aren't any zeroes, and that b is a denormal. a might or
+  // Now we know there aren't any zeroes, and that y is a denormal. x might or
   // might not be a denormal, so we must check that and decide whether to set
   // its top mantissa bit.
-  MOV     r0, r0, LSL #8       // shift mantissa of a to the top of r0
-  TST     r2, #255             // is a's exponent 0? If so, it's denormal
-  ORRNE   r0, r0, #1 << 31     // if not, set leading bit of a,
+  MOV     r0, r0, LSL #8       // shift mantissa of x to the top of r0
+  TST     r2, #255             // is x's exponent 0? If so, it's denormal
+  ORRNE   r0, r0, #1 << 31     // if not, set leading bit of x,
   SUBNE   r3, r3, #1           //   adjust exponent difference,
 
   B       fsub_dosub
 
-fsub_bzero:
-  // Here, we know b = 0, so we're subtracting 0 from a. For most values of a,
-  // we return a unchanged: subtracting 0 makes no difference. But if a is
-  // _also_ 0 then we must return +0, rather than whatever a's sign of zero is.
+fsub_yzero:
+  // Here, we know y = 0, so we're subtracting 0 from x. For most values of x,
+  // we return x unchanged: subtracting 0 makes no difference. But if x is
+  // _also_ 0 then we must return +0, rather than whatever x's sign of zero is.
   // (Because +0 is always the sign of zero you return when subtracting a
   // number from itself).
-  MOVS    r12, r0, LSL #1      // test if a = 0 (bottom 31 bits all zero)
-  MOVEQ   r0, #0               // if so, replace a with +0
+  MOVS    r12, r0, LSL #1      // test if x = 0 (bottom 31 bits all zero)
+  MOVEQ   r0, #0               // if so, replace x with +0
   BX      lr
 
 fsub_naninf:
@@ -685,7 +685,7 @@ fsub_naninf:
 
   // Otherwise, we have no NaNs and at least one infinity, so we're returning
   // either infinity, or NaN for an (inf-inf) subtraction. We can safely handle
-  // all these cases by flipping the sign of b and going to fadd_inf.
+  // all these cases by flipping the sign of y and going to fadd_inf.
   EOR     r1, r1, #0x80000000
   B       fadd_inf
 

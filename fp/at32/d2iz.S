@@ -22,7 +22,7 @@ arm_fp_d2iz:
   // shift it right by an amount derived from the exponent.
 
   // Separate out the exponent of the input.
-  LSLS    r3, ah, #1            // everything but the sign bit
+  LSLS    r3, xh, #1            // everything but the sign bit
   LSRS    r3, r3, #21           // just the exponent
 
   // Convert the exponent into a right shift count. This involves subtracting
@@ -46,10 +46,10 @@ arm_fp_d2iz:
 
   // Construct a word containing the top 32 bits of the mantissa. We do this in
   // such a way that the initial ORRS also sets the N flag based on the sign
-  // bit in ah, so that we can use that for a conditional negation later.
-  ORRS    r2, ah, #1 << 20      // put on the leading 1 and test sign
-  LSL     r2, r2, #11           // shift mantissa part of ah up to top of word
-  ORR     r2, r2, al, LSR #21   // the top 11 mantissa bits from al
+  // bit in xh, so that we can use that for a conditional negation later.
+  ORRS    r2, xh, #1 << 20      // put on the leading 1 and test sign
+  LSL     r2, r2, #11           // shift mantissa part of xh up to top of word
+  ORR     r2, r2, xl, LSR #21   // the top 11 mantissa bits from xl
 
   // Now shift the mantissa down to its output position, moving it into the
   // output register r0 in the process, and negate the result if the input was
@@ -93,15 +93,15 @@ d2iz_uncommon:
   BXGT    lr
 
   // Now check for NaNs.
-  LSLS    r2, ah, #1              // shift exponent of a to top of word
-  CMN     r2, #1 << 21            // set HI if ah proves it's a NaN by itself
-  CMPEQ   al, #0                  // now HI is set if it's a NaN
+  LSLS    r2, xh, #1              // shift exponent of x to top of word
+  CMN     r2, #1 << 21            // set HI if xh proves it's a NaN by itself
+  CMPEQ   xl, #0                  // now HI is set if it's a NaN
   BHI     d2iz_nan
 
   // The remaining case is a too-large exponent. Return either INT_MAX or
   // INT_MIN depending on sign.
   MOV     r2, #0x7FFFFFFF         // start with INT_MAX
-  EOR     r0, r2, ah, ASR #31     // flip all its bits if ah bit 31 is set
+  EOR     r0, r2, xh, ASR #31     // flip all its bits if xh bit 31 is set
   BX      lr
 
 d2iz_nan:

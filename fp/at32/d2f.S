@@ -19,11 +19,11 @@ arm_fp_d2f:
   // else' label which will have to figure out what kind of unusual thing has
   // happened.
 
-  // Split ah into the sign bit (in r3) and everything else (r2), so that we
+  // Split xh into the sign bit (in r3) and everything else (r2), so that we
   // can change the width of the exponent field and then put the sign back on
   // later.
-  BIC     r2, ah, #0x80000000
-  AND     r3, ah, #0x80000000
+  BIC     r2, xh, #0x80000000
+  AND     r3, xh, #0x80000000
 
   // Rebias the exponent, still in its double-precision location, to account
   // for the difference between double- and single-precision exponents.
@@ -39,15 +39,15 @@ arm_fp_d2f:
   // We've disposed of all the uncommon cases, so we know we're returning a
   // normalized float, but we might still need to round it. Shift the round bit
   // into the C flag, also setting Z if everything below that is zero.
-  LSLS    r12, al, #4
+  LSLS    r12, xl, #4
 
   // Put the result back together, by recombining the sign (in r3) with the
   // exponent and top of the mantissa (in r2, needing to be shifted left 3
-  // bits), plus the top 3 bits of al. The last of those is put on with an ADC
+  // bits), plus the top 3 bits of xl. The last of those is put on with an ADC
   // instruction, which also rounds up if the bit we just shifted into C was
   // set.
   ORR     r2, r3, r2, LSL #3    // sign + exponent + most of mantissa
-  ADC     r0, r2, al, LSR #29   // low 3 bits of mantissa + maybe round up
+  ADC     r0, r2, xl, LSR #29   // low 3 bits of mantissa + maybe round up
 
   // If C=1 and Z=1, we need to round to even. Otherwise we're finished. So we
   // conditionally return based on one of those flags, then clear the low
@@ -79,14 +79,14 @@ d2f_uncommon:
   // Of the various cases, the most important one to handle quickly is a zero
   // input, because those are probably fairly common. So the very first thing
   // we do is test if the input is zero, and if so, return the same sign of
-  // zero by simply using ah as the return value.
-  ORRS    r12, al, ah, LSL #1   // are all bits of ah:al 0 except the sign bit?
+  // zero by simply using xh as the return value.
+  ORRS    r12, xl, xh, LSL #1   // are all bits of xh:xl 0 except the sign bit?
 
 #ifndef __BIG_ENDIAN__
-  // In little-endian, ah (containing the desired sign bit) and r0 (the output
+  // In little-endian, xh (containing the desired sign bit) and r0 (the output
   // register) aren't the same. This instruction can be skipped in big-endian,
   // where the correct output value is already in r0.
-  MOVEQ   r0, ah
+  MOVEQ   r0, xh
 #endif
   BXEQ    lr
 
@@ -102,20 +102,20 @@ d2f_uncommon:
   CMP     r2, #0x00100000
   BLT     d2f_underflow
 
-  // Now figure out whether we had a NaN as input, by shifting ah left by a bit
-  // (discarding the sign) and setting the new low bit if al != 0. This gives a
+  // Now figure out whether we had a NaN as input, by shifting xh left by a bit
+  // (discarding the sign) and setting the new low bit if xl != 0. This gives a
   // value which is greater than 0xFFE00000 (in an unsigned comparison) for
   // precisely NaN inputs.
-  CMP     al, #1                // set C if al != 0
-  ADC     r12, ah, ah           // shift that in to the bottom of ah
+  CMP     xl, #1                // set C if xl != 0
+  ADC     r12, xh, xh           // shift that in to the bottom of xh
   CMN     r12, #0x00200000      // is the result > 0xFFE00000?
   BHI     d2f_nan               // if so, go and handle a NaN
 
   // If we're still here, we have a finite overflow, or an input infinity. We
   // don't have to figure out which: we return an infinity of the appropriate
-  // sign in both cases. So keep just the sign of ah, and make an infinity out
+  // sign in both cases. So keep just the sign of xh, and make an infinity out
   // of the rest of the bits.
-  MVN     r0, ah, LSR #31       // shift sign bit down to bit 0 and flip it
+  MVN     r0, xh, LSR #31       // shift sign bit down to bit 0 and flip it
   MVN     r0, r0, LSL #8        // flip it back, putting 8 set bits below it
   LSL     r0, r0, #23           // and shift those 9 bits back up to the top
   BX      lr
@@ -128,12 +128,12 @@ d2f_nan:
   // input one was signaling.
   //
   // So this code looks a bit like a miniature version of the fast path: we
-  // keep the bottom 8 bits of the exponent in ah as the output exponent (we
+  // keep the bottom 8 bits of the exponent in xh as the output exponent (we
   // know it's all 1s, which is what we want), plus all the mantissa bits below
   // it; shift all of that 3 bits left and recombine with the sign; then
-  // combine with the top 3 bits of al. Finally, set the top mantissa bit.
-  BIC     r2, ah, #0xF0000000   // everything from ah we want to shift left
-  ORR     r0, r3, al, LSR #29   // combine sign with low 3 output mantissa bits
+  // combine with the top 3 bits of xl. Finally, set the top mantissa bit.
+  BIC     r2, xh, #0xF0000000   // everything from xh we want to shift left
+  ORR     r0, r3, xl, LSR #29   // combine sign with low 3 output mantissa bits
   ORR     r0, r0, r2, LSL #3    // combine that with the shifted-up value in r2
   ORR     r0, r0, #0x00400000   // set the top mantissa bit to make it a QNaN
   BX      lr
@@ -161,11 +161,11 @@ d2f_underflow:
   // zero. This will determine the rounding direction we pass to __funder,
   // because although we never round _up_ on this path, we must still tell it
   // whether the value we pass it was rounded down or was already exact.
-  LSLS    r12, al, #3           // set Z if the intermediate value is exact
+  LSLS    r12, xl, #3           // set Z if the intermediate value is exact
 
   // Put together the intermediate value to pass to __funder.
   ORR     r2, r3, r2, LSL #3    // sign + exponent + most of mantissa
-  ORR     r0, r2, al, LSR #29   // combine with top 3 bits of al
+  ORR     r0, r2, xl, LSR #29   // combine with top 3 bits of xl
 
   // Set the rounding direction flag based on the test above.
   MOVEQ   r1, #0                // intermediate is exact

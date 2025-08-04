@@ -1,4 +1,4 @@
-// Single-precision comparison, returning a boolean in r0, true if a == b.
+// Single-precision comparison, returning a boolean in r0, true if x == y.
 //
 // Copyright (c) 1994-1998,2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception

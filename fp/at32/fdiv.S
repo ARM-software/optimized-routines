@@ -351,8 +351,8 @@ fdiv_uncommon:
   // We come here from the start of the function if either input is an uncommon
   // value: zero, denormal, infinity or NaN.
   //
-  // We arrive here with r12 = 0xFF000000, and r2 containing the exponent of a
-  // in bits 16..23. But r3 doesn't necessarily contain the exponent of b,
+  // We arrive here with r12 = 0xFF000000, and r2 containing the exponent of x
+  // in bits 16..23. But r3 doesn't necessarily contain the exponent of y,
   // because the instruction that set it up was conditional. So first we
   // unconditionally repeat it.
   AND     r3, r12, r1, LSR #7
@@ -371,14 +371,14 @@ fdiv_uncommon:
 
   // Now we know there are no infinities or NaNs, but there's at least one zero
   // or denormal.
-  MOVS    r12, r1, LSL #1       // is b zero?
+  MOVS    r12, r1, LSL #1       // is y zero?
   BEQ     fdiv_divbyzero        // if so, go and handle division by zero
-  MOVS    r12, r0, LSL #1       // is a zero? (now we know that b is not)
+  MOVS    r12, r0, LSL #1       // is x zero? (now we know that y is not)
   MOVEQ   r0, r2, LSL #23       // if so, 0/nonzero is just 0 (of right sign)
   BXEQ    lr
 
-  // Now we've eliminated zeroes as well, leaving only denormals: either a or
-  // b, or both, is a denormal. Call __fnorm2 to convert both into a normalised
+  // Now we've eliminated zeroes as well, leaving only denormals: either x or
+  // y, or both, is a denormal. Call __fnorm2 to convert both into a normalised
   // mantissa and a (potentially small) exponent.
   AND     r12, r2, #0x100       // save the result sign from r2
   LSR     r2, #16               // shift extracted exponents down to bit 0
@@ -391,7 +391,7 @@ fdiv_uncommon:
   ORR     r2, r12, r2, LSL #16  // and put the result sign back in r2
 
   // Now rejoin the main code path, having finished the setup it will expect:
-  // swap a and b, and shift the fractions back down to the low 24 bits.
+  // swap x and y, and shift the fractions back down to the low 24 bits.
   MOV     r12, r0, LSR #8
   MOV     r0, r1, LSR #8
   MOV     r1, r12
@@ -417,21 +417,21 @@ fdiv_inf_NaN:
   LSLS    r3, #1                // were all bits of XOR zero other than top?
   BEQ     fdiv_invalid          // if so, both operands are infinity
 
-  // See if a is infinite
+  // See if x is infinite
   CMP     r12, r0, LSL #1       // (r0 << 1) == 0xFF000000?
   BEQ     fdiv_infret           // if so, infinity/finite = infinity
 
-  // b is infinite and a is not, so we return a zero of the
+  // y is infinite and x is not, so we return a zero of the
   // combined sign.
   EOR     r0, r0, r1            // calculate the right sign
   AND     r0, r0, #0x80000000   // throw away everything else
   BX      lr
 
 fdiv_divbyzero:
-  // Here, we know b is zero. But we don't know if a is zero or nonzero. So we
+  // Here, we know y is zero. But we don't know if x is zero or nonzero. So we
   // might be calculating 0/0 (invalid operation, generating a NaN), or
   // nonzero/0 (the IEEE "division by zero" exception, generating infinity).
-  MOVS    r12, r0, LSL #1       // is a zero too?
+  MOVS    r12, r0, LSL #1       // is x zero too?
   BEQ     fdiv_invalid          // if so, go and return a NaN
 
 fdiv_infret:

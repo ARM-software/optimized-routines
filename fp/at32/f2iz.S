@@ -65,7 +65,7 @@ f2iz_invalid:
   // error response.
   MOV     r1, #0xFF000000
   CMP     r1, r0, LSL #1         // 0xFF000000 < (input << 1) means a NaN
-  BLO     f2iz_return_zero    // so branch out of line to return zero
+  BLO     f2iz_return_zero       // so branch out of line to return zero
   MOV     r2, #0x7FFFFFFF        // set up to return INT_MAX
   EOR     r0, r2, r0, ASR #31    // turn it into INT_MIN if input was negative
   BX      lr

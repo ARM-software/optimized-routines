@@ -21,7 +21,7 @@ arm_fp_fcmp_flags_rev:
 
 fcmp_NaN:
   // If any NaN is involved, the return value for this comparison is
-  // to set the flags as if a > b, so that the HI condition will return true.
+  // to set the flags as if x > y, so that the HI condition will return true.
   MOVS r0, #1
   CMP r0, #0
   BX lr

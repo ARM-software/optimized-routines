@@ -10,10 +10,10 @@
 
 #include "endian.h"
 
-op0h .req ah
-op0l .req al
-op1h .req bh
-op1l .req bl
+op0h .req xh
+op0l .req xl
+op1h .req yh
+op1l .req yl
 .macro SetReturnRegister
 .endm
 .macro SetReturnRegisterNE
@@ -26,7 +26,7 @@ arm_fp_dcmp_flags:
 
 dcmp_NaN:
   // If any NaN is involved, the return value for this comparison is
-  // to set the flags as if a > b, so that the HI condition will return true.
+  // to set the flags as if x > y, so that the HI condition will return true.
   MOV r0, #1
   CMP r0, #0
   BX lr

@@ -43,14 +43,14 @@ arm_fp_f2lz:
   // Make the top word of the result, which is the easy part: if the shift
   // count is too big, nothing goes wrong, we just end up with whatever part of
   // the mantissa remained in this word.
-  MOV     ah, r3, LSR r2
+  MOV     xh, r3, LSR r2
 
   // Make the bottom word of the result. This might involve shifting the
   // mantissa either left or right, depending on the exponent.
   SUBS    r12, r2, #32          // r12 = how far to shift mantissa down
-  MOVHS   al, r3, LSR r12       // if that's positive, just do it
+  MOVHS   xl, r3, LSR r12       // if that's positive, just do it
   RSBLO   r12, r12, #0          // otherwise, negate it
-  MOVLO   al, r3, LSL r12       // and shift left by that much instead
+  MOVLO   xl, r3, LSL r12       // and shift left by that much instead
   BX      lr
 
 f2lz_negative:
@@ -64,21 +64,21 @@ f2lz_negative:
 
   // Now do exactly the same processing as on the positive path.
   RSBS    r2, r2, #63 + 0x7f   // make the shift count
-  BLS     f2lz_invalid      // branch out of line if shift count < 0
-  MOV     ah, r3, LSR r2       // top word of result
+  BLS     f2lz_invalid         // branch out of line if shift count < 0
+  MOV     xh, r3, LSR r2       // top word of result
   SUBS    r12, r2, #32         // right-shift required for bottom word
-  MOVHS   al, r3, LSR r12      // bottom word, if shift count >= 0
+  MOVHS   xl, r3, LSR r12      // bottom word, if shift count >= 0
   RSBLO   r12, r2, #32         // otherwise, turn into a left-shift count
-  MOVLO   al, r3, LSL r12      // bottom word, if it needed a left shift
+  MOVLO   xl, r3, LSL r12      // bottom word, if it needed a left shift
 
   // Finally, negate the answer.
-  RSBS    al, al, #0           // negate bottom word
+  RSBS    xl, xl, #0           // negate bottom word
 #if !__thumb__
-  RSC     ah, ah, #0           // negate top word
+  RSC     xh, xh, #0           // negate top word
 #else
   // Thumb has no RSC, so simulate it by bitwise inversion and then ADC
-  MVN     ah, ah
-  ADC     ah, ah, #0
+  MVN     xh, xh
+  ADC     xh, xh, #0
 #endif
 
   BX      lr
@@ -103,15 +103,15 @@ f2lz_invalid:
   // answer and the other a best-effort error response.
   MOV     r1, #0xFF000000
   CMP     r1, r0, LSL #1         // 0xFF000000 < (input << 1) means a NaN
-  BLO     f2lz_return_zero    // so branch out of line to return zero
+  BLO     f2lz_return_zero       // so branch out of line to return zero
   MOV     r2, #0x7FFFFFFF        // set up to return INT_MAX
-  EOR     ah, r2, r0, ASR #31    // flip top half to 80000000 if input < 0
-  MVN     al, r0, ASR #31        // and bottom half is FFFFFFFF or 00000000
+  EOR     xh, r2, r0, ASR #31    // flip top half to 80000000 if input < 0
+  MVN     xl, r0, ASR #31        // and bottom half is FFFFFFFF or 00000000
   BX      lr
 
 f2lz_return_zero:
-  MOV     al, #0
-  MOV     ah, #0
+  MOV     xl, #0
+  MOV     xh, #0
   BX      lr
 
   .size arm_fp_f2lz, .-arm_fp_f2lz

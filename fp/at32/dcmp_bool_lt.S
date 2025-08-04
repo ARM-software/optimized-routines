@@ -1,4 +1,4 @@
-// Double-precision comparison, returning a boolean in r0, true if a < b.
+// Double-precision comparison, returning a boolean in r0, true if x < y.
 //
 // Copyright (c) 1994-1998,2025, Arm Limited.
 // SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -9,10 +9,10 @@
 
 #include "endian.h"
 
-op0h .req ah
-op0l .req al
-op1h .req bh
-op1l .req bl
+op0h .req xh
+op0l .req xl
+op1h .req yh
+op1l .req yl
 .macro SetReturnRegister
   MOV r0, #0
   MOVLO r0, #1

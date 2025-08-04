@@ -15,15 +15,15 @@ arm_fp_l2f:
 
   // Isolate the input integer's sign bit in r2, and if the input is negative,
   // negate it.
-  ANDS    r2, ah, #0x80000000
+  ANDS    r2, xh, #0x80000000
   BPL     0f                    // if positive, skip the negation
-  RSBS    al, al, #0
+  RSBS    xl, xl, #0
 #if !__thumb__
-  RSC     ah, ah, #0
+  RSC     xh, xh, #0
 #else
   // Thumb has no RSC, so simulate it by bitwise inversion and then ADC
-  MVN     ah, ah
-  ADC     ah, ah, #0
+  MVN     xh, xh
+  ADC     xh, xh, #0
 #endif
 0:
 
@@ -31,11 +31,11 @@ arm_fp_l2f:
   // single-precision encoding of +1 or -1 as appropriate.
   ORR     r2, r2, #0x3f800000
 
-  // Now we have a positive 64-bit integer in ah,al, and a starting sign +
+  // Now we have a positive 64-bit integer in xh,xl, and a starting sign +
   // exponent in r2.
   //
   // We also come here from the unsigned-integer conversion function below, so
-  // we must handle ah,al having any possible values at all, even 2^63 or
+  // we must handle xh,xl having any possible values at all, even 2^63 or
   // greater.
 l2f_normalise:
 
@@ -53,50 +53,50 @@ l2f_normalise:
   // instructions.
   ADD     r2, r2, #30 << 23
 
-  // Start setting up r3 to be the exponent adjustment, and set ah to be the
-  // highest _nonzero_ word of the input. If ah = 0, set r3 = 0 and copy al
-  // (the only nonzero input word) into ah; if ah != 0, set r3 = 32.
-  MOVS    r3, ah                // sets r3=0 if ah=0, testing at the same time
+  // Start setting up r3 to be the exponent adjustment, and set xh to be the
+  // highest _nonzero_ word of the input. If xh = 0, set r3 = 0 and copy xl
+  // (the only nonzero input word) into xh; if xh != 0, set r3 = 32.
+  MOVS    r3, xh                // sets r3=0 if xh=0, testing at the same time
   MOVNE   r3, #32               // if that didn't happen, set r3=32
-  MOVSEQ  ah, al                // and otherwise, copy al into ah
+  MOVSEQ  xh, xl                // and otherwise, copy xl into xh
 
   // Using a MOVS for the final copy has the side effect that we've also just
-  // tested whether ah = al = 0. If so, then the entire input value was zero,
-  // so we should return 0. Conveniently, that's the value in both al and ah
+  // tested whether xh = xl = 0. If so, then the entire input value was zero,
+  // so we should return 0. Conveniently, that's the value in both xl and xh
   // right now, so no matter which of those is r0 (which varies with
   // endianness) we can just return.
   BXEQ    lr
 
-  // Now we know ah contains the highest set bit of the input. Find that bit,
+  // Now we know xh contains the highest set bit of the input. Find that bit,
   // shift it up to the top of the word, and adjust the shift count
   // appropriately.
   //
   // After this, r3 contains the full exponent adjustment we'll need to add to
   // the starting exponent in r2: it takes values from -31 (if the input was 1)
   // to +32 (if the input was 2^63 or bigger).
-  CLZ     r12, ah
-  MOV     ah, ah, LSL r12
+  CLZ     r12, xh
+  MOV     xh, xh, LSL r12
   SUB     r3, r3, r12
 
-  // If the input integer is < 2^32, then we've now set up ah to be the full
+  // If the input integer is < 2^32, then we've now set up xh to be the full
   // output mantissa (with its leading bit at the top of the word). If not,
-  // then we still need to add some bits from al.
+  // then we still need to add some bits from xl.
   //
   // We don't need to spend an instruction on deciding which: it's enough to
-  // just shift al right by whatever is in r3. In the case where we don't want
-  // it (because the bits in al are already in the output mantissa), r3 <= 0.
-  // If r3 = 0 (the input was an exactly 32-bit integer) then the bits in al
-  // will exactly overlay the ones already in ah and make no difference; if r3
+  // just shift xl right by whatever is in r3. In the case where we don't want
+  // it (because the bits in xl are already in the output mantissa), r3 <= 0.
+  // If r3 = 0 (the input was an exactly 32-bit integer) then the bits in xl
+  // will exactly overlay the ones already in xh and make no difference; if r3
   // < 0 then the AArch32 shift instruction semantics will treat it as a shift
-  // of more than 32 bits, shifting al right off the bottom of the word, and
-  // again not modify ah.
+  // of more than 32 bits, shifting xl right off the bottom of the word, and
+  // again not modify xh.
 #if !__thumb__
-  ORR     ah, ah, al, LSR r3   // if shift negative then ah unaltered
+  ORR     xh, xh, xl, LSR r3   // if shift negative then xh unaltered
 #else
   // Thumb can't fold a register-controlled shift into an ORR, so we must use
   // two separate instructions.
-  LSR     r12, al, r3
-  ORR     ah, ah, r12
+  LSR     r12, xl, r3
+  ORR     xh, xh, r12
 #endif
 
   // Combine the exponent adjustment in r3 with the starting exponent and sign
@@ -109,23 +109,23 @@ l2f_normalise:
   // (which controls the basic 'round up or down?' question). So we can start
   // by checking those, which will handle most cases.
 
-  // This shift moves the round bit off the top of ah into the carry flag, so
+  // This shift moves the round bit off the top of xh into the carry flag, so
   // that C is set if we're rounding up. It also sets Z if all the bits below
   // that are zero, which _might_ mean we need to round to even, but only if
-  // the further bits in al are also zero. But if Z is _not_ set then we can
-  // return without checking al.
-  LSLS    r12, ah, #25
+  // the further bits in xl are also zero. But if Z is _not_ set then we can
+  // return without checking xl.
+  LSLS    r12, xh, #25
 
 #ifndef __BIG_ENDIAN__
   // We're about to overwrite r0 with the preliminary output. This will be our
-  // last use of ah, but we still need al later. So in little-endian mode,
-  // where al _is_ r0, we must spend an extra instruction on saving it.
-  MOV     r12, al
+  // last use of xh, but we still need xl later. So in little-endian mode,
+  // where xl _is_ r0, we must spend an extra instruction on saving it.
+  MOV     r12, xl
 #endif
 
   // Recombine the mantissa (shifted down to the right position) with the sign
   // and exponent in r2. Using ADC also rounds up if C is set.
-  ADC     r0, r2, ah, LSR #8
+  ADC     r0, r2, xh, LSR #8
 
   // If C was clear, we didn't round up, so we don't need to undo that by
   // rounding to even. And if Z was clear, we're not rounding to even anyway.
@@ -134,22 +134,22 @@ l2f_normalise:
   BXNE    lr
 
   // The slow path: nothing in the top 32 bits of the mantissa ruled out having
-  // to round to even. Now we must check the rest of the mantissa bits in al.
+  // to round to even. Now we must check the rest of the mantissa bits in xl.
   //
   // This RSB instruction converts the previous exponent adjustment value (-31
   // for smallest integer, +32 for largest) into a value from 0 (_largest_
-  // integer) to 63 (smallest). So if the integer occupied n bits of ah, then
-  // 32-n bits of al ended up in the initial mantissa word, so shifting al left
-  // by 32-n will catch precisely the bits of al that didn't. And if the
-  // integer was entirely in al, then this shift count will be >=32, so the
-  // left shift will throw away all of al.
+  // integer) to 63 (smallest). So if the integer occupied n bits of xh, then
+  // 32-n bits of xl ended up in the initial mantissa word, so shifting xl left
+  // by 32-n will catch precisely the bits of xl that didn't. And if the
+  // integer was entirely in xl, then this shift count will be >=32, so the
+  // left shift will throw away all of xl.
   RSB     r3, r3, #32
 
-  // Shift al to include just the shifted-off bits, setting Z if they're all
+  // Shift xl to include just the shifted-off bits, setting Z if they're all
   // zero. Then we know whether to round to even by clearing bit 0 of the
   // output.
 #ifdef __BIG_ENDIAN__
-  LSLS    r12, al, r3           // the low word is still in al itself
+  LSLS    r12, xl, r3           // the low word is still in xl itself
 #else
   LSLS    r12, r12, r3          // we moved it into r12 earlier
 #endif

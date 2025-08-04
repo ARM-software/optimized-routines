@@ -17,10 +17,10 @@ arm_fp_i2d:
   ANDS    r2, r0, #0x80000000   // get sign
   RSBMI   r0, r0, #0            // negate input if it was negative
 
-  // Shift the leading bit of the input to the top of ah. In the
+  // Shift the leading bit of the input to the top of xh. In the
   // process, we detect a zero input, and branch out of line for it.
   CLZ     r3, r0
-  LSLS    ah, r0, r3
+  LSLS    xh, r0, r3
   BEQ     i2d_zero
 
   // Use the shift count in r3 to calculate the output exponent, and combine it
@@ -37,16 +37,16 @@ arm_fp_i2d:
   ADD     r3, r3, #0x400        // 0x41d minus shift count
   ADD     r2, r2, r3, LSL #20   // r2 is now sign+exponent
 
-  // Shift the mantissa left and right to get the parts that go in al and ah,
+  // Shift the mantissa left and right to get the parts that go in xl and xh,
   // and combine with the sign and exponent we just computed.
-  LSL     al, ah, #21           // low bits of mantissa
-  ADD     ah, r2, ah, LSR #11   // high bits of mantissa + sign + exponent
+  LSL     xl, xh, #21           // low bits of mantissa
+  ADD     xh, r2, xh, LSR #11   // high bits of mantissa + sign + exponent
   BX      lr
 
 i2d_zero:
-  // We come here if the input was zero. We've just set ah to 0, so we
-  // only need to set al to 0 too and return.
-  MOV     al, #0
+  // We come here if the input was zero. We've just set xh to 0, so we
+  // only need to set xl to 0 too and return.
+  MOV     xl, #0
   BX      lr
 
   .size arm_fp_i2d, .-arm_fp_i2d

@@ -23,7 +23,7 @@
 // and then reloading, which is slow, but the easiest way to avoid ordering
 // problems if the input registers alias r2 and r3.
 
-#include "endian.h" // for register aliases bh and bl
+#include "endian.h" // for register aliases yh and yl
 
 #ifdef DIAGNOSTICS
 
@@ -60,8 +60,8 @@
   sub     sp,sp,#8             // make some space on the stack
   str     \regh,[sp,#0]        // store the two input registers to that space
   str     \regl,[sp,#4]
-  ldr     bh,[sp,#0]           // reload into bh,bl to pass to printf
-  ldr     bl,[sp,#4]
+  ldr     yh,[sp,#0]           // reload into yh,yl to pass to printf
+  ldr     yl,[sp,#4]
   add     sp,sp,#8             // we've finished with those 2 words of stack
   adr     r0, 1f               // address of the format string in r0
   bl      printf               // call out to printf

@@ -52,8 +52,8 @@ arm_fp_f2d:
   // have only one IT instruction on the fast path, and it's _here_, where this
   // comment is, so that it comes immediately after the above 16-bit EORS and
   // can be executed in the same cycle by Cortex-M3.
-  LSLNE   al, r0, #29           // al now has the bottom 3 input mantissa bits
-  ADDNE   ah, r12, #(0x3ff - 0x7f) << 20 // rebias exponent in ah
+  LSLNE   xl, r0, #29           // xl now has the bottom 3 input mantissa bits
+  ADDNE   xh, r12, #(0x3ff - 0x7f) << 20 // rebias exponent in xh
 
   // Finally, check whether the test word in r3 has its top 7 exponent bits
   // zero. If not, we can return the fast-path answer.
@@ -62,9 +62,9 @@ arm_fp_f2d:
 
   // Now we've handled the fast-path cases as fast as we know how, what do we
   // do next? We almost certainly don't have the input value in r0 any more,
-  // because we overwrote it by writing an unused output to ah:al in the above
+  // because we overwrote it by writing an unused output to xh:xl in the above
   // code. Worse, we didn't _reliably_ overwrite it, because those writes to
-  // ah:al might not have happened if the whole test word in r3 was zero. So
+  // xh:xl might not have happened if the whole test word in r3 was zero. So
   // where can we find the input bits?
   //
   // We have r3 = input XOR (input << 1). That's actually an invertible
@@ -97,20 +97,20 @@ arm_fp_f2d:
   // likely to be common, so we'd prefer to handle those with highest priority.
   //
   // r3 = (input XOR (input << 1)) will take the values 0 or 0x80000000 for a
-  // zero input. So it contains precisely the right value to return in ah.
+  // zero input. So it contains precisely the right value to return in xh.
   //
-  // The BICS here combines the zeroing of al with the test of r3, because it
+  // The BICS here combines the zeroing of xl with the test of r3, because it
   // sets Z if and only if the input was one of those two values, and if so,
-  // sets al=0.
+  // sets xl=0.
   //
-  // Unfortunately this has the side effect of clobbering al in the case where
+  // Unfortunately this has the side effect of clobbering xl in the case where
   // we _don't_ take the early return, so now we've lost our verbatim copy of
   // the low 3 input bits! On the denormal-handling path we'll have to recover
   // those from r3 more awkwardly. But denormal handling is rare, and slow
   // anyway, so it's worth the awkwardness to save a cycle in the much more
   // common case of a zero input.
-  BICS    al, r3, #0x80000000   // EQ if output is zero
-  MOVEQ   ah, r3                // if so, copy input sign into ah
+  BICS    xl, r3, #0x80000000   // EQ if output is zero
+  MOVEQ   xh, r3                // if so, copy input sign into xh
   BXEQ    lr                    // and return
 
   // Now we know we're dealing with a denormal, so we need to recover the whole
@@ -124,14 +124,14 @@ arm_fp_f2d:
 
   // Now r3 contains just the low bits of the mantissa. The rest of the
   // mantissa is in r12, shifted right by 3 bits, so this instruction rebuilds
-  // the entire input mantissa in ah. (The exponent field is known to be zero,
+  // the entire input mantissa in xh. (The exponent field is known to be zero,
   // and the sign bit at the top of r12 is discarded by the left shift.)
-  ORR     ah, r3, r12, LSL #3
+  ORR     xh, r3, r12, LSL #3
 
   // Renormalize that input mantissa so that its high bit is at the top of the
   // word.
-  CLZ     r2, ah
-  LSL     ah, ah, r2
+  CLZ     r2, xh
+  LSL     xh, xh, r2
 
   // Compute the right sign + exponent to go with that mantissa.
   //
@@ -148,17 +148,17 @@ arm_fp_f2d:
 
   // Finally, distribute the normalized mantissa across the two output words,
   // and combine the top half with the exponent we just computed.
-  LSLS    al, ah, #21           // low word = low 3 bits of normalized mantissa
-  ADD     ah, r3, ah, LSR #11   // high word = sign + exp + rest of mantissa
+  LSLS    xl, xh, #21           // low word = low 3 bits of normalized mantissa
+  ADD     xh, r3, xh, LSR #11   // high word = sign + exp + rest of mantissa
   BX      lr
 
 f2d_inf_or_nan:
   // We come here if the input was either infinity or a NaN. In this situation
   // we can be sure that the instructions that set up the fast-path return
   // value _did_ happen, because the input was nonzero. Also we branched away
-  // before the test for a zero input clobbered al.
+  // before the test for a zero input clobbered xl.
   //
-  // So ah:al will contain what _would_ be the right output value if 0xFF were
+  // So xh:xl will contain what _would_ be the right output value if 0xFF were
   // not a special input: the exponent field will be 0x47f, and the sign and
   // mantissa will be in place.
   //
@@ -167,9 +167,9 @@ f2d_inf_or_nan:
   // or NaN, and if the mantissa is nonzero at all (so that we're returning a
   // NaN and not an infinity) then we should set its top bit to make it a quiet
   // NaN.
-  ORRS    ah, ah, #0x7f000000   // set the missing bits in the exponent field
-  ORRS    r2, al, ah, LSL #12   // is any bit of the mantissa set?
-  ORRNE   ah, ah, #0x00080000   // if so, set the top mantissa bit
+  ORRS    xh, xh, #0x7f000000   // set the missing bits in the exponent field
+  ORRS    r2, xl, xh, LSL #12   // is any bit of the mantissa set?
+  ORRNE   xh, xh, #0x00080000   // if so, set the top mantissa bit
   BX      lr
 
   .size arm_fp_f2d, .-arm_fp_f2d

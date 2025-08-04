@@ -1,4 +1,4 @@
-// Double-precision comparison, returning a boolean in r0, true if a and b are
+// Double-precision comparison, returning a boolean in r0, true if x and y are
 // 'unordered', i.e. one or both of them is a NaN.
 //
 // Copyright (c) 1994-1998,2025, Arm Limited.
@@ -26,15 +26,15 @@ arm_fp_dcmp_bool_un:
   // (but not equal), via adding 0x00200000 to it and testing for the HI
   // condition (carry flag set, but Z clear).
   //
-  // Once we've done that transformation to the first input ah:al, we
-  // free up al to contain our constant 0x00200000, so there's no need
+  // Once we've done that transformation to the first input xh:xl, we
+  // free up xl to contain our constant 0x00200000, so there's no need
   // to push any registers.
-  CMP     al, #1                // set C if al is nonzero
-  ADC     ah, ah, ah            // shift ah left, bringing in the C bit
-  CMP     bl, #1                // set C if bl is nonzero
-  ADC     bh, bh, bh            // shift bh left, bringing in the C bit
-  CMN     ah, #1 << 21          // if HI, then a is a NaN
-  CMNLS   bh, #1 << 21          // if not HI, then do the same check for b
+  CMP     xl, #1                // set C if xl is nonzero
+  ADC     xh, xh, xh            // shift xh left, bringing in the C bit
+  CMP     yl, #1                // set C if yl is nonzero
+  ADC     yh, yh, yh            // shift yh left, bringing in the C bit
+  CMN     xh, #1 << 21          // if HI, then x is a NaN
+  CMNLS   yh, #1 << 21          // if not HI, then do the same check for y
 
   // If LS, then we have no NaNs and return false. We do this as quickly as we
   // can (not stopping to take two instructions setting up r0 for both

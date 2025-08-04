@@ -25,7 +25,7 @@ arm_fp_d2lz:
   // of LSR means the sign bit keeps its original value, and therefore as a
   // side effect the N flag will tell us whether the input was negative. On the
   // positive path the output is the same anyway.
-  ASRS    r2, ah, #20
+  ASRS    r2, xh, #20
 
   // Make the 64-bit mantissa word, with its top half in r3 and the bottom half
   // in r12, and set the leading mantissa bit at the top of r3.
@@ -36,10 +36,10 @@ arm_fp_d2lz:
   // indicating whether the result is inexact, it makes no difference - all
   // denormals will round down to 0 anyway, and will still do so even if we
   // imagine that their leading mantissa bit was set.)
-  LSL     r3, ah, #11           // shift top word left to discard sign+exponent
-  ORR     r3, r3, al, LSR #21   // combine with bits from bottom word
+  LSL     r3, xh, #11           // shift top word left to discard sign+exponent
+  ORR     r3, r3, xl, LSR #21   // combine with bits from bottom word
   ORR     r3, r3, #1<<31        // set the leading bit
-  LSL     r12, al, #11          // shift bottom word left
+  LSL     r12, xl, #11          // shift bottom word left
 
   // Branch out of line for negative cases, using the N flag set by the ASRS at
   // the start of the function.
@@ -82,25 +82,25 @@ arm_fp_d2lz:
   // Make the top word of the result, which is the easy part: it's a
   // shifted-right version of the top word of the mantissa, which will be zero
   // if the shift count is 32 or more.
-  LSRS    ah, r3, r2
+  LSRS    xh, r3, r2
 
   // Make the bottom word of the result. If the shift count is less than 32,
   // this will be (ml >> n) | (mh << (32-n)), where 'mh' and 'ml' denote the
   // high and low words of the mantissa (in r3 and r12 respectively). Otherwise
   // the whole high output word is zero, and the low mantissa word contributes
   // nothing to the output, so we just need mh >> (n-32).
-  LSR     al, r12, r2           // start by setting it to ml >> n
+  LSR     xl, r12, r2           // start by setting it to ml >> n
   RSBS    r2, r2, #32           // compute 32-n, and find which case we're in
 #if !__thumb__
-  ORRHI   al, al, r3, LSL r2    // shift count < 32, so OR in ml << (32-n)
+  ORRHI   xl, xl, r3, LSL r2    // shift count < 32, so OR in ml << (32-n)
 #else
   // In Thumb we must separate the register-controlled shift and the OR into
   // two instructions.
   LSLHI   r3, r3, r2
-  ORRHI   al, al, r3
+  ORRHI   xl, xl, r3
 #endif
   RSBLS   r2, r2, #0            // shift count > 32, so compute n-32
-  LSRLS   al, r3, r2            // replace al with mh >> (n-32)
+  LSRLS   xl, r3, r2            // replace xl with mh >> (n-32)
 
   // We're done: the result is already rounded towards zero.
   BX      lr
@@ -120,30 +120,30 @@ d2lz_neg:
   BLE     d2lz_invalid          // if it was negative or zero, overflow
 
   // Shift the mantissa down to create the absolute value of the result in
-  // ah:al, exactly as on the positive path above.
-  LSRS    ah, r3, r2            // make high word of mantissa
-  LSR     al, r12, r2           // initially set low word to ml >> n
+  // xh:xl, exactly as on the positive path above.
+  LSRS    xh, r3, r2            // make high word of mantissa
+  LSR     xl, r12, r2           // initially set low word to ml >> n
   RSBS    r2, r2, #32           // compute 32-n, and find which case we're in
 #if !__thumb__
-  ORRHI   al, al, r3, LSL r2    // shift count < 32, so OR in ml << (32-n)
+  ORRHI   xl, xl, r3, LSL r2    // shift count < 32, so OR in ml << (32-n)
 #else
   // In Thumb we must separate the register-controlled shift and the OR into
   // two instructions.
   LSLHI   r3, r3, r2
-  ORRHI   al, al, r3
+  ORRHI   xl, xl, r3
 #endif
   RSBLS   r2, r2, #0            // shift count > 32, so compute n-32
-  LSRLS   al, r3, r2            // and replace al with mh >> that
+  LSRLS   xl, r3, r2            // and replace xl with mh >> that
 
   // All of that was almost exactly the same as the positive code path, but now
   // we must negate the answer before returning it.
-  RSBS    al, al, #0            // negate low word, setting carry flag
+  RSBS    xl, xl, #0            // negate low word, setting carry flag
 #if !__thumb__
-  RSC     ah, ah, #0            // negate high word
+  RSC     xh, xh, #0            // negate high word
 #else
   // Thumb has no RSC, so substitute MVN + ADC.
-  MVN     ah, ah
-  ADC     ah, ah, #0
+  MVN     xh, xh
+  ADC     xh, xh, #0
 #endif
 
   // We're done.
@@ -169,23 +169,23 @@ d2lz_invalid:
   // answer and the other a best-effort error response.
 
   // Check for NaNs and branch out of line.
-  CMP     al, #1                  // set C if any bit of al is nonzero
-  ADC     r2, ah, ah              // shift that bit into ah, discarding sign
+  CMP     xl, #1                  // set C if any bit of xl is nonzero
+  ADC     r2, xh, xh              // shift that bit into xh, discarding sign
   CMN     r2, #1 << 21            // then greater than 0xFFE00000 means NaN
   BHI     d2lz_nan
 
   // The remaining case is a too-large exponent. Return either INT_MAX or
-  // INT_MIN depending on sign, using the fact that (ah ASR 31) is 0 for a
+  // INT_MIN depending on sign, using the fact that (xh ASR 31) is 0 for a
   // positive input or 0xFFFFFFFF for a negative input, so it's exactly the
   // bitwise inverse of the correct low word of the output.
-  MVN     al, ah, ASR #31         // make the low word of the output
-  EOR     ah, al, #0x80000000     // make the high word by flipping sign bit
+  MVN     xl, xh, ASR #31         // make the low word of the output
+  EOR     xh, xl, #0x80000000     // make the high word by flipping sign bit
   BX      lr
 
 d2lz_nan:
   // Return zero, for use when the input was a NaN.
-  MOVS    ah, #0
-  MOVS    al, #0
+  MOVS    xh, #0
+  MOVS    xl, #0
   BX      lr
 
   .size arm_fp_d2lz, .-arm_fp_d2lz

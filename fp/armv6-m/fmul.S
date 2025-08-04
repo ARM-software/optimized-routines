@@ -17,7 +17,7 @@ arm_fp_fmul:
   // of this we also compute the sign, because it's marginally quicker that
   // way.
   LSLS    r2, r0, #1
-  ADCS    r4, r4, r4    // set r4[0] to sign bit of a
+  ADCS    r4, r4, r4    // set r4[0] to sign bit of x
   LSLS    r3, r1, #1
   ADCS    r4, r4, r3    // set r4[0] to the output sign
   LSRS    r2, r2, #24
@@ -48,28 +48,28 @@ normalised: // we may come back here from zerodenorm
   // the other containing the top 32, so they overlap in the middle 16 bits.
   // This is done using only two multiply instructions and some bookkeeping.
   //
-  // In the comments I'll write A and B for the original input mantissas (again
-  // without their leading bits). I'll also decompose them as A = ah + al and
-  // B = bh + bl, where al and bl are in the range 0..2^8-1 and ah,bh are
+  // In the comments I'll write X and Y for the original input mantissas (again
+  // without their leading bits). I'll also decompose them as X = xh + xl and
+  // Y = yh + yl, where xl and yl are in the range 0..2^8-1 and xh,yh are
   // multiples of 2^8.
   ADDS    r5, r0, r1
-  LSLS    r5, r5, #7    // r5 = (A+B) << 7
+  LSLS    r5, r5, #7    // r5 = (X+Y) << 7
   MOVS    r6, r0
-  MULS    r6, r1, r6    // r6 is congruent mod 2^32 to A*B
+  MULS    r6, r1, r6    // r6 is congruent mod 2^32 to X*Y
   LSRS    r0, r0, #8
   LSRS    r1, r1, #8
   MULS    r0, r1, r0
-  LSLS    r1, r0, #16   // r1 is congruent mod 2^32 to ah*bh
+  LSLS    r1, r0, #16   // r1 is congruent mod 2^32 to xh*yh
   SUBS    r3, r6, r1    // now r3 is congruent mod 2^32 to
-                        //   (A*B) - (ah*bh) = ah*bl + al*bh + al*bl
+                        //   (X*Y) - (xh*yh) = xh*yl + xl*yh + xl*yl
                         //   and hence, since that is at most 0xfeff0001,
                         //   is _exactly_ equal to that
-  ADDS    r0, r0, r5    // r0 is now (ah*bh + (A+B)<<23) >> 16
+  ADDS    r0, r0, r5    // r0 is now (xh*yh + (X+Y)<<23) >> 16
   LSRS    r1, r3, #16   // r1 is the top 16 bits of r3, i.e.
-                        //   (ah*bl + al*bh + al*bl) >> 16
+                        //   (xh*yl + xl*yh + xl*yl) >> 16
   ADDS    r3, r0, r1    // now r3 equals
-                        //   (ah*bh + ah*bl + al*bh + al*bl + (A+B)<<23) >> 16
-                        //   i.e. (A*B + (A+B)<<23) >> 16,
+                        //   (xh*yh + xh*yl + xl*yh + xl*yl + (X+Y)<<23) >> 16
+                        //   i.e. (X*Y + (X+Y)<<23) >> 16,
                         //   i.e. (the right answer) >> 16.
                         // Meanwhile, r6 is exactly the bottom 32 bits of the
                         // right answer.

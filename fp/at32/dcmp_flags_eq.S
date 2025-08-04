@@ -9,10 +9,10 @@
 
 #include "endian.h"
 
-op0h .req ah
-op0l .req al
-op1h .req bh
-op1l .req bl
+op0h .req xh
+op0l .req xl
+op1h .req yh
+op1l .req yl
 .macro SetReturnRegister
 .endm
 .macro SetReturnRegisterNE

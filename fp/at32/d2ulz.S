@@ -26,7 +26,7 @@ arm_fp_d2ulz:
   // extra-enormous exponent. This is good enough to trigger a branch out of
   // line later without needing an extra instruction, and then we can handle
   // negative inputs properly after that branch.
-  ASRS    r2, ah, #20
+  ASRS    r2, xh, #20
 
   // Make the 64-bit mantissa word, with its top half in r3 and the bottom half
   // in r12, and set the leading mantissa bit at the top of r3.
@@ -37,10 +37,10 @@ arm_fp_d2ulz:
   // indicating whether the result is inexact, it makes no difference - all
   // denormals will round down to 0 anyway, and will still do so even if we
   // imagine that their leading mantissa bit was set.)
-  LSL     r3, ah, #11           // shift top word left to discard sign+exponent
-  ORR     r3, r3, al, LSR #21   // combine with bits from bottom word
+  LSL     r3, xh, #11           // shift top word left to discard sign+exponent
+  ORR     r3, r3, xl, LSR #21   // combine with bits from bottom word
   ORR     r3, r3, #1<<31        // set the leading bit
-  LSL     r12, al, #11          // shift bottom word left
+  LSL     r12, xl, #11          // shift bottom word left
 
   // Convert the mantissa into a right shift count, indicating how many bits we
   // want to shift the 64-bit mantissa in r3:r12 right by.
@@ -74,25 +74,25 @@ arm_fp_d2ulz:
   // Make the top word of the result, which is the easy part: it's a
   // shifted-right version of the top word of the mantissa, which will be zero
   // if the shift count is 32 or more.
-  LSRS    ah, r3, r2
+  LSRS    xh, r3, r2
 
   // Make the bottom word of the result. If the shift count is less than 32,
   // this will be (ml >> n) | (mh << (32-n)), where 'mh' and 'ml' denote the
   // high and low words of the mantissa (in r3 and r12 respectively). Otherwise
   // the whole high output word is zero, and the low mantissa word contributes
   // nothing to the output, so we just need mh >> (n-32).
-  LSR     al, r12, r2           // start by setting it to ml >> n
+  LSR     xl, r12, r2           // start by setting it to ml >> n
   RSBS    r2, r2, #32           // compute 32-n, and find which case we're in
 #if !__thumb__
-  ORRHI   al, al, r3, LSL r2    // shift count < 32, so OR in ml << (32-n)
+  ORRHI   xl, xl, r3, LSL r2    // shift count < 32, so OR in ml << (32-n)
 #else
   // In Thumb we must separate the register-controlled shift and the OR into
   // two instructions.
   LSLHI   r3, r3, r2
-  ORRHI   al, al, r3
+  ORRHI   xl, xl, r3
 #endif
   RSBLS   r2, r2, #0            // shift count > 32, so compute n-32
-  LSRLS   al, r3, r2            // replace al with mh >> (n-32)
+  LSRLS   xl, r3, r2            // replace xl with mh >> (n-32)
 
   // We're done: the result is already rounded towards zero.
   BX      lr
@@ -109,7 +109,7 @@ d2ulz_uncommon:
   // the theory that reasonably sensible negative values (like -0.5) are more
   // likely than the overflow, infinity or NaN cases, and want to be handled as
   // quickly as possible.
-  TST     ah, ah
+  TST     xh, xh
   BPL     d2ulz_positive_invalid
 
   // Now we have either a negative finite value, -inf, or a NaN (with the sign
@@ -120,20 +120,20 @@ d2ulz_uncommon:
   // _legally_ return 0 (after rounding toward zero), whereas -1 and below
   // would raise the IEEE Invalid Operation exception.
 d2ulz_return_zero:
-  MOVS    ah, #0
-  MOVS    al, #0
+  MOVS    xh, #0
+  MOVS    xl, #0
   BX      lr
 
 d2ulz_positive_invalid:
   // Here we have a positive value causing an invalid operation exception. If
   // it's a NaN, we return zero; otherwise we return UINT_MAX.
-  CMP     al, #1                  // set C if any bit of al is nonzero
-  ADC     r2, ah, ah              // shift that bit into ah, discarding sign
+  CMP     xl, #1                  // set C if any bit of xl is nonzero
+  ADC     r2, xh, xh              // shift that bit into xh, discarding sign
   CMN     r2, #1 << 21            // then greater than 0xFFE00000 means NaN
   BHI     d2ulz_return_zero       // so we go back to the case above
 
-  MOV     ah, #0xFFFFFFFF
-  MOV     al, #0xFFFFFFFF
+  MOV     xh, #0xFFFFFFFF
+  MOV     xl, #0xFFFFFFFF
   BX      lr
 
   .size arm_fp_d2ulz, .-arm_fp_d2ulz

@@ -17,14 +17,14 @@ arm_fp_fmul:
   // r2/r3. But if we do, then that hasn't necessarily been done (because the
   // second AND might have been skipped).
   MOV     r12, #0xFF0000
-  ANDS    r2, r12, r0, LSR #7  // sets Z if exponent of a is 0
-  ANDSNE  r3, r12, r1, LSR #7  // otherwise, sets Z if exponent of b is 0
-  TEQNE   r2, r12              // otherwise, sets Z if exponent of a is FF
-  TEQNE   r3, r12              // otherwise, sets Z if exponent of b is FF
+  ANDS    r2, r12, r0, LSR #7  // sets Z if exponent of x is 0
+  ANDSNE  r3, r12, r1, LSR #7  // otherwise, sets Z if exponent of y is 0
+  TEQNE   r2, r12              // otherwise, sets Z if exponent of x is FF
+  TEQNE   r3, r12              // otherwise, sets Z if exponent of y is FF
   BEQ.W   fmul_uncommon        // branch out of line to handle inf/NaN/0/denorm
 
   // Calculate the sign of the result, and put it in an unused bit of r2.
-  TEQ     r0, r1               // sets N to the XOR of a and b's sign bits
+  TEQ     r0, r1               // sets N to the XOR of x and y's sign bits
   ORRMI   r2, r2, #0x100       // if N set, set bit 8 of r2
 
   // Move the input mantissas to the high end of r0/r1, each with its leading
@@ -231,12 +231,12 @@ fmul_uncommon:
   // Handle zeros, denorms, infinities and NaNs. We arrive here knowing that
   // we've at least done the first _two_ instructions from the entry point,
   // even if all the rest were skipped. So r2 contains the sign and exponent of
-  // a in bits 16..23, and r12 = 0xFF << 16.
+  // x in bits 16..23, and r12 = 0xFF << 16.
   //
   // So, first repeat some instructions from the prologue, which were either
   // conditionally skipped in the sequence leading to the branch, or skipped
   // because they happened after the branch.
-  AND     r3, r12, r1, LSR #7  // get exponent of b in r3 bits 16..23
+  AND     r3, r12, r1, LSR #7  // get exponent of y in r3 bits 16..23
   TEQ     r0, r1               // calculate the sign of the result
   ORRMI   r2, r2, #0x100       // and put it in bit 8 of r2 as before
 
@@ -250,7 +250,7 @@ fmul_uncommon:
   // least one is denormal or zero. A zero makes the result easy (and also is a
   // more likely input than a denormal), so check those first, as fast as
   // possible.
-  MOVS    r12, r0, LSL #1          // Z set if a == 0
+  MOVS    r12, r0, LSL #1          // Z set if x == 0
   MOVSNE  r12, r1, LSL #1          // now Z set if either input is 0
   MOVEQ   r0, r2, LSL #23          // in either case, make 0 of the output sign
   BXEQ    lr                       // and return it
@@ -284,7 +284,7 @@ fmul_inf_NaN:
   // other operand is 0. This is conveniently done by XORing the two: because
   // we know that the low 31 bits of one operand are exactly 0x7F800000, we can
   // test if the low 31 bits of the other one are all 0 by checking whether the
-  // low 31 bits of (a XOR b) equal 0x7F800000.
+  // low 31 bits of (x XOR y) equal 0x7F800000.
   EOR     r3, r0, r1
   CMP     r12, r3, LSL #1          // if inf * 0, this sets Z
   LSR     r0, r12, #1              // set up return value of +infinity

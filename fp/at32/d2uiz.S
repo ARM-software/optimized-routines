@@ -21,7 +21,7 @@ arm_fp_d2uiz:
   // 1 bit explicit at the top of the word, and shift it right by an amount
   // derived from the exponent.
 
-  LSRS    r3, ah, #20           // exponent, or >=0x800 if input is negative
+  LSRS    r3, xh, #20           // exponent, or >=0x800 if input is negative
 
   // Convert the exponent into a right shift count. This involves subtracting
   // from 0x41e (which is the exponent of 2^31, so the largest that doesn't
@@ -48,9 +48,9 @@ arm_fp_d2uiz:
   BLT     d2uiz_uncommon
 
   // Construct a word containing the top 32 bits of the mantissa.
-  ORR     r2, ah, #1 << 20      // put on the leading 1
-  LSLS    r2, r2, #11           // shift mantissa part of ah up to top of word
-  ORR     r2, r2, al, LSR #21   // the top 11 mantissa bits from al
+  ORR     r2, xh, #1 << 20      // put on the leading 1
+  LSLS    r2, r2, #11           // shift mantissa part of xh up to top of word
+  ORR     r2, r2, xl, LSR #21   // the top 11 mantissa bits from xl
 
   // Now shift the mantissa down to its output position, moving it into the
   // output register r0 in the process.
@@ -82,7 +82,7 @@ d2uiz_uncommon:
   // Next test the sign bit. Branch out of line for positive values, again on
   // the theory that reasonably sensible negative values (like -0.5) are more
   // likely than any of the remaining positive cases.
-  TST     ah, ah
+  TST     xh, xh
   BPL     d2uiz_positive_invalid
 
   // Now we have either a negative finite value, -inf, or a NaN (with the sign
@@ -99,9 +99,9 @@ d2uiz_return_zero:
 d2uiz_positive_invalid:
   // Here we have a positive value causing an invalid operation exception. If
   // it's a NaN, we return zero; otherwise we return UINT_MAX.
-  LSLS    r2, ah, #1              // shift exponent of a to top of word
-  CMN     r2, #1 << 21            // set HI if ah proves it's a NaN by itself
-  CMPEQ   al, #0                  // now HI is set if it's a NaN
+  LSLS    r2, xh, #1              // shift exponent of x to top of word
+  CMN     r2, #1 << 21            // set HI if xh proves it's a NaN by itself
+  CMPEQ   xl, #0                  // now HI is set if it's a NaN
   BHI     d2uiz_return_zero
   MOV     r0, #0xFFFFFFFF
   BX      lr

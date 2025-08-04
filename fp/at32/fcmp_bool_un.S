@@ -1,4 +1,4 @@
-// Single-precision comparison, returning a boolean in r0, true if a and b are
+// Single-precision comparison, returning a boolean in r0, true if x and y are
 // 'unordered', i.e. one or both of them is a NaN.
 //
 // Copyright (c) 1994-1998,2025, Arm Limited.

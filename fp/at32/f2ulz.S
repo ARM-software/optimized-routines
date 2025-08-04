@@ -37,7 +37,7 @@ arm_fp_f2ulz:
   // Make the top word of the result, which is the easy part: if the shift
   // count is too big, nothing goes wrong, we just end up with whatever part of
   // the mantissa remained in this word.
-  MOV     ah, r3, LSR r2
+  MOV     xh, r3, LSR r2
 
   // Make the bottom word of the result. This might involve shifting the
   // mantissa either left or right, depending on the exponent.
@@ -45,9 +45,9 @@ arm_fp_f2ulz:
   // We're rounding towards zero, so bits shifted off the bottom can just be
   // ignored.
   SUBS    r12, r2, #32          // r12 = how far to shift mantissa down
-  MOVHS   al, r3, LSR r12       // if that's positive, just do it
+  MOVHS   xl, r3, LSR r12       // if that's positive, just do it
   RSBLO   r12, r12, #0          // otherwise, negate it
-  MOVLO   al, r3, LSL r12       // and shift left by that much instead
+  MOVLO   xl, r3, LSL r12       // and shift left by that much instead
   BX      lr
 
 f2ulz_uncommon:
@@ -66,8 +66,8 @@ f2ulz_uncommon:
   // _legally_ return 0 (after rounding toward zero), whereas -1 and below
   // would raise the IEEE Invalid Operation exception.
 f2ulz_return_zero:
-  MOV     al, #0
-  MOV     ah, #0
+  MOV     xl, #0
+  MOV     xh, #0
   BX      lr
 
 f2ulz_positive_invalid:
@@ -76,8 +76,8 @@ f2ulz_positive_invalid:
   MOV     r1, #0xFF000000
   CMP     r1, r0, LSL #1
   BLO     f2ulz_return_zero
-  MOV     al, #0xFFFFFFFF
-  MOV     ah, #0xFFFFFFFF
+  MOV     xl, #0xFFFFFFFF
+  MOV     xh, #0xFFFFFFFF
   BX      lr
 
   .size arm_fp_f2ulz, .-arm_fp_f2ulz

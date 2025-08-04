@@ -13,17 +13,17 @@
 //
 // There are three actual entry points here, for addition, subtraction and
 // reversed subtraction (just taking the operands the other way round, so that
-// it returns b-a instead of a-b). But the first thing the functions do (after
+// it returns y-x instead of x-y). But the first thing the functions do (after
 // checking for NaNs) is to sort out whether the magnitudes of the two inputs
-// are being added (a+b with like signs, or a-b with different signs), or
+// are being added (x+y with like signs, or x-y with different signs), or
 // subtracted. So dadd jumps across into the middle of dsub if it sees that the
 // signs are different, and vice versa. Then the main code path in dadd handles
 // magnitude addition, and the one in dsub handles magnitude subtraction.
 //
 // NaNs are checked first, so that an input NaN can be propagated exactly,
 // including its sign bit. After ruling out that case, it's safe to flip the
-// sign of one of the inputs, so that during the cross-calls, a - b can be
-// rewritten as a + (-b) and vice versa.
+// sign of one of the inputs, so that during the cross-calls, x - y can be
+// rewritten as x + (-y) and vice versa.
 
   .globl arm_fp_dadd
   .type arm_fp_dadd,%function
@@ -44,51 +44,51 @@ arm_fp_dadd:
   // having the set bits at the top of the word is useful later because we can
   // extend them using ASR.)
   LDR     r14, =0xFFC00000
-  ADD     r12, ah, #1 << 20   // r12 has the adjusted version of a's exponent
-  ADD     r4, bh, #1 << 20    // and r4 the adjusted version of b's
+  ADD     r12, xh, #1 << 20   // r12 has the adjusted version of x's exponent
+  ADD     r4, yh, #1 << 20    // and r4 the adjusted version of y's
   TST     r14, r12, LSL #1    // test the top 10 exponent bits of each
   TSTNE   r14, r4, LSL #1
   BEQ     dadd_uncommon       // and branch out of line if either is 0
 
   // Now we have two normalised numbers. If their signs are opposite, we should
   // be subtracting their magnitudes rather than adding, so cross-jump to dsub.
-  TEQ     ah, bh
-  EORMI   bh, bh, #1 << 31
+  TEQ     xh, yh
+  EORMI   yh, yh, #1 << 31
   BMI     dsub_magnitude
 dadd_magnitude:
   // If we get here, we're adding operands with equal signs (i.e. a magnitude
   // addition). First thing to do is put the operands in magnitude order, so
-  // that a >= b.
-  SUBS    r4, al, bl          // compare inputs, also keeping a-b
-  SBCS    r12, ah, bh
-  BHS     dadd_swapped        // if a>=b then branch round the swap
-  ADDS    bl, bl, r4          // otherwise turn b into a by, adding (a-b)
-  ADC     bh, bh, r12
-  SUBS    al, al, r4          // and turn a into b by subtracting it
-  SBC     ah, ah, r12
+  // that x >= y.
+  SUBS    r4, xl, yl          // compare inputs, also keeping x-y
+  SBCS    r12, xh, yh
+  BHS     dadd_swapped        // if x>=y then branch round the swap
+  ADDS    yl, yl, r4          // otherwise turn y into x by adding (x-y)
+  ADC     yh, yh, r12
+  SUBS    xl, xl, r4          // and turn x into y by subtracting it
+  SBC     xh, xh, r12
 dadd_swapped:
   // Keep the sign and exponent of the larger input, to use as the sign and
   // exponent of the output (up to carries and overflows). Also calculate the
-  // exponent difference, which tells us how far we'll need to shift b's
-  // mantissa right to add it to a's.
+  // exponent difference, which tells us how far we'll need to shift y's
+  // mantissa right to add it to x's.
   //
   // The shifted-right values will include the sign bits as well as the
   // exponents, but both sign bits are the same, so they'll cancel.
-  LSR     r4, ah, #20            // r4 = initial sign+exponent of the output
-  SUB     r12, r4, bh, LSR #20   // r12 = exponent difference
+  LSR     r4, xh, #20            // r4 = initial sign+exponent of the output
+  SUB     r12, r4, yh, LSR #20   // r12 = exponent difference
 
   // Clear the exponents and signs off the numbers to prepare for the addition.
   // (We reuse the value 0xffc00000 that we left in r14 on entry: ASRing that
   // right by 2 gives 0xfff00000, just the bit mask we wanted.)
   //
-  // Also OR in the leading 1 bit of b's mantissa, so that when we shift it
+  // Also OR in the leading 1 bit of y's mantissa, so that when we shift it
   // right and add, it will be included in the addition.
   //
-  // (It's cheaper not to bother doing the same for a, unless the addition
+  // (It's cheaper not to bother doing the same for x, unless the addition
   // carries into the exponent.)
-  BIC     ah, ah, r14, ASR #2
-  BIC     bh, bh, r14, ASR #2
-  ORR     bh, bh, #1 << 20
+  BIC     xh, xh, r14, ASR #2
+  BIC     yh, yh, r14, ASR #2
+  ORR     yh, yh, #1 << 20
 
 dadd_doadd:
   // Here we perform the actual addition. We either fell through from the code
@@ -96,33 +96,33 @@ dadd_doadd:
   //
   // We get here with:
   //   Operands known to be numeric rather than zero/infinity/NaN;
-  //   ah:al = mantissa of larger operand, with low bit at the bottom of al
-  //   bh:bl = mantissa of smaller operand, with low bit at the bottom of bl
+  //   xh:xl = mantissa of larger operand, with low bit at the bottom of xl
+  //   yh:yl = mantissa of smaller operand, with low bit at the bottom of yl
   //   r4 = result sign and exponent (in low 12 bits);
   //   r12 = exponent difference.
   //
-  // For normal inputs, the mantissa of b will have the leading bit set.
+  // For normal inputs, the mantissa of y will have the leading bit set.
   // Denormals will leave that bit clear, treating the number as 0.[mantissa] x
   // 2^(fixed exponent) instead of renormalising to 1.[mantissa] x 2^(variable
   // exponent) as a multiplication would want.
 
-  // The main addition involves shifting b right by the exponent difference in
-  // r12, and adding it to a. This must be done differently depending on how
+  // The main addition involves shifting y right by the exponent difference in
+  // r12, and adding it to x. This must be done differently depending on how
   // big the exponent difference is. Start by checking if it's at most 32.
   RSBS    r14, r12, #32
   BLO     dadd_bigshift
 
   // The exponent difference is 32 or less. The test above also left
-  // (32-difference) in r14, which is the amount we need to shift bh left by to
+  // (32-difference) in r14, which is the amount we need to shift yh left by to
   // recover the bits that the right shift will lose off the bottom.
 #if !__thumb__
-  // Add the right-shifted parts of bh and bl to ah and al, keeping the carry
+  // Add the right-shifted parts of yh and yl to xh and xl, keeping the carry
   // in between if any.
-  ADDS    al, al, bl, LSR r12
-  ADC     ah, ah, bh, LSR r12
-  // Now add the remainder of bh to the low word, again checking for a carry.
-  ADDS    al, al, bh, LSL r14
-  ADCS    ah, ah, #0
+  ADDS    xl, xl, yl, LSR r12
+  ADC     xh, xh, yh, LSR r12
+  // Now add the remainder of yh to the low word, again checking for a carry.
+  ADDS    xl, xl, yh, LSL r14
+  ADCS    xh, xh, #0
 #else
   // Thumb can't fold a register-controlled shift into an add, so we must use
   // two separate instructions in each case.
@@ -134,24 +134,24 @@ dadd_doadd:
   // (It would cost more cycles to avoid that awkwardness by pushing and
   // popping an extra register around the whole function.)
   //
-  // To avoid recomputing r14 _twice_, we do the addition of (bh shifted left)
+  // To avoid recomputing r14 _twice_, we do the addition of (yh shifted left)
   // first, so we can use the value in r14 before clobbering it at all.
-  LSL     r14, bh, r14
-  ADDS    al, al, r14
-  ADCS    ah, ah, #0
-  // Now do the addition of (bh shifted right) and (bl shifted right).
-  LSR     r14, bl, r12
-  ADDS    al, al, r14
-  LSR     r14, bh, r12
-  ADC     ah, ah, r14
+  LSL     r14, yh, r14
+  ADDS    xl, xl, r14
+  ADCS    xh, xh, #0
+  // Now do the addition of (yh shifted right) and (yl shifted right).
+  LSR     r14, yl, r12
+  ADDS    xl, xl, r14
+  LSR     r14, yh, r12
+  ADC     xh, xh, r14
   // And now reconstruct the inverted shift count, for use later.
   RSB     r14, r12, #32
 #endif
 
-  // If that addition carried into bit 20 of ah, then the number has increased
+  // If that addition carried into bit 20 of xh, then the number has increased
   // its exponent. Diverge into a completely separate code path for that case,
   // because there we must check for overflow.
-  CMP     ah, #1 << 20
+  CMP     xh, #1 << 20
   BHS     dadd_carry
 
   // Here, on the non-carrying path, we don't need to check for overflow at
@@ -160,77 +160,77 @@ dadd_doadd:
   // will look like the correct infinity anyway.
   //
   // Recombine the mantissa with the sign + exponent (in r4) via addition.
-  ADD     ah, ah, r4, LSL #20
+  ADD     xh, xh, r4, LSL #20
   // Now our number is complete apart from rounding.
 
 dadd_nocarry:
   // This is the general rounding path for additions that didn't carry into the
-  // next exponent. We come here with the unrounded output in ah:al, and bl and
-  // r14 set up so that (bl << r14) consists of all the bits shifted off the
-  // bottom of b's mantissa, or at least some approximation to them good enough
+  // next exponent. We come here with the unrounded output in xh:xl, and yl and
+  // r14 set up so that (yl << r14) consists of all the bits shifted off the
+  // bottom of y's mantissa, or at least some approximation to them good enough
   // to make the right rounding decision.
   //
   // Perform that shift, which sets the N flag if we need to round.
-  LSLS    bl, bl, r14
+  LSLS    yl, yl, r14
 
   // We're done with our two extra registers, so we can pop them.
   POP     {r4, r14}
 
   // If N is clear, we're rounding down (or the result was exact), and we know
-  // there was no overflow either, so ah:al contains the correct output and we
+  // there was no overflow either, so xh:xl contains the correct output and we
   // can return immediately.
   BXPL    lr
 
   // Otherwise, we're rounding up, or rounding to even. Start by incrementing
   // the low word of the output.
-  ADDS    al, al, #1
+  ADDS    xl, xl, #1
 
-  // The obvious thing to do next would be to ADC ah, ah, #0, propagating any
+  // The obvious thing to do next would be to ADC xh, xh, #0, propagating any
   // carry from that ADDS, and completing the addition of 1 to the 64-bit value
-  // in ah:al. But we can do better, by doing a combined test for that carry
+  // in xh:xl. But we can do better, by doing a combined test for that carry
   // _and_ round-to-even, and returning as quickly as possible in the common
   // case where neither has happened.
   //
-  // The Z flag is set if the addition to al carried, and clear if it didn't.
-  // So if Z is clear, we also test the bits of bl below the round bit. Then if
-  // Z is still clear, there was no carry into ah _and_ no round to even, so we
+  // The Z flag is set if the addition to xl carried, and clear if it didn't.
+  // So if Z is clear, we also test the bits of yl below the round bit. Then if
+  // Z is still clear, there was no carry into xh _and_ no round to even, so we
   // can return.
-  LSLSNE  bl, bl, #1
+  LSLSNE  yl, yl, #1
   BXNE    lr
 
-  // Now we know that we've just incremented al, and either or both of these
+  // Now we know that we've just incremented xl, and either or both of these
   // things is true:
   //
   //  1. this is a halfway case that needs rounding to even
-  //  2. the increment of al wrapped it round from 0xFFFFFFFF to 0
+  //  2. the increment of xl wrapped it round from 0xFFFFFFFF to 0
   //
-  // We can reliably tell if #2 is true by checking if al = 0. If that is so,
-  // we must increment ah. On the other hand, if al != 0, then #1 must be true,
-  // so we clear the low bit of al to complete the round-to-even.
+  // We can reliably tell if #2 is true by checking if xl = 0. If that is so,
+  // we must increment xh. On the other hand, if xl != 0, then #1 must be true,
+  // so we clear the low bit of xl to complete the round-to-even.
   //
-  // What if _both_ are true? Luckily, it doesn't matter, because if al = 0
+  // What if _both_ are true? Luckily, it doesn't matter, because if xl = 0
   // then its low bit is already clear, so it makes no difference whether we
   // clear it or not.
-  CMP     al, #0                  // is al 0?
-  BICNE   al, al, #1              // if not, then round to even
-  ADCEQ   ah, ah, #0              // if so, then increment ah
+  CMP     xl, #0                  // is xl 0?
+  BICNE   xl, xl, #1              // if not, then round to even
+  ADCEQ   xh, xh, #0              // if so, then increment xh
   BX      lr
 
 dadd_bigshift:
-  // We come here from dadd_doadd if b's mantissa must be shifted right by more
-  // than 32 bits. So all of bl is going to be shifted off the bottom, not
+  // We come here from dadd_doadd if y's mantissa must be shifted right by more
+  // than 32 bits. So all of yl is going to be shifted off the bottom, not
   // _even_ into the bit that determines rounding up or down. Therefore we can
-  // approximate it well enough by a single bit at the bottom of bh, which is 1
-  // if any bit of bl is 1.
+  // approximate it well enough by a single bit at the bottom of yh, which is 1
+  // if any bit of yl is 1.
   //
-  // We put the modified value in bl, which is where the rounding code (shared
+  // We put the modified value in yl, which is where the rounding code (shared
   // with the case for shift <= 32 bits) will expect to find the value it has
   // to shift left to make the round word.
-  CMP     bl, #1                  // set C if bl >= 0
-  ADC     bl, bh, bh              // shift bh left 1, putting C at the bottom
+  CMP     yl, #1                  // set C if yl >= 0
+  ADC     yl, yh, yh              // shift yh left 1, putting C at the bottom
 
   // Calculate shift counts. r12 is adjusted down by 32 so it tells us how much
-  // to shift bh right by when adding; r14 is the distance to shift bl left by
+  // to shift yh right by when adding; r14 is the distance to shift yl left by
   // to make the round word (again where the shared rounding code will expect
   // to find it).
   //
@@ -246,94 +246,94 @@ dadd_bigshift:
   // specially.
   //
   // In this situation we reset r14 to 0, so that the rounding code will not
-  // shift bl left at all. Since the top bit of bl is clear (we made bl by
+  // shift yl left at all. Since the top bit of yl is clear (we made yl by
   // shifting the top word of a mantissa left by 1, so its highest set bit is
-  // at most bit 21), the effect is to consider _all_ of b's mantissa to be
+  // at most bit 21), the effect is to consider _all_ of y's mantissa to be
   // lower than the round bit.
   MOVLO   r14, #0
 
   // Do the actual addition, again conditionalised on the result of checking
   // whether the shift count r12 was too big.
 #if !__thumb__
-  ADDSHS  al, al, bh, LSR r12
+  ADDSHS  xl, xl, yh, LSR r12
 #else
-  LSRHS   bh, bh, r12
-  ADDSHS  al, al, bh
+  LSRHS   yh, yh, r12
+  ADDSHS  xl, xl, yh
 #endif
 
   // Recombine the (unrounded) output mantissa with the output sign and
-  // exponent in r4. This also propagates any carry from al into ah, from the
+  // exponent in r4. This also propagates any carry from xl into xh, from the
   // addition. (Luckily the condition for skipping the addition also implies
   // C=0, so in that situation, the ADC is still harmless.)
-  ADC     ah, ah, r4, LSL #20
+  ADC     xh, xh, r4, LSL #20
 
   // Check whether the addition carried into the exponent field, by seeing if
-  // the exponent that ended up at the top of ah is the same as the one in r4
+  // the exponent that ended up at the top of xh is the same as the one in r4
   // that we just added. If it is the same (no carry) then we can go to
   // dadd_nocarry to do the easy version of rounding that doesn't also need to
   // check overflow.
-  CMP     r4, ah, LSR #20
+  CMP     r4, xh, LSR #20
   BEQ     dadd_nocarry
 
   // Otherwise, the addition has carried into the exponent. Subtract the
   // exponent and sign off again, because dadd_carry (again shared with the
-  // small-shift code) will need those not to be in ah, because it will need to
+  // small-shift code) will need those not to be in xh, because it will need to
   // shift just the mantissa down by a bit.
-  SUB     ah, ah, r4, LSL #20
+  SUB     xh, xh, r4, LSL #20
 
 dadd_carry:
   // We get here from both shift branches if magnitude addition overflowed the
   // input mantissa, so that the output will have an exponent one larger than
   // the larger input.
   //
-  // ah:al was the larger input mantissa _without_ its leading 1, which we then
-  // added b's mantissa to. So before we shift down, we must put on the
+  // xh:xl was the larger input mantissa _without_ its leading 1, which we then
+  // added y's mantissa to. So before we shift down, we must put on the
   // explicit leading 1.
-  ADD     ah, ah, #1 << 20
-  LSRS    ah, ah, #1
-  RRXS    al, al
+  ADD     xh, xh, #1 << 20
+  LSRS    xh, xh, #1
+  RRXS    xl, xl
   // Now we can put the sign and exponent back on.
-  ADD     ah, ah, r4, LSL #20
+  ADD     xh, xh, r4, LSL #20
 
   // The right shift left the round bit in C. So if that's clear, we're not
   // rounding up; we only have to check for overflow and then we can return.
   BCC     dadd_check_overflow_pop
 
   // Otherwise, set up for the combined dadd_roundeven_or_roundup_carry code:
-  // round up by incrementing the low word of al, leaving the carry bit set if
-  // ah needs to be incremented too. If that addition _didn't_ carry, make the
+  // round up by incrementing the low word of xl, leaving the carry bit set if
+  // xh needs to be incremented too. If that addition _didn't_ carry, make the
   // round word in r14 that's zero if we need to round to even. Then Z is set
   // in either case, and otherwise, we only have overflow checking left to do.
-  ADDS    al, al, #1              // set Z if there's a carry
-  LSLSNE  r14, bl, r14            // else set Z if we need to round to even
+  ADDS    xl, xl, #1              // set Z if there's a carry
+  LSLSNE  r14, yl, r14            // else set Z if we need to round to even
   POP     {r4, r14}
   BNE     dadd_check_overflow     // if Z not set for either reason, done
 
 dadd_roundeven_or_roundup_carry:
   // Just as in the dadd_nocarry case above, here we know that we've just
-  // incremented al, and we either need to propagate a carry into ah, or we
+  // incremented xl, and we either need to propagate a carry into xh, or we
   // need to round to even, or both. See the comment there for explanation of
   // these three instructions.
   //
   // The difference in this case is that after we've done that, we also need to
   // check for overflow, where dadd_nocarry knew that wasn't necessary.
-  CMP     al, #0                  // is al 0?
-  BICNE   al, al, #1              // if not, then round to even
-  ADCEQ   ah, ah, #0              // if so, then increment ah
+  CMP     xl, #0                  // is xl 0?
+  BICNE   xl, xl, #1              // if not, then round to even
+  ADCEQ   xh, xh, #0              // if so, then increment xh
   // We come here with a result ready to be returned, except that we have to
   // check it for overflow first.
 dadd_check_overflow:
-  LSL     bh, ah, #1              // move exponent into top 11 bits of bh
-  CMP     bh, #0xFFE00000         // if bh >= this, then exponent is all 1s
+  LSL     yh, xh, #1              // move exponent into top 11 bits of yh
+  CMP     yh, #0xFFE00000         // if yh >= this, then exponent is all 1s
   BXLO    lr                      // otherwise, no overflow
 
   // If we haven't just returned, then we have an overflow. In addition we can
-  // only overflow by up to a factor of 2, so the sign bit in ah is still
+  // only overflow by up to a factor of 2, so the sign bit in xh is still
   // correct, and even the exponent has all its bits set. We only need to clear
   // the mantissa.
-  MOV     al, #0                   // clear low word
-  LSRS    ah, ah, #20
-  LSLS    ah, ah, #20
+  MOV     xl, #0                   // clear low word
+  LSRS    xh, xh, #20
+  LSLS    xh, xh, #20
   BX      lr
 
   // Alternative entry point to dadd_check_overflow above, for use when the
@@ -352,8 +352,8 @@ dadd_uncommon:
   // knowing that r14 was set to 0xFFC00000 in the function prologue, so we can
   // make a useful constant for this test by adjusting it.
   ORR     r14, r14, #0x00200000   // now r14 = 0xFFE00000
-  BICS    r4, r14, ah, LSL #1     // if a has exponent 0x7ff, this sets r4=0
-  BICSNE  r4, r14, bh, LSL #1     // and similarly for b
+  BICS    r4, r14, xh, LSL #1     // if x has exponent 0x7ff, this sets r4=0
+  BICSNE  r4, r14, yh, LSL #1     // and similarly for y
   BEQ     dadd_naninf             // so if either set Z, we have a NaN or inf
 
   // Now we've ruled out NaNs and infinities. With NaNs gone, it's safe to flip
@@ -361,54 +361,54 @@ dadd_uncommon:
   // So check if the signs are the same, and cross-jump to dsub_zerodenorm
   // (magnitude subtraction involving a zero or denormal) if not. Meanwhile,
   // that will cross-jump back to here in the opposite case.
-  TEQ     ah, bh
-  EORMI   bh, bh, #1 << 31
+  TEQ     xh, yh
+  EORMI   yh, yh, #1 << 31
   BMI     dsub_zerodenorm
 dadd_zerodenorm:
   // Now we know we're doing a magnitude addition, involving at least one zero
   // or denormal, and no NaNs or infinities.
   //
-  // Sort the operands into magnitude order so that a >= b, exactly as in the
+  // Sort the operands into magnitude order so that x >= y, exactly as in the
   // main code path.
-  SUBS    r4, al, bl          // compare inputs, also keeping a-b
-  SBCS    r12, ah, bh
-  BHS     dadd_zerodenorm_swapped // if a>=b then branch round the swap
-  ADDS    bl, bl, r4          // otherwise turn b into a by, adding (a-b)
-  ADC     bh, bh, r12
-  SUBS    al, al, r4          // and turn a into b by subtracting it
-  SBC     ah, ah, r12
+  SUBS    r4, xl, yl          // compare inputs, also keeping x-y
+  SBCS    r12, xh, yh
+  BHS     dadd_zerodenorm_swapped // if x>=y then branch round the swap
+  ADDS    yl, yl, r4          // otherwise turn y into x by adding (x-y)
+  ADC     yh, yh, r12
+  SUBS    xl, xl, r4          // and turn x into y by subtracting it
+  SBC     xh, xh, r12
 dadd_zerodenorm_swapped:
   // Set up the output sign+exponent, and the exponent difference, again
   // exactly as in the main code path.
-  LSR     r4, ah, #20            // r4 = initial sign+exponent of the output
-  SUB     r12, r4, bh, LSR #20   // r12 = exponent difference
+  LSR     r4, xh, #20            // r4 = initial sign+exponent of the output
+  SUB     r12, r4, yh, LSR #20   // r12 = exponent difference
 
-  // With the operands sorted so that b is smallest, and knowing there's at
+  // With the operands sorted so that y is smallest, and knowing there's at
   // least one zero or denormal present, we know furthermore that if there's
-  // zero at all then it's b. And if b=0, then _whatever_ is in a is the right
+  // zero at all then it's y. And if y=0, then _whatever_ is in x is the right
   // answer to return from the whole operation, whether it's another zero, a
   // denormal, or normalised.
-  ORRS    r14, bl, bh, LSL #1     // test all bits of b except the sign bit
+  ORRS    r14, yl, yh, LSL #1     // test all bits of y except the sign bit
   POPEQ   {r4, pc}                // if they're all zero, we're done
 
-  // Otherwise, there are no zeroes, so b must be denormal, and we don't yet
-  // know if a is denormal too.
+  // Otherwise, there are no zeroes, so y must be denormal, and we don't yet
+  // know if x is denormal too.
   //
-  // If a isn't denormal, we rejoin the main code path for adding normalised
+  // If x isn't denormal, we rejoin the main code path for adding normalised
   // numbers, with everything set up as dadd_doadd expects. It's easiest to
-  // represent the denormal b the same way the FP format does, as a mantissa
+  // represent the denormal y the same way the FP format does, as a mantissa
   // without its leading bit set, shifted by the same amount as normalised
   // numbers of the lowest exponent. (Renormalising via CLZ is more work, and
   // not needed for addition.)
   //
-  // To tell the main code that b's mantissa should be shifted by the same
+  // To tell the main code that y's mantissa should be shifted by the same
   // amount as a number with exponent 0x001, we must adjust the exponent
   // difference r12 by one, because we've already made that by subtracting the
   // _raw_ exponent values.
 
-  LSLS    r14, r4, #21          // output exp = 0? If so, a is denormal too
-  BIC     ah, ah, r4, LSL #20   // clear sign+exponent from top of a
-  BICNE   bh, bh, #1 << 31      // if a not denormal, clear sign of b
+  LSLS    r14, r4, #21          // output exp = 0? If so, x is denormal too
+  BIC     xh, xh, r4, LSL #20   // clear sign+exponent from top of x
+  BICNE   yh, yh, #1 << 31      // if x not denormal, clear sign of y
   SUBNE   r12, r12, #1          //   and adjust exponent difference
   BNE     dadd_doadd            //   and rejoin the main path
 
@@ -420,12 +420,12 @@ dadd_zerodenorm_swapped:
   // it's become a normalised number, with the mantissa still scaled by the
   // same factor relative to the true value.
   //
-  // The only tricky part is the sign bit. But we cleared that out of ah above,
-  // and haven't cleared it out of bh, so there's exactly one copy of it
+  // The only tricky part is the sign bit. But we cleared that out of xh above,
+  // and haven't cleared it out of yh, so there's exactly one copy of it
   // involved in this addition. So the sign bit will end up correct at the top
-  // of ah too.
-  ADDS    al, al, bl
-  ADC     ah, ah, bh
+  // of xh too.
+  ADDS    xl, xl, yl
+  ADC     xh, xh, yh
   POP     {r4, pc}
 
 dadd_naninf:
@@ -436,45 +436,45 @@ dadd_naninf:
   POP     {r4, r14}
 
   // A number is a NaN if its exponent is 0x7ff and at least one bit below that
-  // is set. The CMP + ADC pair here converts the two words ah:al into a single
-  // word containing ah shifted up by one (throwing away the sign bit which
-  // makes no difference), with its low bit set if al was nonzero. So if that
-  // is strictly greater than 0xffe00000, then a was a NaN.
-  CMP     al, #1
-  ADC     r12, ah, ah
+  // is set. The CMP + ADC pair here converts the two words xh:xl into a single
+  // word containing xh shifted up by one (throwing away the sign bit which
+  // makes no difference), with its low bit set if xl was nonzero. So if that
+  // is strictly greater than 0xffe00000, then x was a NaN.
+  CMP     xl, #1
+  ADC     r12, xh, xh
   CMP     r12, #0xFFE00000
   BHI     __dnan2
-  // Now check b in the same way.
-  CMP     bl, #1
-  ADC     r12, bh, bh
+  // Now check y in the same way.
+  CMP     yl, #1
+  ADC     r12, yh, yh
   CMP     r12, #0xFFE00000
   BHI     __dnan2
 
 dadd_inf:
   // Now we know there are no NaNs. Therefore there's at least one infinity. If
   // we have two infinities of opposite sign, that's an invalid operation and
-  // we must return NaN; this happens if and only if a XOR b is all zero except
+  // we must return NaN; this happens if and only if x XOR y is all zero except
   // for the top bit.
-  EOR     r12, ah, bh
+  EOR     r12, xh, yh
   CMP     r12, #0x80000000
-  EORSEQ  r12, al, bl
+  EORSEQ  r12, xl, yl
   BEQ     daddsub_return_nan
 
   // Otherwise, only one sign of infinity is involved in our addition, so
   // return whichever operand is the infinity. Since we know there are no NaNs,
   // we can identify an infinity from just its exponent.
-  LSL     r12, ah, #1
+  LSL     r12, xh, #1
   CMP     r12, #0xFFE00000
   BXEQ    lr
-  MOVS    ah, bh
-  MOVS    al, bl
+  MOVS    xh, yh
+  MOVS    xl, yl
   BX      lr
 
 daddsub_return_nan:
   // Return the default NaN, in the case of adding +inf to -inf.
-  MOVW    ah, 0x7ff8
-  LSLS    ah, ah, #16        // 0x7ff80000 is the high word of the default NaN
-  MOV     al, #0             // and the low word is 0
+  MOVW    xh, 0x7ff8
+  LSLS    xh, xh, #16        // 0x7ff80000 is the high word of the default NaN
+  MOV     xl, #0             // and the low word is 0
   BX      lr
 
   .size arm_fp_dadd, .-arm_fp_dadd
@@ -482,7 +482,7 @@ daddsub_return_nan:
   .globl arm_fp_drsub
   .type arm_fp_drsub,%function
 arm_fp_drsub:
-  // Reversed subtraction, that is, compute b-a, where a is in r0/r1 and b in
+  // Reversed subtraction, that is, compute y-x, where x is in r0/r1 and y in
   // r2/r3.
   //
   // We could implement this by simply swapping the register pairs. But the
@@ -495,8 +495,8 @@ arm_fp_drsub:
 
   // Start by testing for uncommon operands in the same way as dadd.
   LDR     r14, =0xFFC00000
-  ADD     r12, ah, #1 << 20   // r12 has the adjusted version of a's exponent
-  ADD     r4, bh, #1 << 20    // and r4 the adjusted version of b's
+  ADD     r12, xh, #1 << 20   // r12 has the adjusted version of x's exponent
+  ADD     r4, yh, #1 << 20    // and r4 the adjusted version of y's
   TST     r14, r12, LSL #1    // test the top 10 exponent bits of each
   TSTNE   r14, r4, LSL #1
   BEQ     drsub_uncommon      // and branch out of line if either is 0
@@ -504,28 +504,28 @@ arm_fp_drsub:
   // Check if the signs are equal, and branch to one or the other of
   // dadd_magnitude and dsub_magnitude.
   //
-  // If the signs are unequal, then b-a is a magnitude addition: we negate a so
-  // that we're computing b + (-a), in which both values have the same sign and
-  // go to dadd_magnitude. If the signs are equal then b-a is a magnitude
-  // subtraction, equal to (-a) - (-b), so we negate both operands and go to
-  // dsub_magnitude. Since a needs to be negated in both cases, we can do that
+  // If the signs are unequal, then y-x is a magnitude addition: we negate x so
+  // that we're computing y + (-x), in which both values have the same sign and
+  // go to dadd_magnitude. If the signs are equal then y-x is a magnitude
+  // subtraction, equal to (-x) - (-y), so we negate both operands and go to
+  // dsub_magnitude. Since x needs to be negated in both cases, we can do that
   // unconditionally.
-  TEQ     ah, bh              // N set for a magnitude addition
-  EOR     ah, ah, #1 << 31    // negate a unconditionally
+  TEQ     xh, yh              // N set for a magnitude addition
+  EOR     xh, xh, #1 << 31    // negate x unconditionally
   BMI     dadd_magnitude      // branch away for magnitude addition
-  EOR     bh, bh, #1 << 31    // otherwise, negate b too
+  EOR     yh, yh, #1 << 31    // otherwise, negate y too
   B       dsub_magnitude      // and do a magnitude subtraction
 
 drsub_uncommon:
   // Any uncommon operands to drsub are handled by just swapping the two
   // operands and going to dsub's handler. We're off the main fast path now, so
   // there's no need to try to optimise it any harder.
-  EOR     ah, ah, bh
-  EOR     al, al, bl
-  EOR     bh, bh, ah
-  EOR     bl, bl, al
-  EOR     ah, ah, bh
-  EOR     al, al, bl
+  EOR     xh, xh, yh
+  EOR     xl, xl, yl
+  EOR     yh, yh, xh
+  EOR     yl, yl, xl
+  EOR     xh, xh, yh
+  EOR     xl, xl, yl
   B       dsub_uncommon
 
   .size arm_fp_drsub, .-arm_fp_drsub
@@ -539,58 +539,58 @@ arm_fp_dsub:
 
   // Start by testing for uncommon operands in the same way as dadd.
   LDR     r14, =0xFFC00000
-  ADD     r12, ah, #1 << 20   // r12 has the adjusted version of a's exponent
-  ADD     r4, bh, #1 << 20    // and r4 the adjusted version of b's
+  ADD     r12, xh, #1 << 20   // r12 has the adjusted version of x's exponent
+  ADD     r4, yh, #1 << 20    // and r4 the adjusted version of y's
   TST     r14, r12, LSL #1    // test the top 10 exponent bits of each
   TSTNE   r14, r4, LSL #1
   BEQ     dsub_uncommon       // and branch out of line if either is 0
 
   // Check the signs, and if they're unequal, cross-jump into dadd to do
   // magnitude addition. (Now we've excluded NaNs, it's safe to flip the sign
-  // of b.)
-  TEQ     ah, bh
-  EORMI   bh, bh, #1 << 31
+  // of y.)
+  TEQ     xh, yh
+  EORMI   yh, yh, #1 << 31
   BMI     dadd_magnitude
 dsub_magnitude:
   // If we get here, we're subtracting operands with equal signs (i.e. a
   // magnitude subtraction). First thing to do is put operands in magnitude
-  // order, so that a >= b. However, if they are swapped, we must also negate
+  // order, so that x >= y. However, if they are swapped, we must also negate
   // both of them, since A - B = (-B) - (-A). We do this by flipping the top
   // bit of the value we add/subtract to each input to perform the swap
-  SUBS    r4, al, bl          // compare inputs, also keeping a-b
-  SBCS    r12, ah, bh
-  BHS     dsub_swapped        // if a>=b then branch round the swap
-  EOR     r12, r12, #1 << 31  // flip the top bit of a-b
-  ADDS    bl, bl, r4          // so that this addition turns b into a+TOPBIT
-  ADC     bh, bh, r12
-  SUBS    al, al, r4          // and this subtraction turns a into b-TOPBIT
-  SBC     ah, ah, r12
+  SUBS    r4, xl, yl          // compare inputs, also keeping x-y
+  SBCS    r12, xh, yh
+  BHS     dsub_swapped        // if x>=y then branch round the swap
+  EOR     r12, r12, #1 << 31  // flip the top bit of x-y
+  ADDS    yl, yl, r4          // so that this addition turns y into x+TOPBIT
+  ADC     yh, yh, r12
+  SUBS    xl, xl, r4          // and this subtraction turns x into y-TOPBIT
+  SBC     xh, xh, r12
 dsub_swapped:
   // Keep the sign and exponent of the larger input, to use as the sign and
   // exponent of the output (up to carries and overflows). Also calculate the
-  // exponent difference, which tells us how far we'll need to shift b's
-  // mantissa right to add it to a's.
+  // exponent difference, which tells us how far we'll need to shift y's
+  // mantissa right to add it to x's.
   //
   // As in dadd, the values being subtracted both include the sign bit, but
   // we've already ensured the sign bits are the same (if we came here from
-  // dadd then we flipped the sign of b), so as in dadd, they cancel.
-  LSR     r4, ah, #20
-  SUB     r12, r4, bh, LSR #20
+  // dadd then we flipped the sign of y), so as in dadd, they cancel.
+  LSR     r4, xh, #20
+  SUB     r12, r4, yh, LSR #20
 
   // Isolate the two mantissas.
-  BIC     ah, ah, r4, LSL #20
-  BIC     bh, bh, r14, ASR #2     // 0xffc00000 ASR 2 = 0xfff00000
+  BIC     xh, xh, r4, LSL #20
+  BIC     yh, yh, r14, ASR #2     // 0xffc00000 ASR 2 = 0xfff00000
 
-  // Negate the mantissa of b, so that we can compute the difference using
-  // ADD/ADC. As a side effect we also add in the leading bit of b's mantissa,
-  // by subtracting b from 0xfff0000000000000 instead of from 0.
-  RSBS    bl, bl, #0
+  // Negate the mantissa of y, so that we can compute the difference using
+  // ADD/ADC. As a side effect we also add in the leading bit of y's mantissa,
+  // by subtracting y from 0xfff0000000000000 instead of from 0.
+  RSBS    yl, yl, #0
 #if !__thumb__
-  RSC     bh, bh, r14, ASR #2     // 0xffc00000 ASR 2 = 0xfff00000
+  RSC     yh, yh, r14, ASR #2     // 0xffc00000 ASR 2 = 0xfff00000
 #else
   // Thumb has no RSC, so simulate it by bitwise inversion and then ADC
-  MVN     bh, bh
-  ADC     bh, bh, r14, ASR #2     // 0xffc00000 ASR 2 = 0xfff00000
+  MVN     yh, yh
+  ADC     yh, yh, r14, ASR #2     // 0xffc00000 ASR 2 = 0xfff00000
 #endif
 
 dsub_dosub:
@@ -599,77 +599,77 @@ dsub_dosub:
   //
   // We get here with:
   //   Operands known to be numeric rather than zero/infinity/NaN;
-  //   ah:al = mantissa of larger operand, with low bit at the bottom of al
-  //   bh:bl = negated mantissa of smaller operand, similarly
+  //   xh:xl = mantissa of larger operand, with low bit at the bottom of xl
+  //   yh:yl = negated mantissa of smaller operand, similarly
   //   r4 = result sign and exponent (in low 12 bits);
   //   r12 = exponent difference.
   //
-  // For normal inputs, the value in bh:bl will be as if the mantissa of b had
-  // the leading bit set before negating it. For denormal b, the mantissa will
+  // For normal inputs, the value in yh:yl will be as if the mantissa of y had
+  // the leading bit set before negating it. For denormal y, the mantissa will
   // have been negated without setting that bit, similarly to dadd.
 
   // As in dadd, we start by separating off the case where we're shifting the
-  // mantissa of b right by more than 32 bits.
+  // mantissa of y right by more than 32 bits.
   RSBS    r14, r12, #32
   BLO     dsub_bigshift
 
   // The exponent difference is 32 or less. The test above also left
-  // (32-difference) in r14, which is the amount we need to shift bh left by to
+  // (32-difference) in r14, which is the amount we need to shift yh left by to
   // recover the bits that the right shift will lose off the bottom.
 #if !__thumb__
-  // Add the right-shifted parts of bh and bl to ah and al, keeping the carry
+  // Add the right-shifted parts of yh and yl to xh and xl, keeping the carry
   // in between if any.
-  ADDS    al, al, bl, LSR r12
-  ADC     ah, ah, bh, ASR r12
-  // Now add the remainder of bh to the low word, again checking for a carry.
-  ADDS    al, al, bh, LSL r14
-  ADCS    ah, ah, #0
+  ADDS    xl, xl, yl, LSR r12
+  ADC     xh, xh, yh, ASR r12
+  // Now add the remainder of yh to the low word, again checking for a carry.
+  ADDS    xl, xl, yh, LSL r14
+  ADCS    xh, xh, #0
 #else
   // The Thumb version of the addition, which must do each register-controlled
   // shift in a separate instruction from the addition. This works the same as
-  // the dadd version, except that we use ASR to shift bh right, because bh:bl
+  // the dadd version, except that we use ASR to shift yh right, because yh:yl
   // contains a negative signed integer.
 
-  // As in dadd, start by adding (bh shifted left), so as not to waste the
+  // As in dadd, start by adding (yh shifted left), so as not to waste the
   // value we've already set up in r14.
-  LSL     r14, bh, r14
-  ADDS    al, al, r14
-  ADCS    ah, ah, #0
-  // Then add (bh shifted right) and (bl shifted right).
-  LSR     r14, bl, r12
-  ADDS    al, al, r14
-  ASR     r14, bh, r12
-  ADCS    ah, ah, r14
+  LSL     r14, yh, r14
+  ADDS    xl, xl, r14
+  ADCS    xh, xh, #0
+  // Then add (yh shifted right) and (yl shifted right).
+  LSR     r14, yl, r12
+  ADDS    xl, xl, r14
+  ASR     r14, yh, r12
+  ADCS    xh, xh, r14
   // And now reconstruct the inverted shift count, for use later.
   RSB     r14, r12, #32
 #endif
 
-  // We know we had a >= b before the subtraction. So a-b is still a number of
+  // We know we had x >= y before the subtraction. So x-y is still a number of
   // the same sign, but its exponent might have reduced. If we'd set the
-  // leading bit on a's mantissa before subtracting, we'd be able to tell this
+  // leading bit on x's mantissa before subtracting, we'd be able to tell this
   // by testing if it was still set. But in fact we didn't, so the question is
-  // whether a's mantissa without the leading bit is still even positive.
+  // whether x's mantissa without the leading bit is still even positive.
   //
   // The last ADCS (in either of the Arm and Thumb code sequences above) will
-  // have set the N flag if a < 0, which is the case where the exponent has
+  // have set the N flag if x < 0, which is the case where the exponent has
   // reduced. Branch out of line for that case.
   BMI     dsub_borrow
 
 dsub_noborrow:
-  // This is the easy case: the exponent of a has stayed the same, so there's
+  // This is the easy case: the exponent of x has stayed the same, so there's
   // no possibility of underflow. All we have to do is put the pieces of the
   // result back together, round, and return.
 
-  // Recombine a's mantissa with the output sign and exponent.
-  ADD     ah, ah, r4, LSL #20
+  // Recombine x's mantissa with the output sign and exponent.
+  ADD     xh, xh, r4, LSL #20
 
-  // Make the word of bits shifted off the bottom of b's mantissa, with the
+  // Make the word of bits shifted off the bottom of y's mantissa, with the
   // topmost bit indicating whether we round up or down, and the rest used to
   // determine whether to round to even.
-  LSLS    bl, bl, r14
+  LSLS    yl, yl, r14
 
   // If the top bit of the round word is clear, then we're rounding down, so
-  // the value in ah:al is already correct and we can return.
+  // the value in xh:xl is already correct and we can return.
   POPPL   {r4, pc}
 
   // Otherwise, start by rounding up. As in dadd, we make the Z flag do double
@@ -677,49 +677,49 @@ dsub_noborrow:
   // word, and then if that doesn't happen then we have another chance to set
   // it if the round word indicates an exact halfway case. So we can return
   // early in the common case where neither of those things happened.
-  ADDS    al, al, #1
-  CMPNE   bl, #0x80000000
+  ADDS    xl, xl, #1
+  CMPNE   yl, #0x80000000
   POPNE   {r4, pc}
 
-  // Now if al=0 then we must increment ah (the addition from rounding carried
+  // Now if xl=0 then we must increment xh (the addition from rounding carried
   // into the high word). Otherwise we must round to even, by clearing the low
-  // bit of al. As in dadd, it's possible that _both_ conditions are true at
-  // once, but in that situation, the fact that al=0 means if makes no
+  // bit of xl. As in dadd, it's possible that _both_ conditions are true at
+  // once, but in that situation, the fact that xl=0 means if makes no
   // difference whether we clear its low bit or not.
-  CMP     al, #0              // do we need to increment ah?
-  ADDEQ   ah, ah, #1          // if so, do it
-  BICNE   al, al, #1          // otherwise, round to even
+  CMP     xl, #0              // do we need to increment xh?
+  ADDEQ   xh, xh, #1          // if so, do it
+  BICNE   xl, xl, #1          // otherwise, round to even
   POP     {r4, pc}
 
 dsub_bigshift:
-  // We come here from dsub_dosub if b's mantissa must be shifted right by more
+  // We come here from dsub_dosub if y's mantissa must be shifted right by more
   // than 32 bits.
   //
-  // In dadd_bigshift we concluded that all of bl could be condensed into a
+  // In dadd_bigshift we concluded that all of yl could be condensed into a
   // single bit at the bottom of the round word, because it could only affect
   // round-to-even. However, in subtraction, that's not true, because we might
   // renormalise: if the input exponents differ by exactly 33, and the
-  // subtraction reduces the exponent by 1, then the top bit of bl might become
+  // subtraction reduces the exponent by 1, then the top bit of yl might become
   // the round bit again. So we must make our round word by shifting two extra
-  // bits on to the bottom of bh: first the topmost bit of bl, then a single
+  // bits on to the bottom of yh: first the topmost bit of yl, then a single
   // bit indicating whether any of the rest is nonzero.
   //
-  // As in dadd_bigshift, we make this new round word in bl, leaving bh
+  // As in dadd_bigshift, we make this new round word in yl, leaving yh
   // unmodified so that we can use it for the actual shift-and-add.
   //
   // (For these purposes, we only have to worry about renormalisation by _one_
   // bit. If the output exponent reduces by 2 or more, it must be because the
   // input exponents were so close that the output is exact anyway, so a round
   // word isn't needed at all.)
-  ADDS    r14, bl, bl         // put the top bit of bl into C
-  ADC     bl, bh, bh          // and shift it in to the bottom of bh
+  ADDS    r14, yl, yl         // put the top bit of yl into C
+  ADC     yl, yh, yh          // and shift it in to the bottom of yh
   CMP     r14, #1             // set C if anything below that bit was nonzero
-  ADC     bl, bl, bl          // shift that in to bl as well
+  ADC     yl, yl, yl          // shift that in to yl as well
 
-  // Calculate shift counts. r12 is how far to shift bh right when adding; r14
-  // is how far to shift bl left to make the round word (subtracted from 30
+  // Calculate shift counts. r12 is how far to shift yh right when adding; r14
+  // is how far to shift yl left to make the round word (subtracted from 30
   // instead of 32 to account for the two bits we just shifted in at the bottom
-  // of bl).
+  // of yl).
   //
   // If the latter shift count goes negative, then we can't use it. Branch to
   // another handler for _really_ big exponent differences.
@@ -727,40 +727,40 @@ dsub_bigshift:
   RSBS    r14, r12, #30
   BLO     dsub_hugeshift
 
-  // Shift bh right and add it to a, to produce the unrounded output mantissa.
+  // Shift yh right and add it to x, to produce the unrounded output mantissa.
 #if !__thumb__
-  ADDS    al, al, bh, ASR r12
+  ADDS    xl, xl, yh, ASR r12
 #else
   // In Thumb we must do the register-controlled shift and addition separately
-  ASR     r12, bh, r12
-  ADDS    al, al, r12
+  ASR     r12, yh, r12
+  ADDS    xl, xl, r12
 #endif
-  // The top half of the addition, propagating a carry from al into ah. Since
-  // bh was a negative number and we arithmetically shifted it right, the value
-  // we add to ah is 0xFFFFFFFF rather than 0, as if we'd sign-extended that
+  // The top half of the addition, propagating a carry from xl into xh. Since
+  // yh was a negative number and we arithmetically shifted it right, the value
+  // we add to xh is 0xFFFFFFFF rather than 0, as if we'd sign-extended that
   // negative number to 64 bits.
-  ADCS    ah, ah, #-1
+  ADCS    xh, xh, #-1
 
   // As in the small-shift case above, if this has left a positive value in
-  // ah:al, it means the exponent hasn't changed, so we can go to the easy
+  // xh:xl, it means the exponent hasn't changed, so we can go to the easy
   // epilogue code in dsub_noborrow.
   BPL     dsub_noborrow
 
 dsub_borrow:
   // We come here from either of the small-shift or large-shift versions of the
-  // subtraction step, if the subtraction caused ah:al to go negative. This
+  // subtraction step, if the subtraction caused xh:xl to go negative. This
   // means that the result of the subtraction is less than the smallest
-  // possible value with a's exponent. In other words, the output will have a
+  // possible value with x's exponent. In other words, the output will have a
   // smaller exponent, and we must shift the mantissa left and put some bits
-  // back in from bl (which contains the bits of b shifted off the bottom).
+  // back in from yl (which contains the bits of y shifted off the bottom).
   //
   // The most important question in this situation is: do we have to shift the
   // mantissa left by only one bit, or by more than one? It's important because
   // in the case where we shift left by more than one bit, no rounding can
-  // possibly be needed: if a >= 2^k but a-b < 2^{k-1}, then b > 2^{k-1}, so
-  // the exponents of a and b differ by at most 1. Therefore the lowest set bit
-  // in the true difference a-b (before rounding) can't possibly be any lower
-  // than the bit just off the bottom of a's mantissa, and we're shifting left
+  // possibly be needed: if x >= 2^k but x-y < 2^{k-1}, then y > 2^{k-1}, so
+  // the exponents of x and y differ by at most 1. Therefore the lowest set bit
+  // in the true difference x-y (before rounding) can't possibly be any lower
+  // than the bit just off the bottom of x's mantissa, and we're shifting left
   // by at least 1, so that will be part of the output mantissa. So in this
   // case the result must be exact.
   //
@@ -772,29 +772,29 @@ dsub_borrow:
   // value with lots of trailing 0 bits, which can't need any rounding.)
   //
   // On the other hand, if we shift left by only one bit, then the value we
-  // subtracted from a could have been almost arbitrarily small, so there's
-  // lots of scope for bits of b to have been shifted off the bottom to cause
+  // subtracted from x could have been almost arbitrarily small, so there's
+  // lots of scope for bits of y to have been shifted off the bottom to cause
   // rounding.
   //
   // Conclusion: we either shift left 1 and have to figure out rounding, or we
   // shift left more than 1 and have to figure out the right shift count, but
   // never both.
 
-  // On entry to here, (bl << r14) gives the bits shifted off the bottom of
-  // ah:al. Shift ah:al up by one, bringing the high bit of that back in.
+  // On entry to here, (yl << r14) gives the bits shifted off the bottom of
+  // xh:xl. Shift xh:xl up by one, bringing the high bit of that back in.
   //
   // If we're shifting left by only one bit, then the mantissa is now at its
-  // correct position and bl is the round word. On the other hand, if we're
+  // correct position and yl is the round word. On the other hand, if we're
   // shifting by more, then all the output mantissa bits we need are now in
-  // ah:al, and there aren't any in bl that still need to be salvaged.
-  ADD     r14, r14, #1            // we want to shift bl one extra bit left
-  LSLS    r14, bl, r14            // do the shift, leaving the top bit in C
-  ADCS    al, al, al              // shift that in to the bottom of al
-  ADC     ah, ah, ah              // and propagate into ah
+  // xh:xl, and there aren't any in yl that still need to be salvaged.
+  ADD     r14, r14, #1            // we want to shift yl one extra bit left
+  LSLS    r14, yl, r14            // do the shift, leaving the top bit in C
+  ADCS    xl, xl, xl              // shift that in to the bottom of xl
+  ADC     xh, xh, xh              // and propagate into xh
 
   // Our next task is to find out which case we're in: shift by one bit and
   // round, or figure out how many more bits to shift by? We can determine this
-  // by looking at bit 20 of ah: if that's 0 then we need to shift further.
+  // by looking at bit 20 of xh: if that's 0 then we need to shift further.
   //
   // But to save instructions, we fold that test together with a test for
   // another awkward case: was the input exponent in r4 equal to 1? If so, then
@@ -803,22 +803,22 @@ dsub_borrow:
   // significance loss has occurred, even if the exponent in r4 was larger.)
   //
   // To do both of these tests at once, we add the original output exponent in
-  // r4 back in to ah, _shifted left by an extra bit_, as if we'd added it
+  // r4 back in to xh, _shifted left by an extra bit_, as if we'd added it
   // before doing the shift above. This loses the sign bit off the top, and
-  // since the top 11 bits of ah are all 1, has the same result as decrementing
-  // r4. So bit 20 of ah is unaffected (it's still 0 if we need to shift
+  // since the top 11 bits of xh are all 1, has the same result as decrementing
+  // r4. So bit 20 of xh is unaffected (it's still 0 if we need to shift
   // further), and bits 21 and upwards are all zero if the output might be
   // denormal.
   //
   // The Arm condition code LS (unsigned lower-or-same) is implemented by
   // testing if C=0 or Z=1. That's just what we need! Having made our modified
-  // version of ah, shift it right so that bit 20 goes off the bottom into the
-  // carry flag. Then C=0 means bit 20 of ah was clear and we need to shift
+  // version of xh, shift it right so that bit 20 goes off the bottom into the
+  // carry flag. Then C=0 means bit 20 of xh was clear and we need to shift
   // further; Z=1 means the exponent has decremented from 1 to 0 and we're
   // returning a denormal; if _either_ is true, then the BLS will send us out
   // of line.
 
-  ADD     r12, ah, r4, LSL #21    // make test value (keeping the original ah)
+  ADD     r12, xh, r4, LSL #21    // make test value (keeping the original xh)
   LSRS    r12, r12, #21           // set C and Z to the values we want to test
   BLS     dsub_renorm_or_denorm   // branch out of line if C=0 or Z=1
 
@@ -826,36 +826,36 @@ dsub_borrow:
   // correct position _and_ we're confident that the output is a normalised
   // number. So we only have rounding left to do.
   //
-  // Put the sign and exponent back on the output. Because the bits in ah's
+  // Put the sign and exponent back on the output. Because the bits in xh's
   // exponent field are still all 1s, this decrements the exponent in r4 by
   // one, which is just what we want.
-  ADD     ah, ah, r4, LSL #20
+  ADD     xh, xh, r4, LSL #20
 
-  // The round bit is at the top of r14, so we can add it to the bottom of al
+  // The round bit is at the top of r14, so we can add it to the bottom of xl
   // by a right shift.
   //
-  // If this addition carries off the top of al, then C and Z will both be set.
-  // If C is not set, then Z might still be set because al was already zero.
-  ADDS    al, al, r14, LSR #31
+  // If this addition carries off the top of xl, then C and Z will both be set.
+  // If C is not set, then Z might still be set because xl was already zero.
+  ADDS    xl, xl, r14, LSR #31
   // We only need to check for round-to-even if there wasn't a carry, because
-  // if there was a carry, al = 0 and so clearing its low bit won't make a
+  // if there was a carry, xl = 0 and so clearing its low bit won't make a
   // difference anyway. So in the C=0 case, we now clobber the potentially
   // misleading value left in Z by the previous instruction, and replace it
   // with the result of checking r14 against the exact halfway value of the
   // round word.
   CMPCC   r14, #0x80000000
   // Now if Z is clear, we don't have to round to even _or_ propagate a carry
-  // into ah, so we're done.
+  // into xh, so we're done.
   POPNE   {r4, pc}
 
-  // Otherwise, we have to either round to even, or increment ah. We increment
-  // ah exactly if al = 0, because the case where al=0 without rounding up
+  // Otherwise, we have to either round to even, or increment xh. We increment
+  // xh exactly if xl = 0, because the case where xl=0 without rounding up
   // would have taken the early return: the ADDS would have left C clear, so
   // the CMPCC would have checked r14 against 0x80000000, and would have
   // compared unequal because the top bit of r14 would have been claer.
-  CMP     al, #0                  // is al zero?
-  ADDEQ   ah, ah, #1              // if so, increment ah to propagate carry
-  BICNE   al, al, #1              // otherwise, clear al bit 0 to round to even
+  CMP     xl, #0                  // is xl zero?
+  ADDEQ   xh, xh, #1              // if so, increment xh to propagate carry
+  BICNE   xl, xl, #1              // otherwise, clear xl bit 0 to round to even
   POP     {r4, pc}
 
 dsub_renorm_or_denorm:
@@ -874,47 +874,47 @@ dsub_renorm_or_denorm:
   LSR     r12, r4, #11            // sign is now in r12 bit 0
   BIC     r4, r4, #1 << 11        // exponent is in r4 all by itself
 
-  // Add the leading bit of a's mantissa back in (at bit 21 rather than 20
+  // Add the leading bit of x's mantissa back in (at bit 21 rather than 20
   // because we already shifted left by one), to recover the full output
   // mantissa.
   //
-  // As a side effect, this sets Z to indicate that the top word ah is all
-  // zero, so now we know which of ah and al we need to CLZ. It's easier to
+  // As a side effect, this sets Z to indicate that the top word xh is all
+  // zero, so now we know which of xh and xl we need to CLZ. It's easier to
   // separate the two cases than to try to deal with them in a combined code
-  // path. We branch out of line for the ah=0 case, on the theory that the
+  // path. We branch out of line for the xh=0 case, on the theory that the
   // larger the renormalization, the less likely it is, so the common case
   // stays in line.
-  ADDS    ah, ah, #1 << 21
-  BEQ     dsub_renorm_clz_al
+  ADDS    xh, xh, #1 << 21
+  BEQ     dsub_renorm_clz_xl
 
-  // There's a set bit somewhere in ah. Find it, and shift it up to bit 20.
-  CLZ     bl, ah                  // distance from leading bit to bit 31
-  SUBS    bl, bl, #11             // distance to bit 20, where we want it
-  RSBS    bh, bl, #32             // work out the associated right shift
-  LSLS    ah, ah, bl              // shift ah upwards
+  // There's a set bit somewhere in xh. Find it, and shift it up to bit 20.
+  CLZ     yl, xh                  // distance from leading bit to bit 31
+  SUBS    yl, yl, #11             // distance to bit 20, where we want it
+  RSBS    yh, yl, #32             // work out the associated right shift
+  LSLS    xh, xh, yl              // shift xh upwards
 #if !__thumb__
-  ORR     ah, ah, al, LSR bh      // combine with the high bits of al
+  ORR     xh, xh, xl, LSR yh      // combine with the high bits of xl
 #else
   // As usual, in Thumb we must do the register-controlled right shift and the
   // ORR separately.
-  LSRS    bh, al, bh
-  ORRS    ah, ah, bh
+  LSRS    yh, xl, yh
+  ORRS    xh, xh, yh
 #endif
-  LSLS    al, al, bl              // finally, shift al left
+  LSLS    xl, xl, yl              // finally, shift xl left
 
   // Adjust the exponent downward, to match the distance we just shifted the
   // mantissa upward.
   //
-  // We adjust downward by an extra 2: one because we already shifted ah left
+  // We adjust downward by an extra 2: one because we already shifted xh left
   // by one bit, and another because the leading bit of the renormalized
   // mantissa will increment it again.
-  SUBS    r4, r4, bl
+  SUBS    r4, r4, yl
   SUBS    r4, r4, #2
 
 dsub_renormed:
   // Here the two renormalization branches reconverge. The output mantissa in
-  // ah:al has been shifted up to the correct position, with its leading bit
-  // present and in bit 20 of ah. r4 is the adjusted exponent, and the low bit
+  // xh:xl has been shifted up to the correct position, with its leading bit
+  // present and in bit 20 of xh. r4 is the adjusted exponent, and the low bit
   // of r12 is the output sign.
   //
   // Recombine all the pieces. Since no rounding is needed on this path, the
@@ -923,77 +923,77 @@ dsub_renormed:
   // by the leading mantissa bit. Since the last thing both branches did before
   // coming here was to update r4 using a flag-setting instruction, we can
   // therefore detect underflow by the N flag.
-  ADD     ah, ah, r12, LSL #31
-  ADD     ah, ah, r4, LSL #20
+  ADD     xh, xh, r12, LSL #31
+  ADD     xh, xh, r4, LSL #20
   POPPL   {r4, pc}
 
   // Renormalisation made the exponent negative. We're well off the fast path
   // by now, so the simplest way to sort this out is to use the helper routine
   // __dunder.
-  ADD     ah, ah, #3 << 29        // rebias exponent as __dunder will expect
+  ADD     xh, xh, #3 << 29        // rebias exponent as __dunder will expect
   MOV     r2, #0                  // rounding direction = 0 for an exact answer
   POP     {r4, lr}
   B.W     __dunder
 
-dsub_renorm_clz_al:
-  // This is the alternative renormalization code for the case where ah=0, so
-  // that the highest remaining set bit in the mantissa is somewhere in al.
-  // Again we want to shift that all the way up to bit 20 of ah. The easiest
-  // way is to shift it to the top of al, and then shift that in turn by a
-  // fixed distance to split it across ah[20..0] and al[31..21], saving a
+dsub_renorm_clz_xl:
+  // This is the alternative renormalization code for the case where xh=0, so
+  // that the highest remaining set bit in the mantissa is somewhere in xl.
+  // Again we want to shift that all the way up to bit 20 of xh. The easiest
+  // way is to shift it to the top of xl, and then shift that in turn by a
+  // fixed distance to split it across xh[20..0] and xl[31..21], saving a
   // conditional decision about whether to shift up or down.
   //
   // However, there's another special case: on this branch, we might find out
   // that we've subtracted two _exactly_ equal values, not just nearly equal,
   // so the result is zero! To handle this quickly, we put the shifted-up
-  // version of al into ah instead of shifting it in place. Then, if it's zero,
-  // we've just filled ah _and_ al with zero bits, so we can return
+  // version of xl into xh instead of shifting it in place. Then, if it's zero,
+  // we've just filled xh _and_ xl with zero bits, so we can return
   // immediately. (Since this function always uses round-to-nearest mode, an
   // output zero from subtracting like-signed inputs is unconditionally +0.)
-  CLZ     bh, al
-  LSLS    ah, al, bh              // now al has leading bit in bit 31
+  CLZ     yh, xl
+  LSLS    xh, xl, yh              // now xl has leading bit in bit 31
   POPEQ   {r4, pc}                // and if the answer is 0, just return it
-  LSLS    al, ah, #21             // now set al to the low bits of the mantissa
-  LSRS    ah, ah, #11             // and ah to the high bits
+  LSLS    xl, xh, #21             // now set xl to the low bits of the mantissa
+  LSRS    xh, xh, #11             // and xh to the high bits
 
   // Adjust the exponent down by the amount we shifted up, which is the CLZ
-  // output (in bh), plus another 21 bits to get from the top bit of al to bit
-  // 20 of ah, plus 1 bit for the shift already performed before we did the
+  // output (in yh), plus another 21 bits to get from the top bit of xl to bit
+  // 20 of xh, plus 1 bit for the shift already performed before we did the
   // CLZ, plus 1 which the leading mantissa bit will undo when we add it to the
   // exponent. Then go back to dsub_renormed for the shared epilogue code.
-  SUBS    r4, r4, bh
+  SUBS    r4, r4, yh
   SUBS    r4, r4, #23
   B       dsub_renormed
 
 dsub_hugeshift:
-  // We came here in the case where the whole of b's mantissa was shifted down
+  // We came here in the case where the whole of y's mantissa was shifted down
   // so far that dsub_bigshift couldn't cope with it. In this situation the
-  // result of the subtraction differs from the input a by under half a ULP, so
-  // we just return the original a, which we recover by putting the sign and
+  // result of the subtraction differs from the input x by under half a ULP, so
+  // we just return the original x, which we recover by putting the sign and
   // exponent in r4 back together with the mantissa.
-  ADD     ah, ah, r4, LSL #20
+  ADD     xh, xh, r4, LSL #20
   POP     {r4, pc}
 
 dsub_already_denormal:
   // We come here if the initial renormalization by one bit reduced the
-  // exponent of a from 1 to 0, so that the output is denormal. In this
+  // exponent of x from 1 to 0, so that the output is denormal. In this
   // situation we don't need to call __dunder to figure out how far to shift
   // the result, because the answer is a constant: the mantissa was already in
   // the right place _before_ our one-bit left shift (denormals have the same
   // mantissa shift as normalised numbers with the smallest exponent), so all
   // we have to do is undo that left shift, and put the sign bit back on.
-  MOVS    ah, ah, ASR #1
-  RRX     al, al
-  ADD     ah, ah, r4, LSL #20
+  MOVS    xh, xh, ASR #1
+  RRX     xl, xl
+  ADD     xh, xh, r4, LSL #20
 
 dsub_check_zero:
-  // Here we have a denormal result in ah:al, with its sign bit already in
+  // Here we have a denormal result in xh:xl, with its sign bit already in
   // place ... except that the mantissa might be all zeroes, in which case we
   // must clear the sign bit so as to return +0.
   POP     {r4, r14}
-  ORRS    r12, al, ah, LSL #1     // EQ if all non-sign bits of a are zero
+  ORRS    r12, xl, xh, LSL #1     // EQ if all non-sign bits of x are zero
   BXNE    lr                      // if that's not true, return our denormal
-  MOVS    ah, #0                  // otherwise, clear ah completely
+  MOVS    xh, #0                  // otherwise, clear xh completely
   BX      lr
 
 dsub_uncommon:
@@ -1006,8 +1006,8 @@ dsub_uncommon:
   // knowing that r14 was set to 0xFFC00000 in the function prologue, so we can
   // make a useful constant for this test by adjusting it.
   ORR     r14, r14, #0x00200000   // now r14 = 0xFFE00000
-  BICS    r4, r14, ah, LSL #1     // if a has exponent 0x7ff, this sets r4=0
-  BICSNE  r4, r14, bh, LSL #1     // and similarly for b
+  BICS    r4, r14, xh, LSL #1     // if x has exponent 0x7ff, this sets r4=0
+  BICSNE  r4, r14, yh, LSL #1     // and similarly for y
   BEQ     dsub_naninf             // so if either set Z, we have a NaN or inf
 
   // Now we've ruled out NaNs and infinities. With NaNs gone, it's safe to flip
@@ -1015,74 +1015,74 @@ dsub_uncommon:
   // So check if the signs are the same, and cross-jump to dadd_zerodenorm
   // (magnitude subtraction involving a zero or denormal) if not. Meanwhile,
   // that will cross-jump back to here in the opposite case.
-  TEQ     ah, bh
-  EORMI   bh, bh, #1 << 31
+  TEQ     xh, yh
+  EORMI   yh, yh, #1 << 31
   BMI     dadd_zerodenorm
 dsub_zerodenorm:
   // Now we know we're doing a magnitude addition, involving at least one zero
   // or denormal, and no NaNs or infinities.
   //
-  // Sort the operands into magnitude order so that a >= b, exactly as in the
+  // Sort the operands into magnitude order so that x >= y, exactly as in the
   // main code path, including the EOR that negates both operands in the course
   // of swapping them.
-  SUBS    r4, al, bl          // compare inputs, also keeping a-b
-  SBCS    r12, ah, bh
-  BHS     dsub_zerodenorm_swapped // if a>=b then branch round the swap
-  EOR     r12, r12, #1 << 31  // flip the top bit of a-b
-  ADDS    bl, bl, r4          // so that this addition turns b into a+TOPBIT
-  ADC     bh, bh, r12
-  SUBS    al, al, r4          // and this subtraction turns a into b-TOPBIT
-  SBC     ah, ah, r12
+  SUBS    r4, xl, yl          // compare inputs, also keeping x-y
+  SBCS    r12, xh, yh
+  BHS     dsub_zerodenorm_swapped // if x>=y then branch round the swap
+  EOR     r12, r12, #1 << 31  // flip the top bit of x-y
+  ADDS    yl, yl, r4          // so that this addition turns y into x+TOPBIT
+  ADC     yh, yh, r12
+  SUBS    xl, xl, r4          // and this subtraction turns x into y-TOPBIT
+  SBC     xh, xh, r12
 dsub_zerodenorm_swapped:
   // Set up the output sign+exponent, and the exponent difference, again
   // exactly as in the main code path.
-  LSR     r4, ah, #20
-  SUB     r12, r4, bh, LSR #20
+  LSR     r4, xh, #20
+  SUB     r12, r4, yh, LSR #20
 
-  // With the operands sorted so that b is smallest, and knowing there's at
+  // With the operands sorted so that y is smallest, and knowing there's at
   // least one zero or denormal present, we know furthermore that if there's
-  // zero at all then it's b. And if b=0, then we just return a, except that if
-  // a=0 too we must fix up the sign of zero.
-  ORRS    r14, bl, bh, LSL #1     // test all bits of b except the sign bit
-  BEQ     dsub_check_zero         // if they're all zero, return a
+  // zero at all then it's y. And if y=0, then we just return x, except that if
+  // x=0 too we must fix up the sign of zero.
+  ORRS    r14, yl, yh, LSL #1     // test all bits of y except the sign bit
+  BEQ     dsub_check_zero         // if they're all zero, return x
 
-  // Otherwise, there are no zeroes, so b must be denormal, and we don't yet
-  // know if a is denormal too.
+  // Otherwise, there are no zeroes, so y must be denormal, and we don't yet
+  // know if x is denormal too.
   //
-  // If a isn't denormal, we rejoin the main code path for adding normalised
+  // If x isn't denormal, we rejoin the main code path for adding normalised
   // numbers, with everything set up as dadd_doadd expects. It's easiest to
-  // represent the denormal b the same way the FP format does, as a mantissa
+  // represent the denormal y the same way the FP format does, as a mantissa
   // without its leading bit set, shifted by the same amount as normalised
   // numbers of the lowest exponent. (Renormalising via CLZ is more work, and
   // not needed for addition.)
   //
-  // To tell the main code that b's mantissa should be shifted by the same
+  // To tell the main code that y's mantissa should be shifted by the same
   // amount as a number with exponent 0x001, we must adjust the exponent
   // difference r12 by one, because we've already made that by subtracting the
   // _raw_ exponent values.
-  LSLS    r14, r4, #21          // output exp = 0? If so, a is denormal too
-  BIC     ah, ah, r4, LSL #20   // clear sign+exponent from top of a
+  LSLS    r14, r4, #21          // output exp = 0? If so, x is denormal too
+  BIC     xh, xh, r4, LSL #20   // clear sign+exponent from top of x
   BEQ     dsub_both_denorm      // if both inputs denormal, go elsewhere
-  BIC     bh, bh, #1 << 31      // if a not denormal, clear sign of b
+  BIC     yh, yh, #1 << 31      // if x not denormal, clear sign of y
   SUB     r12, r12, #1          //   and adjust exponent difference
-  // Now negate the mantissa of b and then rejoin the main path.
-  RSBS    bl, bl, #0
+  // Now negate the mantissa of y and then rejoin the main path.
+  RSBS    yl, yl, #0
 #if !__thumb__
-  RSC     bh, bh, #0
+  RSC     yh, yh, #0
 #else
   // Thumb has no RSC, so simulate it by bitwise inversion and then ADC
-  MVN     bh, bh
-  ADC     bh, bh, #0
+  MVN     yh, yh
+  ADC     yh, yh, #0
 #endif
   B       dsub_dosub
 
 dsub_both_denorm:
   // If both inputs are denormal, then we can just subtract the mantissas like
-  // ordinary integers. We've cleared the sign bit from a, but not from b, so
+  // ordinary integers. We've cleared the sign bit from x, but not from y, so
   // we'll get exactly one copy of the sign bit in the result. (Negating it
   // makes no difference!)
-  SUBS    al, al, bl
-  SBC     ah, ah, bh
+  SUBS    xl, xl, yl
+  SBC     xh, xh, yh
   // Now go to dsub_check_zero, which will check if the answer is exactly zero,
   // and fix the sign bit if it is.
   B       dsub_check_zero
@@ -1091,18 +1091,18 @@ dsub_both_denorm:
 dsub_naninf:
   // Look for NaNs and hand them off to __dnan2, exactly as in dadd_naninf.
   POP     {r4, r14}
-  CMP     al, #1
-  ADC     r12, ah, ah
+  CMP     xl, #1
+  ADC     r12, xh, xh
   CMP     r12, #0xFFE00000
   BHI     __dnan2
-  CMP     bl, #1
-  ADC     r12, bh, bh
+  CMP     yl, #1
+  ADC     r12, yh, yh
   CMP     r12, #0xFFE00000
   BHI     __dnan2
 
   // Now we know there aren't any NaNs, we can deal with subtractions involving
-  // an infinity by flipping the sign of b and letting dadd_inf deal with it.
-  EOR     bh, bh, #0x80000000
+  // an infinity by flipping the sign of y and letting dadd_inf deal with it.
+  EOR     yh, yh, #0x80000000
   B       dadd_inf
 
   .size arm_fp_dsub, .-arm_fp_dsub
