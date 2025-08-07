@@ -215,12 +215,12 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
      in order to perform core computation in double precision.  */
   const svbool_t pg_lo = svunpklo (pg);
   const svbool_t pg_hi = svunpkhi (pg);
-  svfloat64_t y_lo
-      = svcvt_f64_x (pg, svreinterpret_f32 (svunpklo (svreinterpret_u32 (y))));
-  svfloat64_t y_hi
-      = svcvt_f64_x (pg, svreinterpret_f32 (svunpkhi (svreinterpret_u32 (y))));
-  svfloat64_t z_lo = svcvt_f64_x (pg, svreinterpret_f32 (svunpklo (iz)));
-  svfloat64_t z_hi = svcvt_f64_x (pg, svreinterpret_f32 (svunpkhi (iz)));
+  svfloat64_t y_lo = svcvt_f64_x (
+      ptrue, svreinterpret_f32 (svunpklo (svreinterpret_u32 (y))));
+  svfloat64_t y_hi = svcvt_f64_x (
+      ptrue, svreinterpret_f32 (svunpkhi (svreinterpret_u32 (y))));
+  svfloat64_t z_lo = svcvt_f64_x (ptrue, svreinterpret_f32 (svunpklo (iz)));
+  svfloat64_t z_hi = svcvt_f64_x (ptrue, svreinterpret_f32 (svunpkhi (iz)));
   svuint64_t i_lo = svunpklo (i);
   svuint64_t i_hi = svunpkhi (i);
   svint64_t k_lo = svunpklo (k);
