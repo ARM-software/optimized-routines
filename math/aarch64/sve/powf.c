@@ -301,7 +301,7 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 			 (23 - V_POWF_EXP2_TABLE_BITS));
 
   /* Compute core in extended precision and return intermediate ylogx results
-     to handle cases of underflow and underflow in exp.  */
+     to handle cases of underflow and overflow in exp.  */
   svfloat32_t ylogx;
   svfloat32_t ret
       = sv_powf_core (yint_or_xpos, i, iz, k, y, sign_bias, &ylogx, d);
