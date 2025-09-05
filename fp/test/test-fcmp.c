@@ -550,6 +550,40 @@ main (void)
       }
 
       {
+        extern uint32_t arm_fp_fcmp_gnu_cmp(uint32_t, uint32_t);
+        unsigned cmp_expected = (t->out == FCR_LT ? -1 : t->out == FCR_EQ ? 0 : +1);
+#ifdef USE_NATIVE_ARITHMETIC
+        unsigned cmp_got = isless(in1, in2) ? -1 : islessequal(in1, in2) ? 0 : +1;
+#else
+        unsigned cmp_got = arm_fp_fcmp_gnu_cmp(t->in1, t->in2);
+#endif
+
+        if (cmp_got != cmp_expected)
+	{
+	  printf ("FAIL: fcmp_gnu_cmp(%08" PRIx32 ", %08" PRIx32 ") -> %u, expected %u (full result is '%s')\n",
+		  t->in1, t->in2, cmp_got, cmp_expected, result_strings[t->out]);
+	  failed = true;
+	}
+      }
+
+      {
+        extern uint32_t arm_fp_fcmp_gnu_rcmp(uint32_t, uint32_t);
+        unsigned cmp_expected = (t->out == FCR_GT ? +1 : t->out == FCR_EQ ? 0 : -1);
+#ifdef USE_NATIVE_ARITHMETIC
+        unsigned cmp_got = isgreater(in1, in2) ? +1 : isgreaterequal(in1, in2) ? 0 : -1;
+#else
+        unsigned cmp_got = arm_fp_fcmp_gnu_rcmp(t->in1, t->in2);
+#endif
+
+        if (cmp_got != cmp_expected)
+	{
+	  printf ("FAIL: fcmp_gnu_rcmp(%08" PRIx32 ", %08" PRIx32 ") -> %u, expected %u (full result is '%s')\n",
+		  t->in1, t->in2, cmp_got, cmp_expected, result_strings[t->out]);
+	  failed = true;
+	}
+      }
+
+      {
         unsigned fl_expected = (t->out == FCR_EQ ? FLAG2_EQ : FLAG2_NE);
         unsigned fl_got;
         CALL_FLAG2_RETURNING_FUNCTION(fl_got, t->in1, t->in2, "arm_fp_fcmp_flags_eq");
