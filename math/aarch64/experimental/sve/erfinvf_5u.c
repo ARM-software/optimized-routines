@@ -1,7 +1,7 @@
 /*
  * Single-precision inverse error function (SVE variant).
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "sv_math.h"
@@ -147,7 +147,6 @@ svfloat32_t SV_NAME_F1 (erfinv) (svfloat32_t x, svbool_t pg)
 #else
 TEST_SIG (SV, F, 1, erfinv, -0.99, 0.99)
 TEST_ULP (SV_NAME_F1 (erfinv), 4.09)
-TEST_DISABLE_FENV (SV_NAME_F1 (erfinv))
 TEST_SYM_INTERVAL (SV_NAME_F1 (erfinv), 0, 1, 40000)
 TEST_CONTROL_VALUE (SV_NAME_F1 (erfinv), 0.5)
 TEST_CONTROL_VALUE (SV_NAME_F1 (erfinv), 0.8)

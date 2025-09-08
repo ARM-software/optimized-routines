@@ -1,7 +1,7 @@
 /*
  * Single-precision vector log function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
@@ -82,7 +82,6 @@ HALF_WIDTH_ALIAS_F1 (log)
 
 TEST_SIG (V, F, 1, log, 0.01, 11.1)
 TEST_ULP (V_NAME_F1 (log), 2.9)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (log), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_F1 (log), 0, 0xffff0000, 10000)
 TEST_INTERVAL (V_NAME_F1 (log), 0x1p-4, 0x1p4, 500000)
 TEST_INTERVAL (V_NAME_F1 (log), 0, inf, 50000)

@@ -1,7 +1,7 @@
 /*
  * Single-precision vector exp(x) - 1 function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -85,7 +85,6 @@ svfloat32_t SV_NAME_F1 (expm1) (svfloat32_t x, svbool_t pg)
 
 TEST_SIG (SV, F, 1, expm1, -9.9, 9.9)
 TEST_ULP (SV_NAME_F1 (expm1), 1.02)
-TEST_DISABLE_FENV (SV_NAME_F1 (expm1))
 TEST_SYM_INTERVAL (SV_NAME_F1 (expm1), 0, SpecialBound, 100000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (expm1), SpecialBound, inf, 1000)
 CLOSE_SVE_ATTR

@@ -118,7 +118,6 @@ svfloat64_t SV_NAME_D1 (atanpi) (svfloat64_t x, const svbool_t pg)
 
 #if WANT_C23_TESTS
 TEST_ULP (SV_NAME_D1 (atanpi), 2.30)
-TEST_DISABLE_FENV (SV_NAME_D1 (atanpi))
 TEST_INTERVAL (SV_NAME_D1 (atanpi), 0.0, 1.0, 40000)
 TEST_INTERVAL (SV_NAME_D1 (atanpi), 1.0, 100.0, 40000)
 TEST_INTERVAL (SV_NAME_D1 (atanpi), 100, inf, 40000)

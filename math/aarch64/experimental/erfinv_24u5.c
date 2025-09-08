@@ -1,7 +1,7 @@
 /*
  * Double-precision inverse error function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
@@ -77,7 +77,6 @@ erfinv (double x)
 #if USE_MPFR
 # warning Not generating tests for erfinv, as MPFR has no suitable reference
 #else
-TEST_DISABLE_FENV (erfinv)
 TEST_SIG (S, D, 1, erfinv, -0.99, 0.99)
 TEST_ULP (erfinv, 24.0)
 TEST_INTERVAL (erfinv, 0, 1, 40000)

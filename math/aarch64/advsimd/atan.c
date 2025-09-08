@@ -54,15 +54,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atan) (float64x2_t x)
   uint64x2_t ix = vreinterpretq_u64_f64 (x);
   uint64x2_t sign = vandq_u64 (ix, SignMask);
 
-#if WANT_SIMD_EXCEPT
-  uint64x2_t ia12 = vandq_u64 (ix, v_u64 (0x7ff0000000000000));
-  uint64x2_t special = vcgtq_u64 (vsubq_u64 (ia12, v_u64 (TinyBound)),
-				  v_u64 (BigBound - TinyBound));
-  /* If any lane is special, fall back to the scalar routine for all lanes.  */
-  if (unlikely (v_any_u64 (special)))
-    return v_call_f64 (atan, x, v_f64 (0), v_u64 (-1));
-#endif
-
   /* Argument reduction:
      y := arctan(x) for x < 1
      y := pi/2 + arctan(-1/x) for x > 1
@@ -120,7 +111,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atan) (float64x2_t x)
 
 TEST_SIG (V, D, 1, atan, -10.0, 10.0)
 TEST_ULP (V_NAME_D1 (atan), 1.95)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (atan), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (atan), 0, 0x1p-30, 10000)
 TEST_INTERVAL (V_NAME_D1 (atan), -0, -0x1p-30, 1000)
 TEST_INTERVAL (V_NAME_D1 (atan), 0x1p-30, 0x1p53, 900000)

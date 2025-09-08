@@ -2,7 +2,7 @@
 
 # ULP error check script.
 #
-# Copyright (c) 2019-2024, Arm Limited.
+# Copyright (c) 2019-2025, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 #set -x
@@ -42,7 +42,6 @@ t() {
     [ -n "$L" ] || { echo ERROR: Could not determine ULP limit for $routine in $limits_file && false; }
     cvals=($(grep "^$routine " $CVALS | awk '{print $2}'))
 
-    if grep -q "^$routine$" $DISABLE_FENV; then extra_flags="$extra_flags -f"; fi 
     # Emulate a do-while loop to loop over cvals, but still execute once if it is empty
     while : ; do
 	# Empty string if we are at the end of cvals array
@@ -94,7 +93,17 @@ done
 r=n
 while read F LO HI N
 do
-	[[ -z $F ]] || t $F $LO $HI $N -z
+	[[ -z $F ]] && continue
+
+    # Ignore fenv exceptions for vector routines, as well as a special exception for
+    # scalar erfinv, and sincos.
+    if [[ $F =~ _ZGV.* ]] || [[ $F =~ arm_math_(advsimd|sve).* ]] \
+    || [[ "$F" == "erfinv" ]] || [[ $F =~ arm_math_sincos.* ]]; then
+        t $F $LO $HI $N -z -f
+    else
+        t $F $LO $HI $N -z
+    fi
+
 done << EOF
 $(grep "\b$FUNC\b" $ARCH_ITVS)
 EOF

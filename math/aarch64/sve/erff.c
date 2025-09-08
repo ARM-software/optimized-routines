@@ -1,7 +1,7 @@
 /*
  * Single-precision vector erf(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -83,7 +83,6 @@ svfloat32_t SV_NAME_F1 (erf) (svfloat32_t x, const svbool_t pg)
 
 TEST_SIG (SV, F, 1, erf, -4.0, 4.0)
 TEST_ULP (SV_NAME_F1 (erf), 1.43)
-TEST_DISABLE_FENV (SV_NAME_F1 (erf))
 TEST_SYM_INTERVAL (SV_NAME_F1 (erf), 0, 0x1.cp-7, 40000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (erf), 0x1.cp-7, 3.9375, 40000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (erf), 3.9375, inf, 40000)

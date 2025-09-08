@@ -12,54 +12,29 @@
 const static struct data
 {
   uint64x2_t huge_bound, abs_mask, off, mask;
-#if WANT_SIMD_EXCEPT
-  float64x2_t tiny_bound;
-#endif
   float64x2_t lc0, lc2;
   double lc1, lc3, ln2, lc4;
-
   float64x2_t c0, c2, c4, c6, c8, c10, c12, c14, c16, c17;
   double c1, c3, c5, c7, c9, c11, c13, c15;
-
 } data = {
 
-#if WANT_SIMD_EXCEPT
-  .tiny_bound = V2 (0x1p-26),
-#endif
   /* Even terms of polynomial s.t. asinh(x) is approximated by
      asinh(x) ~= x + x^3 * (C0 + C1 * x + C2 * x^2 + C3 * x^3 + ...).
      Generated using Remez, f = (asinh(sqrt(x)) - sqrt(x))/x^(3/2).  */
-
-  .c0 = V2 (-0x1.55555555554a7p-3),
-  .c1 = 0x1.3333333326c7p-4,
-  .c2 = V2 (-0x1.6db6db68332e6p-5),
-  .c3 = 0x1.f1c71b26fb40dp-6,
-  .c4 = V2 (-0x1.6e8b8b654a621p-6),
-  .c5 = 0x1.1c4daa9e67871p-6,
-  .c6 = V2 (-0x1.c9871d10885afp-7),
-  .c7 = 0x1.7a16e8d9d2ecfp-7,
-  .c8 = V2 (-0x1.3ddca533e9f54p-7),
-  .c9 = 0x1.0becef748dafcp-7,
-  .c10 = V2 (-0x1.b90c7099dd397p-8),
-  .c11 = 0x1.541f2bb1ffe51p-8,
-  .c12 = V2 (-0x1.d217026a669ecp-9),
-  .c13 = 0x1.0b5c7977aaf7p-9,
-  .c14 = V2 (-0x1.e0f37daef9127p-11),
-  .c15 = 0x1.388b5fe542a6p-12,
-  .c16 = V2 (-0x1.021a48685e287p-14),
-  .c17 = V2 (0x1.93d4ba83d34dap-18),
-
-  .lc0 = V2 (-0x1.ffffffffffff7p-2),
-  .lc1 = 0x1.55555555170d4p-2,
-  .lc2 = V2 (-0x1.0000000399c27p-2),
-  .lc3 = 0x1.999b2e90e94cap-3,
-  .lc4 = -0x1.554e550bd501ep-3,
-  .ln2 = 0x1.62e42fefa39efp-1,
-
-  .off = V2 (0x3fe6900900000000),
-  .huge_bound = V2 (0x5fe0000000000000),
-  .abs_mask = V2 (0x7fffffffffffffff),
-  .mask = V2 (0xfffULL << 52),
+  .c0 = V2 (-0x1.55555555554a7p-3),    .c1 = 0x1.3333333326c7p-4,
+  .c2 = V2 (-0x1.6db6db68332e6p-5),    .c3 = 0x1.f1c71b26fb40dp-6,
+  .c4 = V2 (-0x1.6e8b8b654a621p-6),    .c5 = 0x1.1c4daa9e67871p-6,
+  .c6 = V2 (-0x1.c9871d10885afp-7),    .c7 = 0x1.7a16e8d9d2ecfp-7,
+  .c8 = V2 (-0x1.3ddca533e9f54p-7),    .c9 = 0x1.0becef748dafcp-7,
+  .c10 = V2 (-0x1.b90c7099dd397p-8),   .c11 = 0x1.541f2bb1ffe51p-8,
+  .c12 = V2 (-0x1.d217026a669ecp-9),   .c13 = 0x1.0b5c7977aaf7p-9,
+  .c14 = V2 (-0x1.e0f37daef9127p-11),  .c15 = 0x1.388b5fe542a6p-12,
+  .c16 = V2 (-0x1.021a48685e287p-14),  .c17 = V2 (0x1.93d4ba83d34dap-18),
+  .lc0 = V2 (-0x1.ffffffffffff7p-2),   .lc1 = 0x1.55555555170d4p-2,
+  .lc2 = V2 (-0x1.0000000399c27p-2),   .lc3 = 0x1.999b2e90e94cap-3,
+  .lc4 = -0x1.554e550bd501ep-3,	       .ln2 = 0x1.62e42fefa39efp-1,
+  .off = V2 (0x3fe6900900000000),      .huge_bound = V2 (0x5fe0000000000000),
+  .abs_mask = V2 (0x7fffffffffffffff), .mask = V2 (0xfffULL << 52),
 };
 
 static float64x2_t NOINLINE VPCS_ATTR
@@ -95,10 +70,9 @@ lookup (uint64x2_t i)
 }
 
 static inline float64x2_t
-log_inline (float64x2_t xm, const struct data *d)
+log_inline (float64x2_t ax, const struct data *d)
 {
-
-  uint64x2_t u = vreinterpretq_u64_f64 (xm);
+  uint64x2_t u = vreinterpretq_u64_f64 (ax);
   uint64x2_t u_off = vsubq_u64 (u, d->off);
 
   int64x2_t k = vshrq_n_s64 (vreinterpretq_s64_u64 (u_off), 52);
@@ -143,37 +117,19 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 
   uint64x2_t gt1 = vcgeq_f64 (ax, v_f64 (1));
 
-#if WANT_SIMD_EXCEPT
-  uint64x2_t iax = vreinterpretq_u64_f64 (ax);
-  uint64x2_t special = vcgeq_u64 (iax, (d->huge_bound));
-  uint64x2_t tiny = vcltq_f64 (ax, d->tiny_bound);
-  special = vorrq_u64 (special, tiny);
-#else
   uint64x2_t special = vcgeq_f64 (ax, vreinterpretq_f64_u64 (d->huge_bound));
-#endif
 
   /* Option 1: |x| >= 1.
-     Compute asinh(x) according by asinh(x) = log(x + sqrt(x^2 + 1)).
-     If WANT_SIMD_EXCEPT is enabled, sidestep special values, which will
-     overflow, by setting special lanes to 1. These will be fixed later.  */
+     Compute asinh(x) according by asinh(x) = log(x + sqrt(x^2 + 1)).  */
   float64x2_t option_1 = v_f64 (0);
   if (likely (v_any_u64 (gt1)))
     {
-#if WANT_SIMD_EXCEPT
-      float64x2_t xm = v_zerofy_f64 (ax, special);
-#else
-      float64x2_t xm = ax;
-#endif
       option_1 = log_inline (
-	  vaddq_f64 (xm, vsqrtq_f64 (vfmaq_f64 (v_f64 (1), xm, xm))), d);
+	  vaddq_f64 (ax, vsqrtq_f64 (vfmaq_f64 (v_f64 (1), ax, ax))), d);
     }
 
   /* Option 2: |x| < 1.
      Compute asinh(x) using a polynomial.
-     If WANT_SIMD_EXCEPT is enabled, sidestep special lanes, which will
-     overflow, and tiny lanes, which will underflow, by setting them to 0. They
-     will be fixed later, either by selecting x or falling back to the scalar
-     special-case.
      The largest observed error in this region is 1.36 ULPs:
      _ZGVnN2v_asinh(0x1.fe1e2aaa8dd54p-1) got 0x1.c1ee60bc0788ap-1
 					 want 0x1.c1ee60bc0788bp-1.  */
@@ -181,10 +137,6 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
 
   if (likely (v_any_u64 (vceqzq_u64 (gt1))))
     {
-
-#if WANT_SIMD_EXCEPT
-      ax = v_zerofy_f64 (ax, vorrq_u64 (tiny, gt1));
-#endif
       float64x2_t x2 = vmulq_f64 (ax, ax), z2 = vmulq_f64 (x2, x2);
       /* Order-17 Pairwise Horner scheme.  */
       float64x2_t c13 = vld1q_f64 (&d->c1);
@@ -206,32 +158,24 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
       p = vfmaq_f64 (p1213, z2, p);
       p = vfmaq_f64 (p1011, z2, p);
       p = vfmaq_f64 (p89, z2, p);
-
       p = vfmaq_f64 (p67, z2, p);
       p = vfmaq_f64 (p45, z2, p);
-
       p = vfmaq_f64 (p23, z2, p);
-
       p = vfmaq_f64 (p01, z2, p);
       option_2 = vfmaq_f64 (ax, p, vmulq_f64 (ax, x2));
-#if WANT_SIMD_EXCEPT
-      option_2 = vbslq_f64 (tiny, x, option_2);
-#endif
     }
 
   /* Choose the right option for each lane.  */
   float64x2_t y = vbslq_f64 (gt1, option_1, option_2);
   if (unlikely (v_any_u64 (special)))
-    {
-      return special_case (x, y, d->abs_mask, special);
-    }
+    return special_case (x, y, d->abs_mask, special);
+
   /* Copy sign.  */
   return vbslq_f64 (d->abs_mask, y, x);
 }
 
 TEST_SIG (V, D, 1, asinh, -10.0, 10.0)
 TEST_ULP (V_NAME_D1 (asinh), 2.37)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (asinh), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (asinh), 0, 0x1p-26, 50000)
 TEST_SYM_INTERVAL (V_NAME_D1 (asinh), 0x1p-26, 1, 50000)
 TEST_SYM_INTERVAL (V_NAME_D1 (asinh), 1, 0x1p511, 50000)

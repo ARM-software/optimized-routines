@@ -1,7 +1,7 @@
 /*
  * Single-precision vector log(x + 1) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -35,7 +35,6 @@ svfloat32_t SV_NAME_F1 (log1p) (svfloat32_t x, svbool_t pg)
 
 TEST_SIG (SV, F, 1, log1p, -0.9, 10.0)
 TEST_ULP (SV_NAME_F1 (log1p), 0.77)
-TEST_DISABLE_FENV (SV_NAME_F1 (log1p))
 TEST_SYM_INTERVAL (SV_NAME_F1 (log1p), 0, 0x1p-23, 5000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (log1p), 0x1p-23, 1, 5000)
 TEST_INTERVAL (SV_NAME_F1 (log1p), 1, inf, 10000)

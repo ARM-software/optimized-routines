@@ -1,7 +1,7 @@
 /*
  * Single-precision vector sin function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -27,13 +27,6 @@ static const struct data
   .range_val = V4 (0x1p20f)
 };
 
-#if WANT_SIMD_EXCEPT
-/* asuint32(0x1p-59f), below which multiply by inv_pi underflows.  */
-# define TinyBound v_u32 (0x22000000)
-/* RangeVal - TinyBound.  */
-# define Thresh v_u32 (0x27800000)
-#endif
-
 #define C(i) d->poly[i]
 
 static float32x4_t VPCS_ATTR NOINLINE
@@ -49,25 +42,14 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (sin) (float32x4_t x)
   const struct data *d = ptr_barrier (&data);
   float32x4_t n, r, r2, y;
   uint32x4_t odd, cmp;
-
-#if WANT_SIMD_EXCEPT
-  uint32x4_t ir = vreinterpretq_u32_f32 (vabsq_f32 (x));
-  cmp = vcgeq_u32 (vsubq_u32 (ir, TinyBound), Thresh);
-  /* If fenv exceptions are to be triggered correctly, set any special lanes
-     to 1 (which is neutral w.r.t. fenv). These lanes will be fixed by
-     special-case handler later.  */
-  r = vreinterpretq_f32_u32 (vbicq_u32 (vreinterpretq_u32_f32 (x), cmp));
-#else
-  r = x;
   cmp = vcageq_f32 (x, d->range_val);
-#endif
 
   /* n = rint(|x|/pi).  */
-  n = vrndaq_f32 (vmulq_f32 (r, d->inv_pi));
+  n = vrndaq_f32 (vmulq_f32 (x, d->inv_pi));
   odd = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtq_s32_f32 (n)), 31);
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = vfmsq_f32 (r, d->pi_1, n);
+  r = vfmsq_f32 (x, d->pi_1, n);
   r = vfmsq_f32 (r, d->pi_2, n);
   r = vfmsq_f32 (r, d->pi_3, n);
 
@@ -87,6 +69,5 @@ HALF_WIDTH_ALIAS_F1 (sin)
 
 TEST_SIG (V, F, 1, sin, -3.1, 3.1)
 TEST_ULP (V_NAME_F1 (sin), 1.4)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (sin), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (sin), 0, 0x1p20, 500000)
 TEST_SYM_INTERVAL (V_NAME_F1 (sin), 0x1p20, inf, 10000)

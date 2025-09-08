@@ -1,7 +1,7 @@
 /*
  * Single-precision vector atanh(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -50,7 +50,6 @@ svfloat32_t SV_NAME_F1 (atanh) (svfloat32_t x, const svbool_t pg)
 
 TEST_SIG (SV, F, 1, atanh, -1.0, 1.0)
 TEST_ULP (SV_NAME_F1 (atanh), 1.50)
-TEST_DISABLE_FENV (SV_NAME_F1 (atanh))
 TEST_SYM_INTERVAL (SV_NAME_F1 (atanh), 0, 0x1p-12, 1000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (atanh), 0x1p-12, 1, 20000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (atanh), 1, inf, 1000)

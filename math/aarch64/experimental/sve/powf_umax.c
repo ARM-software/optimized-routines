@@ -24,7 +24,6 @@ arm_math_sve_fast_powf (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 }
 
 TEST_ULP (arm_math_sve_fast_powf, 4096)
-TEST_DISABLE_FENV (arm_math_sve_fast_powf)
 /* Wide intervals spanning the whole domain but shared between x and y.  */
 #define SV_POWF_INTERVAL2(xlo, xhi, ylo, yhi, n)                              \
   TEST_INTERVAL2 (arm_math_sve_fast_powf, xlo, xhi, ylo, yhi, n)              \

@@ -68,6 +68,5 @@ arm_math_advsimd_fast_sinf (float32x4_t x)
 }
 
 TEST_ULP (arm_math_advsimd_fast_sinf, 4096)
-TEST_DISABLE_FENV (arm_math_advsimd_fast_sinf)
 TEST_SYM_INTERVAL (arm_math_advsimd_fast_sinf, 0, 0x1p16f, 500000)
 TEST_SYM_INTERVAL (arm_math_advsimd_fast_sinf, 0x1p16f, inf, 10000)

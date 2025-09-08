@@ -1,7 +1,7 @@
 /*
  * Double-precision vector asin(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -27,25 +27,8 @@ static const struct data
   .pi_over_2 = V2 (0x1.921fb54442d18p+0), .abs_mask = V2 (0x7fffffffffffffff),
 };
 
-#define AllMask v_u64 (0xffffffffffffffff)
-#define One 0x3ff0000000000000
-#define Small 0x3e50000000000000 /* 2^-12.  */
-
-#if WANT_SIMD_EXCEPT
-static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t special)
-{
-  return v_call_f64 (asin, x, y, special);
-}
-#endif
-
 /* Double-precision implementation of vector asin(x).
-
-   For |x| < Small, approximate asin(x) by x. Small = 2^-12 for correct
-   rounding. If WANT_SIMD_EXCEPT = 0, Small = 0 and we proceed with the
-   following approximation.
-
-   For |x| in [Small, 0.5], use an order 11 polynomial P such that the final
+   For |x| in [0, 0.5], use an order 11 polynomial P such that the final
    approximation is an odd polynomial: asin(x) ~ x + x^3 P(x^2).
 
    The largest observed error in this region is 1.01 ulps,
@@ -63,16 +46,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (asin) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
   float64x2_t ax = vabsq_f64 (x);
-
-#if WANT_SIMD_EXCEPT
-  /* Special values need to be computed with scalar fallbacks so
-     that appropriate exceptions are raised.  */
-  uint64x2_t special
-      = vcgtq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (ax), v_u64 (Small)),
-		   v_u64 (One - Small));
-  if (unlikely (v_any_u64 (special)))
-    return special_case (x, x, AllMask);
-#endif
 
   uint64x2_t a_lt_half = vcaltq_f64 (x, v_f64 (0.5));
 
@@ -121,9 +94,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (asin) (float64x2_t x)
 
 TEST_SIG (V, D, 1, asin, -1.0, 1.0)
 TEST_ULP (V_NAME_D1 (asin), 2.20)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (asin), WANT_SIMD_EXCEPT)
-TEST_INTERVAL (V_NAME_D1 (asin), 0, Small, 5000)
-TEST_INTERVAL (V_NAME_D1 (asin), Small, 0.5, 50000)
+TEST_INTERVAL (V_NAME_D1 (asin), 0, 0x1p-12, 5000)
+TEST_INTERVAL (V_NAME_D1 (asin), 0x1p-12, 0.5, 50000)
 TEST_INTERVAL (V_NAME_D1 (asin), 0.5, 1.0, 50000)
 TEST_INTERVAL (V_NAME_D1 (asin), 1.0, 0x1p11, 50000)
 TEST_INTERVAL (V_NAME_D1 (asin), 0x1p11, inf, 20000)

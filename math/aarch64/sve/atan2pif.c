@@ -128,7 +128,6 @@ svfloat32_t SV_NAME_F2 (atan2pi) (svfloat32_t y, svfloat32_t x,
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 TEST_ULP (SV_NAME_F2 (atan2pi), 2.40)
-TEST_DISABLE_FENV (SV_NAME_F2 (atan2pi))
 TEST_INTERVAL (SV_NAME_F2 (atan2pi), 0.0, 1.0, 40000)
 TEST_INTERVAL (SV_NAME_F2 (atan2pi), 1.0, 100.0, 40000)
 TEST_INTERVAL (SV_NAME_F2 (atan2pi), 100, inf, 40000)

@@ -1,7 +1,7 @@
 /*
  * Single-precision vector powf function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -200,7 +200,6 @@ HALF_WIDTH_ALIAS_F2 (pow)
 
 TEST_SIG (V, F, 2, pow)
 TEST_ULP (V_NAME_F2 (pow), 2.1)
-TEST_DISABLE_FENV (V_NAME_F2 (pow))
 TEST_INTERVAL2 (V_NAME_F2 (pow), 0x1p-1, 0x1p1, 0x1p-7, 0x1p7, 50000)
 TEST_INTERVAL2 (V_NAME_F2 (pow), 0x1p-1, 0x1p1, -0x1p-7, -0x1p7, 50000)
 TEST_INTERVAL2 (V_NAME_F2 (pow), 0x1p-70, 0x1p70, 0x1p-1, 0x1p1, 50000)

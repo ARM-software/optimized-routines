@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE cos(x) function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -82,7 +82,6 @@ svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
 
 TEST_SIG (SV, D, 1, cos, -3.1, 3.1)
 TEST_ULP (SV_NAME_D1 (cos), 1.61)
-TEST_DISABLE_FENV (SV_NAME_D1 (cos))
 TEST_INTERVAL (SV_NAME_D1 (cos), 0, 0xffff0000, 10000)
 TEST_INTERVAL (SV_NAME_D1 (cos), 0x1p-4, 0x1p4, 500000)
 CLOSE_SVE_ATTR

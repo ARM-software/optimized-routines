@@ -55,7 +55,6 @@ svfloat32_t SV_NAME_F1 (cosh) (svfloat32_t x, svbool_t pg)
 
 TEST_SIG (SV, F, 1, cosh, -10.0, 10.0)
 TEST_ULP (SV_NAME_F1 (cosh), 2.56)
-TEST_DISABLE_FENV (SV_NAME_F1 (cosh))
 TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1p-63, 100)
 TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)

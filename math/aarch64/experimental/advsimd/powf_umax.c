@@ -23,7 +23,6 @@ arm_math_advsimd_fast_powf (float32x4_t x, float32x4_t y)
 }
 
 TEST_ULP (arm_math_advsimd_fast_powf, 4096)
-TEST_DISABLE_FENV (arm_math_advsimd_fast_powf)
 TEST_INTERVAL2 (arm_math_advsimd_fast_powf, 0x1p-1, 0x1p1, 0x1p-7, 0x1p7,
 		500000)
 TEST_INTERVAL2 (arm_math_advsimd_fast_powf, 0x1p-1, 0x1p1, -0x1p-7, -0x1p7,

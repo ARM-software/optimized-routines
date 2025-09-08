@@ -29,8 +29,6 @@ _ZGVnN4vl4l4_sincospif (float32x4_t x, float *out_sin, float *out_cos)
 }
 
 #if WANT_C23_TESTS
-TEST_DISABLE_FENV (_ZGVnN4v_sincospif_sin)
-TEST_DISABLE_FENV (_ZGVnN4v_sincospif_cos)
 TEST_ULP (_ZGVnN4v_sincospif_sin, 2.54)
 TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
 #  define V_SINCOSPIF_INTERVAL(lo, hi, n)                                     \

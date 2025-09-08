@@ -37,26 +37,12 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cospi) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
-#if WANT_SIMD_EXCEPT
-  float32x4_t r = vabsq_f32 (x);
-  uint32x4_t cmp = vcaleq_f32 (v_f32 (0x1p32f), x);
-
-  /* When WANT_SIMD_EXCEPT = 1, special lanes should be zero'd
-     to avoid them overflowing and throwing exceptions.  */
-  r = v_zerofy_f32 (r, cmp);
-  uint32x4_t odd = vshlq_n_u32 (vcvtnq_u32_f32 (r), 31);
-
-#else
-  float32x4_t r = x;
-  uint32x4_t cmp = vcageq_f32 (r, d->range_val);
-
+  uint32x4_t cmp = vcageq_f32 (x, d->range_val);
   uint32x4_t odd
-      = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtaq_s32_f32 (r)), 31);
-
-#endif
+      = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtaq_s32_f32 (x)), 31);
 
   /* r = x - rint(x).  */
-  r = vsubq_f32 (r, vrndaq_f32 (r));
+  float32x4_t r = vsubq_f32 (x, vrndaq_f32 (x));
 
   /* cospi(x) = sinpi(0.5 - abs(x)) for values -1/2 .. 1/2.  */
   r = vsubq_f32 (v_f32 (0.5f), vabsq_f32 (r));
@@ -78,7 +64,6 @@ HALF_WIDTH_ALIAS_F1 (cospi)
 
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_F1 (cospi), 2.67)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (cospi), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0, 0x1p-31, 5000)
 TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0x1p-31, 0.5, 10000)
 TEST_SYM_INTERVAL (V_NAME_F1 (cospi), 0.5, 0x1p32f, 10000)

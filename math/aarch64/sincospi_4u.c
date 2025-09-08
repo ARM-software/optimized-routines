@@ -144,8 +144,6 @@ arm_math_sincospi (double x, double *out_sin, double *out_cos)
 }
 
 #if WANT_C23_TESTS
-TEST_DISABLE_FENV (arm_math_sincospi_sin)
-TEST_DISABLE_FENV (arm_math_sincospi_cos)
 TEST_ULP (arm_math_sincospi_sin, 2.96)
 TEST_ULP (arm_math_sincospi_cos, 3.16)
 #  define SINCOS_INTERVAL(lo, hi, n)                                          \

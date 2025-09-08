@@ -51,7 +51,6 @@ svfloat64_t SV_NAME_D1 (atanh) (svfloat64_t x, const svbool_t pg)
 
 TEST_SIG (SV, D, 1, atanh, -1.0, 1.0)
 TEST_ULP (SV_NAME_D1 (atanh), 2.8)
-TEST_DISABLE_FENV (SV_NAME_D1 (atanh))
 TEST_SYM_INTERVAL (SV_NAME_D1 (atanh), 0, 0x1p-23, 10000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (atanh), 0x1p-23, 1, 90000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (atanh), 1, inf, 100)

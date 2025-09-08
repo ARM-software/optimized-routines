@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE sinh(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -58,7 +58,6 @@ svfloat32_t SV_NAME_F1 (sinh) (svfloat32_t x, const svbool_t pg)
 
 TEST_SIG (SV, F, 1, sinh, -10.0, 10.0)
 TEST_ULP (SV_NAME_F1 (sinh), 1.76)
-TEST_DISABLE_FENV (SV_NAME_F1 (sinh))
 TEST_SYM_INTERVAL (SV_NAME_F1 (sinh), 0, 0x1.6a09e8p-32, 1000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (sinh), 0x1.6a09e8p-32, 0x42b0c0a7, 100000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (sinh), 0x42b0c0a7, inf, 1000)

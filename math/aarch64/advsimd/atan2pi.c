@@ -166,7 +166,6 @@ float64x2_t VPCS_ATTR V_NAME_D2 (atan2pi) (float64x2_t y, float64x2_t x)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 TEST_ULP (V_NAME_D2 (atan2pi), 2.54)
-TEST_DISABLE_FENV (V_NAME_D2 (atan2pi))
 TEST_INTERVAL (V_NAME_D2 (atan2pi), -10.0, 10.0, 50000)
 TEST_INTERVAL (V_NAME_D2 (atan2pi), -1.0, 1.0, 40000)
 TEST_INTERVAL (V_NAME_D2 (atan2pi), 0.0, 1.0, 40000)

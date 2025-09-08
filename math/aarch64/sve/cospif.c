@@ -53,7 +53,6 @@ svfloat32_t SV_NAME_F1 (cospi) (svfloat32_t x, const svbool_t pg)
 
 #if WANT_C23_TESTS
 TEST_ULP (SV_NAME_F1 (cospi), 2.08)
-TEST_DISABLE_FENV (SV_NAME_F1 (cospi))
 TEST_SYM_INTERVAL (SV_NAME_F1 (cospi), 0, 0x1p-31, 5000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (cospi), 0x1p-31, 0.5, 10000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (cospi), 0.5, 0x1p31f, 10000)

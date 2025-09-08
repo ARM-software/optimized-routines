@@ -1,7 +1,7 @@
 /*
  * Single-precision vector/SVE log2 function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -84,7 +84,6 @@ svfloat32_t SV_NAME_F1 (log2) (svfloat32_t x, const svbool_t pg)
 
 TEST_SIG (SV, F, 1, log2, 0.01, 11.1)
 TEST_ULP (SV_NAME_F1 (log2), 1.99)
-TEST_DISABLE_FENV (SV_NAME_F1 (log2))
 TEST_INTERVAL (SV_NAME_F1 (log2), -0.0, -0x1p126, 4000)
 TEST_INTERVAL (SV_NAME_F1 (log2), 0.0, 0x1p-126, 4000)
 TEST_INTERVAL (SV_NAME_F1 (log2), 0x1p-126, 0x1p-23, 50000)

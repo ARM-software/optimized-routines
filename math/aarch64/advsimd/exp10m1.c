@@ -192,7 +192,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10m1) (float64x2_t x)
 
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (exp10m1), 2.53)
-TEST_DISABLE_FENV (V_NAME_D1 (exp10m1))
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), 0, TableBound, 10000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), TableBound, SpecialBound, 10000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), SpecialBound, inf, 10000)

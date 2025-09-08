@@ -1,7 +1,7 @@
 /*
  * Double-precision vector erfc(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -16,9 +16,6 @@ static const struct data
   float64x2_t p20, p40, p41, p51;
   double p42, p52;
   double qr5[2], qr6[2], qr7[2], qr8[2], qr9[2];
-#if WANT_SIMD_EXCEPT
-  float64x2_t uflow_bound;
-#endif
 } data = {
   /* Set an offset so the range of the index used for lookup is 3487, and it
      can be clamped using a saturated add on an offset index.
@@ -39,12 +36,8 @@ static const struct data
   .qr7 = { 0x1.2492492492492p0, -0x1.8e38e38e38e39p-3 },
   .qr8 = { 0x1.2p0, -0x1.6c16c16c16c17p-3 },
   .qr9 = { 0x1.1c71c71c71c72p0, -0x1.4f2094f2094f2p-3 },
-#if WANT_SIMD_EXCEPT
-  .uflow_bound = V2 (0x1.a8b12fc6e4892p+4),
-#endif
 };
 
-#define TinyBound 0x4000000000000000 /* 0x1p-511 << 1.  */
 #define Off 0xfffffffffffff260	     /* 0xffffffffffffffff - 3487.  */
 
 struct entry
@@ -65,14 +58,6 @@ lookup (uint64x2_t i)
   e.scale = vuzp2q_f64 (e1, e2);
   return e;
 }
-
-#if WANT_SIMD_EXCEPT
-static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
-{
-  return v_call_f64 (erfc, x, y, cmp);
-}
-#endif
 
 /* Optimized double-precision vector erfc(x).
    Approximation based on series expansion near x rounded to
@@ -104,23 +89,6 @@ VPCS_ATTR
 float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
 {
   const struct data *dat = ptr_barrier (&data);
-
-#if WANT_SIMD_EXCEPT
-  /* |x| < 2^-511. Avoid fabs by left-shifting by 1.  */
-  uint64x2_t ix = vreinterpretq_u64_f64 (x);
-  uint64x2_t cmp = vcltq_u64 (vaddq_u64 (ix, ix), v_u64 (TinyBound));
-  /* x >= ~26.54 (into subnormal case and uflow case). Comparison is done in
-     integer domain to avoid raising exceptions in presence of nans.  */
-  uint64x2_t uflow = vcgeq_s64 (vreinterpretq_s64_f64 (x),
-				vreinterpretq_s64_f64 (dat->uflow_bound));
-  cmp = vorrq_u64 (cmp, uflow);
-  float64x2_t xm = x;
-  /* If any lanes are special, mask them with 0 and retain a copy of x to allow
-     special case handler to fix special lanes later. This is only necessary if
-     fenv exceptions are to be triggered correctly.  */
-  if (unlikely (v_any_u64 (cmp)))
-    x = v_zerofy_f64 (x, cmp);
-#endif
 
   float64x2_t a = vabsq_f64 (x);
   a = vminq_f64 (a, dat->max);
@@ -187,17 +155,11 @@ float64x2_t V_NAME_D1 (erfc) (float64x2_t x)
   float64x2_t fac = vreinterpretq_f64_u64 (
       vsraq_n_u64 (vshlq_n_u64 (sign, 63), dat->table_scale, 1));
 
-#if WANT_SIMD_EXCEPT
-  if (unlikely (v_any_u64 (cmp)))
-    return special_case (xm, vfmaq_f64 (off, fac, y), cmp);
-#endif
-
   return vfmaq_f64 (off, fac, y);
 }
 
 TEST_SIG (V, D, 1, erfc, -6.0, 28.0)
 TEST_ULP (V_NAME_D1 (erfc), 1.21)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (erfc), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (erfc), 0, 0x1p-26, 40000)
 TEST_INTERVAL (V_NAME_D1 (erfc), 0x1p-26, 28.0, 40000)
 TEST_INTERVAL (V_NAME_D1 (erfc), -0x1p-26, -6.0, 40000)

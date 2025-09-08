@@ -1,7 +1,7 @@
 /*
  * Double-precision inverse error function (AdvSIMD variant).
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
@@ -155,7 +155,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (erfinv) (float64x2_t x)
 #else
 TEST_SIG (V, D, 1, erfinv, -0.99, 0.99)
 TEST_ULP (V_NAME_D1 (erfinv), 24.8)
-TEST_DISABLE_FENV (V_NAME_D1 (erfinv))
 TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
 TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)
 TEST_SYM_INTERVAL (V_NAME_D1 (erfinv), 0, 0x1.fffffffffffffp-1, 100000)

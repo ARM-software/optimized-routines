@@ -1,6 +1,6 @@
 /*
  * Double-precision vector acosh(x) function.
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -38,12 +38,6 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
   const struct data *d = ptr_barrier (&data);
   uint64x2_t special
       = vcgeq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (x), d->one), d->thresh);
-  float64x2_t special_arg = x;
-
-#if WANT_SIMD_EXCEPT
-  if (unlikely (v_any_u64 (special)))
-    x = vbslq_f64 (special, vreinterpretq_f64_u64 (d->one), x);
-#endif
 
   float64x2_t xm1 = vsubq_f64 (x, v_f64 (1.0));
   float64x2_t y = vaddq_f64 (x, v_f64 (1.0));
@@ -52,13 +46,12 @@ VPCS_ATTR float64x2_t V_NAME_D1 (acosh) (float64x2_t x)
   y = vaddq_f64 (xm1, y);
 
   if (unlikely (v_any_u64 (special)))
-    return special_case (special_arg, y, special, &d->log1p_consts);
+    return special_case (x, y, special, &d->log1p_consts);
   return log1p_inline (y, &d->log1p_consts);
 }
 
 TEST_SIG (V, D, 1, acosh, 1.0, 10.0)
 TEST_ULP (V_NAME_D1 (acosh), 2.53)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (acosh), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_D1 (acosh), 1, 0x1p511, 90000)
 TEST_INTERVAL (V_NAME_D1 (acosh), 0x1p511, inf, 10000)
 TEST_INTERVAL (V_NAME_D1 (acosh), 0, 1, 1000)

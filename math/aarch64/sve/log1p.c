@@ -154,7 +154,6 @@ svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
 
 TEST_SIG (SV, D, 1, log1p, -0.9, 10.0)
 TEST_ULP (SV_NAME_D1 (log1p), 1.97)
-TEST_DISABLE_FENV (SV_NAME_D1 (log1p))
 TEST_SYM_INTERVAL (SV_NAME_D1 (log1p), 0.0, 0x1p-23, 50000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (log1p), 0x1p-23, 0.001, 50000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (log1p), 0.001, 1.0, 50000)

@@ -161,7 +161,6 @@ svfloat64_t SV_NAME_D1 (sinh) (svfloat64_t x, svbool_t pg)
 
 TEST_SIG (SV, D, 1, sinh, -10.0, 10.0)
 TEST_ULP (SV_NAME_D1 (sinh), 2.63)
-TEST_DISABLE_FENV (SV_NAME_D1 (sinh))
 TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0, 0x1p-26, 1000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0x1p-26, 0x1p9, 500000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0x1p9, inf, 1000)

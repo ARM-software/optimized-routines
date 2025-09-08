@@ -1,7 +1,7 @@
 /*
  * Single-precision inverse error function (AdvSIMD variant).
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
@@ -162,7 +162,6 @@ HALF_WIDTH_ALIAS_F1 (erfinv)
 # warning Not generating tests for _ZGVnN4v_erfinvf, as MPFR has no suitable reference
 #else
 TEST_SIG (V, F, 1, erfinv, -0.99, 0.99)
-TEST_DISABLE_FENV (V_NAME_F1 (erfinv))
 TEST_ULP (V_NAME_F1 (erfinv), 4.49)
 TEST_SYM_INTERVAL (V_NAME_F1 (erfinv), 0, 0x1.fffffep-1, 40000)
 /* Test with control lane in each interval.  */

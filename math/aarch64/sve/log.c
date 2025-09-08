@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE log(x) function.
  *
- * Copyright (c) 2020-2024, Arm Limited.
+ * Copyright (c) 2020-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -86,7 +86,6 @@ svfloat64_t SV_NAME_D1 (log) (svfloat64_t x, const svbool_t pg)
 
 TEST_SIG (SV, D, 1, log, 0.01, 11.1)
 TEST_ULP (SV_NAME_D1 (log), 2.15)
-TEST_DISABLE_FENV (SV_NAME_D1 (log))
 TEST_INTERVAL (SV_NAME_D1 (log), -0.0, -inf, 1000)
 TEST_INTERVAL (SV_NAME_D1 (log), 0, 0x1p-149, 1000)
 TEST_INTERVAL (SV_NAME_D1 (log), 0x1p-149, 0x1p-126, 4000)

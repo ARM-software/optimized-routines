@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE hypot(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -45,7 +45,6 @@ svfloat64_t SV_NAME_D2 (hypot) (svfloat64_t x, svfloat64_t y, svbool_t pg)
 
 TEST_SIG (SV, D, 2, hypot, -10.0, 10.0)
 TEST_ULP (SV_NAME_D2 (hypot), 0.71)
-TEST_DISABLE_FENV (SV_NAME_D2 (hypot))
 TEST_INTERVAL2 (SV_NAME_D2 (hypot), 0, inf, 0, inf, 10000)
 TEST_INTERVAL2 (SV_NAME_D2 (hypot), 0, inf, -0, -inf, 10000)
 TEST_INTERVAL2 (SV_NAME_D2 (hypot), -0, -inf, 0, inf, 10000)

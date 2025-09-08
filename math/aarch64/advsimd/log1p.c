@@ -1,7 +1,7 @@
 /*
  * Double-precision vector log(1+x) function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -27,8 +27,7 @@ special_case (float64x2_t x, uint64x2_t cmp, const struct data *d)
 {
   /* Side-step special lanes so fenv exceptions are not triggered
      inadvertently.  */
-  float64x2_t x_nospecial = v_zerofy_f64 (x, cmp);
-  return v_call_f64 (log1p, x, log1p_inline (x_nospecial, &d->d), cmp);
+  return v_call_f64 (log1p, x, log1p_inline (x, &d->d), cmp);
 }
 
 /* Vector log1p approximation using polynomial on reduced interval. Routine is
@@ -53,7 +52,6 @@ VPCS_ATTR float64x2_t V_NAME_D1 (log1p) (float64x2_t x)
 
 TEST_SIG (V, D, 1, log1p, -0.9, 10.0)
 TEST_ULP (V_NAME_D1 (log1p), 1.95)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (log1p), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (log1p), 0.0, 0x1p-23, 50000)
 TEST_SYM_INTERVAL (V_NAME_D1 (log1p), 0x1p-23, 0.001, 50000)
 TEST_SYM_INTERVAL (V_NAME_D1 (log1p), 0.001, 1.0, 50000)

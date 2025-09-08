@@ -1,7 +1,7 @@
 /*
  * Double-precision vector tan(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -15,9 +15,7 @@ static const struct data
   float64x2_t poly[9];
   double half_pi[2];
   float64x2_t two_over_pi, shift;
-#if !WANT_SIMD_EXCEPT
   float64x2_t range_val;
-#endif
 } data = {
   /* Coefficients generated using FPMinimax.  */
   .poly = { V2 (0x1.5555555555556p-2), V2 (0x1.1111111110a63p-3),
@@ -28,14 +26,11 @@ static const struct data
   .half_pi = { 0x1.921fb54442d18p0, 0x1.1a62633145c07p-54 },
   .two_over_pi = V2 (0x1.45f306dc9c883p-1),
   .shift = V2 (0x1.8p52),
-#if !WANT_SIMD_EXCEPT
   .range_val = V2 (0x1p23),
-#endif
 };
 
 #define RangeVal 0x4160000000000000  /* asuint64(0x1p23).  */
 #define TinyBound 0x3e50000000000000 /* asuint64(2^-26).  */
-#define Thresh 0x310000000000000     /* RangeVal - TinyBound.  */
 
 /* Special cases (fall back to scalar calls).  */
 static float64x2_t VPCS_ATTR NOINLINE
@@ -55,14 +50,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
      very large inputs. Fall back to scalar routine for all lanes if any are
      too large, or Inf/NaN. If fenv exceptions are expected, also fall back for
      tiny input to avoid underflow.  */
-#if WANT_SIMD_EXCEPT
-  uint64x2_t iax = vreinterpretq_u64_f64 (vabsq_f64 (x));
-  /* iax - tiny_bound > range_val - tiny_bound.  */
-  uint64x2_t special
-      = vcgtq_u64 (vsubq_u64 (iax, v_u64 (TinyBound)), v_u64 (Thresh));
-  if (unlikely (v_any_u64 (special)))
-    return special_case (x);
-#endif
 
   /* q = nearest integer to 2 * x / pi.  */
   float64x2_t q
@@ -71,9 +58,8 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 
   /* Use q to reduce x to r in [-pi/4, pi/4], by:
      r = x - q * pi/2, in extended precision.  */
-  float64x2_t r = x;
   float64x2_t half_pi = vld1q_f64 (dat->half_pi);
-  r = vfmsq_laneq_f64 (r, q, half_pi, 0);
+  float64x2_t r = vfmsq_laneq_f64 (x, q, half_pi, 0);
   r = vfmsq_laneq_f64 (r, q, half_pi, 1);
   /* Further reduce r to [-pi/8, pi/8], to be reconstructed using double angle
      formula.  */
@@ -104,11 +90,9 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 
   uint64x2_t no_recip = vtstq_u64 (vreinterpretq_u64_s64 (qi), v_u64 (1));
 
-#if !WANT_SIMD_EXCEPT
   uint64x2_t special = vcageq_f64 (x, dat->range_val);
   if (unlikely (v_any_u64 (special)))
     return special_case (x);
-#endif
 
   return vdivq_f64 (vbslq_f64 (no_recip, n, vnegq_f64 (d)),
 		    vbslq_f64 (no_recip, d, n));
@@ -116,7 +100,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 
 TEST_SIG (V, D, 1, tan, -3.1, 3.1)
 TEST_ULP (V_NAME_D1 (tan), 2.99)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (tan), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (tan), 0, TinyBound, 5000)
 TEST_SYM_INTERVAL (V_NAME_D1 (tan), TinyBound, RangeVal, 100000)
 TEST_SYM_INTERVAL (V_NAME_D1 (tan), RangeVal, inf, 5000)

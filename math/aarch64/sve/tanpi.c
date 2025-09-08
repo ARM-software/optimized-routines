@@ -78,7 +78,6 @@ svfloat64_t SV_NAME_D1 (tanpi) (svfloat64_t x, const svbool_t pg)
 }
 
 #if WANT_C23_TESTS
-TEST_DISABLE_FENV (SV_NAME_D1 (tanpi))
 TEST_ULP (SV_NAME_D1 (tanpi), 2.57)
 TEST_SYM_INTERVAL (SV_NAME_D1 (tanpi), 0, 0x1p-31, 50000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (tanpi), 0x1p-31, 0.5, 50000)

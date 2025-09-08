@@ -1,6 +1,6 @@
 /*
  * Double-precision vector tanh(x) function.
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,21 +37,12 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tanh) (float64x2_t x)
 
   uint64x2_t ia = vreinterpretq_u64_f64 (vabsq_f64 (x));
 
-  float64x2_t u = x;
-
   /* Trigger special-cases for tiny, boring and infinity/NaN.  */
   uint64x2_t special = vcgtq_u64 (vsubq_u64 (ia, d->tiny_bound), d->thresh);
-#if WANT_SIMD_EXCEPT
-  /* To trigger fp exceptions correctly, set special lanes to a neutral value.
-     They will be fixed up later by the special-case handler.  */
-  if (unlikely (v_any_u64 (special)))
-    u = v_zerofy_f64 (u, special);
-#endif
-
-  u = vaddq_f64 (u, u);
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
-  float64x2_t q = expm1_inline (u, &d->d);
+  float64x2_t twox = vaddq_f64 (x, x);
+  float64x2_t q = expm1_inline (twox, &d->d);
   float64x2_t qp2 = vaddq_f64 (q, v_f64 (2.0));
 
   if (unlikely (v_any_u64 (special)))
@@ -61,7 +52,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tanh) (float64x2_t x)
 
 TEST_SIG (V, D, 1, tanh, -10.0, 10.0)
 TEST_ULP (V_NAME_D1 (tanh), 2.21)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (tanh), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (tanh), 0, 0x1p-27, 5000)
 TEST_SYM_INTERVAL (V_NAME_D1 (tanh), 0x1p-27, 0x1.241bf835f9d5fp+4, 50000)
 TEST_SYM_INTERVAL (V_NAME_D1 (tanh), 0x1.241bf835f9d5fp+4, inf, 1000)

@@ -1,7 +1,7 @@
 /*
  * Single-precision vector tanh(x) function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -48,17 +48,7 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (tanh) (float32x4_t x)
   float32x4_t boring = vreinterpretq_f32_u32 (vorrq_u32 (
       sign, vreinterpretq_u32_s32 (d->expm1f_consts.exponent_bias)));
 
-#if WANT_SIMD_EXCEPT
-  /* If fp exceptions are to be triggered properly, set all special and boring
-     lanes to 0, which will trigger no exceptions, and fix them up later.  */
-  uint32x4_t special = vorrq_u32 (vcgtq_u32 (iax, d->large_bound),
-				  vcltq_u32 (iax, v_u32 (0x34000000)));
-  x = v_zerofy_f32 (x, is_boring);
-  if (unlikely (v_any_u32 (special)))
-    x = v_zerofy_f32 (x, special);
-#else
   uint32x4_t special = vcgtq_u32 (iax, d->large_bound);
-#endif
 
   /* tanh(x) = (e^2x - 1) / (e^2x + 1).  */
   float32x4_t q = expm1f_inline (vmulq_n_f32 (x, 2), &d->expm1f_consts);
@@ -75,7 +65,6 @@ HALF_WIDTH_ALIAS_F1 (tanh)
 
 TEST_SIG (V, F, 1, tanh, -10.0, 10.0)
 TEST_ULP (V_NAME_F1 (tanh), 2.09)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (tanh), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0, 0x1p-23, 1000)
 TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0x1p-23, 0x1.205966p+3, 100000)
 TEST_SYM_INTERVAL (V_NAME_F1 (tanh), 0x1.205966p+3, inf, 100)

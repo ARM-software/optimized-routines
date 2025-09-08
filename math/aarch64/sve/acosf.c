@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE acos(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -77,7 +77,6 @@ svfloat32_t SV_NAME_F1 (acos) (svfloat32_t x, const svbool_t pg)
 
 TEST_SIG (SV, F, 1, acos, -1.0, 1.0)
 TEST_ULP (SV_NAME_F1 (acos), 0.82)
-TEST_DISABLE_FENV (SV_NAME_F1 (acos))
 TEST_INTERVAL (SV_NAME_F1 (acos), 0, 0.5, 50000)
 TEST_INTERVAL (SV_NAME_F1 (acos), 0.5, 1.0, 50000)
 TEST_INTERVAL (SV_NAME_F1 (acos), 1.0, 0x1p11, 50000)

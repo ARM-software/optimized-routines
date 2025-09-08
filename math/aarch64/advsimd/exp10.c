@@ -1,7 +1,7 @@
 /*
  * Double-precision vector 10^x function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -20,9 +20,7 @@ const static struct data
 {
   float64x2_t poly[4];
   float64x2_t log10_2, log2_10_hi, log2_10_lo, shift;
-#if !WANT_SIMD_EXCEPT
   float64x2_t special_bound, scale_thresh;
-#endif
 } data = {
   /* Coefficients generated using Remez algorithm.
      rel error: 0x1.5ddf8f28p-54
@@ -34,30 +32,12 @@ const static struct data
   .log2_10_hi = V2 (0x1.34413509f79ffp-9), /* log2(10)/N.  */
   .log2_10_lo = V2 (-0x1.9dc1da994fd21p-66),
   .shift = V2 (0x1.8p+52),
-#if !WANT_SIMD_EXCEPT
   .scale_thresh = V2 (ScaleBound),
   .special_bound = V2 (SpecialBound),
-#endif
 };
 
 #define N (1 << V_EXP_TABLE_BITS)
 #define IndexMask v_u64 (N - 1)
-
-#if WANT_SIMD_EXCEPT
-
-# define TinyBound v_u64 (0x2000000000000000) /* asuint64 (0x1p-511).  */
-# define BigBound v_u64 (0x4070000000000000)  /* asuint64 (0x1p8).  */
-# define Thres v_u64 (0x2070000000000000)     /* BigBound - TinyBound.  */
-
-static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t cmp)
-{
-  /* If fenv exceptions are to be triggered correctly, fall back to the scalar
-     routine for special lanes.  */
-  return v_call_f64 (exp10, x, y, cmp);
-}
-
-#else
 
 # define SpecialOffset v_u64 (0x6000000000000000) /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
@@ -79,8 +59,6 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n,
   return vbslq_f64 (cmp, r1, r0);
 }
 
-#endif
-
 /* Fast vector implementation of exp10.
    Maximum measured error is 1.64 ulp.
    _ZGVnN2v_exp10(0x1.ccd1c9d82cc8cp+0) got 0x1.f8dab6d7fed0cp+5
@@ -88,19 +66,7 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n,
 float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
-  uint64x2_t cmp;
-#if WANT_SIMD_EXCEPT
-  /* If any lanes are special, mask them with 1 and retain a copy of x to allow
-     special_case to fix special lanes later. This is only necessary if fenv
-     exceptions are to be triggered correctly.  */
-  float64x2_t xm = x;
-  uint64x2_t iax = vreinterpretq_u64_f64 (vabsq_f64 (x));
-  cmp = vcgeq_u64 (vsubq_u64 (iax, TinyBound), Thres);
-  if (unlikely (v_any_u64 (cmp)))
-    x = vbslq_f64 (cmp, v_f64 (1), x);
-#else
-  cmp = vcageq_f64 (x, d->special_bound);
-#endif
+  uint64x2_t cmp = vcageq_f64 (x, d->special_bound);
 
   /* n = round(x/(log10(2)/N)).  */
   float64x2_t z = vfmaq_f64 (d->shift, x, d->log10_2);
@@ -127,11 +93,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
   float64x2_t s = vreinterpretq_f64_u64 (vaddq_u64 (u, e));
 
   if (unlikely (v_any_u64 (cmp)))
-#if WANT_SIMD_EXCEPT
-    return special_case (xm, vfmaq_f64 (s, y, s), cmp);
-#else
     return special_case (s, y, n, d);
-#endif
 
   return vfmaq_f64 (s, y, s);
 }
@@ -140,7 +102,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10) (float64x2_t x)
 TEST_SIG (S, D, 1, exp10, -9.9, 9.9)
 TEST_SIG (V, D, 1, exp10, -9.9, 9.9)
 TEST_ULP (V_NAME_D1 (exp10), 1.15)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp10), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10), 0, SpecialBound, 5000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10), SpecialBound, ScaleBound, 5000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10), ScaleBound, inf, 10000)

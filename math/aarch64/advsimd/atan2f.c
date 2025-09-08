@@ -123,7 +123,6 @@ HALF_WIDTH_ALIAS_F2 (atan2)
 
 /* Arity of 2 means no mathbench entry emitted. See test/mathbench_funcs.h.  */
 TEST_SIG (V, F, 2, atan2)
-TEST_DISABLE_FENV (V_NAME_F2 (atan2))
 TEST_ULP (V_NAME_F2 (atan2), 1.63)
 TEST_INTERVAL (V_NAME_F2 (atan2), -10.0, 10.0, 50000)
 TEST_INTERVAL (V_NAME_F2 (atan2), -1.0, 1.0, 40000)

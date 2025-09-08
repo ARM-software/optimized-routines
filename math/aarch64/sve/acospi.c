@@ -102,7 +102,6 @@ svfloat64_t SV_NAME_D1 (acospi) (svfloat64_t x, const svbool_t pg)
 
 #if WANT_C23_TESTS
 TEST_ULP (SV_NAME_D1 (acospi), 2.05)
-TEST_DISABLE_FENV (SV_NAME_D1 (acospi))
 TEST_INTERVAL (SV_NAME_D1 (acospi), 0, 0x1p-31, 5000)
 TEST_INTERVAL (SV_NAME_D1 (acospi), 0x1p-31, 0.5, 10000)
 TEST_INTERVAL (SV_NAME_D1 (acospi), 0.5, 0x1p32f, 10000)

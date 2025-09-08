@@ -1,7 +1,7 @@
 /*
  * Double-precision vector 2^x function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,19 +37,6 @@ lookup_sbits (uint64x2_t i)
 		       __v_exp_data[i[1] & IndexMask] };
 }
 
-#if WANT_SIMD_EXCEPT
-
-# define Thres 0x2080000000000000     /* asuint64(512.0) - TinyBound.  */
-
-/* Call scalar exp2 as a fallback.  */
-static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x, float64x2_t y, uint64x2_t is_special)
-{
-  return v_call_f64 (exp2, x, y, is_special);
-}
-
-#else
-
 # define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
 /* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
 # define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
@@ -70,8 +57,6 @@ special_case (float64x2_t s, float64x2_t y, float64x2_t n,
   return vbslq_f64 (cmp, r1, r0);
 }
 
-#endif
-
 /* Fast vector implementation of exp2.
    Maximum measured error is 1.65 ulp.
    _ZGVnN2v_exp2(-0x1.4c264ab5b559bp-6) got 0x1.f8db0d4df721fp-1
@@ -80,17 +65,7 @@ VPCS_ATTR
 float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
-  uint64x2_t cmp;
-#if WANT_SIMD_EXCEPT
-  uint64x2_t ia = vreinterpretq_u64_f64 (vabsq_f64 (x));
-  cmp = vcgeq_u64 (vsubq_u64 (ia, v_u64 (TinyBound)), v_u64 (Thres));
-  /* Mask special lanes and retain a copy of x for passing to special-case
-     handler.  */
-  float64x2_t xc = x;
-  x = v_zerofy_f64 (x, cmp);
-#else
-  cmp = vcagtq_f64 (x, d->scale_big_bound);
-#endif
+  uint64x2_t cmp = vcagtq_f64 (x, d->scale_big_bound);
 
   /* n = round(x/N).  */
   float64x2_t z = vaddq_f64 (d->shift, x);
@@ -111,17 +86,12 @@ float64x2_t V_NAME_D1 (exp2) (float64x2_t x)
   y = vmulq_f64 (r, y);
 
   if (unlikely (v_any_u64 (cmp)))
-#if !WANT_SIMD_EXCEPT
     return special_case (s, y, n, d);
-#else
-    return special_case (xc, vfmaq_f64 (s, s, y), cmp);
-#endif
   return vfmaq_f64 (s, s, y);
 }
 
 TEST_SIG (V, D, 1, exp2, -9.9, 9.9)
 TEST_ULP (V_NAME_D1 (exp2), 1.15)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_D1 (exp2), WANT_SIMD_EXCEPT)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp2), 0, TinyBound, 5000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp2), TinyBound, BigBound, 10000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp2), BigBound, UOFlowBound, 5000)

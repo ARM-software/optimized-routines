@@ -108,7 +108,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (atanpi) (float64x2_t x)
 
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (atanpi), 2.26)
-TEST_DISABLE_FENV (V_NAME_D1 (atanpi))
 TEST_INTERVAL (V_NAME_D1 (atanpi), 0, 0x1p-30, 10000)
 TEST_INTERVAL (V_NAME_D1 (atanpi), -0, -0x1p-30, 1000)
 TEST_INTERVAL (V_NAME_D1 (atanpi), 0x1p-30, 0x1p53, 900000)

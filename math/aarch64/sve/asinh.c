@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE asinh(x) function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -184,7 +184,6 @@ svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg)
 
 TEST_SIG (SV, D, 1, asinh, -10.0, 10.0)
 TEST_ULP (SV_NAME_D1 (asinh), 2.52)
-TEST_DISABLE_FENV (SV_NAME_D1 (asinh))
 TEST_SYM_INTERVAL (SV_NAME_D1 (asinh), 0, 0x1p-26, 50000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (asinh), 0x1p-26, 1, 50000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (asinh), 1, 0x1p511, 50000)

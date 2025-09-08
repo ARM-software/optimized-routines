@@ -1,7 +1,7 @@
 /*
  * Single-precision vector acos(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -25,25 +25,10 @@ static const struct data
 
 #define AbsMask 0x7fffffff
 #define Half 0x3f000000
-#define One 0x3f800000
-#define Small 0x32800000 /* 2^-26.  */
-
-#if WANT_SIMD_EXCEPT
-static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t x, float32x4_t y, uint32x4_t special)
-{
-  return v_call_f32 (acosf, x, y, special);
-}
-#endif
 
 /* Single-precision implementation of vector acos(x).
 
-   For |x| < Small, approximate acos(x) by pi/2 - x. Small = 2^-26 for correct
-   rounding.
-   If WANT_SIMD_EXCEPT = 0, Small = 0 and we proceed with the following
-   approximation.
-
-   For |x| in [Small, 0.5], use order 4 polynomial P such that the final
+   For |x| in [0, 0.5], use order 4 polynomial P such that the final
    approximation of asin is an odd polynomial:
 
      acos(x) ~ pi/2 - (x + x^3 P(x^2)).
@@ -64,14 +49,6 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (acos) (float32x4_t x)
 
   uint32x4_t ix = vreinterpretq_u32_f32 (x);
   uint32x4_t ia = vandq_u32 (ix, v_u32 (AbsMask));
-
-#if WANT_SIMD_EXCEPT
-  /* A single comparison for One, Small and QNaN.  */
-  uint32x4_t special
-      = vcgtq_u32 (vsubq_u32 (ia, v_u32 (Small)), v_u32 (One - Small));
-  if (unlikely (v_any_u32 (special)))
-    return special_case (x, x, v_u32 (0xffffffff));
-#endif
 
   float32x4_t ax = vreinterpretq_f32_u32 (ia);
   uint32x4_t a_le_half = vcleq_u32 (ia, v_u32 (Half));
@@ -106,7 +83,6 @@ HALF_WIDTH_ALIAS_F1 (acos)
 
 TEST_SIG (V, F, 1, acos, -1.0, 1.0)
 TEST_ULP (V_NAME_F1 (acos), 0.82)
-TEST_DISABLE_FENV_IF_NOT (V_NAME_F1 (acos), WANT_SIMD_EXCEPT)
 TEST_INTERVAL (V_NAME_F1 (acos), 0, 0x1p-26, 5000)
 TEST_INTERVAL (V_NAME_F1 (acos), 0x1p-26, 0.5, 50000)
 TEST_INTERVAL (V_NAME_F1 (acos), 0.5, 1.0, 50000)

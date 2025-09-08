@@ -2,7 +2,7 @@
  * Helper for vector double-precision routines which calculate log(1 + x) and
  * do not need special-case handling
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #ifndef MATH_V_LOG1P_INLINE_H
@@ -101,7 +101,7 @@ log1p_inline (float64x2_t x, const struct v_log1p_data *d)
   /* Shortcut if k is 0 - set correction term to 0 and f to x. The result is
      that the approximation is solely the polynomial.  */
   uint64x2_t k0 = vceqzq_f64 (k);
-  cm = v_zerofy_f64 (cm, k0);
+  cm = vbslq_f64 (k0, v_f64 (0), cm);
   f = vbslq_f64 (k0, x, f);
 #endif
 

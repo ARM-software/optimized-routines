@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sincos function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -55,8 +55,6 @@ _ZGVnN2vl8l8_sincos (float64x2_t x, double *out_sin, double *out_cos)
     special_case (x, special, out_sin, out_cos);
 }
 
-TEST_DISABLE_FENV (_ZGVnN2v_sincos_cos)
-TEST_DISABLE_FENV (_ZGVnN2v_sincos_sin)
 TEST_ULP (_ZGVnN2v_sincos_sin, 2.73)
 TEST_ULP (_ZGVnN2v_sincos_cos, 2.73)
 #define V_SINCOS_INTERVAL(lo, hi, n)                                          \

@@ -72,7 +72,6 @@ arm_math_sve_fast_cosf (svfloat32_t x, const svbool_t pg)
 }
 
 TEST_ULP (arm_math_sve_fast_cosf, 4096)
-TEST_DISABLE_FENV (arm_math_sve_fast_cosf)
 TEST_SYM_INTERVAL (arm_math_sve_fast_cosf, 0, 0x1p15f, 500000)
 TEST_SYM_INTERVAL (arm_math_sve_fast_cosf, 0x1p15f, inf, 10000)
 CLOSE_SVE_ATTR

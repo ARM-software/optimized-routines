@@ -43,7 +43,6 @@ svfloat64_t SV_NAME_D1 (acosh) (svfloat64_t x, const svbool_t pg)
 
 TEST_SIG (SV, D, 1, acosh, 1.0, 10.0)
 TEST_ULP (SV_NAME_D1 (acosh), 2.65)
-TEST_DISABLE_FENV (SV_NAME_D1 (acosh))
 TEST_INTERVAL (SV_NAME_D1 (acosh), 1, 0x1p511, 90000)
 TEST_INTERVAL (SV_NAME_D1 (acosh), 0x1p511, inf, 10000)
 TEST_INTERVAL (SV_NAME_D1 (acosh), 0, 1, 1000)

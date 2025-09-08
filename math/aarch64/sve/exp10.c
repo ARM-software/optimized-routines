@@ -124,7 +124,6 @@ svfloat64_t SV_NAME_D1 (exp10) (svfloat64_t x, svbool_t pg)
 #if WANT_EXP10_TESTS
 TEST_SIG (SV, D, 1, exp10, -9.9, 9.9)
 TEST_ULP (SV_NAME_D1 (exp10), 0.52)
-TEST_DISABLE_FENV (SV_NAME_D1 (exp10))
 TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), 0, SpecialBound, 10000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (exp10), SpecialBound, inf, 1000)
 #endif

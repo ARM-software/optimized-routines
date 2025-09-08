@@ -1,7 +1,7 @@
 /*
  * Single-precision vector e^x function.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "v_math.h"
@@ -74,6 +74,5 @@ _ZGVnN4v_expf_1u (float32x4_t x)
 }
 
 TEST_ULP (_ZGVnN4v_expf_1u, 0.4)
-TEST_DISABLE_FENV (_ZGVnN4v_expf_1u)
 TEST_INTERVAL (_ZGVnN4v_expf_1u, 0, 0xffff0000, 10000)
 TEST_SYM_INTERVAL (_ZGVnN4v_expf_1u, 0x1p-14, 0x1p8, 500000)

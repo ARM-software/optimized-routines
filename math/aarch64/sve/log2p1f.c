@@ -100,7 +100,6 @@ svfloat32_t SV_NAME_F1 (log2p1) (svfloat32_t x, const svbool_t pg)
 }
 
 #if WANT_C23_TESTS
-TEST_DISABLE_FENV (SV_NAME_F1 (log2p1))
 TEST_ULP (SV_NAME_F1 (log2p1), 1.40)
 TEST_SYM_INTERVAL (SV_NAME_F1 (log2p1), 0.0, 0x1p-23, 30000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (log2p1), 0x1p-23, 1, 50000)

@@ -186,7 +186,6 @@ svfloat64_t SV_NAME_D1 (exp2m1) (svfloat64_t x, svbool_t pg)
 
 #if WANT_C23_TESTS
 TEST_ULP (SV_NAME_D1 (exp2m1), 2.58)
-TEST_DISABLE_FENV (SV_NAME_D1 (exp2m1))
 TEST_INTERVAL (SV_NAME_D1 (exp2m1), 0, 0xffff0000, 10000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (exp2m1), 0, TableBound, 10000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (exp2m1), TableBound, SpecialBound, 10000)

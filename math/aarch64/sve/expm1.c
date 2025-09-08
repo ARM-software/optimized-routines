@@ -173,7 +173,6 @@ svfloat64_t SV_NAME_D1 (expm1) (svfloat64_t x, svbool_t pg)
 
 TEST_SIG (SV, D, 1, expm1, -9.9, 9.9)
 TEST_ULP (SV_NAME_D1 (expm1), 2.81)
-TEST_DISABLE_FENV (SV_NAME_D1 (expm1))
 TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0, 0x1p-23, 1000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), 0x1p-23, SpecialBound, 200000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (expm1), SpecialBound, inf, 1000)

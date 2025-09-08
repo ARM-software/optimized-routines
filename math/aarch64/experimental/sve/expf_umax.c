@@ -44,7 +44,6 @@ arm_math_sve_fast_expf (svfloat32_t x, const svbool_t pg)
 }
 
 TEST_ULP (arm_math_sve_fast_expf, 4096)
-TEST_DISABLE_FENV (arm_math_sve_fast_expf)
 TEST_SYM_INTERVAL (arm_math_sve_fast_expf, 0, Thres, 50000)
 TEST_SYM_INTERVAL (arm_math_sve_fast_expf, Thres, inf, 50000)
 CLOSE_SVE_ATTR

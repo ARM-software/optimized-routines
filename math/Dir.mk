@@ -6,9 +6,6 @@
 .SECONDEXPANSION:
 
 ifneq ($(OS),Linux)
-  ifeq ($(WANT_SIMD_EXCEPT),1)
-    $(error WANT_SIMD_EXCEPT is not supported outside Linux)
-  endif
   ifneq ($(USE_MPFR),1)
     $(warning WARNING: Double-precision ULP tests will not be usable without MPFR)
   endif
@@ -225,9 +222,6 @@ $(ulp-input-dir)/%.ulp_nn: $(ulp-input-dir)/%.ulp_nn.i
 $(ulp-input-dir)/%.fenv.i: $(math-src-dir)/%.c | $$(@D)
 	$(CC) $(CFLAGS) $< -E -o $@
 
-$(ulp-input-dir)/%.fenv: $(ulp-input-dir)/%.fenv.i
-	{ grep "TEST_DISABLE_FENV " $< || true; } > $@
-
 $(ulp-input-dir)/%.itv.i: $(math-src-dir)/%.c | $$(@D)
 	$(CC) $(CFLAGS) $< -E -o $@
 
@@ -246,8 +240,6 @@ $(ulp-lims): $(math-lib-lims)
 ulp-lims-nn = $(ulp-input-dir)/limits_nn
 $(ulp-lims-nn): $(math-lib-lims-nn)
 
-fenv-exps := $(ulp-input-dir)/fenv
-$(fenv-exps): $(math-lib-fenvs)
 
 generic-itvs = $(ulp-input-dir)/itvs
 $(generic-itvs): $(filter-out $(ulp-input-dir)/$(ARCH)/%,$(math-lib-itvs))
@@ -259,18 +251,17 @@ ulp-cvals := $(ulp-input-dir)/cvals
 $(ulp-cvals): $(math-lib-cvals)
 
 # Remove first word, which will be TEST directive
-$(ulp-lims) $(ulp-lims-nn) $(fenv-exps) $(arch-itvs) $(generic-itvs) $(ulp-cvals): | $$(@D)
+$(ulp-lims) $(ulp-lims-nn) $(arch-itvs) $(generic-itvs) $(ulp-cvals): | $$(@D)
 	sed "s/TEST_[^ ]* //g" $^ | sort -u > $@
 
 check-math-ulp: $(ulp-lims) $(ulp-lims-nn)
-check-math-ulp: $(fenv-exps) $(ulp-cvals)
+check-math-ulp: $(ulp-cvals)
 check-math-ulp: $(generic-itvs) $(arch-itvs)
 check-math-ulp: $(math-tools)
 	ULPFLAGS="$(math-ulpflags)" \
 	LIMITS=../../$(ulp-lims) \
 	ARCH_ITVS=../../$(arch-itvs) \
 	GEN_ITVS=../../$(generic-itvs) \
-	DISABLE_FENV=../../$(fenv-exps) \
 	CVALS=../../$(ulp-cvals) \
 	FUNC=$(func) \
 	WANT_EXPERIMENTAL_MATH=$(WANT_EXPERIMENTAL_MATH) \
