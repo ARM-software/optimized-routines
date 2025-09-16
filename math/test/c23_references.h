@@ -218,5 +218,6 @@ arm_math_log10p1 (double x)
 long double
 arm_math_log10p1l (long double x)
 {
-  return log1pl (x) * M_INV_LOG10l;
+  return (fabsl (x) < 0x1p-52l) ? (long double) x * M_INV_LOG10l
+				: (log1pl ((long double) x) / logl (10));
 }
