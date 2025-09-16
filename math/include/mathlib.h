@@ -179,6 +179,7 @@ __vpcs float64x2_t _ZGVnN2v_exp2m1 (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_expm1 (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log10 (float64x2_t);
+__vpcs float64x2_t _ZGVnN2v_log10p1 (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log1p (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log2 (float64x2_t);
 __vpcs float64x2_t _ZGVnN2v_log2p1 (float64x2_t);

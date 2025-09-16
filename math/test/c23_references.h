@@ -11,10 +11,13 @@
 #  define M_PIl 3.141592653589793238462643383279502884l
 #endif
 #ifndef M_INV_LOG2l
-#  define M_INV_LOG2l 0x1.71547652b82fep+0
+#  define M_INV_LOG2l 0x1.71547652b82fe1777d0ffda0d23a7d11d6aef551cp+0
 #endif
 #ifndef M_INV_LOG10
 #  define M_INV_LOG10 0x1.bcb7b1526e50ep-2
+#endif
+#ifndef M_INV_LOG10l
+#  define M_INV_LOG10l 0x1.bcb7b1526e50e32a6ab7555f5a67b8647dc68c049p-2l
 #endif
 #ifndef M_LOG2
 #  define M_LOG2 0x1.62e42fefa39efp-1
@@ -210,4 +213,10 @@ double
 arm_math_log10p1 (double x)
 {
   return log1p (x) * M_INV_LOG10;
+}
+
+long double
+arm_math_log10p1l (long double x)
+{
+  return log1pl (x) * M_INV_LOG10l;
 }
