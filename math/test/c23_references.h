@@ -13,6 +13,9 @@
 #ifndef M_INV_LOG2l
 #  define M_INV_LOG2l 0x1.71547652b82fep+0
 #endif
+#ifndef M_INV_LOG10
+#  define M_INV_LOG10 0x1.bcb7b1526e50ep-2
+#endif
 #ifndef M_LOG2
 #  define M_LOG2 0x1.62e42fefa39efp-1
 #endif
@@ -201,4 +204,10 @@ arm_math_log2p1l (long double x)
 {
   return (fabsl (x) < 0x1p-52l) ? (long double) x * M_INV_LOG2l
 				: (log1pl ((long double) x) / logl (2));
+}
+
+double
+arm_math_log10p1 (double x)
+{
+  return log1p (x) * M_INV_LOG10;
 }
