@@ -230,6 +230,7 @@ svfloat32_t _ZGVsMxv_expm1f (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_exp2m1f (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_exp10m1f (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_log10f (svfloat32_t, svbool_t);
+svfloat32_t _ZGVsMxv_log10p1f (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_log1pf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_log2f (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_log2p1f (svfloat32_t, svbool_t);
