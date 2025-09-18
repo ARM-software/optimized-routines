@@ -39,7 +39,7 @@ static const struct data
   .small_log10_2 = V4 (0x1.344136p-25f),
 };
 
-static inline float32x4_t VPCS_ATTR
+static inline float32x4_t
 special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp,
 	      const struct data *d)
 {
@@ -54,7 +54,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp,
    Worst-case error is 3.39 ULP:
    _ZGVnN4v_log10p1f(0x1.8789fcp-2) got 0x1.000002p+1
 				   want 0x1.fffffep+0.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (log10p1) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (log10p1) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 

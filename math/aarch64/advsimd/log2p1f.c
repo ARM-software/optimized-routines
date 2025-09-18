@@ -29,7 +29,7 @@ static const struct data
   .nan = V4 (NAN)
 };
 
-static inline float32x4_t VPCS_ATTR
+static inline float32x4_t
 special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp,
 	      const struct data *d)
 {
@@ -44,7 +44,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t cmp,
    Worst-case error is 1.93 ULP:
    _ZGVnN4v_log2p1f(0x1.8789fcp-2) got 0x1.de58d4p-2
 				  want 0x1.de58d8p-2.  */
-float32x4_t VPCS_ATTR V_NAME_F1 (log2p1) (float32x4_t x)
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (log2p1) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
