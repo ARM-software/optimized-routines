@@ -18,6 +18,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: inspect hardware
       run: cat /proc/cpuinfo
+    - name: update package cache
+      run: sudo apt-get update
     - name: install dependencies
       run: sudo apt-get install -y libmpfr-dev libmpc-dev wget
     - name: install clang
@@ -41,6 +43,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: inspect hardware
       run: cat /proc/cpuinfo
+    - name: update package cache
+      run: sudo apt-get update
     - name: install dependencies
       run: sudo apt-get install -y libmpfr-dev libmpc-dev gcc-aarch64-linux-gnu qemu-user-static
     - name: configure
