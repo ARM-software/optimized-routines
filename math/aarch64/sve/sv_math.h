@@ -1,7 +1,7 @@
 /*
  * Wrapper functions for SVE ACLE.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -34,6 +34,13 @@
 #define SV_NAME_D1_L1(fun) _ZGVsMxvl8_##fun
 #define SV_NAME_F1_L2(fun) _ZGVsMxvl4l4_##fun##f
 
+static inline void
+svstr_p (uint8_t *dst, svbool_t p)
+{
+  /* Predicate STR does not currently have an intrinsic.  */
+  __asm__("str %0, [%x1]\n" : : "Upa"(p), "r"(dst) : "memory");
+}
+
 /* Double precision.  */
 static inline svint64_t
 sv_s64 (int64_t x)
@@ -56,33 +63,39 @@ sv_f64 (double x)
 static inline svfloat64_t
 sv_call_f64 (double (*f) (double), svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
-  svbool_t p = svpfirst (cmp, svpfalse ());
-  while (svptest_any (cmp, p))
+  double tmp[svcntd ()];
+  uint8_t pg_bits[svcntd ()];
+  svstr_p (pg_bits, cmp);
+  svst1 (svptrue_b64 (), tmp, svsel (cmp, x, y));
+
+  for (int i = 0; i < svcntd (); i++)
     {
-      double elem = svclastb (p, 0, x);
-      elem = (*f) (elem);
-      svfloat64_t y2 = sv_f64 (elem);
-      y = svsel (p, y2, y);
-      p = svpnext_b64 (cmp, p);
+      if (pg_bits[i])
+	{
+	  tmp[i] = f (tmp[i]);
+	}
     }
-  return y;
+  return svld1 (svptrue_b64 (), tmp);
 }
 
 static inline svfloat64_t
 sv_call2_f64 (double (*f) (double, double), svfloat64_t x1, svfloat64_t x2,
 	      svfloat64_t y, svbool_t cmp)
 {
-  svbool_t p = svpfirst (cmp, svpfalse ());
-  while (svptest_any (cmp, p))
+  double tmp1[svcntd ()], tmp2[svcntd ()];
+  uint8_t pg_bits[svcntd ()];
+  svstr_p (pg_bits, cmp);
+  svst1 (svptrue_b64 (), tmp1, svsel (cmp, x1, y));
+  svst1 (cmp, tmp2, x2);
+
+  for (int i = 0; i < svcntd (); i++)
     {
-      double elem1 = svclastb (p, 0, x1);
-      double elem2 = svclastb (p, 0, x2);
-      double ret = (*f) (elem1, elem2);
-      svfloat64_t y2 = sv_f64 (ret);
-      y = svsel (p, y2, y);
-      p = svpnext_b64 (cmp, p);
+      if (pg_bits[i])
+	{
+	  tmp1[i] = f (tmp1[i], tmp2[i]);
+	}
     }
-  return y;
+  return svld1 (svptrue_b64 (), tmp1);
 }
 
 static inline svuint64_t
@@ -114,32 +127,51 @@ sv_f32 (float x)
 static inline svfloat32_t
 sv_call_f32 (float (*f) (float), svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
-  svbool_t p = svpfirst (cmp, svpfalse ());
-  while (svptest_any (cmp, p))
+  float tmp[svcntw ()];
+  /* svcntd, not svcntw, is correct for pg_bits because each bit of pg_bits
+     maps to 1 byte of the vector, so a uint8_t indicates predication of two
+     floats.  */
+  uint8_t pg_bits[svcntd ()];
+  svstr_p (pg_bits, cmp);
+  svst1 (svptrue_b32 (), tmp, svsel (cmp, x, y));
+
+  for (int i = 0; i < svcntd (); i++)
     {
-      float elem = svclastb (p, 0, x);
-      elem = (*f) (elem);
-      svfloat32_t y2 = sv_f32 (elem);
-      y = svsel (p, y2, y);
-      p = svpnext_b32 (cmp, p);
+      uint8_t p = pg_bits[i];
+      if (p & 1)
+	{
+	  tmp[i * 2] = f (tmp[i * 2]);
+	}
+      if (p & (1 << 4))
+	{
+	  tmp[i * 2 + 1] = f (tmp[i * 2 + 1]);
+	}
     }
-  return y;
+  return svld1 (svptrue_b32 (), tmp);
 }
 
 static inline svfloat32_t
 sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
 	      svfloat32_t y, svbool_t cmp)
 {
-  svbool_t p = svpfirst (cmp, svpfalse ());
-  while (svptest_any (cmp, p))
+  float tmp1[svcntw ()], tmp2[svcntw ()];
+  uint8_t pg_bits[svcntd ()];
+  svstr_p (pg_bits, cmp);
+  svst1 (svptrue_b32 (), tmp1, svsel (cmp, x1, y));
+  svst1 (cmp, tmp2, x2);
+
+  for (int i = 0; i < svcntd (); i++)
     {
-      float elem1 = svclastb (p, 0, x1);
-      float elem2 = svclastb (p, 0, x2);
-      float ret = (*f) (elem1, elem2);
-      svfloat32_t y2 = sv_f32 (ret);
-      y = svsel (p, y2, y);
-      p = svpnext_b32 (cmp, p);
+      uint8_t p = pg_bits[i];
+      if (p & 1)
+	{
+	  tmp1[i * 2] = f (tmp1[i * 2], tmp2[i * 2]);
+	}
+      if (p & (1 << 4))
+	{
+	  tmp1[i * 2 + 1] = f (tmp1[i * 2 + 1], tmp2[i * 2 + 1]);
+	}
     }
-  return y;
+  return svld1 (svptrue_b32 (), tmp1);
 }
 #endif
