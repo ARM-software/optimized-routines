@@ -221,3 +221,9 @@ arm_math_log10p1l (long double x)
   return (fabsl (x) < 0x1p-52l) ? (long double) x * M_INV_LOG10l
 				: (log1pl ((long double) x) / logl (10));
 }
+
+double
+arm_math_rsqrt (double x)
+{
+  return 1 / sqrt (x);
+}
