@@ -70,7 +70,7 @@ sv_call_f64 (double (*f) (double), svfloat64_t x, svfloat64_t y, svbool_t cmp)
 
   for (int i = 0; i < svcntd (); i++)
     {
-      if (pg_bits[i])
+      if (pg_bits[i] & 1)
 	{
 	  tmp[i] = f (tmp[i]);
 	}
@@ -90,7 +90,7 @@ sv_call2_f64 (double (*f) (double, double), svfloat64_t x1, svfloat64_t x2,
 
   for (int i = 0; i < svcntd (); i++)
     {
-      if (pg_bits[i])
+      if (pg_bits[i] & 1)
 	{
 	  tmp1[i] = f (tmp1[i], tmp2[i]);
 	}
