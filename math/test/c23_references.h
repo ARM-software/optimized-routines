@@ -227,3 +227,9 @@ arm_math_rsqrt (double x)
 {
   return 1 / sqrt (x);
 }
+
+long double
+arm_math_rsqrtl (long double x)
+{
+  return 1 / sqrtl (x);
+}
