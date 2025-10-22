@@ -63,8 +63,9 @@ sv_f64 (double x)
 static inline svfloat64_t
 sv_call_f64 (double (*f) (double), svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
-  double tmp[svcntd ()];
-  uint8_t pg_bits[svcntd ()];
+  /* Buffer size corresponds to maximum possible vector length.  */
+  double tmp[32];
+  uint8_t pg_bits[32];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b64 (), tmp, svsel (cmp, x, y));
 
@@ -82,8 +83,9 @@ static inline svfloat64_t
 sv_call2_f64 (double (*f) (double, double), svfloat64_t x1, svfloat64_t x2,
 	      svfloat64_t y, svbool_t cmp)
 {
-  double tmp1[svcntd ()], tmp2[svcntd ()];
-  uint8_t pg_bits[svcntd ()];
+  /* Buffer size corresponds to maximum possible vector length.  */
+  double tmp1[32], tmp2[32];
+  uint8_t pg_bits[32];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b64 (), tmp1, svsel (cmp, x1, y));
   svst1 (cmp, tmp2, x2);
@@ -127,11 +129,11 @@ sv_f32 (float x)
 static inline svfloat32_t
 sv_call_f32 (float (*f) (float), svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
-  float tmp[svcntw ()];
-  /* svcntd, not svcntw, is correct for pg_bits because each bit of pg_bits
-     maps to 1 byte of the vector, so a uint8_t indicates predication of two
-     floats.  */
-  uint8_t pg_bits[svcntd ()];
+  /* Buffer size corresponds to maximum vector length.  */
+  float tmp[64];
+  /* 32, not 64, is correct for pg_bits because each bit of pg_bits maps to 1
+     byte of the vector, so a uint8_t indicates predication of two floats.  */
+  uint8_t pg_bits[32];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b32 (), tmp, svsel (cmp, x, y));
 
@@ -154,8 +156,9 @@ static inline svfloat32_t
 sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
 	      svfloat32_t y, svbool_t cmp)
 {
-  float tmp1[svcntw ()], tmp2[svcntw ()];
-  uint8_t pg_bits[svcntd ()];
+  /* Buffer size corresponds to maximum vector length.  */
+  float tmp1[64], tmp2[64];
+  uint8_t pg_bits[32];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b32 (), tmp1, svsel (cmp, x1, y));
   svst1 (cmp, tmp2, x2);
