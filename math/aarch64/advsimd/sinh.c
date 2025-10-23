@@ -23,9 +23,10 @@ static const struct data
 };
 
 static float64x2_t NOINLINE VPCS_ATTR
-special_case (float64x2_t x)
+special_case (float64x2_t x, float64x2_t t, float64x2_t halfsign,
+	      uint64x2_t special)
 {
-  return v_call_f64 (sinh, x, x, v_u64 (-1));
+  return v_call_f64 (sinh, x, vmulq_f64 (t, halfsign), special);
 }
 
 /* Approximation for vector double-precision sinh(x) using expm1.
@@ -44,15 +45,15 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sinh) (float64x2_t x)
 
   uint64x2_t special = vcageq_f64 (x, d->large_bound);
 
-  /* Fall back to scalar variant for all lanes if any of them are special.  */
-  if (unlikely (v_any_u64 (special)))
-    return special_case (x);
-
   /* Up to the point that expm1 overflows, we can use it to calculate sinh
      using a slight rearrangement of the definition of sinh. This allows us to
      retain acceptable accuracy for very small inputs.  */
   float64x2_t t = expm1_inline (ax, &d->d);
   t = vaddq_f64 (t, vdivq_f64 (t, vaddq_f64 (t, v_f64 (1.0))));
+
+  if (unlikely (v_any_u64 (special)))
+    return special_case (x, t, halfsign, special);
+
   return vmulq_f64 (t, halfsign);
 }
 

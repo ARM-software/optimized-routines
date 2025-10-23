@@ -34,9 +34,9 @@ static const struct data
 
 /* Special cases (fall back to scalar calls).  */
 static float64x2_t VPCS_ATTR NOINLINE
-special_case (float64x2_t x)
+special_case (float64x2_t x, float64x2_t n, float64x2_t d, uint64x2_t special)
 {
-  return v_call_f64 (tan, x, x, v_u64 (-1));
+  return v_call_f64 (tan, x, vdivq_f64 (n, d), special);
 }
 
 /* Vector approximation for double-precision tan.
@@ -91,11 +91,14 @@ float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
   uint64x2_t no_recip = vtstq_u64 (vreinterpretq_u64_s64 (qi), v_u64 (1));
 
   uint64x2_t special = vcageq_f64 (x, dat->range_val);
-  if (unlikely (v_any_u64 (special)))
-    return special_case (x);
+  float64x2_t swap = vbslq_f64 (no_recip, n, vnegq_f64 (d));
+  d = vbslq_f64 (no_recip, d, n);
+  n = swap;
 
-  return vdivq_f64 (vbslq_f64 (no_recip, n, vnegq_f64 (d)),
-		    vbslq_f64 (no_recip, d, n));
+  if (unlikely (v_any_u64 (special)))
+    return special_case (x, n, d, special);
+
+  return vdivq_f64 (n, d);
 }
 
 TEST_SIG (V, D, 1, tan, -3.1, 3.1)
