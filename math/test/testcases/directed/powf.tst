@@ -1,6 +1,6 @@
 ; powf.tst - Directed test cases for powf
 ;
-; Copyright (c) 2007-2019, Arm Limited.
+; Copyright (c) 2007-2025, Arm Limited.
 ; SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 func=powf op1=7f800001 op2=7f800001 result=7fc00001 errno=0 status=i
@@ -244,3 +244,6 @@ func=powf op1=2e4e4f30 op2=406b0dc2 result=007e9c59.eb4 errno=0 status=u
 func=powf op1=7f7fffff op2=7f7fffff result=7f800000 error=overflow
 func=powf op1=7f7fffff op2=ff7fffff result=00000000 error=underflow
 func=powf op1=54cb3000 op2=403fffff result=7f7fffb2.a95 error=0
+
+; Hard case when rounding up
+func=powf op1=7f7fffff op2=3f800000 result=7f7fffff error=0

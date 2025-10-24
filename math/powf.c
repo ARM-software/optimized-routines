@@ -1,7 +1,7 @@
 /*
  * Single-precision pow function.
  *
- * Copyright (c) 2017-2024, Arm Limited.
+ * Copyright (c) 2017-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -189,30 +189,39 @@ powf (float x, float y)
 	  ix -= 23 << 23;
 	}
     }
-  double_t logx = log2_inline (ix);
-  double_t ylogx = y * logx; /* Note: cannot overflow, y is single prec.  */
+  /* y * log2(x) cannot overflow since y is single precision.  */
+  double_t ylogx = (double) y * log2_inline (ix);
+
+  /* Check whether |y*log(x)| >= 126.  */
   if (unlikely ((asuint64 (ylogx) >> 47 & 0xffff)
 		 >= asuint64 (126.0 * POWF_SCALE) >> 47))
     {
-      /* |y*log(x)| >= 126.  */
-      if (ylogx > 0x1.fffffffd1d571p+6 * POWF_SCALE)
-	/* |x^y| > 0x1.ffffffp127.  */
-	return __math_oflowf (sign_bias);
-      if (WANT_ROUNDING && WANT_ERRNO
-	  && ylogx > 0x1.fffffffa3aae2p+6 * POWF_SCALE)
-	/* |x^y| > 0x1.fffffep127, check if we round away from 0.  */
-	if ((!sign_bias
-	     && eval_as_float (1.0f + opt_barrier_float (0x1p-25f)) != 1.0f)
-	    || (sign_bias
-		&& eval_as_float (-1.0f - opt_barrier_float (0x1p-25f))
-		     != -1.0f))
-	  return __math_oflowf (sign_bias);
       if (ylogx <= -150.0 * POWF_SCALE)
 	return __math_uflowf (sign_bias);
-#if WANT_ERRNO_UFLOW
-      if (ylogx < -149.0 * POWF_SCALE)
+
+      if (WANT_ERRNO_UFLOW && ylogx < -149.0 * POWF_SCALE)
 	return __math_may_uflowf (sign_bias);
-#endif
+
+      /* |x^y| > 0x1.ffffffp127.  */
+      if (!WANT_ROUNDING && ylogx > 0x1.fffffffd1d571p+6 * POWF_SCALE)
+	return __math_oflowf (sign_bias);
+
+      if (WANT_ROUNDING && ylogx > 0x1.fffffffa3aae2p+6 * POWF_SCALE)
+	{
+	  if (ylogx > 0x1.fffffffd1d571p+6 * POWF_SCALE)
+	    return __math_oflowf (sign_bias);
+
+	  /* |x^y| > 0x1.fffffep127, check if we round away from 0.  */
+	  if (ylogx != 0x1.fffffffa3aae3p+6 * POWF_SCALE)
+	    {
+	      float x = opt_barrier_float (0x1p-25f);
+	      if ((!sign_bias && eval_as_float (1.0f + x) != 1.0f)
+		  || (sign_bias && eval_as_float (-1.0f - x) != -1.0f))
+		return __math_oflowf (sign_bias);
+	    }
+
+	  return sign_bias ? -0x1.fffffep127 : 0x1.fffffep127;
+	}
     }
   return exp2_inline (ylogx, sign_bias);
 }
