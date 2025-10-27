@@ -118,9 +118,11 @@ static int mpfr_log10p1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
 }
 
 static int mpfr_rsqrt (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd){
-  MPFR_DECL_INIT (power, 1080);
-  mpfr_set_d(power, -0.5, rnd);
-  return mpfr_pow(ret, arg, power, rnd);
+  MPFR_DECL_INIT (m, 1080);
+  MPFR_DECL_INIT (one, 1080);
+  mpfr_set_d (one, 1.0, rnd);
+  mpfr_sqrt (m, arg, rnd);
+  return mpfr_div (ret, one, m, rnd);
 }
 
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
