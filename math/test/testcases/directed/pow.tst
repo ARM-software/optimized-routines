@@ -1,6 +1,6 @@
 ; Directed test cases for pow
 ;
-; Copyright (c) 2018-2019, Arm Limited.
+; Copyright (c) 2018-2025, Arm Limited.
 ; SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 func=pow op1=00000000.00000000 op2=00000000.00000000 result=3ff00000.00000000 errno=0
@@ -1416,3 +1416,6 @@ func=pow op1=fff80000.00000001 op2=ffefffff.ffffffff result=7ff80000.00000000 er
 func=pow op1=fff80000.00000001 op2=fff00000.00000000 result=7ff80000.00000000 errno=0
 func=pow op1=fff80000.00000001 op2=fff00000.00000001 result=7ff80000.00000000 errno=0 status=i
 func=pow op1=fff80000.00000001 op2=fff80000.00000001 result=7ff80000.00000000 errno=0
+
+; Hard case when rounding up
+func=pow op1=7fefffff.ffffffff op2=3ff00000.00000000 result=7fefffff.ffffffff error=0
