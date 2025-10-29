@@ -26,6 +26,17 @@
 
 #include "math_config.h"
 
+#if !defined(__ARM_FEATURE_SVE_BITS) || __ARM_FEATURE_SVE_BITS == 0
+/* If not specified by -msve-vector-bits, assume maximum vector length.  */
+# define SVE_VECTOR_BYTES 256
+#else
+# define SVE_VECTOR_BYTES (__ARM_FEATURE_SVE_BITS / 8)
+#endif
+#define SVE_NUM_FLTS (SVE_VECTOR_BYTES / sizeof (float))
+#define SVE_NUM_DBLS (SVE_VECTOR_BYTES / sizeof (double))
+/* Predicate is stored as one bit per byte of VL so requires VL / 64 bytes.  */
+#define SVE_NUM_PG_BYTES (SVE_VECTOR_BYTES / sizeof (uint64_t))
+
 #define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
 #define SV_NAME_D1(fun) _ZGVsMxv_##fun
 #define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
@@ -63,9 +74,8 @@ sv_f64 (double x)
 static inline svfloat64_t
 sv_call_f64 (double (*f) (double), svfloat64_t x, svfloat64_t y, svbool_t cmp)
 {
-  /* Buffer size corresponds to maximum possible vector length.  */
-  double tmp[32];
-  uint8_t pg_bits[32];
+  double tmp[SVE_NUM_DBLS];
+  uint8_t pg_bits[SVE_NUM_PG_BYTES];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b64 (), tmp, svsel (cmp, x, y));
 
@@ -83,9 +93,8 @@ static inline svfloat64_t
 sv_call2_f64 (double (*f) (double, double), svfloat64_t x1, svfloat64_t x2,
 	      svfloat64_t y, svbool_t cmp)
 {
-  /* Buffer size corresponds to maximum possible vector length.  */
-  double tmp1[32], tmp2[32];
-  uint8_t pg_bits[32];
+  double tmp1[SVE_NUM_DBLS], tmp2[SVE_NUM_DBLS];
+  uint8_t pg_bits[SVE_NUM_PG_BYTES];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b64 (), tmp1, svsel (cmp, x1, y));
   svst1 (cmp, tmp2, x2);
@@ -129,11 +138,8 @@ sv_f32 (float x)
 static inline svfloat32_t
 sv_call_f32 (float (*f) (float), svfloat32_t x, svfloat32_t y, svbool_t cmp)
 {
-  /* Buffer size corresponds to maximum vector length.  */
-  float tmp[64];
-  /* 32, not 64, is correct for pg_bits because each bit of pg_bits maps to 1
-     byte of the vector, so a uint8_t indicates predication of two floats.  */
-  uint8_t pg_bits[32];
+  float tmp[SVE_NUM_FLTS];
+  uint8_t pg_bits[SVE_NUM_PG_BYTES];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b32 (), tmp, svsel (cmp, x, y));
 
@@ -156,9 +162,8 @@ static inline svfloat32_t
 sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
 	      svfloat32_t y, svbool_t cmp)
 {
-  /* Buffer size corresponds to maximum vector length.  */
-  float tmp1[64], tmp2[64];
-  uint8_t pg_bits[32];
+  float tmp1[SVE_NUM_FLTS], tmp2[SVE_NUM_FLTS];
+  uint8_t pg_bits[SVE_NUM_PG_BYTES];
   svstr_p (pg_bits, cmp);
   svst1 (svptrue_b32 (), tmp1, svsel (cmp, x1, y));
   svst1 (cmp, tmp2, x2);
