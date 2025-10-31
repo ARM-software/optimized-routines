@@ -45,6 +45,9 @@
 #define SV_NAME_D1_L1(fun) _ZGVsMxvl8_##fun
 #define SV_NAME_F1_L2(fun) _ZGVsMxvl4l4_##fun##f
 
+#define SV_NAME_F1_STRET(fun) _ZGVsMxv_##fun##f_stret
+#define SV_NAME_D1_STRET(fun) _ZGVsMxv_##fun##_stret
+
 static inline void
 svstr_p (uint8_t *dst, svbool_t p)
 {

@@ -164,6 +164,20 @@ _Z_modf_wrap (float64x2_t x)
 }
 
 __vpcs static float32x4_t
+_Z_modff_stret_wrap (float32x4_t x)
+{
+  float32x4x2_t fi = _ZGVnN4v_modff_stret (x);
+  return fi.val[0] + fi.val[1];
+}
+
+__vpcs static float64x2_t
+_Z_modf_stret_wrap (float64x2_t x)
+{
+  float64x2x2_t fi = _ZGVnN2v_modf_stret (x);
+  return fi.val[0] + fi.val[1];
+}
+
+__vpcs static float32x4_t
 _Z_sincosf_wrap (float32x4_t x)
 {
   float s[4], c[4];
@@ -337,6 +351,20 @@ _Z_sv_modf_wrap (svfloat64_t x, svbool_t pg)
   double i[svcntd ()];
   svfloat64_t r = _ZGVsMxvl8_modf (x, i, pg);
   return svadd_x (pg, r, svld1 (pg, i));
+}
+
+static svfloat32_t
+_Z_sv_modff_stret_wrap (svfloat32_t x, svbool_t pg)
+{
+  svfloat32x2_t fi = _ZGVsMxv_modff_stret (x, pg);
+  return svadd_x (pg, svget2 (fi, 0), svget2 (fi, 1));
+}
+
+static svfloat64_t
+_Z_sv_modf_stret_wrap (svfloat64_t x, svbool_t pg)
+{
+  svfloat64x2_t fi = _ZGVsMxv_modf_stret (x, pg);
+  return svadd_x (pg, svget2 (fi, 0), svget2 (fi, 1));
 }
 
 static svfloat32_t

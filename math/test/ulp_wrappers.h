@@ -350,6 +350,16 @@ v_modff_int (float x)
   _ZGVnN4vl4_modff (vdupq_n_f32 (x), y);
   return y[0];
 }
+float
+v_modff_stret_frac (float x)
+{
+  return _ZGVnN4v_modff_stret (vdupq_n_f32 (x)).val[0][0];
+}
+float
+v_modff_stret_int (float x)
+{
+  return _ZGVnN4v_modff_stret (vdupq_n_f32 (x)).val[1][0];
+}
 double
 v_sincos_sin (double x)
 {
@@ -386,6 +396,16 @@ v_modf_int (double x)
   double y[2];
   _ZGVnN2vl8_modf (vdupq_n_f64 (x), y);
   return y[0];
+}
+double
+v_modf_stret_frac (double x)
+{
+  return _ZGVnN2v_modf_stret (vdupq_n_f64 (x)).val[0][0];
+}
+double
+v_modf_stret_int (double x)
+{
+  return _ZGVnN2v_modf_stret (vdupq_n_f64 (x)).val[1][0];
 }
 #endif //  __aarch64__ && __linux__
 
@@ -560,6 +580,26 @@ sv_modf_int (svbool_t pg, double x)
   double i[svcntd ()];
   _ZGVsMxvl8_modf (svdup_f64 (x), i, pg);
   return svretd (svld1 (pg, i), pg);
+}
+float
+sv_modff_stret_frac (svbool_t pg, float x)
+{
+  return svretf (svget2 (_ZGVsMxv_modff_stret (svdup_f32 (x), pg), 0), pg);
+}
+float
+sv_modff_stret_int (svbool_t pg, float x)
+{
+  return svretf (svget2 (_ZGVsMxv_modff_stret (svdup_f32 (x), pg), 1), pg);
+}
+double
+sv_modf_stret_frac (svbool_t pg, double x)
+{
+  return svretd (svget2 (_ZGVsMxv_modf_stret (svdup_f64 (x), pg), 0), pg);
+}
+double
+sv_modf_stret_int (svbool_t pg, double x)
+{
+  return svretd (svget2 (_ZGVsMxv_modf_stret (svdup_f64 (x), pg), 1), pg);
 }
 
 # if WANT_EXPERIMENTAL_MATH

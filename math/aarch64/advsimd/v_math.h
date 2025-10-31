@@ -21,6 +21,9 @@
 #define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
 #define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
 
+#define V_NAME_F1_STRET(fun) _ZGVnN4v_##fun##f_stret
+#define V_NAME_D1_STRET(fun) _ZGVnN2v_##fun##_stret
+
 #if USE_GLIBC_ABI
 
 # define HALF_WIDTH_ALIAS_F1(fun)                                             \

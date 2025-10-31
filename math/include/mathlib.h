@@ -155,6 +155,7 @@ __vpcs float32x4_t _ZGVnN4vv_hypotf (float32x4_t, float32x4_t);
 __vpcs float32x4_t _ZGVnN4vv_powf (float32x4_t, float32x4_t);
 __vpcs float32x4x2_t _ZGVnN4v_cexpif (float32x4_t);
 __vpcs float32x4x2_t _ZGVnN4v_cexpipif (float32x4_t);
+__vpcs float32x4x2_t _ZGVnN4v_modff_stret (float32x4_t);
 __vpcs void _ZGVnN4vl4l4_sincosf (float32x4_t, float *, float *);
 __vpcs void _ZGVnN4vl4l4_sincospif (float32x4_t, float *, float *);
 
@@ -199,6 +200,7 @@ __vpcs float64x2_t _ZGVnN2vv_hypot (float64x2_t, float64x2_t);
 __vpcs float64x2_t _ZGVnN2vv_pow (float64x2_t, float64x2_t);
 __vpcs float64x2x2_t _ZGVnN2v_cexpi (float64x2_t);
 __vpcs float64x2x2_t _ZGVnN2v_cexpipi (float64x2_t x);
+__vpcs float64x2x2_t _ZGVnN2v_modf_stret (float64x2_t x);
 __vpcs void _ZGVnN2vl8l8_sincos (float64x2_t, double *, double *);
 __vpcs void _ZGVnN2vl8l8_sincospi (float64x2_t, double *, double *);
 
@@ -253,6 +255,7 @@ svfloat32_t _ZGVsMxvv_hypotf (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvv_powf (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpipif (svfloat32_t, svbool_t);
+svfloat32x2_t _ZGVsMxv_modff_stret (svfloat32_t, svbool_t);
 void _ZGVsMxvl4l4_sincosf (svfloat32_t, float *, float *, svbool_t);
 void _ZGVsMxvl4l4_sincospif (svfloat32_t, float *, float *, svbool_t);
 
@@ -297,6 +300,7 @@ svfloat64_t _ZGVsMxvv_hypot (svfloat64_t, svfloat64_t, svbool_t);
 svfloat64_t _ZGVsMxvv_pow (svfloat64_t, svfloat64_t, svbool_t);
 svfloat64x2_t _ZGVsMxv_cexpi (svfloat64_t, svbool_t);
 svfloat64x2_t _ZGVsMxv_cexpipi (svfloat64_t, svbool_t);
+svfloat64x2_t _ZGVsMxv_modf_stret (svfloat64_t, svbool_t);
 void _ZGVsMxvl8l8_sincos (svfloat64_t, double *, double *, svbool_t);
 void _ZGVsMxvl8l8_sincospi (svfloat64_t, double *, double *, svbool_t);
 
