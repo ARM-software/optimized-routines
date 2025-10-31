@@ -4,8 +4,9 @@
  * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
-#include "v_sincospi_common.h"
+
 #include "v_math.h"
+#include "v_sincospi_common.h"
 #include "test_defs.h"
 
 /* Double-precision vector function allowing calculation of both sin and cos in
@@ -21,9 +22,7 @@
 VPCS_ATTR void
 _ZGVnN2vl8l8_sincospi (float64x2_t x, double *out_sin, double *out_cos)
 {
-  const struct v_sincospi_data *d = ptr_barrier (&v_sincospi_data);
-
-  float64x2x2_t sc = v_sincospi_inline (x, d);
+  float64x2x2_t sc = v_sincospi_inline (x);
 
   vst1q_f64 (out_sin, sc.val[0]);
   vst1q_f64 (out_cos, sc.val[1]);

@@ -277,6 +277,16 @@ v_sincospi_cos (double x)
   _ZGVnN2vl8l8_sincospi (vdupq_n_f64 (x), s, c);
   return c[0];
 }
+double
+v_cexpipi_sin (double x)
+{
+  return _ZGVnN2v_cexpipi (vdupq_n_f64 (x)).val[0][0];
+}
+double
+v_cexpipi_cos (double x)
+{
+  return _ZGVnN2v_cexpipi (vdupq_n_f64 (x)).val[1][0];
+}
 float
 v_sincospif_sin (float x)
 {
@@ -290,6 +300,16 @@ v_sincospif_cos (float x)
   float s[4], c[4];
   _ZGVnN4vl4l4_sincospif (vdupq_n_f32 (x), s, c);
   return c[0];
+}
+float
+v_cexpipif_sin (float x)
+{
+  return _ZGVnN4v_cexpipif (vdupq_n_f32 (x)).val[0][0];
+}
+float
+v_cexpipif_cos (float x)
+{
+  return _ZGVnN4v_cexpipif (vdupq_n_f32 (x)).val[1][0];
 }
 #endif // WANT_C23_TESTS
 
@@ -444,6 +464,26 @@ sv_sincospif_cos (svbool_t pg, float x)
   float s[svcntw ()], c[svcntw ()];
   _ZGVsMxvl4l4_sincospif (svdup_f32 (x), s, c, pg);
   return svretf (svld1 (pg, c), pg);
+}
+double
+sv_cexpipi_sin (svbool_t pg, double x)
+{
+  return svretd (svget2 (_ZGVsMxv_cexpipi (svdup_f64 (x), pg), 0), pg);
+}
+double
+sv_cexpipi_cos (svbool_t pg, double x)
+{
+  return svretd (svget2 (_ZGVsMxv_cexpipi (svdup_f64 (x), pg), 1), pg);
+}
+float
+sv_cexpipif_sin (svbool_t pg, float x)
+{
+  return svretf (svget2 (_ZGVsMxv_cexpipif (svdup_f32 (x), pg), 0), pg);
+}
+float
+sv_cexpipif_cos (svbool_t pg, float x)
+{
+  return svretf (svget2 (_ZGVsMxv_cexpipif (svdup_f32 (x), pg), 1), pg);
 }
 #endif // WANT_C23_TESTS
 

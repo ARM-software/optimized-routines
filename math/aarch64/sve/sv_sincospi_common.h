@@ -1,19 +1,22 @@
 /*
  * Core approximation for double-precision SVE sincospi
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#ifndef MATH_SV_SINCOSPI_COMMON_H
+#define MATH_SV_SINCOSPI_COMMON_H
 
 #include "sv_math.h"
 #include "sv_poly_f64.h"
 
-static const struct sv_sincospi_data
+static const struct data
 {
   double c0, c2, c4, c6, c8;
   double c1, c3, c5, c7, c9;
   double range_val;
-} sv_sincospi_data = {
+} data = {
   /* Polynomial coefficients generated using Remez algorithm,
      see sinpi.sollya for details.  */
   .c0 = 0x1.921fb54442d184p1,
@@ -40,9 +43,9 @@ static const struct sv_sincospi_data
 						    want 0x1.fd2da484ff402p-1.
  */
 static inline svfloat64x2_t
-sv_sincospi_inline (svbool_t pg, svfloat64_t x,
-		    const struct sv_sincospi_data *d)
+sv_sincospi_inline (svbool_t pg, svfloat64_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   const svbool_t pt = svptrue_b64 ();
 
   /* r = x - rint(x).  */
@@ -74,3 +77,4 @@ sv_sincospi_inline (svbool_t pg, svfloat64_t x,
 
   return svcreate2 (sinpix, cospix);
 }
+#endif

@@ -6,9 +6,8 @@
  */
 
 #include "sv_math.h"
-#include "test_defs.h"
-#include "mathlib.h"
 #include "sv_sincospi_common.h"
+#include "test_defs.h"
 
 /* Double-precision vector function allowing calculation of both sinpi and
    cospi in one function call, using shared argument reduction and polynomials.
@@ -23,9 +22,7 @@ void
 _ZGVsMxvl8l8_sincospi (svfloat64_t x, double *out_sin, double *out_cos,
 		       svbool_t pg)
 {
-  const struct sv_sincospi_data *d = ptr_barrier (&sv_sincospi_data);
-
-  svfloat64x2_t sc = sv_sincospi_inline (pg, x, d);
+  svfloat64x2_t sc = sv_sincospi_inline (pg, x);
 
   svst1 (pg, out_sin, svget2 (sc, 0));
   svst1 (pg, out_cos, svget2 (sc, 1));

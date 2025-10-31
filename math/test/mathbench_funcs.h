@@ -90,6 +90,8 @@ VNF (_ZGVnN4v_tanpif, -0.9, 0.9)
 VND (_ZGVnN2v_tanpi, -0.9, 0.9)
 {"_ZGVnN4vl4l4_sincospif", 'f', 'n', -0.9, 0.9, {.vnf = _Z_sincospif_wrap}},
 {"_ZGVnN2vl8l8_sincospi", 'd', 'n', -0.9, 0.9, {.vnd = _Z_sincospi_wrap}},
+{"_ZGVnN4v_cexpipif", 'f', 'n', -0.9, 0.9, {.vnf = _Z_cexpipif_wrap}},
+{"_ZGVnN2v_cexpipi", 'd', 'n', 0.9, 0.9, {.vnd = _Z_cexpipi_wrap}},
 # endif
 #endif
 
@@ -137,6 +139,8 @@ SVF (_ZGVsMxv_tanpif, -0.9, 0.9)
 SVD (_ZGVsMxv_tanpi, -0.9, 0.9)
 {"_ZGVsMxvl4l4_sincospif", 'f', 's', -0.9, 0.9, {.svf = _Z_sv_sincospif_wrap}},
 {"_ZGVsMxvl8l8_sincospi", 'd', 's', -0.9, 0.9, {.svd = _Z_sv_sincospi_wrap}},
+{"_ZGVsMxv_cexpipif", 'f', 's', -0.9, 0.9, {.svf = _Z_sv_cexpipif_wrap}},
+{"_ZGVsMxv_cexpipi", 'd', 's', -0.9, 0.9, {.svd = _Z_sv_cexpipi_wrap}},
 # endif
 # if WANT_EXPERIMENTAL_MATH
 SVF (arm_math_sve_fast_cosf, -3.1, 3.1)

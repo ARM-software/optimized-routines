@@ -1,17 +1,21 @@
 /*
  * Helper for Single-precision vector sincospi function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#ifndef MATH_V_SINCOSPIF_COMMON_H
+#define MATH_V_SINCOSPIF_COMMON_H
+
 #include "mathlib.h"
 #include "v_math.h"
 #include "v_poly_f32.h"
 
-const static struct v_sincospif_data
+const static struct data
 {
   float32x4_t poly[6], range_val;
-} v_sincospif_data = {
+} data = {
   /* Taylor series coefficents for sin(pi * x).  */
   .poly = { V4 (0x1.921fb6p1f), V4 (-0x1.4abbcep2f), V4 (0x1.466bc6p1f),
 	    V4 (-0x1.32d2ccp-1f), V4 (0x1.50783p-4f), V4 (-0x1.e30750p-8f) },
@@ -26,8 +30,10 @@ const static struct v_sincospif_data
    _ZGVnN4v_sincospif_cos(0x1.d341a8p-5) got 0x1.f7cd56p-1 want 0x1.f7cd5p-1.
  */
 static inline float32x4x2_t
-v_sincospif_inline (float32x4_t x, const struct v_sincospif_data *d)
+v_sincospif_inline (float32x4_t x)
 {
+  const struct data *d = ptr_barrier (&data);
+
   /* If r is odd, the sign of the result should be inverted for sinpi and
      reintroduced for cospi.  */
   uint32x4_t cmp = vcgeq_f32 (x, d->range_val);
@@ -55,3 +61,4 @@ v_sincospif_inline (float32x4_t x, const struct v_sincospif_data *d)
 
   return (float32x4x2_t){ sinpix, cospix };
 }
+#endif

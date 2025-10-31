@@ -1,16 +1,20 @@
 /*
  * Helper for Double-precision vector sincospi function.
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#ifndef MATH_V_SINCOSPI_COMMON_H
+#define MATH_V_SINCOSPI_COMMON_H
+
 #include "v_math.h"
 #include "v_poly_f64.h"
 
-static const struct v_sincospi_data
+static const struct data
 {
   float64x2_t poly[10], range_val;
-} v_sincospi_data = {
+} data = {
   /* Polynomial coefficients generated using Remez algorithm,
      see sinpi.sollya for details.  */
   .poly = { V2 (0x1.921fb54442d184p1), V2 (-0x1.4abbce625be53p2),
@@ -32,8 +36,10 @@ static const struct v_sincospi_data
   _ZGVnN2v_sincospi_cos(-0x1.11e3c7e284adep-5) got 0x1.fd2da484ff3ffp-1
 					      want 0x1.fd2da484ff402p-1.  */
 static inline float64x2x2_t
-v_sincospi_inline (float64x2_t x, const struct v_sincospi_data *d)
+v_sincospi_inline (float64x2_t x)
 {
+  const struct data *d = ptr_barrier (&data);
+
   /* If r is odd, the sign of the result should be inverted for sinpi
      and reintroduced for cospi.  */
   uint64x2_t cmp = vcgeq_f64 (x, d->range_val);
@@ -62,3 +68,4 @@ v_sincospi_inline (float64x2_t x, const struct v_sincospi_data *d)
 
   return (float64x2x2_t){ sinpix, cospix };
 }
+#endif

@@ -59,6 +59,20 @@ _Z_sincospi_wrap (float64x2_t x)
   _ZGVnN2vl8l8_sincospi (x, s, c);
   return vld1q_f64 (s) + vld1q_f64 (c);
 }
+
+__vpcs static float32x4_t
+_Z_cexpipif_wrap (float32x4_t x)
+{
+  float32x4x2_t sc = _ZGVnN4v_cexpipif (x);
+  return sc.val[0] + sc.val[1];
+}
+
+__vpcs static float64x2_t
+_Z_cexpipi_wrap (float64x2_t x)
+{
+  float64x2x2_t sc = _ZGVnN2v_cexpipi (x);
+  return sc.val[0] + sc.val[1];
+}
 #endif
 
 __vpcs static float64x2_t
@@ -292,6 +306,20 @@ _Z_sv_sincospi_wrap (svfloat64_t x, svbool_t pg)
   double s[svcntd ()], c[svcntd ()];
   _ZGVsMxvl8l8_sincospi (x, s, c, pg);
   return svadd_x (pg, svld1 (pg, s), svld1 (pg, c));
+}
+
+static svfloat32_t
+_Z_sv_cexpipif_wrap (svfloat32_t x, svbool_t pg)
+{
+  svfloat32x2_t sc = _ZGVsMxv_cexpipif (x, pg);
+  return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
+}
+
+static svfloat64_t
+_Z_sv_cexpipi_wrap (svfloat64_t x, svbool_t pg)
+{
+  svfloat64x2_t sc = _ZGVsMxv_cexpipi (x, pg);
+  return svadd_x (pg, svget2 (sc, 0), svget2 (sc, 1));
 }
 #endif
 

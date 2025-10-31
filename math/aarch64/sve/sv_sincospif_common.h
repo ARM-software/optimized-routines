@@ -1,19 +1,22 @@
 /*
  * Helper for single-precision SVE sincospi
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
+
+#ifndef MATH_SV_SINCOSPIF_COMMON_H
+#define MATH_SV_SINCOSPIF_COMMON_H
 
 #include "sv_math.h"
 #include "sv_poly_f32.h"
 
-const static struct sv_sincospif_data
+const static struct data
 {
   float c0, c2, c4;
   float c1, c3, c5;
   float range_val;
-} sv_sincospif_data = {
+} data = {
   /* Taylor series coefficents for sin(pi * x).  */
   .c0 = 0x1.921fb6p1f,
   .c1 = -0x1.4abbcep2f,
@@ -28,15 +31,15 @@ const static struct sv_sincospif_data
 /* Single-precision vector function allowing calculation of both sinpi and
    cospi in one function call, using shared argument reduction and polynomials.
    Worst-case error for sin is 3.04 ULP:
-   _ZGVsMxvl4l4_sincospif_sin(0x1.b51b8p-2) got 0x1.f28b5ep-1 want
-   0x1.f28b58p-1.
+   _ZGVsMxvl4l4_sincospif_sin(0x1.b51b8p-2) got 0x1.f28b5ep-1
+					   want 0x1.f28b58p-1.
    Worst-case error for cos is 3.18 ULP:
-   _ZGVsMxvl4l4_sincospif_cos(0x1.d341a8p-5) got 0x1.f7cd56p-1 want
-   0x1.f7cd5p-1.  */
+   _ZGVsMxvl4l4_sincospif_cos(0x1.d341a8p-5) got 0x1.f7cd56p-1
+					    want 0x1.f7cd5p-1.  */
 static inline svfloat32x2_t
-sv_sincospif_inline (svbool_t pg, svfloat32_t x,
-		     const struct sv_sincospif_data *d)
+sv_sincospif_inline (svbool_t pg, svfloat32_t x)
 {
+  const struct data *d = ptr_barrier (&data);
   const svbool_t pt = svptrue_b32 ();
 
   /* r = x - rint(x).  */
@@ -80,3 +83,4 @@ sv_sincospif_inline (svbool_t pg, svfloat32_t x,
 
   return svcreate2 (sinpix, cospix);
 }
+#endif

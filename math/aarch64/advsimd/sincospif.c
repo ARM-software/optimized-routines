@@ -5,10 +5,9 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "v_sincospif_common.h"
 #include "v_math.h"
+#include "v_sincospif_common.h"
 #include "test_defs.h"
-#include "mathlib.h"
 
 /* Single-precision vector function allowing calculation of both sinpi and
    cospi in one function call, using shared argument reduction and polynomials.
@@ -20,9 +19,7 @@
 VPCS_ATTR void
 _ZGVnN4vl4l4_sincospif (float32x4_t x, float *out_sin, float *out_cos)
 {
-  const struct v_sincospif_data *d = ptr_barrier (&v_sincospif_data);
-
-  float32x4x2_t sc = v_sincospif_inline (x, d);
+  float32x4x2_t sc = v_sincospif_inline (x);
 
   vst1q_f32 (out_sin, sc.val[0]);
   vst1q_f32 (out_cos, sc.val[1]);
