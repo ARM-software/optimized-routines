@@ -17,12 +17,6 @@ float64x2_t VPCS_ATTR V_NAME_D1_L1 (modf) (float64x2_t x, double *out_int)
   vst1q_f64 (out_int, res.val[1]);
   return res.val[0];
 }
-
-float64x2x2_t VPCS_ATTR V_NAME_D1_STRET (modf) (float64x2_t x)
-{
-  return v_modf_inline (x);
-}
-
 TEST_ULP (_ZGVnN2vl8_modf_frac, 0.0)
 TEST_SYM_INTERVAL (_ZGVnN2vl8_modf_frac, 0, 1, 20000)
 TEST_SYM_INTERVAL (_ZGVnN2vl8_modf_frac, 1, inf, 20000)
@@ -31,10 +25,3 @@ TEST_ULP (_ZGVnN2vl8_modf_int, 0.0)
 TEST_SYM_INTERVAL (_ZGVnN2vl8_modf_int, 0, 1, 20000)
 TEST_SYM_INTERVAL (_ZGVnN2vl8_modf_int, 1, inf, 20000)
 
-TEST_ULP (_ZGVnN2v_modf_stret_frac, 0.0)
-TEST_SYM_INTERVAL (_ZGVnN2v_modf_stret_frac, 0, 1, 20000)
-TEST_SYM_INTERVAL (_ZGVnN2v_modf_stret_frac, 1, inf, 20000)
-
-TEST_ULP (_ZGVnN2v_modf_stret_int, 0.0)
-TEST_SYM_INTERVAL (_ZGVnN2v_modf_stret_int, 0, 1, 20000)
-TEST_SYM_INTERVAL (_ZGVnN2v_modf_stret_int, 1, inf, 20000)

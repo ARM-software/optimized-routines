@@ -19,11 +19,6 @@ svfloat64_t SV_NAME_D1_L1 (modf) (svfloat64_t x, double *out_int,
   return svget2 (res, 0);
 }
 
-svfloat64x2_t SV_NAME_D1_STRET (modf) (svfloat64_t x, svbool_t pg)
-{
-  return sv_modf_inline (pg, x);
-}
-
 TEST_ULP (_ZGVsMxvl8_modf_frac, 0.0)
 TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_frac, 0, 1, 20000)
 TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_frac, 1, inf, 20000)
@@ -31,12 +26,4 @@ TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_frac, 1, inf, 20000)
 TEST_ULP (_ZGVsMxvl8_modf_int, 0.0)
 TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_int, 0, 1, 20000)
 TEST_SYM_INTERVAL (_ZGVsMxvl8_modf_int, 1, inf, 20000)
-
-TEST_ULP (_ZGVsMxv_modf_stret_frac, 0.0)
-TEST_SYM_INTERVAL (_ZGVsMxv_modf_stret_frac, 0, 1, 20000)
-TEST_SYM_INTERVAL (_ZGVsMxv_modf_stret_frac, 1, inf, 20000)
-
-TEST_ULP (_ZGVsMxv_modf_stret_int, 0.0)
-TEST_SYM_INTERVAL (_ZGVsMxv_modf_stret_int, 0, 1, 20000)
-TEST_SYM_INTERVAL (_ZGVsMxv_modf_stret_int, 1, inf, 20000)
 CLOSE_SVE_ATTR
