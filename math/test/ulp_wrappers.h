@@ -125,6 +125,13 @@ static int mpfr_rsqrt (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd){
   return mpfr_div (ret, one, m, rnd);
 }
 
+static int mpfr_powr(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
+  MPFR_DECL_INIT (ylogx, 1080);
+  mpfr_log(ylogx, x, rnd);
+  mpfr_mul(ylogx, y, ylogx, rnd);
+  return mpfr_exp(ret, ylogx, rnd);
+}
+
 static int mpfr_sinpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   if (mpfr_integer_p (arg)) {
     /* Integer inputs return signed 0 depending on sign of input.  */
@@ -258,6 +265,7 @@ ZVNF1_WRAP (log10p1)
 ZVND1_WRAP (log10p1)
 ZVNF1_WRAP (rsqrt)
 ZVND1_WRAP (rsqrt)
+ZVNF2_WRAP (powr)
 ZVNF1_WRAP (sinpi)
 ZVND1_WRAP (sinpi)
 ZVNF1_WRAP (tanpi)

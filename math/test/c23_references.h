@@ -233,3 +233,9 @@ arm_math_rsqrtl (long double x)
 {
   return 1 / sqrtl (x);
 }
+
+double
+arm_math_powr (double x, double y)
+{
+  return exp (y * log (x));
+}

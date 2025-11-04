@@ -148,6 +148,24 @@ y_Z_pow (float64x2_t x)
 }
 
 __vpcs static float32x4_t
+xy_Z_powrf (float32x4_t x)
+{
+  return _ZGVnN4vv_powrf (x, x);
+}
+
+__vpcs static float32x4_t
+x_Z_powrf (float32x4_t x)
+{
+  return _ZGVnN4vv_powrf (x, vdupq_n_f32 (23.4));
+}
+
+__vpcs static float32x4_t
+y_Z_powrf (float32x4_t x)
+{
+  return _ZGVnN4vv_powrf (vdupq_n_f32 (2.34), x);
+}
+
+__vpcs static float32x4_t
 _Z_modff_wrap (float32x4_t x)
 {
   float y[4];
