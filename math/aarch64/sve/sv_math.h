@@ -85,9 +85,7 @@ sv_call_f64 (double (*f) (double), svfloat64_t x, svfloat64_t y, svbool_t cmp)
   for (int i = 0; i < svcntd (); i++)
     {
       if (pg_bits[i] & 1)
-	{
-	  tmp[i] = f (tmp[i]);
-	}
+	tmp[i] = f (tmp[i]);
     }
   return svld1 (svptrue_b64 (), tmp);
 }
@@ -105,9 +103,7 @@ sv_call2_f64 (double (*f) (double, double), svfloat64_t x1, svfloat64_t x2,
   for (int i = 0; i < svcntd (); i++)
     {
       if (pg_bits[i] & 1)
-	{
-	  tmp1[i] = f (tmp1[i], tmp2[i]);
-	}
+	tmp1[i] = f (tmp1[i], tmp2[i]);
     }
   return svld1 (svptrue_b64 (), tmp1);
 }
@@ -150,13 +146,9 @@ sv_call_f32 (float (*f) (float), svfloat32_t x, svfloat32_t y, svbool_t cmp)
     {
       uint8_t p = pg_bits[i];
       if (p & 1)
-	{
-	  tmp[i * 2] = f (tmp[i * 2]);
-	}
+	tmp[i * 2] = f (tmp[i * 2]);
       if (p & (1 << 4))
-	{
-	  tmp[i * 2 + 1] = f (tmp[i * 2 + 1]);
-	}
+	tmp[i * 2 + 1] = f (tmp[i * 2 + 1]);
     }
   return svld1 (svptrue_b32 (), tmp);
 }
@@ -175,13 +167,9 @@ sv_call2_f32 (float (*f) (float, float), svfloat32_t x1, svfloat32_t x2,
     {
       uint8_t p = pg_bits[i];
       if (p & 1)
-	{
-	  tmp1[i * 2] = f (tmp1[i * 2], tmp2[i * 2]);
-	}
+	tmp1[i * 2] = f (tmp1[i * 2], tmp2[i * 2]);
       if (p & (1 << 4))
-	{
-	  tmp1[i * 2 + 1] = f (tmp1[i * 2 + 1], tmp2[i * 2 + 1]);
-	}
+	tmp1[i * 2 + 1] = f (tmp1[i * 2 + 1], tmp2[i * 2 + 1]);
     }
   return svld1 (svptrue_b32 (), tmp1);
 }
