@@ -27,11 +27,10 @@ relerr_exp2: 1.69 * 2^-34 (Relative error of exp2(ylogx).)
 
 /* Subnormal input is normalized so ix has negative biased exponent.
    Output is multiplied by N (POWF_SCALE) if TOINT_INTRINICS is set.  */
-static inline double_t
+static inline double
 log2_inline (uint32_t ix)
 {
-  /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
-  double_t z, r, r2, r4, p, q, y, y0, invc, logc;
+  double z, r, r2, r4, p, q, y, y0, invc, logc;
   uint32_t iz, top, tmp;
   int k, i;
 
@@ -45,11 +44,11 @@ log2_inline (uint32_t ix)
   k = (int32_t) top >> (23 - POWF_SCALE_BITS); /* arithmetic shift */
   invc = T[i].invc;
   logc = T[i].logc;
-  z = (double_t) asfloat (iz);
+  z = asfloat (iz);
 
   /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k */
   r = z * invc - 1;
-  y0 = logc + (double_t) k;
+  y0 = logc + (double) k;
 
   /* Pipelined polynomial evaluation to approximate log1p(r)/ln2.  */
   r2 = r * r;
@@ -72,11 +71,10 @@ log2_inline (uint32_t ix)
    (in case of fast toint intrinsics) or not.  The unscaled xd must be
    in [-1021,1023], sign_bias sets the sign of the result.  */
 static inline float
-exp2_inline (double_t xd, uint32_t sign_bias)
+exp2_inline (double xd, uint32_t sign_bias)
 {
   uint64_t ki, ski, t;
-  /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
-  double_t kd, z, r, r2, y, s;
+  double kd, z, r, r2, y, s;
 
 #if TOINT_INTRINSICS
 # define C __exp2f_data.poly_scaled
@@ -156,7 +154,7 @@ powf (float x, float y)
 	}
       if (unlikely (zeroinfnan (ix)))
 	{
-	  float_t x2 = x * x;
+	  float x2 = x * x;
 	  if (ix & 0x80000000 && checkint (iy) == 1)
 	    {
 	      x2 = -x2;
@@ -190,7 +188,7 @@ powf (float x, float y)
 	}
     }
   /* y * log2(x) cannot overflow since y is single precision.  */
-  double_t ylogx = (double) y * log2_inline (ix);
+  double ylogx = (double) y * log2_inline (ix);
 
   /* Check whether |y*log(x)| >= 126.  */
   if (unlikely ((asuint64 (ylogx) >> 47 & 0xffff)

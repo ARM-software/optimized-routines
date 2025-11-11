@@ -343,7 +343,7 @@ pow_specialcase (double x, double y)
     }
   if (unlikely (zeroinfnan (ix)))
     {
-      double_t x2 = x * x;
+      double x2 = x * x;
       if (ix >> 63 && checkint (iy) == 1)
 	x2 = -x2;
       return (iy >> 63) ? 1 / x2 : x2;

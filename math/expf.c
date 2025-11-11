@@ -1,7 +1,7 @@
 /*
  * Single-precision e^x function.
  *
- * Copyright (c) 2017-2024, Arm Limited.
+ * Copyright (c) 2017-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,10 +37,9 @@ expf (float x)
 {
   uint32_t abstop;
   uint64_t ki, t;
-  /* double_t for better performance on targets with FLT_EVAL_METHOD==2.  */
-  double_t kd, xd, z, r, r2, y, s;
+  double kd, xd, z, r, r2, y, s;
 
-  xd = (double_t) x;
+  xd = x;
   abstop = top12 (x) & 0x7ff;
   if (unlikely (abstop >= top12 (88.0f)))
     {
