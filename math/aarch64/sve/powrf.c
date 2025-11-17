@@ -1,0 +1,145 @@
+/*
+ * Single-precision SVE powr function.
+ *
+ * Copyright (c) 2025, Arm Limited.
+ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+ */
+
+#include "sv_math.h"
+#include "test_sig.h"
+#include "test_defs.h"
+#define WANT_SV_POWF_SIGN_BIAS 0
+#include "sv_powf_inline.h"
+
+/* A scalar subroutine used to fix main powrf special cases. Similar to the
+   preamble of scalar powf except that we do not update ix and sign_bias.  */
+static inline float
+powrf_specialcase (float x, float y)
+{
+  uint32_t ix = asuint (x);
+  uint32_t iy = asuint (y);
+  if (unlikely (zeroinfnan (iy)))
+    {
+      /* |y| is 0.0.  */
+      if (2 * iy == 0)
+	return issignalingf_inline (x) ? x + y : 1.0f;
+      /* x is 1.0.  */
+      if (ix == 0x3f800000)
+	return issignalingf_inline (y) ? x + y : 1.0f;
+      /* |x| or |y| is nan.  */
+      if (2 * ix > 2u * 0x7f800000 || 2 * iy > 2u * 0x7f800000)
+	return x + y;
+      /* |x|<1 && y==inf or |x|>1 && y==-inf.  */
+      if ((2 * ix < 2 * 0x3f800000) == !(iy & 0x80000000))
+	return 0.0f;
+      /* Remaining cases should be y is inf and x is finite, but do not satisfy
+       * above case for returning 0.0 therefore returns +inf.  */
+      return y * y;
+    }
+  if (unlikely (zeroinfnan (ix)))
+    {
+      float x2 = x * x;
+      return iy & 0x80000000 ? 1 / x2 : x2;
+    }
+  /* Return x for convenience, but make sure result is never used.  */
+  return x;
+}
+
+/* Scalar fallback for special case routines with custom signature.  */
+static svfloat32_t NOINLINE
+sv_call_powrf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
+{
+  return sv_call2_f32 (powrf_specialcase, x1, x2, y, cmp);
+}
+
+/* Implementation of SVE powrf.
+   Provides the same accuracy as AdvSIMD powf, since it relies on the same
+   algorithm.
+   Maximum measured error is 2.57 ULPs:
+   SV_NAME_F2 (pow) (0x1.031706p+0, 0x1.ce2ec2p+12) got 0x1.fff868p+127
+						   want 0x1.fff862p+127.  */
+svfloat32_t SV_NAME_F2 (powr) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
+{
+  const struct data *d = ptr_barrier (&data);
+
+  svuint32_t vix = svreinterpret_u32 (x);
+  svuint32_t viy = svreinterpret_u32 (y);
+
+  svbool_t xpos = svcmpge (pg, x, sv_f32 (0.0f));
+
+  /* Special cases of x or y: zero, inf and nan.  */
+  svbool_t xspecial = sv_zeroinfnan (xpos, vix);
+  svbool_t yspecial = sv_zeroinfnan (xpos, viy);
+  svbool_t cmp = svorr_z (xpos, xspecial, yspecial);
+
+  /* Small cases of x: |x| < 0x1p-126.  */
+  svbool_t xsmall = svaclt (xpos, x, d->small_bound);
+  if (unlikely (svptest_any (xpos, xsmall)))
+    {
+      /* Normalize subnormal x so exponent becomes negative.  */
+      svuint32_t vix_norm = svreinterpret_u32 (svmul_m (xsmall, x, Norm));
+      vix = svsub_m (xsmall, vix_norm, d->subnormal_bias);
+    }
+
+  /* Part of core computation carried in working precision.  */
+  svuint32_t tmp = svsub_x (xpos, vix, d->off);
+  svuint32_t i
+      = svand_x (xpos, svlsr_x (xpos, tmp, (23 - V_POWF_LOG2_TABLE_BITS)),
+		 V_POWF_LOG2_N - 1);
+  svuint32_t top = svand_x (xpos, tmp, 0xff800000);
+  svuint32_t iz = svsub_x (xpos, vix, top);
+  svint32_t k
+      = svasr_x (xpos, svreinterpret_s32 (top), (23 - V_POWF_EXP2_TABLE_BITS));
+
+  /* Compute core in extended precision and return intermediate ylogx results
+     to handle cases of underflow and underflow in exp.  */
+  svfloat32_t ylogx;
+  /* Pass a dummy sign_bias so we can re-use powf core.
+     The core is simplified by setting WANT_SV_POWF_SIGN_BIAS = 0.  */
+  svfloat32_t ret = sv_powf_core (xpos, i, iz, k, y, sv_u32 (0), &ylogx, d);
+
+  /* Handle exp special cases of underflow and overflow.  */
+  svbool_t no_uflow = svcmpgt (xpos, ylogx, d->uflow_bound);
+  svbool_t oflow = svcmpgt (xpos, ylogx, d->oflow_bound);
+  svfloat32_t ret_flow = svdup_n_f32_z (no_uflow, INFINITY);
+  ret = svsel (svorn_z (xpos, oflow, no_uflow), ret_flow, ret);
+
+  /* Cases of negative x.  */
+  ret = svsel (xpos, ret, sv_f32 (__builtin_nanf ("")));
+
+  if (unlikely (svptest_any (cmp, cmp)))
+    return sv_call_powrf_sc (x, y, ret, cmp);
+
+  return ret;
+}
+
+#if WANT_C23_TESTS
+TEST_ULP (SV_NAME_F2 (powr), 2.08)
+/* Wide intervals spanning the whole domain but shared between x and y.  */
+#  define SV_POWR_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), xlo, xhi, ylo, yhi, n)                 \
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), xlo, xhi, -ylo, -yhi, n)               \
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), -xlo, -xhi, ylo, yhi, n)               \
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), -xlo, -xhi, -ylo, -yhi, n)
+SV_POWR_INTERVAL2 (0, 0x1p-126, 0, inf, 40000)
+SV_POWR_INTERVAL2 (0x1p-126, 1, 0, inf, 50000)
+SV_POWR_INTERVAL2 (1, inf, 0, inf, 50000)
+/* x~1 or y~1.  */
+SV_POWR_INTERVAL2 (0x1p-1, 0x1p1, 0x1p-10, 0x1p10, 10000)
+SV_POWR_INTERVAL2 (0x1.ep-1, 0x1.1p0, 0x1p8, 0x1p16, 10000)
+SV_POWR_INTERVAL2 (0x1p-500, 0x1p500, 0x1p-1, 0x1p1, 10000)
+/* around estimated argmaxs of ULP error.  */
+SV_POWR_INTERVAL2 (0x1p-300, 0x1p-200, 0x1p-20, 0x1p-10, 10000)
+SV_POWR_INTERVAL2 (0x1p50, 0x1p100, 0x1p-20, 0x1p-10, 10000)
+/* |x| is 0, inf or nan.  */
+SV_POWR_INTERVAL2 (0.0, 0.0, 0, inf, 1000)
+SV_POWR_INTERVAL2 (inf, inf, 0, inf, 1000)
+SV_POWR_INTERVAL2 (nan, nan, 0, inf, 1000)
+/* |y| is 0, inf or nan.  */
+SV_POWR_INTERVAL2 (0, inf, 0.0, 0.0, 1000)
+SV_POWR_INTERVAL2 (0, inf, inf, inf, 1000)
+SV_POWR_INTERVAL2 (0, inf, nan, nan, 1000)
+/* x is negative.  */
+TEST_INTERVAL2 (SV_NAME_F2 (powr), -0.0, -inf, 0, 0xffff0000, 1000)
+#endif
+CLOSE_SVE_ATTR

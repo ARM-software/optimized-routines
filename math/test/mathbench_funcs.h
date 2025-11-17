@@ -144,6 +144,9 @@ SVF (_ZGVsMxv_sinpif, -0.9, 0.9)
 SVD (_ZGVsMxv_sinpi, -0.9, 0.9)
 SVF (_ZGVsMxv_tanpif, -0.9, 0.9)
 SVD (_ZGVsMxv_tanpi, -0.9, 0.9)
+{"x_ZGVsMxvv_powrf",    'f', 's', -10.0, 10.0, {.svf = x_Z_sv_powrf}},
+{"y_ZGVsMxvv_powrf",    'f', 's', -10.0, 10.0, {.svf = y_Z_sv_powrf}},
+{"_ZGVsMxvv_powrf",    'f', 's', -10.0, 10.0, {.svf = xy_Z_sv_powrf}},
 {"_ZGVsMxvl4l4_sincospif", 'f', 's', -0.9, 0.9, {.svf = _Z_sv_sincospif_wrap}},
 {"_ZGVsMxvl8l8_sincospi", 'd', 's', -0.9, 0.9, {.svd = _Z_sv_sincospi_wrap}},
 {"_ZGVsMxv_cexpipif", 'f', 's', -0.9, 0.9, {.svf = _Z_sv_cexpipif_wrap}},

@@ -288,6 +288,24 @@ _Z_sv_hypot_wrap (svfloat64_t x, svbool_t pg)
 }
 
 static svfloat32_t
+xy_Z_sv_powrf (svfloat32_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_powrf (x, x, pg);
+}
+
+static svfloat32_t
+x_Z_sv_powrf (svfloat32_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_powrf (x, svdup_f32 (23.4f), pg);
+}
+
+static svfloat32_t
+y_Z_sv_powrf (svfloat32_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_powrf (svdup_f32 (2.34f), x, pg);
+}
+
+static svfloat32_t
 xy_Z_sv_powf (svfloat32_t x, svbool_t pg)
 {
   return _ZGVsMxvv_powf (x, x, pg);

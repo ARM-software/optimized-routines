@@ -253,6 +253,7 @@ svfloat32_t _ZGVsMxvl4_modff (svfloat32_t, float *, svbool_t);
 svfloat32_t _ZGVsMxvv_atan2f (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvv_atan2pif (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvv_hypotf (svfloat32_t, svfloat32_t, svbool_t);
+svfloat32_t _ZGVsMxvv_powrf (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxvv_powf (svfloat32_t, svfloat32_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpif (svfloat32_t, svbool_t);
 svfloat32x2_t _ZGVsMxv_cexpipif (svfloat32_t, svbool_t);
