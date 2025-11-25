@@ -140,6 +140,7 @@ SVF (_ZGVsMxv_modf_stret_int, sv_modf_stret_int, modfl_int, modf_mpfr_int, 1, 0,
  SVF (_ZGVsMxv_log2p1f, Z_sv_log2p1f, arm_math_log2p1,  mpfr_log2p1, 1, 1, f1, 0)
  SVF (_ZGVsMxv_log2p1, Z_sv_log2p1, arm_math_log2p1l,  mpfr_log2p1, 1, 0, d1, 0)
  SVF (_ZGVsMxvv_powrf, Z_sv_powrf, arm_math_powr,  mpfr_powr, 2, 1, f2, 0)
+ SVF (_ZGVsMxvv_powr, Z_sv_powr, arm_math_powrl,  mpfr_powr, 2, 0, d2, 0)
  SVF (_ZGVsMxv_rsqrtf, Z_sv_rsqrtf, arm_math_rsqrt, mpfr_rsqrt, 1, 1, f1, 0)
  SVF (_ZGVsMxv_rsqrt, Z_sv_rsqrt, arm_math_rsqrtl, mpfr_rsqrt, 1, 0, d1, 0)
  SVF (_ZGVsMxv_sinpif, Z_sv_sinpif, arm_math_sinpi,  mpfr_sinpi, 1, 1, f1, 0)

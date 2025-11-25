@@ -341,6 +341,24 @@ y_Z_sv_pow (svfloat64_t x, svbool_t pg)
   return _ZGVsMxvv_pow (svdup_f64 (2.34), x, pg);
 }
 
+static svfloat64_t
+xy_Z_sv_powr (svfloat64_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_powr (x, x, pg);
+}
+
+static svfloat64_t
+x_Z_sv_powr (svfloat64_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_powr (x, svdup_f64 (23.4), pg);
+}
+
+static svfloat64_t
+y_Z_sv_powr (svfloat64_t x, svbool_t pg)
+{
+  return _ZGVsMxvv_powr (svdup_f64 (2.34), x, pg);
+}
+
 #if WANT_C23_TESTS
 static svfloat32_t
 _Z_sv_sincospif_wrap (svfloat32_t x, svbool_t pg)
