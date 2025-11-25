@@ -18,7 +18,6 @@
 #define Tlogc __v_powf_data.logc
 #define Texp __v_powf_data.scale
 #define SignBias (1 << (V_POWF_EXP2_TABLE_BITS + 11))
-#define Norm 0x1p23f /* 0x4b000000.  */
 static const struct data
 {
   double log_poly[4];

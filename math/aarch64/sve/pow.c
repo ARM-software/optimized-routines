@@ -43,15 +43,6 @@
 #define ThresExp 0x03f /* BigExp - SmallExp.  */
 #define HugeExp 0x409  /* top12(1024.).  */
 
-/* Constants associated with pow.  */
-#define SmallBoundX 0x1p-126
-#define SmallPowX 0x001 /* top12(0x1p-126).  */
-#define BigPowX 0x7ff	/* top12(INFINITY).  */
-#define ThresPowX 0x7fe /* BigPowX - SmallPowX.  */
-#define SmallPowY 0x3be /* top12(0x1.e7b6p-65).  */
-#define BigPowY 0x43e	/* top12(0x1.749p62).  */
-#define ThresPowY 0x080 /* BigPowY - SmallPowY.  */
-
 static const struct data
 {
   double log_c0, log_c2, log_c4, log_c6, ln2_hi, ln2_lo;
@@ -387,18 +378,14 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
       sign_bias = svsel (yisodd_xisneg, sv_u64 (SignBias), sv_u64 (0));
     }
 
-  /* Small cases of x: |x| < 0x1p-126.  */
-  svbool_t xsmall = svaclt (yint_or_xpos, x, SmallBoundX);
-  if (unlikely (svptest_any (yint_or_xpos, xsmall)))
+  /* Cases of subnormal x: |x| < 0x1p-1022.  */
+  svbool_t x_is_subnormal = svaclt (yint_or_xpos, x, 0x1p-1022);
+  if (unlikely (svptest_any (yint_or_xpos, x_is_subnormal)))
     {
       /* Normalize subnormal x so exponent becomes negative.  */
-      svuint64_t vtopx = svlsr_x (svptrue_b64 (), vix, 52);
-      svbool_t topx_is_null = svcmpeq (xsmall, vtopx, 0);
-
-      svuint64_t vix_norm = svreinterpret_u64 (svmul_m (xsmall, x, 0x1p52));
-      vix_norm = svand_m (xsmall, vix_norm, 0x7fffffffffffffff);
-      vix_norm = svsub_m (xsmall, vix_norm, 52ULL << 52);
-      vix = svsel (topx_is_null, vix_norm, vix);
+      vix = svreinterpret_u64 (svmul_m (x_is_subnormal, x, 0x1p52));
+      vix = svand_m (x_is_subnormal, vix, 0x7fffffffffffffff);
+      vix = svsub_m (x_is_subnormal, vix, 52ULL << 52);
     }
 
   /* y_hi = log(ix, &y_lo).  */
@@ -434,15 +421,9 @@ TEST_ULP (SV_NAME_D2 (pow), 0.55)
   TEST_INTERVAL2 (SV_NAME_D2 (pow), xlo, xhi, -ylo, -yhi, n)                  \
   TEST_INTERVAL2 (SV_NAME_D2 (pow), -xlo, -xhi, ylo, yhi, n)                  \
   TEST_INTERVAL2 (SV_NAME_D2 (pow), -xlo, -xhi, -ylo, -yhi, n)
-#define EXPAND(str) str##000000000
-#define SHL52(str) EXPAND (str)
-SV_POW_INTERVAL2 (0, SHL52 (SmallPowX), 0, inf, 40000)
-SV_POW_INTERVAL2 (SHL52 (SmallPowX), SHL52 (BigPowX), 0, inf, 40000)
-SV_POW_INTERVAL2 (SHL52 (BigPowX), inf, 0, inf, 40000)
-SV_POW_INTERVAL2 (0, inf, 0, SHL52 (SmallPowY), 40000)
-SV_POW_INTERVAL2 (0, inf, SHL52 (SmallPowY), SHL52 (BigPowY), 40000)
-SV_POW_INTERVAL2 (0, inf, SHL52 (BigPowY), inf, 40000)
-SV_POW_INTERVAL2 (0, inf, 0, inf, 1000)
+SV_POW_INTERVAL2 (0, 0x1p-1022, 0, inf, 40000)
+SV_POW_INTERVAL2 (0x1p-1022, 1, 0, inf, 50000)
+SV_POW_INTERVAL2 (1, inf, 0, inf, 50000)
 /* x~1 or y~1.  */
 SV_POW_INTERVAL2 (0x1p-1, 0x1p1, 0x1p-10, 0x1p10, 10000)
 SV_POW_INTERVAL2 (0x1.ep-1, 0x1.1p0, 0x1p8, 0x1p16, 10000)

@@ -72,13 +72,13 @@ svfloat32_t SV_NAME_F2 (powr) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
   svbool_t yspecial = sv_zeroinfnan (xpos, viy);
   svbool_t cmp = svorr_z (xpos, xspecial, yspecial);
 
-  /* Small cases of x: |x| < 0x1p-126.  */
-  svbool_t xsmall = svaclt (xpos, x, d->small_bound);
-  if (unlikely (svptest_any (xpos, xsmall)))
+  /* Cases of subnormal x: |x| < 0x1p-126.  */
+  svbool_t x_is_subnormal = svaclt (xpos, x, d->small_bound);
+  if (unlikely (svptest_any (xpos, x_is_subnormal)))
     {
       /* Normalize subnormal x so exponent becomes negative.  */
-      svuint32_t vix_norm = svreinterpret_u32 (svmul_m (xsmall, x, Norm));
-      vix = svsub_m (xsmall, vix_norm, d->subnormal_bias);
+      vix = svreinterpret_u32 (svmul_m (x_is_subnormal, x, 0x1p23f));
+      vix = svsub_m (x_is_subnormal, vix, d->subnormal_bias);
     }
 
   /* Part of core computation carried in working precision.  */
