@@ -147,6 +147,24 @@ y_Z_pow (float64x2_t x)
   return _ZGVnN2vv_pow (vdupq_n_f64 (2.34), x);
 }
 
+__vpcs static float64x2_t
+xy_Z_powr (float64x2_t x)
+{
+  return _ZGVnN2vv_powr (x, x);
+}
+
+__vpcs static float64x2_t
+x_Z_powr (float64x2_t x)
+{
+  return _ZGVnN2vv_powr (x, vdupq_n_f64 (23.4));
+}
+
+__vpcs static float64x2_t
+y_Z_powr (float64x2_t x)
+{
+  return _ZGVnN2vv_powr (vdupq_n_f64 (2.34), x);
+}
+
 __vpcs static float32x4_t
 xy_Z_powrf (float32x4_t x)
 {

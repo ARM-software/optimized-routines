@@ -103,6 +103,7 @@ SVF (_ZGVsMxv_modf_stret_int, sv_modf_stret_int, modfl_int, modf_mpfr_int, 1, 0,
  F (_ZGVnN4v_rsqrtf, Z_rsqrtf, arm_math_rsqrt, mpfr_rsqrt, 1, 1, f1, 0)
  F (_ZGVnN2v_rsqrt, Z_rsqrt, arm_math_rsqrtl, mpfr_rsqrt, 1, 0, d1, 0)
  F (_ZGVnN4vv_powrf, Z_powrf, arm_math_powr,  mpfr_powr, 2, 1, f2, 0)
+ F (_ZGVnN2vv_powr, Z_powr, arm_math_powrl,  mpfr_powr, 2, 0, d2, 0)
  F (_ZGVnN4v_sinpif, Z_sinpif, arm_math_sinpi,  mpfr_sinpi, 1, 1, f1, 0)
  F (_ZGVnN2v_sinpi,  Z_sinpi,  arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
  F (_ZGVnN4v_tanpif, Z_tanpif, arm_math_tanpi,  mpfr_tanpi, 1, 1, f1, 0)
