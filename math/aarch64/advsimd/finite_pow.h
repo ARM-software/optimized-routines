@@ -1,5 +1,6 @@
 /*
- * Double-precision x^y function.
+ * Scalar double-precision x^y helper functions used for fallbacks in
+ * vector implementations.
  *
  * Copyright (c) 2018-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -7,7 +8,10 @@
 
 #include "math_config.h"
 
-/* Scalar version of pow used for fallbacks in vector implementations.  */
+#ifndef WANT_V_POW_SIGN_BIAS
+#  error                                                                       \
+      "Cannot use v_pow_inline.h without specifying whether you need sign_bias."
+#endif
 
 /* Data is defined in v_pow_log_data.c.  */
 #define N_LOG (1 << V_POW_LOG_TABLE_BITS)
@@ -172,7 +176,7 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
 /* Computes exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
    A version of exp_inline that is not inlined and for which sign_bias is
    equal to 0.  */
-static double NOINLINE
+static inline double
 exp_nosignbias (double x, double xtail)
 {
   uint32_t abstop = top12 (x) & 0x7ff;
@@ -239,7 +243,9 @@ zeroinfnan (uint64_t i)
 static double NOINLINE
 pow_scalar_special_case (double x, double y)
 {
+#if WANT_V_POW_SIGN_BIAS
   uint32_t sign_bias = 0;
+#endif
   uint64_t ix, iy;
   uint32_t topx, topy;
 
@@ -272,16 +278,19 @@ pow_scalar_special_case (double x, double y)
       if (unlikely (zeroinfnan (ix)))
 	{
 	  double x2 = x * x;
+#if WANT_V_POW_SIGN_BIAS
 	  if (ix >> 63 && checkint (iy) == 1)
 	    {
 	      x2 = -x2;
 	      sign_bias = 1;
 	    }
+#endif
 	  return iy >> 63 ? 1 / x2 : x2;
 	}
       /* Here x and y are non-zero finite.  */
       if (ix >> 63)
 	{
+#if WANT_V_POW_SIGN_BIAS
 	  /* Finite x < 0.  */
 	  int yint = checkint (iy);
 	  if (yint == 0)
@@ -290,6 +299,9 @@ pow_scalar_special_case (double x, double y)
 	    sign_bias = SignBias;
 	  ix &= 0x7fffffffffffffff;
 	  topx &= 0x7ff;
+#else
+	  return __builtin_nan ("");
+#endif
 	}
       if ((topy & 0x7ff) - SmallPowY >= ThresPowY)
 	{
@@ -314,5 +326,9 @@ pow_scalar_special_case (double x, double y)
   double hi = log_inline (ix, &lo);
   double ehi = y * hi;
   double elo = y * lo + fma (y, hi, -ehi);
+#if WANT_V_POW_SIGN_BIAS
   return exp_inline (ehi, elo, sign_bias);
+#else
+  return exp_nosignbias (ehi, elo);
+#endif
 }

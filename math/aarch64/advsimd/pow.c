@@ -9,20 +9,16 @@
 #include "test_sig.h"
 #include "test_defs.h"
 
-/* Defines parameters of the approximation and scalar fallback.  */
+/* This header defines parameters of the approximation and scalar fallback.  */
+#define WANT_V_POW_SIGN_BIAS 1
 #include "finite_pow.h"
-
-#define VecSmallPowX v_u64 (SmallPowX)
-#define VecThresPowX v_u64 (ThresPowX)
-#define VecSmallPowY v_u64 (SmallPowY)
-#define VecThresPowY v_u64 (ThresPowY)
 
 static const struct data
 {
   uint64x2_t inf;
-  float64x2_t small_powx;
+  float64x2_t subnormal_bound, subnormal_scale;
+  uint64x2_t subnormal_bias;
   uint64x2_t offset, mask;
-  uint64x2_t mask_sub_0, mask_sub_1;
   float64x2_t log_c0, log_c2, log_c4, log_c5;
   double log_c1, log_c3;
   double ln2_lo, ln2_hi;
@@ -31,13 +27,15 @@ static const struct data
   double inv_ln2_n, exp_c2;
   float64x2_t exp_c0, exp_c1;
 } data = {
-  /* Power threshold.  */
+  /* Power thresholds.  */
   .inf = V2 (0x7ff0000000000000),
-  .small_powx = V2 (0x1p-126),
+  .subnormal_bound = V2 (0x1p-1022),
+  /* Subnormal x update.  */
+  .subnormal_scale = V2 (0x1p52),
+  .subnormal_bias = V2 (52ULL << 52),
+  /* Constants for logarithm.  */
   .offset = V2 (Off),
   .mask = V2 (0xfffULL << 52),
-  .mask_sub_0 = V2 (1ULL << 52),
-  .mask_sub_1 = V2 (52ULL << 52),
   /* Coefficients copied from v_pow_log_data.c
      relative error: 0x1.11922ap-70 in [-0x1.6bp-8, 0x1.6bp-8]
      Coefficients are scaled to match the scaling during evaluation.  */
@@ -72,7 +70,7 @@ static const struct data
      got 0x1.f71162f473251p-1
     want 0x1.f71162f473252p-1.  */
 
-static inline float64x2_t
+static inline float64x2_t VPCS_ATTR
 v_masked_lookup_f64 (const double *table, uint64x2_t i)
 {
   return (float64x2_t){
@@ -84,7 +82,7 @@ v_masked_lookup_f64 (const double *table, uint64x2_t i)
 /* Compute y+TAIL = log(x) where the rounded result is y and TAIL has about
    additional 15 bits precision.  IX is the bit representation of x, but
    normalized in the subnormal range using the sign bit for the exponent.  */
-static inline float64x2_t
+static inline float64x2_t VPCS_ATTR
 v_log_inline (uint64x2_t ix, float64x2_t *tail, const struct data *d)
 {
   /* x = 2^k z; where z is in range [OFF,2*OFF) and exact.
@@ -139,7 +137,7 @@ exp_special_case (float64x2_t x, float64x2_t xtail)
 }
 
 /* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.  */
-static inline float64x2_t
+static inline float64x2_t VPCS_ATTR
 v_exp_inline (float64x2_t x, float64x2_t neg_xtail, const struct data *d)
 {
   /* Fallback to scalar exp_inline for all lanes if any lane
@@ -179,7 +177,7 @@ v_exp_inline (float64x2_t x, float64x2_t neg_xtail, const struct data *d)
   return vfmaq_f64 (scale, scale, tmp);
 }
 
-static float64x2_t NOINLINE VPCS_ATTR
+static float64x2_t VPCS_ATTR NOINLINE
 scalar_fallback (float64x2_t x, float64x2_t y)
 {
   return (float64x2_t){ pow_scalar_special_case (x[0], y[0]),
@@ -210,20 +208,15 @@ float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
   if (unlikely (v_any_u64 (special)))
     return scalar_fallback (x, y);
 
-  /* Small cases of x: |x| < 0x1p-126.  */
-  uint64x2_t smallx = vcaltq_f64 (x, d->small_powx);
-  if (unlikely (v_any_u64 (smallx)))
+  /* Cases of subnormal x: |x| < 0x1p-1022.  */
+  uint64x2_t x_is_subnormal = vcaltq_f64 (x, d->subnormal_bound);
+  if (unlikely (v_any_u64 (x_is_subnormal)))
     {
-      /* Update ix if top 12 bits of x are 0.  */
-      uint64x2_t sub_x = vceqzq_u64 (vshrq_n_u64 (vix, 52));
-      if (unlikely (v_any_u64 (sub_x)))
-	{
-	  /* Normalize subnormal x so exponent becomes negative.  */
-	  uint64x2_t vix_norm = vreinterpretq_u64_f64 (
-	      vabsq_f64 (vmulq_f64 (x, vcvtq_f64_u64 (d->mask_sub_0))));
-	  vix_norm = vsubq_u64 (vix_norm, d->mask_sub_1);
-	  vix = vbslq_u64 (sub_x, vix_norm, vix);
-	}
+      /* Normalize subnormal x so exponent becomes negative.  */
+      uint64x2_t vix_norm = vreinterpretq_u64_f64 (
+	  vabsq_f64 (vmulq_f64 (x, d->subnormal_scale)));
+      vix_norm = vsubq_u64 (vix_norm, d->subnormal_bias);
+      vix = vbslq_u64 (x_is_subnormal, vix_norm, vix);
     }
 
   /* Vector Log(ix, &lo).  */
