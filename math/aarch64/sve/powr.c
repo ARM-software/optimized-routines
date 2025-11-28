@@ -1,5 +1,5 @@
 /*
- * Double-precision SVE powr function.
+ * Double-precision SVE exp(y * log(x)) function.
  *
  * Copyright (c) 2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -54,9 +54,14 @@ sv_powr_specialcase (svfloat64_t x1, svfloat64_t x2, svfloat64_t y,
 }
 
 /* Implementation of SVE powr.
-   Provides the same accuracy as SVE pow, since it relies on the same
-   algorithm.
-   Maximum measured error is below 1 ULP.  */
+
+   Provides the same accuracy as AdvSIMD pow and powr, since it relies on the
+   same algorithm.
+
+   Maximum measured error is 1.04 ULPs:
+   SV_NAME_D2 (powr) (0x1.3d2d45bc848acp+63, -0x1.a48a38b40cd43p-12)
+     got 0x1.f7116284221fcp-1
+    want 0x1.f7116284221fdp-1.  */
 svfloat64_t SV_NAME_D2 (powr) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -99,7 +104,7 @@ svfloat64_t SV_NAME_D2 (powr) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 }
 
 #if WANT_C23_TESTS
-TEST_ULP (SV_NAME_D2 (powr), 1.0)
+TEST_ULP (SV_NAME_D2 (powr), 0.55)
 /* Wide intervals spanning the positive domain.  */
 #  define SV_POWR_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
     TEST_INTERVAL2 (SV_NAME_D2 (powr), xlo, xhi, ylo, yhi, n)                 \

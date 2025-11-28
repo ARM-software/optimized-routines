@@ -1,5 +1,5 @@
 /*
- * Single-precision vector powf function.
+ * Single-precision vector x^y function.
  *
  * Copyright (c) 2019-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -117,7 +117,6 @@ v_powf_x_is_neg_or_small (float32x4_t x, float32x4_t y, const struct data *d)
 }
 
 /* Implementation of AdvSIMD powf.
-   The theoretical maximum error is under 2.60 ULPs.
    Maximum measured error is 2.57 ULPs:
    V_NAME_F2 (pow) (0x1.031706p+0, 0x1.ce2ec2p+12)
      got 0x1.fff868p+127
@@ -153,7 +152,7 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
 HALF_WIDTH_ALIAS_F2 (pow)
 
 TEST_SIG (V, F, 2, pow)
-TEST_ULP (V_NAME_F2 (pow), 2.1)
+TEST_ULP (V_NAME_F2 (pow), 2.08)
 #define V_POWF_INTERVAL2(xlo, xhi, ylo, yhi, n)                               \
   TEST_INTERVAL2 (V_NAME_F2 (pow), xlo, xhi, ylo, yhi, n)                     \
   TEST_INTERVAL2 (V_NAME_F2 (pow), xlo, xhi, -ylo, -yhi, n)

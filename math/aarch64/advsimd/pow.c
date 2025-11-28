@@ -1,5 +1,5 @@
 /*
- * Double-precision vector pow function.
+ * Double-precision vector x^y function.
  *
  * Copyright (c) 2020-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -12,6 +12,11 @@
 #define WANT_V_POW_SIGN_BIAS 1
 #include "v_pow_inline.h"
 
+/* Implementation of AdvSIMD pow.
+   Maximum measured error is 1.04 ULPs:
+   _ZGVnN2vv_pow(0x1.024a3e56b3c3p-136, 0x1.87910248b58acp-13)
+     got 0x1.f71162f473251p-1
+    want 0x1.f71162f473252p-1.  */
 float64x2_t VPCS_ATTR V_NAME_D2 (pow) (float64x2_t x, float64x2_t y)
 {
   return v_pow_inline (x, y);

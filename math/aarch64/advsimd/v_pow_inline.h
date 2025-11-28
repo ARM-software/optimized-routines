@@ -56,17 +56,6 @@ static const struct data
   .ln2_lo_n = -0x1.c610ca86c3899p-45,
 };
 
-/* This version implements an algorithm close to scalar pow but
-   - does not implement the trick in the exp's specialcase subroutine to avoid
-     double-rounding,
-   - does not use a tail in the exponential core computation,
-   - and pow's exp polynomial order and table bits might differ.
-
-   Maximum measured error is 1.04 ULPs:
-   _ZGVnN2vv_pow(0x1.024a3e56b3c3p-136, 0x1.87910248b58acp-13)
-     got 0x1.f71162f473251p-1
-    want 0x1.f71162f473252p-1.  */
-
 static inline float64x2_t VPCS_ATTR
 v_masked_lookup_f64 (const double *table, uint64x2_t i)
 {
@@ -181,6 +170,11 @@ scalar_fallback (float64x2_t x, float64x2_t y)
 			pow_scalar_special_case (x[1], y[1]) };
 }
 
+/* This version of AdvSIMD pow implements an algorithm close to AOR scalar pow
+   but:
+   - it does not prevent double-rounding in the exp's specialcase subroutine,
+   - it does not use a tail in the exponential core computation,
+   - and pow's exp polynomial order and table bits might differ.  */
 static inline float64x2_t VPCS_ATTR
 v_pow_inline (float64x2_t x, float64x2_t y)
 {

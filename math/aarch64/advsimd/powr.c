@@ -1,5 +1,5 @@
 /*
- * Double-precision vector powr function.
+ * Double-precision vector exp(y * log(x)) function.
  *
  * Copyright (c) 2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -11,6 +11,11 @@
 #define WANT_V_POW_SIGN_BIAS 0
 #include "v_pow_inline.h"
 
+/* Implementation of AdvSIMD powr.
+   Maximum measured error is 1.04 ULPs:
+   _ZGVnN2vv_powr(0x1.024a3e56b3c3p-136, 0x1.87910248b58acp-13)
+     got 0x1.f71162f473251p-1
+    want 0x1.f71162f473252p-1.  */
 float64x2_t VPCS_ATTR V_NAME_D2 (powr) (float64x2_t x, float64x2_t y)
 {
   return v_pow_inline (x, y);

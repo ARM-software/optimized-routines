@@ -1,5 +1,5 @@
 /*
- * Single-precision SVE powr function.
+ * Single-precision SVE exp(y * log(x)) function.
  *
  * Copyright (c) 2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -53,11 +53,14 @@ sv_call_powrf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
 }
 
 /* Implementation of SVE powrf.
-   Provides the same accuracy as AdvSIMD powf, since it relies on the same
-   algorithm.
+
+   Provides the same accuracy as AdvSIMD powf and powrf, since it relies on the
+   same algorithm.
+
    Maximum measured error is 2.57 ULPs:
-   SV_NAME_F2 (pow) (0x1.031706p+0, 0x1.ce2ec2p+12) got 0x1.fff868p+127
-						   want 0x1.fff862p+127.  */
+   SV_NAME_F2 (powr) (0x1.031706p+0, 0x1.ce2ec2p+12)
+     got 0x1.fff868p+127
+    want 0x1.fff862p+127.  */
 svfloat32_t SV_NAME_F2 (powr) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);

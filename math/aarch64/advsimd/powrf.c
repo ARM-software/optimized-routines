@@ -1,5 +1,5 @@
 /*
- * Single-precision vector powrf function.
+ * Single-precision vector exp(y * log(x)) function.
  *
  * Copyright (c) 2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -66,12 +66,14 @@ v_powrf_x_is_neg_or_sub (float32x4_t x, float32x4_t y, const struct data *d)
 }
 
 /* Implementation of AdvSIMD powrf.
+
      powr(x,y) := exp(y * log (x))
+
    This means powr(x,y) core computation matches that of pow(x,y)
    but powr returns NaN for negative x even if y is an integer.
-   The theoretical maximum error is under 2.60 ULPs.
+
    Maximum measured error is 2.57 ULPs:
-   V_NAME_F2 (pow) (0x1.031706p+0, 0x1.ce2ec2p+12)
+   V_NAME_F2 (powr) (0x1.031706p+0, 0x1.ce2ec2p+12)
      got 0x1.fff868p+127
     want 0x1.fff862p+127.  */
 float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (powr) (float32x4_t x, float32x4_t y)
@@ -104,7 +106,7 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (powr) (float32x4_t x, float32x4_t y)
 HALF_WIDTH_ALIAS_F2 (powr)
 
 #if WANT_C23_TESTS
-TEST_ULP (V_NAME_F2 (powr), 2.1)
+TEST_ULP (V_NAME_F2 (powr), 2.08)
 #  define V_POWRF_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
     TEST_INTERVAL2 (V_NAME_F2 (powr), xlo, xhi, ylo, yhi, n)                  \
     TEST_INTERVAL2 (V_NAME_F2 (powr), xlo, xhi, -ylo, -yhi, n)

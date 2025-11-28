@@ -1,5 +1,5 @@
 /*
- * Double-precision SVE pow(x, y) function.
+ * Double-precision SVE x^y function.
  *
  * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -8,28 +8,6 @@
 #include "sv_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
-
-/* This version share a similar algorithm as AOR scalar pow.
-
-   The core computation consists in computing pow(x, y) as
-
-     exp (y * log (x)).
-
-   The algorithms for exp and log are very similar to scalar exp and log.
-   The log relies on table lookup for 3 variables and an order 8 polynomial.
-   It returns a high and a low contribution that are then passed to the exp,
-   to minimise the loss of accuracy in both routines.
-   The exp is based on 8-bit table lookup for scale and order-4 polynomial.
-   The SVE algorithm drops the tail in the exp computation at the price of
-   a lower accuracy, slightly above 1ULP.
-   The SVE algorithm also drops the special treatement of small (< 2^-65) and
-   large (> 2^63) finite values of |y|, as they only affect non-round to
-   nearest modes.
-
-   Maximum measured error is 1.04 ULPs:
-   SV_NAME_D2 (pow) (0x1.3d2d45bc848acp+63, -0x1.a48a38b40cd43p-12)
-     got 0x1.f7116284221fcp-1
-    want 0x1.f7116284221fdp-1.  */
 
 #define WANT_SV_POW_SIGN_BIAS 1
 #include "sv_pow_inline.h"
@@ -72,6 +50,32 @@ sv_pow_specialcase (svfloat64_t x1, svfloat64_t x2, svfloat64_t y,
   return sv_call2_f64 (pow_specialcase, x1, x2, y, cmp);
 }
 
+/* Implementation of SVE pow.
+
+   This version share a similar algorithm as AOR scalar pow.
+
+   The core computation consists in computing pow(x, y) as
+
+     exp (y * log (x)).
+
+   The algorithms for exp and log are very similar to scalar exp and log.
+   The log relies on table lookup for 3 variables and an order 8 polynomial.
+   It returns a high and a low contribution that are then passed to the exp,
+   to minimise the loss of accuracy in both routines.
+   The exp is based on 8-bit table lookup for scale and order-4 polynomial.
+   The SVE algorithm drops the tail in the exp computation at the price of
+   a lower accuracy, slightly above 1ULP.
+   The SVE algorithm also drops the special treatement of small (< 2^-65) and
+   large (> 2^63) finite values of |y|, as they only affect non-round to
+   nearest modes.
+
+   Provides the same accuracy as AdvSIMD powf, since it relies on the same
+   algorithm.
+
+   Maximum measured error is 1.04 ULPs:
+   SV_NAME_D2 (pow) (0x1.3d2d45bc848acp+63, -0x1.a48a38b40cd43p-12)
+     got 0x1.f7116284221fcp-1
+    want 0x1.f7116284221fdp-1.  */
 svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
