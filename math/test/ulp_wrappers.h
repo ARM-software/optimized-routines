@@ -23,6 +23,14 @@ static int sincos_mpfr_sin(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_cos(y,
 static int sincos_mpfr_cos(mpfr_t y, const mpfr_t x, mpfr_rnd_t r) { mpfr_sin(y,x,r); return mpfr_cos(y,x,r); }
 static int modf_mpfr_frac(mpfr_t f, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(i, 80); return mpfr_modf(i,f,x,r); }
 static int modf_mpfr_int(mpfr_t i, const mpfr_t x, mpfr_rnd_t r) { MPFR_DECL_INIT(f, 80); return mpfr_modf(i,f,x,r); }
+static int mpfr_rsqrt (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd){
+  MPFR_DECL_INIT (m, 1080);
+  MPFR_DECL_INIT (one, 1080);
+  mpfr_set_d (one, 1.0, rnd);
+  mpfr_sqrt (m, arg, rnd);
+  return mpfr_div (ret, one, m, rnd);
+}
+
 # if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
 static int mpfr_acospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
@@ -115,14 +123,6 @@ static int mpfr_log10p1 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   mpfr_set_d(one, 1.0, rnd);
   mpfr_add(m, arg, one, rnd);
   return mpfr_log10 (ret, m, rnd);
-}
-
-static int mpfr_rsqrt (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd){
-  MPFR_DECL_INIT (m, 1080);
-  MPFR_DECL_INIT (one, 1080);
-  mpfr_set_d (one, 1.0, rnd);
-  mpfr_sqrt (m, arg, rnd);
-  return mpfr_div (ret, one, m, rnd);
 }
 
 static int mpfr_powr(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
