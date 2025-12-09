@@ -1,7 +1,7 @@
 /*
  * Double-precision e^x - 1 function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -18,8 +18,8 @@
 #define TinyBound 0x3cc0000000000000
 /* Above which expm1(x) overflows.  */
 #define BigBound 0x1.63108c75a1937p+9
-/* Below which expm1(x) rounds to 1.  */
-#define NegBound -0x1.740bf7c0d927dp+9
+/* -1022*log(2), below which e^x is subnormal and expm1(x) rounds to -1.  */
+#define NegBound -0x1.6232bdd7abcd2p9
 #define AbsMask 0x7fffffffffffffff
 
 /* Approximation for exp(x) - 1 using polynomial on a reduced interval.
@@ -71,7 +71,7 @@ expm1 (double x)
      accuracy.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^(i - 1).  */
-  double t = ldexp (0.5, i);
+  double t = asdouble ((i + 1022) << 52);
   /* expm1(x) ~= 2 * (p * t + (t - 1/2)).  */
   return 2 * fma (p, t, t - 0.5);
 }

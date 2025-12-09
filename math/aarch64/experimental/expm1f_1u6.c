@@ -1,7 +1,7 @@
 /*
  * Single-precision e^x - 1 function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,15 +10,15 @@
 #include "test_sig.h"
 #include "test_defs.h"
 
-#define Shift (0x1.8p23f)
-#define InvLn2 (0x1.715476p+0f)
-#define Ln2hi (0x1.62e4p-1f)
-#define Ln2lo (0x1.7f7d1cp-20f)
-#define AbsMask (0x7fffffff)
-#define InfLimit                                                              \
-  (0x1.644716p6) /* Smallest value of x for which expm1(x) overflows.  */
-#define NegLimit                                                              \
-  (-0x1.9bbabcp+6) /* Largest value of x for which expm1(x) rounds to 1.  */
+#define Shift 0x1.8p23f
+#define InvLn2 0x1.715476p+0f
+#define Ln2hi 0x1.62e4p-1f
+#define Ln2lo 0x1.7f7d1cp-20f
+#define AbsMask 0x7fffffff
+/* Smallest value of x for which expm1(x) overflows.  */
+#define InfLimit 0x1.644716p6f
+/* -126*log(2), below which e^x is subnormal and expm1(x) rounds to -1.  */
+#define NegLimit -0x1.5d58ap6f
 
 /* Approximation for exp(x) - 1 using polynomial on a reduced interval.
    The maximum error is 1.51 ULP:
@@ -65,7 +65,7 @@ expm1f (float x)
      accuracy.
      expm1(x) ~= 2^i * (p + 1) - 1
      Let t = 2^(i - 1).  */
-  float t = ldexpf (0.5f, i);
+  float t = asfloat ((i + 126) << 23);
   /* expm1(x) ~= 2 * (p * t + (t - 1/2)).  */
   return 2 * fmaf (p, t, t - 0.5f);
 }

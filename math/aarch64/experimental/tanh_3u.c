@@ -1,7 +1,7 @@
 /*
  * Double-precision tanh(x) function.
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
@@ -27,8 +27,7 @@ expm1_inline (double x)
   /* Helper routine for calculating exp(x) - 1. Copied from expm1_2u5.c, with
      several simplifications:
      - No special-case handling for tiny or special values.
-     - Simpler combination of p and t in final stage of the algorithm.
-     - Use shift-and-add instead of ldexp to calculate t.  */
+     - Simpler combination of p and t in final stage of the algorithm.  */
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
   double j = fma (InvLn2, x, Shift) - Shift;
@@ -42,7 +41,7 @@ expm1_inline (double x)
   double p = fma (f2, estrin_10_f64 (f, f2, f4, f4 * f4, __expm1_poly), f);
 
   /* t = 2 ^ i.  */
-  double t = asdouble ((uint64_t) (i + 1023) << 52);
+  double t = asdouble ((i + 1023) << 52);
   /* expm1(x) = p * t + (t - 1).  */
   return fma (p, t, t - 1);
 }

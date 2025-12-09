@@ -1,7 +1,7 @@
 /*
  * Single-precision tanh(x) function.
  *
- * Copyright (c) 2022-2024, Arm Limited.
+ * Copyright (c) 2022-2025, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 #include "math_config.h"
@@ -29,9 +29,7 @@ expm1f_inline (float x)
        early from the main routine.
      - No special handling for large values:
        - No early return for infinity.
-       - Simpler combination of p and t in final stage of algorithm.
-       - |i| < 27, so can calculate t by simpler shift-and-add, instead of
-	 ldexpf (same as vector algorithm).  */
+       - Simpler combination of p and t in final stage of algorithm.  */
 
   /* Reduce argument: f in [-ln2/2, ln2/2], i is exact.  */
   float j = fmaf (InvLn2, x, Shift) - Shift;
@@ -49,7 +47,7 @@ expm1f_inline (float x)
   p = fmaf (f2, p, f);
 
   /* t = 2^i.  */
-  float t = asfloat ((uint32_t) (i + 127) << 23);
+  float t = asfloat ((i + 127) << 23);
   /* expm1(x) ~= p * t + (t - 1).  */
   return fmaf (p, t, t - 1);
 }
