@@ -75,12 +75,12 @@ svfloat64_t SV_NAME_D2 (powr) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
   svuint64_t vix = svreinterpret_u64 (x);
   svuint64_t viy = svreinterpret_u64 (y);
 
-  svbool_t xpos = svcmpgt (pg, x, sv_f64 (0.0));
+  svbool_t xpos = svcmpge (pg, x, sv_f64 (0.0));
 
   /* Special cases of x or y: zero, inf and nan.  */
-  svbool_t xspecial = sv_zeroinfnan (pg, vix);
-  svbool_t yspecial = sv_zeroinfnan (pg, viy);
-  svbool_t cmp = svorr_z (pg, xspecial, yspecial);
+  svbool_t xspecial = sv_zeroinfnan (xpos, vix);
+  svbool_t yspecial = sv_zeroinfnan (xpos, viy);
+  svbool_t cmp = svorr_z (xpos, xspecial, yspecial);
 
   /* Cases of positive subnormal x: 0 < x < 0x1p-1022.  */
   svbool_t x_is_subnormal = svaclt (xpos, x, 0x1p-1022);
@@ -114,7 +114,9 @@ TEST_ULP (SV_NAME_D2 (powr), 0.55)
 /* Wide intervals spanning the positive domain.  */
 #  define SV_POWR_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
     TEST_INTERVAL2 (SV_NAME_D2 (powr), xlo, xhi, ylo, yhi, n)                 \
-    TEST_INTERVAL2 (SV_NAME_D2 (powr), xlo, xhi, -ylo, -yhi, n)
+    TEST_INTERVAL2 (SV_NAME_D2 (powr), xlo, xhi, -ylo, -yhi, n)               \
+    TEST_INTERVAL2 (SV_NAME_D2 (powr), -xlo, -xhi, ylo, yhi, n)               \
+    TEST_INTERVAL2 (SV_NAME_D2 (powr), -xlo, -xhi, -ylo, -yhi, n)
 SV_POWR_INTERVAL2 (0, 0x1p-1022, 0, inf, 40000)
 SV_POWR_INTERVAL2 (0x1p-1022, 1, 0, inf, 50000)
 SV_POWR_INTERVAL2 (1, inf, 0, inf, 50000)

@@ -127,7 +127,9 @@ TEST_ULP (SV_NAME_F2 (powr), 2.08)
 /* Wide intervals spanning the whole domain but shared between x and y.  */
 #  define SV_POWR_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
     TEST_INTERVAL2 (SV_NAME_F2 (powr), xlo, xhi, ylo, yhi, n)                 \
-    TEST_INTERVAL2 (SV_NAME_F2 (powr), xlo, xhi, -ylo, -yhi, n)
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), xlo, xhi, -ylo, -yhi, n)               \
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), -xlo, -xhi, ylo, yhi, n)               \
+    TEST_INTERVAL2 (SV_NAME_F2 (powr), -xlo, -xhi, -ylo, -yhi, n)
 SV_POWR_INTERVAL2 (0, 0x1p-126, 0, inf, 40000)
 SV_POWR_INTERVAL2 (0x1p-126, 1, 0, inf, 50000)
 SV_POWR_INTERVAL2 (1, inf, 0, inf, 50000)

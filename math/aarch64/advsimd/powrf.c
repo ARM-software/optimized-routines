@@ -13,6 +13,10 @@
 static inline float
 powrf_specialcase (float x, float y)
 {
+  /* Negative x returns NaN (+0/-0 and NaN x not handled here).  */
+  if (x < 0)
+    return __builtin_nanf ("");
+
   uint32_t ix = asuint (x);
   uint32_t iy = asuint (y);
   /* y is 0, Inf or NaN.  */
@@ -121,7 +125,9 @@ HALF_WIDTH_ALIAS_F2 (powr)
 TEST_ULP (V_NAME_F2 (powr), 2.08)
 #  define V_POWRF_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
     TEST_INTERVAL2 (V_NAME_F2 (powr), xlo, xhi, ylo, yhi, n)                  \
-    TEST_INTERVAL2 (V_NAME_F2 (powr), xlo, xhi, -ylo, -yhi, n)
+    TEST_INTERVAL2 (V_NAME_F2 (powr), xlo, xhi, -ylo, -yhi, n)                \
+    TEST_INTERVAL2 (V_NAME_F2 (powr), -xlo, -xhi, ylo, yhi, n)                \
+    TEST_INTERVAL2 (V_NAME_F2 (powr), -xlo, -xhi, -ylo, -yhi, n)
 /* Wide intervals spanning the whole domain.  */
 V_POWRF_INTERVAL2 (0, 0x1p-126, 0, inf, 40000)
 V_POWRF_INTERVAL2 (0x1p-126, 1, 0, inf, 50000)

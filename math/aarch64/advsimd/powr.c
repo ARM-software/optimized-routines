@@ -14,17 +14,15 @@
 static double NOINLINE
 powr_scalar_special_case (double x, double y)
 {
-  uint64_t ix, iy;
-  uint32_t topx, topy;
-
   /* Negative x returns NaN (+0/-0 and NaN x not handled here).  */
   if (x < 0)
     return __builtin_nan ("");
 
-  ix = asuint64 (x);
-  iy = asuint64 (y);
-  topx = top12 (x);
-  topy = top12 (y);
+  uint64_t ix = asuint64 (x);
+  uint64_t iy = asuint64 (y);
+  uint32_t topx = top12 (x);
+  uint32_t topy = top12 (y);
+
   /* Special cases: (x < 0x1p-126 or inf or nan) or
      (|y| < 0x1p-65 or |y| >= 0x1p63 or nan).  */
   if (unlikely (topx - SmallPowX >= ThresPowX
