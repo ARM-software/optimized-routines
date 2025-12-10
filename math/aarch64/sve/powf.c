@@ -151,6 +151,36 @@ SV_POWF_INTERVAL2 (0x1p-500, 0x1p500, 0x1p-1, 0x1p1, 10000)
 /* around estimated argmaxs of ULP error.  */
 SV_POWF_INTERVAL2 (0x1p-300, 0x1p-200, 0x1p-20, 0x1p-10, 10000)
 SV_POWF_INTERVAL2 (0x1p50, 0x1p100, 0x1p-20, 0x1p-10, 10000)
+#define SV_POWF_SPECIALX(ylo, yhi, n)                                         \
+  SV_POWF_INTERVAL2 (0, 0, ylo, yhi, n)                                       \
+  SV_POWF_INTERVAL2 (1, 1, ylo, yhi, n)                                       \
+  SV_POWF_INTERVAL2 (inf, inf, ylo, yhi, n)                                   \
+  SV_POWF_INTERVAL2 (nan, nan, ylo, yhi, n)                                   \
+  SV_POWF_INTERVAL2 (0xffff0000, 0xffff0000, ylo, yhi, n)
+#define SV_POWF_SPECIALY(xlo, xhi, n)                                         \
+  SV_POWF_INTERVAL2 (xlo, xhi, 0, 0, n)                                       \
+  SV_POWF_INTERVAL2 (xlo, xhi, inf, inf, n)                                   \
+  SV_POWF_INTERVAL2 (xlo, xhi, nan, nan, n)                                   \
+  SV_POWF_INTERVAL2 (xlo, xhi, 0xffff0000, 0xffff0000, n)
+/* x is 0, inf or nan. |y| is finite.  */
+SV_POWF_SPECIALX (0.0, inf, 1000)
+/* x is 0, inf or nan. |y| is special.  */
+SV_POWF_SPECIALX (0.0, 0.0, 1)
+SV_POWF_SPECIALX (inf, inf, 1)
+SV_POWF_SPECIALX (nan, nan, 1)
+SV_POWF_SPECIALX (0xffff0000, 0xffff0000, 1)
+/* |y| is 0, inf or nan. x is finite.  */
+SV_POWF_SPECIALY (0.0, inf, 1000)
+/* |y| is 0, inf or nan. x is special.  */
+SV_POWF_SPECIALY (0.0, 0.0, 1)
+SV_POWF_SPECIALY (1.0, 1.0, 1)
+SV_POWF_SPECIALY (inf, inf, 1)
+SV_POWF_SPECIALY (0xffff0000, 0xffff0000, 1)
+/* x is negative.  */
+TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -inf, 0, 0xffff0000, 1000)
+
+/* pow-specific cases, not shared with powr.  */
+
 /* x is negative, y is odd or even integer, or y is real not integer.  */
 TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 3.0, 3.0, 10000)
 TEST_INTERVAL2 (SV_NAME_F2 (pow), -0.0, -10.0, 4.0, 4.0, 10000)

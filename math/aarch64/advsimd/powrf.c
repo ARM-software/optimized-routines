@@ -9,32 +9,44 @@
 #include "v_powrf_inline.h"
 #include "test_defs.h"
 
-/* A scalar subroutine used to fix main power special cases. Similar to the
-   preamble of scalar powf except that we do not update ix and sign_bias. This
-   is done in the preamble of the SVE powf.  */
+/* A scalar subroutine used to fix main powrf special cases.  */
 static inline float
 powrf_specialcase (float x, float y)
 {
   uint32_t ix = asuint (x);
   uint32_t iy = asuint (y);
-  /* Either x or y is 0 or inf or nan.  */
+  /* y is 0, Inf or NaN.  */
   if (unlikely (zeroinfnan (iy)))
     {
-      if (2 * iy == 0)
-	return issignalingf_inline (x) ? x + y : 1.0f;
-      if (ix == 0x3f800000)
-	return issignalingf_inline (y) ? x + y : 1.0f;
+      /* |x| or |y| is NaN.  */
       if (2 * ix > 2u * 0x7f800000 || 2 * iy > 2u * 0x7f800000)
-	return x + y;
+	return __builtin_nanf ("");
+      /* |y| = 0.  */
+      if (2 * iy == 0)
+	{
+	  /* |x| = 0 or inf.  */
+	  if ((2 * ix == 0) || (2 * ix == 2u * 0x7f800000))
+	    return __builtin_nanf ("");
+	  /* x is finite.  */
+	  return 1.0f;
+	}
+      /* |y| = Inf and x = 1.0.  */
+      if (ix == 0x3f800000)
+	return __builtin_nanf ("");
+      /* |x| < 1 and y = Inf or |x| > 1 and y = -Inf.  */
       if ((2 * ix < 2 * 0x3f800000) == !(iy & 0x80000000))
-	return 0.0f; /* |x|<1 && y==inf or |x|>1 && y==-inf.  */
+	return 0.0f;
+      /* |y| = Inf and previous conditions not met.  */
       return y * y;
     }
+  /* x is 0, Inf or NaN. Negative x are handled in the core.  */
   if (unlikely (zeroinfnan (ix)))
     {
       float x2 = x * x;
       return iy & 0x80000000 ? 1 / x2 : x2;
     }
+
+  /* Return x for convenience, but make sure result is never used.  */
   return x;
 }
 
@@ -118,14 +130,31 @@ V_POWRF_INTERVAL2 (1, inf, 0, inf, 50000)
 V_POWRF_INTERVAL2 (0x1p-1, 0x1p1, 0x1p-7, 0x1p7, 50000)
 V_POWRF_INTERVAL2 (0x1p-70, 0x1p70, 0x1p-1, 0x1p1, 50000)
 V_POWRF_INTERVAL2 (0x1.ep-1, 0x1.1p0, 0x1p8, 0x1p14, 50000)
-/* |x| is 0, inf or nan.  */
-V_POWRF_INTERVAL2 (0.0, 0.0, 0, inf, 1000)
-V_POWRF_INTERVAL2 (inf, inf, 0, inf, 1000)
-V_POWRF_INTERVAL2 (nan, nan, 0, inf, 1000)
-/* |y| is 0, inf or nan.  */
-V_POWRF_INTERVAL2 (0, inf, 0.0, 0.0, 1000)
-V_POWRF_INTERVAL2 (0, inf, inf, inf, 1000)
-V_POWRF_INTERVAL2 (0, inf, nan, nan, 1000)
+#  define V_POWRF_SPECIALX(ylo, yhi, n)                                       \
+    V_POWRF_INTERVAL2 (0, 0, ylo, yhi, n)                                     \
+    V_POWRF_INTERVAL2 (1, 1, ylo, yhi, n)                                     \
+    V_POWRF_INTERVAL2 (inf, inf, ylo, yhi, n)                                 \
+    V_POWRF_INTERVAL2 (nan, nan, ylo, yhi, n)                                 \
+    V_POWRF_INTERVAL2 (0xffff0000, 0xffff0000, ylo, yhi, n)
+#  define V_POWRF_SPECIALY(xlo, xhi, n)                                       \
+    V_POWRF_INTERVAL2 (xlo, xhi, 0, 0, n)                                     \
+    V_POWRF_INTERVAL2 (xlo, xhi, inf, inf, n)                                 \
+    V_POWRF_INTERVAL2 (xlo, xhi, nan, nan, n)                                 \
+    V_POWRF_INTERVAL2 (xlo, xhi, 0xffff0000, 0xffff0000, n)
+/* x is 0, inf or nan. |y| is finite.  */
+V_POWRF_SPECIALX (0.0, inf, 1000)
+/* x is 0, inf or nan. |y| is special.  */
+V_POWRF_SPECIALX (0.0, 0.0, 1)
+V_POWRF_SPECIALX (inf, inf, 1)
+V_POWRF_SPECIALX (nan, nan, 1)
+V_POWRF_SPECIALX (0xffff0000, 0xffff0000, 1)
+/* |y| is 0, inf or nan. x is finite.  */
+V_POWRF_SPECIALY (0.0, inf, 1000)
+/* |y| is 0, inf or nan. x is special.  */
+V_POWRF_SPECIALY (0.0, 0.0, 1)
+V_POWRF_SPECIALY (1.0, 1.0, 1)
+V_POWRF_SPECIALY (inf, inf, 1)
+V_POWRF_SPECIALY (0xffff0000, 0xffff0000, 1)
 /* x is negative.  */
 TEST_INTERVAL2 (V_NAME_F2 (powr), -0.0, -inf, 0, 0xffff0000, 1000)
 #endif

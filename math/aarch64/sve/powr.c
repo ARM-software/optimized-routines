@@ -11,31 +11,37 @@
 #define WANT_SV_POW_SIGN_BIAS 0
 #include "sv_pow_inline.h"
 
-/* A scalar subroutine used to fix main powr special cases. Similar to the
-   preamble of scalar pow except that we do not update ix and sign_bias.  */
+/* A scalar subroutine used to fix main powr special cases.  */
 static inline double
 powr_specialcase (double x, double y)
 {
   uint64_t ix = asuint64 (x);
   uint64_t iy = asuint64 (y);
+  /* |y| is 0, Inf or NaN.  */
   if (unlikely (zeroinfnan (iy)))
     {
+      /* |x| or |y| is NaN.  */
+      if (2 * ix > 2 * asuint64 (INFINITY) || 2 * iy > 2 * asuint64 (INFINITY))
+	return __builtin_nan ("");
       /* |y| is 0.0.  */
       if (2 * iy == 0)
-	return issignaling_inline (x) ? x + y : 1.0;
+	{
+	  /* |x| = 0 or Inf.  */
+	  if ((2 * ix == 0) || (2 * ix == 2 * asuint64 (INFINITY)))
+	    return __builtin_nan ("");
+	  /* x is finite.  */
+	  return 1.0;
+	}
       /* x is 1.0.  */
       if (ix == asuint64 (1.0))
-	return issignaling_inline (y) ? x + y : 1.0;
-      /* |x| or |y| is nan.  */
-      if (2 * ix > 2 * asuint64 (INFINITY) || 2 * iy > 2 * asuint64 (INFINITY))
-	return x + y;
-      /* |x|<1 && y==inf or |x|>1 && y==-inf.  */
+	return __builtin_nan ("");
+      /* |x| < 1 and y = Inf or |x| > 1 and y = -Inf.  */
       if ((2 * ix < 2 * asuint64 (1.0)) == !(iy >> 63))
 	return 0.0;
-      /* Remaining cases should be y is inf and x is finite, but do not satisfy
-	 above case for returning 0.0 therefore returns +inf.  */
+      /* |y| = Inf and previous conditions not met.  */
       return y * y;
     }
+  /* x is 0, Inf or NaN. Negative x are handled in the core.  */
   if (unlikely (zeroinfnan (ix)))
     {
       double x2 = x * x;
@@ -119,14 +125,31 @@ SV_POWR_INTERVAL2 (0x1p-500, 0x1p500, 0x1p-1, 0x1p1, 10000)
 /* around estimated argmaxs of ULP error.  */
 SV_POWR_INTERVAL2 (0x1p-300, 0x1p-200, 0x1p-20, 0x1p-10, 10000)
 SV_POWR_INTERVAL2 (0x1p50, 0x1p100, 0x1p-20, 0x1p-10, 10000)
-/* |x| is 0, inf or nan.  */
-SV_POWR_INTERVAL2 (0.0, 0.0, 0, inf, 1000)
-SV_POWR_INTERVAL2 (inf, inf, 0, inf, 1000)
-SV_POWR_INTERVAL2 (nan, nan, 0, inf, 1000)
-/* |y| is 0, inf or nan.  */
-SV_POWR_INTERVAL2 (0, inf, 0.0, 0.0, 1000)
-SV_POWR_INTERVAL2 (0, inf, inf, inf, 1000)
-SV_POWR_INTERVAL2 (0, inf, nan, nan, 1000)
+#  define SV_POWR_SPECIALX(ylo, yhi, n)                                       \
+    SV_POWR_INTERVAL2 (0, 0, ylo, yhi, n)                                     \
+    SV_POWR_INTERVAL2 (1, 1, ylo, yhi, n)                                     \
+    SV_POWR_INTERVAL2 (inf, inf, ylo, yhi, n)                                 \
+    SV_POWR_INTERVAL2 (nan, nan, ylo, yhi, n)                                 \
+    SV_POWR_INTERVAL2 (0xffff000000000000, 0xffff000000000000, ylo, yhi, n)
+#  define SV_POWR_SPECIALY(xlo, xhi, n)                                       \
+    SV_POWR_INTERVAL2 (xlo, xhi, 0, 0, n)                                     \
+    SV_POWR_INTERVAL2 (xlo, xhi, inf, inf, n)                                 \
+    SV_POWR_INTERVAL2 (xlo, xhi, nan, nan, n)                                 \
+    SV_POWR_INTERVAL2 (xlo, xhi, 0xffff000000000000, 0xffff000000000000, n)
+/* x is 0, inf or nan. |y| is finite.  */
+SV_POWR_SPECIALX (0.0, inf, 1000)
+/* x is 0, inf or nan. |y| is special.  */
+SV_POWR_SPECIALX (0.0, 0.0, 1)
+SV_POWR_SPECIALX (inf, inf, 1)
+SV_POWR_SPECIALX (nan, nan, 1)
+SV_POWR_SPECIALX (0xffff000000000000, 0xffff000000000000, 1)
+/* |y| is 0, inf or nan. x is finite.  */
+SV_POWR_SPECIALY (0.0, inf, 1000)
+/* |y| is 0, inf or nan. x is special.  */
+SV_POWR_SPECIALY (0.0, 0.0, 1)
+SV_POWR_SPECIALY (1.0, 1.0, 1)
+SV_POWR_SPECIALY (inf, inf, 1)
+SV_POWR_SPECIALY (0xffff000000000000, 0xffff000000000000, 1)
 /* x is negative.  */
 TEST_INTERVAL2 (SV_NAME_D2 (powr), -0.0, -inf, 0, 0xffff000000000000, 1000)
 #endif
