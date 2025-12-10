@@ -8,11 +8,6 @@
 
 #include "math_config.h"
 
-#ifndef WANT_V_POW_SIGN_BIAS
-#  error                                                                       \
-      "Cannot use v_pow_inline.h without specifying whether you need sign_bias."
-#endif
-
 /* Data is defined in v_pow_log_data.c.  */
 #define N_LOG (1 << V_POW_LOG_TABLE_BITS)
 #define Off 0x3fe6955500000000
@@ -173,49 +168,6 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   return scale + scale * tmp;
 }
 
-/* Computes exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
-   A version of exp_inline that is not inlined and for which sign_bias is
-   equal to 0.  */
-static inline double
-exp_nosignbias (double x, double xtail)
-{
-  uint32_t abstop = top12 (x) & 0x7ff;
-  if (unlikely (abstop - SmallExp >= ThresExp))
-    {
-      /* Avoid spurious underflow for tiny x.  */
-      if (abstop - SmallExp >= 0x80000000)
-	return 1.0;
-      /* Note: inf and nan are already handled.  */
-      if (abstop >= top12 (1024.0))
-	return asuint64 (x) >> 63 ? 0.0 : INFINITY;
-      /* Large x is special cased below.  */
-      abstop = 0;
-    }
-
-  /* exp(x) = 2^(k/N) * exp(r), with exp(r) in [2^(-1/2N),2^(1/2N)].  */
-  /* x = ln2/N*k + r, with k integer and r in [-ln2/2N, ln2/2N].  */
-  double z = InvLn2N * x;
-  double kd = round (z);
-  uint64_t ki = lround (z);
-  double r = x - kd * Ln2HiN - kd * Ln2LoN;
-  /* The code assumes 2^-200 < |xtail| < 2^-8/N.  */
-  r += xtail;
-  /* 2^(k/N) ~= scale.  */
-  uint64_t idx = ki & (N_EXP - 1);
-  uint64_t top = ki << (52 - V_POW_EXP_TABLE_BITS);
-  /* This is only a valid scale when -1023*N < k < 1024*N.  */
-  uint64_t sbits = SBits[idx] + top;
-  /* exp(x) = 2^(k/N) * exp(r) ~= scale + scale * (tail + exp(r) - 1).  */
-  double r2 = r * r;
-  double tmp = r + r2 * Cs[0] + r * r2 * (Cs[1] + r * Cs[2]);
-  if (unlikely (abstop == 0))
-    return special_case (tmp, sbits, ki);
-  double scale = asdouble (sbits);
-  /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
-     is no spurious underflow here even without fma.  */
-  return scale + scale * tmp;
-}
-
 /* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
    the bit representation of a non-zero finite floating-point value.  */
 static inline int
@@ -238,97 +190,4 @@ static inline int
 zeroinfnan (uint64_t i)
 {
   return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
-}
-
-static double NOINLINE
-pow_scalar_special_case (double x, double y)
-{
-#if WANT_V_POW_SIGN_BIAS
-  uint32_t sign_bias = 0;
-#endif
-  uint64_t ix, iy;
-  uint32_t topx, topy;
-
-  ix = asuint64 (x);
-  iy = asuint64 (y);
-  topx = top12 (x);
-  topy = top12 (y);
-  if (unlikely (topx - SmallPowX >= ThresPowX
-		|| (topy & 0x7ff) - SmallPowY >= ThresPowY))
-    {
-      /* Note: if |y| > 1075 * ln2 * 2^53 ~= 0x1.749p62 then pow(x,y) = inf/0
-	 and if |y| < 2^-54 / 1075 ~= 0x1.e7b6p-65 then pow(x,y) = +-1.  */
-      /* Special cases: (x < 0x1p-126 or inf or nan) or
-	 (|y| < 0x1p-65 or |y| >= 0x1p63 or nan).  */
-      if (unlikely (zeroinfnan (iy)))
-	{
-	  if (2 * iy == 0)
-	    return issignaling_inline (x) ? x + y : 1.0;
-	  if (ix == asuint64 (1.0))
-	    return issignaling_inline (y) ? x + y : 1.0;
-	  if (2 * ix > 2 * asuint64 (INFINITY)
-	      || 2 * iy > 2 * asuint64 (INFINITY))
-	    return x + y;
-	  if (2 * ix == 2 * asuint64 (1.0))
-	    return 1.0;
-	  if ((2 * ix < 2 * asuint64 (1.0)) == !(iy >> 63))
-	    return 0.0; /* |x|<1 && y==inf or |x|>1 && y==-inf.  */
-	  return y * y;
-	}
-      if (unlikely (zeroinfnan (ix)))
-	{
-	  double x2 = x * x;
-#if WANT_V_POW_SIGN_BIAS
-	  if (ix >> 63 && checkint (iy) == 1)
-	    {
-	      x2 = -x2;
-	      sign_bias = 1;
-	    }
-#endif
-	  return iy >> 63 ? 1 / x2 : x2;
-	}
-      /* Here x and y are non-zero finite.  */
-      if (ix >> 63)
-	{
-#if WANT_V_POW_SIGN_BIAS
-	  /* Finite x < 0.  */
-	  int yint = checkint (iy);
-	  if (yint == 0)
-	    return __builtin_nan ("");
-	  if (yint == 1)
-	    sign_bias = SignBias;
-	  ix &= 0x7fffffffffffffff;
-	  topx &= 0x7ff;
-#else
-	  return __builtin_nan ("");
-#endif
-	}
-      if ((topy & 0x7ff) - SmallPowY >= ThresPowY)
-	{
-	  /* Note: sign_bias == 0 here because y is not odd.  */
-	  if (ix == asuint64 (1.0))
-	    return 1.0;
-	  /* |y| < 2^-65, x^y ~= 1 + y*log(x).  */
-	  if ((topy & 0x7ff) < SmallPowY)
-	    return 1.0;
-	  return (ix > asuint64 (1.0)) == (topy < 0x800) ? INFINITY : 0;
-	}
-      if (topx == 0)
-	{
-	  /* Normalize subnormal x so exponent becomes negative.  */
-	  ix = asuint64 (x * 0x1p52);
-	  ix &= 0x7fffffffffffffff;
-	  ix -= 52ULL << 52;
-	}
-    }
-
-  double lo;
-  double hi = log_inline (ix, &lo);
-  double ehi = y * hi;
-  double elo = y * lo + fma (y, hi, -ehi);
-#if WANT_V_POW_SIGN_BIAS
-  return exp_inline (ehi, elo, sign_bias);
-#else
-  return exp_nosignbias (ehi, elo);
-#endif
 }

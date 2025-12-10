@@ -118,8 +118,8 @@ v_log_inline (uint64x2_t ix, float64x2_t *tail, const struct data *d)
 static float64x2_t VPCS_ATTR NOINLINE
 exp_special_case (float64x2_t x, float64x2_t xtail)
 {
-  return (float64x2_t){ exp_nosignbias (x[0], xtail[0]),
-			exp_nosignbias (x[1], xtail[1]) };
+  return (float64x2_t){ exp_inline (x[0], xtail[0], 0),
+			exp_inline (x[1], xtail[1], 0) };
 }
 
 /* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.  */
@@ -163,55 +163,17 @@ v_exp_inline (float64x2_t x, float64x2_t neg_xtail, const struct data *d)
   return vfmaq_f64 (scale, scale, tmp);
 }
 
-static float64x2_t VPCS_ATTR NOINLINE
-scalar_fallback (float64x2_t x, float64x2_t y)
-{
-  return (float64x2_t){ pow_scalar_special_case (x[0], y[0]),
-			pow_scalar_special_case (x[1], y[1]) };
-}
-
 /* This version of AdvSIMD pow implements an algorithm close to AOR scalar pow
    but:
    - it does not prevent double-rounding in the exp's specialcase subroutine,
    - it does not use a tail in the exponential core computation,
    - and pow's exp polynomial order and table bits might differ.  */
 static inline float64x2_t VPCS_ATTR
-v_pow_inline (float64x2_t x, float64x2_t y)
+v_pow_inline (float64x2_t x, float64x2_t y, const struct data *d)
 {
-  const struct data *d = ptr_barrier (&data);
-  /* Case of x <= 0 is too complicated to be vectorised efficiently here,
-     fallback to scalar pow for all lanes if any x < 0 detected.  */
-  if (v_any_u64 (vclezq_s64 (vreinterpretq_s64_f64 (x))))
-    return scalar_fallback (x, y);
-
-  uint64x2_t vix = vreinterpretq_u64_f64 (x);
-  uint64x2_t viy = vreinterpretq_u64_f64 (y);
-
-  /* Special cases of x or y.
-     The case y==0 does not trigger a special case, since in this case it is
-     necessary to fix the result only if x is a signalling nan, which already
-     triggers a special case. We test y==0 directly in the scalar fallback.  */
-  uint64x2_t x_is_inf_or_nan = vcgeq_u64 (vandq_u64 (vix, d->inf), d->inf);
-  uint64x2_t y_is_inf_or_nan = vcgeq_u64 (vandq_u64 (viy, d->inf), d->inf);
-  uint64x2_t special = vorrq_u64 (x_is_inf_or_nan, y_is_inf_or_nan);
-  /* Fallback to scalar on all lanes if any lane is inf or nan.  */
-  if (unlikely (v_any_u64 (special)))
-    return scalar_fallback (x, y);
-
-  /* Cases of subnormal x: |x| < 0x1p-1022.  */
-  uint64x2_t x_is_subnormal = vcaltq_f64 (x, d->subnormal_bound);
-  if (unlikely (v_any_u64 (x_is_subnormal)))
-    {
-      /* Normalize subnormal x so exponent becomes negative.  */
-      uint64x2_t vix_norm = vreinterpretq_u64_f64 (
-	  vabsq_f64 (vmulq_f64 (x, d->subnormal_scale)));
-      vix_norm = vsubq_u64 (vix_norm, d->subnormal_bias);
-      vix = vbslq_u64 (x_is_subnormal, vix_norm, vix);
-    }
-
   /* Vector Log(ix, &lo).  */
   float64x2_t vlo;
-  float64x2_t vhi = v_log_inline (vix, &vlo, d);
+  float64x2_t vhi = v_log_inline (vreinterpretq_u64_f64 (x), &vlo, d);
 
   /* Vector Exp(y_loghi, y_loglo).  */
   float64x2_t vehi = vmulq_f64 (y, vhi);
