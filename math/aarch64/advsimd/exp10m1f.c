@@ -1,31 +1,33 @@
 /*
  * Single-precision vector 10^x - 1 function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "v_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
+#include "v_expf_special_inline.h"
 
 /* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
-
-/* Value of n above which scale overflows even with special treatment.  */
-#define ScaleBound 192.0f
+#define SpecialBound 0x1.330cf3ce9955ap+5 /* ≈ 38.3813.  */
 
 static const struct data
 {
-  float log10_2_high, log10_2_low;
+  struct v_expf_special_data special_data;
+  uint32x4_t exponent_bias;
   float log10_lo, c2, c4, c6;
+  float log10_2_high, log10_2_low;
   float32x4_t log10_hi, c1, c3, c5, c7, c8;
   float32x4_t inv_log10_2, special_bound;
-  uint32x4_t exponent_bias, special_offset, special_bias;
-  float32x4_t scale_thresh;
 } data = {
+  .special_data = V_EXPF_SPECIAL_DATA,
   /* Coefficients generated using Remez algorithm with minimisation of relative
-     error.  */
+  error.  */
+  .inv_log10_2 = V4 (0x1.a934fp+1),
+  .log10_2_high = 0x1.344136p-2,
+  .log10_2_low = 0x1.ec10cp-27,
   .log10_hi = V4 (0x1.26bb1b8000000p+1),
   .log10_lo = 0x1.daaa8b0000000p-26,
   .c1 = V4 (0x1.53524ep1),
@@ -36,32 +38,16 @@ static const struct data
   .c6 = -0x1.05e38ep-4,
   .c7 = V4 (-0x1.c79f4ap-4),
   .c8 = V4 (0x1.2d6f34p1),
-  .inv_log10_2 = V4 (0x1.a934fp+1),
-  .log10_2_high = 0x1.344136p-2,
-  .log10_2_low = 0x1.ec10cp-27,
   .exponent_bias = V4 (0x3f800000),
-  .special_offset = V4 (0x82000000),
-  .special_bias = V4 (0x7f000000),
-  .scale_thresh = V4 (ScaleBound),
+  /* Implementation triggers special case handling as soon as the scale
+     overflows, which is earlier than exp10m1f's
+     true overflow bound `log10(FLT_MAX) ≈ 38.53` or
+     underflow bound `log10(FLT_TRUE_MIN) ≈ -44.85`.
+     The absolute comparison catches all these cases efficiently, although
+     there is a small window where special cases are triggered
+     unnecessarily.  */
   .special_bound = V4 (SpecialBound),
 };
-
-static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t poly, float32x4_t n, uint32x4_t e, uint32x4_t cmp1,
-	      float32x4_t scale, const struct data *d)
-{
-  /* 2^n may overflow, break it up into s1*s2.  */
-  uint32x4_t b = vandq_u32 (vclezq_f32 (n), d->special_offset);
-  float32x4_t s1 = vreinterpretq_f32_u32 (vaddq_u32 (b, d->special_bias));
-  float32x4_t s2 = vreinterpretq_f32_u32 (vsubq_u32 (e, b));
-  uint32x4_t cmp2 = vcagtq_f32 (n, d->scale_thresh);
-  float32x4_t r2 = vmulq_f32 (s1, s1);
-  float32x4_t r1 = vmulq_f32 (vfmaq_f32 (s2, poly, s2), s1);
-  /* Similar to r1 but avoids double rounding in the subnormal range.  */
-  float32x4_t r0 = vfmaq_f32 (scale, poly, scale);
-  float32x4_t r = vbslq_f32 (cmp1, r1, r0);
-  return vsubq_f32 (vbslq_f32 (cmp2, r2, r), v_f32 (1.0f));
-}
 
 /* Fast vector implementation of single-precision exp10m1.
    Algorithm is accurate to 1.70 + 0.5 ULP.
@@ -72,16 +58,17 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (exp10m1) (float32x4_t x)
   const struct data *d = ptr_barrier (&data);
 
   /* exp10(x) = 2^n * 10^r = 2^n * (1 + poly (r)),
-     with poly(r) in [1/sqrt(2), sqrt(2)] and
+     with 1 + poly(r) in [1/sqrt(2), sqrt(2)] and
      x = r + n * log10 (2), with r in [-log10(2)/2, log10(2)/2].  */
-  float32x4_t log10_2 = vld1q_f32 (&d->log10_2_high);
   float32x4_t n = vrndaq_f32 (vmulq_f32 (x, d->inv_log10_2));
+  float32x4_t log10_2 = vld1q_f32 (&d->log10_2_high);
   float32x4_t r = vfmsq_laneq_f32 (x, n, log10_2, 0);
   r = vfmaq_laneq_f32 (r, n, log10_2, 1);
-  uint32x4_t e = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtaq_s32_f32 (n)), 23);
 
+  uint32x4_t e = vshlq_n_u32 (vreinterpretq_u32_s32 (vcvtaq_s32_f32 (n)), 23);
   float32x4_t scale = vreinterpretq_f32_u32 (vaddq_u32 (e, d->exponent_bias));
-  uint32x4_t cmp = vcagtq_f32 (n, d->special_bound);
+
+  uint32x4_t cmp = vcageq_f32 (x, d->special_bound);
 
   /* Pairwise Horner scheme.  */
   float32x4_t log10lo_c246 = vld1q_f32 (&d->log10_lo);
@@ -102,8 +89,12 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (exp10m1) (float32x4_t x)
 
   /* Fallback to special case for lanes with overflow.  */
   if (unlikely (v_any_u32 (cmp)))
-    return vbslq_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
-
+    {
+      float32x4_t special
+	  = (expf_special (poly, n, e, cmp, scale, &d->special_data));
+      float32x4_t specialm1 = vsubq_f32 (special, v_f32 (1.0f));
+      return vbslq_f32 (cmp, specialm1, y);
+    }
   return y;
 }
 
@@ -112,6 +103,8 @@ HALF_WIDTH_ALIAS_F1 (exp10m1)
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_F1 (exp10m1), 1.70)
 TEST_INTERVAL (V_NAME_F1 (exp10m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0, SpecialBound, 50000)
-TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), SpecialBound, inf, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0, 0x1p-23, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0x1p-23, SpecialBound, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), SpecialBound, 0x1.8p+7, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (exp10m1), 0x1.8p+7, inf, 50000)
 #endif
