@@ -120,7 +120,7 @@ Regular biannual releases are tagged as `vYY.MM`. All release are available at
 [https://github.com/ARM-software/optimized-routines/releases]().
 
 The latest release is
-[https://github.com/ARM-software/optimized-routines/releases/tag/v25.07](v25.07).
+[https://github.com/ARM-software/optimized-routines/releases/tag/v26.01](v26.01).
 
 ---
 
