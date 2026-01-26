@@ -1,6 +1,6 @@
 /*
  * Double-precision vector acosh(x) function.
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -25,7 +25,18 @@ static float64x2_t NOINLINE VPCS_ATTR
 special_case (float64x2_t x, float64x2_t y, uint64x2_t special,
 	      const struct v_log1p_data *d)
 {
-  return v_call_f64 (acosh, x, log1p_inline (y, d), special);
+  /* Acosh is define on [1, inf). Its formula can be re-written knowing that 1
+    becomes negligible when x is a very large number. So for special numbers,
+    where x >= 2^511, acosh ~= ln(2x). But, ln(2x) = ln(2) + ln(x) and below we
+    calculate ln(x) and then add ln(2) to the result.
+
+    Right before returning we check if x is infinity or if x is lower than 1,
+    in which case we return infinity or NaN.  */
+  float64x2_t one = v_f64 (1.0);
+  float64x2_t t = log1p_inline (vbslq_f64 (special, x, y), d);
+  t = vbslq_f64 (special, vaddq_f64 (t, v_f64 (d->ln2[0])), t);
+  t = vbslq_f64 (vceqq_f64 (x, v_f64 (INFINITY)), v_f64 (INFINITY), t);
+  return vbslq_f64 (vcltq_f64 (x, one), v_f64 (NAN), t);
 }
 
 /* Vector approximation for double-precision acosh, based on log1p.
