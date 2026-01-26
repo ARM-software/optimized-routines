@@ -1,7 +1,7 @@
 /*
  * Double-precision vector asinh(x) function.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -16,35 +16,42 @@ const static struct data
   double lc1, lc3, ln2, lc4;
   float64x2_t c0, c2, c4, c6, c8, c10, c12, c14, c16, c17;
   double c1, c3, c5, c7, c9, c11, c13, c15;
+  float64x2_t inf;
 } data = {
 
   /* Even terms of polynomial s.t. asinh(x) is approximated by
      asinh(x) ~= x + x^3 * (C0 + C1 * x + C2 * x^2 + C3 * x^3 + ...).
      Generated using Remez, f = (asinh(sqrt(x)) - sqrt(x))/x^(3/2).  */
-  .c0 = V2 (-0x1.55555555554a7p-3),    .c1 = 0x1.3333333326c7p-4,
-  .c2 = V2 (-0x1.6db6db68332e6p-5),    .c3 = 0x1.f1c71b26fb40dp-6,
-  .c4 = V2 (-0x1.6e8b8b654a621p-6),    .c5 = 0x1.1c4daa9e67871p-6,
-  .c6 = V2 (-0x1.c9871d10885afp-7),    .c7 = 0x1.7a16e8d9d2ecfp-7,
-  .c8 = V2 (-0x1.3ddca533e9f54p-7),    .c9 = 0x1.0becef748dafcp-7,
-  .c10 = V2 (-0x1.b90c7099dd397p-8),   .c11 = 0x1.541f2bb1ffe51p-8,
-  .c12 = V2 (-0x1.d217026a669ecp-9),   .c13 = 0x1.0b5c7977aaf7p-9,
-  .c14 = V2 (-0x1.e0f37daef9127p-11),  .c15 = 0x1.388b5fe542a6p-12,
-  .c16 = V2 (-0x1.021a48685e287p-14),  .c17 = V2 (0x1.93d4ba83d34dap-18),
-  .lc0 = V2 (-0x1.ffffffffffff7p-2),   .lc1 = 0x1.55555555170d4p-2,
-  .lc2 = V2 (-0x1.0000000399c27p-2),   .lc3 = 0x1.999b2e90e94cap-3,
-  .lc4 = -0x1.554e550bd501ep-3,	       .ln2 = 0x1.62e42fefa39efp-1,
-  .off = V2 (0x3fe6900900000000),      .huge_bound = V2 (0x5fe0000000000000),
-  .abs_mask = V2 (0x7fffffffffffffff), .mask = V2 (0xfffULL << 52),
+  .c0 = V2 (-0x1.55555555554a7p-3),
+  .c1 = 0x1.3333333326c7p-4,
+  .c2 = V2 (-0x1.6db6db68332e6p-5),
+  .c3 = 0x1.f1c71b26fb40dp-6,
+  .c4 = V2 (-0x1.6e8b8b654a621p-6),
+  .c5 = 0x1.1c4daa9e67871p-6,
+  .c6 = V2 (-0x1.c9871d10885afp-7),
+  .c7 = 0x1.7a16e8d9d2ecfp-7,
+  .c8 = V2 (-0x1.3ddca533e9f54p-7),
+  .c9 = 0x1.0becef748dafcp-7,
+  .c10 = V2 (-0x1.b90c7099dd397p-8),
+  .c11 = 0x1.541f2bb1ffe51p-8,
+  .c12 = V2 (-0x1.d217026a669ecp-9),
+  .c13 = 0x1.0b5c7977aaf7p-9,
+  .c14 = V2 (-0x1.e0f37daef9127p-11),
+  .c15 = 0x1.388b5fe542a6p-12,
+  .c16 = V2 (-0x1.021a48685e287p-14),
+  .c17 = V2 (0x1.93d4ba83d34dap-18),
+  .lc0 = V2 (-0x1.ffffffffffff7p-2),
+  .lc1 = 0x1.55555555170d4p-2,
+  .lc2 = V2 (-0x1.0000000399c27p-2),
+  .lc3 = 0x1.999b2e90e94cap-3,
+  .lc4 = -0x1.554e550bd501ep-3,
+  .ln2 = 0x1.62e42fefa39efp-1,
+  .off = V2 (0x3fe6900900000000),
+  .huge_bound = V2 (0x5fe0000000000000),
+  .abs_mask = V2 (0x7fffffffffffffff),
+  .mask = V2 (0xfffULL << 52),
+  .inf = V2 (INFINITY)
 };
-
-static float64x2_t NOINLINE VPCS_ATTR
-special_case (float64x2_t x, float64x2_t y, uint64x2_t abs_mask,
-	      uint64x2_t special)
-{
-  /* Copy sign.  */
-  y = vbslq_f64 (abs_mask, y, x);
-  return v_call_f64 (asinh, x, y, special);
-}
 
 #define N (1 << V_LOG_TABLE_BITS)
 #define IndexMask (N - 1)
@@ -97,6 +104,19 @@ log_inline (float64x2_t ax, const struct data *d)
   y = vfmaq_laneq_f64 (y, r2, ln2_and_lc4, 1);
   y = vfmaq_f64 (p, r2, y);
   return vfmaq_f64 (hi, y, r2);
+}
+
+static float64x2_t NOINLINE VPCS_ATTR
+special_case (float64x2_t x, uint64x2_t special, float64x2_t y, float64x2_t ax,
+	      const struct data *d)
+{
+  /* For very large inputs (x > 2^511), asinh(x) ≈ ln(2x).
+    In this range the +sqrt(x^2+1) term is negligible, so we compute
+    asinh(x) as ln(x) + ln(2).  */
+  float64x2_t res_asinh = vaddq_f64 (log_inline (ax, d), v_f64 (d->ln2));
+  res_asinh = vbslq_f64 (vceqq_f64 (ax, d->inf), d->inf, res_asinh);
+  res_asinh = vbslq_f64 (special, res_asinh, y);
+  return vbslq_f64 (d->abs_mask, res_asinh, x);
 }
 
 /* Double-precision implementation of vector asinh(x).
@@ -168,7 +188,7 @@ VPCS_ATTR float64x2_t V_NAME_D1 (asinh) (float64x2_t x)
   /* Choose the right option for each lane.  */
   float64x2_t y = vbslq_f64 (gt1, option_1, option_2);
   if (unlikely (v_any_u64 (special)))
-    return special_case (x, y, d->abs_mask, special);
+    return special_case (x, special, y, ax, d);
 
   /* Copy sign.  */
   return vbslq_f64 (d->abs_mask, y, x);
