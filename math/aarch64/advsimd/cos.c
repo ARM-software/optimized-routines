@@ -12,22 +12,19 @@
 
 static const struct data
 {
-  float64x2_t poly[7];
-  float64x2_t range_val, inv_pi, pi_1, pi_2, pi_3;
+  double c1, c3, c5, c6;
+  double inv_pi, pi_1, pi_2, pi_3;
+  float64x2_t c0, c2, c4;
+  float64x2_t range_val;
 } data = {
   /* Worst-case error is 3.3 ulp in [-pi/2, pi/2].  */
-  .poly = { V2 (-0x1.555555555547bp-3), V2 (0x1.1111111108a4dp-7),
-	    V2 (-0x1.a01a019936f27p-13), V2 (0x1.71de37a97d93ep-19),
-	    V2 (-0x1.ae633919987c6p-26), V2 (0x1.60e277ae07cecp-33),
-	    V2 (-0x1.9e9540300a1p-41) },
-  .inv_pi = V2 (0x1.45f306dc9c883p-2),
-  .pi_1 = V2 (0x1.921fb54442d18p+1),
-  .pi_2 = V2 (0x1.1a62633145c06p-53),
-  .pi_3 = V2 (0x1.c1cd129024e09p-106),
-  .range_val = V2 (0x1p23)
+  .c0 = V2 (-0x1.555555555547bp-3),  .c1 = 0x1.1111111108a4dp-7,
+  .c2 = V2 (-0x1.a01a019936f27p-13), .c3 = 0x1.71de37a97d93ep-19,
+  .c4 = V2 (-0x1.ae633919987c6p-26), .c5 = 0x1.60e277ae07cecp-33,
+  .c6 = -0x1.9e9540300a1p-41,	     .inv_pi = 0x1.45f306dc9c883p-2,
+  .pi_1 = 0x1.921fb54442d18p+1,	     .pi_2 = 0x1.1a62633145c06p-53,
+  .pi_3 = 0x1.c1cd129024e09p-106,    .range_val = V2 (0x1p23)
 };
-
-#define C(i) d->poly[i]
 
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
@@ -48,37 +45,42 @@ special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
-  float64x2_t n, r, r2, r3, r4, t1, t2, t3, y;
-  uint64x2_t odd, cmp;
+  uint64x2_t cmp = vcageq_f64 (x, d->range_val);
 
-  cmp = vcageq_f64 (x, d->range_val);
+  float64x2_t invpi_pi_1 = vld1q_f64 (&d->inv_pi);
+  float64x2_t pi_2_3 = vld1q_f64 (&d->pi_2);
 
   /* n = rint((|x|+pi/2)/pi) - 0.5.  */
-  n = vrndaq_f64 (vfmaq_f64 (v_f64 (0.5), x, d->inv_pi));
-  odd = vshlq_n_u64 (vreinterpretq_u64_s64 (vcvtq_s64_f64 (n)), 63);
+  float64x2_t n = vrndaq_f64 (vfmaq_laneq_f64 (v_f64 (0.5), x, invpi_pi_1, 0));
+  uint64x2_t odd = vshlq_n_u64 (vreinterpretq_u64_s64 (vcvtq_s64_f64 (n)), 63);
   n = vsubq_f64 (n, v_f64 (0.5f));
 
   /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  r = vfmsq_f64 (x, d->pi_1, n);
-  r = vfmsq_f64 (r, d->pi_2, n);
-  r = vfmsq_f64 (r, d->pi_3, n);
+  float64x2_t r = x;
+  r = vfmsq_laneq_f64 (r, n, invpi_pi_1, 1);
+  r = vfmsq_laneq_f64 (r, n, pi_2_3, 0);
+  r = vfmsq_laneq_f64 (r, n, pi_2_3, 1);
 
   /* sin(r) poly approx.  */
-  r2 = vmulq_f64 (r, r);
-  r3 = vmulq_f64 (r2, r);
-  r4 = vmulq_f64 (r2, r2);
+  float64x2_t r2 = vmulq_f64 (r, r);
+  float64x2_t r3 = vmulq_f64 (r2, r);
+  float64x2_t r4 = vmulq_f64 (r2, r2);
 
-  t1 = vfmaq_f64 (C (4), C (5), r2);
-  t2 = vfmaq_f64 (C (2), C (3), r2);
-  t3 = vfmaq_f64 (C (0), C (1), r2);
+  float64x2_t c13 = vld1q_f64 (&d->c1);
+  float64x2_t c56 = vld1q_f64 (&d->c5);
 
-  y = vfmaq_f64 (t1, C (6), r4);
-  y = vfmaq_f64 (t2, y, r4);
-  y = vfmaq_f64 (t3, y, r4);
-  y = vfmaq_f64 (r, y, r3);
+  float64x2_t p01 = vfmaq_laneq_f64 (d->c0, r2, c13, 0);
+  float64x2_t p23 = vfmaq_laneq_f64 (d->c2, r2, c13, 1);
+  float64x2_t p45 = vfmaq_laneq_f64 (d->c4, r2, c56, 0);
+  float64x2_t p46 = vfmaq_laneq_f64 (p45, r4, c56, 1);
+
+  float64x2_t p26 = vfmaq_f64 (p23, r4, p46);
+  float64x2_t p06 = vfmaq_f64 (p01, r4, p26);
+  float64x2_t y = vfmaq_f64 (r, r3, p06);
 
   if (unlikely (v_any_u64 (cmp)))
     return special_case (x, y, odd, cmp);
+
   return vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
 }
 
