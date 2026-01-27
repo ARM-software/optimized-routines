@@ -1,14 +1,14 @@
 /*
  * Double-precision vector cos function.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "mathlib.h"
-#include "v_math.h"
 #include "test_defs.h"
 #include "test_sig.h"
+#include "v_math.h"
+#include "v_trig_fallback.h"
 
 static const struct data
 {
@@ -33,9 +33,18 @@ static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
   y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
-  return v_call_f64 (cos, x, y, cmp);
+  return v_call_vpcs_f64 (v_cos_fallback, x, y, cmp);
 }
 
+/* Vector AdvSIMD cos approximation.
+   Maximum observed error in the non-special domain (|x| < 2^23)
+   is 2.77 + 0.5 ULP
+   _ZGVnN2v_cos (0x1.ad06044746e06p-2) got 0x1.d3b778d480fd6p-1
+				      want 0x1.d3b778d480fd9p-1
+   Maximum observed error in the special domain (|x| > 2^23)
+   is 2.70 + 0.5ULP
+   _ZGVnN2v_cos (0x1.0808d08f24a99p+854) got -0x1.fe675082631d2p-3
+					want -0x1.fe675082631cfp-3.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -74,6 +83,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, cos, -3.1, 3.1)
-TEST_ULP (V_NAME_D1 (cos), 3.0)
+TEST_ULP (V_NAME_D1 (cos), 2.78)
 TEST_SYM_INTERVAL (V_NAME_D1 (cos), 0, 0x1p23, 500000)
 TEST_SYM_INTERVAL (V_NAME_D1 (cos), 0x1p23, inf, 10000)

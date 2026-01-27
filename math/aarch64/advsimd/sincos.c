@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sincos function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -14,25 +14,24 @@
 #include "v_math.h"
 #include "test_defs.h"
 #include "v_sincos_common.h"
-
-/* sincos not available for all scalar libm implementations.  */
-#if defined(_MSC_VER) || !defined(__GLIBC__)
-static void
-sincos (double x, double *out_sin, double *out_cos)
-{
-  *out_sin = sin (x);
-  *out_cos = cos (x);
-}
-#endif
+#include "v_trig_fallback.h"
 
 static void VPCS_ATTR NOINLINE
 special_case (float64x2_t x, uint64x2_t special, double *out_sin,
 	      double *out_cos)
 {
   if (special[0])
-    sincos (x[0], out_sin, out_cos);
+    {
+      float64x2_t ret = v_sincos_fallback (x[0]);
+      *out_sin = ret[0];
+      *out_cos = ret[1];
+    }
   if (special[1])
-    sincos (x[1], out_sin + 1, out_cos + 1);
+    {
+      float64x2_t ret = v_sincos_fallback (x[1]);
+      *(out_sin + 1) = ret[0];
+      *(out_cos + 1) = ret[1];
+    }
 }
 
 /* Double-precision vector function allowing calculation of both sin and cos in

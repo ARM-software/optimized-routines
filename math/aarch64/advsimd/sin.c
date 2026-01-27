@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sin function.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,6 +9,7 @@
 #include "test_sig.h"
 #include "mathlib.h"
 #include "v_math.h"
+#include "v_trig_fallback.h"
 
 static const struct data
 {
@@ -33,18 +34,21 @@ static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
   y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
-  return v_call_f64 (sin, x, y, cmp);
+  return v_call_vpcs_f64 (v_sin_fallback, x, y, cmp);
 }
 
 /* Vector (AdvSIMD) sin approximation.
    Maximum observed error in [-pi/2, pi/2], where argument is not reduced,
-   is 2.87 ULP:
+   is 2.37 + 0.5 ULP:
    _ZGVnN2v_sin (0x1.921d5c6a07142p+0) got 0x1.fffffffa7dc02p-1
 				      want 0x1.fffffffa7dc05p-1
    Maximum observed error in the entire non-special domain ([-2^23, 2^23])
-   is 3.22 ULP:
+   is 2.72 + 0.5 ULP:
    _ZGVnN2v_sin (0x1.5702447b6f17bp+22) got 0x1.ffdcd125c84fbp-3
-				       want 0x1.ffdcd125c84f8p-3.  */
+				       want 0x1.ffdcd125c84f8p-3
+   Maximum observed error in the special domain (|x| > 2^23) is 2.71 + 0.5ULP
+   _ZGVnN2v_sin (0x1.ce2af8b309a2ep+939) got -0x1.ffdd7a49803e6p-3
+					want -0x1.ffdd7a49803e3p-3.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -82,6 +86,6 @@ float64x2_t VPCS_ATTR V_NAME_D1 (sin) (float64x2_t x)
 }
 
 TEST_SIG (V, D, 1, sin, -3.1, 3.1)
-TEST_ULP (V_NAME_D1 (sin), 3.0)
+TEST_ULP (V_NAME_D1 (sin), 2.73)
 TEST_SYM_INTERVAL (V_NAME_D1 (sin), 0, 0x1p23, 500000)
 TEST_SYM_INTERVAL (V_NAME_D1 (sin), 0x1p23, inf, 10000)

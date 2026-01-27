@@ -1,7 +1,7 @@
 /*
  * Vector math abstractions.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -168,6 +168,19 @@ v_lookup_u64 (const uint64_t *tab, uint64x2_t idx)
 }
 static inline float64x2_t
 v_call_f64 (double (*f) (double), float64x2_t x, float64x2_t y, uint64x2_t p)
+{
+  double p1 = p[1];
+  double x1 = x[1];
+  if (likely (p[0]))
+    y[0] = f (x[0]);
+  if (likely (p1))
+    y[1] = f (x1);
+  return y;
+}
+
+static inline float64x2_t
+v_call_vpcs_f64 (double (VPCS_ATTR *f) (double), float64x2_t x, float64x2_t y,
+		 uint64x2_t p)
 {
   double p1 = p[1];
   double x1 = x[1];

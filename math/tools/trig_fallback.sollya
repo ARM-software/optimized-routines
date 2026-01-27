@@ -1,0 +1,28 @@
+// Script for generating relevant values for the reduction of large inputs
+// to fp64 trig routines.
+//
+// Generates a lookup table where each element is a 24 bit sliding window
+// of 2/pi. It is computed by iteratively multiplying 2/pi by 2^24,
+// and taking the integer component, which can be stored exactly.
+//
+// Also generates a polynomial for sine and cosine.
+// Copyright (c) 2026, Arm Limited.
+// SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+
+// Lookup table parameters
+tableSize = 75;
+val = 2 / pi;
+
+display = hexadecimal;
+for i from 0 to tableSize-1 do {
+    val = val * 2^24;
+
+    // To avoid propagating rounding errors, sollya defers evalulation of
+    // complex calculations, so it can use the exact inputs later on.
+    // the ~ forces immediate evalulation, which is required to get true values
+    // printed out, rather than floor(2/pi - ...)
+
+    limb = ~floor(val);
+    print (limb);
+    val = val - limb;
+};
