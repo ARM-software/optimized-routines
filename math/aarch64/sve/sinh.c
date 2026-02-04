@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE sinh(x) function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,13 +11,14 @@
 
 static const struct data
 {
+  uint64_t expm1_data[20];
   uint64_t halff;
   double c2, c4;
   double inv_ln2;
   double ln2_hi, ln2_lo;
   double c0, c1, c3;
-  double shift, special_bound, bound;
-  uint64_t expm1_data[20];
+  double shift, small_bound;
+  double special_bound, cosh_9;
 } data = {
   /* Table lookup of 2^(i/64) - 1, for values of i from 0..19.  */
   .expm1_data = {
@@ -40,7 +41,9 @@ static const struct data
   .shift = 0x1.800000000ffc0p+46, /* 1.5*2^46+1023.  */
   .halff = 0x3fe0000000000000,
   .special_bound = 0x1.62e37e7d8ba72p+9,	/* ln(2^(1024 - 1/128)).  */
-  .bound = 0x1.a56ef8ec924ccp-3 /* 19*ln2/64.  */
+  .small_bound = 0x1.a56ef8ec924ccp-3, /* 19*ln2/64.  */
+  /* cosh(9) 4051.541963787692 slightly shifted for accuracy.  */
+  .cosh_9 = 0x1.fa7157c470f82p+11,
 };
 
 /* A specialised FEXPA expm1 that is only valid for positive inputs and
@@ -79,7 +82,7 @@ expm1_inline (svbool_t pg, svfloat64_t x)
 
      This can be circumvented by using a small lookup for scale-1
      when our input is below a certain bound, otherwise we can use FEXPA.  */
-  svbool_t is_small = svaclt (pg, x, d->bound);
+  svbool_t is_small = svaclt (pg, x, d->small_bound);
 
   /* Index via the input of FEXPA, but we only care about the lower 5 bits.  */
   svuint64_t base_idx = svand_x (pg, u, 0x1f);
@@ -97,32 +100,37 @@ expm1_inline (svbool_t pg, svfloat64_t x)
   return svmla_x (pg, scalem1, scale, p);
 }
 
-/* Vectorised special case to handle values past where exp_inline overflows.
-   Halves the input value and uses the identity exp(x) = exp(x/2)^2 to double
-   the valid range of inputs, and returns inf for anything past that.  */
+/* Uses the compound angle formula to adjust x back into an approximable range:
+   sinh (A + B) = cosh(A)cosh(B) + sinh(A)sinh(B)
+   By choosing sufficiently large values whereby after rounding sinh == cosh,
+   this can be simplified into: sinh (A + B) = sinh(A) * e^B.  */
 static svfloat64_t NOINLINE
-special_case (svbool_t pg, svbool_t special, svfloat64_t ax,
-	      svfloat64_t halfsign, const struct data *d)
+special_case (svuint64_t sign, svbool_t pg, svbool_t special, svfloat64_t ax,
+	      svfloat64_t halfsign)
 {
-  /* Halves input value, and then check if any cases
-     are still going to overflow.  */
-  ax = svmul_x (special, ax, 0.5);
-  svbool_t is_safe = svaclt (special, ax, d->special_bound);
+  const struct data *d = ptr_barrier (&data);
+
+  /* The input `x` is reduced by an offset of 9.0 to allow for accurate
+     approximation on the interval x > SpecialBound ~ 709.78.  */
+  ax = svsub_m (special, ax, 9.0);
 
   svfloat64_t t = expm1_inline (pg, ax);
-
   /* Finish fastpass to compute values for non-special cases.  */
   svfloat64_t y = svadd_x (pg, t, svdiv_x (pg, t, svadd_x (pg, t, 1.0)));
   y = svmul_x (pg, y, halfsign);
 
-  /* Computes special lane, and set remaining overflow lanes to inf.  */
-  svfloat64_t half_special_y = svmul_x (svptrue_b64 (), t, halfsign);
-  svfloat64_t special_y = svmul_x (svptrue_b64 (), half_special_y, t);
+  /* Multiply the result by cosh(9) with a slight tweek for accuracy for
+     special lanes only.  */
+  svfloat64_t cosh_sum = svmul_x (svptrue_b64 (), t, d->cosh_9);
 
-  svuint64_t signed_inf
-      = svorr_x (svptrue_b64 (), svreinterpret_u64 (halfsign),
-		 sv_u64 (0x7ff0000000000000));
-  special_y = svsel (is_safe, special_y, svreinterpret_f64 (signed_inf));
+  /* Check for overflowing special lanes.  */
+  svbool_t is_inf = svcmpgt (special, ax, d->special_bound);
+  /* Return inf for overflowing lanes.  */
+  svfloat64_t special_y = svsel (is_inf, sv_f64 (INFINITY), cosh_sum);
+
+  /* Change sign back to original and return.  */
+  special_y = svreinterpret_f64 (
+      svorr_x (svptrue_b64 (), sign, svreinterpret_u64 (special_y)));
 
   /* Join resulting vectors together and return.  */
   return svsel (special, special_y, y);
@@ -130,13 +138,9 @@ special_case (svbool_t pg, svbool_t special, svfloat64_t ax,
 
 /* Approximation for SVE double-precision sinh(x) using FEXPA expm1.
    Uses sinh(x) = e^2x - 1 / 2e^x, rewritten for accuracy.
-   The greatest observed error in the fast pass is 2.63 + 0.5 ULP:
+   The greatest observed error is 2.62 + 0.5 ULP:
    _ZGVsMxv_sinh (0x1.b5e0e13ba88aep-2) got 0x1.c3587faf97b0cp-2
-				       want 0x1.c3587faf97b09p-2
-
-   The greatest observed error in the slow pass is 2.65 + 0.5 ULP:
-   _ZGVsMxv_sinh (0x1.633ce847dab1ap+9) got 0x1.fffd30eea0066p+1023
-				       want 0x1.fffd30eea0063p+1023.  */
+				       want 0x1.c3587faf97b09p-2.  */
 svfloat64_t SV_NAME_D1 (sinh) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -147,9 +151,10 @@ svfloat64_t SV_NAME_D1 (sinh) (svfloat64_t x, svbool_t pg)
       = sveor_x (pg, svreinterpret_u64 (x), svreinterpret_u64 (ax));
   svfloat64_t halfsign = svreinterpret_f64 (svorr_x (pg, sign, d->halff));
 
-  /* Fall back to scalar variant for all lanes if any are special.  */
+  /* Fall back to vectorised special case for any lanes which would cause
+     expm1f to overflow.  */
   if (unlikely (svptest_any (pg, special)))
-    return special_case (pg, special, ax, halfsign, d);
+    return special_case (sign, pg, special, ax, halfsign);
 
   /* Up to the point that expm1 overflows, we can use it to calculate sinh
      using a slight rearrangement of the definition of sinh. This allows us to
@@ -161,7 +166,9 @@ svfloat64_t SV_NAME_D1 (sinh) (svfloat64_t x, svbool_t pg)
 
 TEST_SIG (SV, D, 1, sinh, -10.0, 10.0)
 TEST_ULP (SV_NAME_D1 (sinh), 2.63)
-TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0, 0x1p-26, 1000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0x1p-26, 0x1p9, 500000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0x1p9, inf, 1000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0, 0x1p-26, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0x1p-26, 0x1.62e37e7d8ba72p+9, 500000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0x1.62e37e7d8ba72p+9, inf, 10000)
+/* Full range including NaNs.  */
+TEST_SYM_INTERVAL (SV_NAME_D1 (sinh), 0, 0xffff0000, 50000)
 CLOSE_SVE_ATTR
