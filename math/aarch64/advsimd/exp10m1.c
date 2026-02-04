@@ -1,16 +1,17 @@
 /*
  * Double-precision vector 10^x - 1 function.
  *
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2025-2026 Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "v_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
+#include "v_exp_special_case_inline.h"
 
 /* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 306.0 /* floor (log10 (2^1023)) - 1.  */
+#define SpecialBound 0x1.33f424c404a73p+8 /* log10(2^1023) ~ 307.96.  */
 
 /* Value of n above which scale overflows even with special treatment.  */
 #define ScaleBound 163840.0 /* 1280.0 * N.  */
@@ -18,11 +19,9 @@
 /* Value of |x| below which scale - 1 contributes produces large error.  */
 #define TableBound 0x1.a308a4198c9d7p-4 /* log10(2) * 87/256.  */
 
-#define N (1 << V_EXP_TABLE_BITS)
-#define IndexMask (N - 1)
-
 const static struct data
 {
+  struct v_exp_special_data special_data;
   double c6, c0;
   double c2, c4;
   double log2_10_hi, log2_10_lo;
@@ -33,6 +32,9 @@ const static struct data
   float64x2_t rnd2zero;
   uint64_t scalem1[88];
 } data = {
+  /* Special case data from helper.  */
+  .special_data = V_EXP_SPECIAL_DATA,
+
   /* Coefficients generated using Remez algorithm.  */
   .c0 = 0x1.26bb1bbb55516p1,
   .c1 = V2 (0x1.53524c73cea69p1),
@@ -46,12 +48,18 @@ const static struct data
   .rnd2zero = V2 (-0x1.34413509f79ffp-10), /* (2^-8)/log2(10).  */
   .sm1_tbl_off = V2 (24),
   .sm1_tbl_mask = V2 (0x3f),
-
   .log10_2 = V2 (0x1.a934f0979a371p8), /* N/log2(10).  */
   .log2_10_hi = 0x1.34413509f79ffp-9,  /* log2(10)/N.  */
   .log2_10_lo = -0x1.9dc1da994fd21p-66,
   .shift = V2 (0x1.8p+52),
   .scale_thresh = V2 (ScaleBound),
+  /* Implementation triggers special case handling as soon as the scale
+     overflows, which is earlier than exp10m1's overflow bound
+     `log10(DBL_MAX) ≈ 308.25` or underflow bound
+     `log10(DBL_TRUE_MIN) ≈ -323.31`.
+     The absolute comparison catches all these cases efficiently, although
+     there is a small window where special cases are triggered
+     unnecessarily.  */
   .special_bound = V2 (SpecialBound),
 
   /* Table containing 2^x - 1, for 2^x values close to 1.
@@ -93,25 +101,8 @@ const static struct data
   }
 };
 
-#define SpecialOffset v_u64 (0x6000000000000000) /* 0x1p513.  */
-/* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
-#define SpecialBias1 v_u64 (0x7000000000000000) /* 0x1p769.  */
-#define SpecialBias2 v_u64 (0x3010000000000000) /* 0x1p-254.  */
-
-static inline float64x2_t VPCS_ATTR
-special_case (float64x2_t s, float64x2_t y, float64x2_t n,
-	      const struct data *d)
-{
-  /* 2^(n/N) may overflow, break it up into s1*s2.  */
-  uint64x2_t b = vandq_u64 (vcltzq_f64 (n), SpecialOffset);
-  float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (SpecialBias1, b));
-  float64x2_t s2 = vreinterpretq_f64_u64 (
-      vaddq_u64 (vsubq_u64 (vreinterpretq_u64_f64 (s), SpecialBias2), b));
-  uint64x2_t cmp = vcagtq_f64 (n, d->scale_thresh);
-  float64x2_t r1 = vmulq_f64 (s1, s1);
-  float64x2_t r0 = vmulq_f64 (vfmaq_f64 (s2, y, s2), s1);
-  return vsubq_f64 (vbslq_f64 (cmp, r1, r0), v_f64 (1.0));
-}
+#define N (1 << V_EXP_TABLE_BITS)
+#define IndexMask (N - 1)
 
 static inline uint64x2_t
 lookup_sbits (uint64x2_t i)
@@ -140,7 +131,7 @@ lookup_sm1bits (float64x2_t x, uint64x2_t u, const struct data *d)
 float64x2_t VPCS_ATTR V_NAME_D1 (exp10m1) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
-  uint64x2_t cmp = vcageq_f64 (x, d->special_bound);
+  uint64x2_t cmp = vcagtq_f64 (x, d->special_bound);
 
   /* n = round(x/(log10(2)/N)).  */
   float64x2_t z = vfmaq_f64 (d->shift, x, d->log10_2);
@@ -166,7 +157,7 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10m1) (float64x2_t x)
   float64x2_t p16 = vfmaq_f64 (p12, r2, p36);
 
   float64x2_t p0 = vmulq_laneq_f64 (r, c60, 1);
-  float64x2_t p = vfmaq_f64 (p0, r2, p16);
+  float64x2_t poly = vfmaq_f64 (p0, r2, p16);
 
   uint64x2_t e = vshlq_n_u64 (u, 52 - V_EXP_TABLE_BITS);
 
@@ -181,18 +172,24 @@ float64x2_t VPCS_ATTR V_NAME_D1 (exp10m1) (float64x2_t x)
     scalem1 = vbslq_f64 (is_small, lookup_sm1bits (x, u, d), scalem1);
 
   /* Construct exp10m1 = (scale - 1) + scale * poly.  */
-  float64x2_t y = vfmaq_f64 (scalem1, scale, p);
+  float64x2_t y = vfmaq_f64 (scalem1, scale, poly);
 
   /* Fallback to special case for lanes with overflow.  */
   if (unlikely (v_any_u64 (cmp)))
-    return vbslq_f64 (cmp, special_case (scale, p, n, d), y);
-
+    {
+      float64x2_t special
+	  = (exp_special (poly, n, scale, d->scale_thresh, &d->special_data));
+      float64x2_t specialm1 = vsubq_f64 (special, v_f64 (1.0));
+      return vbslq_f64 (cmp, specialm1, y);
+    }
   return y;
 }
 
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (exp10m1), 2.53)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), 0, TableBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), 0, 0x1p-51, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), 0x1p-51, TableBound, 10000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), TableBound, SpecialBound, 10000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), SpecialBound, inf, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), SpecialBound, ScaleBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp10m1), ScaleBound, inf, 10000)
 #endif

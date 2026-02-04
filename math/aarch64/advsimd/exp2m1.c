@@ -1,18 +1,19 @@
 /*
  * Double-precision vector 2^x - 1 function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "test_defs.h"
 #include "v_math.h"
+#include "v_exp_special_case_inline.h"
 
 /* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 1022.0
+#define SpecialBound 0x1.ff8p+9 /* log2(2^1023) = 1023.00.  */
 
 /* Value of n above which scale overflows even with special treatment.  */
-#define ScaleBound 1280.0
+#define ScaleBound 0x1.4p+10 /* 1280.0.  */
 
 /* 87/256, value of x under which table lookup is used for 2^x-1.  */
 #define TableBound 0x1.5bfffffffffffp-2
@@ -23,13 +24,16 @@
 
 static const struct data
 {
-  uint64x2_t exponent_bias, special_offset, special_bias, special_bias2,
-      sm1_tbl_off, sm1_tbl_mask;
+  struct v_exp_special_data special_data;
+  double log2_lo, c2, c4, c6;
+  uint64x2_t sm1_tbl_off, sm1_tbl_mask;
   float64x2_t scale_thresh, special_bound, shift, rnd2zero;
   float64x2_t log2_hi, c1, c3, c5;
-  double log2_lo, c2, c4, c6;
   uint64_t scalem1[88];
 } data = {
+  /* Special case data from helper.  */
+  .special_data = V_EXP_SPECIAL_DATA,
+
   /* Coefficients generated using remez's algorithm for exp2m1(x).  */
   .log2_hi = V2 (0x1.62e42fefa39efp-1),
   .log2_lo = 0x1.abc9e3b39803f3p-56,
@@ -39,16 +43,19 @@ static const struct data
   .c4 = 0x1.5d1d37eb33b15p-10,
   .c5 = V2 (0x1.423f35f371d9ap-13),
   .c6 = 0x1.e7d57ad9a5f93p-5,
-  .exponent_bias = V2 (0x3ff0000000000000),
-  .special_offset = V2 (0x6000000000000000), /* 0x1p513.  */
-  .special_bias = V2 (0x7000000000000000),   /* 0x1p769.  */
-  .special_bias2 = V2 (0x3010000000000000),  /* 0x1p-254.  */
-  .scale_thresh = V2 (ScaleBound),
+  /* Implementation triggers special case handling as soon as the scale
+     overflows, which is earlier than exp2m1's overflow bound
+     `log2(DBL_MAX) ≈ 1024.0` or underflow bound
+     `log2(DBL_TRUE_MIN) = -1074.0`.
+     The absolute comparison catches all these cases efficiently, although
+     there is a small window where special cases are triggered
+     unnecessarily.  */
   .special_bound = V2 (SpecialBound),
   .shift = V2 (0x1.8p52 / N),
   .rnd2zero = V2 (-0x1p-8),
   .sm1_tbl_off = V2 (24),
   .sm1_tbl_mask = V2 (0x3f),
+  .scale_thresh = V2 (ScaleBound),
 
   /* Table containing 2^x - 1, for 2^x values close to 1.
      The table holds values of 2^(i/128) - 1, computed in
@@ -111,22 +118,6 @@ lookup_sm1bits (float64x2_t x, uint64x2_t u, const struct data *d)
   return vreinterpretq_f64_u64 (sm1);
 }
 
-static inline VPCS_ATTR float64x2_t
-special_case (float64x2_t poly, float64x2_t n, uint64x2_t e, float64x2_t scale,
-	      const struct data *d)
-{
-  /* 2^n may overflow, break it up into s1*s2.  */
-  uint64x2_t b = vandq_u64 (vclezq_f64 (n), d->special_offset);
-  float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (d->special_bias, b));
-  float64x2_t s2 = vreinterpretq_f64_u64 (vaddq_u64 (
-      vsubq_u64 (vreinterpretq_u64_f64 (scale), d->special_bias2), b));
-  uint64x2_t cmp2 = vcagtq_f64 (n, d->scale_thresh);
-  float64x2_t r1 = vmulq_f64 (s1, s1);
-  float64x2_t r2 = vmulq_f64 (vfmaq_f64 (s2, poly, s2), s1);
-  /* Similar to r1 but avoids double rounding in the subnormal range.  */
-  return vsubq_f64 (vbslq_f64 (cmp2, r1, r2), v_f64 (1.0f));
-}
-
 /* Double-precision vector exp2(x) - 1 function.
    The maximum error is 2.55 + 0.5 ULP.
    _ZGVnN2v_exp2m1 (0x1.1113e87a035ap-8) got 0x1.7b1d06f0a7d36p-9
@@ -177,15 +168,20 @@ VPCS_ATTR float64x2_t V_NAME_D1 (exp2m1) (float64x2_t x)
 
   /* Fallback to special case for lanes with overflow.  */
   if (unlikely (v_any_u64 (cmp)))
-    return vbslq_f64 (cmp, special_case (poly, n, e, scale, d), y);
-
+    {
+      float64x2_t special
+	  = (exp_special (poly, n, scale, d->scale_thresh, &d->special_data));
+      float64x2_t specialm1 = vsubq_f64 (special, v_f64 (1.0f));
+      return vbslq_f64 (cmp, specialm1, y);
+    }
   return y;
 }
 
 #if WANT_C23_TESTS
 TEST_ULP (V_NAME_D1 (exp2m1), 2.55)
-TEST_INTERVAL (V_NAME_D1 (exp2m1), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0, TableBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0, 0x1p-51, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), 0x1p-51, TableBound, 10000)
 TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), TableBound, SpecialBound, 10000)
-TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), SpecialBound, inf, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), SpecialBound, ScaleBound, 10000)
+TEST_SYM_INTERVAL (V_NAME_D1 (exp2m1), ScaleBound, inf, 10000)
 #endif

@@ -8,23 +8,26 @@
 #include "v_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
+#include "v_exp_special_case_inline.h"
 
 /* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 0x1.62b7d369a5aa9p+9 /* ~709.43.  */
+#define SpecialBound 0x1.62b7d369a5aa9p+9 /* ln(√2 * (2^1023) ~ 709.44.  */
 
 /* Value of n above which scale overflows even with special treatment.  */
 #define ScaleBound 0x1.4p+10 /* 1280.0.  */
 
 static const struct data
 {
+  struct v_exp_special_data special_data;
+  double c1, c3, c5, c7;
+  double c9, c10, ln2[2];
   float64x2_t c2, c4, c6, c8;
   float64x2_t invln2;
   int64x2_t exponent_bias;
-  uint64x2_t special_offset, special_bias, special_bias2;
-  double c1, c3, c5, c7, c9, c10;
-  double ln2[2];
   float64x2_t special_bound, scale_thresh;
 } data = {
+  /* Special case data from helper.  */
+  .special_data = V_EXP_SPECIAL_DATA,
   .c1 = 0x1.5555555555559p-3,
   .c2 = V2 (0x1.555555555554bp-5),
   .c3 = 0x1.111111110f663p-7,
@@ -38,31 +41,16 @@ static const struct data
   .ln2 = { 0x1.62e42fefa39efp-1, 0x1.abc9e3b39803fp-56 },
   .invln2 = V2 (0x1.71547652b82fep0),
   .exponent_bias = V2 (0x3ff0000000000000),
-  .special_offset = V2 (0x6000000000000000), /* 0x1p513.  */
-  .special_bias = V2 (0x7000000000000000),   /* 0x1p769.  */
-  .special_bias2 = V2 (0x3010000000000000),  /* 0x1p-254.  */
-  /* Value above which expm1(x) should overflow. Absolute value of the
-     underflow bound is greater than this, so it catches both cases - there is
-     a small window where fallbacks are triggered unnecessarily.  */
-  .scale_thresh = V2 (ScaleBound),
+  /* Implementation triggers special case handling as soon as the scale
+     overflows, which is earlier than expm1's overflow bound
+     `ln(DBL_MAX) ≈ 709.78` or underflow bound
+     `ln(DBL_TRUE_MIN) ≈ -744.44`.
+     The absolute comparison catches all these cases efficiently, although
+     there is a small window where special cases are triggered
+     unnecessarily.  */
   .special_bound = V2 (SpecialBound),
+  .scale_thresh = V2 (ScaleBound),
 };
-
-static inline float64x2_t VPCS_ATTR
-special_case (float64x2_t poly, float64x2_t n, float64x2_t scale,
-	      const struct data *d)
-{
-  /* 2^n may overflow, break it up into s1*s2.  */
-  uint64x2_t b = vandq_u64 (vclezq_f64 (n), d->special_offset);
-  float64x2_t s1 = vreinterpretq_f64_u64 (vsubq_u64 (d->special_bias, b));
-  float64x2_t s2 = vreinterpretq_f64_u64 (vaddq_u64 (
-      vsubq_u64 (vreinterpretq_u64_f64 (scale), d->special_bias2), b));
-  uint64x2_t cmp2 = vcagtq_f64 (n, d->scale_thresh);
-  float64x2_t r1 = vmulq_f64 (s1, s1);
-  float64x2_t r2 = vmulq_f64 (vfmaq_f64 (s2, poly, s2), s1);
-  /* Similar to r1 but avoids double rounding in the subnormal range.  */
-  return vsubq_f64 (vbslq_f64 (cmp2, r1, r2), v_f64 (1.0f));
-}
 
 /* Double-precision vector exp(x) - 1 function.
    The maximum error observed error is 1.55 +0.5 ULP:
@@ -103,27 +91,30 @@ float64x2_t VPCS_ATTR V_NAME_D1 (expm1) (float64x2_t x)
   float64x2_t p03 = vfmaq_f64 (p01, f2, p23);
   float64x2_t p47 = vfmaq_f64 (p45, f2, p67);
   float64x2_t p89 = vfmaq_laneq_f64 (d->c8, f, lane_consts_910, 0);
-  float64x2_t p = vfmaq_laneq_f64 (p89, f2, lane_consts_910, 1);
-  p = vfmaq_f64 (p47, f4, p);
-  p = vfmaq_f64 (p03, f4, p);
+  float64x2_t poly = vfmaq_laneq_f64 (p89, f2, lane_consts_910, 1);
+  poly = vfmaq_f64 (p47, f4, poly);
+  poly = vfmaq_f64 (p03, f4, poly);
 
-  p = vfmaq_f64 (f, f2, p);
+  poly = vfmaq_f64 (f, f2, poly);
 
   /* Assemble the result.
-     expm1(x) ~= 2^i * (p + 1) - 1
+     expm1(x) ~= 2^i * (poly + 1) - 1
      Let scale = 2^i.  */
   int64x2_t u = vaddq_s64 (vshlq_n_s64 (i, 52), d->exponent_bias);
   float64x2_t scale = vreinterpretq_f64_s64 (u);
 
-  float64x2_t y = vfmaq_f64 (vsubq_f64 (scale, v_f64 (1.0)), p, scale);
+  float64x2_t y = vfmaq_f64 (vsubq_f64 (scale, v_f64 (1.0)), poly, scale);
 
-  uint64x2_t special = vcageq_f64 (x, d->special_bound);
+  uint64x2_t cmp = vcageq_f64 (x, d->special_bound);
 
   /* Fallback to special case for lanes with overflow.  */
-  if (unlikely (v_any_u64 (special)))
-    return vbslq_f64 (special, special_case (p, n, scale, d), y);
-
-  /* expm1(x) ~= p * scale + (scale - 1).  */
+  if (unlikely (v_any_u64 (cmp)))
+    {
+      float64x2_t special
+	  = (exp_special (poly, n, scale, d->scale_thresh, &d->special_data));
+      float64x2_t specialm1 = vsubq_f64 (special, v_f64 (1.0f));
+      return vbslq_f64 (cmp, specialm1, y);
+    }
   return y;
 }
 
