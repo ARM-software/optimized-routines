@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE asinh(x) function.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -19,7 +19,7 @@ static const struct data
   double even_coeffs[9];
   double ln2, p3, p1, p4, p0, p2, c1, c3, c5, c7, c9, c11, c13, c15, c17;
   uint64_t off, mask;
-
+  double inf;
 } data = {
    /* Polynomial generated using Remez on [2^-26, 1].  */
   .even_coeffs ={
@@ -51,13 +51,8 @@ static const struct data
   .p4 = -0x1.554e550bd501ep-3,
   .off = 0x3fe6900900000000,
   .mask = 0xfffULL << 52,
+  .inf = INFINITY
 };
-
-static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
-{
-  return sv_call_f64 (asinh, x, y, special);
-}
 
 static inline svfloat64_t
 __sv_log_inline (svfloat64_t x, const struct data *d, const svbool_t pg)
@@ -94,12 +89,38 @@ __sv_log_inline (svfloat64_t x, const struct data *d, const svbool_t pg)
   return y;
 }
 
+static svfloat64_t NOINLINE
+special_case (svfloat64_t ax, svfloat64_t y, svuint64_t sign, svbool_t special,
+	      svbool_t pg, const struct data *d)
+{
+  /* For very large inputs (x > 2^511), asinh(x) ≈ ln(2x).
+     In this range the +sqrt(x^2+1) term is negligible, so we compute
+     asinh(x) as ln(x) + ln(2) later in this function.  */
+  svfloat64_t log_ax = __sv_log_inline (ax, d, special);
+
+  /* The only special cases that need considering are infinity and NaNs since
+     0 will be handled by other calculations.  */
+  svfloat64_t inf = sv_f64 (d->inf);
+  svbool_t is_inf = svcmpeq (special, ax, inf);
+  svbool_t is_nan = svcmpne (special, ax, ax);
+  svfloat64_t inf_ln2 = svsel (is_inf, inf, sv_f64 (d->ln2));
+  svfloat64_t inf_nan_ln2 = svsel (is_nan, sv_f64 (NAN), inf_ln2);
+  svfloat64_t asinh_x_res = svadd_x (special, log_ax, inf_nan_ln2);
+
+  /* Now select (based on special) between x and y to change the type and,
+     return either the positive or negative value, considering the input and
+     its sign.  */
+  svfloat64_t result = svsel (special, asinh_x_res, y);
+  svuint64_t result_uint = svreinterpret_u64 (result);
+  return svreinterpret_f64 (sveor_m (pg, result_uint, sign));
+}
+
 /* Double-precision implementation of SVE asinh(x).
    asinh is very sensitive around 1, so it is impractical to devise a single
    low-cost algorithm which is sufficiently accurate on a wide range of input.
    Instead we use two different algorithms:
    asinh(x) = sign(x) * log(|x| + sqrt(x^2 + 1)      if |x| >= 1
-	    = sign(x) * (|x| + |x|^3 * P(x^2))       otherwise
+      = sign(x) * (|x| + |x|^3 * P(x^2))       otherwise
    where log(x) is an optimized log approximation, and P(x) is a polynomial
    shared with the scalar routine. The greatest observed error 2.51 ULP, in
    |x| >= 1:
@@ -170,15 +191,12 @@ svfloat64_t SV_NAME_D1 (asinh) (svfloat64_t x, const svbool_t pg)
       option_2 = svmla_x (pg, ax, p, svmul_x (svptrue_b64 (), x2, ax));
     }
 
-  if (unlikely (svptest_any (pg, special)))
-    return special_case (
-	x,
-	svreinterpret_f64 (sveor_x (
-	    pg, svreinterpret_u64 (svsel (ge1, option_1, option_2)), sign)),
-	special);
-
   /* Choose the right option for each lane.  */
   svfloat64_t y = svsel (ge1, option_1, option_2);
+
+  if (unlikely (svptest_any (pg, special)))
+    return special_case (ax, y, sign, special, pg, d);
+
   return svreinterpret_f64 (sveor_x (pg, svreinterpret_u64 (y), sign));
 }
 
