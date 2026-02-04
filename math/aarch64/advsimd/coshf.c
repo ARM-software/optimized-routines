@@ -1,7 +1,7 @@
 /*
  * Single-precision vector cosh(x) function.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -13,18 +13,49 @@
 static const struct data
 {
   struct v_expf_data expf_consts;
-  float32x4_t bound;
+  float32x4_t special_bound, inf_bound, cosh_9, nine;
 } data = {
   .expf_consts = V_EXPF_DATA,
-  /* 0x1.5a92d8p+6: expf overflows above this, so have to use special case.  */
-  .bound = V4 (0x1.5a92d8p+6),
+  /* 86.64: expf overflows above this, so have to use special case.  */
+  .special_bound = V4 (0x1.5a92d8p+6),
+  /* Value above which inf is returned.  */
+  .inf_bound = V4 (0x1.65a9fap+6), /* ~ 89.42.  */
+  .cosh_9 = V4 (0x1.fa715845p+11), /* cosh(9).  */
+  .nine = V4 (0x1.2p+3),	   /* 9.0.  */
 };
 
+/* Uses the compound angle formula to adjust x back into an approximable range:
+   cosh (A + B) = cosh(A)cosh(B) + sinh(A)sinh(B)
+   By choosing sufficiently large values whereby after rounding cosh == sinh,
+   this can be simplified into: cosh (A + B) = cosh(A) * e^B.  */
 static float32x4_t NOINLINE VPCS_ATTR
-special_case (float32x4_t x, float32x4_t half_t, float32x4_t half_over_t,
-	      uint32x4_t special)
+special_case (float32x4_t x, float32x4_t t, uint32x4_t special)
 {
-  return v_call_f32 (coshf, x, vaddq_f32 (half_t, half_over_t), special);
+  const struct data *d = ptr_barrier (&data);
+
+  /* Complete fast path computation.  */
+  /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */
+  float32x4_t half_t = vmulq_n_f32 (t, 0.5);
+  float32x4_t half_over_t = vdivq_f32 (v_f32 (0.5), t);
+  float32x4_t y = vaddq_f32 (half_t, half_over_t);
+
+  /* Absolute x so we can subtract 9.0 without worrying about signing.  */
+  float32x4_t ax = vabsq_f32 (x);
+  /* Subtract 9.0 from x as a reduction to prevent early overflow.  */
+  float32x4_t sx = vsubq_f32 (ax, d->nine);
+  float32x4_t s = v_expf_inline (sx, &d->expf_consts);
+
+  /* Multiply the result by cosh(9) slightly shifted for accuracy.  */
+  float32x4_t r = vmulq_f32 (s, d->cosh_9);
+
+  /* Check for overflowing lanes and return inf.  */
+  uint32x4_t cmp = vcagtq_f32 (ax, d->inf_bound);
+
+  /* Set overflowing lines to inf and set none over flowing to result.  */
+  r = vbslq_f32 (cmp, v_f32 (INFINITY), r);
+
+  /* Return r for special lanes and y for none special lanes.  */
+  return vbslq_f32 (special, r, y);
 }
 
 /* Single-precision vector cosh, using vector expf.
@@ -35,16 +66,19 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cosh) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
 
-  uint32x4_t special = vcageq_f32 (x, d->bound);
   float32x4_t t = v_expf_inline (x, &d->expf_consts);
 
+  /* Check for special cases.  */
+  uint32x4_t special = vcageq_f32 (x, d->special_bound);
+  /* Fall back to vectorised special case for any lanes which would cause
+     expm1 to overflow.  */
+  if (unlikely (v_any_u32 (special)))
+    return special_case (x, t, special);
+
+  /* Complete fast path if no special lanes.  */
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.  */
   float32x4_t half_t = vmulq_n_f32 (t, 0.5);
   float32x4_t half_over_t = vdivq_f32 (v_f32 (0.5), t);
-
-  if (unlikely (v_any_u32 (special)))
-    return special_case (x, half_t, half_over_t, special);
-
   return vaddq_f32 (half_t, half_over_t);
 }
 
@@ -52,7 +86,9 @@ HALF_WIDTH_ALIAS_F1 (cosh)
 
 TEST_SIG (V, F, 1, cosh, -10.0, 10.0)
 TEST_ULP (V_NAME_F1 (cosh), 1.89)
-TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0x1p-63, 100)
-TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1p-63, 1, 1000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0x1p-63, 1000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1p-63, 1, 10000)
 TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 1, 0x1.5a92d8p+6, 80000)
-TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 10000)
+/* Full range including NaNs.  */
+TEST_SYM_INTERVAL (V_NAME_F1 (cosh), 0, 0xffff0000, 50000)
