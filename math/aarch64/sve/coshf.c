@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE cosh(x) function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,33 +10,59 @@
 #include "test_defs.h"
 #include "sv_expf_inline.h"
 
+/* For x < SpecialBound, the result of exp is subnormal and not handled
+   correctly by FEXPA.  */
+#define SpecialBound 0x1.5d5e2ap+6f /* ~ 87.34.  */
+
 static const struct data
 {
   struct sv_expf_data expf_consts;
-  float special_bound;
+  float32_t special_bound, cosh_9;
 } data = {
   .expf_consts = SV_EXPF_DATA,
-  /* 0x1.5a92d8p+6: expf overflows above this, so have to use special case.  */
-  .special_bound = 0x1.5a92d8p+6,
+  .special_bound = SpecialBound,
+  .cosh_9 = 0x1.fa715845p+11, /* cosh(9).  */
 };
 
-static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t half_e, svfloat32_t half_over_e,
-	      svbool_t pg)
+/* Uses the compound angle formula to adjust x back into an approximable range:
+   cosh (A + B) = cosh(A)cosh(B) + sinh(A)sinh(B)
+   By choosing sufficiently large values whereby after rounding cosh == sinh,
+   this can be simplified into: cosh (A + B) = cosh(A) * e^B.  */
+static inline svfloat32_t
+special_case (svfloat32_t x, svbool_t special, svfloat32_t half_e,
+	      svfloat32_t half_over_e, const struct data *d)
 {
-  return sv_call_f32 (coshf, x, svadd_x (svptrue_b32 (), half_e, half_over_e),
-		      pg);
+  /* Finish fastpass to compute values for non-special cases.  */
+  svfloat32_t y = svadd_x (svptrue_b32 (), half_e, half_over_e);
+
+  /* Make special values positive.  */
+  svfloat32_t ax = svabs_x (svptrue_b32 (), x);
+
+  /* The input `x` is reduced by an offset of 9.0 to allow for accurate
+     approximation on the interval `x > SpecialBound ~ 87.34`.  */
+  ax = svsub_x (svptrue_b32 (), ax, 9.0);
+  svfloat32_t r = expf_inline (ax, svptrue_b32 (), &d->expf_consts);
+
+  /* Multiply the result e by cosh(9) = exp(9)/2 for special lanes only.  */
+  svfloat32_t coshf_sum = svmul_x (svptrue_b32 (), r, d->cosh_9);
+
+  /* Check for overflow in exponential for special case lanes.  */
+  svbool_t is_inf = svcmpge (special, ax, d->special_bound);
+
+  /* Set overflowing lines to inf and set none over flowing to result.  */
+  svfloat32_t special_y = svsel (is_inf, sv_f32 (INFINITY), coshf_sum);
+
+  /* Return special_y for special lanes and y for none special lanes.  */
+  return svsel (special, special_y, y);
 }
 
 /* Single-precision vector cosh, using vector expf.
-   Maximum error is 2.56 +0.5 ULP:
+   Maximum error is 2.55 +0.5 ULP:
    _ZGVsMxv_coshf(-0x1.5b40f4p+1) got 0x1.e47748p+2
 				 want 0x1.e4774ep+2.  */
 svfloat32_t SV_NAME_F1 (cosh) (svfloat32_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
-
-  svbool_t special = svacge (pg, x, d->special_bound);
 
   /* Calculate cosh by exp(x) / 2 + exp(-x) / 2.
      Note that x is passed to exp here, rather than |x|. This is to avoid using
@@ -47,15 +73,21 @@ svfloat32_t SV_NAME_F1 (cosh) (svfloat32_t x, svbool_t pg)
   svfloat32_t half_e = svmul_x (svptrue_b32 (), e, 0.5);
   svfloat32_t half_over_e = svdivr_x (pg, e, 0.5);
 
+  /* Check for special cases and fall back to vectorised special case for any
+  lanes which would cause expf to overflow.  */
+  svbool_t special = svacgt (pg, x, d->special_bound);
   if (unlikely (svptest_any (pg, special)))
-    return special_case (x, half_e, half_over_e, special);
+    return special_case (x, special, half_e, half_over_e, d);
 
+  /* Complete fast path if no special lanes.  */
   return svadd_x (svptrue_b32 (), half_e, half_over_e);
 }
 
 TEST_SIG (SV, F, 1, cosh, -10.0, 10.0)
 TEST_ULP (SV_NAME_F1 (cosh), 2.56)
-TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1p-63, 100)
-TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1.5a92d8p+6, 80000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0x1.5a92d8p+6, inf, 2000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0x1p-63, 10000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, SpecialBound, 80000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), SpecialBound, inf, 20000)
+/* Full range including NaNs.  */
+TEST_SYM_INTERVAL (SV_NAME_F1 (cosh), 0, 0xffff0000, 50000)
 CLOSE_SVE_ATTR
