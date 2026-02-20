@@ -1,7 +1,7 @@
 /*
  * Single-precision vector asinh(x) function.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -15,12 +15,12 @@ const static struct data
   struct v_log1pf_data log1pf_consts;
   float32x4_t one;
   uint32x4_t square_lim;
-  float32x4_t pinf, nan;
+  float32x4_t inf, nan;
 } data = {
   .one = V4 (1),
   .log1pf_consts = V_LOG1PF_CONSTANTS_TABLE,
   .square_lim = V4 (0x5f800000), /* asuint(sqrt(FLT_MAX)).  */
-  .pinf = V4 (INFINITY),
+  .inf = V4 (INFINITY),
   .nan = V4 (NAN),
 };
 
@@ -41,31 +41,39 @@ static float32x4_t VPCS_ATTR NOINLINE
 special_case (float32x4_t ax, uint32x4_t sign, uint32x4_t special,
 	      const struct data *d)
 {
-  /* To avoid overflow in x^2 (so the x < sqrt(FLT_MAX) constraint), we
-    reduce the input of asinh to a narrower interval by relying on the
-    identity: 2asinh(t) = +-acosh(2t^2 + 1)
-    If we set t=sqrt((x-1)/2), then
-    2asinh(sqrt((x-1)/2)) = acosh(x).
-    Found that, for a high input x, asinh(x) very closely approximates
-    acosh(x), so implemented it with this function instead.  */
-  float32x4_t r = vsubq_f32 (ax, d->one);
-  r = vmulq_f32 (r, v_f32 (0.5f));
-  r = vbslq_f32 (special, vsqrtq_f32 (r), ax);
+  float32x4_t t
+      = vaddq_f32 (v_f32 (1.0f), vsqrtq_f32 (vfmaq_f32 (d->one, ax, ax)));
+  float32x4_t y = vaddq_f32 (ax, vdivq_f32 (vmulq_f32 (ax, ax), t));
 
-  float32x4_t y = inline_asinhf (r, sign, d);
+  /* For large inputs (x > 2^64), asinh(x) ≈ ln(2x).
+     1 becomes negligible in sqrt(x^2+1), so we compute
+     asinh(x) as ln(x) + ln(2).  */
+  float32x4_t xy = vbslq_f32 (special, ax, y);
+  float32x4_t log_xy = log1pf_inline (xy, &d->log1pf_consts);
 
-  y = vbslq_f32 (special, vmulq_f32 (y, v_f32 (2.0f)), y);
+  /* Infinity and NaNs are the only other special cases that need checking
+     before we return the values. 0 is handled by inline_asinhf as it returns
+     0. Below we implememt the logic that returns infinity when infinity is
+     passed and NaNs when NaNs are passed. Sometimes due to intrinsics like
+     vdivq_f32, infinity can change into NaNs, so we want to make sure the
+     right result is returned.
 
-  /* Check whether x is inf or nan.  */
-  uint32x4_t ret_inf = vceqq_f32 (ax, d->pinf);
-  uint32x4_t ret_nan = vmvnq_u32 (vcleq_f32 (ax, d->pinf));
-  y = vbslq_f32 (ret_inf, d->pinf, y);
-  y = vbslq_f32 (ret_nan, d->nan, y);
-  /* Put sign back in for minf, as it doesn't happen in log1pf_inline call.  */
-  y = vbslq_f32 (
-      ret_inf,
-      vreinterpretq_f32_u32 (veorq_u32 (vreinterpretq_u32_f32 (y), sign)), y);
-  return y;
+     Since these steps run in parallel with the log, we select between the
+     results we'll want to add to log_x in time, since addition with infinity
+     and NaNs doesn't make a difference. When we get to the adition step,
+     everything is already in the right place.  */
+  float32x4_t ln2 = d->log1pf_consts.ln2;
+  uint32x4_t is_finite = vcltq_f32 (ax, d->inf);
+  float32x4_t ln2_inf_nan = vbslq_f32 (is_finite, ln2, ax);
+
+  /* Before returning the result, the right sign will be assinged to the
+     absolute result. This is because we pass an absoulte x to the function.
+   */
+
+  float32x4_t asinhf
+      = vbslq_f32 (special, vaddq_f32 (log_xy, ln2_inf_nan), log_xy);
+  return vreinterpretq_f32_u32 (
+      veorq_u32 (sign, vreinterpretq_u32_f32 (asinhf)));
 }
 
 /* Single-precision implementation of vector asinh(x), using vector log1p.
