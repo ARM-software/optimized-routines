@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE log10(x) function.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,18 +9,15 @@
 #include "test_sig.h"
 #include "test_defs.h"
 
-#define Min 0x0010000000000000
-#define Max 0x7ff0000000000000
-#define Thres 0x7fe0000000000000 /* Max - Min.  */
 #define N (1 << V_LOG10_TABLE_BITS)
 
 static const struct data
 {
-  double c0, c2;
+  double two_2_52, log10_52;
+  double c0, c2, c4;
   double c1, c3;
   double invln10, log10_2;
-  double c4;
-  uint64_t off;
+  uint64_t off, thresh;
 } data = {
   .c0 = -0x1.bcb7b1526e506p-3,
   .c1 = 0x1.287a7636be1d1p-3,
@@ -29,28 +26,18 @@ static const struct data
   .c4 = -0x1.287461742fee4p-4,
   .invln10 = 0x1.bcb7b1526e50ep-2,
   .log10_2 = 0x1.34413509f79ffp-2,
+  .two_2_52 = 0x1p52,		     /* 2^52.  */
+  .log10_52 = -0x1.f4e9f6303263ep+3, /* log10(2) * 52 ~ 15.65.  */
   .off = 0x3fe6900900000000,
+  /* The threshold is computed from the lower and upper bounds,
+     respectively the smallest normalised number, min = 0x0010000000000000
+     and infinity, 0x7ff0000000000000.  */
+  .thresh = 0x7fe0000000000000, /* infinity - min.  */
 };
 
-static svfloat64_t NOINLINE
-special_case (svfloat64_t hi, svuint64_t tmp, svfloat64_t y, svfloat64_t r2,
-	      svbool_t special, const struct data *d)
+static inline svfloat64_t
+v_log10_inline (svuint64_t ix, const svbool_t pg, const struct data *d)
 {
-  svfloat64_t x = svreinterpret_f64 (svadd_x (svptrue_b64 (), tmp, d->off));
-  return sv_call_f64 (log10, x, svmla_x (svptrue_b64 (), hi, r2, y), special);
-}
-
-/* Double-precision SVE log10 routine.
-   Maximum measured error is 2.46 ulps.
-   SV_NAME_D1 (log10)(0x1.131956cd4b627p+0) got 0x1.fffbdf6eaa669p-6
-					   want 0x1.fffbdf6eaa667p-6.  */
-svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
-{
-  const struct data *d = ptr_barrier (&data);
-
-  svuint64_t ix = svreinterpret_u64 (x);
-  svbool_t special = svcmpge (pg, svsub_x (pg, ix, Min), Thres);
-
   /* x = 2^k z; where z is in range [Off,2*Off) and exact.
      The range is split into N subintervals.
      The ith subinterval contains z and c is near its center.  */
@@ -84,9 +71,60 @@ svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
   y = svmla_x (pg, y, r2, d->c4);
   y = svmla_x (pg, p, r2, y);
 
-  if (unlikely (svptest_any (pg, special)))
-    return special_case (hi, tmp, y, r2, special, d);
   return svmla_x (pg, hi, r2, y);
+}
+
+/* The special case is made up of a series of selects which chose the correct
+   outcome of the special lanes from inf, -inf or nan or for subnormals a
+   calculation of x * 2^52 (2^mantissa) to normalise the number at entry to
+   the log function and then subtract log10(2) * 52 to re-subnormalise the
+   output to the correct result.  */
+static svfloat64_t NOINLINE
+special_case (svfloat64_t x, svbool_t pg, svbool_t special)
+{
+  const struct data *d = ptr_barrier (&data);
+  /* Check covers subnormal range. This is greater than the actual range but
+     standard case lanes and +inf are handled seperately.  */
+  svbool_t is_sub = svcmpgt_f64 (pg, x, sv_f64 (0));
+  /* Check for 0 which = -Infinity.  */
+  svbool_t is_minf = svcmpeq_f64 (pg, x, sv_f64 (0));
+  svbool_t is_pinf = svcmpeq_f64 (pg, x, sv_f64 (INFINITY));
+
+  /* Increase x for special cases to catch sub normals.  */
+  x = svmul_m (special, x, d->two_2_52);
+  svuint64_t ix = svreinterpret_u64 (x);
+
+  /* Select correct special case correction depending on x.  */
+  svfloat64_t special_log = svsel (is_sub, sv_f64 (d->log10_52), sv_f64 (NAN));
+  special_log = svsel (is_minf, sv_f64 (-INFINITY), special_log);
+  special_log = svsel (is_pinf, sv_f64 (INFINITY), special_log);
+
+  /* Return log for both special after offset and none special cases.  */
+  svfloat64_t log_sum = v_log10_inline (ix, pg, d);
+
+  /* Reduce the output of log for special cases to complete the subnormals
+     calculation or add inf, -inf or nan depending on special_log.
+     Return log without correction for none special lanes.  */
+  return svadd_m (special, log_sum, special_log);
+}
+
+/* Double-precision SVE log10 routine.
+   Maximum measured error is 2.46 ulps.
+   SV_NAME_D1 (log10)(0x1.131956cd4b627p+0) got 0x1.fffbdf6eaa669p-6
+					   want 0x1.fffbdf6eaa667p-6.  */
+svfloat64_t SV_NAME_D1 (log10) (svfloat64_t x, const svbool_t pg)
+{
+  const struct data *d = ptr_barrier (&data);
+
+  svuint64_t ix = svreinterpret_u64 (x);
+  /* Special cases: x is subnormal, x <= 0, x == inf, x == nan.  */
+  svbool_t special
+      = svcmpge (pg, svsub_x (pg, ix, 0x0010000000000000), d->thresh);
+  if (unlikely (svptest_any (special, special)))
+    return special_case (x, pg, special);
+
+  /* If no special cases just return log_10 function call.  */
+  return v_log10_inline (ix, pg, d);
 }
 
 TEST_SIG (SV, D, 1, log10, 0.01, 11.1)
