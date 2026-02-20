@@ -1,26 +1,27 @@
 /*
  * Single-precision vector 2^x - 1 function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "test_defs.h"
 #include "sv_math.h"
+#include "sv_expf_special_inline.h"
 
-/* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
-
-/* Value of n above which scale overflows even with special treatment.  */
-#define ScaleBound 192.0f
+/* Value of |x| above which scale overflows without special treatment.
+   log2(2^(127 + 0.5)) = 127.5.  */
+#define SpecialBound 0x1.fep+6
 
 static const struct data
 {
-  uint32_t exponent_bias, special_offset, special_bias;
-  float32_t scale_thresh, special_bound;
+  struct sv_expf_special_data special_data;
+  float32_t special_bound;
   float log2_lo, c2, c4, c6;
   float log2_hi, c1, c3, c5, shift;
+  uint32_t exponent_bias;
 } data = {
+  .special_data = SV_EXPF_SPECIAL_DATA,
   /* Coefficients generated using remez's algorithm for exp2m1f(x).  */
   .log2_hi = 0x1.62e43p-1,
   .log2_lo = -0x1.05c610p-29,
@@ -31,30 +32,8 @@ static const struct data
   .c5 = 0x1.440dccp-13,
   .c6 = 0x1.e081d6p-17,
   .exponent_bias = 0x3f800000,
-  .special_offset = 0x82000000,
-  .special_bias = 0x7f000000,
-  .scale_thresh = ScaleBound,
   .special_bound = SpecialBound,
 };
-
-static svfloat32_t NOINLINE
-special_case (svfloat32_t poly, svfloat32_t n, svuint32_t e, svbool_t cmp1,
-	      svfloat32_t scale, const struct data *d)
-{
-  svbool_t b = svcmple (svptrue_b32 (), n, 0.0f);
-  svfloat32_t s1 = svreinterpret_f32 (
-      svsel (b, sv_u32 (d->special_offset + d->special_bias),
-	     sv_u32 (d->special_bias)));
-  svfloat32_t s2
-      = svreinterpret_f32 (svsub_m (b, e, sv_u32 (d->special_offset)));
-  svbool_t cmp2 = svacgt (svptrue_b32 (), n, d->scale_thresh);
-  svfloat32_t r2 = svmul_x (svptrue_b32 (), s1, s1);
-  svfloat32_t r1
-      = svmul_x (svptrue_b32 (), svmla_x (svptrue_b32 (), s2, poly, s2), s1);
-  svfloat32_t r0 = svmla_x (svptrue_b32 (), scale, poly, scale);
-  svfloat32_t r = svsel (cmp1, r1, r0);
-  return svsub_x (svptrue_b32 (), svsel (cmp2, r2, r), 1.0f);
-}
 
 /* Single-precision vector exp2(x) - 1 function.
    The maximum error is  1.76 + 0.5 ULP.
@@ -67,11 +46,7 @@ svfloat32_t SV_NAME_F1 (exp2m1) (svfloat32_t x, const svbool_t pg)
   svfloat32_t n = svrinta_x (pg, x);
   svfloat32_t r = svsub_x (pg, x, n);
 
-  svuint32_t e = svlsl_x (pg, svreinterpret_u32 (svcvt_s32_x (pg, n)), 23);
-  svfloat32_t scale
-      = svreinterpret_f32 (svadd_n_u32_x (pg, e, d->exponent_bias));
-
-  svbool_t cmp = svacgt_n_f32 (pg, n, d->special_bound);
+  svfloat32_t scale = svscale_x (pg, sv_f32 (1.0f), svcvt_s32_x (pg, n));
 
   svfloat32_t r2 = svmul_x (pg, r, r);
 
@@ -87,13 +62,12 @@ svfloat32_t SV_NAME_F1 (exp2m1) (svfloat32_t x, const svbool_t pg)
       svmul_x (svptrue_b32 (), r, sv_f32 (d->log2_hi)), r, log2lo_c246, 0);
   poly = svmla_x (pg, poly, p16, r2);
 
-  svfloat32_t y = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
-
+  svbool_t cmp = svacge_n_f32 (svptrue_b32 (), x, d->special_bound);
   /* Fallback to special case for lanes with overflow.  */
-  if (unlikely (svptest_any (pg, cmp)))
-    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
+  if (unlikely (svptest_any (cmp, cmp)))
+    return special_case (poly, n, scale, cmp, &d->special_data);
 
-  return y;
+  return svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
 }
 
 #if WANT_C23_TESTS

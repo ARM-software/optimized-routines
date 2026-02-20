@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE 10^x function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -10,13 +10,13 @@
 #include "test_sig.h"
 #include "test_defs.h"
 
-/* For x < -SpecialBound (-log10(2^126)), the result is subnormal and not
-   handled correctly by FEXPA.  */
-#define SpecialBound 0x1.2f702p+5
+/* For x < -SpecialBound, the result is subnormal and not handled
+   correctly by FEXPA.  */
+#define SpecialBound 0x1.2f702p+5 /* log10(2^126) ~ 37.93.  */
 
-/* Value of n over which exp overflows or underflows.  */
-#define InfBound 38.6f
-#define ZeroBound -45.1f
+/* Values of x over which exp overflows or underflows.  */
+#define InfBound 0x1.34ccccccccccdp+5 /* 38.6.  */
+#define ZeroBound -0x1.68ccccccccccdp+5 /* -45.1.  */
 
 static const struct data
 {
@@ -60,6 +60,7 @@ sv_exp10f_inline (svfloat32_t x, const svbool_t pg, const struct data *d)
   /* Polynomial evaluation: poly(r) ~ exp10(r)-1.  */
   svfloat32_t poly = svmla_lane (sv_f32 (d->c0), r, lane_consts, 3);
   poly = svmul_x (pg, poly, r);
+
   return svmla_x (pg, scale, scale, poly);
 }
 
@@ -71,18 +72,17 @@ special_case (svfloat32_t x, svbool_t pg, svbool_t special,
      lanes.  */
   svbool_t is_inf = svcmpgt (pg, x, d->inf_bound);
   svbool_t is_zero = svcmplt (pg, x, d->zero_bound);
-  svfloat32_t limit = svsel (is_inf, sv_f32 (INFINITY), sv_f32 (0));
-  svbool_t is_uoflow = svorr_b_z (pg, is_inf, is_zero);
 
   /* The input `x` is further reduced (to `x/2`) to allow for accurate
      approximation on the interval `x > SpecialBound ~ 0x1.2f702p+5`.  */
   x = svmul_m (special, x, 0.5);
 
   /* Computes exp(x/2), and set lanes with underflow/overflow.  */
-  svfloat32_t half_exp = sv_exp10f_inline (x, pg, d);
-  half_exp = svsel (is_uoflow, limit, half_exp);
+  svfloat32_t half_exp = sv_exp10f_inline (x, svptrue_b32 (), d);
+  half_exp = svmul_m (special, half_exp, half_exp);
+  half_exp = svsel (is_inf, sv_f32 (INFINITY), half_exp);
 
-  return svmul_m (special, half_exp, half_exp);
+  return svsel (is_zero, sv_f32 (0), half_exp);
 }
 
 /* Single-precision SVE exp10f routine. Based on the FEXPA instruction.
@@ -95,7 +95,7 @@ svfloat32_t SV_NAME_F1 (exp10) (svfloat32_t x, const svbool_t pg)
   svbool_t special = svacgt (pg, x, d->special_bound);
   if (unlikely (svptest_any (special, special)))
     return special_case (x, pg, special, d);
-  return sv_exp10f_inline (x, pg, d);
+  return sv_exp10f_inline (x, svptrue_b32 (), d);
 }
 
 #if WANT_EXP10_TESTS

@@ -1,21 +1,28 @@
 /*
  * Double-precision vector e^x function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "sv_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
+#include "sv_exp_special_inline.h"
+
+/* Value of |x| above which scale overflows without special treatment.
+   ln(2^(1022 + 1/128)) ~ 708.40.  */
+#define SpecialBound 0x1.62336f49c49a2p+9
 
 static const struct data
 {
+  struct sv_exp_special_data special_data;
   double c0, c2;
   double c1, c3;
-  double ln2_hi, ln2_lo, inv_ln2, shift, thres;
-
+  double ln2_hi, ln2_lo;
+  double inv_ln2, shift, special_bound;
 } data = {
+  .special_data = SV_EXP_SPECIAL_DATA,
   .c0 = 0x1.fffffffffdbcdp-2,
   .c1 = 0x1.555555555444cp-3,
   .c2 = 0x1.555573c6a9f7dp-5,
@@ -26,44 +33,22 @@ static const struct data
   .inv_ln2 = 0x1.71547652b82fep+0,
   /* 1.5*2^46+1023. This value is further explained below.  */
   .shift = 0x1.800000000ffc0p+46,
-  .thres = 704.0,
+  .special_bound = SpecialBound,
 };
 
-#define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
-/* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
-#define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
-#define SpecialBias2 0x3010000000000000 /* 0x1p-254.  */
-
-/* Update of both special and non-special cases, if any special case is
-   detected.  */
-static inline svfloat64_t
-special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
+static svfloat64_t NOINLINE
+special_exp (svfloat64_t poly, svfloat64_t scale, svfloat64_t n, svuint64_t u,
+	     const struct sv_exp_special_data *ds)
 {
-  /* s=2^n may overflow, break it up into s=s1*s2,
-     such that exp = s + s*y can be computed as s1*(s2+s2*y)
-     and s1*s1 overflows only if n>0.  */
-
-  /* If n<=0 then set b to 0x6, 0 otherwise.  */
-  svbool_t p_sign = svcmple (pg, n, 0.0); /* n <= 0.  */
-  svuint64_t b
-      = svdup_u64_z (p_sign, SpecialOffset); /* Inactive lanes set to 0.  */
-
-  /* Set s1 to generate overflow depending on sign of exponent n,
-     ie. s1 = 0x70...0 - b.  */
-  svfloat64_t s1 = svreinterpret_f64 (svsubr_x (pg, b, SpecialBias1));
-  /* Offset s to avoid overflow in final result if n is below threshold.
-     ie. s2 = as_u64 (s) - 0x3010...0 + b.  */
-  svfloat64_t s2 = svreinterpret_f64 (
-      svadd_x (pg, svsub_x (pg, svreinterpret_u64 (s), SpecialBias2), b));
-
-  /* |n| > 1280 => 2^(n) overflows.  */
-  svbool_t p_cmp = svacgt (pg, n, 1280.0);
-
-  svfloat64_t r1 = svmul_x (svptrue_b64 (), s1, s1);
-  svfloat64_t r2 = svmla_x (pg, s2, s2, y);
-  svfloat64_t r0 = svmul_x (svptrue_b64 (), r2, s1);
-
-  return svsel (p_cmp, r1, r0);
+  /* FEXPA zeroes the sign bit, however the sign is meaningful to the
+  special case function so needs to be copied.
+  e = sign bit of u << 46.  */
+  svuint64_t e = svand_x (svptrue_b64 (), svlsl_x (svptrue_b64 (), u, 46),
+			  0x8000000000000000);
+  /* Copy sign to scale.  */
+  scale = svreinterpret_f64 (
+      svadd_x (svptrue_b64 (), e, svreinterpret_u64 (scale)));
+  return special_case (scale, poly, n, ds);
 }
 
 /* SVE exp algorithm. Maximum measured error is 1.01ulps:
@@ -72,8 +57,6 @@ special_case (svbool_t pg, svfloat64_t s, svfloat64_t y, svfloat64_t n)
 svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
-
-  svbool_t special = svacgt (pg, x, d->thres);
 
   /* Use a modifed version of the shift used for flooring, such that x/ln2 is
      rounded to a multiple of 2^-6=1/64, shift = 1.5 * 2^52 * 2^-6 = 1.5 *
@@ -97,44 +80,37 @@ svfloat64_t SV_NAME_D1 (exp) (svfloat64_t x, const svbool_t pg)
   svfloat64_t n = svsub_x (pg, z, d->shift);
   svfloat64_t c13 = svld1rq (svptrue_b64 (), &d->c1);
   /* r = x - n * ln2, r is in [-ln2/(2N), ln2/(2N)].  */
-  svfloat64_t ln2 = svld1rq (svptrue_b64 (), &d->ln2_hi);
-  svfloat64_t r = svmls_lane (x, n, ln2, 0);
-  r = svmls_lane (r, n, ln2, 1);
+  svfloat64_t ln2_hi_lo = svld1rq (svptrue_b64 (), &d->ln2_hi);
+  svfloat64_t r = x;
+  r = svmls_lane (r, n, ln2_hi_lo, 0);
+  r = svmls_lane (r, n, ln2_hi_lo, 1);
 
-  /* y = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5.  */
+  /* poly = exp(r) - 1 ~= r + C0 r^2 + C1 r^3 + C2 r^4 + C3 r^5.  */
   svfloat64_t r2 = svmul_x (svptrue_b64 (), r, r);
   svfloat64_t p01 = svmla_lane (sv_f64 (d->c0), r, c13, 0);
   svfloat64_t p23 = svmla_lane (sv_f64 (d->c2), r, c13, 1);
   svfloat64_t p04 = svmla_x (pg, p01, p23, r2);
-  svfloat64_t y = svmla_x (pg, r, p04, r2);
+  svfloat64_t poly = svmla_x (pg, r, p04, r2);
 
-  /* s = 2^n, computed using FEXPA. FEXPA does not propagate NaNs, so for
+  /* scale = 2^n, computed using FEXPA. FEXPA does not propagate NaNs, so for
      consistent NaN handling we have to manually propagate them. This comes at
      significant performance cost.  */
-  svfloat64_t s = svexpa (u);
+  svfloat64_t scale = svexpa (u);
 
+  svbool_t special = svacge (svptrue_b64 (), x, d->special_bound);
   /* Assemble result as exp(x) = 2^n * exp(r).  If |x| > Thresh the
      multiplication may overflow, so use special case routine.  */
-
-  if (unlikely (svptest_any (pg, special)))
-    {
-      /* FEXPA zeroes the sign bit, however the sign is meaningful to the
-	 special case function so needs to be copied.
-	 e = sign bit of u << 46.  */
-      svuint64_t e = svand_x (pg, svlsl_x (pg, u, 46), 0x8000000000000000);
-      /* Copy sign to s.  */
-      s = svreinterpret_f64 (svadd_x (pg, e, svreinterpret_u64 (s)));
-      return special_case (pg, s, y, n);
-    }
+  if (unlikely (svptest_any (special, special)))
+    return special_exp (poly, scale, n, u, &d->special_data);
 
   /* No special case.  */
-  return svmla_x (pg, s, s, y);
+  return svmla_x (pg, scale, scale, poly);
 }
 
 TEST_SIG (SV, D, 1, exp, -9.9, 9.9)
 TEST_ULP (SV_NAME_D1 (exp), 1.46)
 TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 0, 0x1p-23, 40000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 0x1p-23, 1, 50000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 1, 0x1p23, 50000)
-TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 0x1p23, inf, 50000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp), 1, SpecialBound, 10000)
+TEST_SYM_INTERVAL (SV_NAME_D1 (exp), SpecialBound, inf, 1000)
 CLOSE_SVE_ATTR

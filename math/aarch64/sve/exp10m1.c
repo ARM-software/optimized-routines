@@ -1,30 +1,32 @@
 /*
  * Double-precision vector 10^x - 1 function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "sv_math.h"
 #include "test_defs.h"
+#include "sv_exp_special_inline.h"
 
-/* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 0x1.33f4bedd4fa70p+8 /* log10(2^(1023 + 1/128)).  */
-
-/* Value of n above which scale overflows even with special treatment.  */
-#define ScaleBound 1280.0
+/* Value of |x| above which scale overflows without special treatment.
+   log10(2^1023 + 1/128) ~ 307.96.  */
+#define SpecialBound 0x1.33f4bedd4f3fdp+8
 
 /* Value of |x| below which scale - 1 contributes produces large error.  */
 #define FexpaBound 0x1.2a9f2b61a7e2p-4 /* 31*(log10(2)/128).  */
 
 static const struct data
 {
+  struct sv_exp_special_data special_data;
   double log2_10_hi, log2_10_lo;
+  double log10_2, c1;
   double c3, c5;
-  double c0, c1, c2, c4;
-  double shift, log10_2, special_bound;
+  double c0, c2, c4;
+  double shift, special_bound;
   uint64_t scalem1[32];
 } data = {
+  .special_data = SV_EXP_SPECIAL_DATA,
   /* Coefficients generated using Remez algorithm.  */
   .c0 = 0x1.26bb1bbb55516p1,
   .c1 = 0x1.53524c73cea6ap1,
@@ -59,41 +61,22 @@ static const struct data
   },
 };
 
-#define SpecialOffset 0x6000000000000000 /* 0x1p513.  */
-/* SpecialBias1 + SpecialBias1 = asuint(1.0).  */
-#define SpecialBias1 0x7000000000000000 /* 0x1p769.  */
-#define SpecialBias2 0x3010000000000000 /* 0x1p-254.  */
-
-static NOINLINE svfloat64_t
-special_case (svbool_t pg, svfloat64_t y, svfloat64_t s, svfloat64_t p,
-	      svfloat64_t n)
+static svfloat64_t NOINLINE
+special_m1 (svbool_t special, svfloat64_t y, svfloat64_t z, svfloat64_t scale,
+	    svfloat64_t poly, svfloat64_t n,
+	    const struct sv_exp_special_data *ds)
 {
-  /* s=2^n may overflow, break it up into s=s1*s2,
-     such that exp = s + s*y can be computed as s1*(s2+s2*y)
-     and s1*s1 overflows only if n>0.  */
-
-  /* If n<=0 then set b to 0x6, 0 otherwise.  */
-  svbool_t p_sign = svcmple (pg, n, 0.0); /* n <= 0.  */
-  svuint64_t b
-      = svdup_u64_z (p_sign, SpecialOffset); /* Inactive lanes set to 0.  */
-
-  /* Set s1 to generate overflow depending on sign of exponent n,
-     ie. s1 = 0x70...0 - b.  */
-  svfloat64_t s1 = svreinterpret_f64 (svsubr_x (pg, b, SpecialBias1));
-  /* Offset s to avoid overflow in final result if n is below threshold.
-     ie. s2 = as_u64 (s) - 0x3010...0 + b.  */
-  svfloat64_t s2 = svreinterpret_f64 (
-      svadd_x (pg, svsub_x (pg, svreinterpret_u64 (s), SpecialBias2), b));
-
-  /* |n| > 1280 => 2^(n) overflows.  */
-  svbool_t p_cmp = svacgt (pg, n, ScaleBound);
-
-  svfloat64_t r1 = svmul_x (svptrue_b64 (), s1, s1);
-  svfloat64_t r2 = svmla_x (pg, s2, s2, p);
-  svfloat64_t r0 = svmul_x (svptrue_b64 (), r2, s1);
-
-  svbool_t is_safe = svacle (pg, n, 1023); /* Only correct special lanes.  */
-  return svsel (is_safe, y, svsub_x (pg, svsel (p_cmp, r1, r0), 1.0));
+  /* FEXPA zeroes the sign bit, however the sign is meaningful to the
+  special case function so needs to be copied.
+  e = sign bit of u << 46.  */
+  svuint64_t u = svreinterpret_u64 (z);
+  svuint64_t e = svand_x (svptrue_b64 (), svlsl_x (svptrue_b64 (), u, 46),
+			  0x8000000000000000);
+  /* Copy sign to scale.  */
+  scale = svreinterpret_f64 (
+      svadd_x (svptrue_b64 (), e, svreinterpret_u64 (scale)));
+  svfloat64_t special_result = special_case (scale, poly, n, ds);
+  return svsel (special, svsub_x (svptrue_b64 (), special_result, 1.0), y);
 }
 
 /* FEXPA based SVE exp10m1 algorithm.
@@ -103,11 +86,11 @@ special_case (svbool_t pg, svfloat64_t y, svfloat64_t s, svfloat64_t p,
 svfloat64_t SV_NAME_D1 (exp10m1) (svfloat64_t x, svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
-  svbool_t special = svacgt (pg, x, d->special_bound);
 
   /* n = round(x/(log10(2)/N)).  */
   svfloat64_t shift = sv_f64 (d->shift);
-  svfloat64_t z = svmla_x (pg, shift, x, d->log10_2);
+  svfloat64_t log10_2_c1 = svld1rq (svptrue_b64 (), &d->log10_2);
+  svfloat64_t z = svmla_lane (shift, x, log10_2_c1, 0);
   svfloat64_t n = svsub_x (pg, z, shift);
 
   /* r = x - n*log10(2)/N.  */
@@ -124,13 +107,13 @@ svfloat64_t SV_NAME_D1 (exp10m1) (svfloat64_t x, svbool_t pg)
   svfloat64_t c24 = svld1rq (svptrue_b64 (), &d->c3);
   /* Approximate exp10(r) using polynomial.  */
   svfloat64_t r2 = svmul_x (svptrue_b64 (), r, r);
-  svfloat64_t p01 = svmla_x (pg, sv_f64 (d->c0), r, sv_f64 (d->c1));
+  svfloat64_t p01 = svmla_lane (sv_f64 (d->c0), r, log10_2_c1, 1);
   svfloat64_t p23 = svmla_lane (sv_f64 (d->c2), r, c24, 0);
   svfloat64_t p45 = svmla_lane (sv_f64 (d->c4), r, c24, 1);
   svfloat64_t p25 = svmla_x (pg, p23, p45, r2);
   svfloat64_t p05 = svmla_x (pg, p01, p25, r2);
 
-  svfloat64_t p = svmul_x (pg, p05, r);
+  svfloat64_t poly = svmul_x (pg, p05, r);
 
   svfloat64_t scalem1 = svsub_x (pg, scale, 1.0);
 
@@ -155,21 +138,17 @@ svfloat64_t SV_NAME_D1 (exp10m1) (svfloat64_t x, svbool_t pg)
       scalem1 = svsel (is_small, lookup, scalem1);
     }
 
-  svfloat64_t y = svmla_x (pg, scalem1, scale, p);
-
+  /* Fallback to special case for lanes with overflow.  */
+  svbool_t special = svacgt (svptrue_b64 (), x, d->special_bound);
   /* FEXPA returns nan for large inputs so we special case those.  */
-  if (unlikely (svptest_any (pg, special)))
+  if (unlikely (svptest_any (special, special)))
     {
-      /* FEXPA zeroes the sign bit, however the sign is meaningful to the
-	  special case function so needs to be copied.
-	  e = sign bit of u << 46.  */
-      svuint64_t e = svand_x (pg, svlsl_x (pg, u, 46), 0x8000000000000000);
-      /* Copy sign to scale.  */
-      scale = svreinterpret_f64 (svadd_x (pg, e, svreinterpret_u64 (scale)));
-      return special_case (pg, y, scale, p, n);
+      svfloat64_t y = svmla_x (svptrue_b64 (), scalem1, scale, poly);
+      return special_m1 (special, y, z, scale, poly, n, &d->special_data);
     }
 
-  return y;
+  /* return expm1 = (scale - 1) + (scale * poly).  */
+  return svmla_x (pg, scalem1, scale, poly);
 }
 
 #if WANT_C23_TESTS

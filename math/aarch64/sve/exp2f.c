@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE 2^x function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,7 +11,9 @@
 
 /* For x < -SpecialBound, the result is subnormal and not handled
    correctly by FEXPA.  */
-#define SpecialBound 0x1.f8p6f /* 126.0f.  */
+#define SpecialBound 0x1.f8p6f /* log2(2^126) = 126.0f.  */
+
+/* Values of x over which exp overflows or underflows.  */
 #define InfBound 0x1.0p7f /* 128.0f.  */
 #define ZeroBound -0x1.2a8p7f /* -149.0f.  */
 
@@ -52,20 +54,21 @@ static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svbool_t pg, svbool_t special,
 	      const struct data *d)
 {
+  /* This deals with overflow and underflow in exponential for special case
+     lanes.  */
   svbool_t is_inf = svcmpgt (pg, x, d->inf_bound);
   svbool_t is_zero = svcmplt (pg, x, d->zero_bound);
-  svfloat32_t limit = svsel (is_inf, sv_f32 (INFINITY), sv_f32 (0));
-  svbool_t is_uoflow = svorr_b_z (pg, is_inf, is_zero);
 
   /* The input `x` is further reduced (to `x/2`) to allow for accurate
      approximation on the interval `x > SpecialBound = 126.0`.  */
   x = svmul_x (special, x, 0.5);
 
   /* Computes exp(x/2), and set lanes with underflow/overflow.  */
-  svfloat32_t half_exp = sv_exp2f_inline (x, pg, d);
-  half_exp = svsel (is_uoflow, limit, half_exp);
+  svfloat32_t half_exp = sv_exp2f_inline (x, svptrue_b32 (), d);
+  half_exp = svmul_m (special, half_exp, half_exp);
+  half_exp = svsel (is_inf, sv_f32 (INFINITY), half_exp);
 
-  return svmul_x (special, half_exp, half_exp);
+  return svsel (is_zero, sv_f32 (0), half_exp);
 }
 
 /* Single-precision SVE exp2f routine, based on the FEXPA instruction.
@@ -76,7 +79,7 @@ svfloat32_t SV_NAME_F1 (exp2) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
   svbool_t special = svacgt (pg, x, d->special_bound);
-  if (unlikely (svptest_any (pg, special)))
+  if (unlikely (svptest_any (special, special)))
     return special_case (x, pg, special, d);
   return sv_exp2f_inline (x, pg, d);
 }

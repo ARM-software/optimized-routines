@@ -1,28 +1,28 @@
 /*
  * Single-precision vector 10^x - 1 function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "test_defs.h"
 #include "sv_math.h"
+#include "sv_expf_special_inline.h"
 
-/* Value of |x| above which scale overflows without special treatment.  */
-#define SpecialBound 126.0f /* rint (log2 (2^127 / (1 + sqrt (2)))).  */
-
-/* Value of n above which scale overflows even with special treatment.  */
-#define ScaleBound 192.0f
+/* Value of |x| above which scale overflows without special treatment.
+   log10(2^(127 + 0.5)) ~ 38.3813244.  */
+#define SpecialBound 0x1.330cf3ce9955ap+5
 
 static const struct data
 {
-  float log10_2_high, log10_2_low;
-  float log10_lo, c2, c4, c6, c8;
-  float32_t log10_hi, c1, c3, c5, c7;
-  float32_t inv_log10_2, special_bound;
-  uint32_t exponent_bias, special_offset, special_bias;
-  float32_t scale_thresh;
+  struct sv_expf_special_data special_data;
+  float c2, c4, c6, c8;
+  float log10_2_high, log10_2_low, inv_log10_2, log10_lo;
+  float32_t c1, c3, c5, c7;
+  float32_t log10_hi, special_bound;
+  uint32_t exponent_bias;
 } data = {
+  .special_data = SV_EXPF_SPECIAL_DATA,
   /* Coefficients generated using Remez algorithm with minimisation of relative
      error.  */
   .log10_hi = 0x1.26bb1b8000000p+1,
@@ -39,30 +39,8 @@ static const struct data
   .log10_2_high = 0x1.344136p-2,
   .log10_2_low = 0x1.ec10cp-27,
   .exponent_bias = 0x3f800000,
-  .special_offset = 0x82000000,
-  .special_bias = 0x7f000000,
-  .scale_thresh = ScaleBound,
   .special_bound = SpecialBound,
 };
-
-static svfloat32_t NOINLINE
-special_case (svfloat32_t poly, svfloat32_t n, svuint32_t e, svbool_t cmp1,
-	      svfloat32_t scale, const struct data *d)
-{
-  svbool_t b = svcmple (svptrue_b32 (), n, 0.0f);
-  svfloat32_t s1 = svreinterpret_f32 (
-      svsel (b, sv_u32 (d->special_offset + d->special_bias),
-	     sv_u32 (d->special_bias)));
-  svfloat32_t s2
-      = svreinterpret_f32 (svsub_m (b, e, sv_u32 (d->special_offset)));
-  svbool_t cmp2 = svacgt (svptrue_b32 (), n, d->scale_thresh);
-  svfloat32_t r2 = svmul_x (svptrue_b32 (), s1, s1);
-  svfloat32_t r1
-      = svmul_x (svptrue_b32 (), svmla_x (svptrue_b32 (), s2, poly, s2), s1);
-  svfloat32_t r0 = svmla_x (svptrue_b32 (), scale, poly, scale);
-  svfloat32_t r = svsel (cmp1, r1, r0);
-  return svsub_x (svptrue_b32 (), svsel (cmp2, r2, r), 1.0f);
-}
 
 /* Fast vector implementation of single-precision exp10.
    Algorithm is accurate to 1.68 + 0.5 ULP.
@@ -72,19 +50,19 @@ svfloat32_t SV_NAME_F1 (exp10m1) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
 
+  /* This vector is reliant on layout of data - it contains constants
+     that can be used with _lane forms of svmla/svmls/svmul. Values are:
+     [ log10_2_high, log10_2_low, inv_log10_2, log10_lo ].  */
+  svfloat32_t log10 = svld1rq (svptrue_b32 (), &d->log10_2_high);
+
   /* exp10(x) = 2^n * 10^r = 2^n * (1 + poly (r)),
      with poly(r) in [1/sqrt(2), sqrt(2)] and
      x = r + n * log10 (2), with r in [-log10(2)/2, log10(2)/2].  */
-  svfloat32_t log10_2 = svld1rq (svptrue_b32 (), &d->log10_2_high);
-  svfloat32_t n = svrinta_x (pg, svmul_x (pg, x, d->inv_log10_2));
-  svfloat32_t r = svmls_lane_f32 (x, n, log10_2, 0);
-  r = svmla_lane_f32 (r, n, log10_2, 1);
+  svfloat32_t n = svrinta_x (pg, svmul_lane (x, log10, 2));
+  svfloat32_t r = svmls_lane_f32 (x, n, log10, 0);
+  r = svmla_lane_f32 (r, n, log10, 1);
 
-  svuint32_t e = svlsl_x (pg, svreinterpret_u32 (svcvt_s32_x (pg, n)), 23);
-
-  svfloat32_t scale
-      = svreinterpret_f32 (svadd_n_u32_x (pg, e, d->exponent_bias));
-  svbool_t cmp = svacgt_n_f32 (pg, n, d->special_bound);
+  svfloat32_t scale = svscale_x (pg, sv_f32 (1.0f), svcvt_s32_x (pg, n));
 
   /* Pairwise Horner scheme.  */
   svfloat32_t r2 = svmul_x (pg, r, r);
@@ -96,18 +74,15 @@ svfloat32_t SV_NAME_F1 (exp10m1) (svfloat32_t x, const svbool_t pg)
   svfloat32_t p58 = svmla_x (pg, p56, r2, p78);
   svfloat32_t p36 = svmla_x (pg, p34, r2, p58);
   svfloat32_t p16 = svmla_x (pg, p12, r2, p36);
-
-  svfloat32_t poly = svmla_n_f32_x (pg, svmul_x (pg, r, sv_f32 (d->log10_hi)),
-				    r, d->log10_lo);
+  svfloat32_t poly = svmla_lane (svmul_x (pg, r, d->log10_hi), r, log10, 3);
   poly = svmla_x (pg, poly, p16, r2);
 
-  svfloat32_t y = svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
-
+  svbool_t cmp = svacge_n_f32 (svptrue_b32 (), x, d->special_bound);
   /* Fallback to special case for lanes with overflow.  */
-  if (unlikely (svptest_any (pg, cmp)))
-    return svsel_f32 (cmp, special_case (poly, n, e, cmp, scale, d), y);
+  if (unlikely (svptest_any (cmp, cmp)))
+    return special_case (poly, n, scale, cmp, &d->special_data);
 
-  return y;
+  return svmla_x (pg, svsub_x (pg, scale, 1.0f), poly, scale);
 }
 
 #if WANT_C23_TESTS
