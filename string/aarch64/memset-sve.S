@@ -29,13 +29,13 @@
 ENTRY (__memset_aarch64_sve)
 	dup	v0.16B, valw
 	cmp	count, 16
-	b.ls	L(set_16)
+	b.lo	L(set_16)
 
 	add	dstend, dstin, count
 	cmp	count, 64
 	b.hi	L(set_128)
 
-	/* Set 17..64 bytes.  */
+	/* Set 16..64 bytes.  */
 	mov	off, 48
 	and	off, off, count, lsr 1
 	sub	dstend2, dstend, off
