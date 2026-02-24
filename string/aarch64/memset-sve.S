@@ -38,7 +38,7 @@ ENTRY (__memset_aarch64_sve)
 	/* Set 16..64 bytes.  */
 	mov	val, 16
 	and	off, val, count, lsr 1
-	csel off, val, off, eq
+	csel	off, val, off, eq
 	sub	dstend2, dstend, off
 	str	q0, [dstin]
 	str	q0, [dstin, off]
