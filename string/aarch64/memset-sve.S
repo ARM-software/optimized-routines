@@ -36,8 +36,8 @@ ENTRY (__memset_aarch64_sve)
 	b.hi	L(set_128)
 
 	/* Set 17..64 bytes.  */
-	and off, count, 96
-	lsr off, off, 1
+	mov	off, 48
+	and	off, off, count, lsr 1
 	sub	dstend2, dstend, off
 	str	q0, [dstin]
 	str	q0, [dstin, off]
