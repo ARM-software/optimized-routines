@@ -35,7 +35,7 @@ ENTRY (__memset_aarch64_sve)
 	cmp	count, 64
 	b.hi	L(set_128)
 
-	/* Set 16..64 bytes.  */
+	/* Set 17..64 bytes.  */
 	and off, count, 96
 	lsr off, off, 1
 	sub	dstend2, dstend, off
