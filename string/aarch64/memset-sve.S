@@ -33,10 +33,10 @@ ENTRY (__memset_aarch64_sve)
 
 	add	dstend, dstin, count
 	cmp	count, 64
-	b.hs	L(set_128)
+	b.hi	L(set_128)
 
-	/* Set 16..63 bytes.  */
-	mov	off, 16
+	/* Set 16..64 bytes.  */
+	mov	off, 48
 	and	off, off, count, lsr 1
 	sub	dstend2, dstend, off
 	str	q0, [dstin]
