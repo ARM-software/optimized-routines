@@ -85,7 +85,7 @@ expf_slow_inline (svfloat32_t x, const svbool_t special, const struct data *d)
   svfloat32_t r3 = svmul_x (svptrue_b32 (), r, r2);
   svfloat32_t poly_slow = svmla_lane (sv_f32 (d->c2), r, lane_constants, 3);
   svfloat32_t poly_fast = svmla_lane (r, r2, lane_constants, 2);
-  svfloat32_t poly = svmla_x (special, poly_fast, poly_slow, r3);
+  svfloat32_t poly = svmla_m (special, poly_fast, poly_slow, r3);
 
   svfloat32_t scale = svexpa (svreinterpret_u32 (z));
 
