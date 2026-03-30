@@ -1,7 +1,7 @@
 /*
  * Single-precision vector sincos function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -61,11 +61,11 @@ _ZGVsMxvl4l4_sincosf (svfloat32_t x, float *out_sin, float *out_cos,
     special_case (x, special, out_sin, out_cos);
 }
 
-TEST_ULP (_ZGVsMxv_sincosf_sin, 1.17)
-TEST_ULP (_ZGVsMxv_sincosf_cos, 1.31)
+TEST_ULP (_ZGVsMxvl4l4_sincosf_sin, 1.17)
+TEST_ULP (_ZGVsMxvl4l4_sincosf_cos, 1.31)
 #define SV_SINCOSF_INTERVAL(lo, hi, n)                                        \
-  TEST_SYM_INTERVAL (_ZGVsMxv_sincosf_sin, lo, hi, n)                         \
-  TEST_SYM_INTERVAL (_ZGVsMxv_sincosf_cos, lo, hi, n)
+  TEST_SYM_INTERVAL (_ZGVsMxvl4l4_sincosf_sin, lo, hi, n)                     \
+  TEST_SYM_INTERVAL (_ZGVsMxvl4l4_sincosf_cos, lo, hi, n)
 SV_SINCOSF_INTERVAL (0, 0x1p-31, 50000)
 SV_SINCOSF_INTERVAL (0x1p-31, 0x1p20, 500000)
 SV_SINCOSF_INTERVAL (0x1p20, inf, 10000)

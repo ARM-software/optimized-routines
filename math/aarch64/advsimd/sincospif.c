@@ -1,7 +1,7 @@
 /*
  * Single-precision vector sincospi function.
  *
- * Copyright (c) 2024-2025, Arm Limited.
+ * Copyright (c) 2024-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -26,11 +26,11 @@ _ZGVnN4vl4l4_sincospif (float32x4_t x, float *out_sin, float *out_cos)
 }
 
 #if WANT_C23_TESTS
-TEST_ULP (_ZGVnN4v_sincospif_sin, 2.54)
-TEST_ULP (_ZGVnN4v_sincospif_cos, 2.68)
+TEST_ULP (_ZGVnN4vl4l4_sincospif_sin, 2.54)
+TEST_ULP (_ZGVnN4vl4l4_sincospif_cos, 2.68)
 #  define V_SINCOSPIF_INTERVAL(lo, hi, n)                                     \
-    TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_sin, lo, hi, n)                     \
-    TEST_SYM_INTERVAL (_ZGVnN4v_sincospif_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (_ZGVnN4vl4l4_sincospif_sin, lo, hi, n)                 \
+    TEST_SYM_INTERVAL (_ZGVnN4vl4l4_sincospif_cos, lo, hi, n)
 V_SINCOSPIF_INTERVAL (0, 0x1p-63, 10000)
 V_SINCOSPIF_INTERVAL (0x1p-63, 0.5, 50000)
 V_SINCOSPIF_INTERVAL (0.5, 0x1p31, 50000)

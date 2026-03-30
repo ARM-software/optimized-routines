@@ -1,7 +1,7 @@
 /*
  * Function entries for ulp.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 /* clang-format off */
@@ -14,16 +14,16 @@
  F (_ZGVnN4v_exp2f_1u, Z_exp2f_1u, exp2, mpfr_exp2, 1, 1, f1, 1)
  F (_ZGVnN4vv_powf, Z_powf, pow, mpfr_pow, 2, 1, f2, 1)
  F (_ZGVnN2vv_pow, Z_pow, powl, mpfr_pow, 2, 0, d2, 1)
- F (_ZGVnN4v_sincosf_sin, v_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
- F (_ZGVnN4v_sincosf_cos, v_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
+ F (_ZGVnN4vl4l4_sincosf_sin, v_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
+ F (_ZGVnN4vl4l4_sincosf_cos, v_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
  F (_ZGVnN4v_cexpif_sin, v_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)
  F (_ZGVnN4v_cexpif_cos, v_cexpif_cos, cos, mpfr_cos, 1, 1, f1, 0)
  F (_ZGVnN4vl4_modff_frac, v_modff_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
  F (_ZGVnN4vl4_modff_int, v_modff_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
  F (_ZGVnN4v_modff_stret_frac, v_modff_stret_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
  F (_ZGVnN4v_modff_stret_int, v_modff_stret_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
- F (_ZGVnN2v_sincos_sin, v_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
- F (_ZGVnN2v_sincos_cos, v_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+ F (_ZGVnN2vl8l8_sincos_sin, v_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+ F (_ZGVnN2vl8l8_sincos_cos, v_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
  F (_ZGVnN2v_cexpi_sin, v_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
  F (_ZGVnN2v_cexpi_cos, v_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
  F (_ZGVnN2vl8_modf_frac, v_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1, 0)
@@ -33,16 +33,16 @@
 #endif
 
 #if WANT_SVE_TESTS
-SVF (_ZGVsMxv_sincosf_sin, sv_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
-SVF (_ZGVsMxv_sincosf_cos, sv_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
+SVF (_ZGVsMxvl4l4_sincosf_sin, sv_sincosf_sin, sin, mpfr_sin, 1, 1, f1, 0)
+SVF (_ZGVsMxvl4l4_sincosf_cos, sv_sincosf_cos, cos, mpfr_cos, 1, 1, f1, 0)
 SVF (_ZGVsMxv_cexpif_sin, sv_cexpif_sin, sin, mpfr_sin, 1, 1, f1, 0)
 SVF (_ZGVsMxv_cexpif_cos, sv_cexpif_cos, cos, mpfr_cos, 1, 1, f1, 0)
 SVF (_ZGVsMxvl4_modff_frac, sv_modff_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
 SVF (_ZGVsMxvl4_modff_int, sv_modff_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
 SVF (_ZGVsMxv_modff_stret_frac, sv_modff_stret_frac, modf_frac, modf_mpfr_frac, 1, 1, f1, 0)
 SVF (_ZGVsMxv_modff_stret_int, sv_modff_stret_int, modf_int, modf_mpfr_int, 1, 1, f1, 0)
-SVF (_ZGVsMxv_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
-SVF (_ZGVsMxv_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
+SVF (_ZGVsMxvl8l8_sincos_sin, sv_sincos_sin, sinl, mpfr_sin, 1, 0, d1, 0)
+SVF (_ZGVsMxvl8l8_sincos_cos, sv_sincos_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 SVF (_ZGVsMxv_cexpi_sin, sv_cexpi_sin, sinl, mpfr_sin, 1, 0, d1, 0)
 SVF (_ZGVsMxv_cexpi_cos, sv_cexpi_cos, cosl, mpfr_cos, 1, 0, d1, 0)
 SVF (_ZGVsMxvl8_modf_frac, sv_modf_frac, modfl_frac, modf_mpfr_frac, 1, 0, d1, 0)
@@ -108,10 +108,10 @@ SVF (_ZGVsMxv_modf_stret_int, sv_modf_stret_int, modfl_int, modf_mpfr_int, 1, 0,
  F (_ZGVnN2v_sinpi,  Z_sinpi,  arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
  F (_ZGVnN4v_tanpif, Z_tanpif, arm_math_tanpi,  mpfr_tanpi, 1, 1, f1, 0)
  F (_ZGVnN2v_tanpi,  Z_tanpi,  arm_math_tanpil, mpfr_tanpi, 1, 0, d1, 0)
- F (_ZGVnN4v_sincospif_sin, v_sincospif_sin, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
- F (_ZGVnN4v_sincospif_cos, v_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
- F (_ZGVnN2v_sincospi_sin, v_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
- F (_ZGVnN2v_sincospi_cos, v_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
+ F (_ZGVnN4vl4l4_sincospif_sin, v_sincospif_sin, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
+ F (_ZGVnN4vl4l4_sincospif_cos, v_sincospif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
+ F (_ZGVnN2vl8l8_sincospi_sin, v_sincospi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)
+ F (_ZGVnN2vl8l8_sincospi_cos, v_sincospi_cos, arm_math_cospil, mpfr_cospi, 1, 0, d1, 0)
  F (_ZGVnN4v_cexpipif_sin, v_cexpipif_sin, arm_math_sinpi, mpfr_sinpi, 1, 1, f1, 0)
  F (_ZGVnN4v_cexpipif_cos, v_cexpipif_cos, arm_math_cospi, mpfr_cospi, 1, 1, f1, 0)
  F (_ZGVnN2v_cexpipi_sin, v_cexpipi_sin, arm_math_sinpil, mpfr_sinpi, 1, 0, d1, 0)

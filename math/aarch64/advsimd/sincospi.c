@@ -1,7 +1,7 @@
 /*
  * Double-precision vector sincospi function.
  *
- * Copyright (c) 2024-2025, Arm Limited.
+ * Copyright (c) 2024-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,11 +29,11 @@ _ZGVnN2vl8l8_sincospi (float64x2_t x, double *out_sin, double *out_cos)
 }
 
 #if WANT_C23_TESTS
-TEST_ULP (_ZGVnN2v_sincospi_sin, 2.59)
-TEST_ULP (_ZGVnN2v_sincospi_cos, 2.66)
+TEST_ULP (_ZGVnN2vl8l8_sincospi_sin, 2.59)
+TEST_ULP (_ZGVnN2vl8l8_sincospi_cos, 2.66)
 #  define V_SINCOSPI_INTERVAL(lo, hi, n)                                      \
-    TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_sin, lo, hi, n)                      \
-    TEST_SYM_INTERVAL (_ZGVnN2v_sincospi_cos, lo, hi, n)
+    TEST_SYM_INTERVAL (_ZGVnN2vl8l8_sincospi_sin, lo, hi, n)                  \
+    TEST_SYM_INTERVAL (_ZGVnN2vl8l8_sincospi_cos, lo, hi, n)
 V_SINCOSPI_INTERVAL (0, 0x1p-63, 10000)
 V_SINCOSPI_INTERVAL (0x1p-63, 0.5, 50000)
 V_SINCOSPI_INTERVAL (0.5, 0x1p63, 50000)
