@@ -8,7 +8,8 @@
 static const struct fallback_data
 {
   float64x2_t shift;
-  float64x2_t tm48, offset;
+  float64x2_t tm48;
+  double offset[2];
   double hp0, hp1;
   double mp0, mp1;
   double sincos_poly[14];
@@ -161,7 +162,8 @@ compute_x_times_invpio2 (float64x2_t *data, double d_x)
   /* Splits x into a higher/lower magnitude pair,
      and then pack into a vector for double-double reduction.  */
   struct dd_t x_split = to_dd_accurate (d_x_scaled);
-  float64x2_t x_scaled = { x_split.hi, x_split.lo };
+  float64x2_t x_scaled
+      = vcombine_f64 (vdup_n_f64 (x_split.hi), vdup_n_f64 (x_split.lo));
 
   /* Calculates the table index for each lane to use.  */
   k1 = (asuint64 (x_split.hi) >> 52) & 0x7ff;
@@ -182,8 +184,9 @@ compute_x_times_invpio2 (float64x2_t *data, double d_x)
   /* Since we're using vectors to accelerate this, we multiply the scale by
      <1, 0x1p-24> This causes the second lane to act as if it's one iteration
      ahead, halving the iterations required per vector.  */
-  scale_hi = vmulq_f64 (scale_hi, d->offset);
-  scale_lo = vmulq_f64 (scale_lo, d->offset);
+  float64x2_t offset = vld1q_f64 (d->offset);
+  scale_hi = vmulq_f64 (scale_hi, offset);
+  scale_lo = vmulq_f64 (scale_lo, offset);
 
   float64x2_t result[6];
   float64x2_t x_hi, x_lo;
@@ -306,15 +309,15 @@ vec_extended_range_reduction (double x)
      changes of adding the two vector lanes together.  */
   float64x2_t abs_tail = vabsq_f64 (tail);
   double hi, lo;
-  if (abs_tail[0] > abs_tail[1])
+  if (vgetq_lane_f64 (abs_tail, 0) > vgetq_lane_f64 (abs_tail, 1))
     {
-      hi = tail[0];
-      lo = tail[1];
+      hi = vgetq_lane_f64 (tail, 0);
+      lo = vgetq_lane_f64 (tail, 1);
     }
   else
     {
-      hi = tail[1];
-      lo = tail[0];
+      hi = vgetq_lane_f64 (tail, 1);
+      lo = vgetq_lane_f64 (tail, 0);
     }
 
   s_tail_lo += (hi - s_tail_hi) + lo;
