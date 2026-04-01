@@ -1,13 +1,14 @@
 /*
  * Double-precision SVE exp(y * log(x)) function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "sv_math.h"
-#include "test_sig.h"
+#include "pow_common.h"
 #include "test_defs.h"
+#include "test_sig.h"
+#include "sv_math.h"
 #define WANT_SV_POW_SIGN_BIAS 0
 #include "sv_pow_inline.h"
 

@@ -1,13 +1,14 @@
 /*
  * Single-precision pow function.
  *
- * Copyright (c) 2017-2025, Arm Limited.
+ * Copyright (c) 2017-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "powf_common.h"
 #include "test_defs.h"
 
 /*
@@ -17,8 +18,7 @@ EXP2F_TABLE_BITS = 5
 ULP error: 0.82 (~ 0.5 + relerr*2^24)
 relerr: 1.27 * 2^-26 (Relative error ~= 128*Ln2*relerr_log2 + relerr_exp2)
 relerr_log2: 1.83 * 2^-33 (Relative error of logx.)
-relerr_exp2: 1.69 * 2^-34 (Relative error of exp2(ylogx).)
-*/
+relerr_exp2: 1.69 * 2^-34 (Relative error of exp2(ylogx).).  */
 
 #define N (1 << POWF_LOG2_TABLE_BITS)
 #define T __powf_log2_data.tab
@@ -41,12 +41,12 @@ log2_inline (uint32_t ix)
   i = (tmp >> (23 - POWF_LOG2_TABLE_BITS)) % N;
   top = tmp & 0xff800000;
   iz = ix - top;
-  k = (int32_t) top >> (23 - POWF_SCALE_BITS); /* arithmetic shift */
+  k = (int32_t) top >> (23 - POWF_SCALE_BITS); /* arithmetic shift.  */
   invc = T[i].invc;
   logc = T[i].logc;
   z = asfloat (iz);
 
-  /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k */
+  /* log2(x) = log1p(z/c-1)/ln2 + log2(c) + k.  */
   r = z * invc - 1;
   y0 = logc + (double) k;
 
@@ -78,20 +78,20 @@ exp2_inline (double xd, uint32_t sign_bias)
 
 #if TOINT_INTRINSICS
 # define C __exp2f_data.poly_scaled
-  /* N*x = k + r with r in [-1/2, 1/2] */
-  kd = roundtoint (xd); /* k */
+  /* N*x = k + r with r in [-1/2, 1/2].  */
+  kd = roundtoint (xd); /* k.  */
   ki = converttoint (xd);
 #else
 # define C __exp2f_data.poly
 # define SHIFT __exp2f_data.shift_scaled
-  /* x = k/N + r with r in [-1/(2N), 1/(2N)] */
+  /* x = k/N + r with r in [-1/(2N), 1/(2N)].  */
   kd = eval_as_double (xd + SHIFT);
   ki = asuint64 (kd);
-  kd -= SHIFT; /* k/N */
+  kd -= SHIFT; /* k/N.  */
 #endif
   r = xd - kd;
 
-  /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1) */
+  /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
   t = T[ki % N];
   ski = ki + sign_bias;
   t += ski << (52 - EXP2F_TABLE_BITS);
@@ -102,29 +102,6 @@ exp2_inline (double xd, uint32_t sign_bias)
   y = z * r2 + y;
   y = y * s;
   return eval_as_float (y);
-}
-
-/* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
-   the bit representation of a non-zero finite floating-point value.  */
-static inline int
-checkint (uint32_t iy)
-{
-  int e = iy >> 23 & 0xff;
-  if (e < 0x7f)
-    return 0;
-  if (e > 0x7f + 23)
-    return 2;
-  if (iy & ((1 << (0x7f + 23 - e)) - 1))
-    return 0;
-  if (iy & (1 << (0x7f + 23 - e)))
-    return 1;
-  return 2;
-}
-
-static inline int
-zeroinfnan (uint32_t ix)
-{
-  return 2 * ix - 1 >= 2u * 0x7f800000 - 1;
 }
 
 float

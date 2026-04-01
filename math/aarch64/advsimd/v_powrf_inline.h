@@ -1,10 +1,11 @@
 /*
  * Single-precision AdvSIMD pow and powr function helpers.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "powf_common.h"
 #include "v_math.h"
 
 #define Log2IdxMask (V_POWF_LOG2_N - 1)
@@ -109,13 +110,6 @@ static inline uint32x4_t
 v_zeroinfnan (const struct data *d, uint32x4_t i)
 {
   return vcgeq_u32 (vsubq_u32 (vaddq_u32 (i, i), d->one), d->special_bound);
-}
-
-/* Check if zero, inf or nan.  */
-static inline int
-zeroinfnan (uint32_t ix)
-{
-  return 2 * ix - 1 >= 2u * 0x7f800000 - 1;
 }
 
 static inline float64x2_t

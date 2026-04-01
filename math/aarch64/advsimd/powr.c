@@ -1,14 +1,14 @@
 /*
  * Double-precision vector exp(y * log(x)) function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "v_math.h"
-#include "test_sig.h"
+#include "pow_common.h"
 #include "test_defs.h"
-
+#include "test_sig.h"
+#include "v_math.h"
 #include "v_pow_inline.h"
 
 static double NOINLINE

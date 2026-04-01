@@ -1,13 +1,14 @@
 /*
  * Single-precision vector x^y function.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "v_math.h"
+#include "powf_common.h"
 #include "test_defs.h"
 #include "test_sig.h"
+#include "v_math.h"
 #include "v_powf_inline.h"
 
 /* Check if x is an integer.  */
@@ -30,23 +31,6 @@ visodd (float32x4_t x)
 {
   float32x4_t y = vmulq_n_f32 (x, 0.5f);
   return visnotint (y);
-}
-
-/* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
-   the bit representation of a non-zero finite floating-point value.  */
-static inline int
-checkint (uint32_t iy)
-{
-  int e = iy >> 23 & 0xff;
-  if (e < 0x7f)
-    return 0;
-  if (e > 0x7f + 23)
-    return 2;
-  if (iy & ((1 << (0x7f + 23 - e)) - 1))
-    return 0;
-  if (iy & (1 << (0x7f + 23 - e)))
-    return 1;
-  return 2;
 }
 
 /* A scalar subroutine used to fix main power special cases. Similar to the

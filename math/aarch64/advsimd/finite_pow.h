@@ -2,11 +2,12 @@
  * Scalar double-precision x^y helper functions used for fallbacks in
  * vector implementations.
  *
- * Copyright (c) 2018-2025, Arm Limited.
+ * Copyright (c) 2018-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "math_config.h"
+#include "pow_common.h"
 
 /* Data is defined in v_pow_log_data.c.  */
 #define N_LOG (1 << V_POW_LOG_TABLE_BITS)
@@ -32,13 +33,6 @@
 #define SmallPowY 0x3be /* top12(0x1.e7b6p-65).  */
 #define BigPowY 0x43e	/* top12(0x1.749p62).  */
 #define ThresPowY 0x080 /* BigPowY - SmallPowY.  */
-
-/* Top 12 bits of a double (sign and exponent bits).  */
-static inline uint32_t
-top12 (double x)
-{
-  return asuint64 (x) >> 52;
-}
 
 /* Compute y+TAIL = log(x) where the rounded result is y and TAIL has about
    additional 15 bits precision.  IX is the bit representation of x, but
@@ -166,28 +160,4 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
   return scale + scale * tmp;
-}
-
-/* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
-   the bit representation of a non-zero finite floating-point value.  */
-static inline int
-checkint (uint64_t iy)
-{
-  int e = iy >> 52 & 0x7ff;
-  if (e < 0x3ff)
-    return 0;
-  if (e > 0x3ff + 52)
-    return 2;
-  if (iy & ((1ULL << (0x3ff + 52 - e)) - 1))
-    return 0;
-  if (iy & (1ULL << (0x3ff + 52 - e)))
-    return 1;
-  return 2;
-}
-
-/* Returns 1 if input is the bit representation of 0, infinity or nan.  */
-static inline int
-zeroinfnan (uint64_t i)
-{
-  return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
 }

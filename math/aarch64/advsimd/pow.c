@@ -1,14 +1,13 @@
 /*
  * Double-precision vector x^y function.
  *
- * Copyright (c) 2020-2025, Arm Limited.
+ * Copyright (c) 2020-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "v_math.h"
-#include "test_sig.h"
 #include "test_defs.h"
-
+#include "test_sig.h"
+#include "v_math.h"
 #include "v_pow_inline.h"
 
 static double NOINLINE

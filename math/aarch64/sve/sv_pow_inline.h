@@ -1,10 +1,11 @@
 /*
  * Double-precision SVE pow and powr function helpers.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#include "pow_common.h"
 #include "sv_math.h"
 
 #ifndef WANT_SV_POW_SIGN_BIAS
@@ -71,35 +72,11 @@ sv_isodd (svbool_t pg, svfloat64_t x)
   return sv_isnotint (pg, y);
 }
 
-/* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
-   the bit representation of a non-zero finite floating-point value.  */
-static inline int
-checkint (uint64_t iy)
-{
-  int e = iy >> 52 & 0x7ff;
-  if (e < 0x3ff)
-    return 0;
-  if (e > 0x3ff + 52)
-    return 2;
-  if (iy & ((1ULL << (0x3ff + 52 - e)) - 1))
-    return 0;
-  if (iy & (1ULL << (0x3ff + 52 - e)))
-    return 1;
-  return 2;
-}
-
 /* Top 12 bits (sign and exponent of each double float lane).  */
 static inline svuint64_t
 sv_top12 (svfloat64_t x)
 {
   return svlsr_x (svptrue_b64 (), svreinterpret_u64 (x), 52);
-}
-
-/* Returns 1 if input is the bit representation of 0, infinity or nan.  */
-static inline int
-zeroinfnan (uint64_t i)
-{
-  return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
 }
 
 /* Returns 1 if input is the bit representation of 0, infinity or nan.  */

@@ -1,7 +1,7 @@
 /*
  * Double-precision x^y function.
  *
- * Copyright (c) 2018-2025, Arm Limited.
+ * Copyright (c) 2018-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,13 +9,13 @@
 #include <math.h>
 #include <stdint.h>
 #include "math_config.h"
+#include "pow_common.h"
 #include "test_defs.h"
 
 /*
 Worst-case error: 0.54 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
 relerr_log: 1.3 * 2^-68 (Relative error of log, 1.5 * 2^-68 without fma)
-ulperr_exp: 0.509 ULP (ULP error of exp, 0.511 ULP without fma)
-*/
+ulperr_exp: 0.509 ULP (ULP error of exp, 0.511 ULP without fma).  */
 
 #define T __pow_log_data.tab
 #define A __pow_log_data.poly
@@ -23,13 +23,6 @@ ulperr_exp: 0.509 ULP (ULP error of exp, 0.511 ULP without fma)
 #define Ln2lo __pow_log_data.ln2lo
 #define N (1 << POW_LOG_TABLE_BITS)
 #define OFF 0x3fe6955500000000
-
-/* Top 12 bits of a double (sign and exponent bits).  */
-static inline uint32_t
-top12 (double x)
-{
-  return asuint64 (x) >> 52;
-}
 
 /* Compute y+TAIL = log(x) where the rounded result is y and TAIL has about
    additional 15 bits precision.  IX is the bit representation of x, but
@@ -46,7 +39,7 @@ log_inline (uint64_t ix, double *tail)
      The ith subinterval contains z and c is near its center.  */
   tmp = ix - OFF;
   i = (tmp >> (52 - POW_LOG_TABLE_BITS)) % N;
-  k = (int64_t) tmp >> 52; /* arithmetic shift */
+  k = (int64_t) tmp >> 52; /* arithmetic shift.  */
   iz = ix - (tmp & 0xfffULL << 52);
   z = asdouble (iz);
   kd = (double) k;
@@ -248,30 +241,6 @@ exp_inline (double x, double xtail, uint32_t sign_bias)
   /* Note: tmp == 0 or |tmp| > 2^-200 and scale > 2^-739, so there
      is no spurious underflow here even without fma.  */
   return eval_as_double (scale + scale * tmp);
-}
-
-/* Returns 0 if not int, 1 if odd int, 2 if even int.  The argument is
-   the bit representation of a non-zero finite floating-point value.  */
-static inline int
-checkint (uint64_t iy)
-{
-  int e = iy >> 52 & 0x7ff;
-  if (e < 0x3ff)
-    return 0;
-  if (e > 0x3ff + 52)
-    return 2;
-  if (iy & ((1ULL << (0x3ff + 52 - e)) - 1))
-    return 0;
-  if (iy & (1ULL << (0x3ff + 52 - e)))
-    return 1;
-  return 2;
-}
-
-/* Returns 1 if input is the bit representation of 0, infinity or nan.  */
-static inline int
-zeroinfnan (uint64_t i)
-{
-  return 2 * i - 1 >= 2 * asuint64 (INFINITY) - 1;
 }
 
 double
