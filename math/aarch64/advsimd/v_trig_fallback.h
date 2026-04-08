@@ -545,9 +545,9 @@ v_sincos_fallback (double large_x)
   float64x2_t c5 = vld1q_f64 (&d->sincos_poly[10]);
   float64x2_t c6 = vld1q_f64 (&d->sincos_poly[12]);
 
-  float64x2_t offset = { r.hi, 1.0 };
-  float64x2_t x = { r.hi, r.hi };
-  float64x2_t dx = { r.lo, r.lo };
+  float64x2_t offset = vcombine_f64 (vdup_n_f64 (r.hi), vdup_n_f64 (1.0));
+  float64x2_t x = vdupq_n_f64 (r.hi);
+  float64x2_t dx = vdupq_n_f64 (r.lo);
 
   float64x2_t x2 = vmulq_f64 (x, x);
   float64x2_t x4 = vmulq_f64 (x2, x2);
@@ -570,17 +570,27 @@ v_sincos_fallback (double large_x)
   switch (n & 3)
     {
     case 0:
-      retval = (float64x2_t){ retval[0], retval[1] };
+      /* retval already correctly ordered.  */
       break;
     case 1:
-      retval = (float64x2_t){ retval[1], -retval[0] };
-      break;
+      {
+	const double y0 = vgetq_lane_f64 (retval, 0);
+	const double y1 = vgetq_lane_f64 (retval, 1);
+	retval = vsetq_lane_f64 (y1, retval, 0);
+	retval = vsetq_lane_f64 (-y0, retval, 1);
+	break;
+      }
     case 2:
-      retval = (float64x2_t){ -retval[0], -retval[1] };
+      retval = vmulq_f64 (retval, vdupq_n_f64 (-1));
       break;
     case 3:
-      retval = (float64x2_t){ -retval[1], retval[0] };
-      break;
+      {
+	const double y0 = vgetq_lane_f64 (retval, 0);
+	const double y1 = vgetq_lane_f64 (retval, 1);
+	retval = vsetq_lane_f64 (-y1, retval, 0);
+	retval = vsetq_lane_f64 (y0, retval, 1);
+	break;
+      }
     };
 
   return retval;

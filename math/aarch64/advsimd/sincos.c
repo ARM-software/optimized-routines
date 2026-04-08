@@ -20,17 +20,17 @@ static void VPCS_ATTR NOINLINE
 special_case (float64x2_t x, uint64x2_t special, double *out_sin,
 	      double *out_cos)
 {
-  if (special[0])
+  if (vgetq_lane_u64 (special, 0))
     {
-      float64x2_t ret = v_sincos_fallback (x[0]);
-      *out_sin = ret[0];
-      *out_cos = ret[1];
+      float64x2_t ret = v_sincos_fallback (vgetq_lane_f64 (x, 0));
+      *out_sin = vgetq_lane_f64 (ret, 0);
+      *out_cos = vgetq_lane_f64 (ret, 1);
     }
-  if (special[1])
+  if (vgetq_lane_u64 (special, 1))
     {
-      float64x2_t ret = v_sincos_fallback (x[1]);
-      *(out_sin + 1) = ret[0];
-      *(out_cos + 1) = ret[1];
+      float64x2_t ret = v_sincos_fallback (vgetq_lane_f64 (x, 1));
+      *(out_sin + 1) = vgetq_lane_f64 (ret, 0);
+      *(out_cos + 1) = vgetq_lane_f64 (ret, 1);
     }
 }
 
