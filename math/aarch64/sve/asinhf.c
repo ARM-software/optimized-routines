@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE asinh(x) function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -14,12 +14,30 @@
 #define BigBound 0x5f800000 /* asuint(0x1p64).  */
 
 static svfloat32_t NOINLINE
-special_case (svuint32_t iax, svuint32_t sign, svfloat32_t y, svbool_t special)
+special_case (svfloat32_t ax, svfloat32_t y, svuint32_t sign, svbool_t pg,
+	      svbool_t special, const struct sv_log1pf_data *d)
 {
-  svfloat32_t x = svreinterpret_f32 (sveor_x (svptrue_b32 (), iax, sign));
-  y = svreinterpret_f32 (
-      svorr_x (svptrue_b32 (), sign, svreinterpret_u32 (y)));
-  return sv_call_f32 (asinhf, x, y, special);
+  /* For very large inputs (x > 2^64), asinh(x) ≈ ln(2x).
+     In this range the +sqrt(x^2+1) term is negligible, so we compute
+     asinh(x) as ln(x) + ln(2) later in this function.  */
+  svfloat32_t log_ax = sv_log1pf_inline (ax, special);
+
+  /* The only special cases that need considering are infinity and NaNs since
+     0 will be handled by other calculations.  */
+  svfloat32_t inf = svreinterpret_f32 (sv_u32 (d->inf));
+  svbool_t is_inf = svcmpeq (special, ax, inf);
+  svbool_t is_nan = svcmpne (special, ax, ax);
+  svfloat32_t inf_ln2 = svsel (is_inf, inf, sv_f32 (d->ln2));
+  svfloat32_t inf_nan_ln2
+      = svsel (is_nan, svreinterpret_f32 (sv_u32 (d->nan)), inf_ln2);
+  svfloat32_t asinh_x_res = svadd_x (special, log_ax, inf_nan_ln2);
+
+  /* Now select (based on special) between x and y to change the type and,
+     return either the positive or negative value, considering the input and
+     its sign.  */
+  svfloat32_t result = svsel (special, asinh_x_res, y);
+  svuint32_t result_uint = svreinterpret_u32 (result);
+  return svreinterpret_f32 (sveor_m (pg, result_uint, sign));
 }
 
 /* Single-precision SVE asinh(x) routine. Implements the same algorithm as
@@ -30,6 +48,8 @@ special_case (svuint32_t iax, svuint32_t sign, svfloat32_t y, svbool_t special)
 				      want -0x1.fd0bc8p-2.  */
 svfloat32_t SV_NAME_F1 (asinh) (svfloat32_t x, const svbool_t pg)
 {
+  const struct sv_log1pf_data *d = ptr_barrier (&sv_log1pf_data);
+
   svfloat32_t ax = svabs_x (pg, x);
   svuint32_t iax = svreinterpret_u32 (ax);
   svuint32_t sign = sveor_x (pg, svreinterpret_u32 (x), iax);
@@ -38,12 +58,12 @@ svfloat32_t SV_NAME_F1 (asinh) (svfloat32_t x, const svbool_t pg)
   /* asinh(x) = log(x + sqrt(x * x + 1)).
      For positive x, asinh(x) = log1p(x + x * x / (1 + sqrt(x * x + 1))).  */
   svfloat32_t ax2 = svmul_x (pg, ax, ax);
-  svfloat32_t d = svadd_x (pg, svsqrt_x (pg, svadd_x (pg, ax2, 1.0f)), 1.0f);
+  svfloat32_t dx = svadd_x (pg, svsqrt_x (pg, svadd_x (pg, ax2, 1.0f)), 1.0f);
   svfloat32_t y
-      = sv_log1pf_inline (svadd_x (pg, ax, svdiv_x (pg, ax2, d)), pg);
+      = sv_log1pf_inline (svadd_x (pg, ax, svdiv_x (pg, ax2, dx)), pg);
 
   if (unlikely (svptest_any (pg, special)))
-    return special_case (iax, sign, y, special);
+    return special_case (ax, y, sign, pg, special, d);
   return svreinterpret_f32 (svorr_x (pg, sign, svreinterpret_u32 (y)));
 }
 
