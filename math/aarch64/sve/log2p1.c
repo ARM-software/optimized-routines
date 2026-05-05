@@ -1,7 +1,7 @@
 /*
- * doube-precision SVE log2(1+x) function.
+ * Double-precision SVE log2(1+x) function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
