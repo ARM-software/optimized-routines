@@ -13,9 +13,9 @@
 #include "stringlib.h"
 #include "benchlib.h"
 
-#define ITERS  5000
-#define ITERS2 20000000
-#define ITERS3 1000000
+#define ITERS_RANDOM  5000
+#define ITERS_MEDIUM 20000000
+#define ITERS_LARGE 1000000
 #define NUM_TESTS 16384
 #define MIN_SIZE 32768
 #define MAX_SIZE (1024 * 1024)
@@ -128,13 +128,13 @@ memset_random (const char *name, void *(*set)(void *, int, size_t))
 
   for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
     {
-      uint64_t memset_size = init_memset (size) * ITERS;
+      uint64_t memset_size = init_memset (size) * ITERS_RANDOM;
 
       for (int c = 0; c < NUM_TESTS; c++)
 	set (a + test_arr[c].offset, 0, test_arr[c].len);
 
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS; i++)
+      for (int i = 0; i < ITERS_RANDOM; i++)
 	for (int c = 0; c < NUM_TESTS; c++)
 	  set (a + test_arr[c].offset, 0, test_arr[c].len);
       t = clock_get_ns () - t;
@@ -153,10 +153,10 @@ memset_medium (const char *name, void *(*set)(void *, int, size_t))
   for (int size = 8; size <= 512; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
+      for (int i = 0; i < ITERS_MEDIUM; i++)
 	set (a, 0, size);
       t = clock_get_ns () - t;
-      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
+      printf ("%dB: %5.2f ", size, (double)size * ITERS_MEDIUM / t);
     }
   printf ("\n");
 }
@@ -169,10 +169,10 @@ memset_large (const char *name, void *(*set)(void *, int, size_t))
   for (int size = 1024; size <= 65536; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS3; i++)
+      for (int i = 0; i < ITERS_LARGE; i++)
 	set (a, 0, size);
       t = clock_get_ns () - t;
-      printf ("%dKB: %6.2f ", size / 1024, (double)size * ITERS3 / t);
+      printf ("%dKB: %6.2f ", size / 1024, (double)size * ITERS_LARGE / t);
     }
   printf ("\n");
 }

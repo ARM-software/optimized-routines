@@ -13,9 +13,10 @@
 #include "stringlib.h"
 #include "benchlib.h"
 
-#define ITERS  5000
-#define ITERS2 20000000
-#define ITERS3 200000
+#define ITERS_RANDOM  5000
+#define ITERS_MEDIUM 20000000
+#define ITERS_LARGE 200000
+#define ITERS_UNALIGNED 200000
 #define NUM_TESTS 16384
 #define MIN_SIZE 32768
 #define MAX_SIZE (1024 * 1024)
@@ -150,13 +151,13 @@ memcpy_random (const char *name, void *(*fn)(void *, const void *, size_t))
   uint64_t total = 0, tsum = 0;
   for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
     {
-      uint64_t copy_size = init_copies (size) * ITERS;
+      uint64_t copy_size = init_copies (size) * ITERS_RANDOM;
 
       for (int c = 0; c < NUM_TESTS; c++)
 	fn (b + test_arr[c].dst, a + test_arr[c].src, test_arr[c].len);
 
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS; i++)
+      for (int i = 0; i < ITERS_RANDOM; i++)
 	for (int c = 0; c < NUM_TESTS; c++)
 	  fn (b + test_arr[c].dst, a + test_arr[c].src, test_arr[c].len);
       t = clock_get_ns () - t;
@@ -175,10 +176,10 @@ memcpy_medium_aligned (const char *name, void *(*fn)(void *, const void *, size_
   for (int size = 8; size <= 512; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
+      for (int i = 0; i < ITERS_MEDIUM; i++)
 	fn (b, a, size);
       t = clock_get_ns () - t;
-      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
+      printf ("%dB: %5.2f ", size, (double)size * ITERS_MEDIUM / t);
     }
   printf ("\n");
 }
@@ -191,10 +192,10 @@ memcpy_medium_unaligned (const char *name, void *(*fn)(void *, const void *, siz
   for (int size = 8; size <= 512; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
+      for (int i = 0; i < ITERS_MEDIUM; i++)
 	fn (b + 3, a + 1, size);
       t = clock_get_ns () - t;
-      printf ("%dB: %5.2f ", size, (double)size * ITERS2 / t);
+      printf ("%dB: %5.2f ", size, (double)size * ITERS_MEDIUM / t);
     }
   printf ("\n");
 }
@@ -207,10 +208,10 @@ memcpy_large (const char *name, void *(*fn)(void *, const void *, size_t))
   for (int size = 1024; size <= 65536; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS3; i++)
+      for (int i = 0; i < ITERS_LARGE; i++)
 	fn (b, a, size);
       t = clock_get_ns () - t;
-      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
+      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS_LARGE / t);
     }
   printf ("\n");
 }
@@ -223,10 +224,10 @@ memmove_forward_unaligned (const char *name, void *(*fn)(void *, const void *, s
   for (int size = 1024; size <= 65536; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS3; i++)
+      for (int i = 0; i < ITERS_UNALIGNED; i++)
         fn (a, a + 256 + (i & 31), size);
       t = clock_get_ns () - t;
-      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
+      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS_UNALIGNED / t);
     }
 
   printf ("\n");
@@ -240,10 +241,10 @@ memmove_backward_unaligned (const char *name, void *(*fn)(void *, const void *, 
   for (int size = 1024; size <= 65536; size *= 2)
     {
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS3; i++)
+      for (int i = 0; i < ITERS_UNALIGNED; i++)
 	fn (a + 256 + (i & 31), a, size);
       t = clock_get_ns () - t;
-      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS3 / t);
+      printf ("%dK: %5.2f ", size / 1024, (double)size * ITERS_UNALIGNED / t);
     }
 
   printf ("\n");

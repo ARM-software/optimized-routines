@@ -13,9 +13,9 @@
 #include "stringlib.h"
 #include "benchlib.h"
 
-#define ITERS 5000
-#define ITERS2 40000000
-#define ITERS3 4000000
+#define ITERS_RANDOM 5000
+#define ITERS_SMALL 40000000
+#define ITERS_MEDIUM 4000000
 #define NUM_TESTS 65536
 
 #define MAX_ALIGN 32
@@ -123,11 +123,11 @@ strlen_random (const char *name, size_t (*fn)(const char *))
 
   for (int c = 0; c < NUM_TESTS; c++)
     strlen_size += fn (a + strlen_tests[c]) + 1;
-  strlen_size *= ITERS;
+  strlen_size *= ITERS_RANDOM;
 
   /* Measure throughput of strlen.  */
   uint64_t t = clock_get_ns ();
-  for (int i = 0; i < ITERS; i++)
+  for (int i = 0; i < ITERS_RANDOM; i++)
     for (int c = 0; c < NUM_TESTS; c++)
       res += fn (a + strlen_tests[c]);
   t = clock_get_ns () - t;
@@ -135,7 +135,7 @@ strlen_random (const char *name, size_t (*fn)(const char *))
 
   /* Measure latency of strlen result with (res & mask).  */
   t = clock_get_ns ();
-  for (int i = 0; i < ITERS; i++)
+  for (int i = 0; i < ITERS_RANDOM; i++)
     for (int c = 0; c < NUM_TESTS; c++)
       res += fn (a + strlen_tests[c] + (res & mask));
   t = clock_get_ns () - t;
@@ -155,11 +155,11 @@ strlen_small_aligned (const char *name, size_t (*fn)(const char *))
       a[size - 1] = 0;
 
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
+      for (int i = 0; i < ITERS_SMALL; i++)
 	res += fn (a + (i & mask));
       t = clock_get_ns () - t;
       printf ("%d%c: %5.2f ", size < 1024 ? size : size / 1024,
-	      size < 1024 ? 'B' : 'K', (double)size * ITERS2 / t);
+	      size < 1024 ? 'B' : 'K', (double)size * ITERS_SMALL / t);
     }
   maskv &= res;
   printf ("\n");
@@ -178,11 +178,11 @@ strlen_small_unaligned (const char *name, size_t (*fn)(const char *))
       a[align + size - 1] = 0;
 
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS2; i++)
+      for (int i = 0; i < ITERS_SMALL; i++)
 	res += fn (a + align + (i & mask));
       t = clock_get_ns () - t;
       printf ("%d%c: %5.2f ", size < 1024 ? size : size / 1024,
-	      size < 1024 ? 'B' : 'K', (double)size * ITERS2 / t);
+	      size < 1024 ? 'B' : 'K', (double)size * ITERS_SMALL / t);
     }
   maskv &= res;
   printf ("\n");
@@ -200,11 +200,11 @@ strlen_medium (const char *name, size_t (*fn)(const char *))
       a[size - 1] = 0;
 
       uint64_t t = clock_get_ns ();
-      for (int i = 0; i < ITERS3; i++)
+      for (int i = 0; i < ITERS_MEDIUM; i++)
 	res += fn (a + (i & mask));
       t = clock_get_ns () - t;
       printf ("%d%c: %5.2f ", size < 1024 ? size : size / 1024,
-	      size < 1024 ? 'B' : 'K', (double)size * ITERS3 / t);
+	      size < 1024 ? 'B' : 'K', (double)size * ITERS_MEDIUM / t);
     }
   maskv &= res;
   printf ("\n");
