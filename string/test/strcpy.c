@@ -28,6 +28,8 @@ static const struct fun
 # if __ARM_FEATURE_SVE
   F(__strcpy_aarch64_sve, 1)
 # endif
+# if __ARM_FEATURE_SVE2
+# endif
 #elif __arm__ && defined (__thumb2__) && !defined (__thumb__)
   F(__strcpy_arm, 0)
 #endif

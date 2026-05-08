@@ -45,6 +45,12 @@ rand32 (uint32_t seed)
 # define RUNSVE(BENCH, FN)
 #endif
 
+#if __ARM_FEATURE_SVE2
+# define RUNSVE2(BENCH, FN) BENCH(#FN, FN)
+#else
+# define RUNSVE2(BENCH, FN)
+#endif
+
 #if WANT_MOPS
 # define RUNMOPS(BENCH, FN) BENCH(#FN, FN)
 #else

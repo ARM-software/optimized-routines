@@ -51,6 +51,8 @@ size_t __strlen_aarch64_sve (const char *);
 size_t __strnlen_aarch64_sve (const char *, size_t);
 int __strncmp_aarch64_sve (const char *, const char *, size_t);
 # endif
+# if __ARM_FEATURE_SVE2
+# endif
 # if WANT_MOPS
 void *__memcpy_aarch64_mops (void *__restrict, const void *__restrict, size_t);
 void *__memmove_aarch64_mops (void *__restrict, const void *__restrict, size_t);

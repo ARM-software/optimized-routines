@@ -28,6 +28,8 @@ static const struct fun
 # if __ARM_FEATURE_SVE
   F(__memcmp_aarch64_sve, 1)
 # endif
+# if __ARM_FEATURE_SVE2
+# endif
 #endif
   {0, 0, 0}
   // clang-format on

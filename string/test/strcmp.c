@@ -28,6 +28,8 @@ static const struct fun
 # if __ARM_FEATURE_SVE
   F(__strcmp_aarch64_sve, 1)
 # endif
+# if __ARM_FEATURE_SVE2
+# endif
 #elif __arm__
 # if __ARM_ARCH >= 7 && __ARM_ARCH_ISA_ARM >= 1
   F(__strcmp_arm, 0)
