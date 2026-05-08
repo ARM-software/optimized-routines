@@ -1,0 +1,33 @@
+// Table generation for single-precision trig fallback
+//
+// Copyright (c) 2026, Arm Limited.
+// SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+
+display = hexadecimal;
+// Table of { sin(k * pi/4), cos(k * pi/4) } for k < 8.
+print("SINCOS_K_PI_OVER_4 Table");
+for k from 0 to 7 do {
+  s = single(sin(k*pi/4));
+  c = single(cos(k*pi/4));
+  print("  { " @ s @ ", " @ c @ " },");
+};
+
+// Row i uses q = i - 3 and stores a 4-term binary32 expansion of
+// frac((4/pi) * 2^(8*q)), biased into [0.5, 1.5).
+print("FOUR_OVER_PI Table");
+for i from 0 to 15 do {
+  q = i - 3;
+  value = (4/pi) * 2^(8*q);
+  value = ~(value - floor(value));
+  if (value < 0.5) then { value = value + 1; };
+
+  d0 = single(value);
+  value = ~(value - d0);
+  d1 = single(value);
+  value = ~(value - d1);
+  d2 = single(value);
+  value = ~(value - d2);
+  d3 = single(value);
+
+  print("  { " @ d0 @ ", " @ d1 @ ", " @ d2 @ ", " @ d3 @ " },");
+};
