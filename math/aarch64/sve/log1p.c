@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE log(1+x) function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -52,9 +52,13 @@ static const struct data
 #define BottomMask 0xffffffff
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special, svbool_t pg)
 {
-  return sv_call_f64 (log1p, x, y, special);
+  y = svsel (special, sv_f64 (NAN), y);
+  svbool_t ret_pinf = svcmpeq (pg, x, INFINITY);
+  svbool_t ret_minf = svcmpeq (pg, x, -1.0);
+  y = svsel (ret_pinf, sv_f64 (INFINITY), y);
+  return svsel (ret_minf, sv_f64 (-INFINITY), y);
 }
 
 /* Vector approximation for log1p using polynomial on reduced interval. Maximum
@@ -148,7 +152,7 @@ svfloat64_t SV_NAME_D1 (log1p) (svfloat64_t x, svbool_t pg)
   if (unlikely (svptest_any (pg, special)))
     return special_case (
 	x, svmla_x (svptrue_b64 (), svadd_x (svptrue_b64 (), ylo, yhi), f2, p),
-	special);
+	special, pg);
   return svmla_x (svptrue_b64 (), svadd_x (svptrue_b64 (), ylo, yhi), f2, p);
 }
 
