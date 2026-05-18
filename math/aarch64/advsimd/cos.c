@@ -29,19 +29,47 @@ static const struct data
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t y, uint64x2_t odd, uint64x2_t cmp)
 {
-  y = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
-  return v_call_vpcs_f64 (v_cos_fallback, x, y, cmp);
+  const struct reduction_data *d = ptr_barrier (&reduction_data);
+  struct reduction_result_t r = v_large_range_reduction (x, d);
+
+  float64x2x2_t eval = v_sincos_eval (r.remainder, d);
+  float64x2x2_t lookup = v_sincos_lookup (r.quadrant);
+
+  float64x2_t sin_r = eval.val[0];
+  float64x2_t cosm1_r = eval.val[1];
+  float64x2_t sin_k = lookup.val[0];
+  float64x2_t cos_k = lookup.val[1];
+
+  /* Construct cos(x) from k and r, using angle addition formula, with
+    approximations of sin(r) and cos(r) - 1 to reduce rounding errors.
+    cos(x) = cos(k + r)
+      = cos(k)*cos(r) - sin(k)*sin(r)
+      = cos(k)*cosm1(r) - sin(k)*sin(r) + cos(k).  */
+
+  float64x2_t large_cos = vfmaq_f64 (cos_k, cosm1_r, cos_k);
+  large_cos = vfmsq_f64 (large_cos, sin_k, sin_r);
+  float64x2_t small_cos
+      = vreinterpretq_f64_u64 (veorq_u64 (vreinterpretq_u64_f64 (y), odd));
+
+  /* Inf cases are handled correctly by the fast path, and incorrectly
+     by the slow path. However, it's less costly to the fast path to
+     handle them separately. So we do want to branch here for inf cases,
+     but then use the fast path value anyway.  */
+  uint64x2_t is_finite = vcaltq_f64 (x, v_f64 (INFINITY));
+  cmp = vandq_u64 (cmp, is_finite);
+  return vbslq_f64 (cmp, large_cos, small_cos);
 }
 
-/* Vector AdvSIMD cos approximation.
-   Maximum observed error in the non-special domain (|x| < 2^23)
-   is 2.77 + 0.5 ULP
-   _ZGVnN2v_cos (0x1.ad06044746e06p-2) got 0x1.d3b778d480fd6p-1
-				      want 0x1.d3b778d480fd9p-1
-   Maximum observed error in the special domain (|x| > 2^23)
-   is 2.70 + 0.5ULP
-   _ZGVnN2v_cos (0x1.0808d08f24a99p+854) got -0x1.fe675082631d2p-3
-					want -0x1.fe675082631cfp-3.  */
+/* Vector version of cos.
+   Maximum observed error is 2.44 + 0.5ULP when |x| >= 0x1p23.
+   _ZGVnN2v_cos (0x1.aac6f8bffec82p+206)
+    got -0x1.98ecd0b3020bfp-7
+   want -0x1.98ecd0b3020bcp-7
+   The fast path has a higher maximum error than the special domain:
+   The maximum observed error is 2.77 + 0.5 ULP when |x| < 0x1p23.
+   _ZGVnN2v_cos (0x1.ad06044746e06p-2)
+    got 0x1.d3b778d480fd6p-1
+   want 0x1.d3b778d480fd9p-1.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -50,12 +78,12 @@ float64x2_t VPCS_ATTR V_NAME_D1 (cos) (float64x2_t x)
   float64x2_t invpi_pi_1 = vld1q_f64 (&d->inv_pi);
   float64x2_t pi_2_3 = vld1q_f64 (&d->pi_2);
 
-  /* n = rint((|x|+pi/2)/pi) - 0.5.  */
+  /* n = rint((x+pi/2)/pi) - 0.5.  */
   float64x2_t n = vrndaq_f64 (vfmaq_laneq_f64 (v_f64 (0.5), x, invpi_pi_1, 0));
   uint64x2_t odd = vshlq_n_u64 (vreinterpretq_u64_s64 (vcvtq_s64_f64 (n)), 63);
   n = vsubq_f64 (n, v_f64 (0.5f));
 
-  /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
+  /* r = x - n*pi  (range reduction into -pi/2 .. pi/2).  */
   float64x2_t r = x;
   r = vfmsq_laneq_f64 (r, n, invpi_pi_1, 1);
   r = vfmsq_laneq_f64 (r, n, pi_2_3, 0);
