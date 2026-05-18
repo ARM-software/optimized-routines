@@ -5,39 +5,19 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-/* Define _GNU_SOURCE in order to include sincosf declaration. If building
-   pre-GLIBC 2.1, or on a non-GNU conforming system, this routine will need to
-   be linked against the scalar sincosf from math/.  */
-#define _GNU_SOURCE
-
 #include "sv_math.h"
 #include "sv_sincosf_common.h"
 #include "test_defs.h"
 
-#include <math.h>
-
-/* sincos not available for all scalar libm implementations.  */
-#ifndef __GLIBC__
-static void
-sincosf (float x, float *out_sin, float *out_cos)
-{
-  *out_sin = sinf (x);
-  *out_cos = cosf (x);
-}
-#endif
-
 static void NOINLINE
-special_case (svfloat32_t x, svbool_t special, float *out_sin, float *out_cos)
+special_case (svfloat32_t x, float *out_sin, float *out_cos, svbool_t pg,
+	      svbool_t special)
 {
-  svbool_t p = svptrue_pat_b32 (SV_VL1);
-  for (int i = 0; i < svcntw (); i++)
-    {
-      if (svptest_any (special, p))
-	sincosf (svlastb (p, x), out_sin + i, out_cos + i);
-      p = svpnext_b32 (svptrue_b32 (), p);
-    }
+  const struct trig_data *d = ptr_barrier (&trig_data);
+  svfloat32x2_t result = sv_sincos_fallback (x, special, d);
+  svst1_f32 (pg, out_sin, svget2 (result, 0));
+  svst1_f32 (pg, out_cos, svget2 (result, 1));
 }
-
 /* Single-precision vector function allowing calculation of both sin and cos in
    one function call, using shared argument reduction and separate low-order
    polynomials.
@@ -48,7 +28,16 @@ special_case (svfloat32_t x, svbool_t special, float *out_sin, float *out_cos)
    The maximum observed error is 1.56 + 0.5 ULP for cos when |x| < 0x1p20.
    _ZGVsMxvl4l4_sincosf_cos (0x1.dea2f2p+19)
     got 0x1.fffe7ap-6
-   want 0x1.fffe76p-6.  */
+   want 0x1.fffe76p-6
+   The special domain has a higher maximum error than the fast path:
+   The maximum observed error is 2.69 + 0.5 ULP for sin when |x| >= 0x1p20.
+   _ZGVsMxvl4l4_sincosf_sin (0x1.be07aap+77)
+    got 0x1.ffe05ep-5
+   want 0x1.ffe058p-5
+   The maximum observed error is 2.65 + 0.5 ULP for cos when |x| >= 0x1p20.
+   _ZGVsMxvl4l4_sincosf_cos (0x1.ff3afcp+53)
+    got -0x1.ffe74p-3
+   want -0x1.ffe73ap-3.  */
 void
 _ZGVsMxvl4l4_sincosf (svfloat32_t x, float *out_sin, float *out_cos,
 		      svbool_t pg)
@@ -56,16 +45,16 @@ _ZGVsMxvl4l4_sincosf (svfloat32_t x, float *out_sin, float *out_cos,
   const struct trig_data *d = ptr_barrier (&trig_data);
   svbool_t special = svacge (pg, x, d->range_val);
 
+  if (unlikely (svptest_any (pg, special)))
+    return special_case (x, out_sin, out_cos, pg, special);
+
   svfloat32x2_t result = sv_sincosf_inline (x, d);
   svst1_f32 (pg, out_sin, svget2 (result, 0));
   svst1_f32 (pg, out_cos, svget2 (result, 1));
-
-  if (unlikely (svptest_any (pg, special)))
-    special_case (x, special, out_sin, out_cos);
 }
 
-TEST_ULP (_ZGVsMxvl4l4_sincosf_sin, 1.45)
-TEST_ULP (_ZGVsMxvl4l4_sincosf_cos, 1.57)
+TEST_ULP (_ZGVsMxvl4l4_sincosf_sin, 2.70)
+TEST_ULP (_ZGVsMxvl4l4_sincosf_cos, 2.65)
 #define SV_SINCOSF_INTERVAL(lo, hi, n)                                        \
   TEST_SYM_INTERVAL (_ZGVsMxvl4l4_sincosf_sin, lo, hi, n)                     \
   TEST_SYM_INTERVAL (_ZGVsMxvl4l4_sincosf_cos, lo, hi, n)

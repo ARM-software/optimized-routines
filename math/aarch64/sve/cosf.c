@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "sv_trigf_fallback.h"
 #include "test_sig.h"
 #include "test_defs.h"
 
@@ -26,16 +27,42 @@ static const struct data
 };
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t oob)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 {
-  return sv_call_f32 (cosf, x, y, oob);
+  special = svaclt (special, x, sv_f32 (INFINITY));
+
+  svfloat32x2_t reduction = large_range_reduction (svptrue_b32 (), x);
+
+  /* Unpack the quadrant from the return struct.  */
+  svuint32_t quadrant = svreinterpret_u32 (svget2 (reduction, 1));
+  svfloat32_t r = svget2 (reduction, 0);
+
+  /* Adjust quadrant to select cosine polynomial.  */
+  quadrant = svadd_x (svptrue_b32 (), quadrant, 1);
+
+  svfloat32_t f = svtssel (r, quadrant);
+  svfloat32_t r2 = svtsmul (r, quadrant);
+  svfloat32_t cos = sv_f32 (0.0f);
+  cos = svtmad (cos, r2, 4);
+  cos = svtmad (cos, r2, 3);
+  cos = svtmad (cos, r2, 2);
+  cos = svtmad (cos, r2, 1);
+  cos = svtmad (cos, r2, 0);
+  cos = svmul_x (svptrue_b32 (), f, cos);
+
+  return svsel (special, cos, y);
 }
 
 /* Vector version of cosf.
    The maximum observed error is 1.56 + 0.5 ULP if |x| < 0x1p20.
    _ZGVsMxv_cosf (0x1.dea2f2p+19)
     got 0x1.fffe7ap-6
-   want 0x1.fffe76p-6.  */
+   want 0x1.fffe76p-6
+   The special domain has a higher maximum error than the fast path:
+   Maximum observed error is 2.65 + 0.5ULP
+   _ZGVsMxv_cosf (0x1.ff3afcp+53)
+    got -0x1.ffe74p-3
+   want -0x1.ffe73ap-3.  */
 svfloat32_t SV_NAME_F1 (cos) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -75,7 +102,8 @@ svfloat32_t SV_NAME_F1 (cos) (svfloat32_t x, const svbool_t pg)
 }
 
 TEST_SIG (SV, F, 1, cos, -3.1, 3.1)
-TEST_ULP (SV_NAME_F1 (cos), 1.57)
+TEST_ULP (SV_NAME_F1 (cos), 2.65)
 TEST_INTERVAL (SV_NAME_F1 (cos), 0, 0xffff0000, 10000)
 TEST_INTERVAL (SV_NAME_F1 (cos), 0x1p-4, 0x1p4, 500000)
+TEST_INTERVAL (SV_NAME_F1 (cos), 0x1p20, inf, 10000)
 CLOSE_SVE_ATTR

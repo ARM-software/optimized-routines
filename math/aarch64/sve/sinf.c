@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "sv_trigf_fallback.h"
 #include "test_sig.h"
 #include "test_defs.h"
 
@@ -26,16 +27,39 @@ static const struct data
 };
 
 static svfloat32_t NOINLINE
-special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
+special_case (svfloat32_t x, svfloat32_t y, svbool_t special)
 {
-  return sv_call_f32 (sinf, x, y, cmp);
+  special = svaclt (special, x, sv_f32 (INFINITY));
+
+  svfloat32x2_t reduction = large_range_reduction (svptrue_b32 (), x);
+
+  /* Unpack the quadrant from the return struct.  */
+  svuint32_t quadrant = svreinterpret_u32 (svget2 (reduction, 1));
+  svfloat32_t r = svget2 (reduction, 0);
+
+  svfloat32_t f = svtssel (r, quadrant);
+  svfloat32_t r2 = svtsmul (r, quadrant);
+  svfloat32_t sin = sv_f32 (0.0f);
+  sin = svtmad (sin, r2, 4);
+  sin = svtmad (sin, r2, 3);
+  sin = svtmad (sin, r2, 2);
+  sin = svtmad (sin, r2, 1);
+  sin = svtmad (sin, r2, 0);
+  sin = svmul_x (svptrue_b32 (), f, sin);
+
+  return svsel (special, sin, y);
 }
 
 /* Vector version of sinf.
    The maximum observed error is 1.44 + 0.5 ULP when |x| < 0x1p20.
    _ZGVsMxv_sinf(0x1.4b0d9cp+13)
     got 0x1.fc28cep-3
-   want 0x1.fc28d2p-3.  */
+   want 0x1.fc28d2p-3.
+   The special domain has a higher maximum error than the fast path:
+   The maximum observed error is 2.69 + 0.5 ULP when |x| >= 0x1p20.
+   _ZGVsMxv_sinf (0x1.be07aap+77)
+    got 0x1.ffe05ep-5
+   want 0x1.ffe058p-5.  */
 svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -75,7 +99,7 @@ svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 }
 
 TEST_SIG (SV, F, 1, sin, -3.1, 3.1)
-TEST_ULP (SV_NAME_F1 (sin), 1.45)
-TEST_SYM_INTERVAL (SV_NAME_F1 (sin), 0, 0x1p23, 1000000)
-TEST_SYM_INTERVAL (SV_NAME_F1 (sin), 0x1p23, inf, 10000)
+TEST_ULP (SV_NAME_F1 (sin), 2.70)
+TEST_SYM_INTERVAL (SV_NAME_F1 (sin), 0, 0x1p20, 1000000)
+TEST_SYM_INTERVAL (SV_NAME_F1 (sin), 0x1p20, inf, 10000)
 CLOSE_SVE_ATTR
