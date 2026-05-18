@@ -13,16 +13,31 @@ static svfloat64x2_t NOINLINE
 special_case (svfloat64_t x, svbool_t special, const struct sv_sincos_data *d)
 {
   svfloat64x2_t small = sv_sincos_inline (x, d);
+  svfloat64x2_t large = sv_sincos_fallback (x);
 
-  svfloat64_t s = sv_call_f64 (sin, x, svget2 (small, 0), special);
-  svfloat64_t c = sv_call_f64 (cos, x, svget2 (small, 1), special);
+  /* Inf cases are handled correctly by the fast path, and incorrectly
+  by the slow path. However, it's less costly to the fast path to
+  handle them separately. So we do want to branch here for inf cases,
+  but then use the fast path value anyway.  */
+  special = svaclt (special, x, sv_f64 (INFINITY));
+  svfloat64_t sin = svsel (special, svget2 (large, 0), svget2 (small, 0));
+  svfloat64_t cos = svsel (special, svget2 (large, 1), svget2 (small, 1));
 
-  return svcreate2 (s, c);
+  return svcreate2 (sin, cos);
 }
 
 /* Double-precision vector function allowing calculation of both sin and cos in
    one function call, using shared argument reduction and addition angle trig
    identities.
+   Worst-case error for sin is 2.15 + 0.5 ULP when |x| >= 0x1p23:
+   _ZGVsMxv_cexpi_sin (0x1.3d4ded894041ep+784)
+    got -0x1.fffa6b28930b5p-7
+   want -0x1.fffa6b28930b2p-7
+   Worst-case error for cos is 2.44 + 0.5 ULP when |x| >= 0x1p23:
+   _ZGVsMxv_cexpi_cos (0x1.aac6f8bffec82p+206)
+    got -0x1.98ecd0b3020bfp-7
+   want -0x1.98ecd0b3020bcp-7.
+
    Worst-case error for sin is 2.67 + 0.5 ULP when |x| < 0x1p23:
    _ZGVsMxv_cexpi_sin (0x1.022ae05e6dae2p+12)
     got 0x1.f7f7190cb05e9p-2

@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "sv_trig_fallback.h"
 #include "test_sig.h"
 #include "test_defs.h"
 
@@ -23,16 +24,49 @@ static const struct data
 };
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 {
-  return sv_call_f64 (sin, x, y, cmp);
+  svfloat64x2_t r = sv_large_range_reduction (x);
+
+  /* Unpack return struct.  */
+  svfloat64_t remainder = svget2 (r, 0);
+  svuint64_t quadrant = svreinterpret_u64 (svget2 (r, 1));
+
+  svfloat64x2_t eval = sv_sincos_eval (remainder);
+  svfloat64x2_t lookup = sv_sin_cos_lookup (quadrant);
+
+  svfloat64_t sin_r = svget2 (eval, 0);
+  svfloat64_t cosm1_r = svget2 (eval, 1);
+  svfloat64_t sin_k = svget2 (lookup, 0);
+  svfloat64_t cos_k = svget2 (lookup, 1);
+
+  /* Construct sin(x) from k and r, using angle addition formula, with
+     approximations of sin(r) and cos(r) - 1 to reduce rounding errors.
+     sin(x) = sin(k + r)
+	    = cos(k)*sin(r) + sin(k)*cos(r)
+	    = cos(k)*sin(r) + sin(k)*cosm1(r) + sin(k).  */
+
+  svfloat64_t large_sin = svmla_x (svptrue_b64 (), sin_k, cos_k, sin_r);
+  large_sin = svmla_x (svptrue_b64 (), large_sin, sin_k, cosm1_r);
+
+  /* Inf cases are handled correctly by the fast path, and incorrectly
+    by the slow path. However, it's less costly to the fast path to
+    handle them separately. So we do want to branch here for inf cases,
+    but then use the fast path value anyway.  */
+  special = svaclt (special, x, sv_f64 (INFINITY));
+  return svsel (special, large_sin, y);
 }
 
 /* Vector version of sin.
    The maximum observed error is 1.54 + 0.5 ULP when |x| < 0x1p23.
    _ZGVsMxv_sin (0x1.66645abd9b8b5p+7)
     got -0x1.ff938061b2778p-4
-   want -0x1.ff938061b2776p-4.  */
+   want -0x1.ff938061b2776p-4
+   The special domain has a higher maximum error than the fast path:
+   Maximum observed error is 2.15 + 0.5ULP when |x| >= 0x1p23.
+   _ZGVsMxv_sin (0x1.3d4ded894041ep+784)
+    got -0x1.fffa6b28930b5p-7
+   want -0x1.fffa6b28930b2p-7.  */
 svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -67,7 +101,6 @@ svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
   svbool_t special = svacge (pg, x, d->range_val);
   if (unlikely (svptest_any (pg, special)))
     return special_case (x, svmul_x (svptrue_b64 (), f, y), special);
-  /* Apply factor.  */
   return svmul_x (svptrue_b64 (), f, y);
 }
 

@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "sv_trig_fallback.h"
 #include "test_sig.h"
 #include "test_defs.h"
 
@@ -26,16 +27,49 @@ static const struct data
 };
 
 static svfloat64_t NOINLINE
-special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
+special_case (svfloat64_t x, svfloat64_t y, svbool_t special)
 {
-  return sv_call_f64 (cos, x, y, cmp);
+  svfloat64x2_t r = sv_large_range_reduction (x);
+
+  /* Unpack return struct.  */
+  svfloat64_t remainder = svget2 (r, 0);
+  svuint64_t quadrant = svreinterpret_u64 (svget2 (r, 1));
+
+  svfloat64x2_t eval = sv_sincos_eval (remainder);
+  svfloat64x2_t lookup = sv_sin_cos_lookup (quadrant);
+
+  svfloat64_t sin_r = svget2 (eval, 0);
+  svfloat64_t cosm1_r = svget2 (eval, 1);
+  svfloat64_t sin_k = svget2 (lookup, 0);
+  svfloat64_t cos_k = svget2 (lookup, 1);
+
+  /* Construct cos(x) from k and r, using angle addition formula, with
+    approximations of sin(r) and cos(r) - 1 to reduce rounding errors.
+    cos(x) = cos(k + r)
+      = cos(k)*cos(r) - sin(k)*sin(r)
+      = cos(k)*cosm1(r) - sin(k)*sin(r) + cos(k).  */
+
+  svfloat64_t large_cos = svmla_x (svptrue_b64 (), cos_k, cosm1_r, cos_k);
+  large_cos = svmls_x (svptrue_b64 (), large_cos, sin_k, sin_r);
+
+  /* Inf cases are handled correctly by the fast path, and incorrectly
+    by the slow path. However, it's less costly to the fast path to
+    handle them separately. So we do want to branch here for inf cases,
+    but then use the fast path value anyway.  */
+  special = svaclt (special, x, sv_f64 (INFINITY));
+  return svsel (special, large_cos, y);
 }
 
 /* Vector version of cos.
    The maximum observed error is 1.53 + 0.5 ULP when |x| < 0x1p23.
    _ZGVsMxv_cos (0x1.166b1063318b8p+19)
     got 0x1.fff1e92b6c31ap-4
-   want 0x1.fff1e92b6c318p-4.  */
+   want 0x1.fff1e92b6c318p-4
+   The special domain has a higher maximum error than the fast path:
+   Maximum observed error is 2.44 + 0.5ULP when |x| >= 0x1p23.
+   _ZGVsMxv_cos (0x1.aac6f8bffec82p+206)
+    got -0x1.98ecd0b3020bfp-7
+   want -0x1.98ecd0b3020bcp-7.  */
 svfloat64_t SV_NAME_D1 (cos) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);

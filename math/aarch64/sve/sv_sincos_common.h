@@ -6,6 +6,7 @@
  */
 
 #include "sv_math.h"
+#include "sv_trig_fallback.h"
 
 static const struct sv_sincos_data
 {
@@ -104,6 +105,45 @@ sv_sincos_inline (svfloat64_t x, const struct sv_sincos_data *d)
     cos(x) = cos(k + r)
       = cos(k)*cos(r) - sin(k)*sin(r)
       = cos(k)*cosm1(r) - sin(k)*sin(r) + cos(k).  */
+
+  svfloat64_t sin = svmla_x (ptrue, sin_k, cos_k, sin_r);
+  sin = svmla_x (ptrue, sin, sin_k, cosm1_r);
+
+  svfloat64_t cos = svmla_x (ptrue, cos_k, cosm1_r, cos_k);
+  cos = svmls_x (ptrue, cos, sin_k, sin_r);
+
+  return svcreate2 (sin, cos);
+}
+
+/* Double-precision vector function allowing calculation of both sin and cos
+   for large x in one function call, using shared argument reduction and
+   addition angle trig identities.
+   Worst-case error for sin is 2.15 + 0.5 ULP when |x| >= 0x1p23:
+   sv_sincos_sin (0x1.3d4ded894041ep+784)
+    got -0x1.fffa6b28930b5p-7
+   want -0x1.fffa6b28930b2p-7
+
+   Worst-case error for cos is 2.44 + 0.5 ULP when |x| >= 0x1p23:
+   sv_sincos_cos (0x1.aac6f8bffec82p+206)
+    got -0x1.98ecd0b3020bfp-7
+   want -0x1.98ecd0b3020bcp-7.  */
+static inline svfloat64x2_t
+sv_sincos_fallback (svfloat64_t x)
+{
+  svbool_t ptrue = svptrue_b64 ();
+  svfloat64x2_t r = sv_large_range_reduction (x);
+
+  /* Unpack return struct.  */
+  svfloat64_t remainder = svget2 (r, 0);
+  svuint64_t quadrant = svreinterpret_u64 (svget2 (r, 1));
+
+  svfloat64x2_t eval = sv_sincos_eval (remainder);
+  svfloat64x2_t lookup = sv_sin_cos_lookup (quadrant);
+
+  svfloat64_t sin_r = svget2 (eval, 0);
+  svfloat64_t cosm1_r = svget2 (eval, 1);
+  svfloat64_t sin_k = svget2 (lookup, 0);
+  svfloat64_t cos_k = svget2 (lookup, 1);
 
   svfloat64_t sin = svmla_x (ptrue, sin_k, cos_k, sin_r);
   sin = svmla_x (ptrue, sin, sin_k, cosm1_r);
