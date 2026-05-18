@@ -1,81 +1,74 @@
 /*
  * Core approximation for single-precision vector sincos
  *
- * Copyright (c) 2023-2024, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "sv_math.h"
 
-const static struct sv_sincosf_data
+static const struct trig_data
 {
-  float poly_sin[3], poly_cos[3], pio2[3], inv_pio2, shift, range_val;
-} sv_sincosf_data = {
-  .poly_sin = { /* Generated using Remez, odd coeffs only, in [-pi/4, pi/4].  */
-	        -0x1.555546p-3, 0x1.11076p-7, -0x1.994eb4p-13 },
-  .poly_cos = { /* Generated using Remez, even coeffs only, in [-pi/4, pi/4].  */
-	        0x1.55554ap-5, -0x1.6c0c1ap-10, 0x1.99e0eep-16 },
-  .pio2 = { 0x1.921fb6p+0f, -0x1.777a5cp-25f, -0x1.ee59dap-50f },
+  float neg_pio2_1, neg_pio2_2, neg_pio2_3, inv_pio2, shift, range_val;
+  float sin_start, cos_start;
+} trig_data = {
+  /* Polynomial coefficients are hard-wired in FTMAD instructions.  */
+  .neg_pio2_1 = -0x1.921fb6p+0f,
+  .neg_pio2_2 = 0x1.777a5cp-25f,
+  .neg_pio2_3 = 0x1.ee59dap-50f,
   .inv_pio2 = 0x1.45f306p-1f,
-  .shift = 0x1.8p23,
-  .range_val = 0x1p20
+  /* Original shift used in AdvSIMD cosf,
+     plus a contribution to set the bit #0 of q
+     as expected by trigonometric instructions.  */
+  .shift = 0x1.8p+23f,
+  .range_val = 0x1p20f,
+  /* Values used by svtmad when #4 is passed in,
+     Loaded directly for better performance.  */
+  .sin_start = 0x1.6d3adap-19f,
+  .cos_start = 0x1.9a6f98p-16f,
 };
 
-static inline svbool_t
-check_ge_rangeval (svbool_t pg, svfloat32_t x, const struct sv_sincosf_data *d)
-{
-  svbool_t in_bounds = svaclt (pg, x, d->range_val);
-  return svnot_z (pg, in_bounds);
-}
-
-/* Single-precision vector function allowing calculation of both sin and cos in
-   one function call, using shared argument reduction and separate low-order
-   polynomials.
-   Worst-case error for sin is 1.67 ULP:
-   sv_sincosf_sin(0x1.c704c4p+19) got 0x1.fff698p-5 want 0x1.fff69cp-5
-   Worst-case error for cos is 1.81 ULP:
-   sv_sincosf_cos(0x1.e506fp+19) got -0x1.ffec6ep-6 want -0x1.ffec72p-6.  */
 static inline svfloat32x2_t
-sv_sincosf_inline (svbool_t pg, svfloat32_t x, const struct sv_sincosf_data *d)
+sv_sincosf_inline (svfloat32_t x, const struct trig_data *d)
 {
-  /* n = rint ( x / (pi/2) ).  */
-  svfloat32_t q = svmla_x (pg, sv_f32 (d->shift), x, d->inv_pio2);
-  q = svsub_x (pg, q, d->shift);
-  svint32_t n = svcvt_s32_x (pg, q);
+  svbool_t ptrue = svptrue_b32 ();
 
-  /* Reduce x such that r is in [ -pi/4, pi/4 ].  */
+  /* Load some constants in quad-word chunks to minimise memory access.  */
+  svfloat32_t negpio2_and_invpio2 = svld1rq (ptrue, &d->neg_pio2_1);
+
+  /* n = rint(x/(pi/2)).  */
+  svfloat32_t q = svmla_lane (sv_f32 (d->shift), x, negpio2_and_invpio2, 3);
+  svfloat32_t n = svsub_x (ptrue, q, d->shift);
+
+  /* r = x - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
   svfloat32_t r = x;
-  r = svmls_x (pg, r, q, d->pio2[0]);
-  r = svmls_x (pg, r, q, d->pio2[1]);
-  r = svmls_x (pg, r, q, d->pio2[2]);
+  r = svmla_lane (r, n, negpio2_and_invpio2, 0);
+  r = svmla_lane (r, n, negpio2_and_invpio2, 1);
+  r = svmla_lane (r, n, negpio2_and_invpio2, 2);
 
-  /* Approximate sin(r) ~= r + r^3 * poly_sin(r^2).  */
-  svfloat32_t r2 = svmul_x (pg, r, r), r3 = svmul_x (pg, r, r2);
-  svfloat32_t s = svmla_x (pg, sv_f32 (d->poly_sin[1]), r2, d->poly_sin[2]);
-  s = svmad_x (pg, r2, s, d->poly_sin[0]);
-  s = svmla_x (pg, r, r3, s);
+  svuint32_t sin_q = svreinterpret_u32 (q);
+  svuint32_t cos_q = svadd_x (ptrue, svreinterpret_u32 (q), 1);
 
-  /* Approximate cos(r) ~= 1 - (r^2)/2 + r^4 * poly_cos(r^2).  */
-  svfloat32_t r4 = svmul_x (pg, r2, r2);
-  svfloat32_t p = svmla_x (pg, sv_f32 (d->poly_cos[1]), r2, d->poly_cos[2]);
-  svfloat32_t c = svmad_x (pg, sv_f32 (d->poly_cos[0]), r2, -0.5);
-  c = svmla_x (pg, c, r4, p);
-  c = svmad_x (pg, r2, c, 1);
+  svfloat32_t sin_f = svtssel (r, sin_q);
+  svfloat32_t sin_r2 = svtsmul (r, sin_q);
 
-  svuint32_t un = svreinterpret_u32 (n);
-  /* If odd quadrant, swap cos and sin.  */
-  svbool_t swap = svcmpeq (pg, svlsl_x (pg, un, 31), 0);
-  svfloat32_t ss = svsel (swap, s, c);
-  svfloat32_t cc = svsel (swap, c, s);
+  svfloat32_t cos_f = svtssel (r, cos_q);
+  svfloat32_t cos_r2 = svtsmul (r, cos_q);
 
-  /* Fix signs according to quadrant.
-     ss = asfloat(asuint(ss) ^ ((n       & 2) << 30))
-     cc = asfloat(asuint(cc) & (((n + 1) & 2) << 30)).  */
-  svuint32_t sin_sign = svlsl_x (pg, svand_x (pg, un, 2), 30);
-  svuint32_t cos_sign = svlsl_x (
-      pg, svand_x (pg, svreinterpret_u32 (svadd_x (pg, n, 1)), 2), 30);
-  ss = svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (ss), sin_sign));
-  cc = svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (cc), cos_sign));
+  /* Manually selecting the starting value saves a redundant svtmad.  */
+  svbool_t swap = svcmpne (ptrue, svand_x (ptrue, sin_q, 1), 0);
+  svfloat32_t sin = svsel (swap, sv_f32 (d->cos_start), sv_f32 (d->sin_start));
+  svfloat32_t cos = svsel (swap, sv_f32 (d->sin_start), sv_f32 (d->cos_start));
 
-  return svcreate2 (ss, cc);
+  sin = svtmad (sin, sin_r2, 3);
+  sin = svtmad (sin, sin_r2, 2);
+  sin = svtmad (sin, sin_r2, 1);
+  sin = svtmad (sin, sin_r2, 0);
+
+  cos = svtmad (cos, cos_r2, 3);
+  cos = svtmad (cos, cos_r2, 2);
+  cos = svtmad (cos, cos_r2, 1);
+  cos = svtmad (cos, cos_r2, 0);
+
+  return svcreate2 (svmul_x (ptrue, sin_f, sin), svmul_x (ptrue, cos_f, cos));
 }

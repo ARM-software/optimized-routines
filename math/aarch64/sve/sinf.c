@@ -1,7 +1,7 @@
 /*
  * Single-precision SVE sin(x) function.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,26 +11,19 @@
 
 static const struct data
 {
-  float poly[4];
-  /* Pi-related values to be loaded as one quad-word and used with
-     svmla_lane.  */
-  float negpi1, negpi2, negpi3, invpi;
-  float shift;
+  float neg_pio2_1, neg_pio2_2, neg_pio2_3, inv_pio2, shift, range_val;
 } data = {
-  .poly = {
-    /* Non-zero coefficients from the degree 9 Taylor series expansion of
-       sin.  */
-    -0x1.555548p-3f, 0x1.110df4p-7f, -0x1.9f42eap-13f, 0x1.5b2e76p-19f
-  },
-  .negpi1 = -0x1.921fb6p+1f,
-  .negpi2 = 0x1.777a5cp-24f,
-  .negpi3 = 0x1.ee59dap-49f,
-  .invpi = 0x1.45f306p-2f,
-  .shift = 0x1.8p+23f
+  /* Polynomial coefficients are hard-wired in FTMAD instructions.  */
+  .neg_pio2_1 = -0x1.921fb6p+0f,
+  .neg_pio2_2 = 0x1.777a5cp-25f,
+  .neg_pio2_3 = 0x1.ee59dap-50f,
+  .inv_pio2 = 0x1.45f306p-1f,
+  /* Original shift used in AdvSIMD cosf,
+     plus a contribution to set the bit #0 of q
+     as expected by trigonometric instructions.  */
+  .shift = 0x1.8p+23f,
+  .range_val = 0x1p20f,
 };
-
-#define RangeVal 0x49800000 /* asuint32 (0x1p20f).  */
-#define C(i) sv_f32 (d->poly[i])
 
 static svfloat32_t NOINLINE
 special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
@@ -38,57 +31,51 @@ special_case (svfloat32_t x, svfloat32_t y, svbool_t cmp)
   return sv_call_f32 (sinf, x, y, cmp);
 }
 
-/* A fast SVE implementation of sinf.
-   Maximum error: 1.89 ULPs.
-   This maximum error is achieved at multiple values in [-2^18, 2^18]
-   but one example is:
-   SV_NAME_F1 (sin)(0x1.9247a4p+0) got 0x1.fffff6p-1 want 0x1.fffffap-1.  */
+/* Vector version of sinf.
+   The maximum observed error is 1.44 + 0.5 ULP when |x| < 0x1p20.
+   _ZGVsMxv_sinf(0x1.4b0d9cp+13)
+    got 0x1.fc28cep-3
+   want 0x1.fc28d2p-3.  */
 svfloat32_t SV_NAME_F1 (sin) (svfloat32_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
+  svbool_t ptrue = svptrue_b32 ();
 
-  svfloat32_t ax = svabs_x (pg, x);
-  svuint32_t sign
-      = sveor_x (pg, svreinterpret_u32 (x), svreinterpret_u32 (ax));
-  svbool_t cmp = svcmpge (pg, svreinterpret_u32 (ax), RangeVal);
+  /* Load some constants in quad-word chunks to minimise memory access.  */
+  svfloat32_t negpio2_and_invpio2 = svld1rq (ptrue, &d->neg_pio2_1);
 
-  /* pi_vals are a quad-word of helper values - the first 3 elements contain
-     -pi in extended precision, the last contains 1 / pi.  */
-  svfloat32_t pi_vals = svld1rq (svptrue_b32 (), &d->negpi1);
+  /* n = rint(x/(pi/2)).  */
+  svfloat32_t q = svmla_lane (sv_f32 (d->shift), x, negpio2_and_invpio2, 3);
+  svfloat32_t n = svsub_x (ptrue, q, d->shift);
 
-  /* n = rint(|x|/pi).  */
-  svfloat32_t n = svmla_lane (sv_f32 (d->shift), ax, pi_vals, 3);
-  svuint32_t odd = svlsl_x (pg, svreinterpret_u32 (n), 31);
-  n = svsub_x (pg, n, d->shift);
+  /* r = x - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
+  svfloat32_t r = x;
+  r = svmla_lane (r, n, negpio2_and_invpio2, 0);
+  r = svmla_lane (r, n, negpio2_and_invpio2, 1);
+  r = svmla_lane (r, n, negpio2_and_invpio2, 2);
 
-  /* r = |x| - n*pi  (range reduction into -pi/2 .. pi/2).  */
-  svfloat32_t r;
-  r = svmla_lane (ax, n, pi_vals, 0);
-  r = svmla_lane (r, n, pi_vals, 1);
-  r = svmla_lane (r, n, pi_vals, 2);
+  /* Final multiplicative factor: 1.0 or x depending on bit #0 of q.  */
+  svuint32_t q_u = svreinterpret_u32 (q);
+  svfloat32_t f = svtssel (r, q_u);
 
-  /* sin(r) approx using a degree 9 polynomial from the Taylor series
-     expansion. Note that only the odd terms of this are non-zero.  */
-  svfloat32_t r2 = svmul_x (pg, r, r);
-  svfloat32_t y;
-  y = svmla_x (pg, C (2), r2, C (3));
-  y = svmla_x (pg, C (1), r2, y);
-  y = svmla_x (pg, C (0), r2, y);
-  y = svmla_x (pg, r, r, svmul_x (pg, y, r2));
+  /* sin(r) poly approx.  */
+  svfloat32_t r2 = svtsmul (r, q_u);
+  svfloat32_t y = sv_f32 (0.0f);
+  y = svtmad (y, r2, 4);
+  y = svtmad (y, r2, 3);
+  y = svtmad (y, r2, 2);
+  y = svtmad (y, r2, 1);
+  y = svtmad (y, r2, 0);
 
-  /* sign = y^sign^odd.  */
-  sign = sveor_x (pg, sign, odd);
-
+  svbool_t cmp = svacge (pg, x, sv_f32 (d->range_val));
   if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x,
-			 svreinterpret_f32 (sveor_x (
-			     svnot_z (pg, cmp), svreinterpret_u32 (y), sign)),
-			 cmp);
-  return svreinterpret_f32 (sveor_x (pg, svreinterpret_u32 (y), sign));
+    return special_case (x, svmul_x (ptrue, f, y), cmp);
+  /* Apply factor.  */
+  return svmul_x (ptrue, f, y);
 }
 
 TEST_SIG (SV, F, 1, sin, -3.1, 3.1)
-TEST_ULP (SV_NAME_F1 (sin), 1.40)
+TEST_ULP (SV_NAME_F1 (sin), 1.45)
 TEST_SYM_INTERVAL (SV_NAME_F1 (sin), 0, 0x1p23, 1000000)
 TEST_SYM_INTERVAL (SV_NAME_F1 (sin), 0x1p23, inf, 10000)
 CLOSE_SVE_ATTR
