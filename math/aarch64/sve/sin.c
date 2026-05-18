@@ -1,7 +1,7 @@
 /*
  * Double-precision SVE sin(x) function.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -11,22 +11,16 @@
 
 static const struct data
 {
-  double inv_pi, pi_1, pi_2, pi_3, shift, range_val;
-  double poly[7];
+  double inv_pio2, pio2_1, pio2_2, pio2_3, shift, range_val;
 } data = {
-  .poly = { -0x1.555555555547bp-3, 0x1.1111111108a4dp-7, -0x1.a01a019936f27p-13,
-            0x1.71de37a97d93ep-19, -0x1.ae633919987c6p-26,
-            0x1.60e277ae07cecp-33, -0x1.9e9540300a1p-41, },
-
-  .inv_pi = 0x1.45f306dc9c883p-2,
-  .pi_1 = 0x1.921fb54442d18p+1,
-  .pi_2 = 0x1.1a62633145c06p-53,
-  .pi_3 = 0x1.c1cd129024e09p-106,
+  /* Polynomial coefficients are hardwired in FTMAD instructions.  */
+  .inv_pio2 = 0x1.45f306dc9c882p-1,
+  .pio2_1 = 0x1.921fb54442d18p+0,
+  .pio2_2 = 0x1.1a62633145c07p-54,
+  .pio2_3 = -0x1.f1976b7ed8fbcp-110,
   .shift = 0x1.8p52,
   .range_val = 0x1p23,
 };
-
-#define C(i) sv_f64 (d->poly[i])
 
 static svfloat64_t NOINLINE
 special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
@@ -34,64 +28,51 @@ special_case (svfloat64_t x, svfloat64_t y, svbool_t cmp)
   return sv_call_f64 (sin, x, y, cmp);
 }
 
-/* A fast SVE implementation of sin.
-   Maximum observed error in [-pi/2, pi/2], where argument is not reduced,
-   is 2.87 ULP:
-   _ZGVsMxv_sin (0x1.921d5c6a07142p+0) got 0x1.fffffffa7dc02p-1
-				      want 0x1.fffffffa7dc05p-1
-   Maximum observed error in the entire non-special domain ([-2^23, 2^23])
-   is 3.22 ULP:
-   _ZGVsMxv_sin (0x1.5702447b6f17bp+22) got 0x1.ffdcd125c84fbp-3
-				       want 0x1.ffdcd125c84f8p-3.  */
+/* Vector version of sin.
+   The maximum observed error is 1.54 + 0.5 ULP when |x| < 0x1p23.
+   _ZGVsMxv_sin (0x1.66645abd9b8b5p+7)
+    got -0x1.ff938061b2778p-4
+   want -0x1.ff938061b2776p-4.  */
 svfloat64_t SV_NAME_D1 (sin) (svfloat64_t x, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
+  svfloat64_t inv_pio2 = svld1rq (svptrue_b64 (), &d->inv_pio2);
+  svfloat64_t pio2_23 = svld1rq (svptrue_b64 (), &d->pio2_2);
 
-  /* Load some values in quad-word chunks to minimise memory access.  */
-  const svbool_t ptrue = svptrue_b64 ();
-  svfloat64_t shift = sv_f64 (d->shift);
-  svfloat64_t inv_pi_and_pi1 = svld1rq (ptrue, &d->inv_pi);
-  svfloat64_t pi2_and_pi3 = svld1rq (ptrue, &d->pi_2);
+  /* n = rint(x/(pi/2)).  */
+  svfloat64_t q = svmla_lane (sv_f64 (d->shift), x, inv_pio2, 0);
+  svfloat64_t n = svsub_x (pg, q, sv_f64 (d->shift));
 
-  /* n = rint(|x|/pi).  */
-  svfloat64_t n = svmla_lane (shift, x, inv_pi_and_pi1, 0);
-  svuint64_t odd = svlsl_x (pg, svreinterpret_u64 (n), 63);
-  n = svsub_x (pg, n, shift);
-
-  /* r = |x| - n*(pi/2)  (range reduction into -pi/2 .. pi/2).  */
+  /* r = x - n*(pi/2)  (range reduction into -pi/4 .. pi/4).  */
   svfloat64_t r = x;
-  r = svmls_lane (r, n, inv_pi_and_pi1, 1);
-  r = svmls_lane (r, n, pi2_and_pi3, 0);
-  r = svmls_lane (r, n, pi2_and_pi3, 1);
+  r = svmls_lane (r, n, inv_pio2, 1);
+  r = svmls_lane (r, n, pio2_23, 0);
+  r = svmls_lane (r, n, pio2_23, 1);
 
-  /* sin(r) poly approx.  */
-  svfloat64_t r2 = svmul_x (pg, r, r);
-  svfloat64_t r3 = svmul_x (pg, r2, r);
-  svfloat64_t r4 = svmul_x (pg, r2, r2);
+  /* sin(r) or cos(r) poly approx, selected by the quadrant bits in q.  */
+  svfloat64_t r2 = svtsmul (r, svreinterpret_u64 (q));
+  svfloat64_t y = sv_f64 (0.0);
+  y = svtmad (y, r2, 7);
+  y = svtmad (y, r2, 6);
+  y = svtmad (y, r2, 5);
+  y = svtmad (y, r2, 4);
+  y = svtmad (y, r2, 3);
+  y = svtmad (y, r2, 2);
+  y = svtmad (y, r2, 1);
+  y = svtmad (y, r2, 0);
 
-  svfloat64_t t1 = svmla_x (pg, C (4), C (5), r2);
-  svfloat64_t t2 = svmla_x (pg, C (2), C (3), r2);
-  svfloat64_t t3 = svmla_x (pg, C (0), C (1), r2);
+  /* Final multiplicative factor: r or 1.0 depending on bit #0 of q.  */
+  svfloat64_t f = svtssel (r, svreinterpret_u64 (q));
 
-  svfloat64_t y = svmla_x (pg, t1, C (6), r4);
-  y = svmla_x (pg, t2, y, r4);
-  y = svmla_x (pg, t3, y, r4);
-  y = svmla_x (pg, r, y, r3);
-
-  svbool_t cmp = svacle (pg, x, d->range_val);
-  cmp = svnot_z (pg, cmp);
-  if (unlikely (svptest_any (pg, cmp)))
-    return special_case (x,
-			 svreinterpret_f64 (sveor_z (
-			     svnot_z (pg, cmp), svreinterpret_u64 (y), odd)),
-			 cmp);
-
-  /* Copy sign.  */
-  return svreinterpret_f64 (sveor_z (pg, svreinterpret_u64 (y), odd));
+  svbool_t special = svacge (pg, x, d->range_val);
+  if (unlikely (svptest_any (pg, special)))
+    return special_case (x, svmul_x (svptrue_b64 (), f, y), special);
+  /* Apply factor.  */
+  return svmul_x (svptrue_b64 (), f, y);
 }
 
 TEST_SIG (SV, D, 1, sin, -3.1, 3.1)
-TEST_ULP (SV_NAME_D1 (sin), 2.73)
+TEST_ULP (SV_NAME_D1 (sin), 1.55)
 TEST_SYM_INTERVAL (SV_NAME_D1 (sin), 0, 0x1p23, 1000000)
 TEST_SYM_INTERVAL (SV_NAME_D1 (sin), 0x1p23, inf, 10000)
 CLOSE_SVE_ATTR
