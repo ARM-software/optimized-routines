@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+# Copyright (c) 2026, Arm Limited.
+# Default style for optimized-routines.
+#
+# CONTRIBUTING.md asks contributors to use clang-format with the style
+# configuration from GCC's contrib/ directory unless a sub-project overrides it.
+---
+Language: Cpp
+AccessModifierOffset: -2
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+AlwaysBreakTemplateDeclarations: MultiLine
+BinPackArguments: true
+BinPackParameters: true
+BraceWrapping:
+  AfterClass: true
+  AfterCaseLabel: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: false
+  AfterObjCDeclaration: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeWhile: true
+  IndentBraces: true
+  SplitEmptyFunction: false
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: true
+ColumnLimit: 80
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
+IndentCaseLabels: false
+IndentWidth: 2
+NamespaceIndentation: None
+PenaltyBreakBeforeFirstCallParameter: 100
+PointerAlignment: Right
+SortIncludes: false
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: Always
+SpacesBeforeTrailingComments: 1
+TabWidth: 8
+UseTab: Always
+AlignEscapedNewlines: Right
+AlignTrailingComments: true
+AllowShortFunctionsOnASingleLine: All
+KeepEmptyLinesAtTheStartOfBlocks: false
+Standard: Auto
