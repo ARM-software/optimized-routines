@@ -13,9 +13,10 @@
 #include "stringlib.h"
 #include "benchlib.h"
 
-#define ITERS_RANDOM 5000
-#define ITERS_SMALL 40000000
-#define ITERS_MEDIUM 4000000
+#define ITERS_RANDOM	5000
+#define ITERS_SMALL	100000000
+#define ITERS_MEDIUM	10000000
+
 #define NUM_TESTS 65536
 
 #define MAX_ALIGN 32
