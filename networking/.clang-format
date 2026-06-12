@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+# Copyright (c) 2026, Arm Limited.
+---
+Language: Cpp
+BasedOnStyle: GNU
+AlwaysBreakAfterDefinitionReturnType: All
+AlwaysBreakAfterReturnType: AllDefinitions
+BreakBeforeBraces: GNU
+ColumnLimit: 79
+ContinuationIndentWidth: 4
+IndentPPDirectives: AfterHash
+IndentWidth: 2
+PointerAlignment: Right
+SortIncludes: false
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: Always
+TabWidth: 8
+UseTab: Always
