@@ -46,22 +46,23 @@ ENTRY (__memchr_scalar)
 	orr	chr_repeated, chr_repeated, chr_repeated, lsl 32
 	mov	zeroones, #REP8_01
 
-	/* Align back to 8-byte boundary, look for a match and shift the found
-	   result back before checking.  */
 	bic	src, src_in, #7
 	ldr	data1, [src], #8
+#ifdef __AARCH64EB__
+	rev	data1, data1
+#endif
+	/* Skip unused bytes before src_in.  */
+	lsl	tmp1, src_in, 3
+	lsr	tmp2, zeroones, tmp1
+	lsr	data1, data1, tmp1
 
 	eor	data1, data1, chr_repeated
-	sub	tmp1, data1, zeroones
+	sub	tmp1, data1, tmp2
 	orr	tmp2, data1, REP8_7f
 	bic	found1, tmp1, tmp2
-
-	lsl	tmp1, src_in, #3
-	lsr	found1, found1, tmp1
 	cbz	found1, L(loop_start)
 
-    /* Calculate the offset and return
-	   it if offset < count_in. */
+	/* Calculate the offset and return it if offset < count_in.  */
 	rbit	found1, found1
 	clz	tmp1, found1
 	cmp	count_in, tmp1, lsr #3
@@ -69,6 +70,7 @@ ENTRY (__memchr_scalar)
 	csel	result, result, xzr, hi
 	ret
 
+	.p2align 4
 L(loop_start):
 	adds	src_end, src_in, count_in
 	/* Deal with count_in being so large that src_end comes before src_in due
@@ -82,6 +84,9 @@ L(loop_start):
 	.p2align 4
 L(loop):
 	ldr	data1, [src], #8
+#ifdef __AARCH64EB__
+	rev	data1, data1
+#endif
 	eor	data1, data1, chr_repeated
 	sub	tmp1, data1, zeroones
 	orr	tmp2, data1, REP8_7f

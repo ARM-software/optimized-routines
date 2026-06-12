@@ -26,7 +26,7 @@ static const struct fun
   F(memchr, 0)
 #if __aarch64__
   F(__memchr_aarch64, 0)
-  F(__memchr_scalar, 0)
+  F(__memchr_scalar, 1)
   F(__memchr_aarch64_mte, 1)
 # if __ARM_FEATURE_SVE
   F(__memchr_aarch64_sve, 1)
@@ -72,6 +72,8 @@ test (const struct fun *fun, int align, size_t seekpos, size_t len,
     s[len + i] = seekchar;
   for (int i = 0; i < len; i++)
     s[i] = 'a' + (i & 31);
+
+  s[0] = seekchar ^ 1;		/* Difficult case for scalar version.  */
   s[seekpos] = seekchar;
   s[((len ^ align) & 1) ? seekpos + 1 : len] = seekchar;
 
