@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+# Copyright (c) 2026, Arm Limited.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{c,h}]
+indent_style = space
+indent_size = 2
+tab_width = 8
+max_line_length = 80
+
+[networking/**.{c,h}]
+indent_style = space
+indent_size = 2
+tab_width = 8
+max_line_length = 79
+
+[*.{S,s}]
+indent_style = tab
+tab_width = 8
+max_line_length = 80
+
+[{Makefile,*.mk}]
+indent_style = tab
+tab_width = 8
+
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
