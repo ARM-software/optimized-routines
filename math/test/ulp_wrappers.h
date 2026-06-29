@@ -1,7 +1,7 @@
 /*
  * Function wrappers for ulp.
  *
- * Copyright (c) 2022-2025, Arm Limited.
+ * Copyright (c) 2022-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -29,6 +29,12 @@ static int mpfr_rsqrt (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd){
   mpfr_set_d (one, 1.0, rnd);
   mpfr_sqrt (m, arg, rnd);
   return mpfr_div (ret, one, m, rnd);
+}
+
+static int
+mpfr_cr_exp (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd)
+{
+  return mpfr_exp (ret, arg, rnd);
 }
 
 # if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
@@ -172,6 +178,12 @@ double modf_frac(double x) { double i; return modf(x, &i); }
 double modf_int(double x) { double i; modf(x, &i); return i; }
 long double modfl_frac(long double x) { long double i; return modfl(x, &i); }
 long double modfl_int(long double x) { long double i; modfl(x, &i); return i; }
+
+static double
+cr_exp (double x)
+{
+  return exp (x);
+}
 
 /* Wrappers for vector functions.  */
 #if __aarch64__ && __linux__
