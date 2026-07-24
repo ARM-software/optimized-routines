@@ -18,5 +18,5 @@ func=atanh op1=80000000.00000000 result=80000000.00000000 errno=0
 ; No exception is raised with certain versions of glibc. Functions
 ; approximated by x near zero may not generate/implement flops and
 ; thus may not raise exceptions.
-func=atanh op1=00000000.00000001 result=00000000.00000001 errno=0 maybestatus=ux
-func=atanh op1=80000000.00000001 result=80000000.00000001 errno=0 maybestatus=ux
+func=atanh op1=00000000.00000001 result=00000000.00000001 errno=0 maybestatus=ux maybeerror=underflow
+func=atanh op1=80000000.00000001 result=80000000.00000001 errno=0 maybestatus=ux maybeerror=underflow

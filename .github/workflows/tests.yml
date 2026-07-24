@@ -12,7 +12,7 @@ jobs:
     runs-on: ah-ubuntu_24_04-c7g_4x-50
     strategy:
       matrix:
-        compiler: ["gcc", "clang-20"]
+        compiler: ["gcc-16", "clang-22"]
 
     steps:
     - uses: actions/checkout@v4
@@ -21,9 +21,15 @@ jobs:
     - name: update package cache
       run: sudo apt-get update
     - name: install dependencies
-      run: sudo apt-get install -y libmpfr-dev libmpc-dev wget
+      run: sudo apt-get install -y libmpfr-dev libmpc-dev wget software-properties-common
+    - name: install test PPA
+      run: sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - name: update package cache (again)
+      run: sudo apt-get update
     - name: install clang
-      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 20
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 22
+    - name: install GCC
+      run: sudo apt install -y gcc-16 g++-16
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
@@ -34,7 +40,7 @@ jobs:
       run: CC="${{ matrix.compiler }}" make prefix=$(pwd)/install install
 
   linux-x86-64-cross:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         compiler: ["aarch64-linux-gnu-gcc"]
@@ -46,7 +52,7 @@ jobs:
     - name: update package cache
       run: sudo apt-get update
     - name: install dependencies
-      run: sudo apt-get install -y libmpfr-dev libmpc-dev gcc-aarch64-linux-gnu qemu-user-static
+      run: sudo apt-get install -y libmpfr-dev libmpc-dev gcc-aarch64-linux-gnu qemu-user-binfmt
     - name: configure
       run: cp config.mk.dist config.mk
     - name: make
