@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
+# Copyright (c) 2026, Arm Limited.
+# Default style for optimized-routines. Based on GNU style with deviations to
+# match glibc style.
+---
+BasedOnStyle: GNU
+IndentPPDirectives: AfterHash
+SortIncludes:    false
+SpaceAfterCStyleCast: true
+Standard:        Cpp03
+UseTab:          Always
+ForEachMacros:
+  - 'FOR_EACH_IMPL'
+  - 'list_for_each'
+  - 'list_for_each_prev'
+  - 'list_for_each_prev_safe'
