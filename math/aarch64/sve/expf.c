@@ -11,7 +11,7 @@
 
 /* For x < -SpecialBound, the result is subnormal and not handled
    correctly by FEXPA.  */
-#define SpecialBound 0x1.5d5e2ap+6f /* ln(2^126) ~ 87.34.  */
+#define SpecialBound 0x1.5d589ep+6f /* ln(2^126) ~ 87.34.  */
 
 /* Values of x which exp overflows or underflows.  */
 #define InfBound 0x1.62e42fp6f /* ~ 88.72.  */

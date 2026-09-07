@@ -10,8 +10,8 @@
 #include "test_defs.h"
 
 /* Value of |x| above which scale overflows without special treatment.
-   log2(2^(1022 + 1/128)) ~ 1022.00.  */
-#define SpecialBound 0x1.ff01p+9
+   log2(2^1022) = 1022.00.  */
+#define SpecialBound 0x1.ffp+9
 
 /* Values of x which exp2 overflows or underflows.  */
 #define InfBound 0x1p10		 /* 1024.  */

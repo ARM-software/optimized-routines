@@ -10,8 +10,8 @@
 #include "test_defs.h"
 
 /* Value of |x| above which scale overflows without special treatment.
-   ln(2^(1022 + 1/128)) ~ 708.40.  */
-#define SpecialBound 0x1.62336f49c49a2p+9
+   ln(2^1022) ~ 708.3964.  */
+#define SpecialBound 0x1.6232bdd7abcd2p+9
 
 /* Values of x which exp overflows or underflows.  */
 #define InfBound 0x1.63p+9		/* 710.0.  */
