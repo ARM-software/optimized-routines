@@ -49,9 +49,9 @@
 
 ENTRY_ALIAS (__memmove_aarch64_sve)
 ENTRY (__memcpy_aarch64_sve)
+	cntb	vlen
 	cmp	count, 128
 	b.hi	L(copy_long)
-	cntb	vlen
 	cmp	count, vlen, lsl 1
 	b.hi	L(copy32_128)
 
@@ -74,6 +74,8 @@ L(copy32_128):
 	stp	A_q, B_q, [dstin]
 	stp	C_q, D_q, [dstend, -32]
 	ret
+
+	.p2align 4
 
 	/* Copy 65..128 bytes.  */
 L(copy128):
@@ -128,6 +130,9 @@ L(copy64_from_end):
 	stp	E_q, F_q, [dstend, -64]
 	stp	A_q, B_q, [dstend, -32]
 	ret
+
+	.p2align 4
+	nop
 
 	/* Large backwards copy for overlapping copies.
 	   Copy 16 bytes and then align srcend to 16-byte alignment.  */
