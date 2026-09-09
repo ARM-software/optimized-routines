@@ -88,4 +88,18 @@ GNU_PROPERTY (FEATURE_1_AND, FEATURE_1_BTI|FEATURE_1_PAC)
 
 #define L(l) .L ## l
 
+/* Macro for SVE: Contiguous load of bytes.
+   Using LDBSVE without setting the predicate p0 to true would not
+   raise an error. However, it's the user's responsibility to ensure
+   the predicate p0 is set to true with ptrue.  */
+#ifdef __BIG_ENDIAN__ /* Assumption: PTRUE p0.b.  */
+  .macro LDBSVE sve_vect:req, src_address:vararg
+   ld1b	{\sve_vect\().b}, p0/z, \src_address
+  .endm
+#else
+/* No endian conversion.  */
+# define LDBSVE	LDR
+# define ldbsve	LDR
+#endif
+
 #endif
