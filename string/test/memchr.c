@@ -32,6 +32,7 @@ static const struct fun
   F(__memchr_aarch64_sve, 1)
 # endif
 # if __ARM_FEATURE_SVE2
+  F(__memchr_aarch64_sve2, 1)
 # endif
 #elif __arm__
   F(__memchr_arm, 0)
