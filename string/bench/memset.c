@@ -14,10 +14,11 @@
 #include "benchlib.h"
 
 #define ITERS_RANDOM	20000
+#define ITERS_SMALL	200000000
 #define ITERS_MEDIUM	100000000
 #define ITERS_LARGE	2000000
 
-#define NUM_TESTS 16384
+#define NUM_TESTS 32768
 #define MIN_SIZE 32768
 #define MAX_SIZE (1024 * 1024)
 
@@ -123,14 +124,13 @@ init_memset (size_t max_size)
 static void inline __attribute ((always_inline))
 memset_random (const char *name, void *(*set)(void *, int, size_t))
 {
-  uint64_t total_size = 0;
-  uint64_t tsum = 0;
+  uint64_t total_size = 0, tsum = 0, memset_size;
   printf ("%22s ", name);
   rand32 (0x12345678);
 
-  for (int size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
+  for (size_t size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
     {
-      uint64_t memset_size = init_memset (size) * ITERS_RANDOM;
+      memset_size = init_memset (size) * ITERS_RANDOM;
 
       for (int c = 0; c < NUM_TESTS; c++)
 	set (a + test_arr[c].offset, 0, test_arr[c].len);
@@ -142,7 +142,27 @@ memset_random (const char *name, void *(*set)(void *, int, size_t))
       t = clock_get_ns () - t;
       total_size += memset_size;
       tsum += t;
-      printf ("%dK: %5.2f ", size / 1024, (double)memset_size / t);
+      printf ("%ldK: %5.2f ", size / 1024, (double)memset_size / t);
+    }
+  printf( "avg %5.2f\n", (double)total_size / tsum);
+}
+
+static void inline __attribute ((always_inline))
+memset_small (const char *name, void *(*set)(void *, int, size_t))
+{
+  printf ("%22s ", name);
+  uint64_t total_size = 0, tsum = 0, memset_size;
+
+  for (size_t size = 0; size < 16; size++)
+    {
+      uint64_t t = clock_get_ns ();
+      for (int i = 0; i < ITERS_SMALL; i++)
+	set (a + (i & 4095), 0, size);
+      t = clock_get_ns () - t;
+      memset_size = (size ? size : 1) * ITERS_SMALL;
+      total_size += memset_size;
+      tsum += t;
+      printf ("%4.2f ", (double)memset_size / t);
     }
   printf( "avg %5.2f\n", (double)total_size / tsum);
 }
@@ -151,32 +171,40 @@ static void inline __attribute ((always_inline))
 memset_medium (const char *name, void *(*set)(void *, int, size_t))
 {
   printf ("%22s ", name);
+  uint64_t total_size = 0, tsum = 0, memset_size;
 
-  for (int size = 8; size <= 512; size *= 2)
+  for (size_t size = 8; size <= 512; size *= 2)
     {
       uint64_t t = clock_get_ns ();
       for (int i = 0; i < ITERS_MEDIUM; i++)
 	set (a, 0, size);
       t = clock_get_ns () - t;
-      printf ("%dB: %5.2f ", size, (double)size * ITERS_MEDIUM / t);
+      memset_size = size * ITERS_MEDIUM;
+      total_size += memset_size;
+      tsum += t;
+      printf ("%ldB: %5.2f ", size, (double)memset_size / t);
     }
-  printf ("\n");
+  printf( "avg %5.2f\n", (double)total_size / tsum);
 }
 
 static void inline __attribute ((always_inline))
 memset_large (const char *name, void *(*set)(void *, int, size_t))
 {
   printf ("%22s ", name);
+  uint64_t total_size = 0, tsum = 0, memset_size;
 
-  for (int size = 1024; size <= 65536; size *= 2)
+  for (size_t size = 1024; size <= 65536; size *= 2)
     {
       uint64_t t = clock_get_ns ();
       for (int i = 0; i < ITERS_LARGE; i++)
 	set (a, 0, size);
       t = clock_get_ns () - t;
-      printf ("%dKB: %6.2f ", size / 1024, (double)size * ITERS_LARGE / t);
+      memset_size = size * ITERS_LARGE;
+      total_size += memset_size;
+      tsum += t;
+      printf ("%ldKB: %6.2f ", size / 1024, (double)memset_size / t);
     }
-  printf ("\n");
+  printf( "avg %5.2f\n", (double)total_size / tsum);
 }
 
 int main (void)
@@ -186,7 +214,8 @@ int main (void)
   memset (a, 1, sizeof (a));
 
   DOTEST ("Random memset (bytes/ns):\n", memset_random);
-  DOTEST ("Medium memset (bytes/ns):\n", memset_medium);
-  DOTEST ("Large memset (bytes/ns):\n", memset_large);
+  DOTEST ("Small unaligned memset 0-15 (bytes/ns):\n", memset_small);
+  DOTEST ("Medium aligned memset (bytes/ns):\n", memset_medium);
+  DOTEST ("Large aligned memset (bytes/ns):\n", memset_large);
   return 0;
 }
