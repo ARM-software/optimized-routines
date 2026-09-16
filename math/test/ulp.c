@@ -508,7 +508,7 @@ rmap (int r)
   return -1;
 }
 
-#define prec_mpfr_f 50
+#define prec_mpfr_f 100
 #define prec_mpfr_d 80
 #define prec_f 24
 #define prec_d 53

@@ -38,6 +38,20 @@ mpfr_cr_exp (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd)
   return mpfr_exp (ret, arg, rnd);
 }
 
+static int
+mpfr_cr_exp2 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd)
+{
+  return mpfr_exp2 (ret, arg, rnd);
+}
+
+# if WANT_EXP10_TESTS
+static int
+mpfr_cr_exp10 (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd)
+{
+  return mpfr_exp10 (ret, arg, rnd);
+}
+# endif
+
 # if MPFR_VERSION < MPFR_VERSION_NUM(4, 2, 0)
 static int mpfr_acospi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   MPFR_DECL_INIT (frd, 1080);
@@ -187,6 +201,20 @@ cr_exp (double x)
 {
   return exp (x);
 }
+
+static double
+cr_exp2 (double x)
+{
+  return exp2 (x);
+}
+
+#if WANT_EXP10_TESTS
+static double
+cr_exp10 (double x)
+{
+  return exp10 (x);
+}
+#endif
 
 /* Wrappers for vector functions.  */
 #if __aarch64__ && __linux__

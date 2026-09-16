@@ -1,5 +1,5 @@
 /*
- * Single-precision correctly rounded vector e^x function.
+ * Single-precision correctly rounded vector 2^x function.
  *
  * Copyright (c) 2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
@@ -15,35 +15,37 @@ static const struct data
   double c1, c3;
   float64x2_t c0, c2;
   struct cr_expf_data exp_data;
-  float64x2_t shift, inv_ln2;
-  double ln2_hi, ln2_lo;
+  float64x2_t shift, biased_ln2;
   float32x4_t range_val;
   uint32x4_t inf;
-} expf_data = {
+} exp2f_data = {
   .c0 = V2 (0x1.fffffffffdbcep-2),
   .c1 = 0x1.55555555543c2p-3,
   .c2 = V2 (0x1.555573c64f2e3p-5),
   .c3 = 0x1.111126b4eff73p-7,
   .exp_data = CR_EXPF_DATA,
   .shift = V2 (0x1.800000000ffc0p+46),
-  .inv_ln2 = V2 (0x1.71547652b82fep+0),
-  .ln2_hi = 0x1.62e42fefa39efp-1,
-  .ln2_lo = 0x1.abc9e3b39803fp-56,
+  /* ln(2) is biased upward by 768 FP64 ULP, which is enough to remove
+     hard to round cases.  */
+  .biased_ln2 = V2 (0x1.62e42fefa3cefp-1),
   .range_val = V4 (0x1p+9),
   .inf = V4 (0x7f800000),
 };
 
 static inline float64x2_t VPCS_ATTR
-inline_exp (float64x2_t x, const struct data *d)
+inline_exp2 (float64x2_t x, const struct data *d)
 {
-  float64x2_t z = vfmaq_f64 (d->shift, x, d->inv_ln2);
+  /* By using 2^x = e^(x * ln(2)).
+     By splitting x into n + (x - n), where n is x rounded to the
+     nearest multiple of 1/64. From this, we then get:
+      r = (x - n) * ln(2), with |r| < ln2/128,
+      2^x = 2^n * exp(r).  */
+  float64x2_t z = vaddq_f64 (x, d->shift);
   float64x2_t n = vsubq_f64 (z, d->shift);
 
-  float64x2_t ln2 = vld1q_f64 (&d->ln2_hi);
-
   float64x2_t r = x;
-  r = vfmsq_laneq_f64 (r, n, ln2, 0);
-  r = vfmsq_laneq_f64 (r, n, ln2, 1);
+  r = vsubq_f64 (r, n);
+  r = vmulq_f64 (r, d->biased_ln2);
 
   float64x2_t coeffs = vld1q_f64 (&d->c1);
 
@@ -59,23 +61,23 @@ inline_exp (float64x2_t x, const struct data *d)
   return vfmaq_f64 (s, s, y);
 }
 
-/* Single-precision correctly rounded vector expf routine.  */
-float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cr_exp) (float32x4_t x)
+/* Single-precision correctly rounded vector exp2f routine.  */
+float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cr_exp2) (float32x4_t x)
 {
-  const struct data *d = ptr_barrier (&expf_data);
+  const struct data *d = ptr_barrier (&exp2f_data);
 
   /* Splits into an upper and lower half for double-precision computation.  */
   float64x2_t x_d_lo = vcvt_f64_f32 (vget_low_f32 (x));
   float64x2_t x_d_hi = vcvt_high_f64_f32 (x);
 
   /* Compute the double precision exponential for the high and low halves.  */
-  float64x2_t y_lo = inline_exp (x_d_lo, d);
-  float64x2_t y_hi = inline_exp (x_d_hi, d);
+  float64x2_t y_lo = inline_exp2 (x_d_lo, d);
+  float64x2_t y_hi = inline_exp2 (x_d_hi, d);
 
   /* Round to single precision, and recombine the results.  */
   float32x4_t ret = vcombine_f32 (vcvt_f32_f64 (y_lo), vcvt_f32_f64 (y_hi));
 
-  /* Handle special cases: overflow, underflow, and NaNs.  */
+  /* Clamps inputs outside the range needed by binary32 to inf or zero.  */
   uint32x4_t special = vcagtq_f32 (x, d->range_val);
   if (unlikely (v_any_u32 (special)))
     {
@@ -90,11 +92,12 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cr_exp) (float32x4_t x)
   return ret;
 }
 
-HALF_WIDTH_ALIAS_F1 (cr_exp)
+HALF_WIDTH_ALIAS_F1 (cr_exp2)
 
-TEST_SIG (V, F, 1, cr_exp, -9.9, 9.9)
-TEST_ULP (V_NAME_F1 (cr_exp), 0.00)
-TEST_INTERVAL (V_NAME_F1 (cr_exp), 0, 0xffff0000, 10000)
-TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp), 0, 0x1p-23, 50000)
-TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp), 0x1p-23, 0x1p9, 50000)
-TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp), 0x1p9, inf, 50000)
+TEST_SIG (V, F, 1, cr_exp2, -9.9, 9.9)
+TEST_ULP (V_NAME_F1 (cr_exp2), 0.00)
+TEST_INTERVAL (V_NAME_F1 (cr_exp2), 0, 0xffff0000, 10000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp2), 0, 0x1p-23, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp2), 0x1p-23, 0x1p7, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp2), 0x1p7, 0x1p9, 50000)
+TEST_SYM_INTERVAL (V_NAME_F1 (cr_exp2), 0x1p9, inf, 50000)
