@@ -128,7 +128,7 @@ memset_random (const char *name, void *(*set)(void *, int, size_t))
   printf ("%22s ", name);
   rand32 (0x12345678);
 
-  for (size_t size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
+  for (uint64_t size = MIN_SIZE; size <= MAX_SIZE; size *= 2)
     {
       memset_size = init_memset (size) * ITERS_RANDOM;
 
@@ -153,7 +153,7 @@ memset_small (const char *name, void *(*set)(void *, int, size_t))
   printf ("%22s ", name);
   uint64_t total_size = 0, tsum = 0, memset_size;
 
-  for (size_t size = 0; size < 16; size++)
+  for (uint64_t size = 0; size < 16; size++)
     {
       uint64_t t = clock_get_ns ();
       for (int i = 0; i < ITERS_SMALL; i++)
@@ -173,7 +173,7 @@ memset_medium (const char *name, void *(*set)(void *, int, size_t))
   printf ("%22s ", name);
   uint64_t total_size = 0, tsum = 0, memset_size;
 
-  for (size_t size = 8; size <= 512; size *= 2)
+  for (uint64_t size = 8; size <= 512; size *= 2)
     {
       uint64_t t = clock_get_ns ();
       for (int i = 0; i < ITERS_MEDIUM; i++)
@@ -193,7 +193,7 @@ memset_large (const char *name, void *(*set)(void *, int, size_t))
   printf ("%22s ", name);
   uint64_t total_size = 0, tsum = 0, memset_size;
 
-  for (size_t size = 1024; size <= 65536; size *= 2)
+  for (uint64_t size = 1024; size <= 65536; size *= 2)
     {
       uint64_t t = clock_get_ns ();
       for (int i = 0; i < ITERS_LARGE; i++)
