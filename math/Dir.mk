@@ -1,6 +1,6 @@
 # Makefile fragment - requires GNU make
 #
-# Copyright (c) 2019-2025, Arm Limited.
+# Copyright (c) 2019-2026, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 .SECONDEXPANSION:
@@ -113,6 +113,13 @@ ifeq ($(WANT_SVE_TESTS), 0)
   ulp-funcs := $(foreach a,$(ulp-funcs),$(if $(findstring sve,$a),,$a))
   ulp-wrappers := $(foreach a,$(ulp-wrappers),$(if $(findstring sve,$a),,$a))
   mathbench-funcs := $(foreach a,$(mathbench-funcs),$(if $(findstring sve,$a),,$a))
+endif
+
+ifneq ($(WANT_FP16_TESTS), 1)
+  # Filter out anything with f16 in the path
+  ulp-funcs := $(foreach a,$(ulp-funcs),$(if $(findstring f16,$a),,$a))
+  ulp-wrappers := $(foreach a,$(ulp-wrappers),$(if $(findstring f16,$a),,$a))
+  mathbench-funcs := $(foreach a,$(mathbench-funcs),$(if $(findstring f16,$a),,$a))
 endif
 
 define emit_sig

@@ -186,9 +186,11 @@ SVF (arm_math_sve_fast_expf, -9.9, 9.9)
 #define _ZSF1(fun, a, b) F (fun##f, a, b)
 #define _ZSD1(f, a, b) D (f, a, b)
 
+#define _ZVH1(fun, a, b) VNH (_ZGVnN8v_##fun##f16, a, b)
 #define _ZVF1(fun, a, b) VNF (_ZGVnN4v_##fun##f, a, b)
 #define _ZVD1(f, a, b) VND (_ZGVnN2v_##f, a, b)
 
+#define _ZSVH1(fun, a, b) SVH (_ZGVsMxv_##fun##f16, a, b)
 #define _ZSVF1(fun, a, b) SVF (_ZGVsMxv_##fun##f, a, b)
 #define _ZSVD1(f, a, b) SVD (_ZGVsMxv_##f, a, b)
 
@@ -197,8 +199,10 @@ SVF (arm_math_sve_fast_expf, -9.9, 9.9)
    macros for them anyway as they will be emitted by TEST_SIG.  */
 #define _ZSF2(...)
 #define _ZSD2(...)
+#define _ZVH2(...)
 #define _ZVF2(...)
 #define _ZVD2(...)
+#define _ZSVH2(...)
 #define _ZSVF2(...)
 #define _ZSVD2(...)
 

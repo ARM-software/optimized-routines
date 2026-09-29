@@ -13,18 +13,40 @@
 #endif
 
 #define VPCS_ATTR __attribute__ ((aarch64_vector_pcs))
+#ifdef __clang__
+#  define FP16_ATTR __attribute__ ((target ("fp16")))
+#else
+#  define FP16_ATTR __attribute__ ((target ("+fp16")))
+#endif
 
+#define V_NAME_H1(fun) _ZGVnN8v_##fun##f16
+#define V_NAME_H2(fun) _ZGVnN8vv_##fun##f16
 #define V_NAME_F1(fun) _ZGVnN4v_##fun##f
 #define V_NAME_D1(fun) _ZGVnN2v_##fun
 #define V_NAME_F2(fun) _ZGVnN4vv_##fun##f
 #define V_NAME_D2(fun) _ZGVnN2vv_##fun
+#define V_NAME_H1_L1(fun) _ZGVnN8vl2_##fun##f16
 #define V_NAME_F1_L1(fun) _ZGVnN4vl4_##fun##f
 #define V_NAME_D1_L1(fun) _ZGVnN2vl8_##fun
 
+#define V_NAME_H1_STRET(fun) _ZGVnN8v_##fun##f16_stret
 #define V_NAME_F1_STRET(fun) _ZGVnN4v_##fun##f_stret
 #define V_NAME_D1_STRET(fun) _ZGVnN2v_##fun##_stret
 
 #if USE_GLIBC_ABI
+
+#  define HALF_WIDTH_ALIAS_H1(fun)                                            \
+    float16x4_t VPCS_ATTR _ZGVnN4v_##fun##f16 (float16x4_t x)                 \
+    {                                                                         \
+      return vget_low_f16 (_ZGVnN8v_##fun##f16 (vcombine_f16 (x, x)));        \
+    }
+
+#  define HALF_WIDTH_ALIAS_H2(fun)                                            \
+    float16x4_t VPCS_ATTR _ZGVnN4vv_##fun##f16 (float16x4_t x, float16x4_t y) \
+    {                                                                         \
+      return vget_low_f16 (                                                   \
+	  _ZGVnN8vv_##fun##f16 (vcombine_f16 (x, x), vcombine_f16 (y, y)));   \
+    }
 
 # define HALF_WIDTH_ALIAS_F1(fun)                                             \
     float32x2_t VPCS_ATTR _ZGVnN2v_##fun##f (float32x2_t x)                   \
@@ -40,8 +62,10 @@
     }
 
 #else
-# define HALF_WIDTH_ALIAS_F1(fun)
-# define HALF_WIDTH_ALIAS_F2(fun)
+#  define HALF_WIDTH_ALIAS_H1(fun)
+#  define HALF_WIDTH_ALIAS_H2(fun)
+#  define HALF_WIDTH_ALIAS_F1(fun)
+#  define HALF_WIDTH_ALIAS_F2(fun)
 #endif
 
 #include <stdint.h>

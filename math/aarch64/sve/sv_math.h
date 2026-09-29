@@ -1,7 +1,7 @@
 /*
  * Wrapper functions for SVE ACLE.
  *
- * Copyright (c) 2019-2025, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -37,14 +37,19 @@
 /* Predicate is stored as one bit per byte of VL so requires VL / 64 bytes.  */
 #define SVE_NUM_PG_BYTES (SVE_VECTOR_BYTES / sizeof (uint64_t))
 
+#define SV_NAME_H1(fun) _ZGVsMxv_##fun##f16
 #define SV_NAME_F1(fun) _ZGVsMxv_##fun##f
 #define SV_NAME_D1(fun) _ZGVsMxv_##fun
+#define SV_NAME_H2(fun) _ZGVsMxvv_##fun##f16
 #define SV_NAME_F2(fun) _ZGVsMxvv_##fun##f
 #define SV_NAME_D2(fun) _ZGVsMxvv_##fun
+#define SV_NAME_H1_L1(fun) _ZGVsMxvl2_##fun##f16
 #define SV_NAME_F1_L1(fun) _ZGVsMxvl4_##fun##f
 #define SV_NAME_D1_L1(fun) _ZGVsMxvl8_##fun
+#define SV_NAME_H1_L2(fun) _ZGVsMxvl2l2_##fun##f16
 #define SV_NAME_F1_L2(fun) _ZGVsMxvl4l4_##fun##f
 
+#define SV_NAME_H1_STRET(fun) _ZGVsMxv_##fun##f16_stret
 #define SV_NAME_F1_STRET(fun) _ZGVsMxv_##fun##f_stret
 #define SV_NAME_D1_STRET(fun) _ZGVsMxv_##fun##_stret
 

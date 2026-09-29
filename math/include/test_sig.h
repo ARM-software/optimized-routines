@@ -1,7 +1,7 @@
 /*
  * Macros for emitting various ulp/bench entries based on function signature
  *
- * Copyright (c) 2024, Arm Limited.
+ * Copyright (c) 2024-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception.
  */
 
@@ -10,6 +10,9 @@
 #define TEST_DECL_SD1(fun) double fun (double);
 #define TEST_DECL_SD2(fun) double fun (double, double);
 
+#define TEST_DECL_VH1(fun) VPCS_ATTR float16x8_t V_NAME_H1 (fun) (float16x8_t);
+#define TEST_DECL_VH2(fun)                                                    \
+  VPCS_ATTR float16x8_t V_NAME_H2 (fun) (float16x8_t, float16x8_t);
 #define TEST_DECL_VF1(fun)                                                    \
   float32x4_t VPCS_ATTR V_NAME_F1 (fun##f) (float32x4_t);
 #define TEST_DECL_VF2(fun)                                                    \
@@ -18,6 +21,10 @@
 #define TEST_DECL_VD2(fun)                                                    \
   VPCS_ATTR float64x2_t V_NAME_D2 (fun) (float64x2_t, float64x2_t);
 
+#define TEST_DECL_SVH1(fun)                                                   \
+  svfloat16_t SV_NAME_H1 (fun) (svfloat16_t, svbool_t);
+#define TEST_DECL_SVH2(fun)                                                   \
+  svfloat16_t SV_NAME_H2 (fun) (svfloat16_t, svfloat16_t, svbool_t);
 #define TEST_DECL_SVF1(fun)                                                   \
   svfloat32_t SV_NAME_F1 (fun) (svfloat32_t, svbool_t);
 #define TEST_DECL_SVF2(fun)                                                   \

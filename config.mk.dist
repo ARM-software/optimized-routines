@@ -1,6 +1,6 @@
 # Example config.mk
 #
-# Copyright (c) 2018-2025, Arm Limited.
+# Copyright (c) 2018-2026, Arm Limited.
 # SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
 
 # Subprojects to build
@@ -89,6 +89,7 @@ ifneq (,$(filter $(OS),Msys Mingw64))
   CFLAGS_SHARED =
   USE_GLIBC_ABI = 0
   WANT_SVE_TESTS = 0
+  WANT_FP16_TESTS = 0
   WANT_EXP10_TESTS = 0
   # This doesn't seem to get applied to MATH, the libm-libs likely override it
   # instead of append?
@@ -108,6 +109,7 @@ ifeq ($(ARCH),aarch64)
   TEST_BIN_FLAGS =
   WANT_EXPERIMENTAL_MATH = 1
   WANT_SVE_TESTS = 0
+  WANT_FP16_TESTS = 0
   USE_GLIBC_ABI = 0
   WANT_EXP10_TESTS = 0
   USE_MPFR = 1
@@ -156,6 +158,14 @@ else
   WANT_C23_TESTS = 0
 endif
 math-cflags += -DWANT_C23_TESTS=$(WANT_C23_TESTS)
+
+# Disable/enable FP16 vector math tests/tools.
+ifeq ($(ARCH),aarch64)
+  WANT_FP16_TESTS ?= 1
+else
+  WANT_FP16_TESTS ?= 0
+endif
+math-cflags += -DWANT_FP16_TESTS=$(WANT_FP16_TESTS)
 
 # Remove GNU Property Notes from asm files.
 #string-cflags += -DWANT_GNU_PROPERTY=0

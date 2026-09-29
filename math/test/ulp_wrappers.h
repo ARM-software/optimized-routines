@@ -233,11 +233,25 @@ static float Z_fast_expf(float x) { return arm_math_advsimd_fast_expf(argf(x))[0
 /* clang-format on */
 
 /* No wrappers for scalar routines, but TEST_SIG will emit them.  */
+#define ZSNH1_WRAP(func)
+#define ZSNH2_WRAP(func)
 #define ZSNF1_WRAP(func)
 #define ZSNF2_WRAP(func)
 #define ZSND1_WRAP(func)
 #define ZSND2_WRAP(func)
 
+#if WANT_FP16_TESTS
+#  define ZVNH1_WRAP(func)                                                    \
+    static float16_t Z_##func##f16 (float16_t x)                              \
+    {                                                                         \
+      return _ZGVnN8v_##func##f16 (argh (x))[0];                              \
+    }
+#  define ZVNH2_WRAP(func)                                                    \
+    static float16_t Z_##func##f16 (float16_t x, float16_t y)                 \
+    {                                                                         \
+      return _ZGVnN8vv_##func##f16 (argh (x), argh (y))[0];                   \
+    }
+#endif
 #define ZVNF1_WRAP(func)                                                      \
   static float Z_##func##f (float x)                                          \
   {                                                                           \
@@ -464,22 +478,36 @@ v_modf_stret_int (double x)
 #endif //  __aarch64__ && __linux__
 
 #if WANT_SVE_TESTS
-# define ZSVNF1_WRAP(func)                                                   \
+#  if WANT_FP16_TESTS
+#    define ZSVNH1_WRAP(func)                                                 \
+      static float16_t Z_sv_##func##f16 (svbool_t pg, float16_t x)            \
+      {                                                                       \
+	return svreth (_ZGVsMxv_##func##f16 (svargh (x), pg), pg);            \
+      }
+#    define ZSVNH2_WRAP(func)                                                 \
+      static float16_t Z_sv_##func##f16 (svbool_t pg, float16_t x,            \
+					 float16_t y)                         \
+      {                                                                       \
+	return svreth (_ZGVsMxvv_##func##f16 (svargh (x), svargh (y), pg),    \
+		       pg);                                                   \
+      }
+#  endif
+#  define ZSVNF1_WRAP(func)                                                   \
     static float Z_sv_##func##f (svbool_t pg, float x)                        \
     {                                                                         \
       return svretf (_ZGVsMxv_##func##f (svargf (x), pg), pg);                \
     }
-# define ZSVNF2_WRAP(func)                                                   \
+#  define ZSVNF2_WRAP(func)                                                   \
     static float Z_sv_##func##f (svbool_t pg, float x, float y)               \
     {                                                                         \
       return svretf (_ZGVsMxvv_##func##f (svargf (x), svargf (y), pg), pg);   \
     }
-# define ZSVND1_WRAP(func)                                                   \
+#  define ZSVND1_WRAP(func)                                                   \
     static double Z_sv_##func (svbool_t pg, double x)                         \
     {                                                                         \
       return svretd (_ZGVsMxv_##func (svargd (x), pg), pg);                   \
     }
-# define ZSVND2_WRAP(func)                                                   \
+#  define ZSVND2_WRAP(func)                                                   \
     static double Z_sv_##func (svbool_t pg, double x, double y)               \
     {                                                                         \
       return svretd (_ZGVsMxvv_##func (svargd (x), svargd (y), pg), pg);      \

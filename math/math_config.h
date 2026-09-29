@@ -1,7 +1,7 @@
 /*
  * Configuration for math routines.
  *
- * Copyright (c) 2017-2025, Arm Limited.
+ * Copyright (c) 2017-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -16,17 +16,17 @@
    rounding modes (logf (1.0f) returns 0.0f with FE_DOWNWARD rather than
    -0.0f). This may be set to 0 if there is no fenv support or if math
    functions only get called in round to nearest mode.  */
-# define WANT_ROUNDING 1
+#  define WANT_ROUNDING 1
 #endif
 #ifndef WANT_ERRNO
 /* If defined to 1, set errno in math functions according to ISO C.  Many math
    libraries do not set errno, so this is 0 by default.  It may need to be
    set to 1 if math.h has (math_errhandling & MATH_ERRNO) != 0.  */
-# define WANT_ERRNO 0
+#  define WANT_ERRNO 0
 #endif
 #ifndef WANT_ERRNO_UFLOW
 /* Set errno to ERANGE if result underflows to 0 (in all rounding modes).  */
-# define WANT_ERRNO_UFLOW (WANT_ROUNDING && WANT_ERRNO)
+#  define WANT_ERRNO_UFLOW (WANT_ROUNDING && WANT_ERRNO)
 #endif
 
 /* Compiler can inline round as a single instruction.  */
@@ -201,6 +201,30 @@ converttoint (double x)
 # else
   return (long) round (x);
 # endif
+}
+#endif
+
+#if WANT_FP16_TESTS
+static inline uint16_t
+asuint16 (_Float16 f)
+{
+  union
+  {
+    _Float16 f;
+    uint16_t i;
+  } u = { f };
+  return u.i;
+}
+
+static inline _Float16
+asfloat16 (uint16_t i)
+{
+  union
+  {
+    uint16_t i;
+    _Float16 f;
+  } u = { i };
+  return u.f;
 }
 #endif
 

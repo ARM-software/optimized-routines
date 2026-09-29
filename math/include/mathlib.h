@@ -110,6 +110,8 @@ DECL_SIMD_aarch64 double tanh (double);
 # undef __vpcs
 # define __vpcs __attribute__((__aarch64_vector_pcs__))
 
+__vpcs float16x8_t _ZGVnN8v_expf16 (float16x8_t);
+
 /* Vector functions following the vector PCS using ABI names.  */
 __vpcs float32x4_t _ZGVnN4v_acosf (float32x4_t);
 __vpcs float32x4_t _ZGVnN4v_acoshf (float32x4_t);
@@ -220,6 +222,8 @@ __vpcs float64x2_t _ZGVnN2v_erfinv (float64x2_t);
 # endif
 
 #  include <arm_sve.h>
+svfloat16_t _ZGVsMxv_expf16 (svfloat16_t, svbool_t);
+
 svfloat32_t _ZGVsMxv_acosf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_acoshf (svfloat32_t, svbool_t);
 svfloat32_t _ZGVsMxv_acospif (svfloat32_t, svbool_t);

@@ -1,7 +1,7 @@
 /*
  * Microbenchmark for math functions.
  *
- * Copyright (c) 2018-2025, Arm Limited.
+ * Copyright (c) 2018-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -39,6 +39,9 @@ static double *Trace;
 static size_t trace_size;
 static double A[N];
 static float Af[N];
+#if WANT_FP16_TESTS
+static float16_t Ah[N];
+#endif
 static long measurecount = MEASURE;
 static long itercount = ITER;
 
@@ -65,7 +68,14 @@ __vn_dummyf (float32x4_t x)
 {
   return x;
 }
-#if WANT_SVE_TESTS
+#  if WANT_FP16_TESTS
+__vpcs static float16x8_t
+__vn_dummyf16 (float16x8_t x)
+{
+  return x;
+}
+#  endif
+#  if WANT_SVE_TESTS
 static svfloat64_t
 __sv_dummy (svfloat64_t x, svbool_t pg)
 {
@@ -77,7 +87,14 @@ __sv_dummyf (svfloat32_t x, svbool_t pg)
 {
   return x;
 }
-#endif
+#    if WANT_FP16_TESTS
+static svfloat16_t
+__sv_dummyf16 (svfloat16_t x, svbool_t pg)
+{
+  return x;
+}
+#    endif
+#  endif
 #endif
 
 #include "test/mathbench_wrappers.h"
@@ -96,10 +113,16 @@ static const struct fun
 #if __aarch64__ && __linux__
     __vpcs float64x2_t (*vnd) (float64x2_t);
     __vpcs float32x4_t (*vnf) (float32x4_t);
+#  if WANT_FP16_TESTS
+    __vpcs float16x8_t (*vnh) (float16x8_t);
+#  endif
 #endif
 #if WANT_SVE_TESTS
     svfloat64_t (*svd) (svfloat64_t, svbool_t);
     svfloat32_t (*svf) (svfloat32_t, svbool_t);
+#  if WANT_FP16_TESTS
+    svfloat16_t (*svh) (svfloat16_t, svbool_t);
+#  endif
 #endif
   } fun;
 } funtab[] = {
@@ -108,24 +131,34 @@ static const struct fun
 #define F(func, lo, hi) {#func, 'f', 0, lo, hi, {.f = func}},
 #define VND(func, lo, hi) {#func, 'd', 'n', lo, hi, {.vnd = func}},
 #define VNF(func, lo, hi) {#func, 'f', 'n', lo, hi, {.vnf = func}},
+#define VNH(func, lo, hi) {#func, 'h', 'n', lo, hi, {.vnh = func}},
 #define SVD(func, lo, hi) {#func, 'd', 's', lo, hi, {.svd = func}},
 #define SVF(func, lo, hi) {#func, 'f', 's', lo, hi, {.svf = func}},
+#define SVH(func, lo, hi) {#func, 'h', 's', lo, hi, {.svh = func}},
 D (dummy, 1.0, 2.0)
 F (dummyf, 1.0, 2.0)
 #if  __aarch64__ && __linux__
 VND (__vn_dummy, 1.0, 2.0)
 VNF (__vn_dummyf, 1.0, 2.0)
+#if WANT_FP16_TESTS
+VNH (__vn_dummyf16, 1.0, 2.0)
+#endif
 #endif
 #if WANT_SVE_TESTS
 SVD (__sv_dummy, 1.0, 2.0)
 SVF (__sv_dummyf, 1.0, 2.0)
+#if WANT_FP16_TESTS
+SVH (__sv_dummyf16, 1.0, 2.0)
+#endif
 #endif
 #include "test/mathbench_funcs.h"
 {0},
 #undef F
 #undef D
+#undef VNH
 #undef VNF
 #undef VND
+#undef SVH
 #undef SVF
 #undef SVD
   // clang-format on
@@ -144,6 +177,15 @@ genf_linear (double lo, double hi)
   for (int i = 0; i < N; i++)
     Af[i] = (float)(lo * (N - i) + hi * i) / N;
 }
+
+#if WANT_FP16_TESTS
+static void
+genf16_linear (double lo, double hi)
+{
+  for (int i = 0; i < N; i++)
+    Ah[i] = (float16_t) ((lo * (N - i) + hi * i) / N);
+}
+#endif
 
 static inline double
 asdouble (uint64_t i)
@@ -179,6 +221,15 @@ genf_rand (double lo, double hi)
     Af[i] = (float)frand (lo, hi);
 }
 
+#if WANT_FP16_TESTS
+static void
+genf16_rand (double lo, double hi)
+{
+  for (int i = 0; i < N; i++)
+    Ah[i] = (float16_t) frand (lo, hi);
+}
+#endif
+
 static void
 gen_trace (int index)
 {
@@ -192,6 +243,15 @@ genf_trace (int index)
   for (int i = 0; i < N; i++)
     Af[i] = (float)Trace[index + i];
 }
+
+#if WANT_FP16_TESTS
+static void
+genf16_trace (int index)
+{
+  for (int i = 0; i < N; i++)
+    Ah[i] = (float16_t) Trace[index + i];
+}
+#endif
 
 static void
 run_thruput (double f (double))
@@ -242,6 +302,15 @@ runf_vn_thruput (__vpcs float32x4_t f (float32x4_t))
     f (vld1q_f32 (Af + i));
 }
 
+#  if WANT_FP16_TESTS
+static void
+runf16_vn_thruput (__vpcs float16x8_t f (float16x8_t))
+{
+  for (int i = 0; i < N; i += 8)
+    f (vld1q_f16 (Ah + i));
+}
+#  endif
+
 static void
 run_vn_latency (__vpcs float64x2_t f (float64x2_t))
 {
@@ -261,6 +330,18 @@ runf_vn_latency (__vpcs float32x4_t f (float32x4_t))
   for (int i = 0; i < N; i += 4)
     prev = f (vbslq_f32 (sel, prev, vld1q_f32 (Af + i)));
 }
+
+#  if WANT_FP16_TESTS
+static void
+runf16_vn_latency (__vpcs float16x8_t f (float16x8_t))
+{
+  volatile uint16x8_t vsel = (uint16x8_t){ 0, 0, 0, 0, 0, 0, 0, 0 };
+  uint16x8_t sel = vsel;
+  float16x8_t prev = vdupq_n_f16 (0);
+  for (int i = 0; i < N; i += 8)
+    prev = f (vbslq_f16 (sel, prev, vld1q_f16 (Ah + i)));
+}
+#  endif
 #endif
 
 #if WANT_SVE_TESTS
@@ -277,6 +358,15 @@ runf_sv_thruput (svfloat32_t f (svfloat32_t, svbool_t))
   for (int i = 0; i < N; i += svcntw ())
     f (svld1_f32 (svptrue_b32 (), Af + i), svptrue_b32 ());
 }
+
+#  if WANT_FP16_TESTS
+static void
+runf16_sv_thruput (svfloat16_t f (svfloat16_t, svbool_t))
+{
+  for (int i = 0; i < N; i += svcnth ())
+    f (svld1_f16 (svptrue_b16 (), Ah + i), svptrue_b16 ());
+}
+#  endif
 
 static void
 run_sv_latency (svfloat64_t f (svfloat64_t, svbool_t))
@@ -299,8 +389,20 @@ runf_sv_latency (svfloat32_t f (svfloat32_t, svbool_t))
     prev = f (svsel_f32 (sel, svld1_f32 (svptrue_b32 (), Af + i), prev),
 	      svptrue_b32 ());
 }
-#endif
 
+#  if WANT_FP16_TESTS
+static void
+runf16_sv_latency (svfloat16_t f (svfloat16_t, svbool_t))
+{
+  volatile svbool_t vsel = svptrue_b16 ();
+  svbool_t sel = vsel;
+  svfloat16_t prev = svdup_f16 (0);
+  for (int i = 0; i < N; i += svcnth ())
+    prev = f (svsel_f16 (sel, svld1_f16 (svptrue_b16 (), Ah + i), prev),
+	      svptrue_b16 ());
+}
+#  endif
+#endif
 static uint64_t
 tic (void)
 {
@@ -337,10 +439,10 @@ bench1 (const struct fun *f, int type, double lo, double hi)
   int vlen = 1;
 
   if (f->vec == 'n')
-    vlen = f->prec == 'd' ? 2 : 4;
+    vlen = f->prec == 'd' ? 2 : f->prec == 'f' ? 4 : 8;
 #if WANT_SVE_TESTS
   else if (f->vec == 's')
-    vlen = f->prec == 'd' ? svcntd () : svcntw ();
+    vlen = f->prec == 'd' ? svcntd () : f->prec == 'f' ? svcntw () : svcnth ();
 #endif
 
   if (f->prec == 'd' && type == 't' && f->vec == 0)
@@ -360,6 +462,12 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_vn_thruput, f->fun.vnf);
   else if (f->prec == 'f' && type == 'l' && f->vec == 'n')
     TIMEIT (runf_vn_latency, f->fun.vnf);
+#  if WANT_FP16_TESTS
+  else if (f->prec == 'h' && type == 't' && f->vec == 'n')
+    TIMEIT (runf16_vn_thruput, f->fun.vnh);
+  else if (f->prec == 'h' && type == 'l' && f->vec == 'n')
+    TIMEIT (runf16_vn_latency, f->fun.vnh);
+#  endif
 #endif
 #if WANT_SVE_TESTS
   else if (f->prec == 'd' && type == 't' && f->vec == 's')
@@ -370,6 +478,12 @@ bench1 (const struct fun *f, int type, double lo, double hi)
     TIMEIT (runf_sv_thruput, f->fun.svf);
   else if (f->prec == 'f' && type == 'l' && f->vec == 's')
     TIMEIT (runf_sv_latency, f->fun.svf);
+#  if WANT_FP16_TESTS
+  else if (f->prec == 'h' && type == 't' && f->vec == 's')
+    TIMEIT (runf16_sv_thruput, f->fun.svh);
+  else if (f->prec == 'h' && type == 'l' && f->vec == 's')
+    TIMEIT (runf16_sv_latency, f->fun.svh);
+#  endif
 #endif
 
   if (type == 't')
@@ -406,6 +520,14 @@ bench (const struct fun *f, double lo, double hi, int type, int gen)
     genf_linear (lo, hi);
   else if (f->prec == 'f' && gen == 't')
     genf_trace (0);
+#if WANT_FP16_TESTS
+  else if (f->prec == 'h' && gen == 'r')
+    genf16_rand (lo, hi);
+  else if (f->prec == 'h' && gen == 'l')
+    genf16_linear (lo, hi);
+  else if (f->prec == 'h' && gen == 't')
+    genf16_trace (0);
+#endif
 
   if (gen == 't')
     hi = trace_size / N;
@@ -420,8 +542,12 @@ bench (const struct fun *f, double lo, double hi, int type, int gen)
     {
       if (f->prec == 'd')
 	gen_trace (i);
-      else
+      else if (f->prec == 'f')
 	genf_trace (i);
+#if WANT_FP16_TESTS
+      else
+	genf16_trace (i);
+#endif
 
       lo = i / N;
       if (type == 'b' || type == 't')
