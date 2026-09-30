@@ -31,6 +31,7 @@ static const struct fun
   F(__strlen_aarch64_sve, 1)
 # endif
 # if __ARM_FEATURE_SVE2
+  F(__strlen_aarch64_sve2, 0)
 # endif
 #elif __arm__
 # if __ARM_ARCH >= 6 && __ARM_ARCH_ISA_THUMB == 2

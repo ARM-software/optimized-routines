@@ -14,8 +14,8 @@
 #include "benchlib.h"
 
 #define ITERS_RANDOM	5000
-#define ITERS_SMALL	100000000
-#define ITERS_MEDIUM	10000000
+#define ITERS_SMALL	200000000
+#define ITERS_MEDIUM	20000000
 
 #define NUM_TESTS 65536
 
@@ -30,6 +30,7 @@ static char a[(MAX_STRLEN + 1) * MAX_ALIGN] __attribute__((__aligned__(4096)));
   RUNA64 (TESTFN, __strlen_aarch64);		\
   RUNA64 (TESTFN, __strlen_aarch64_mte);	\
   RUNSVE (TESTFN, __strlen_aarch64_sve);	\
+  RUNSVE2 (TESTFN, __strlen_aarch64_sve2);	\
   RUNT32 (TESTFN, __strlen_armv6t2);		\
   printf ("\n");
 
