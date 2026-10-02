@@ -86,7 +86,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: ucrt, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
+          - { sys: ucrt64, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
           # - { sys: mingw64, base: x86_64, env: cross, prefix: aarch64-w64-mingw32, compiler: clang }
     defaults:
       run:
