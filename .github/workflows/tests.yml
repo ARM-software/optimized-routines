@@ -86,7 +86,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { sys: ucrt64, base: x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
+          - { sys: ucrt64, base: ucrt-x86_64, env: cross-mingwarm64, prefix: aarch64-w64-mingw32, compiler: gcc }
           # - { sys: mingw64, base: x86_64, env: cross, prefix: aarch64-w64-mingw32, compiler: clang }
     defaults:
       run:
@@ -119,4 +119,3 @@ jobs:
 #      run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" HOST_CC=/${{matrix.sys}}/bin/${{matrix.compiler}} CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make check -j
     - name: make install
       run: CC="/opt/bin/${{matrix.prefix}}-${{matrix.compiler}}.exe" HOST_CC=/${{matrix.sys}}/bin/${{matrix.compiler}} CROSS_COMPILE=/opt/bin/${{matrix.prefix}}- make prefix=$(pwd)/install install
-
