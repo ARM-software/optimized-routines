@@ -9,7 +9,7 @@
 #include "v_poly_f32.h"
 #include "test_sig.h"
 #include "test_defs.h"
-#include "v_sincosf_common.h"
+#include "v_trigf_fallback.h"
 
 static const struct data
 {
@@ -42,12 +42,37 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t pred_alt,
   uint32x4_t is_inf = vcageq_f32 (x, v_f32 (INFINITY));
 
   /* For large values, we can compute tan(x) = sin(x) / cos(x).  */
-  float32x4x2_t sc = sincos_fallback (x);
+  struct reduction_result_t r = large_range_reduction (x);
+  float32x4x2_t lookup = sin_cos_lookup (r.octant);
+  float32x4x2_t eval_fast = sincos_eval (r.remainder);
+
+  /* Construct sin(x) and cos (x)from k and r, using angle addition formula,
+     with approximations of sin(r) and cos(r) - 1 to reduce rounding errors.
+     sin(x) = sin(k + r)
+	    = cos(k)*sin(r) + sin(k)*cos(r)
+	    = cos(k)*sin(r) + sin(k)*cosm1(r) + sin(k).
+     cos(x) = cos(k + r)
+	     = cos(k)*cos(r) - sin(k)*sin(r)
+	     = cos(k)*cosm1(r) - sin(k)*sin(r) + cos(k).  */
+
+  float32x4_t sin_k = lookup.val[0];
+  float32x4_t cos_k = lookup.val[1];
+  float32x4_t sin_r = eval_fast.val[0];
+  float32x4_t cosm1_r = eval_fast.val[1];
+
+  float32x4_t sin_k_cosm1_r = vmulq_f32 (sin_k, cosm1_r);
+  float32x4_t sin = vfmaq_f32 (sin_k_cosm1_r, cos_k, sin_r);
+
+  float32x4_t cos_k_cosm1_r = vmulq_f32 (cos_k, cosm1_r);
+  float32x4_t cos = vfmsq_f32 (cos_k_cosm1_r, sin_k, sin_r);
+
+  sin = vaddq_f32 (sin, sin_k);
+  cos = vaddq_f32 (cos, cos_k);
 
   /* For special lanes, computes sin(x)/cos(x)
      For non-special lanes, computes 1/y.  */
-  float32x4_t n = vbslq_f32 (special, sc.val[0], v_f32 (1.0f));
-  float32x4_t d = vbslq_f32 (special, sc.val[1], y);
+  float32x4_t n = vbslq_f32 (special, sin, v_f32 (1.0f));
+  float32x4_t d = vbslq_f32 (special, cos, y);
 
   float32x4_t div = vdivq_f32 (n, d);
 
@@ -58,6 +83,7 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t pred_alt,
   /* Handle inf case.  */
   return vbslq_f32 (is_inf, v_f32 (NAN), ret);
 }
+
 /* Vector version of tanf.
    Maximum observed error is 2.95 + 0.5 ULP if |x| < 0x1p15.
    _ZGVnN4v_tanf (0x1.e5f0cap+13)
