@@ -177,6 +177,23 @@ static int mpfr_tanpi (mpfr_t ret, const mpfr_t arg, mpfr_rnd_t rnd) {
   return mpfr_div (ret, sin, cos, rnd);
 }
 # endif
+# if WANT_C23_TESTS
+static int
+wrap_mpfr_powr (mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd)
+{
+  /* MPFR 4.2.x returns 1 for powr (1, NaN), but C23 requires NaN.
+     This is fixed on MPFR master (4.3.0-dev), not on the 4.2 branch
+     as of 4.2.3-dev.  */
+# if MPFR_VERSION < MPFR_VERSION_NUM(4, 3, 0)
+  if (mpfr_nan_p (y) && mpfr_regular_p (x) && mpfr_cmp_ui (x, 1) == 0)
+    {
+      mpfr_set_nan (ret);
+      return 0;
+    }
+# endif
+  return mpfr_powr (ret, x, y, rnd);
+}
+# endif
 # if WANT_EXPERIMENTAL_MATH
 static int wrap_mpfr_powi(mpfr_t ret, const mpfr_t x, const mpfr_t y, mpfr_rnd_t rnd) {
   mpfr_t y2;
