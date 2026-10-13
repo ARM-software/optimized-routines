@@ -109,7 +109,8 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
   if (unlikely (svptest_any (yint_or_xpos, x_is_subnormal)))
     {
       /* Normalize subnormal x so exponent becomes negative.  */
-      vix = svreinterpret_u64 (svmul_m (x_is_subnormal, x, 0x1p52));
+      vix = svreinterpret_u64 (
+	  svmul_m (x_is_subnormal, svreinterpret_f64 (vix), 0x1p52));
       vix = svand_m (x_is_subnormal, vix, 0x7fffffffffffffff);
       vix = svsub_m (x_is_subnormal, vix, 52ULL << 52);
     }
@@ -141,6 +142,10 @@ svfloat64_t SV_NAME_D2 (pow) (svfloat64_t x, svfloat64_t y, const svbool_t pg)
 
 TEST_SIG (SV, D, 2, pow)
 TEST_ULP (SV_NAME_D2 (pow), 0.55)
+/* Exercise negative-base lanes beside zero and subnormal bases.  */
+TEST_CONTROL_VALUE (SV_NAME_D2 (pow), 1)
+TEST_CONTROL_VALUE (SV_NAME_D2 (pow), 0)
+TEST_CONTROL_VALUE (SV_NAME_D2 (pow), 0x1p-1023)
 /* Wide intervals spanning the whole domain but shared between x and y.  */
 #define SV_POW_INTERVAL2(xlo, xhi, ylo, yhi, n)                               \
   TEST_INTERVAL2 (SV_NAME_D2 (pow), xlo, xhi, ylo, yhi, n)                    \
@@ -186,6 +191,10 @@ SV_POW_SPECIALY (0xffff000000000000, 0xffff000000000000, 1)
 TEST_INTERVAL2 (SV_NAME_D2 (pow), -0.0, -inf, 0, 0xffff000000000000, 1000)
 
 /* pow-specific cases, not shared with powr.  */
+
+TEST_INTERVAL2 (SV_NAME_D2 (pow), -2, -2, 1, 1, 1)
+TEST_INTERVAL2 (SV_NAME_D2 (pow), -2, -2, 2, 2, 1)
+TEST_INTERVAL2 (SV_NAME_D2 (pow), -2, -2, -1, -1, 1)
 
 /* x is negative, y is odd or even integer, or y is real not integer.  */
 TEST_INTERVAL2 (SV_NAME_D2 (pow), -0.0, -10.0, 3.0, 3.0, 10000)
