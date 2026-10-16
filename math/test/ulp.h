@@ -55,6 +55,18 @@ static int RT (ulpscale_long) (RT (double) yl, RT (float) y)
   return scale < RT (emin) ? RT (emin) - 1 : scale;
 }
 
+/* Compute the wider reference's scale and tail after the caller's fast
+   acceptance check fails.  */
+static inline void RT (set_long_reference) (RT (double) yl,
+					    struct RT (ret) * p)
+{
+  p->ulpexp = RT (ulpscale_long) (yl, p->y);
+  if (isinf (p->y))
+    p->tail = RT (lscalbn) (yl - (RT (double)) 2 * RT (halfinf), -p->ulpexp);
+  else
+    p->tail = RT (lscalbn) (yl - p->y, -p->ulpexp);
+}
+
 /* Form the signed error using Harrison's ULP at the unrounded reference.
    Nearest rounding removes 0.5 ULP from its magnitude; directed modes move
    an error in the rounding direction one representable step toward the
@@ -177,11 +189,7 @@ static inline int T (call_long_fenv) (const struct fun *f, struct T (args) a,
   p->ex_may = FE_INEXACT;
   if (RT(isok) (ygot, exgot, p->y, p->ex, p->ex_may))
     return 1;
-  p->ulpexp = RT (ulpscale_long) (yl, p->y);
-  if (isinf (p->y))
-    p->tail = RT(lscalbn) (yl - (RT(double)) 2 * RT(halfinf), -p->ulpexp);
-  else
-    p->tail = RT(lscalbn) (yl - p->y, -p->ulpexp);
+  RT (set_long_reference) (yl, p);
   if (RT(fabs) (p->y) < RT(min_normal))
     {
       /* TODO: subnormal result is treated as undeflow even if it's
@@ -203,11 +211,7 @@ static inline int T(call_long_nofenv) (const struct fun *f, struct T(args) a,
     fesetround (FE_TONEAREST);
   if (RT(isok_nofenv) (ygot, p->y))
     return 1;
-  p->ulpexp = RT (ulpscale_long) (yl, p->y);
-  if (isinf (p->y))
-    p->tail = RT(lscalbn) (yl - (RT(double)) 2 * RT(halfinf), -p->ulpexp);
-  else
-    p->tail = RT(lscalbn) (yl - p->y, -p->ulpexp);
+  RT (set_long_reference) (yl, p);
   return 0;
 }
 
