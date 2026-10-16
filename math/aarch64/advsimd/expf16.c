@@ -15,7 +15,8 @@
 
 static const struct data
 {
-  float32x4_t c2, c3, lane_consts;
+  float32x4_t c2, c3;
+  float inv_ln2, ln2, c4, c5;
   float16x8_t special_bound;
 } data = {
   /* Degree-5 relative minimax polynomial.
@@ -24,9 +25,11 @@ static const struct data
      binary32.  */
   .c2 = V4 (0x1.fffdfcp-2f),
   .c3 = V4 (0x1.5557aep-3f),
-  /* { inv_ln2, ln2, c4, c5 }.  */
-  .lane_consts
-  = { 0x1.715476p+0f, 0x1.62e43p-1f, 0x1.5729fp-5f, 0x1.106284p-7f },
+  /* Stored contiguously for a lane load as { inv_ln2, ln2, c4, c5 }.  */
+  .inv_ln2 = 0x1.715476p+0f,
+  .ln2 = 0x1.62e43p-1f,
+  .c4 = 0x1.5729fp-5f,
+  .c5 = 0x1.106284p-7f,
   .special_bound = V8 (SpecialBound),
 };
 
@@ -36,7 +39,7 @@ static inline float32x4_t VPCS_ATTR
 inline_expf16 (float32x4_t x, const struct data *d)
 {
   const float32x4_t one = vdupq_n_f32 (1.0f);
-  const float32x4_t lane_consts = d->lane_consts;
+  const float32x4_t lane_consts = vld1q_f32 (&d->inv_ln2);
 
   float32x4_t n = vrndnq_f32 (vmulq_laneq_f32 (x, lane_consts, 0));
   int32x4_t ni = vcvtq_s32_f32 (n);
