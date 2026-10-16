@@ -35,6 +35,13 @@
 #ifndef USE_MPFR
 # define USE_MPFR 0
 #endif
+#define prec_h 11
+#define prec_f 24
+#define prec_d 53
+#define emin_h -23
+#define emin_f -148
+#define emin_d -1073
+
 #if USE_MPFR
 # include <mpfr.h>
 #endif
@@ -508,6 +515,9 @@ static const struct fun fun[] = {
 };
 
 /* Boilerplate for generic calls.  */
+/* Return the exponent of the spacing in the rounded result's binade.  Zero
+   and subnormal results use the fixed smallest subnormal spacing.  The
+   wider-reference helper in ulp.h corrects this at powers of two.  */
 #if WANT_FP16_TESTS
 static inline int
 ulpscale_h (float16_t x)
@@ -759,12 +769,6 @@ rmap (int r)
 #define prec_mpfr_h 100
 #define prec_mpfr_f 100
 #define prec_mpfr_d 80
-#define prec_h 11
-#define prec_f 24
-#define prec_d 53
-#define emin_h -23
-#define emin_f -148
-#define emin_d -1073
 #define emax_h 16
 #define emax_f 128
 #define emax_d 1024
@@ -832,6 +836,7 @@ call_mpfr_d2 (mpfr_t y, const struct fun *f, struct args_d2 a, mpfr_rnd_t r)
 #define lscalbn_h scalbn
 #define halfinf_h 0x1p15f
 #define min_normal_h 0x1p-14f
+#define mantmask_h 0x03ff
 #endif
 
 #define float_f float
@@ -845,6 +850,7 @@ call_mpfr_d2 (mpfr_t y, const struct fun *f, struct args_d2 a, mpfr_rnd_t r)
 #define lscalbn_f scalbn
 #define halfinf_f 0x1p127f
 #define min_normal_f 0x1p-126f
+#define mantmask_f 0x007fffff
 
 #define float_d double
 #define double_d long double
@@ -857,6 +863,7 @@ call_mpfr_d2 (mpfr_t y, const struct fun *f, struct args_d2 a, mpfr_rnd_t r)
 #define lscalbn_d scalbnl
 #define halfinf_d 0x1p1023
 #define min_normal_d 0x1p-1022
+#define mantmask_d 0x000fffffffffffffULL
 
 #if WANT_FP16_TESTS
 #define NEW_RT

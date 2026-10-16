@@ -1,7 +1,7 @@
 /*
  * Generic functions for ULP error estimation.
  *
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -13,12 +13,18 @@
 #undef NEW_RT
 
 # if USE_MPFR
-static int RT(ulpscale_mpfr) (mpfr_t x, int t)
+/* Return log2 of Harrison's ULP at the exact reference, clamped to the
+   smallest subnormal spacing.  MPFR uses x = m*2^exp with 1/2 <= |m| < 1.  */
+static int RT (ulpscale_mpfr) (mpfr_t x, int ternary)
 {
-  /* TODO: pow of 2 cases.  */
   if (mpfr_regular_p (x))
     {
       mpfr_exp_t e = mpfr_get_exp (x) - RT(prec);
+      /* A rounded power of two may represent an exact result just above it.
+	 MPFR's ternary result distinguishes that case.  */
+      if (mpfr_cmp_si_2exp (x, mpfr_sgn (x), mpfr_get_exp (x) - 1) == 0
+	  && (ternary == 0 || ternary * mpfr_sgn (x) > 0))
+	--e;
       if (e < RT(emin))
 	e = RT(emin) - 1;
       if (e > RT(emax) - RT(prec))
@@ -34,9 +40,25 @@ static int RT(ulpscale_mpfr) (mpfr_t x, int t)
 }
 # endif
 
-/* Difference between exact result and closest real number that
-   gets rounded to got, i.e. error before rounding, for a correctly
-   rounded result the difference is 0.  */
+/* As above for the wider floating-point reference yl.  Normally its rounded
+   result y has the same binade, so use the cheap exponent bits.  If y is a
+   power of two, compare magnitudes to pick its upper or lower spacing.  If yl
+   itself rounded to that power of two, only MPFR's ternary value can tell
+   which side of the boundary the exact result was on.  */
+static int RT (ulpscale_long) (RT (double) yl, RT (float) y)
+{
+  int scale = RT (ulpscale) (y);
+  if (isfinite (y) && !(RT (asuint) (y) & RT (mantmask))
+      && RT (fabs) (y) >= RT (min_normal)
+      && (yl < 0 ? -yl : yl) <= (RT (double)) RT (fabs) (y))
+    --scale;
+  return scale < RT (emin) ? RT (emin) - 1 : scale;
+}
+
+/* Form the signed error using Harrison's ULP at the unrounded reference.
+   Nearest rounding removes 0.5 ULP from its magnitude; directed modes move
+   an error in the rounding direction one representable step toward the
+   reference.  A correctly rounded result scores zero.  */
 static double RT (ulperr) (RT (float) got, const struct RT (ret) * p, int r,
 			   int ignore_zero_sign)
 {
@@ -81,7 +103,6 @@ static double RT (ulperr) (RT (float) got, const struct RT (ret) * p, int r,
     }
   if (r == FE_TONEAREST)
     {
-      // TODO: incorrect when got vs want cross a powof2 boundary
       /* error = got > want
 	      ? got - want - tail ulp - 0.5 ulp
 	      : got - want - tail ulp + 0.5 ulp.  */
@@ -156,7 +177,7 @@ static inline int T (call_long_fenv) (const struct fun *f, struct T (args) a,
   p->ex_may = FE_INEXACT;
   if (RT(isok) (ygot, exgot, p->y, p->ex, p->ex_may))
     return 1;
-  p->ulpexp = RT(ulpscale) (p->y);
+  p->ulpexp = RT (ulpscale_long) (yl, p->y);
   if (isinf (p->y))
     p->tail = RT(lscalbn) (yl - (RT(double)) 2 * RT(halfinf), -p->ulpexp);
   else
@@ -182,7 +203,7 @@ static inline int T(call_long_nofenv) (const struct fun *f, struct T(args) a,
     fesetround (FE_TONEAREST);
   if (RT(isok_nofenv) (ygot, p->y))
     return 1;
-  p->ulpexp = RT(ulpscale) (p->y);
+  p->ulpexp = RT (ulpscale_long) (yl, p->y);
   if (isinf (p->y))
     p->tail = RT(lscalbn) (yl - (RT(double)) 2 * RT(halfinf), -p->ulpexp);
   else
@@ -206,13 +227,14 @@ static inline int T(call_mpfr_fix) (const struct fun *f, struct T(args) a,
 				     RT(float) ygot, int exgot)
 {
 #if USE_MPFR
-  int t, t2;
+  int t, t2, t_high;
   mpfr_rnd_t r = rmap (r_fenv);
   MPFR_DECL_INIT(my, RT(prec_mpfr));
   MPFR_DECL_INIT(mr, RT(prec));
   MPFR_DECL_INIT(me, RT(prec_mpfr));
   mpfr_clear_flags ();
   t = T(call_mpfr) (my, f, a, r);
+  t_high = t;
   /* Double rounding.  */
   t2 = mpfr_set (mr, my, r);
   if (t2)
@@ -239,7 +261,7 @@ static inline int T(call_mpfr_fix) (const struct fun *f, struct T(args) a,
     return 1;
   if (mpfr_nanflag_p () && !T(qnanpropagation) (a))
     p->ex |= FE_INVALID;
-  p->ulpexp = RT(ulpscale_mpfr) (my, t);
+  p->ulpexp = RT (ulpscale_mpfr) (my, t_high);
   if (!isfinite (p->y))
     {
       p->tail = 0;

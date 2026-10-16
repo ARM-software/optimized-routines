@@ -63,15 +63,19 @@ special_case (float32x4_t x, float32x4_t y, uint32x4_t odd, uint32x4_t cmp)
 }
 
 /* Vector version of cosf.
-   The maximum observed error is 1.31 + 0.5 ULP if |x| < 0x1p20.
-   _ZGVnN4v_cosf (0x1.35fb0cp-2)
-    got 0x1.e8b83cp-1
-   want 0x1.e8b838p-1.
-   The special domain has a slightly higher maximum error than the fast path:
-   Maximum observed error is 1.43 + 0.5ULP
+
+   Maximum observed error is 1.43 + 0.5 ULP if |x| > 0x1p20.
    _ZGVnN4v_cosf (0x1.a2785ap+108)
     got -0x1.dc17fp-2
-   want -0x1.dc17f4p-2.  */
+   want -0x1.dc17f4p-2.
+
+   The fast path has lower accuracy, mainly due to a number of return
+   values exceeding 1.0 (by 1 float).
+
+   The maximum observed error is 1.68 + 0.5 ULP if |x| < 0x1p20.
+   _ZGVnN4v_cosf(0x1.36ep-13)
+    got 0x1.000002p+0
+   want 0x1p+0.  */
 float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cos) (float32x4_t x)
 {
   const struct data *d = ptr_barrier (&data);
@@ -107,6 +111,6 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F1 (cos) (float32x4_t x)
 HALF_WIDTH_ALIAS_F1 (cos)
 
 TEST_SIG (V, F, 1, cos, -3.1, 3.1)
-TEST_ULP (V_NAME_F1 (cos), 1.43)
+TEST_ULP (V_NAME_F1 (cos), 1.69)
 TEST_SYM_INTERVAL (V_NAME_F1 (cos), 0, 0x1p20, 500000)
 TEST_SYM_INTERVAL (V_NAME_F1 (cos), 0x1p20, inf, 10000)

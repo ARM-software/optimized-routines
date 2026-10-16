@@ -207,6 +207,17 @@ requirements.
   - < 3.5 for performance-optimized variants
   The `ulp` tool is designed to assess accuracy of all routines.
 
+  The tool reports rounding-adjusted error: it subtracts 0.5 ULP for nearest
+  rounding or removes one step when a directed result errs in the rounding
+  direction. It uses Harrison's ULP spacing at the unrounded reference,
+  including the lower spacing at an exact power of two. For reliable values
+  close to powers of two, build with MPFR and use `ulp -m`.
+
+  See [Muller, *On the definition of ulp(x)*](https://inria.hal.science/inria-00070503)
+  for the ULP definition and [Gladman et al., *Accuracy of Mathematical
+  Functions*](https://members.loria.fr/PZimmermann/papers/accuracy.pdf) for its
+  use in comparing math libraries. The latter reports unadjusted ULP error.
+
 - All standard rounding modes should be supported for scalar implementations,
   even if slower or slightly less accurate.
 
