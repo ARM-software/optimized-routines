@@ -27,8 +27,6 @@ static int RT (ulpscale_mpfr) (mpfr_t x, int ternary)
 	--e;
       if (e < RT(emin))
 	e = RT(emin) - 1;
-      if (e > RT(emax) - RT(prec))
-	e = RT(emax) - RT(prec);
       return e;
     }
   if (mpfr_zero_p (x))
@@ -42,27 +40,45 @@ static int RT (ulpscale_mpfr) (mpfr_t x, int ternary)
 
 /* As above for the wider floating-point reference yl.  Normally its rounded
    result y has the same binade, so use the cheap exponent bits.  If y is a
-   power of two, compare magnitudes to pick its upper or lower spacing.  If yl
-   itself rounded to that power of two, only MPFR's ternary value can tell
-   which side of the boundary the exact result was on.  */
+   power of two, compare magnitudes to pick its upper or lower spacing.
+   Overflowed results and the largest finite result (which directed rounding
+   can produce above the overflow boundary) use yl.  If yl itself rounded to
+   that power of two, only MPFR's ternary value can tell which side of the
+   boundary the exact result was on.  */
 static int RT (ulpscale_long) (RT (double) yl, RT (float) y)
 {
-  int scale = RT (ulpscale) (y);
-  if (isfinite (y) && !(RT (asuint) (y) & RT (mantmask))
-      && RT (fabs) (y) >= RT (min_normal)
-      && (yl < 0 ? -yl : yl) <= (RT (double)) RT (fabs) (y))
-    --scale;
+  int scale;
+  if (isinf (y) || RT (fabs) (y) == RT (maxfinite))
+    {
+      /* At the overflow edge, y cannot reveal the binade of yl.  */
+      int e;
+      RT (double) m = RT (lfrexp) (yl < 0 ? -yl : yl, &e);
+      scale = e - RT (prec) - (m == 0.5);
+    }
+  else
+    {
+      scale = RT (ulpscale) (y);
+      if (!(RT (asuint) (y) & RT (mantmask))
+	  && RT (fabs) (y) >= RT (min_normal)
+	  && (yl < 0 ? -yl : yl) <= (RT (double)) RT (fabs) (y))
+	--scale;
+    }
   return scale < RT (emin) ? RT (emin) - 1 : scale;
 }
 
-/* Compute the wider reference's scale and tail after the caller's fast
-   acceptance check fails.  */
+/* Fill in the error data after the caller's fast acceptance check fails.
+   A finite yl may round to infinity in the target type.  */
 static inline void RT (set_long_reference) (RT (double) yl,
 					    struct RT (ret) * p)
 {
-  p->ulpexp = RT (ulpscale_long) (yl, p->y);
-  if (isinf (p->y))
-    p->tail = RT (lscalbn) (yl - (RT (double)) 2 * RT (halfinf), -p->ulpexp);
+  p->ref_finite = isfinite (yl);
+  p->ulpexp = p->ref_finite ? RT (ulpscale_long) (yl, p->y) : 0;
+  if (!p->ref_finite)
+    p->tail = 0;
+  else if (isinf (p->y))
+    /* Measure the tail from the signed overflow boundary, not infinity.  */
+    p->tail = RT (lscalbn) (
+	yl - (yl < 0 ? -1 : 1) * ((RT (double)) 2 * RT (halfinf)), -p->ulpexp);
   else
     p->tail = RT (lscalbn) (yl - p->y, -p->ulpexp);
 }
@@ -75,11 +91,14 @@ static double RT (ulperr) (RT (float) got, const struct RT (ret) * p, int r,
 			   int ignore_zero_sign)
 {
   RT(float) want = p->y;
-  RT(float) d;
-  double e;
+  double d;
 
+  /* Equal results, including matching infinities, have zero error.  */
   if (RT(asuint) (got) == RT(asuint) (want))
     return 0.0;
+  /* Muller's ulp (NaN) is NaN.  This test score follows the special-value
+     rule in Gladman et al. (Zimmermann): two NaNs match, while a one-sided
+     NaN has infinite error.  Non-MPFR also compares signalling status.  */
   if (isnan (got) && isnan (want))
   /* Ignore sign of NaN, and signalling-ness for MPFR.  */
 # if USE_MPFR
@@ -96,40 +115,32 @@ static double RT (ulperr) (RT (float) got, const struct RT (ret) * p, int r,
       if (!ignore_zero_sign || (want != 0 && got != 0))
 	return INFINITY;
     }
-  if (!isfinite (want) || !isfinite (got))
-    {
-      if (isnan (got) != isnan (want))
-	return INFINITY;
-      if (isnan (want))
-	return 0;
-      if (isinf (got))
-	{
-	  got = RT(copysign) (RT(halfinf), got);
-	  want *= 0.5f;
-	}
-      if (isinf (want))
-	{
-	  want = RT(copysign) (RT(halfinf), want);
-	  got *= 0.5f;
-	}
-    }
+  if (isnan (got) || isnan (want))
+    return INFINITY;
+  if ((r == FE_DOWNWARD && got < want) || (r == FE_UPWARD && got > want)
+      || (r == FE_TOWARDZERO && fabs (got) < fabs (want)))
+    got = RT (nextafter) (got, want);
+  /* A directed step to an infinite reference is still allowed.  */
+  if (!p->ref_finite)
+    return RT (asuint) (got) == RT (asuint) (want) ? 0 : INFINITY;
+  /* Treat infinity from target overflow as the signed 2^emax boundary.  */
+  if (RT (asuint) (got) == RT (asuint) (want))
+    d = 0;
+  else if (isinf (got))
+    d = (signbit (got) ? -1.0 : 1.0) * scalbn (1.0, RT (emax) - p->ulpexp)
+	- scalbn ((double) want, -p->ulpexp);
+  else if (isinf (want))
+    d = scalbn ((double) got, -p->ulpexp)
+	- (signbit (want) ? -1.0 : 1.0) * scalbn (1.0, RT (emax) - p->ulpexp);
+  else
+    d = scalbn ((double) got - (double) want, -p->ulpexp);
+  double error = d - p->tail;
   if (r == FE_TONEAREST)
     {
-      /* error = got > want
-	      ? got - want - tail ulp - 0.5 ulp
-	      : got - want - tail ulp + 0.5 ulp.  */
-      d = got - want;
-      e = d > 0 ? -p->tail - 0.5 : -p->tail + 0.5;
+      double excess = fabs (error) - 0.5;
+      return excess > 0 ? copysign (excess, error) : 0;
     }
-  else
-    {
-      if ((r == FE_DOWNWARD && got < want) || (r == FE_UPWARD && got > want)
-	  || (r == FE_TOWARDZERO && fabs (got) < fabs (want)))
-	got = RT(nextafter) (got, want);
-      d = got - want;
-      e = -p->tail;
-    }
-  return RT(scalbn) (d, -p->ulpexp) + e;
+  return error;
 }
 
 static int RT(isok) (RT(float) ygot, int exgot, RT(float) ywant, int exwant,
@@ -250,6 +261,7 @@ static inline int T(call_mpfr_fix) (const struct fun *f, struct T(args) a,
   mpfr_set_emax (MPFR_EMAX_DEFAULT);
   mpfr_set_emin (MPFR_EMIN_DEFAULT);
   p->y = mpfr_get_d (mr, r);
+  p->ref_finite = mpfr_number_p (my);
   p->ex = t ? FE_INEXACT : 0;
   p->ex_may = FE_INEXACT;
   if (mpfr_underflow_p () && (p->ex & FE_INEXACT))
@@ -277,9 +289,10 @@ static inline int T(call_mpfr_fix) (const struct fun *f, struct T(args) a,
 	    p->y = (p->y - p->y) / (p->y - p->y);
 	  return RT(isok) (ygot, exgot, p->y, p->ex, p->ex_may);
 	}
-      mpfr_set_si_2exp (mr, signbit (p->y) ? -1 : 1, 1024, MPFR_RNDN);
-      if (mpfr_cmpabs (my, mr) >= 0)
-	return RT(isok) (ygot, exgot, p->y, p->ex, p->ex_may);
+      if (!p->ref_finite)
+	return 0;
+      /* Keep a finite tail when the target result overflows.  */
+      mpfr_set_si_2exp (mr, signbit (p->y) ? -1 : 1, RT (emax), MPFR_RNDN);
     }
   mpfr_sub (me, my, mr, MPFR_RNDN);
   mpfr_mul_2si (me, me, -p->ulpexp, MPFR_RNDN);

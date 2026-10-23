@@ -41,6 +41,9 @@
 #define emin_h -23
 #define emin_f -148
 #define emin_d -1073
+#define emax_h 16
+#define emax_f 128
+#define emax_d 1024
 
 #if USE_MPFR
 # include <mpfr.h>
@@ -179,7 +182,8 @@ struct args_d2
   double x2;
 };
 
-/* result = y + tail*2^ulpexp.  */
+/* The reference is y + tail*2^ulpexp.  ref_finite tracks the unrounded
+   reference even when y overflows; then y represents +/-2^emax.  */
 #if WANT_FP16_TESTS
 struct ret_h
 {
@@ -188,6 +192,7 @@ struct ret_h
   int ulpexp;
   int ex;
   int ex_may;
+  int ref_finite;
 };
 #endif
 
@@ -198,6 +203,7 @@ struct ret_f
   int ulpexp;
   int ex;
   int ex_may;
+  int ref_finite;
 };
 
 struct ret_d
@@ -207,6 +213,7 @@ struct ret_d
   int ulpexp;
   int ex;
   int ex_may;
+  int ref_finite;
 };
 
 static inline uint64_t
@@ -769,9 +776,6 @@ rmap (int r)
 #define prec_mpfr_h 100
 #define prec_mpfr_f 100
 #define prec_mpfr_d 80
-#define emax_h 16
-#define emax_f 128
-#define emax_d 1024
 #if WANT_FP16_TESTS
 static inline int
 call_mpfr_h1 (mpfr_t y, const struct fun *f, struct args_h1 a, mpfr_rnd_t r)
@@ -830,40 +834,40 @@ call_mpfr_d2 (mpfr_t y, const struct fun *f, struct args_d2 a, mpfr_rnd_t r)
 #define fabs_h fabsh
 #define asuint_h asuint16
 #define asfloat_h asfloat16
-#define copysign_h copysignh
 #define nextafter_h nextafterh
-#define scalbn_h scalbnh
 #define lscalbn_h scalbn
 #define halfinf_h 0x1p15f
 #define min_normal_h 0x1p-14f
+#define lfrexp_h frexp
 #define mantmask_h 0x03ff
+#define maxfinite_h 0x1.ffcp15f
 #endif
 
 #define float_f float
 #define double_f double
-#define copysign_f copysignf
 #define nextafter_f nextafterf
 #define fabs_f fabsf
 #define asuint_f asuint
 #define asfloat_f asfloat
-#define scalbn_f scalbnf
 #define lscalbn_f scalbn
 #define halfinf_f 0x1p127f
 #define min_normal_f 0x1p-126f
+#define lfrexp_f frexp
 #define mantmask_f 0x007fffff
+#define maxfinite_f 0x1.fffffep127f
 
 #define float_d double
 #define double_d long double
-#define copysign_d copysign
 #define nextafter_d nextafter
 #define fabs_d fabs
 #define asuint_d asuint64
 #define asfloat_d asdouble
-#define scalbn_d scalbn
 #define lscalbn_d scalbnl
 #define halfinf_d 0x1p1023
 #define min_normal_d 0x1p-1022
+#define lfrexp_d frexpl
 #define mantmask_d 0x000fffffffffffffULL
+#define maxfinite_d 0x1.fffffffffffffp1023
 
 #if WANT_FP16_TESTS
 #define NEW_RT
