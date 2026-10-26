@@ -5,7 +5,6 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
-#include "powf_common.h"
 #include "test_defs.h"
 #include "test_sig.h"
 #include "v_math.h"
@@ -25,7 +24,8 @@ visnotint (float32x4_t x)
   return vmvnq_u32 (vceqq_f32 (vrndq_f32 (x), x));
 }
 
-/* Check if x is an odd integer.  */
+/* Check if x is odd, assuming x is an integer: x / 2 is not integral.
+   Also true for non-integer x except +-0x1p-149 (x / 2 rounds to 0).  */
 static inline uint32x4_t
 visodd (float32x4_t x)
 {
@@ -33,44 +33,103 @@ visodd (float32x4_t x)
   return visnotint (y);
 }
 
-/* A scalar subroutine used to fix main power special cases. Similar to the
-   preamble of scalar powf except that we do not update ix and sign_bias. This
-   is done in the preamble of the SVE powf.  */
-static inline float
-powf_specialcase (float x, float y)
+/* pow (x, y) for special x (0, inf or nan) and finite nonzero y:
+   x * x, or 1 / (x * x) for negative y.  For negative x and odd integer
+   y, special_case also flips the sign.  x * x is exactly +0, +inf or
+   NaN, so the reciprocal is an exponent-field flip (0 <-> inf, NaN
+   unchanged) instead of a slow vector FDIV.  As a result
+   pow (+-0, y < 0) does not raise FE_DIVBYZERO.  */
+static inline float32x4_t
+v_powf_xspecial (float32x4_t x, uint32x4_t iy)
 {
-  uint32_t ix = asuint (x);
-  uint32_t iy = asuint (y);
-  /* Either x or y is 0 or inf or nan.  */
-  if (unlikely (zeroinfnan (iy)))
-    {
-      if (2 * iy == 0)
-	return issignalingf_inline (x) ? x + y : 1.0f;
-      if (ix == 0x3f800000)
-	return issignalingf_inline (y) ? x + y : 1.0f;
-      if (2 * ix > 2u * 0x7f800000 || 2 * iy > 2u * 0x7f800000)
-	return x + y;
-      if (2 * ix == 2 * 0x3f800000)
-	return 1.0f;
-      if ((2 * ix < 2 * 0x3f800000) == !(iy & 0x80000000))
-	return 0.0f; /* |x|<1 && y==inf or |x|>1 && y==-inf.  */
-      return y * y;
-    }
-  if (unlikely (zeroinfnan (ix)))
-    {
-      float x2 = x * x;
-      if (ix & 0x80000000 && checkint (iy) == 1)
-	x2 = -x2;
-      return iy & 0x80000000 ? 1 / x2 : x2;
-    }
-  return x;
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
+  uint32x4_t ix2 = vaddq_u32 (ix, ix);
+  uint32x4_t x_nan = vcgtq_u32 (ix2, vdupq_n_u32 (2u * 0x7f800000));
+  uint32x4_t y_neg = vcltzq_s32 (vreinterpretq_s32_u32 (iy));
+  float32x4_t x2 = vmulq_f32 (x, x);
+  /* 0x7f800000 where y < 0 and x is not NaN, built from the mask instead
+     of a constant.  */
+  uint32x4_t expflip
+      = vshrq_n_u32 (vshlq_n_u32 (vbicq_u32 (y_neg, x_nan), 24), 1);
+  return vreinterpretq_f32_u32 (
+      veorq_u32 (vreinterpretq_u32_f32 (x2), expflip));
 }
 
-/* Special case function wrapper.  */
+/* Fix the lanes where x or y is 0, inf or nan, with a lane-parallel
+   transcription of the zeroinfnan branches of scalar powf.  In the y
+   special branch, each conditional return becomes a select, applied in
+   reverse order so that earlier conditions win.  The results are built
+   from the same values as in the scalar code (1.0f, 0.0f, x + y, x * x,
+   y * y).  Lanes not in CMP keep RET.  YSPECIAL marks the lanes of CMP
+   where y is 0, inf or nan.  Computing every case may raise spurious FP
+   exceptions.  Vector math does not guarantee exception flags.  */
 static float32x4_t VPCS_ATTR NOINLINE
-special_case (float32x4_t x, float32x4_t y, float32x4_t ret, uint32x4_t cmp)
+special_case (float32x4_t x, float32x4_t y, float32x4_t ret, uint32x4_t cmp,
+	      uint32x4_t yspecial)
 {
-  return v_call2_f32 (powf_specialcase, x, y, ret, cmp);
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
+  uint32x4_t iy = vreinterpretq_u32_f32 (y);
+  /* 2 * i drops the sign bit, as in the scalar code.  */
+  uint32x4_t ix2 = vaddq_u32 (ix, ix);
+  uint32x4_t iy2 = vaddq_u32 (iy, iy);
+
+  uint32x4_t inf2 = vdupq_n_u32 (2u * 0x7f800000);
+  uint32x4_t one2 = vdupq_n_u32 (2u * 0x3f800000);
+  uint32x4_t y_zero = vceqzq_u32 (iy2);
+  uint32x4_t x_one = vceqq_u32 (ix, vdupq_n_u32 (0x3f800000));
+  uint32x4_t x_nan = vcgtq_u32 (ix2, inf2);
+  uint32x4_t y_nan = vcgtq_u32 (iy2, inf2);
+  uint32x4_t any_nan = vorrq_u32 (x_nan, y_nan);
+  uint32x4_t x_abs1 = vceqq_u32 (ix2, one2);
+  uint32x4_t x_lt1 = vcltq_u32 (ix2, one2);
+  uint32x4_t y_neg = vcltzq_s32 (vreinterpretq_s32_u32 (iy));
+  uint32x4_t x_neg = vcltzq_s32 (vreinterpretq_s32_u32 (ix));
+
+  /* A NaN is signaling if the top mantissa bit is clear.  */
+  uint32x4_t quiet_bit = vdupq_n_u32 (0x00400000);
+  uint32x4_t x_snan = vbicq_u32 (x_nan, vtstq_u32 (ix, quiet_bit));
+  uint32x4_t y_snan = vbicq_u32 (y_nan, vtstq_u32 (iy, quiet_bit));
+
+  /* The two branches of the scalar code cover disjoint lanes (y
+     special, or only x special), so the order in which they are applied
+     here does not matter.  Each runs only if some lane needs it.  */
+  float32x4_t res = ret;
+
+  /* Second scalar branch: x is 0, inf or nan, y is finite and nonzero.  */
+  uint32x4_t xonly = vbicq_u32 (cmp, yspecial);
+  if (v_any_u32 (xonly))
+    {
+      float32x4_t r_x = v_powf_xspecial (x, iy);
+      /* Only negative special x needs the odd-integer test, the longest
+	 dependency chain in this branch.  */
+      if (v_any_u32 (vandq_u32 (x_neg, xonly)))
+	{
+	  /* checkint (iy) == 1.  visodd alone is also true for
+	     non-integer y such as 2.5.  */
+	  uint32x4_t y_odd = vandq_u32 (visint (y), visodd (y));
+	  uint32x4_t flip = vandq_u32 (vandq_u32 (x_neg, y_odd),
+				       vdupq_n_u32 (0x80000000));
+	  r_x = vreinterpretq_f32_u32 (
+	      veorq_u32 (vreinterpretq_u32_f32 (r_x), flip));
+	}
+      res = vbslq_f32 (xonly, r_x, res);
+    }
+
+  /* First scalar branch: y is 0, inf or nan.  */
+  if (v_any_u32 (yspecial))
+    {
+      /* As in the scalar code, x + y quiets sNaNs and propagates NaNs.  */
+      float32x4_t xpy = vaddq_f32 (x, y);
+      float32x4_t r_y = vmulq_f32 (y, y);
+      r_y = vbslq_f32 (veorq_u32 (x_lt1, y_neg), v_f32 (0.0f), r_y);
+      r_y = vbslq_f32 (x_abs1, v_f32 (1.0f), r_y);
+      r_y = vbslq_f32 (any_nan, xpy, r_y);
+      r_y = vbslq_f32 (x_one, vbslq_f32 (y_snan, xpy, v_f32 (1.0f)), r_y);
+      r_y = vbslq_f32 (y_zero, vbslq_f32 (x_snan, xpy, v_f32 (1.0f)), r_y);
+      res = vbslq_f32 (yspecial, r_y, res);
+    }
+
+  return res;
 }
 
 /* Power implementation for x containing negative or subnormal lanes.  */
@@ -100,6 +159,67 @@ v_powf_x_is_neg_or_small (float32x4_t x, float32x4_t y, const struct data *d)
   return vbslq_f32 (yint_or_xpos, ret, d->nan);
 }
 
+/* Pack two lane masks (each lane 0 or -1u) into one scalar, one byte per
+   lane, A in the low and B in the high 32 bits, so that both reach the
+   general registers with a single transfer.  Lane i of A and of B land
+   in the same byte of their halves, so the halves can be combined
+   bitwise.  The instructions act on architectural lanes, so the layout
+   is the same on big-endian.  */
+static inline uint64_t
+v_pack_masks (uint32x4_t a, uint32x4_t b)
+{
+  uint16x8_t ab = vuzp1q_u16 (vreinterpretq_u16_u32 (a),
+			      vreinterpretq_u16_u32 (b));
+  return vget_lane_u64 (vreinterpret_u64_u8 (vmovn_u16 (ab)), 0);
+}
+
+/* Handle a vector with at least one lane where x is negative, subnormal
+   or special, or y is special.  MASKS holds the x < 0x1p-126 lanes in
+   its low word and the special lanes in its high word.  Kept out of
+   line so that the fast path has no stack frame and no callee-saved
+   registers to preserve.  */
+static float32x4_t VPCS_ATTR NOINLINE
+v_powf_cold (float32x4_t x, float32x4_t y, uint32x4_t cmp,
+	     uint32x4_t yspecial, const struct data *d, uint64_t masks)
+{
+  uint32x4_t ix = vreinterpretq_u32_f32 (x);
+  uint32x4_t iy = vreinterpretq_u32_f32 (y);
+  uint32_t lt_min_bits = masks;
+  uint32_t cmp_bits = masks >> 32;
+
+  /* v_powf_x_is_neg_or_small is needed only for negative or
+     subnormal x that is not special.  Special lanes take their result
+     from special_case or v_powf_xspecial anyway, and +0 is below
+     0x1p-126, so without this an exact zero lane would send the whole
+     vector through it.  */
+  if (unlikely ((lt_min_bits & ~cmp_bits) != 0))
+    {
+      float32x4_t ret = v_powf_x_is_neg_or_small (x, y, d);
+      if (unlikely (cmp_bits != 0))
+	return special_case (x, y, ret, cmp, yspecial);
+      return ret;
+    }
+
+  /* Every lane below 0x1p-126 is special here.  Special y, and
+     negative special x (whose result sign depends on the parity of y),
+     need the full decision tree.  */
+  uint32x4_t x_neg = vcltzq_s32 (vreinterpretq_s32_u32 (ix));
+  uint32x4_t need_tree = vorrq_u32 (yspecial, vandq_u32 (cmp, x_neg));
+  if (unlikely (v_any_u32 (need_tree)))
+    {
+      /* Skip the core when special_case overwrites every lane.  */
+      if (cmp_bits == 0xffffffff)
+	return special_case (x, y, x, cmp, yspecial);
+      return special_case (x, y, v_powrf_core (x, y, d), cmp, yspecial);
+    }
+  /* Only non-negative special x: fixed inline with v_powf_xspecial
+     and one select, avoiding the call.  */
+  float32x4_t r_x = v_powf_xspecial (x, iy);
+  if (cmp_bits == 0xffffffff)
+    return r_x;
+  return vbslq_f32 (cmp, r_x, v_powrf_core (x, y, d));
+}
+
 /* Implementation of AdvSIMD powf.
    Maximum measured error is 2.57 ULPs:
    V_NAME_F2 (pow) (0x1.031706p+0, 0x1.ce2ec2p+12)
@@ -116,20 +236,15 @@ float32x4_t VPCS_ATTR NOINLINE V_NAME_F2 (pow) (float32x4_t x, float32x4_t y)
   uint32x4_t yspecial = v_zeroinfnan (d, iy);
   uint32x4_t cmp = vorrq_u32 (xspecial, yspecial);
 
-  /* Evaluate pow(x, y) for x containing negative or subnormal lanes.  */
-  uint32x4_t x_is_neg_or_sub = vcltq_f32 (x, v_f32 (0x1p-126f));
-  if (unlikely (v_any_u32 (x_is_neg_or_sub)))
-    {
-      float32x4_t ret = v_powf_x_is_neg_or_small (x, y, d);
-      if (unlikely (v_any_u32 (cmp)))
-	return special_case (x, y, ret, cmp);
-      return ret;
-    }
-
-  /* Else evaluate pow(x, y) for normal and positive x only.
-     Use the powrf helper routine.  */
-  if (unlikely (v_any_u32 (cmp)))
-    return special_case (x, y, v_powrf_core (x, y, d), cmp);
+  /* One unlikely branch covers both negative or subnormal x
+     (x < 0x1p-126) and the special lanes (CMP).  The cold side tells
+     them apart with scalar tests on the packed masks, because
+     vector-to-general transfers are comparatively expensive on some
+     cores.  */
+  uint32x4_t x_lt_min = vcltq_f32 (x, v_f32 (0x1p-126f));
+  uint64_t masks = v_pack_masks (x_lt_min, cmp);
+  if (unlikely (masks != 0))
+    return v_powf_cold (x, y, cmp, yspecial, d, masks);
   return v_powrf_core (x, y, d);
 }
 
