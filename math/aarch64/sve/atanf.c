@@ -1,7 +1,7 @@
 /*
  * Single-precision vector atan(x) function.
  *
- * Copyright (c) 2021-2025, Arm Limited.
+ * Copyright (c) 2021-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -45,8 +45,6 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
 
   /* No need to trigger special case. Small cases, infs and nans
      are supported by our approximation technique.  */
-  svuint32_t ix = svreinterpret_u32 (x);
-  svuint32_t sign = svand_x (ptrue, ix, SignMask);
 
   /* Argument reduction:
      y := arctan(x) for x < 1
@@ -54,11 +52,20 @@ svfloat32_t SV_NAME_F1 (atan) (svfloat32_t x, const svbool_t pg)
      y := arctan(-1/x) - pi/2 for x < -1
      Hence, use z=-1/a if |x|>=|-1|, otherwise z=a.  */
   svbool_t red = svacgt (pg, x, d->neg_one);
-  svfloat32_t z = svsel (red, svdiv_x (pg, sv_f32 (d->neg_one), x), x);
+  svfloat32_t z = x;
+  svfloat32_t shift = x;
 
-  /* Reinserts the sign bit of the argument to handle the case of x < -1.  */
-  svfloat32_t shift = svreinterpret_f32 (
-      sveor_x (red, svreinterpret_u32 (sv_f32 (d->shift_val)), sign));
+  if (svptest_any (pg, red))
+    {
+      svuint32_t ix = svreinterpret_u32 (x);
+      svuint32_t sign = svand_x (ptrue, ix, SignMask);
+      z = svsel (red, svdiv_x (pg, sv_f32 (d->neg_one), x), x);
+
+      /* Reinserts the sign bit of the argument to handle the case of x < -1.
+       */
+      shift = svreinterpret_f32 (
+	  sveor_x (red, svreinterpret_u32 (sv_f32 (d->shift_val)), sign));
+    }
 
   svfloat32_t z2 = svmul_x (ptrue, z, z);
   svfloat32_t z3 = svmul_x (ptrue, z2, z);
