@@ -27,7 +27,7 @@
 #define dstend2 x5
 
 ENTRY (__memset_aarch64_sve)
-	dup	v0.16B, valw
+	dup	z0.b, valw
 	cmp	count, 16
 	b.lo	L(set_16)
 
@@ -80,21 +80,31 @@ L(set_long):
 	bic	dst, dstin, 31
 	stp	q0, q0, [dst, 32]
 	bic	dst, dstin, 63
-	sub	count, dstend, dst	/* Count is now 64 too large.  */
-	sub	count, count, 128	/* Adjust count and bias for loop.  */
 
-	sub	x8, dstend, 1		/* Write last bytes before ZVA loop.  */
+	sub	x8, dstend, 65
 	bic	x8, x8, 15
-	stp	q0, q0, [x8, -48]
-	str	q0, [x8, -16]
+	stp	q0, q0, [x8, 16]
+	str	q0, [x8, 48]
 	str	q0, [dstend, -16]
+
+	bic	x8, x8, 63
+	sub	count, x8, dst
+	sub	count, count, 128
 
 	.p2align 4
 L(zva64_loop):
-	add	dst, dst, 64
+	add	x6, dst, 64
+	add	dst, dst, 128
+	dc	zva, x6
 	dc	zva, dst
-	subs	count, count, 64
-	b.hi	L(zva64_loop)
+	subs	count, count, 128
+	b.hs	L(zva64_loop)
+
+L(zva_remainder):
+	tbz	count, 6, L(done)
+	dc	zva, x8
+
+L(done):
 	ret
 
 L(no_zva):
