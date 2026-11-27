@@ -116,6 +116,9 @@ VND (_ZGVnN2v_tanpi, -0.9, 0.9)
 #endif
 
 #if WANT_SVE_TESTS
+# if WANT_FP16_TESTS
+SVH (_ZGVsMxv_expf16_1u, -9.9, 9.9)
+# endif
 { "_ZGVsMxvv_atan2f", 'f', 's', -10.0, 10.0, { .svf = _Z_sv_atan2f_wrap } },
 { "_ZGVsMxvv_atan2", 'd', 's', -10.0, 10.0, { .svd = _Z_sv_atan2_wrap } },
 { "_ZGVsMxvv_atan2pif", 'f', 's', -10.0, 10.0, { .svf = _Z_sv_atan2pif_wrap } },

@@ -1,0 +1,11 @@
+Code in this sub-directory should follow the GNU Coding Standard, but it is
+expected to be upstreamed into llvm with formatting modification.
+glibc and llvm specific conventions need not be followed.
+
+The requirements for portable code apply to non-portable code with the
+following differences:
+
+1. All routines must be correctly rounded for all inputs.
+
+2. Functions are assumed to support round-to-nearest mode by default, unless
+   stated; other rounding modes are not required to be provided.

@@ -18,14 +18,27 @@ contribution guidelines for math routines.
 
 Here is a quick overview of the **`math/`** subdirectory's layout:
 
-- **`aarch64/`**: AArch64-specific math sources and shared sources.
+- **`aarch64/`**: AArch64-specific math sources and shared vector data.
   - **`advsimd/`**: AdvSIMD-specific math sources.
-  - **`experimental/`**: Experimental math sources that do not meet the quality requirements stated below.
+    - **`cr/`**: Correctly rounded AdvSIMD routines and their private helpers.
+    - **`ha/`**: High-accuracy routines with error below 1 ULP.
+    - **`la/`**: Low-accuracy routines with error below 3.5 ULP.
+    - **`pa/`**: Routines with custom performance-accuracy tradeoffs.
   - **`sve/`**: SVE-specific math sources.
+    - **`ha/`**: High-accuracy routines with error below 1 ULP.
+    - **`la/`**: Low-accuracy routines with error below 3.5 ULP.
+    - **`pa/`**: Routines with custom performance-accuracy tradeoffs.
 - **`include/`**: Public headers for the math library.
+- **`scalar/`**: Scalar math sources and private helpers.
+  - **`ha/`**: High-accuracy routines with error below 1 ULP.
+  - **`la/`**: Low-accuracy routines with error below 3.5 ULP.
+  - **`pa/`**: Routines with custom performance-accuracy tradeoffs.
 - **`test/`**: Sources related to testing and benchmarking math routines.
 - **`tools/`**: Tools used for designing algorithms.
 
+- Scalar, AdvSIMD, and SVE directories each have various accuracy
+  subdirectory, each have their own specific contribution guidance is in
+  their respective ISA/Accuracy/README.contributors.
 ---
 
 ## 🧑‍💻 User Guidelines
@@ -177,9 +190,9 @@ ensure consistency and quality across the math routines.
 ### 🎨 Style Requirements
 
 1. **Upstream Compatibility**:
-   Most code here is intended for upstreaming into glibc (except for
-   `aarch64/experimental/`).
-   - Follow the GNU Coding Standards and glibc-specific conventions.
+  Most code here is intended for upstreaming into glibc or llvm/libc.
+   - Follow the GNU Coding Standards and glibc-specific conventions
+   - LLVM-bound code is expected to be adapted to C++ and LLVM standards at upstreaming time.
 
 2. **ABI and Symbols**:
    - Code should be suitable for inclusion into a libc with minimal changes.
@@ -201,10 +214,13 @@ requirements.
 
 #### Quality Requirements
 
-- Worst-case ULP error should be small in the entire input domain, typically:
-  - < 0.66 for double-precision scalar functions (tested via random sampling)
-  - < 1 for single-precision (tested exhaustively)
-  - < 3.5 for performance-optimized variants
+- Worst-case ULP error (from true value) is defined by the parent directory:
+  - <= 0.5 ULP for correctly rounded functions
+  - <= 1.0 ULP for high-accuracy functions
+  - <= 3.5 ULP for low-accuracy functions
+  - Performance-accuracy functions aim to provide the most performance possible within
+    reason, with a firm bound at half the mantissa bits being correct (4096 ULP for FP32).
+
   The `ulp` tool is designed to assess accuracy of all routines.
 
   The tool reports rounding-adjusted error: it subtracts 0.5 ULP for nearest

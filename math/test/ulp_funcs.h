@@ -35,6 +35,9 @@
 #endif
 
 #if WANT_SVE_TESTS
+# if WANT_FP16_TESTS
+SVF (_ZGVsMxv_expf16_1u, Z_sv_expf16_1u, exp, mpfr_exp, 1, 16, h1, 0)
+# endif
 SVF (_ZGVsMxvl4l4_sincosf_sin, sv_sincosf_sin, sin, mpfr_sin, 1, 32, f1, 0)
 SVF (_ZGVsMxvl4l4_sincosf_cos, sv_sincosf_cos, cos, mpfr_cos, 1, 32, f1, 0)
 SVF (_ZGVsMxv_cexpif_sin, sv_cexpif_sin, sin, mpfr_sin, 1, 32, f1, 0)

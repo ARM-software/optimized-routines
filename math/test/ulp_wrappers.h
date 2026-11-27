@@ -496,6 +496,12 @@ v_modf_stret_int (double x)
 
 #if WANT_SVE_TESTS
 #  if WANT_FP16_TESTS
+static float16_t
+Z_sv_expf16_1u (svbool_t pg, float16_t x)
+{
+  return svreth (_ZGVsMxv_expf16_1u (svargh (x), pg), pg);
+}
+
 #    define ZSVNH1_WRAP(func)                                                 \
       static float16_t Z_sv_##func##f16 (svbool_t pg, float16_t x)            \
       {                                                                       \

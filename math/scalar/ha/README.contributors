@@ -1,0 +1,12 @@
+Code in this sub-directory should follow the GNU Coding Standard, but it is
+not expected to be upstreamed into glibc without modification, so
+glibc-specific conventions need not be followed.
+
+The requirements for portable code apply to non-portable code with the
+following differences:
+
+1. All routines must be within 1ULP of the true value.
+   Error bounds of the approximation should be clearly documented in comments.
+
+2. Functions are assumed to support round-to-nearest mode by default, unless
+   stated; other rounding modes are not required to be provided.
