@@ -5,6 +5,11 @@
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
+#ifndef WANT_ACCURATE_REDUCTION
+#  error "Cannot use v_trig_fallback.h without specifying whether \
+you need the accurate (1) or fast reduction (0)."
+#endif
+
 static const double ONE_TWENTY_EIGHT_OVER_PI[64][4] = {
   { 0x1.0000000000014p5, 0x1.7cc1b727220a8p-49, 0x1.4fe13abe8fa9cp-101,
     -0x1.911f924eb5336p-153 },
@@ -399,7 +404,7 @@ static const double SIN_COS_K_PI_OVER_128[256][2] = {
 struct reduction_result_t
 {
   uint64x2_t quadrant;
-  float64x2_t remainder;
+  float64x2x2_t remainder;
 };
 
 /* Error-free multiplication using double-double computation
@@ -454,6 +459,7 @@ static const struct reduction_data
   double s3, c2;
   float64x2_t s1, s2, c0, c1;
   float64x2_t pio128;
+  float64x2_t pio128_lo;
 } reduction_data = {
   .s1 = V2 (-0x1.5555555555555p-3),
   .s2 = V2 (0x1.11111110efcdap-7),
@@ -462,7 +468,9 @@ static const struct reduction_data
   .c1 = V2 (0x1.5555555549e76p-5),
   .c2 = -0x1.6c165d6952a53p-10,
   .pio128 = V2 (0x1.921fb54442d18p-6),
+  .pio128_lo = V2 (0x1.1a62633145c07p-60),
 };
+
 /* Reduce a large finite x modulo 2*pi, such that:
      x = k * (pi / 128) + remainder
 
@@ -522,6 +530,7 @@ v_large_range_reduction (float64x2_t x, const struct reduction_data *d)
      result, so a simple FMA is sufficient.  */
   float64x2_t y_l = vfmaq_f64 (pl.val[1], x_reduced, data.val[3]);
 
+#if !WANT_ACCURATE_REDUCTION
   /* Our final remainder is (y_hi + y_mid_hi + y_mid_lo + y_l) * pi / 128.
      We can split the multiplication into two parts to maintain accuracy.  */
   float64x2_t y = vaddq_f64 (y_hi, y_mid.val[0]);
@@ -529,19 +538,37 @@ v_large_range_reduction (float64x2_t x, const struct reduction_data *d)
   y_l = vmulq_f64 (vaddq_f64 (y_mid.val[1], y_l), d->pio128);
 
   struct reduction_result_t result;
-  result.remainder = vfmaq_f64 (y_l, y, d->pio128);
+  result.remainder.val[0] = vfmaq_f64 (y_l, y, d->pio128);
   result.quadrant = vreinterpretq_u64_s64 (vcvtpq_s64_f64 (kd));
   return result;
+#else
+  /* Recover the rounding error of the high sum and add it to the tail.  */
+  float64x2x2_t u = fast_two_sum (y_hi, y_mid.val[0]);
+  float64x2_t u_lo = vaddq_f64 (u.val[1], vaddq_f64 (y_mid.val[1], y_l));
+
+  /* Multiply by the split pi / 128. Accumulate the cross terms into the
+     low product before renormalizing the pair.  */
+  float64x2x2_t product = two_prod (u.val[0], d->pio128);
+  float64x2_t product_lo = vfmaq_f64 (product.val[1], u.val[0], d->pio128_lo);
+  product_lo = vfmaq_f64 (product_lo, u_lo, d->pio128);
+
+  struct reduction_result_t result;
+  result.remainder = fast_two_sum (product.val[0], product_lo);
+  result.quadrant = vreinterpretq_u64_s64 (vcvtpq_s64_f64 (kd));
+  return result;
+#endif
 }
 
 static inline VPCS_ATTR float64x2x2_t
-v_sincos_eval (float64x2_t r, const struct reduction_data *d)
+v_sincos_eval (float64x2x2_t remainder, const struct reduction_data *d)
 {
+  float64x2_t r = remainder.val[0];
   float64x2_t s3c2 = vld1q_f64 (&d->s3);
 
   float64x2_t r2 = vmulq_f64 (r, r);
   float64x2_t r3 = vmulq_f64 (r2, r);
 
+#if !WANT_ACCURATE_REDUCTION
   float64x2_t sin = vfmaq_laneq_f64 (d->s2, r2, s3c2, 0);
   sin = vfmaq_f64 (d->s1, r2, sin);
   sin = vfmaq_f64 (r, r3, sin);
@@ -549,6 +576,17 @@ v_sincos_eval (float64x2_t r, const struct reduction_data *d)
   float64x2_t cosm1 = vfmaq_laneq_f64 (d->c1, r2, s3c2, 1);
   cosm1 = vfmaq_f64 (d->c0, r2, cosm1);
   cosm1 = vmulq_f64 (cosm1, r2);
+#else
+  float64x2_t r_lo = remainder.val[1];
+  /* Apply the low part using the small-angle derivatives 1 and -r.  */
+  float64x2_t sin = vfmaq_laneq_f64 (d->s2, r2, s3c2, 0);
+  sin = vfmaq_f64 (d->s1, r2, sin);
+  sin = vaddq_f64 (r, vfmaq_f64 (r_lo, r3, sin));
+
+  float64x2_t cosm1 = vfmaq_laneq_f64 (d->c1, r2, s3c2, 1);
+  cosm1 = vfmaq_f64 (d->c0, r2, cosm1);
+  cosm1 = vfmsq_f64 (vmulq_f64 (cosm1, r2), r, r_lo);
+#endif
 
   float64x2x2_t result;
   result.val[0] = sin;

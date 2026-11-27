@@ -9,6 +9,8 @@
 #include "v_poly_f64.h"
 #include "test_sig.h"
 #include "test_defs.h"
+/* Enable accurate reduction to keep special case error < 3.  */
+#define WANT_ACCURATE_REDUCTION 1
 #include "v_trig_fallback.h"
 
 static const struct data
@@ -77,9 +79,14 @@ special_case (float64x2_t x, float64x2_t n, float64x2_t d, uint64x2_t special)
   return vbslq_f64 (is_inf, v_f64 (NAN), div);
 }
 
-/* Vector approximation for double-precision tan.
-   The maximum observed error is 2.98 + 0.5 ULP.
-   _ZGVnN2v_tan(0x1.4457047ef78d8p+20)
+/* Vector version of tan.
+   Maximum observed error is 2.83 + 0.5 ULP when |x| >= 0x1p23.
+   _ZGVnN2v_tan (0x1.ebf54d48ea5e9p+580)
+    got 0x1.ff898411c4eep+5
+   want 0x1.ff898411c4eddp+5
+   The fast path has a higher maximum error than the special domain:
+   The maximum observed error is 2.98 + 0.5 ULP when |x| < 0x1p23.
+   _ZGVnN2v_tan (0x1.4457047ef78d8p+20)
     got -0x1.f6ccd8ecf7dedp+37
    want -0x1.f6ccd8ecf7deap+37.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)

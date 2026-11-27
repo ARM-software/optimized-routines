@@ -7,6 +7,7 @@
 
 #include "v_math.h"
 #include "v_poly_f64.h"
+#define WANT_ACCURATE_REDUCTION 0
 #include "v_trig_fallback.h"
 
 static const struct v_sincos_data

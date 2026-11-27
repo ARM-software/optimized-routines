@@ -8,6 +8,7 @@
 #include "test_defs.h"
 #include "test_sig.h"
 #include "v_math.h"
+#define WANT_ACCURATE_REDUCTION 0
 #include "v_trig_fallback.h"
 
 static const struct data
