@@ -594,16 +594,13 @@ extern const struct v_log_data
   } table[1 << V_LOG_TABLE_BITS];
 } __v_log_data HIDDEN;
 
-/* Some data for SVE powf's internal exp and log.  */
-#define V_POWF_EXP2_TABLE_BITS 5
-#define V_POWF_EXP2_N (1 << V_POWF_EXP2_TABLE_BITS)
+/* Data for AdvSIMD and SVE powf's internal log2.  */
 #define V_POWF_LOG2_TABLE_BITS 5
 #define V_POWF_LOG2_N (1 << V_POWF_LOG2_TABLE_BITS)
 extern const struct v_powf_data
 {
   double invc[V_POWF_LOG2_N];
   double logc[V_POWF_LOG2_N];
-  uint64_t scale[V_POWF_EXP2_N];
 } __v_powf_data HIDDEN;
 
 /* Some data for AdvSIMD and SVE pow's internal exp and log.  */

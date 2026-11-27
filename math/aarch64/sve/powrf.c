@@ -1,14 +1,13 @@
 /*
  * Single-precision SVE exp(y * log(x)) function.
  *
- * Copyright (c) 2025, Arm Limited.
+ * Copyright (c) 2025-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
 #include "sv_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
-#define WANT_SV_POWF_SIGN_BIAS 0
 #include "sv_powf_inline.h"
 
 /* A scalar subroutine used to fix main powrf special cases.  */
@@ -60,13 +59,12 @@ sv_call_powrf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
 
 /* Implementation of SVE powrf.
 
-   Provides the same accuracy as AdvSIMD powf and powrf, since it relies on the
-   same algorithm.
+   Shares the logarithm and FEXPA exponential core with SVE powf.
 
-   Maximum measured error is 2.57 ULPs:
-   SV_NAME_F2 (powr) (0x1.031706p+0, 0x1.ce2ec2p+12)
-     got 0x1.fff868p+127
-    want 0x1.fff862p+127.  */
+   The maximum observed error is 2.54 + 0.5 ULP.
+   SV_NAME_F2 (powr) (0x1.0314fap+0, 0x1.cbc136p+12)
+     got 0x1.000002p+127
+    want 0x1.fffffep+126.  */
 svfloat32_t SV_NAME_F2 (powr) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -97,15 +95,12 @@ svfloat32_t SV_NAME_F2 (powr) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 		 V_POWF_LOG2_N - 1);
   svuint32_t top = svand_x (xpos, tmp, 0xff800000);
   svuint32_t iz = svsub_x (xpos, vix, top);
-  svint32_t k
-      = svasr_x (xpos, svreinterpret_s32 (top), (23 - V_POWF_EXP2_TABLE_BITS));
+  svint32_t k = svasr_x (xpos, svreinterpret_s32 (top), 23);
 
   /* Compute core in extended precision and return intermediate ylogx results
      to handle cases of underflow and underflow in exp.  */
   svfloat32_t ylogx;
-  /* Pass a dummy sign_bias so we can re-use powf core.
-     The core is simplified by setting WANT_SV_POWF_SIGN_BIAS = 0.  */
-  svfloat32_t ret = sv_powf_core (xpos, i, iz, k, y, sv_u32 (0), &ylogx, d);
+  svfloat32_t ret = sv_powf_core (xpos, i, iz, k, y, &ylogx, d);
 
   /* Handle exp special cases of underflow and overflow.  */
   svbool_t no_uflow = svcmpgt (xpos, ylogx, d->uflow_bound);
@@ -123,7 +118,11 @@ svfloat32_t SV_NAME_F2 (powr) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 }
 
 #if WANT_C23_TESTS
-TEST_ULP (SV_NAME_F2 (powr), 2.08)
+TEST_ULP (SV_NAME_F2 (powr), 2.55)
+/* Add control lanes for normal, special and subnormal bases.  */
+TEST_CONTROL_VALUE (SV_NAME_F2 (powr), 1)
+TEST_CONTROL_VALUE (SV_NAME_F2 (powr), 0)
+TEST_CONTROL_VALUE (SV_NAME_F2 (powr), 0x1p-127)
 /* Wide intervals spanning the whole domain but shared between x and y.  */
 #  define SV_POWR_INTERVAL2(xlo, xhi, ylo, yhi, n)                            \
     TEST_INTERVAL2 (SV_NAME_F2 (powr), xlo, xhi, ylo, yhi, n)                 \

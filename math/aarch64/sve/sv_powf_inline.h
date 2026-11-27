@@ -8,39 +8,36 @@
 #include "powf_common.h"
 #include "sv_math.h"
 
-#ifndef WANT_SV_POWF_SIGN_BIAS
-#  error                                                                       \
-      "Cannot use sv_powf_inline.h without specifying whether you need sign_bias."
-#endif
-
 /* The following data is used in the SVE pow core computation
    and special case detection.  */
 #define Tinvc __v_powf_data.invc
 #define Tlogc __v_powf_data.logc
-#define Texp __v_powf_data.scale
-#define SignBias (1 << (V_POWF_EXP2_TABLE_BITS + 11))
 static const struct data
 {
   double log_poly[4];
-  double exp_poly[3];
+  double exp_poly[2], shift;
   float uflow_bound, oflow_bound, small_bound;
-  uint32_t sign_bias, subnormal_bias, off;
+  uint32_t subnormal_bias, off;
 } data = {
-  /* rel err: 1.5 * 2^-30. Each coefficients is multiplied the value of
-     V_POWF_EXP2_N.  */
-  .log_poly = { -0x1.6ff5daa3b3d7cp+3, 0x1.ec81d03c01aebp+3,
-		-0x1.71547bb43f101p+4, 0x1.7154764a815cbp+5 },
-  /* rel err: 1.69 * 2^-34.  */
-  .exp_poly = {
-    0x1.c6af84b912394p-20, /* A0 / V_POWF_EXP2_N^3.  */
-    0x1.ebfce50fac4f3p-13, /* A1 / V_POWF_EXP2_N^2.  */
-    0x1.62e42ff0c52d6p-6,   /* A3 / V_POWF_EXP2_N.  */
+  .log_poly = {
+    /* rel err: 1.5 * 2^-30.  */
+    -0x1.6ff5daa3b3d7cp-2,
+    0x1.ec81d03c01aebp-2,
+    -0x1.71547bb43f101p-1,
+    0x1.7154764a815cbp+0,
   },
-  .uflow_bound = -0x1.2cp+12f, /* -150.0 * V_POWF_EXP2_N.  */
-  .oflow_bound = 0x1p+12f, /* 128.0 * V_POWF_EXP2_N.  */
+  .exp_poly = {
+    /* Approximate 2^r on [-1/128, 1/128] (FEXPA means N=64)
+       with 1 + c1 * r + c2 * r^2 using Sollya's Remez algorithm.
+       Relative approximation error: 1.78 * 2^-28.  */
+    0x1.ebfbdfcf1ce17p-3,
+    0x1.62e48521e5ca8p-1,
+  },
+  .shift = 0x1.800000000ffc0p+46,
+  .uflow_bound = -150.0,
+  .oflow_bound = 128.0,
   .small_bound = 0x1p-126f,
   .off = 0x3f35d000,
-  .sign_bias = SignBias,
   .subnormal_bias = 0x0b800000, /* 23 << 23.  */
 };
 
@@ -77,11 +74,7 @@ sv_zeroinfnan (svbool_t pg, svuint32_t i)
 /* Compute core for half of the lanes in double precision.  */
 static inline svfloat64_t
 sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
-#if WANT_SV_POWF_SIGN_BIAS
-		  svfloat64_t y, svuint64_t sign_bias, svfloat64_t *pylogx,
-#else
 		  svfloat64_t y, svfloat64_t *pylogx,
-#endif
 		  const struct data *d)
 {
   svfloat64_t invc = svld1_gather_index (pg, Tinvc, i);
@@ -99,30 +92,16 @@ sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
   logx = svmad_x (pg, r, logx, y0);
   *pylogx = svmul_x (pg, y, logx);
 
-  /* z - kd is in [-1, 1] in non-nearest rounding modes.  */
-  svfloat64_t kd = svrinta_x (svptrue_b64 (), *pylogx);
-  svuint64_t ki = svreinterpret_u64 (svcvt_s64_x (svptrue_b64 (), kd));
+  /* Evaluate exp2 (ylogx) using FEXPA-based approach.  */
+  z = svadd_x (svptrue_b64 (), *pylogx, d->shift);
+  svfloat64_t n = svsub_x (pg, z, d->shift);
+  r = svsub_x (pg, *pylogx, n);
 
-  r = svsub_x (pg, *pylogx, kd);
-
-  /* exp2(x) = 2^(k/N) * 2^r ~= s * (C0*r^3 + C1*r^2 + C2*r + 1).  */
-  svuint64_t t = svld1_gather_index (
-      svptrue_b64 (), Texp, svand_x (svptrue_b64 (), ki, V_POWF_EXP2_N - 1));
-#if WANT_SV_POWF_SIGN_BIAS
-  svuint64_t ski = svadd_x (svptrue_b64 (), ki, sign_bias);
-  t = svadd_x (svptrue_b64 (), t,
-	       svlsl_x (svptrue_b64 (), ski, 52 - V_POWF_EXP2_TABLE_BITS));
-#else
-  t = svadd_x (svptrue_b64 (), t,
-	       svlsl_x (svptrue_b64 (), ki, 52 - V_POWF_EXP2_TABLE_BITS));
-#endif
-  svfloat64_t s = svreinterpret_f64 (t);
+  svfloat64_t scale = svexpa (svreinterpret_u64 (z));
 
   svfloat64_t p = sv_f64 (d->exp_poly[0]);
   p = svmla_x (pg, sv_f64 (d->exp_poly[1]), p, r);
-  p = svmla_x (pg, sv_f64 (d->exp_poly[2]), p, r);
-  p = svmla_x (pg, s, p, svmul_x (svptrue_b64 (), s, r));
-
+  p = svmla_x (pg, scale, p, svmul_x (svptrue_b64 (), scale, r));
   return p;
 }
 
@@ -130,12 +109,11 @@ sv_powf_core_ext (const svbool_t pg, svuint64_t i, svfloat64_t z, svint64_t k,
    vector. Lower cost of promotion by considering all lanes active.  */
 static inline svfloat32_t
 sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
-	      svfloat32_t y, svuint32_t sign_bias, svfloat32_t *pylogx,
-	      const struct data *d)
+	      svfloat32_t y, svfloat32_t *pylogx, const struct data *d)
 {
   const svbool_t ptrue = svptrue_b64 ();
 
-  /* Unpack and promote input vectors (pg, y, z, i, k and sign_bias) into two
+  /* Unpack and promote input vectors (pg, y, z, i, k) into two
      in order to perform core computation in double precision.  */
   const svbool_t pg_lo = svunpklo (pg);
   const svbool_t pg_hi = svunpkhi (pg);
@@ -149,24 +127,13 @@ sv_powf_core (const svbool_t pg, svuint32_t i, svuint32_t iz, svint32_t k,
   svuint64_t i_hi = svunpkhi (i);
   svint64_t k_lo = svunpklo (k);
   svint64_t k_hi = svunpkhi (k);
-#if WANT_SV_POWF_SIGN_BIAS
-  svuint64_t sign_bias_lo = svunpklo (sign_bias);
-  svuint64_t sign_bias_hi = svunpkhi (sign_bias);
-#endif
 
   /* Compute each part in double precision.  */
   svfloat64_t ylogx_lo, ylogx_hi;
-#if WANT_SV_POWF_SIGN_BIAS
-  svfloat64_t lo = sv_powf_core_ext (pg_lo, i_lo, z_lo, k_lo, y_lo,
-				     sign_bias_lo, &ylogx_lo, d);
-  svfloat64_t hi = sv_powf_core_ext (pg_hi, i_hi, z_hi, k_hi, y_hi,
-				     sign_bias_hi, &ylogx_hi, d);
-#else
   svfloat64_t lo
       = sv_powf_core_ext (pg_lo, i_lo, z_lo, k_lo, y_lo, &ylogx_lo, d);
   svfloat64_t hi
       = sv_powf_core_ext (pg_hi, i_hi, z_hi, k_hi, y_hi, &ylogx_hi, d);
-#endif
 
   /* Convert back to single-precision and interleave.  */
   svfloat32_t ylogx_lo_32 = svcvt_f32_x (ptrue, ylogx_lo);

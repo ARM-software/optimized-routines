@@ -8,7 +8,6 @@
 #include "sv_math.h"
 #include "test_sig.h"
 #include "test_defs.h"
-#define WANT_SV_POWF_SIGN_BIAS 1
 #include "sv_powf_inline.h"
 
 /* A scalar subroutine used to fix main power special cases. Similar to the
@@ -53,13 +52,12 @@ sv_call_powf_sc (svfloat32_t x1, svfloat32_t x2, svfloat32_t y, svbool_t cmp)
 
 /* Implementation of SVE powf.
 
-   Provides the same accuracy as AdvSIMD powf, since it relies on the same
-   algorithm.
+   Shares the logarithm and FEXPA exponential core with SVE powrf.
 
-   Maximum measured error is 2.57 ULPs:
-   SV_NAME_F2 (pow) (0x1.031706p+0, 0x1.ce2ec2p+12)
-     got 0x1.fff868p+127
-    want 0x1.fff862p+127.  */
+   The maximum observed error is 2.54 + 0.5 ULP.
+   SV_NAME_F2 (pow) (0x1.0314fap+0, 0x1.cbc136p+12)
+     got 0x1.000002p+127
+    want 0x1.fffffep+126.  */
 svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 {
   const struct data *d = ptr_barrier (&data);
@@ -70,19 +68,19 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
   /* Negative x cases.  */
   svbool_t xisneg = svcmplt (pg, x, sv_f32 (0));
 
-  /* Set sign_bias and ix depending on sign of x and nature of y.  */
+  /* Set sign and ix depending on sign of x and nature of y.  */
   svbool_t yint_or_xpos = pg;
-  svuint32_t sign_bias = sv_u32 (0);
+  svuint32_t sign = sv_u32 (0);
   svuint32_t vix = vix0;
   if (unlikely (svptest_any (pg, xisneg)))
     {
       /* Determine nature of y, preserving lanes where x isn't negative.  */
       yint_or_xpos = svorn_z (pg, svisint (xisneg, y), xisneg);
       svbool_t yisodd_xisneg = svisodd (xisneg, y);
-      /* ix set to abs(ix) if y is integer.  */
-      vix = svand_m (yint_or_xpos, vix0, 0x7fffffff);
-      /* Set to SignBias if x is negative and y is odd.  */
-      sign_bias = svsel (yisodd_xisneg, sv_u32 (d->sign_bias), sv_u32 (0));
+      /* Discard sign, regardless of y value (for efficiency).  */
+      vix = svand_x (svptrue_b32 (), vix0, 0x7fffffff);
+      /* Extract sign if x is negative and y is odd.  */
+      sign = svand_z (yisodd_xisneg, vix0, 0x80000000);
     }
 
   /* Special cases of x or y: zero, inf and nan.  */
@@ -97,7 +95,8 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
       /* Normalize subnormal x so exponent becomes negative.  */
       vix = svreinterpret_u32 (
 	  svmul_m (x_is_subnormal, svreinterpret_f32 (vix), 0x1p23f));
-      vix = svand_m (x_is_subnormal, vix, 0x7fffffff);
+      /* Discard sign, regardless of x value (for efficiency).  */
+      vix = svand_x (svptrue_b32 (), vix, 0x7fffffff);
       vix = svsub_m (x_is_subnormal, vix, d->subnormal_bias);
     }
   /* Part of core computation carried in working precision.  */
@@ -107,23 +106,22 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
       V_POWF_LOG2_N - 1);
   svuint32_t top = svand_x (yint_or_xpos, tmp, 0xff800000);
   svuint32_t iz = svsub_x (yint_or_xpos, vix, top);
-  svint32_t k = svasr_x (yint_or_xpos, svreinterpret_s32 (top),
-			 (23 - V_POWF_EXP2_TABLE_BITS));
+  svint32_t k = svasr_x (yint_or_xpos, svreinterpret_s32 (top), 23);
 
   /* Compute core in extended precision and return intermediate ylogx results
      to handle cases of underflow and overflow in exp.  */
   svfloat32_t ylogx;
-  svfloat32_t ret
-      = sv_powf_core (yint_or_xpos, i, iz, k, y, sign_bias, &ylogx, d);
+  svfloat32_t ret = sv_powf_core (yint_or_xpos, i, iz, k, y, &ylogx, d);
 
   /* Handle exp special cases of underflow and overflow.  */
-  svuint32_t sign
-      = svlsl_x (yint_or_xpos, sign_bias, 20 - V_POWF_EXP2_TABLE_BITS);
-  svfloat32_t ret_oflow
-      = svreinterpret_f32 (svorr_x (yint_or_xpos, sign, asuint (INFINITY)));
-  svfloat32_t ret_uflow = svreinterpret_f32 (sign);
+  svfloat32_t ret_oflow = sv_f32 (INFINITY);
+  svfloat32_t ret_uflow = sv_f32 (0);
   ret = svsel (svcmple (yint_or_xpos, ylogx, d->uflow_bound), ret_uflow, ret);
   ret = svsel (svcmpgt (yint_or_xpos, ylogx, d->oflow_bound), ret_oflow, ret);
+
+  /* Copysign outside the core and after under/overflow.  */
+  ret = svreinterpret_f32 (
+      svorr_x (svptrue_b32 (), svreinterpret_u32 (ret), sign));
 
   /* Cases of finite y and finite negative x.  */
   ret = svsel (yint_or_xpos, ret, sv_f32 (__builtin_nanf ("")));
@@ -135,7 +133,7 @@ svfloat32_t SV_NAME_F2 (pow) (svfloat32_t x, svfloat32_t y, const svbool_t pg)
 }
 
 TEST_SIG (SV, F, 2, pow)
-TEST_ULP (SV_NAME_F2 (pow), 2.08)
+TEST_ULP (SV_NAME_F2 (pow), 2.55)
 /* Exercise negative-base lanes beside zero and subnormal bases.  */
 TEST_CONTROL_VALUE (SV_NAME_F2 (pow), 1)
 TEST_CONTROL_VALUE (SV_NAME_F2 (pow), 0)

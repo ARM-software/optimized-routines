@@ -8,6 +8,9 @@
 #include "powf_common.h"
 #include "v_math.h"
 
+#define V_POWF_EXP2_TABLE_BITS 5
+#define V_POWF_EXP2_N (1 << V_POWF_EXP2_TABLE_BITS)
+
 #define Log2IdxMask (V_POWF_LOG2_N - 1)
 #define Exp2IdxMask (V_POWF_EXP2_N - 1)
 #define Scale ((double) V_POWF_EXP2_N)
