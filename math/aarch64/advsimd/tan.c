@@ -1,7 +1,7 @@
 /*
  * Double-precision vector tan(x) function.
  *
- * Copyright (c) 2023-2025, Arm Limited.
+ * Copyright (c) 2023-2026, Arm Limited.
  * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
  */
 
@@ -9,6 +9,7 @@
 #include "v_poly_f64.h"
 #include "test_sig.h"
 #include "test_defs.h"
+#include "v_trig_fallback.h"
 
 static const struct data
 {
@@ -32,24 +33,61 @@ static const struct data
 #define RangeVal 0x4160000000000000  /* asuint64(0x1p23).  */
 #define TinyBound 0x3e50000000000000 /* asuint64(2^-26).  */
 
-/* Special cases (fall back to scalar calls).  */
+/* Special cases use a vectorized implementation of sin(x) / cos(x).  */
 static float64x2_t VPCS_ATTR NOINLINE
 special_case (float64x2_t x, float64x2_t n, float64x2_t d, uint64x2_t special)
 {
-  return v_call_f64 (tan, x, vdivq_f64 (n, d), special);
+  uint64x2_t is_inf = vcageq_f64 (x, v_f64 (INFINITY));
+
+  /* For large values, we can compute tan(x) = sin(x) / cos(x).  */
+  struct reduction_result_t r = v_large_range_reduction (x, &reduction_data);
+  float64x2x2_t lookup = v_sincos_lookup (r.quadrant);
+  float64x2x2_t eval_fast = v_sincos_eval (r.remainder, &reduction_data);
+
+  /* Construct sin(x) and cos (x) from k and r, using angle addition formula,
+    with approximations of sin(r) and cos(r) - 1 to reduce rounding errors.
+    sin(x) = sin(k + r)
+    = cos(k)*sin(r) + sin(k)*cos(r)
+    = cos(k)*sin(r) + sin(k)*cosm1(r) + sin(k).
+    cos(x) = cos(k + r)
+      = cos(k)*cos(r) - sin(k)*sin(r)
+      = cos(k)*cosm1(r) - sin(k)*sin(r) + cos(k).  */
+
+  float64x2_t sin_k = lookup.val[0];
+  float64x2_t cos_k = lookup.val[1];
+  float64x2_t sin_r = eval_fast.val[0];
+  float64x2_t cosm1_r = eval_fast.val[1];
+
+  float64x2_t sin_k_cosm1_r = vmulq_f64 (sin_k, cosm1_r);
+  float64x2_t sin = vfmaq_f64 (sin_k_cosm1_r, cos_k, sin_r);
+
+  float64x2_t cos_k_cosm1_r = vmulq_f64 (cos_k, cosm1_r);
+  float64x2_t cos = vfmsq_f64 (cos_k_cosm1_r, sin_k, sin_r);
+
+  sin = vaddq_f64 (sin, sin_k);
+  cos = vaddq_f64 (cos, cos_k);
+
+  /* For special lanes, computes sin(x)/cos(x)
+     For non-special lanes, computes n/d.  */
+  float64x2_t n_comb = vbslq_f64 (special, sin, n);
+  float64x2_t d_comb = vbslq_f64 (special, cos, d);
+
+  float64x2_t div = vdivq_f64 (n_comb, d_comb);
+
+  return vbslq_f64 (is_inf, v_f64 (NAN), div);
 }
 
 /* Vector approximation for double-precision tan.
-   Maximum measured error is 3.48 ULP:
-   _ZGVnN2v_tan(0x1.4457047ef78d8p+20) got -0x1.f6ccd8ecf7dedp+37
-				      want -0x1.f6ccd8ecf7deap+37.  */
+   The maximum observed error is 2.98 + 0.5 ULP.
+   _ZGVnN2v_tan(0x1.4457047ef78d8p+20)
+    got -0x1.f6ccd8ecf7dedp+37
+   want -0x1.f6ccd8ecf7deap+37.  */
 float64x2_t VPCS_ATTR V_NAME_D1 (tan) (float64x2_t x)
 {
   const struct data *dat = ptr_barrier (&data);
   /* Our argument reduction cannot calculate q with sufficient accuracy for
-     very large inputs. Fall back to scalar routine for all lanes if any are
-     too large, or Inf/NaN. If fenv exceptions are expected, also fall back for
-     tiny input to avoid underflow.  */
+     very large inputs. For large values we use the special case to compute
+     tan(x) = sin(x) / cos(x).  */
 
   /* q = nearest integer to 2 * x / pi.  */
   float64x2_t q
